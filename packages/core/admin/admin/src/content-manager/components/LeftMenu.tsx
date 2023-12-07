@@ -1,10 +1,4 @@
-/**
- *
- * LeftMenu
- *
- */
-
-import React, { useMemo, useState } from 'react';
+import * as React from 'react';
 
 import {
   SubNav,
@@ -15,46 +9,45 @@ import {
 } from '@strapi/design-system/v2';
 import { useCollator, useFilter } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { shallowEqual, useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
-import { getTranslation } from '../../../utils/translations';
-import { selectModelLinks } from '../reducer';
+import { useTypedSelector } from '../../core/store/hooks';
+import { getTranslation } from '../utils/translations';
 
 const LeftMenu = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = React.useState('');
   const { formatMessage, locale } = useIntl();
-  const { collectionTypeLinks, singleTypeLinks } = useSelector(selectModelLinks, shallowEqual);
+  const collectionTypeLinks = useTypedSelector(
+    (state) => state['content-manager_app'].collectionTypeLinks
+  );
+  const singleTypeLinks = useTypedSelector((state) => state['content-manager_app'].singleTypeLinks);
 
   const { startsWith } = useFilter(locale, {
     sensitivity: 'base',
   });
 
-  /**
-   * @type {Intl.Collator}
-   */
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
 
-  const menu = useMemo(
+  const menu = React.useMemo(
     () =>
       [
         {
           id: 'collectionTypes',
-          title: {
+          title: formatMessage({
             id: getTranslation('components.LeftMenu.collection-types'),
             defaultMessage: 'Collection Types',
-          },
+          }),
           searchable: true,
           links: collectionTypeLinks,
         },
         {
           id: 'singleTypes',
-          title: {
+          title: formatMessage({
             id: getTranslation('components.LeftMenu.single-types'),
             defaultMessage: 'Single Types',
-          },
+          }),
           searchable: true,
           links: singleTypeLinks,
         },
@@ -86,7 +79,7 @@ const LeftMenu = () => {
     setSearch('');
   };
 
-  const handleChangeSearch = ({ target: { value } }) => {
+  const handleChangeSearch = ({ target: { value } }: { target: { value: string } }) => {
     setSearch(value);
   };
 
@@ -110,21 +103,17 @@ const LeftMenu = () => {
       />
       <SubNavSections>
         {menu.map((section) => {
-          const label = formatMessage(
-            { id: section.title.id, defaultMessage: section.title.defaultMessage },
-            section.title.values
-          );
-
           return (
             <SubNavSection
               key={section.id}
-              label={label}
+              label={section.title}
               badgeLabel={section.links.length.toString()}
             >
               {section.links.map((link) => {
                 const search = link.search ? `?${link.search}` : '';
 
                 return (
+                  // @ts-expect-error – DS inference does not work with the `as` prop.
                   <SubNavLink as={NavLink} key={link.uid} to={`${link.to}${search}`}>
                     {link.title}
                   </SubNavLink>
@@ -138,4 +127,4 @@ const LeftMenu = () => {
   );
 };
 
-export default LeftMenu;
+export { LeftMenu };

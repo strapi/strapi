@@ -3,7 +3,8 @@ import QueryString, { parse, stringify } from 'qs';
 
 import { useTypedSelector } from '../../core/store/hooks';
 import { isObject } from '../../utils/objects';
-import { ContentManagerAppState } from '../pages/App/reducer';
+
+import type { ContentManagerAppState } from '../pages/App';
 
 const useFindRedirectionLink = (slug: string) => {
   const [{ rawQuery }] = useQueryParams();
@@ -42,16 +43,14 @@ const getRedirectionLink = (
   slug: string,
   rawQuery: string
 ) => {
-  // @ts-expect-error – this will be fixed when we type the CM App state better
   const matchingLink = links.find(({ to }) => to.includes(slug));
 
   if (!matchingLink) {
     return '/';
   }
 
-  // @ts-expect-error – this will be fixed when we type the CM App state better
   const { to, search } = matchingLink;
-  const searchQueryParams = parse(search);
+  const searchQueryParams = parse(search ?? '');
   const currentQueryParams = parse(rawQuery.substring(1));
 
   const mergedParams = mergeParams(searchQueryParams, currentQueryParams);

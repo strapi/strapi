@@ -1,9 +1,14 @@
 import cloneDeep from 'lodash/cloneDeep';
+import omit from 'lodash/omit';
 
 import { ModifiedLayoutData, mergeMetasWithSchema } from './schemas';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute, Schema } from '@strapi/types';
+
+/* -------------------------------------------------------------------------------------------------
+ * formatLayouts
+ * -----------------------------------------------------------------------------------------------*/
 
 type LayoutData = Contracts.ContentTypes.FindContentTypeConfiguration.Response['data'];
 type Models = Array<Contracts.Components.Component | Contracts.ContentTypes.ContentType>;
@@ -20,6 +25,7 @@ type FormattedContentTypeLayout = Omit<SchemasWithMeta['contentType'], 'layouts'
 
 type FormattedComponentLayout = Omit<SchemasWithMeta['components'][string], 'layouts'> & {
   layouts: {
+    list: string[];
     edit: EditLayoutRow[][];
   };
 };
@@ -258,10 +264,101 @@ const shouldDisplayRelationLink = (
   return models.some((model) => model.uid === targetModel && model.isDisplayed);
 };
 
-export { formatLayouts };
+/* -------------------------------------------------------------------------------------------------
+ * formatLayoutForSettingsView
+ * -----------------------------------------------------------------------------------------------*/
+
+interface MetadataWithStringMainField {
+  edit: Omit<Metadata['edit'], 'mainField'> & {
+    mainField?: string;
+  };
+  list: Omit<Metadata['list'], 'mainField'>;
+}
+
+type ReturnLayout<TLayout> = TLayout extends FormattedContentTypeLayout
+  ? SettingsViewContentTypeLayout
+  : SettingsViewComponentLayout;
+
+const formatLayoutForSettingsView = <
+  TLayout extends FormattedContentTypeLayout | FormattedComponentLayout
+>({
+  layouts,
+  metadatas,
+  ...rest
+}: TLayout): ReturnLayout<TLayout> => {
+  // @ts-expect-error – TODO: fix this.
+  return {
+    ...rest,
+    layouts: {
+      edit: layouts.edit.map((row) =>
+        row.map(({ name, size }) => ({
+          name,
+          size,
+        }))
+      ),
+      list: layouts.list.map((obj) => {
+        if (typeof obj === 'object' && 'name' in obj) {
+          return obj.name;
+        }
+
+        return obj;
+      }),
+    },
+    metadatas: Object.keys(metadatas).reduce<Record<string, MetadataWithStringMainField>>(
+      (acc, current) => {
+        const currentMetadatas = metadatas[current] ?? {};
+
+        if (currentMetadatas.edit.mainField) {
+          return {
+            ...acc,
+            [current]: {
+              edit: {
+                ...currentMetadatas.edit,
+                mainField: currentMetadatas.edit.mainField.name,
+              },
+              list: omit(currentMetadatas.list, ['mainField']),
+            },
+          };
+        } else {
+          return {
+            ...acc,
+            [current]: {
+              edit: currentMetadatas.edit as MetadataWithStringMainField['edit'],
+              list: omit(currentMetadatas.list, ['mainField']),
+            },
+          };
+        }
+      },
+      {}
+    ),
+  };
+};
+
+interface SettingsViewContentTypeLayout
+  extends Omit<FormattedContentTypeLayout, 'metadatas' | 'layouts'> {
+  layouts: {
+    edit: Array<Array<{ name: string; size: number }>>;
+    list: Array<string>;
+  };
+  metadatas: Record<string, MetadataWithStringMainField>;
+}
+
+interface SettingsViewComponentLayout
+  extends Omit<FormattedComponentLayout, 'metadatas' | 'layouts'> {
+  layouts: {
+    edit: Array<Array<{ name: string; size: number }>>;
+    list: Array<string>;
+  };
+  metadatas: Record<string, MetadataWithStringMainField>;
+}
+
+export { formatLayouts, formatLayoutForSettingsView };
 export type {
   FormattedLayouts,
   FormattedContentTypeLayout,
   FormattedComponentLayout,
   EditLayoutRow,
+  Metadata,
+  SettingsViewContentTypeLayout,
+  SettingsViewComponentLayout,
 };

@@ -1,34 +1,13 @@
-import React from 'react';
-
 import { Flex, IconButton, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { CarretDown, Drag, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const DropdownIconWrapper = styled(Flex)`
-  border-radius: 50%;
+interface ComponentDragPreviewProps {
+  displayedValue: string;
+}
 
-  svg {
-    height: ${6 / 16}rem;
-    width: ${11 / 16}rem;
-    > path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
-`;
-
-// TODO: we shouldn't have to reset a whole button
-const ToggleButton = styled.button`
-  border: none;
-  background: transparent;
-  display: block;
-  width: 100%;
-  text-align: unset;
-  padding: 0;
-`;
-
-export function ComponentDragPreview({ displayedValue }) {
+const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => {
   return (
     <Flex
       background="neutral0"
@@ -59,18 +38,39 @@ export function ComponentDragPreview({ displayedValue }) {
       </ToggleButton>
 
       <Flex gap={2}>
-        <IconButton noBorder>
+        <IconButton aria-label="" borderWidth={0}>
           <Trash />
         </IconButton>
 
-        <IconButton noBorder>
+        <IconButton aria-label="" borderWidth={0}>
           <Drag />
         </IconButton>
       </Flex>
     </Flex>
   );
-}
-
-ComponentDragPreview.propTypes = {
-  displayedValue: PropTypes.string.isRequired,
 };
+
+const DropdownIconWrapper = styled(Flex)`
+  border-radius: 50%;
+
+  svg {
+    height: ${6 / 16}rem;
+    width: ${11 / 16}rem;
+    > path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
+
+// TODO: we shouldn't have to reset a whole button
+const ToggleButton = styled.button`
+  border: none;
+  background: transparent;
+  display: block;
+  width: 100%;
+  text-align: unset;
+  padding: 0;
+`;
+
+export { ComponentDragPreview };
+export type { ComponentDragPreviewProps };
