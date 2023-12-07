@@ -9,7 +9,7 @@ const createCfg = (opts = {}) => {
       return {};
     },
     ...opts,
-  });
+  } as any);
 };
 
 describe('Model Configuration', () => {
@@ -37,7 +37,7 @@ describe('Model Configuration', () => {
       settings: {},
       layouts: {},
       metadatas: {},
-    });
+    } as any);
 
     expect(spyFn).toHaveBeenCalledWith('test_prefix::test-uid', {
       layouts: {},
@@ -61,7 +61,7 @@ describe('Model Configuration', () => {
       metadatas: {},
       settings: {},
       options: { test: true },
-    });
+    } as any);
 
     expect(spyFn).toHaveBeenCalledWith('test_prefix::test-uid', {
       layouts: {},
@@ -85,7 +85,7 @@ describe('Model Configuration', () => {
       settings: {},
       layouts: {},
       metadatas: {},
-    });
+    } as any);
 
     expect(spyFn).toHaveBeenCalledWith('test_prefix::test-uid', {
       layouts: {},

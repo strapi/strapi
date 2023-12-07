@@ -20,7 +20,7 @@ import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
-import * as LimitsModal from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
+import { LimitsModal } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
 import {
   CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
   CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,

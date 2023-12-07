@@ -35,7 +35,7 @@ export type Layouts = {
 };
 
 export type Configuration = {
-  uid: string;
+  uid?: string;
   settings: Settings;
   metadatas: Metadatas;
   layouts: Layouts;
