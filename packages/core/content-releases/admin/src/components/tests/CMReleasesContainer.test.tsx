@@ -22,6 +22,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({ id: '1' }),
+}));
+
 describe('CMReleasesContainer', () => {
   it('should not render the injection zone when creating an entry', () => {
     // @ts-expect-error - Ignore error

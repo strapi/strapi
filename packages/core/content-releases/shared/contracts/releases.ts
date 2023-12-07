@@ -21,6 +21,10 @@ export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: { meta: { count: number } };
 }
 
+export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
+  action: { type: ReleaseAction['type'] };
+}
+
 /**
  * GET /content-releases/ - Get all releases
  */
@@ -37,6 +41,27 @@ export declare namespace GetReleases {
     meta: {
       pagination?: Pagination;
     };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * GET /content-releases/ - Get all releases for a given entry
+ */
+export declare namespace GetContentTypeEntryReleases {
+  export interface Request {
+    state: {
+      userAbility: {};
+    };
+    query: {
+      contentTypeUid: ReleaseAction['contentType'];
+      entryId: ReleaseAction['entry']['id'];
+      hasEntryAttached?: boolean;
+    };
+  }
+
+  export interface Response {
+    data: ReleaseForContentTypeEntryDataResponse[];
     error?: errors.ApplicationError;
   }
 }
