@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "4.15.4",
+  "version": "4.15.5",
   "description": "Strapi plugin to create content type",
   "repository": {
     "type": "git",
@@ -59,11 +59,11 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.13.1",
-    "@strapi/generators": "4.15.4",
-    "@strapi/helper-plugin": "4.15.4",
-    "@strapi/icons": "1.13.0",
-    "@strapi/utils": "4.15.4",
+    "@strapi/design-system": "1.13.2",
+    "@strapi/generators": "4.15.5",
+    "@strapi/helper-plugin": "4.15.5",
+    "@strapi/icons": "1.13.2",
+    "@strapi/utils": "4.15.5",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "koa-bodyparser": "4.4.1",
@@ -77,9 +77,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.4",
-    "@strapi/strapi": "4.15.4",
-    "@strapi/types": "4.15.4",
+    "@strapi/pack-up": "4.15.5",
+    "@strapi/strapi": "4.15.5",
+    "@strapi/types": "4.15.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",

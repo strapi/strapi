@@ -24,8 +24,7 @@ import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { ThemeToggleProvider } from '../src/components/ThemeToggleProvider';
-// @ts-expect-error – no types yet.
-import ModelsContext from '../src/content-manager/contexts/ModelsContext';
+import { ModelsContext } from '../src/content-manager/contexts/models';
 import { AdminContextProvider } from '../src/contexts/admin';
 import { ConfigurationContextProvider } from '../src/contexts/configuration';
 

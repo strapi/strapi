@@ -3,7 +3,7 @@ import React, { memo, useMemo } from 'react';
 import { difference, LoadingIndicatorPage, useRBAC } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
-import { generatePermissionsObject } from '../../utils';
+import { generatePermissionsObject } from '../../utils/permissions';
 import ListView from '../ListView';
 
 const Permissions = (props) => {

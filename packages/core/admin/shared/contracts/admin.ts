@@ -169,6 +169,7 @@ export interface AuditLogsFeature {
 
 export interface ReviewWorkflowsFeature {
   name: 'review-workflows';
+  options?: { numberOfWorkflows: number | null; stagesPerWorkflow: number | null };
 }
 
 /**
