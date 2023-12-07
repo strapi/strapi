@@ -235,6 +235,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       }
     });
 
+		// When the transaction fails it throws an error, when it is successful proceed to updating the release
     const release = await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
       data: {
         /*
