@@ -247,13 +247,15 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     })) as unknown as Release;
 
     // We delete each action related to the release
-    deletedRelease.actions.forEach((action) => {
-      strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
+    if (deletedRelease.actions) {
+      await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
         where: {
-          id: action.id,
+          id: {
+            $in: deletedRelease.actions.map(({ id }) => id),
+          },
         },
       });
-    });
+    }
 
     return deletedRelease;
   },
