@@ -149,6 +149,33 @@ describe('release service', () => {
     });
   });
 
+  describe('findManyForContentTypeEntry', () => {
+    it('should format the return value correctly when hasEntryAttached is true', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn(() => ({
+            findMany: jest
+              .fn()
+              .mockReturnValue([{ name: 'test release', actions: [{ type: 'publish' }] }]),
+          })),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+      const releases = await releaseService.findManyForContentTypeEntry(
+        'api::contentType.contentType',
+        1,
+        {
+          hasEntryAttached: true,
+        }
+      );
+
+      expect(releases).toEqual([{ name: 'test release', action: { type: 'publish' } }]);
+    });
+  });
+
   describe('delete', () => {
     it('throws an error if the release does not exist', () => {
       const strapiMock = {

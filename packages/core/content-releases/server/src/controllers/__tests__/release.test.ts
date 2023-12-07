@@ -1,14 +1,14 @@
 import releaseController from '../release';
 
 const mockFindPage = jest.fn();
-const mockFindMany = jest.fn();
+const mockFindManyForContentTypeEntry = jest.fn();
 const mockCountActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     findOne: jest.fn(() => ({ id: 1 })),
     findPage: mockFindPage,
-    findMany: mockFindMany,
+    findManyForContentTypeEntry: mockFindManyForContentTypeEntry,
     countActions: mockCountActions,
     findReleaseContentTypesMainFields: jest.fn(),
   })),
@@ -19,7 +19,7 @@ describe('Release controller', () => {
   describe('findMany', () => {
     it('should call findPage', async () => {
       mockFindPage.mockResolvedValue({ results: [], pagination: {} });
-      mockFindMany.mockResolvedValue([]);
+      mockFindManyForContentTypeEntry.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -53,9 +53,9 @@ describe('Release controller', () => {
       expect(mockFindPage).toHaveBeenCalled();
     });
 
-    it('should call findMany', async () => {
+    it('should call findManyForContentTypeEntry', async () => {
       mockFindPage.mockResolvedValue({ results: [], pagination: {} });
-      mockFindMany.mockResolvedValue([]);
+      mockFindManyForContentTypeEntry.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -63,7 +63,10 @@ describe('Release controller', () => {
         state: {
           userAbility: {},
         },
-        query: {},
+        query: {
+          contentTypeUid: 'api::kitchensink.kitchensink',
+          entryId: 1,
+        },
       };
       global.strapi = {
         // @ts-expect-error Ignore missing properties
@@ -83,7 +86,7 @@ describe('Release controller', () => {
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(mockFindMany).toHaveBeenCalled();
+      expect(mockFindManyForContentTypeEntry).toHaveBeenCalled();
     });
   });
   describe('create', () => {

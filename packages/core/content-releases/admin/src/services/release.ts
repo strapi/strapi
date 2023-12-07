@@ -5,7 +5,12 @@ import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
 
-import type { CreateRelease, GetReleases, UpdateRelease } from '../../../shared/contracts/releases';
+import type {
+  CreateRelease,
+  GetContentTypeEntryReleases,
+  GetReleases,
+  UpdateRelease,
+} from '../../../shared/contracts/releases';
 
 export interface GetReleasesQueryParams {
   page?: number;
@@ -30,26 +35,16 @@ const releaseApi = createApi({
   tagTypes: ['Releases'],
   endpoints: (build) => {
     return {
-      /**
-       * TODO: This will need to evolve to handle queries for:
-       * - Get all releases where the entry is attached
-       * - Get all releases where the entry is not attached
-       *
-       *  We need to explore the best way to filter on polymorphic relations in another PR
-       */
-      getReleasesForEntry: build.query<GetReleases.Response, GetReleasesQueryParams | void>({
-        query() {
+      getReleasesForEntry: build.query<
+        GetContentTypeEntryReleases.Response,
+        GetContentTypeEntryReleases.Request['query']
+      >({
+        query(params) {
           return {
             url: '/content-releases',
             method: 'GET',
             config: {
-              params: {
-                filters: {
-                  releasedAt: {
-                    $notNull: false,
-                  },
-                },
-              },
+              params,
             },
           };
         },
