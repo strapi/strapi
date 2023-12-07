@@ -100,3 +100,22 @@ export declare namespace UpdateRelease {
     error?: errors.ApplicationError | errors.ValidationError;
   }
 }
+
+/**
+ * POST /content-releases/:releaseId/publish - Publish a release
+ */
+export declare namespace PublishRelease {
+  export interface Request {
+    state: {
+      user: UserInfo;
+    };
+    params: {
+      id: Release['id'];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}

@@ -5,6 +5,7 @@ import { validateRelease } from './validation/release';
 import type {
   CreateRelease,
   UpdateRelease,
+  PublishRelease,
   GetRelease,
   Release,
 } from '../../../shared/contracts/releases';
@@ -132,6 +133,18 @@ const releaseController = {
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(release),
+    };
+  },
+
+  async publish(ctx: Koa.Context) {
+    const user: PublishRelease.Request['state']['user'] = ctx.state.user;
+    const id: PublishRelease.Request['params']['id'] = ctx.params.id;
+
+    const releaseService = getService('release', { strapi });
+    const release = await releaseService.publish(id, { user });
+
+    ctx.body = {
+      data: release,
     };
   },
 };
