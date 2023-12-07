@@ -2,7 +2,6 @@ import type { Entity } from '../types';
 import type { ReleaseAction } from './release-actions';
 import type { UserInfo } from '../types';
 import { errors } from '@strapi/utils';
-import { UID } from '@strapi/types';
 
 export interface Release extends Entity {
   name: string;

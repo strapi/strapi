@@ -177,7 +177,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       throw new errors.ValidationError('Release already published');
     }
 
-    const deletedRelease = await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
+    const deletedRelease = (await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId, {
+      populate: { actions: { fields: ['id'] } },
+    })) as unknown as Release;
+
+    // We delete each action related to the release
+    deletedRelease.actions.forEach((action) => {
+      strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
+        where: {
+          id: action.id,
+        },
+      });
+    });
 
     return deletedRelease;
   },
