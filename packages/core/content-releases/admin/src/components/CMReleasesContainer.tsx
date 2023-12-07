@@ -207,13 +207,12 @@ export const CMReleasesContainer = () => {
     isCreatingEntry,
     allLayoutData: { contentType },
   } = useCMEditViewDataManager();
-  const params = useParams<{ id?: string }>();
+  const params = useParams<{ id: string }>();
 
-  const canFetch = Boolean(params.id && contentType?.uid);
+  const canFetch = params?.id != null && contentType?.uid != null;
   const fetchParams = canFetch
     ? {
-        // TypeScript still thinks contentType could be undefined, assert that it is defined
-        contentTypeUid: contentType!.uid,
+        contentTypeUid: contentType.uid,
         entryId: params.id,
         hasEntryAttached: true,
       }
@@ -241,12 +240,15 @@ export const CMReleasesContainer = () => {
 
   const toggleAddActionToReleaseModal = () => setShowModal((prev) => !prev);
 
-  const getReleaseColorVariant = (actionType: 'publish' | 'unpublish') => {
+  const getReleaseColorVariant = (
+    actionType: 'publish' | 'unpublish',
+    shade: '200' | '100' | '600'
+  ) => {
     if (actionType === 'unpublish') {
-      return 'secondary';
+      return `secondary${shade}`;
     }
 
-    return 'success';
+    return `success${shade}`;
   };
 
   return (
@@ -267,7 +269,7 @@ export const CMReleasesContainer = () => {
           <Typography variant="sigma" textColor="neutral600" textTransform="uppercase">
             {formatMessage({
               id: 'content-releases.plugin.name',
-              defaultMessage: 'RELEASES',
+              defaultMessage: 'Releases',
             })}
           </Typography>
           {releases?.map((release) => {
@@ -278,7 +280,7 @@ export const CMReleasesContainer = () => {
                 alignItems="start"
                 borderWidth="1px"
                 borderStyle="solid"
-                borderColor={`${getReleaseColorVariant(release.action.type)}200`}
+                borderColor={getReleaseColorVariant(release.action.type, '200')}
                 hasRadius
               >
                 <Box
@@ -286,13 +288,13 @@ export const CMReleasesContainer = () => {
                   paddingBottom={3}
                   paddingLeft={4}
                   paddingRight={4}
-                  background={`${getReleaseColorVariant(release.action.type)}100`}
+                  background={getReleaseColorVariant(release.action.type, '100')}
                   width="100%"
                 >
                   <Typography
                     fontSize={1}
                     variant="pi"
-                    textColor={`${getReleaseColorVariant(release.action.type)}600`}
+                    textColor={getReleaseColorVariant(release.action.type, '600')}
                   >
                     {formatMessage(
                       {
@@ -332,10 +334,8 @@ export const CMReleasesContainer = () => {
         {showModal && (
           <AddActionToReleaseModal
             handleClose={toggleAddActionToReleaseModal}
-            // Assert contentType.uid is defined when canFetch is true
-            contentTypeUid={contentType.uid!}
-            // Assert params.id is defined when canFetch is true
-            entryId={params.id!}
+            contentTypeUid={contentType.uid}
+            entryId={params.id}
           />
         )}
       </Box>
