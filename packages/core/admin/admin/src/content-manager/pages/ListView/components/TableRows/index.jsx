@@ -25,7 +25,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { getFullName } from '../../../../../utils/getFullName';
 import { usePluginsQueryParams } from '../../../../hooks';
-import { getTrad } from '../../../../utils';
+import { getTranslation } from '../../../../utils/translations';
 import CellContent from '../CellContent';
 
 const REVIEW_WORKFLOW_COLUMNS_CE = () => null;
@@ -51,7 +51,7 @@ export const TableRows = ({
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const [{ query }] = useQueryParams();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
   const ReviewWorkflowsStage = useEnterprise(
     REVIEW_WORKFLOW_COLUMNS_CE,
     async () =>
@@ -167,7 +167,7 @@ export const TableRows = ({
                         textColor={`${data.publishedAt ? 'success' : 'secondary'}700`}
                       >
                         {formatMessage({
-                          id: getTrad(
+                          id: getTranslation(
                             `containers.List.${data.publishedAt ? 'published' : 'draft'}`
                           ),
                           defaultMessage: data.publishedAt ? 'Published' : 'Draft',

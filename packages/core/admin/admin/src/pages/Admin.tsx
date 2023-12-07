@@ -21,9 +21,8 @@ import { useMenu } from '../hooks/useMenu';
 import { AppLayout } from '../layouts/AppLayout';
 import { createRoute } from '../utils/createRoute';
 
-const CM = React.lazy(
-  // @ts-expect-error – No types, yet.
-  () => import('../content-manager/pages/App')
+const CM = React.lazy(() =>
+  import('../content-manager/pages/App').then((mod) => ({ default: mod.App }))
 );
 const HomePage = React.lazy(() =>
   import('./HomePage').then((mod) => ({

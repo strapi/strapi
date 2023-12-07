@@ -4,24 +4,18 @@ import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 
-// @ts-expect-error not converted yet
-import LifeSpanInput from '../../../../components/Tokens/LifeSpanInput';
-// @ts-expect-error not converted yet
-import TokenDescription from '../../../../components/Tokens/TokenDescription';
-// @ts-expect-error not converted yet
-import TokenName from '../../../../components/Tokens/TokenName';
-// @ts-expect-error not converted yet
-import TokenTypeSelect from '../../../../components/Tokens/TokenTypeSelect';
-
-type TokenType = 'full-access' | 'read-only' | 'custom';
+import { LifeSpanInput } from '../../../../components/Tokens/LifeSpanInput';
+import { TokenDescription } from '../../../../components/Tokens/TokenDescription';
+import { TokenName } from '../../../../components/Tokens/TokenName';
+import { TokenTypeSelect } from '../../../../components/Tokens/TokenTypeSelect';
 
 import type { ApiToken } from '../../../../../../../../shared/contracts/api-token';
 
 interface FormApiTokenContainerProps {
   errors?: FormikErrors<Pick<ApiToken, 'name' | 'description' | 'lifespan' | 'type'>>;
-  onChange: ({ target: { name, value } }: { target: { name: string; value: TokenType } }) => void;
+  onChange: ({ target: { name, value } }: { target: { name: string; value: string } }) => void;
   canEditInputs: boolean;
-  values: undefined | Partial<Pick<ApiToken, 'name' | 'description' | 'lifespan' | 'type'>>;
+  values?: Partial<Pick<ApiToken, 'name' | 'description' | 'lifespan' | 'type'>>;
   isCreating: boolean;
   apiToken?: null | Partial<ApiToken>;
   onDispatch: React.Dispatch<any>;
@@ -33,18 +27,14 @@ export const FormApiTokenContainer = ({
   onChange,
   canEditInputs,
   isCreating,
-  values,
+  values = {},
   apiToken = {},
   onDispatch,
   setHasChangedPermissions,
 }: FormApiTokenContainerProps) => {
   const { formatMessage } = useIntl();
 
-  const handleChangeSelectApiTokenType = ({
-    target: { value },
-  }: {
-    target: { value: TokenType };
-  }) => {
+  const handleChangeSelectApiTokenType = ({ target: { value } }: { target: { value: string } }) => {
     setHasChangedPermissions(false);
 
     if (value === 'full-access') {
@@ -103,16 +93,16 @@ export const FormApiTokenContainer = ({
         <Grid gap={5}>
           <GridItem key="name" col={6} xs={12}>
             <TokenName
-              errors={errors}
-              values={values}
+              error={errors['name']}
+              value={values['name']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
           </GridItem>
           <GridItem key="description" col={6} xs={12}>
             <TokenDescription
-              errors={errors}
-              values={values}
+              error={errors['description']}
+              value={values['description']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
@@ -120,8 +110,8 @@ export const FormApiTokenContainer = ({
           <GridItem key="lifespan" col={6} xs={12}>
             <LifeSpanInput
               isCreating={isCreating}
-              errors={errors}
-              values={values}
+              error={errors['lifespan']}
+              value={values['lifespan']}
               onChange={onChange}
               token={apiToken}
             />
@@ -129,14 +119,17 @@ export const FormApiTokenContainer = ({
 
           <GridItem key="type" col={6} xs={12}>
             <TokenTypeSelect
-              values={values}
-              errors={errors}
+              value={values['type']}
+              error={errors['type']}
               label={{
                 id: 'Settings.tokens.form.type',
                 defaultMessage: 'Token type',
               }}
-              onChange={(value: TokenType) => {
+              onChange={(value) => {
+                // @ts-expect-error – DS Select supports numbers & strings, will be removed in V2
                 handleChangeSelectApiTokenType({ target: { value } });
+
+                // @ts-expect-error – DS Select supports numbers & strings, will be removed in V2
                 onChange({ target: { name: 'type', value } });
               }}
               options={typeOptions}

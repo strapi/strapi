@@ -29,3 +29,7 @@ export function getTimer(): TimeMeasurer {
 
   return { start, end, getTimings: () => timings };
 }
+
+export const prettyTime = (timeInMs: number): string => {
+  return Math.ceil(timeInMs) + 'ms';
+};

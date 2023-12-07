@@ -8,8 +8,9 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad, ItemTypes } from '../../../utils';
-import { CardDragPreview } from '../../App/components/CardDragPreview';
+import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
+import { ItemTypes } from '../../../utils/dragAndDrop';
+import { getTranslation } from '../../../utils/translations';
 
 const ActionButton = styled.button`
   display: flex;
@@ -177,7 +178,7 @@ const DraggableCard = ({
 
   return (
     <FieldWrapper ref={refs ? refs.dropRef : null}>
-      {isDragging && <CardDragPreview transparent labelField={labelField} />}
+      {isDragging && <CardDragPreview labelField={labelField} />}
       {!isDragging && isDraggingSibling && <CardDragPreview isSibling labelField={labelField} />}
 
       {!isDragging && !isDraggingSibling && (
@@ -194,7 +195,7 @@ const DraggableCard = ({
               as="span"
               aria-label={formatMessage(
                 {
-                  id: getTrad('components.DraggableCard.move.field'),
+                  id: getTranslation('components.DraggableCard.move.field'),
                   defaultMessage: 'Move {item}',
                 },
                 { item: labelField }
@@ -216,7 +217,7 @@ const DraggableCard = ({
               }}
               aria-label={formatMessage(
                 {
-                  id: getTrad('components.DraggableCard.edit.field'),
+                  id: getTranslation('components.DraggableCard.edit.field'),
                   defaultMessage: 'Edit {item}',
                 },
                 { item: labelField }
@@ -230,7 +231,7 @@ const DraggableCard = ({
               data-testid={`delete-${name}`}
               aria-label={formatMessage(
                 {
-                  id: getTrad('components.DraggableCard.delete.field'),
+                  id: getTranslation('components.DraggableCard.delete.field'),
                   defaultMessage: 'Delete {item}',
                 },
                 { item: labelField }

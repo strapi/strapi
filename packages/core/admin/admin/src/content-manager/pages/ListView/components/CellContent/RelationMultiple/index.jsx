@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../../../utils';
+import { getTranslation } from '../../../../../utils/translations';
 import CellValue from '../CellValue';
 
 const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
@@ -43,7 +43,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
     if (data) {
       notifyStatus(
         formatMessage({
-          id: getTrad('DynamicTable.relation-loaded'),
+          id: getTranslation('DynamicTable.relation-loaded'),
           defaultMessage: 'Relations have been loaded',
         })
       );
@@ -69,7 +69,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
           <Menu.Item disabled>
             <Loader small>
               {formatMessage({
-                id: getTrad('ListViewTable.relation-loading'),
+                id: getTranslation('ListViewTable.relation-loading'),
                 defaultMessage: 'Relations are loading',
               })}
             </Loader>
@@ -93,7 +93,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
               <Menu.Item
                 aria-disabled
                 aria-label={formatMessage({
-                  id: getTrad('ListViewTable.relation-more'),
+                  id: getTranslation('ListViewTable.relation-more'),
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >
