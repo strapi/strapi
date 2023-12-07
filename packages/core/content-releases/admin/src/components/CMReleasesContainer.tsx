@@ -242,7 +242,7 @@ export const CMReleasesContainer = () => {
 
   const getReleaseColorVariant = (
     actionType: 'publish' | 'unpublish',
-    shade: '200' | '100' | '600'
+    shade: '100' | '200' | '600'
   ) => {
     if (actionType === 'unpublish') {
       return `secondary${shade}`;
