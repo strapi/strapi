@@ -8,7 +8,7 @@ import styled, { css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
-import { type Block } from '../utils/types';
+import { isListNode, type Block } from '../utils/types';
 
 const listStyle = css`
   display: flex;
@@ -38,10 +38,6 @@ const Unorderedlist = styled.ul`
   list-style-type: disc;
   ${listStyle}
 `;
-
-const isListNode = (node: unknown): node is Block<'list'> => {
-  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
-};
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
   if (!isListNode(element)) {

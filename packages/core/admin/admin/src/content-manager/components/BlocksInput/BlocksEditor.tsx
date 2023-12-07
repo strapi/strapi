@@ -163,12 +163,11 @@ interface BlocksEditorProps {
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
     const { formatMessage } = useIntl();
-
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
-    const ariaDescriptionId = `${name}-item-instructions`;
+    const ariaDescriptionId = React.useId();
 
     const formattedPlaceholder =
       placeholder &&
@@ -244,6 +243,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               disabled={disabled}
               hasError={Boolean(error)}
               style={{ overflow: 'hidden' }}
+              aria-describedby={ariaDescriptionId}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />

@@ -28,7 +28,7 @@ const DROP_SENSITIVITY = {
 } as const;
 
 interface UseDragAndDropOptions<
-  TIndex extends number | Array<number> = number | Array<number>,
+  TIndex extends number | Array<number> = number,
   TItem extends { index: TIndex } = { index: TIndex }
 > extends UseKeyboardDragAndDropCallbacks<TIndex> {
   type?: string;

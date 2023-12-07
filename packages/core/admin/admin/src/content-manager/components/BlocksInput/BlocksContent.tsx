@@ -16,7 +16,7 @@ import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getAttributesToClear } from './utils/conversions';
-import { getEntries, type Block } from './utils/types';
+import { getEntries, isLinkNode, isListNode } from './utils/types';
 
 const StyledEditable = styled(Editable)`
   // The outline style is set on the wrapper with :focus-within
@@ -255,10 +255,14 @@ const DragAndDropElement = ({
           onDragStart={(event) => {
             const target = event.target as HTMLElement;
             const currentTarget = event.currentTarget as HTMLElement;
-            // Dragging action should only trigger drag event when the button is dragged
+
+            // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
             if (target.getAttribute('role') !== 'button') {
               event.preventDefault();
-            } else currentTarget.style.opacity = '0.5';
+            } else {
+              // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
+              currentTarget.style.opacity = '0.5';
+            }
           }}
           onDragEnd={(event) => {
             const currentTarget = event.currentTarget as HTMLElement;
@@ -334,14 +338,6 @@ type BaseRenderElementProps = Direction & {
   editor: Editor;
 };
 
-const isLink = (element: Element): element is Block<'link'> => {
-  return element.type === 'link';
-};
-
-const isList = (element: Element): element is Block<'list'> => {
-  return element.type === 'list';
-};
-
 const baseRenderElement = ({
   props,
   blocks,
@@ -355,7 +351,7 @@ const baseRenderElement = ({
 
   // Link is inline block so it cannot be dragged
   // List is skipped from dragged items
-  if (isLink(props.element) || isList(props.element)) return block.renderElement(props);
+  if (isLinkNode(props.element) || isListNode(props.element)) return block.renderElement(props);
 
   return (
     <DragAndDropElement
