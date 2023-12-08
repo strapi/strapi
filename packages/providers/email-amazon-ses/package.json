@@ -43,8 +43,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.15.5",
-    "node-ses": "^3.0.3"
+    "@aws-sdk/client-ses": "^3.468.0",
+    "@strapi/utils": "4.15.5"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.15.5",

@@ -1,4 +1,4 @@
-import nodeSES from 'node-ses';
+import { SESClient, SendEmailCommand, SESClientConfig } from "@aws-sdk/client-ses";
 
 interface Settings {
   defaultFrom: string;
@@ -17,43 +17,52 @@ interface SendOptions {
   [key: string]: unknown;
 }
 
-interface ProviderOptions {
-  key: string;
-  secret: string;
-  amazon?: string;
-}
-
 export default {
-  init(providerOptions: ProviderOptions, settings: Settings) {
-    const client = nodeSES.createClient(providerOptions);
-
+  init(providerOptions: SESClientConfig, settings: Settings) {
+    const client = new SESClient(providerOptions);
+    
     return {
       send(options: SendOptions): Promise<void> {
         return new Promise((resolve, reject) => {
-          const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
+          const { from, to, cc, bcc, replyTo, subject, text, html } = options;
 
-          const msg: nodeSES.sendEmailOptions = {
-            from: from || settings.defaultFrom,
-            subject,
-            message: html,
-            to,
-            cc,
-            bcc,
-            replyTo: replyTo || settings.defaultReplyTo,
-            altText: text,
-            ...rest,
+          const msg = { // SendEmailRequest
+            Source: from || settings.defaultFrom,
+            Destination: {
+              ToAddresses: [to],
+              ...cc ? { CcAddresses: [cc] } : { },
+              ...bcc ? { BccAddresses: [bcc] } : {}
+
+            },
+            Message: {
+              Subject: {
+                Data: subject
+              },
+              Body: { 
+                Text: {
+                  Data: text
+                },
+                Html: {
+                  Data: html
+                },
+              },
+            },
+            ReplyToAddresses: [
+              replyTo || settings.defaultReplyTo,
+            ],
+            ReturnPath: settings.defaultFrom 
           };
-
-          client.sendEmail(msg, (err) => {
-            if (err) {
-              if (err.Message) {
-                // eslint-disable-next-line prefer-promise-reject-errors
-                reject(`${err.Message} ${err.Detail ? err.Detail : ''}`);
-              }
-              reject(err);
-            } else {
-              resolve();
+          const command = new SendEmailCommand(msg);        
+          client.send(command, (err) => {
+          if (err) {
+            if (err.Message) {
+              // eslint-disable-next-line prefer-promise-reject-errors
+              reject(`${err.Message} ${err.Detail ? err.Detail : ''}`);
             }
+            reject(err);
+          } else {
+            resolve();
+          }
           });
         });
       },

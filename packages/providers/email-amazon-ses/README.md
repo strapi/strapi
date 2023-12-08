@@ -26,7 +26,7 @@ npm install @strapi/provider-email-amazon-ses --save
 | Variable                | Type                    | Description                                                                                                                | Required | Default   |
 | ----------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
 | provider                | string                  | The name of the provider you use                                                                                           | yes      |           |
-| providerOptions         | object                  | Will be directly given to `createClient` function. Please refer to [node-ses](https://www.npmjs.com/package/node-ses) doc. | yes      |           |
+| providerOptions         | object                  | Will be directly given to `SESClient` function. Please refer to [SESClient](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/) doc. | yes      |           |
 | settings                | object                  | Settings                                                                                                                   | no       | {}        |
 | settings.defaultFrom    | string                  | Default sender mail address                                                                                                | no       | undefined |
 | settings.defaultReplyTo | string \| array<string> | Default address or addresses the receiver is asked to reply to                                                             | no       | undefined |
@@ -44,9 +44,12 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'amazon-ses',
       providerOptions: {
-        key: env('AWS_SES_KEY'),
-        secret: env('AWS_SES_SECRET'),
-        amazon: 'https://email.us-east-1.amazonaws.com',
+        region: 'eu-west-1',
+        credentials: {
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
+        }
+        // or any other SESClientConfig parameter
       },
       settings: {
         defaultFrom: 'myemail@protonmail.com',
