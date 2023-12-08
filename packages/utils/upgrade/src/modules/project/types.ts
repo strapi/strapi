@@ -1,3 +1,5 @@
+import type { Utils } from '@strapi/types';
+
 import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
@@ -18,11 +20,12 @@ export type MinimalPackageJSON = {
   name: string;
   version: string;
   dependencies?: Record<string, string>;
-} & Record<string, unknown>;
+} & Utils.JSONObject;
 
 export interface Project {
   cwd: string;
   files: string[];
+  packageJSONPath: string;
   packageJSON: MinimalPackageJSON;
   strapiVersion: Version.SemVer;
 

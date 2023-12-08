@@ -26,6 +26,8 @@ export class Project implements ProjectInterface {
 
   public files!: string[];
 
+  public packageJSONPath!: string;
+
   public packageJSON!: MinimalPackageJSON;
 
   public strapiVersion!: Version.SemVer;
@@ -91,16 +93,17 @@ export class Project implements ProjectInterface {
   }
 
   private refreshPackageJSON(): void {
-    const packagePath = path.join(this.cwd, constants.PROJECT_PACKAGE_JSON);
+    const packageJSONPath = path.join(this.cwd, constants.PROJECT_PACKAGE_JSON);
 
     try {
-      fse.accessSync(packagePath);
+      fse.accessSync(packageJSONPath);
     } catch {
       throw new Error(`Could not find a ${constants.PROJECT_PACKAGE_JSON} file in ${this.cwd}`);
     }
 
-    const packageJSONBuffer = fse.readFileSync(packagePath);
+    const packageJSONBuffer = fse.readFileSync(packageJSONPath);
 
+    this.packageJSONPath = packageJSONPath;
     this.packageJSON = JSON.parse(packageJSONBuffer.toString());
   }
 

@@ -2,9 +2,9 @@ import { cloneDeep } from 'lodash/fp';
 
 import type { Utils } from '@strapi/types';
 
-import { createJSONTransformAPI } from '../json/transform-api';
+import { createJSONTransformAPI } from '../transform-api';
 
-import type { JSONTransformAPI } from '../json';
+import type { JSONTransformAPI } from '../types';
 
 const model = { foo: 'bar', nested: { bar: 42 } } as const;
 
@@ -42,8 +42,8 @@ describe('JSON Transform API', () => {
       expect(value).toBe('bar');
     });
 
-    test('Calling get without any path returns the whole object', () => {
-      const value = api.get();
+    test('Calling get with an empty path returns the whole object', () => {
+      const value = api.get('');
 
       expect(value).toStrictEqual(model);
     });
