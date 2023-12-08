@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { Readable } from 'node:stream';
 
 import type { Logger as LoggerInterface, LoggerOptions } from './types';
 
