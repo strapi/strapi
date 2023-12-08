@@ -26,13 +26,16 @@ interface PluginDeclaration {
   isModule: boolean;
 }
 
+/**
+ * otherwise known as "core features"
+ */
 const INTERNAL_PLUGINS = [
   '@strapi/plugin-content-manager',
   '@strapi/plugin-content-type-builder',
   '@strapi/plugin-email',
   '@strapi/plugin-upload',
-  process.env.FEATURE_FLAG_CONTENT_RELEASES && '@strapi/content-releases',
-].filter(Boolean);
+  '@strapi/content-releases',
+];
 
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';
 
@@ -79,10 +82,8 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
 
 export const getEnabledPlugins = async (strapi: Strapi, { client } = { client: false }) => {
   const internalPlugins: PluginMetas = {};
-  for (const dep of INTERNAL_PLUGINS) {
-    // eslint-disable-next-line no-continue
-    if (!dep) continue;
 
+  for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
     const packageInfo = require(packagePath);
 

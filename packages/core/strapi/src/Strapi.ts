@@ -77,6 +77,7 @@ import convertCustomFieldType from './utils/convert-custom-field-type';
 
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
+import { FeaturesService, createFeaturesService } from './services/features';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -189,6 +190,8 @@ class Strapi implements StrapiI {
 
   reload: Reloader;
 
+  features: FeaturesService;
+
   constructor(opts: StrapiOptions = {}) {
     destroyOnSignal(this);
 
@@ -237,6 +240,7 @@ class Strapi implements StrapiI {
     this.requestContext = requestContext;
     this.customFields = createCustomFields(this);
     this.fetch = createStrapiFetch(this);
+    this.features = createFeaturesService(this);
 
     createUpdateNotifier(this).notify();
 
