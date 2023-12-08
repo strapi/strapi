@@ -99,13 +99,15 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
         TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,
-              | Attribute.RelationPluralityModifier<TRelationKind, RelationScalarAssociation>
-              | Attribute.RelationPluralityModifier<TRelationKind, RelationObjectAssociation>
-              // Only add the relation reordering APIs if the relation is x(to)Many
-              | Utils.Expression.If<
-                  Attribute.IsManyRelation<TRelationKind>,
-                  RelationReorderingAssociation
-                >
+              Utils.Expression.If<
+                Attribute.IsManyRelation<TRelationKind>,
+                // Only add the relation reordering APIs if the relation is x(to)Many
+                | RelationReorderingAssociation
+                | RelationScalarAssociation[]
+                | RelationObjectAssociation[],
+                // Else stick with a simple ID
+                RelationScalarAssociation | RelationObjectAssociation
+              >
             >
           : never
       ],
