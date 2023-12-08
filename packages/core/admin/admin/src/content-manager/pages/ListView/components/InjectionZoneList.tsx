@@ -14,7 +14,6 @@ const InjectionZoneList = ({ area, ...props }: InjectionZoneListProps) => {
     return null;
   }
 
-  // TODO
   return (
     <ul>
       {injectedComponents.map(({ name, Component }) => (

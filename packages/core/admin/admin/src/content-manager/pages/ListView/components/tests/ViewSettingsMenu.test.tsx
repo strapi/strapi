@@ -4,6 +4,11 @@ import { Route } from 'react-router-dom';
 
 import { ViewSettingsMenu } from '../ViewSettingsMenu';
 
+/**
+ * @note we do `user.click(document.body)` because otherwise our
+ * tooltips remain open and then they're torn down which throws
+ * react act errors.
+ */
 describe('ViewSettingsMenu', () => {
   it('should show the cog button by default', () => {
     render(<ViewSettingsMenu slug="api::temp.temp" />);
@@ -42,6 +47,8 @@ describe('ViewSettingsMenu', () => {
         name: 'Reset',
       })
     ).toBeInTheDocument();
+
+    await user.click(document.body);
   });
 
   it('should contains the initially selected headers within the popover', async () => {
@@ -57,6 +64,8 @@ describe('ViewSettingsMenu', () => {
     expect(screen.getByRole('checkbox', { name: 'id' })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'name' })).not.toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'updatedAt' })).not.toBeChecked();
+
+    await user.click(document.body);
   });
 
   it('should select an header', async () => {
@@ -75,6 +84,8 @@ describe('ViewSettingsMenu', () => {
     expect(screen.getByRole('checkbox', { name: 'id' })).toBeChecked();
     fireEvent.click(screen.getByRole('checkbox', { name: 'id' }));
     expect(screen.getByRole('checkbox', { name: 'id' })).not.toBeChecked();
+
+    await user.click(document.body);
   });
 
   it('should reset the header selection when the reset button is clicked', async () => {

@@ -1,14 +1,12 @@
-import React from 'react';
-
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
-import { AssigneeFilter } from '../AssigneeFilter';
+import { AssigneeFilter, AssigneeFilterProps } from '../AssigneeFilter';
 
 const server = setupServer(
   rest.get('*/admin/users', (req, res, ctx) => {
@@ -29,7 +27,7 @@ const server = setupServer(
 
 const queryClient = new QueryClient();
 
-const setup = (props) => {
+const setup = (props: Partial<AssigneeFilterProps>) => {
   return {
     ...render(<AssigneeFilter {...props} />, {
       wrapper: ({ children }) => (
@@ -57,23 +55,22 @@ describe('Content-Manager | List-view | AssigneeFilter', () => {
 
   it('should render all the options fetched from the API', async () => {
     const mockOnChange = jest.fn();
-    const { getByText, user, getByRole } = setup({ onChange: mockOnChange });
+    const { getByText, user, getByRole, findByText } = setup({ onChange: mockOnChange });
 
     await user.click(getByRole('combobox'));
 
-    await waitFor(() => {
-      expect(getByText('John Doe')).toBeInTheDocument();
-      expect(getByText('Kai Doe')).toBeInTheDocument();
-    });
+    await findByText('John Doe');
+
+    expect(getByText('Kai Doe')).toBeInTheDocument();
   });
 
   it('should call the onChange function with the selected value', async () => {
     const mockOnChange = jest.fn();
-    const { getByText, user, getByRole } = setup({ onChange: mockOnChange });
+    const { getByText, user, getByRole, findByText } = setup({ onChange: mockOnChange });
 
     await user.click(getByRole('combobox'));
 
-    await waitFor(() => expect(getByText('John Doe')).toBeInTheDocument());
+    await findByText('John Doe');
 
     const option = getByText('John Doe');
 

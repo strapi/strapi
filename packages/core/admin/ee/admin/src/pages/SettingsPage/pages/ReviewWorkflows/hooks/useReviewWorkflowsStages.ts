@@ -16,7 +16,7 @@ export function useReviewWorkflowsStages(
   queryOptions: Omit<
     UseQueryOptions<Contracts.ReviewWorkflows.GetStages.Response>,
     'queryKey' | 'queryFn'
-  >
+  > = {}
 ) {
   const { kind, uid } = layout;
   const slug = kind === 'collectionType' ? 'collection-types' : 'single-types';

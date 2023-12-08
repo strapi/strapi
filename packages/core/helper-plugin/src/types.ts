@@ -39,7 +39,7 @@ export interface Operator {
 export interface DefaultFilterInputsProps {
   label?: string;
   onChange: (value: string | null) => void;
-  options?: FilterData['fieldSchema']['options'];
+  options?: FilterData['fieldSchema']['options'] | FilterData['metadatas']['options'];
   type: FilterData['fieldSchema']['type'];
   value?: string | null;
 }

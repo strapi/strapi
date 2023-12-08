@@ -207,7 +207,7 @@ export const FilterPopoverURLQuery = ({
               <Inputs
                 label={appliedFilter.metadatas.label}
                 type={appliedFilter.fieldSchema.type}
-                options={appliedFilter.fieldSchema.options}
+                options={appliedFilter.fieldSchema.options ?? appliedFilter.metadatas.options}
                 value={modifiedData.value}
                 onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
               />
@@ -241,9 +241,9 @@ const SelectContainers = styled(Flex)`
 const DefaultInputs = ({
   label = '',
   onChange,
-  options = [],
   type,
   value = '',
+  ...restProps
 }: DefaultFilterInputsProps) => {
   const { formatMessage } = useIntl();
 
@@ -286,6 +286,7 @@ const DefaultInputs = ({
   }
 
   if (type === 'enumeration') {
+    const options = (restProps.options as FilterData['fieldSchema']['options']) ?? [];
     return (
       // @ts-expect-error from the DS V2 this won't be needed because we're only returning strings.
       <SingleSelect aria-label={label} onChange={onChange} value={value}>

@@ -85,4 +85,4 @@ namespace UpdateStage {
   }
 }
 
-export type { UpdateAssignee, UpdateStage, GetStages };
+export type { UpdateAssignee, UpdateStage, GetStages, Stage, StagePermission };

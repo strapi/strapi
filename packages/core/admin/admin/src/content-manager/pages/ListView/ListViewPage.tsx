@@ -198,7 +198,7 @@ const ListViewPage = ({
       metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
       fieldSchema: {
         type: attribute.type,
-        options: 'enum' in attribute ? attribute.enum : undefined,
+        options: 'enum' in attribute ? attribute.enum : [],
         mainField,
       },
       trackedEvent,

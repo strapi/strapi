@@ -8,7 +8,7 @@ import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
-import { StageFilter } from '../StageFilter';
+import { StageFilter, StageFilterProps } from '../StageFilter';
 
 const server = setupServer(
   rest.get('*/admin/review-workflows/workflows', (req, res, ctx) => {
@@ -33,7 +33,7 @@ const server = setupServer(
 
 const queryClient = new QueryClient();
 
-const setup = (props) => {
+const setup = (props?: Partial<StageFilterProps>) => {
   return {
     ...render(<StageFilter uid="api::address.address" onChange={() => {}} {...props} />, {
       wrapper: ({ children }) => (

@@ -10,6 +10,7 @@ const layout = {
   attributes: {
     address: {
       type: 'relation',
+      relation: 'manyToOne',
     },
     averagePrice: {
       type: 'float',
