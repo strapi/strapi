@@ -45,6 +45,11 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
     background-color: ${({ theme }) => theme.colors.primary100};
     border-color: ${({ theme }) => theme.colors.primary700};
   }
+
+  &[data-checked='false'] {
+    border-left: ${({ actionType }) => actionType === 'unpublish' && 'none'};
+    border-right: ${({ actionType }) => actionType === 'publish' && 'none'};
+  }
 `;
 
 interface ActionOptionProps {
