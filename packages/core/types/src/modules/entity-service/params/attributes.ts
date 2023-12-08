@@ -49,15 +49,15 @@ export type ScalarValues = GetValue<
   | Attribute.Integer
   | Attribute.Blocks
   | Attribute.JSON
-  // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
-  //      The member below has been commented on purpose to avoid adding it back without noticing.
-  // | Attribute.Password
   | Attribute.RichText
   | Attribute.String
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
   | Attribute.UID<Common.UID.Schema>
+  // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
+  //      The member below has been commented on purpose to avoid adding it back without noticing.
+  // | Attribute.Password
 >;
 
 /**
@@ -79,6 +79,10 @@ export type OmitRelationWithoutTarget<TSchemaUID extends Common.UID.Schema, TVal
   Exclude<Attribute.GetKeysByType<TSchemaUID, 'relation'>, Attribute.GetKeysWithTarget<TSchemaUID>>
 >;
 
+type RelationScalarAssociation = ID;
+type RelationObjectAssociation = { id: ID };
+type RelationReorderingAssociation = { set: ID[] } | { connect: ID[] };
+
 /**
  * Attribute.GetValue override with extended values
  *
@@ -95,7 +99,13 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
         TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,
-              Attribute.RelationPluralityModifier<TRelationKind, ID>
+              | Attribute.RelationPluralityModifier<TRelationKind, RelationScalarAssociation>
+              | Attribute.RelationPluralityModifier<TRelationKind, RelationObjectAssociation>
+              // Only add the relation reordering APIs if the relation is x(to)Many
+              | Utils.Expression.If<
+                  Attribute.IsManyRelation<TRelationKind>,
+                  RelationReorderingAssociation
+                >
             >
           : never
       ],
