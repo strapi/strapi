@@ -281,6 +281,7 @@ export const CMReleasesContainer = () => {
                 borderWidth="1px"
                 borderStyle="solid"
                 borderColor={getReleaseColorVariant(release.action.type, '200')}
+                overflow="hidden"
                 hasRadius
               >
                 <Box
