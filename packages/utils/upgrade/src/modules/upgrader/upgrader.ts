@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { packageManager } from '@strapi/utils';
 
 import {
   codemodRepositoryFactory,
@@ -89,6 +90,7 @@ export class Upgrader implements UpgraderInterface {
       });
 
       await this.updateDependencies();
+      await this.installDependencies();
 
       await this.runCodemods(range);
     } catch (e) {
@@ -185,7 +187,18 @@ export class Upgrader implements UpgraderInterface {
     return strapiDependencies;
   }
 
-  private async runCodemods(range: Version.Range) {
+  private async installDependencies(): Promise<void> {
+    const projectPath = this.project.cwd;
+
+    const packageManagerName = await packageManager.getPreferred(projectPath);
+
+    await packageManager.installDependencies(projectPath, packageManagerName, {
+      stdout: this.logger?.stdout,
+      stderr: this.logger?.stderr,
+    });
+  }
+
+  private async runCodemods(range: Version.Range): Promise<void> {
     const repository = codemodRepositoryFactory(
       codemodRepositoryConstants.INTERNAL_CODEMODS_DIRECTORY
     );
