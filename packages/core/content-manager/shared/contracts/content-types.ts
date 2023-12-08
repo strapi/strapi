@@ -14,23 +14,18 @@ export type Settings = {
 
 export type Metadatas = {
   [key: string]: {
-    edit:
-      | {
-          label: string;
-          description: string;
-          placeholder: string;
-          visible: boolean;
-          editable: boolean;
-          mainField?: string;
-        }
-      | {};
-    list:
-      | {
-          label: string;
-          searchable: boolean;
-          sortable: boolean;
-        }
-      | {};
+    edit: {
+      label?: string;
+      description?: string;
+      placeholder?: string;
+      visible?: boolean;
+      editable?: boolean;
+    };
+    list: {
+      label?: string;
+      searchable?: boolean;
+      sortable?: boolean;
+    };
   };
 };
 
@@ -60,9 +55,7 @@ export declare namespace FindContentTypes {
     query: {};
   }
   export interface Response {
-    data: {
-      data: ContentType[];
-    };
+    data: ContentType[];
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -76,12 +69,10 @@ export declare namespace FindContentTypesSettings {
     query: {};
   }
   export interface Response {
-    data: {
-      data: {
-        uid: string;
-        settings: Settings;
-      };
-    };
+    data: Array<{
+      uid: string;
+      settings: Settings;
+    }>;
     error?: errors.ApplicationError;
   }
 }
@@ -96,7 +87,8 @@ export declare namespace FindContentTypeConfiguration {
   }
   export interface Response {
     data: {
-      data: Configuration;
+      contentType: Configuration;
+      components: Record<string, ComponentConfiguration>;
     };
     error?: errors.ApplicationError;
   }
@@ -116,10 +108,8 @@ export declare namespace UpdateContentTypeConfiguration {
   }
   export interface Response {
     data: {
-      data: {
-        contentType: Configuration;
-        components: Record<string, ComponentConfiguration> | {};
-      };
+      contentType: Configuration;
+      components: Record<string, ComponentConfiguration>;
     };
     error?: errors.ApplicationError | errors.YupValidationError;
   }

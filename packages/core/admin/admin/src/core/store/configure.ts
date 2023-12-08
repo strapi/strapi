@@ -7,16 +7,12 @@ import {
 } from '@reduxjs/toolkit';
 
 import { RBACReducer, RBACState } from '../../components/RBACProvider';
-// @ts-expect-error no types, yet.
-import rbacManagerReducer from '../../content-manager/hooks/useSyncRbac/reducer';
-// @ts-expect-error no types, yet.
-import cmAppReducer from '../../content-manager/pages/App/reducer';
-// @ts-expect-error no types, yet.
-import editViewLayoutManagerReducer from '../../content-manager/pages/EditViewLayoutManager/reducer';
+import { reducer as rbacManagerReducer } from '../../content-manager/hooks/useSyncRbac';
+import { reducer as cmAppReducer } from '../../content-manager/pages/App';
+import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
 // @ts-expect-error no types, yet.
 import listViewReducer from '../../content-manager/pages/ListView/reducer';
-// @ts-expect-error no types, yet.
-import editViewCrudReducer from '../../content-manager/sharedReducers/crudReducer/reducer';
+import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
 
 /**
@@ -28,8 +24,8 @@ const staticReducers = {
   'content-manager_app': cmAppReducer,
   'content-manager_listView': listViewReducer,
   'content-manager_rbacManager': rbacManagerReducer,
-  'content-manager_editViewLayoutManager': editViewLayoutManagerReducer,
-  'content-manager_editViewCrudReducer': editViewCrudReducer,
+  'content-manager_editViewLayoutManager': editViewReducer,
+  'content-manager_editViewCrudReducer': crudReducer,
 } as const;
 
 const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => StoreEnhancer =

@@ -24,8 +24,7 @@ import { useHistory } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../../selectors';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
-// @ts-expect-error not converted yet
-import Table from '../../components/Tokens/Table';
+import { Table } from '../../components/Tokens/Table';
 
 import type { List } from '../../../../../../shared/contracts/api-token';
 
@@ -201,7 +200,6 @@ export const ListView = () => {
             permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="api-tokens"
-            rows={apiTokens}
             isLoading={isLoading}
             // @ts-expect-error not converted yet
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
