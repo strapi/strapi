@@ -66,8 +66,7 @@ const formatAttribute = (key: any, attribute: Attribute.Any) => {
 const toRelation = (attribute: Attribute.Relation) => {
   return {
     ...attribute,
-    // @ts-expect-error target to found on Attribute.Relation
-    targetModel: attribute.target,
+    targetModel: 'target' in attribute ? attribute.target : undefined,
     relationType: attribute.relation,
   };
 };
