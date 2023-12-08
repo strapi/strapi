@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { useFindRedirectionLink, useSyncRbac } from '../../hooks';
+import { useFindRedirectionLink } from '../../hooks/useFindRedirectionLink';
+import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { resetProps, setLayout } from '../ListView/actions';
 
 import Permissions from './Permissions';

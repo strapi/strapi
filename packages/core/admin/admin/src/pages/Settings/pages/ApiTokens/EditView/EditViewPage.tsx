@@ -27,10 +27,8 @@ import {
 import { selectAdminPermissions } from '../../../../../selectors';
 import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
-// @ts-expect-error not converted yet
-import FormHead from '../../../components/Tokens/FormHead';
-// @ts-expect-error not converted yet
-import TokenBox from '../../../components/Tokens/TokenBox';
+import { FormHead } from '../../../components/Tokens/FormHead';
+import { TokenBox } from '../../../components/Tokens/TokenBox';
 
 import { FormApiTokenContainer } from './components/FormApiTokenContainer';
 import { LoadingView } from './components/LoadingView';

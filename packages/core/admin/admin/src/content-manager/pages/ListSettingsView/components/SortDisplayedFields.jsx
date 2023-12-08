@@ -6,7 +6,7 @@ import { Plus } from '@strapi/icons';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import DraggableCard from './DraggableCard';
 
@@ -44,7 +44,7 @@ export const SortDisplayedFields = ({
     <Flex alignItems="stretch" direction="column" gap={4}>
       <Typography variant="delta" as="h2">
         {formatMessage({
-          id: getTrad('containers.SettingPage.view'),
+          id: getTranslation('containers.SettingPage.view'),
           defaultMessage: 'View',
         })}
       </Typography>
@@ -79,7 +79,7 @@ export const SortDisplayedFields = ({
           >
             <VisuallyHidden as="span">
               {formatMessage({
-                id: getTrad('components.FieldSelect.label'),
+                id: getTranslation('components.FieldSelect.label'),
                 defaultMessage: 'Add a field',
               })}
             </VisuallyHidden>

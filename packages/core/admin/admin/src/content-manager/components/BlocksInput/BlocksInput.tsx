@@ -4,8 +4,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-// @ts-expect-error TODO convert to typescript
-import { Hint } from '../Hint';
+import { Hint, HintProps } from '../Hint';
 
 import { BlocksEditor } from './BlocksEditor';
 
@@ -15,18 +14,19 @@ const LabelAction = styled(Box)`
   }
 `;
 
-interface BlocksInputProps extends React.ComponentPropsWithoutRef<typeof BlocksEditor> {
+interface BlocksInputProps
+  extends React.ComponentPropsWithoutRef<typeof BlocksEditor>,
+    Pick<HintProps, 'hint'> {
   intlLabel: MessageDescriptor;
   attribute: { type: string; [key: string]: unknown };
   description?: MessageDescriptor;
   labelAction?: React.ReactNode;
   required?: boolean;
-  hint?: string | string[];
 }
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   (
-    { intlLabel, labelAction, name, required = false, error = '', hint = null, ...editorProps },
+    { intlLabel, labelAction, name, required = false, error = '', hint, ...editorProps },
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();

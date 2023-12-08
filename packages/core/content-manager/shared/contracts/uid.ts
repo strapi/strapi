@@ -17,9 +17,7 @@ export declare namespace GenerateUID {
     query: {};
   }
   export interface Response {
-    data: {
-      data: string;
-    };
+    data: string;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -36,11 +34,15 @@ export declare namespace CheckUIDAvailability {
     };
     query: {};
   }
-  export interface Response {
-    data: {
-      isAvailable: boolean;
-      suggestion: string | null;
-    };
-    error?: errors.ApplicationError | errors.YupValidationError;
-  }
+  export type Response =
+    | {
+        isAvailable: boolean;
+        suggestion: string | null;
+        error?: never;
+      }
+    | {
+        isAvailable?: never;
+        suggesiton?: never;
+        error?: errors.ApplicationError | errors.YupValidationError;
+      };
 }

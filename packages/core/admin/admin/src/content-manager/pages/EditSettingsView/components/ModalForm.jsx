@@ -4,10 +4,11 @@ import { GridItem, Option, Select } from '@strapi/design-system';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import getTrad from '../../../utils/getTrad';
-import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
+import { useTypedSelector } from '../../../../core/store/hooks';
+import { getTranslation } from '../../../utils/translations';
+import { selectSchemas } from '../../App';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 
@@ -23,9 +24,8 @@ const FIELD_SIZES = [
 const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
-  const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
-  const fieldSizes = useSelector(selectFieldSizes);
+  const schemas = useSelector(selectSchemas);
+  const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
 
   const formToDisplay = useMemo(() => {
     if (!selectedField) {
@@ -85,7 +85,9 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
           hint={
             meta === 'mainField'
               ? formatMessage({
-                  id: getTrad('containers.SettingPage.editSettings.relation-field.description'),
+                  id: getTranslation(
+                    'containers.SettingPage.editSettings.relation-field.description'
+                  ),
                 })
               : ''
           }
@@ -117,7 +119,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
               onSizeChange({ name: selectedField, value });
             }}
             label={formatMessage({
-              id: getTrad('containers.SettingPage.editSettings.size.label'),
+              id: getTranslation('containers.SettingPage.editSettings.size.label'),
               defaultMessage: 'Size',
             })}
           >

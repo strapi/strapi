@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "4.15.4",
+  "version": "4.15.5",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -20,6 +20,13 @@
     }
   ],
   "exports": {
+    "./_internal/shared": {
+      "types": "./dist/shared/index.d.ts",
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.js"
+    },
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
@@ -37,12 +44,13 @@
     "lint": "run -T eslint .",
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/types": "workspace:*",
-    "@strapi/utils": "4.15.4",
+    "@strapi/utils": "4.15.5",
     "koa": "2.13.4",
     "koa-bodyparser": "4.4.1",
     "lodash": "4.17.21",

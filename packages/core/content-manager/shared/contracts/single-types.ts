@@ -106,9 +106,7 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: {
-      data: number;
-    };
+    data: number;
     error?: errors.ApplicationError;
   }
 }

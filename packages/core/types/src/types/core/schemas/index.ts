@@ -69,7 +69,7 @@ export interface Info {
   description?: string;
 
   /**
-   * FontAwesome (v5) icon name to use for the component's icon in the admin panel
+   * @strapi/icon name to use for the component's icon in the admin panel
    */
   icon?: string;
 }
@@ -85,6 +85,10 @@ export interface Attributes {
  * Structure containing every core schema options and their associated value
  */
 export interface Options {
+  /**
+   * EE only.
+   */
+  reviewWorkflows?: boolean;
   draftAndPublish?: boolean;
   populateCreatorFields?: boolean;
   comment?: string;
