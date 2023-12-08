@@ -289,7 +289,7 @@ const DragAndDropElement = ({
             aria-disabled={disabled}
             disabled={disabled}
             draggable
-            // For some headings top margin added to drag handle to align at the text level
+            // For some blocks top margin added to drag handle to align at the text level
             dragHandleTopMargin={dragHandleTopMargin}
           >
             <Drag color="neutral600" />

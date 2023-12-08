@@ -7,7 +7,7 @@ import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
-import styled, { CSSProperties } from 'styled-components';
+import styled, { type CSSProperties } from 'styled-components';
 
 import { getTranslation } from '../../utils/translations';
 
@@ -24,7 +24,6 @@ import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
-import { blocksData } from './tests/mock-schema';
 
 /* -------------------------------------------------------------------------------------------------
  * BlocksEditorProvider
@@ -227,9 +226,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
         <Slate
           editor={editor}
-          initialValue={
-            blocksData || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
-          }
+          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
           onChange={handleSlateChange}
           key={key}
         >

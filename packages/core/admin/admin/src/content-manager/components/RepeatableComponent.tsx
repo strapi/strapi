@@ -28,7 +28,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout } from '../hooks/useContentTypeLayout';
-import { useDragAndDrop } from '../hooks/useDragAndDrop';
+import { useDragAndDrop, UseDragAndDropOptions } from '../hooks/useDragAndDrop';
 import { useLazyComponents } from '../hooks/useLazyComponents';
 import { ItemTypes } from '../utils/dragAndDrop';
 import { getMaxTempKey } from '../utils/fields';
@@ -409,7 +409,8 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
   }
 `;
 
-interface ComponentProps {
+interface ComponentProps
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'> {
   componentFieldName: string;
   componentUid: string;
   fields?: EditLayoutRow[][];
@@ -420,9 +421,6 @@ interface ComponentProps {
   onClickToggle: () => void;
   toggleCollapses: () => void;
   moveComponentField: (newIndex: number, currentIndex: number) => void;
-  onGrabItem?: (index: number) => void;
-  onDropItem?: (index: number) => void;
-  onCancel?: (index: number) => void;
 }
 
 const Component = ({

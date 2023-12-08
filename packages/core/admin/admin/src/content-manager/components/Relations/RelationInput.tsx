@@ -566,7 +566,8 @@ const LinkEllipsis = styled(Link)`
  * -----------------------------------------------------------------------------------------------*/
 
 interface RelationItemProps
-  extends Omit<FlexProps, 'id' | 'style'>,
+  extends Pick<UseDragAndDropOptions, 'onCancel' | 'onDropItem' | 'onGrabItem'>,
+    Omit<FlexProps, 'id' | 'style'>,
     Pick<ListChildComponentProps, 'style' | 'index'> {
   ariaDescribedBy: string;
   canDrag: boolean;
@@ -579,9 +580,6 @@ interface RelationItemProps
   name: string;
   status?: NormalizedRelation['publicationState'];
   updatePositionOfRelation: UseDragAndDropOptions['onMoveItem'];
-  onCancel?: (index: number) => void;
-  onDropItem?: (index: number) => void;
-  onGrabItem?: (index: number) => void;
 }
 
 const RelationItem = ({
