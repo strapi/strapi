@@ -33,6 +33,14 @@ export class Logger implements LoggerInterface {
     return this.nbWarningsCalls;
   }
 
+  get stdout(): (NodeJS.WriteStream & { fd: 1 }) | undefined {
+    return this.isSilent ? undefined : process.stdout;
+  }
+
+  get stderr(): (NodeJS.WriteStream & { fd: 2 }) | undefined {
+    return this.isSilent ? undefined : process.stderr;
+  }
+
   setDebug(debug: boolean): this {
     this.isDebug = debug;
     return this;
