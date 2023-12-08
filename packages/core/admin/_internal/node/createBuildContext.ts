@@ -9,8 +9,8 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
-import { getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
-import type { Strapi, FeaturesService } from '@strapi/types';
+import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
+import { Strapi, FeaturesService } from '@strapi/types';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 
 interface BuildContext {
@@ -60,11 +60,7 @@ interface BuildContext {
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
    */
-  plugins: Array<{
-    path: string;
-    name: string;
-    importName: string;
-  }>;
+  plugins: PluginMeta[];
   /**
    * The absolute path to the runtime directory
    */
@@ -117,6 +113,8 @@ const createBuildContext = async ({
 
   const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
 
+  const appDir = strapiInstance.dirs.app.root;
+
   await loadEnv(cwd);
 
   const env = getStrapiAdminEnvVars({
@@ -154,22 +152,22 @@ const createBuildContext = async ({
   const runtimeDir = path.join(cwd, '.strapi', 'client');
   const entry = path.relative(cwd, path.join(runtimeDir, 'app.js'));
 
-  const plugins = await getEnabledPlugins({ cwd, logger, strapi: strapiInstance });
+  const plugins = await getEnabledPlugins({ cwd, logger, runtimeDir, strapi: strapiInstance });
 
   logger.debug('Enabled plugins', os.EOL, plugins);
 
-  const pluginsWithFront = getMapOfPluginsWithAdmin(plugins, { runtimeDir });
+  const pluginsWithFront = getMapOfPluginsWithAdmin(plugins);
 
   logger.debug('Enabled plugins with FE', os.EOL, plugins);
 
   const target = browserslist.loadConfig({ path: cwd }) ?? DEFAULT_BROWSERSLIST;
 
-  const customisations = await loadUserAppFile(strapiInstance.dirs.app.root);
+  const customisations = await loadUserAppFile({ appDir, runtimeDir });
 
   const features = strapiInstance.config.get('features', undefined);
 
   const buildContext = {
-    appDir: strapiInstance.dirs.app.root,
+    appDir,
     basePath: `${adminPath}/`,
     customisations,
     cwd,
