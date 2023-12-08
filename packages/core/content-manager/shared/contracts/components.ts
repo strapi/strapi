@@ -41,10 +41,8 @@ export declare namespace FindComponentConfiguration {
   }
   export interface Response {
     data: {
-      data: {
-        component: ComponentConfiguration;
-        components: Record<string, ComponentConfiguration> | {};
-      };
+      component: ComponentConfiguration;
+      components: Record<string, ComponentConfiguration>;
     };
     error?: errors.ApplicationError;
   }
@@ -68,7 +66,7 @@ export declare namespace UpdateComponentConfiguration {
   }
 
   export interface Response {
-    data: { data: ComponentConfiguration };
+    data: ComponentConfiguration;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

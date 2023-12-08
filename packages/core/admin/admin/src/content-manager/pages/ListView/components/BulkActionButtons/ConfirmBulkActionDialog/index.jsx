@@ -15,7 +15,7 @@ import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
 import InjectionZoneList from '../../../../../components/InjectionZoneList';
-import { getTrad } from '../../../../../utils';
+import { getTranslation } from '../../../../../utils/translations';
 import { listViewDomain } from '../../../selectors';
 
 const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
@@ -79,7 +79,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
   const { get } = useFetchClient();
   const { selectedEntries } = useTableContext();
   const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
   const {
     contentType: { uid: slug },
   } = useSelector(listViewDomain());
@@ -129,7 +129,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
             {countDraftRelations > 0 &&
               formatMessage(
                 {
-                  id: getTrad(`popUpwarning.warning.bulk-has-draft-relations.message`),
+                  id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
                   defaultMessage:
                     '<b>{count} {count, plural, one { relation } other { relations } } out of {entities} { entities, plural, one { entry } other { entries } } {count, plural, one { is } other { are } }</b> not published yet and might lead to unexpected behavior. ',
                 },
@@ -140,7 +140,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
                 }
               )}
             {formatMessage({
-              id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
+              id: getTranslation('popUpWarning.bodyMessage.contentType.publish.all'),
               defaultMessage: 'Are you sure you want to publish these entries?',
             })}
           </Typography>

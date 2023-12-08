@@ -8583,6 +8583,7 @@ __metadata:
     "@strapi/icons": "npm:1.13.2"
     "@strapi/pack-up": "npm:4.15.5"
     "@strapi/permissions": "npm:4.15.5"
+    "@strapi/plugin-content-manager": "npm:4.15.5"
     "@strapi/provider-audit-logs-local": "npm:4.15.5"
     "@strapi/strapi": "npm:4.15.5"
     "@strapi/types": "npm:4.15.5"
@@ -8591,6 +8592,7 @@ __metadata:
     "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
+    "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
     "@types/find-root": "npm:1.1.3"
     "@types/invariant": "npm:2.2.36"
     "@types/jest": "npm:29.5.2"
@@ -8598,9 +8600,15 @@ __metadata:
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
     "@types/lodash": "npm:^4.14.191"
+    "@types/markdown-it": "npm:13.0.7"
+    "@types/markdown-it-container": "npm:2.0.9"
+    "@types/markdown-it-emoji": "npm:2.0.4"
+    "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/prettier": "npm:2.7.3"
+    "@types/react-window": "npm:1.8.8"
+    "@types/sanitize-html": "npm:2.9.5"
     "@types/webpack-bundle-analyzer": "npm:4.6.2"
     "@types/webpack-hot-middleware": "npm:2.25.8"
     axios: "npm:1.6.0"
@@ -10123,6 +10131,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/codemirror5@npm:@types/codemirror@^5.60.15":
+  version: 5.60.15
+  resolution: "@types/codemirror@npm:5.60.15"
+  dependencies:
+    "@types/tern": "npm:*"
+  checksum: 925ad6b76a703e0ed8ea07f11593cb32498960ece111d21d57a867f30cf151773beeefa2e593df536766d2f3240aa6d3eaa7d5398c8380e0b996a19bf058032e
+  languageName: node
+  linkType: hard
+
 "@types/configstore@npm:5.0.1":
   version: 5.0.1
   resolution: "@types/configstore@npm:5.0.1"
@@ -10695,6 +10712,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/linkify-it@npm:*":
+  version: 3.0.5
+  resolution: "@types/linkify-it@npm:3.0.5"
+  checksum: fac28f41a6e576282300a459d70ea0d33aab70dbb77c3d09582bb0335bb00d862b6de69585792a4d590aae4173fbab0bf28861e2d90ca7b2b1439b52688e9ff6
+  languageName: node
+  linkType: hard
+
 "@types/lodash@npm:^4.14.149":
   version: 4.14.197
   resolution: "@types/lodash@npm:4.14.197"
@@ -10730,12 +10754,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/markdown-it-container@npm:2.0.9":
+  version: 2.0.9
+  resolution: "@types/markdown-it-container@npm:2.0.9"
+  dependencies:
+    "@types/markdown-it": "npm:*"
+  checksum: bea2e414acca34242a6ed8967d58f9c7fc036b2b97d79a27b3428572ffe190a46f6e13181c108a7bb1207ad3036915844df50d56afa6d89cbac6e32e100f5c72
+  languageName: node
+  linkType: hard
+
+"@types/markdown-it-emoji@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@types/markdown-it-emoji@npm:2.0.4"
+  dependencies:
+    "@types/markdown-it": "npm:*"
+  checksum: baa72839b6bc0eb005c5516042fa9c025c9918f2e892d75bc4966bdaf721ea6601de4fb1a829c2b66725a648018452355fe444dad062dbedb134639e4d8935b2
+  languageName: node
+  linkType: hard
+
+"@types/markdown-it-footnote@npm:3.0.3":
+  version: 3.0.3
+  resolution: "@types/markdown-it-footnote@npm:3.0.3"
+  dependencies:
+    "@types/markdown-it": "npm:*"
+  checksum: 18c6c8e659d4b05bb5ca6661cbbcc2af95014e6696ea1061642bba4dcef301664a5c8e4e82a53c0c826f019877a6469e86493a2e9971e4e985148f2da1635f55
+  languageName: node
+  linkType: hard
+
+"@types/markdown-it@npm:*, @types/markdown-it@npm:13.0.7":
+  version: 13.0.7
+  resolution: "@types/markdown-it@npm:13.0.7"
+  dependencies:
+    "@types/linkify-it": "npm:*"
+    "@types/mdurl": "npm:*"
+  checksum: fb9fe249e5542e1cce5d7b006125cd976dc9a1d093ef2639e6e35fbc5fce47aacc2f166f2678b1cbe27939f1f05f85e5b7b9e363269b59834cf7431d8461f48d
+  languageName: node
+  linkType: hard
+
 "@types/mdast@npm:^3.0.0":
   version: 3.0.12
   resolution: "@types/mdast@npm:3.0.12"
   dependencies:
     "@types/unist": "npm:^2"
   checksum: 7446c87e3c51db5e3daa7490f9d04c183e619a8f6542f5dbaa263599052adc89af17face06609d4f5c5c49aacee2bff04748bba0342cbc4106904f9cf1121a69
+  languageName: node
+  linkType: hard
+
+"@types/mdurl@npm:*":
+  version: 1.0.5
+  resolution: "@types/mdurl@npm:1.0.5"
+  checksum: e8e872e8da8f517a9c748b06cec61c947cb73fd3069e8aeb0926670ec5dfac5d30549b3d0f1634950401633e812f9b7263f2d5dbe7e98fce12bcb2c659aa4b21
   languageName: node
   linkType: hard
 
@@ -11013,6 +11081,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-window@npm:1.8.8":
+  version: 1.8.8
+  resolution: "@types/react-window@npm:1.8.8"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 79b70b7c33161efb14bf69115792843de8e038594136a8373cfbbcc4066c49fd611dd2d3592a9a81d19d21c075bf14e5e73a64f4d9ad32e45d4d5493f5f53918
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:*, @types/react@npm:16 || 17 || 18, @types/react@npm:18.2.39, @types/react@npm:>=16":
   version: 18.2.39
   resolution: "@types/react@npm:18.2.39"
@@ -11037,6 +11114,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: e4972389457e4edce3cbba5e8474fb33684d73879433a9eec989d0afb7e550fd6fa3ffb8fe68dbb429288d10707796a193bc0007c4e8429fd267bdc4d8404632
+  languageName: node
+  linkType: hard
+
+"@types/sanitize-html@npm:2.9.5":
+  version: 2.9.5
+  resolution: "@types/sanitize-html@npm:2.9.5"
+  dependencies:
+    htmlparser2: "npm:^8.0.0"
+  checksum: fd0afee5dac91aa2c42391f0c8c9254204f4ee1f10b902aa04e8f7809043d785e28af2732f75277ef09e46838013ad60abedb02ba1424b6218264f3333437fb5
   languageName: node
   linkType: hard
 
@@ -11157,6 +11243,15 @@ __metadata:
     "@types/node": "npm:*"
     minipass: "npm:^4.0.0"
   checksum: af670ba3da70f755fdf4de0ef71f04cd2029545d7842df4f58716c103b47c94a1dc14de9576345f995880cd990723a217ed0a7354a7098e32487eda43463101b
+  languageName: node
+  linkType: hard
+
+"@types/tern@npm:*":
+  version: 0.23.9
+  resolution: "@types/tern@npm:0.23.9"
+  dependencies:
+    "@types/estree": "npm:*"
+  checksum: 72d26a1abc2b13aa7ee6a34abc0558bfbff1f977beb1c9f2554c4193c6cfc7e1677e4f84663d3f971135b436c5b847f170c74c3b1d6c320e08a1aba7e83cc3c2
   languageName: node
   linkType: hard
 

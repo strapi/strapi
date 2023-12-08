@@ -18,8 +18,7 @@ import { type Element, Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
-// @ts-expect-error TODO migrate this file
-import { composeRefs } from '../../../utils';
+import { composeRefs } from '../../../utils/refs';
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
 import { type Block } from '../utils/types';

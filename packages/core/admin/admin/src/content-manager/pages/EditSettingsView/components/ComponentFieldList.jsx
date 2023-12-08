@@ -7,7 +7,7 @@ import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad';
+import { getTranslation } from '../../../utils/translations';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 const ComponentFieldList = ({ componentUid }) => {
@@ -46,7 +46,7 @@ const ComponentFieldList = ({ componentUid }) => {
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
           {formatMessage({
-            id: getTrad('components.FieldItem.linkToComponentLayout'),
+            id: getTranslation('components.FieldItem.linkToComponentLayout'),
             defaultMessage: "Set the component's layout",
           })}
         </Link>
