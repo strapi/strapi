@@ -1,4 +1,6 @@
-const tableHeaders = [
+import { SanitizedAdminUserForAuditLogs } from '../../../../../../../../shared/contracts/audit-logs';
+
+export const tableHeaders = [
   {
     name: 'action',
     key: 'action',
@@ -31,8 +33,6 @@ const tableHeaders = [
       },
       sortable: false,
     },
-    cellFormatter: (user) => (user ? user.displayName : ''),
+    cellFormatter: (user: SanitizedAdminUserForAuditLogs) => (user ? user.displayName : ''),
   },
 ];
-
-export default tableHeaders;

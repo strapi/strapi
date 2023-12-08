@@ -1,19 +1,27 @@
-import getDisplayedFilters from '../utils/getDisplayedFilters';
+import { getDisplayedFilters } from '../getDisplayedFilters';
 
 const mockUsers = [
   {
     id: 1,
     firstname: 'test',
     lastname: 'tester',
-    username: null,
     email: 'test@test.com',
+    isActive: true,
+    blocked: false,
+    createdAt: '',
+    updatedAt: '',
+    roles: [],
   },
   {
     id: 2,
     firstname: 'test2',
     lastname: 'tester2',
-    username: null,
     email: 'test2@test.com',
+    isActive: true,
+    blocked: false,
+    createdAt: '',
+    updatedAt: '',
+    roles: [],
   },
 ];
 
@@ -21,6 +29,7 @@ describe('Audit Logs getDisplayedFilters', () => {
   it('should return all filters when canReadUsers is true', () => {
     const filters = getDisplayedFilters({
       users: mockUsers,
+      // @ts-expect-error - mock
       formatMessage: jest.fn(({ defaultMessage }) => defaultMessage),
       canReadUsers: true,
     });
@@ -31,6 +40,7 @@ describe('Audit Logs getDisplayedFilters', () => {
   it('should not return user filter when canReadUsers is false', () => {
     const filters = getDisplayedFilters({
       users: mockUsers,
+      // @ts-expect-error - mock
       formatMessage: jest.fn(({ defaultMessage }) => defaultMessage),
       canReadUsers: false,
     });

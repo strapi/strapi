@@ -1,16 +1,14 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 
-import TableRows from '..';
+import { TableHeader, TableRows } from '../TableRows';
 
 const history = createMemoryHistory();
 
-const headers = [
+const headers: TableHeader[] = [
   {
     name: 'action',
     key: 'action',
@@ -25,7 +23,8 @@ const headers = [
     key: 'user',
     name: 'user',
     metadatas: { label: 'User', sortable: false },
-    cellFormatter: (value) => (value ? value.fullname : null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cellFormatter: (value: any) => (value ? value.fullname : null),
   },
 ];
 
@@ -34,37 +33,57 @@ const rows = [
     id: 1,
     action: 'role.update',
     date: '2022-11-14T23:04:00.000Z',
+    payload: {},
     user: {
       id: 1,
       fullname: 'John Doe',
       email: 'test@email.com',
+      displayName: 'John Doe',
+      isActive: true,
+      blocked: false,
+      createdAt: '',
+      updatedAt: '',
+      roles: [],
     },
   },
   {
     id: 2,
     action: 'permission.create',
     date: '2022-11-04T18:24:00.000Z',
+    payload: {},
     user: {
       id: 2,
       fullname: 'Kai Doe',
       email: 'test2@email.com',
+      displayName: 'Kai Doe',
+      isActive: true,
+      blocked: false,
+      createdAt: '',
+      updatedAt: '',
+      roles: [],
     },
   },
   {
     id: 3,
     action: 'custom.action',
     date: '2022-11-04T18:23:00.000Z',
+    payload: {},
     user: {
       id: 2,
       fullname: 'Kai Doe',
       email: 'test2@email.com',
+      displayName: 'Kai Doe',
+      isActive: true,
+      blocked: false,
+      createdAt: '',
+      updatedAt: '',
+      roles: [],
     },
   },
 ];
 
 const onModalOpen = jest.fn();
 
-// eslint-disable-next-line react/prop-types
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
@@ -96,14 +115,15 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView | Dynamic Table | Table Rows', (
   it('should open a modal when clicked on a view details icon button', () => {
     render(App);
     const label = screen.getByText(/update action details/i);
+    // eslint-disable-next-line testing-library/no-node-access
     const viewDetailsButton = label.closest('button');
-    fireEvent.click(viewDetailsButton);
+    if (viewDetailsButton) fireEvent.click(viewDetailsButton);
     expect(onModalOpen).toHaveBeenCalled();
   });
 
-  it('should open a modal when clicked on a row', () => {
+  it('should open a modal when clicked on a row', async () => {
     render(App);
-    const rows = document.querySelectorAll('tr');
+    const rows = await screen.findAllByRole('row');
     fireEvent.click(rows[0]);
     expect(onModalOpen).toHaveBeenCalled();
   });

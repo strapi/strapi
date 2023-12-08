@@ -3,17 +3,38 @@ import React from 'react';
 import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
+import { Entity } from '@strapi/types';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
+import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
+import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
-const TableRows = ({ headers, rows, onOpenModal }) => {
+export type TableHeader = {
+  key: string;
+  name: keyof AuditLog;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cellFormatter?: (cellValue: any) => string;
+  metadatas: {
+    label: string;
+    sortable: boolean;
+  };
+};
+
+type TableRowsProps = {
+  headers: TableHeader[];
+  rows: AuditLog[];
+  onOpenModal: (id: Entity.ID) => void;
+};
+
+export const TableRows = ({ headers, rows, onOpenModal }: TableRowsProps) => {
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
 
-  const getCellValue = ({ type, value, model }) => {
+  // Not sure that 'value' can be typed properly
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getCellValue = ({ type, value, model }: { type: string; value: any; model: unknown }) => {
     if (type === 'date') {
       return formatTimeStamp(value);
     }
@@ -24,6 +45,7 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
           id: `Settings.permissions.auditLogs.${value}`,
           defaultMessage: getDefaultMessage(value),
         },
+        // @ts-expect-error - Model
         { model }
       );
     }
@@ -41,13 +63,15 @@ const TableRows = ({ headers, rows, onOpenModal }) => {
               fn: () => onOpenModal(data.id),
             })}
           >
-            {headers.map(({ key, name, cellFormatter }) => {
+            {headers?.map(({ key, name, cellFormatter }) => {
+              const rowvalue = data[name];
+
               return (
                 <Td key={key}>
                   <Typography textColor="neutral800">
                     {getCellValue({
                       type: key,
-                      value: cellFormatter ? cellFormatter(data[name]) : data[name],
+                      value: cellFormatter ? cellFormatter(rowvalue) : rowvalue,
                       model: data.payload?.model,
                     })}
                   </Typography>
@@ -83,5 +107,3 @@ TableRows.propTypes = {
   rows: PropTypes.array,
   onOpenModal: PropTypes.func.isRequired,
 };
-
-export default TableRows;

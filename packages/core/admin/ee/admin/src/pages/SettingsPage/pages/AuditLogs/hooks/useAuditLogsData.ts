@@ -2,9 +2,16 @@ import { useFetchClient, useNotification, useQueryParams } from '@strapi/helper-
 import { useQuery } from 'react-query';
 import { useLocation } from 'react-router-dom';
 
-import { useAdminUsers } from '../../../../../../../../../admin/src/hooks/useAdminUsers';
+import { useAdminUsers } from '../../../../../../../../admin/src/hooks/useAdminUsers';
+import { GetAll } from '../../../../../../../../shared/contracts/audit-logs';
 
-const useAuditLogsData = ({ canReadAuditLogs, canReadUsers }) => {
+export const useAuditLogsData = ({
+  canReadAuditLogs,
+  canReadUsers,
+}: {
+  canReadAuditLogs: boolean;
+  canReadUsers: boolean;
+}) => {
   const { get } = useFetchClient();
   const { search } = useLocation();
   const toggleNotification = useNotification();
@@ -14,7 +21,7 @@ const useAuditLogsData = ({ canReadAuditLogs, canReadUsers }) => {
     keepPreviousData: true,
     retry: false,
     staleTime: 1000 * 20, // 20 seconds
-    onError: (error) => toggleNotification({ type: 'warning', message: error.message }),
+    onError: (error: Error) => toggleNotification({ type: 'warning', message: error.message }),
   };
 
   const {
@@ -37,7 +44,7 @@ const useAuditLogsData = ({ canReadAuditLogs, canReadUsers }) => {
   } = useQuery(
     ['auditLogs', search],
     async () => {
-      const { data } = await get(`/admin/audit-logs`, {
+      const { data } = await get<GetAll.Response['data']>(`/admin/audit-logs`, {
         params: query,
       });
 
@@ -56,5 +63,3 @@ const useAuditLogsData = ({ canReadAuditLogs, canReadUsers }) => {
     hasError: isAuditLogsError || isUsersError,
   };
 };
-
-export default useAuditLogsData;

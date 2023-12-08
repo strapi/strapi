@@ -29,6 +29,6 @@ export const actionTypes = {
   'permission.delete': 'Delete permission',
 };
 
-export const getDefaultMessage = (value) => {
+export const getDefaultMessage = (value: keyof typeof actionTypes) => {
   return actionTypes[value] || value;
 };

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   ActionLayout,
   Box,
@@ -15,32 +13,33 @@ import {
   useFocusWhenNavigate,
   useQueryParams,
   useRBAC,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { Filters } from '../../../../../../../../admin/src/pages/Settings/components/Filters';
-import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
+import { Filters } from '../../../../../../../admin/src/pages/Settings/components/Filters';
+import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
 
-import useAuditLogsData from './hooks/useAuditLogsData';
-import Modal from './Modal';
-import PaginationFooter from './PaginationFooter';
-import TableRows from './TableRows';
-import getDisplayedFilters from './utils/getDisplayedFilters';
-import tableHeaders from './utils/tableHeaders';
+import { Modal } from './components/Modal';
+import { PaginationFooter } from './components/PaginationFooter';
+import { TableHeader, TableRows } from './components/TableRows';
+import { useAuditLogsData } from './hooks/useAuditLogsData';
+import { getDisplayedFilters } from './utils/getDisplayedFilters';
+import { tableHeaders } from './utils/tableHeaders';
 
-const ListView = () => {
+export const ListView = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
 
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
   } = useRBAC({
-    ...permissions.settings.auditLogs,
-    readUsers: permissions.settings.users.read,
+    ...permissions.settings?.auditLogs,
+    readUsers: permissions.settings?.users.read || [],
   });
 
-  const [{ query }, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams<{ id?: string | null }>();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({
     canReadAuditLogs,
     canReadUsers,
@@ -55,7 +54,8 @@ const ListView = () => {
     defaultMessage: 'Audit Logs',
   });
 
-  const headers = tableHeaders.map((header) => ({
+  // @ts-expect-error - Another headache here. We need to fix that way we handle the TableHeaders.
+  const headers: TableHeader[] = tableHeaders.map((header) => ({
     ...header,
     metadatas: {
       ...header.metadatas,
@@ -85,8 +85,9 @@ const ListView = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
+      {/* @ts-expect-error – TODO: fix the way filters work and are passed around, this will be a headache. */}
       <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
-      <ContentLayout canRead={canReadAuditLogs}>
+      <ContentLayout>
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
@@ -97,14 +98,22 @@ const ListView = () => {
           <TableRows
             headers={headers}
             rows={auditLogs?.results || []}
-            onOpenModal={(id) => setQuery({ id })}
+            onOpenModal={(id) => setQuery({ id: `${id}` })}
           />
         </DynamicTable>
-        <PaginationFooter pagination={auditLogs?.pagination} />
+        {auditLogs?.pagination && <PaginationFooter pagination={auditLogs.pagination} />}
       </ContentLayout>
       {query?.id && <Modal handleClose={() => setQuery({ id: null }, 'remove')} logId={query.id} />}
     </Main>
   );
 };
 
-export default ListView;
+export const ProtectedAuditLogsListPage = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings?.auditLogs.main}>
+      <ListView />
+    </CheckPagePermissions>
+  );
+};

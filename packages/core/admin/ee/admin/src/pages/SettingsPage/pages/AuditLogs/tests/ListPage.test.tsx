@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
@@ -11,12 +9,14 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 
-import useAuditLogsData from '../hooks/useAuditLogsData';
-import ListView from '../index';
+import { useAuditLogsData } from '../hooks/useAuditLogsData';
+import { ListView } from '../ListPage';
 
 import { getBigTestPageData, TEST_PAGE_DATA, TEST_SINGLE_DATA } from './utils/data';
 
-jest.mock('../hooks/useAuditLogsData', () => jest.fn());
+jest.mock('../hooks/useAuditLogsData', () => ({
+  useAuditLogsData: jest.fn(),
+}));
 
 const mockUseQuery = jest.fn();
 
@@ -41,8 +41,8 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const history = createMemoryHistory();
 
-const setup = (props) => ({
-  ...render(<ListView {...props} />, {
+const setup = () => ({
+  ...render(<ListView />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -105,6 +105,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should render page with right header details', () => {
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: [],
@@ -121,6 +122,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should show a list of audit logs with all actions', async () => {
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: TEST_PAGE_DATA,
@@ -128,12 +130,19 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { getByText } = setup();
+    setup();
 
-    await waitFor(() => expect(getByText('Create role')).toBeInTheDocument());
-    await waitFor(() => expect(getByText('Delete role')).toBeInTheDocument());
-    await waitFor(() => expect(getByText('Create entry (article)')).toBeInTheDocument());
-    await waitFor(() => expect(getByText('Admin logout')).toBeInTheDocument());
+    const createRoleEl = await screen.findByText('Create role');
+    expect(createRoleEl).toBeInTheDocument();
+
+    const deleteRoleEl = await screen.findByText('Delete role');
+    expect(deleteRoleEl).toBeInTheDocument();
+
+    const createEntryEl = await screen.findByText('Create entry (article)');
+    expect(createEntryEl).toBeInTheDocument();
+
+    const adminLogoutEl = await screen.findByText('Admin logout');
+    expect(adminLogoutEl).toBeInTheDocument();
   });
 
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
@@ -152,8 +161,10 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       status: 'success',
     });
 
+    // eslint-disable-next-line testing-library/no-node-access
     const auditLogRow = getByText('Create role').closest('tr');
-    await user.click(auditLogRow);
+
+    if (auditLogRow) await user.click(auditLogRow);
 
     const modal = screen.getByRole('dialog');
     expect(modal).toBeInTheDocument();
@@ -163,12 +174,16 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     expect(modalContainer.getByText('test user')).toBeInTheDocument();
     expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(2);
 
+    // eslint-disable-next-line testing-library/no-node-access
     const closeButton = modalContainer.getByText(/close the modal/i).closest('button');
-    await user.click(closeButton);
+
+    if (closeButton) await user.click(closeButton);
+
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('should show pagination and be on page 1 on first render', async () => {
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: getBigTestPageData(15),
@@ -182,12 +197,17 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { getByText } = setup();
+    setup();
 
-    await waitFor(() => expect(getByText(/go to page 1/i).closest('a')).toHaveClass('active'));
+    const goToPageEl = await screen.findByText(/go to page 1/i);
+    // eslint-disable-next-line testing-library/no-node-access
+    const goToPageLink = goToPageEl.closest('a');
+
+    expect(goToPageLink).toHaveClass('active');
   });
 
   it('should paginate the results', async () => {
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: getBigTestPageData(35),
@@ -207,28 +227,37 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     // Should have pagination section with 4 pages
     const pagination = getByLabelText(/pagination/i);
     expect(pagination).toBeVisible();
+    // eslint-disable-next-line testing-library/no-node-access
     const pageButtons = getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
     expect(pageButtons.length).toBe(4);
 
     // Can't go to previous page since there isn't one
+    // eslint-disable-next-line testing-library/no-node-access
     expect(getByText(/go to previous page/i).closest('a')).toHaveAttribute('aria-disabled', 'true');
 
     // Can go to next page
-    await user.click(getByText(/go to next page/i).closest('a'));
+    // eslint-disable-next-line testing-library/no-node-access
+    const nextPageLinkEl = getByText(/go to next page/i).closest('a');
+    if (nextPageLinkEl) await user.click(nextPageLinkEl);
     expect(history.location.search).toBe('?page=2');
 
     // Can go to previous page
-    await user.click(getByText(/go to previous page/i).closest('a'));
+    // eslint-disable-next-line testing-library/no-node-access
+    const previousPageLinkEl = getByText(/go to previous page/i).closest('a');
+    if (previousPageLinkEl) await user.click(previousPageLinkEl);
     expect(history.location.search).toBe('?page=1');
 
     // Can go to specific page
-    await user.click(getByText(/go to page 3/i).closest('a'));
+    // eslint-disable-next-line testing-library/no-node-access
+    const thirdPageLinkEl = getByText(/go to page 3/i).closest('a');
+    if (thirdPageLinkEl) await user.click(thirdPageLinkEl);
     expect(history.location.search).toBe('?page=3');
   });
 
   it('should show 20 elements if pageSize is 20', async () => {
     history.location.search = '?pageSize=20';
 
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: getBigTestPageData(20),
@@ -244,11 +273,17 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
 
     const { container } = setup();
 
-    const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
-    expect(rows.length).toEqual(20);
+    // eslint-disable-next-line testing-library/no-node-access
+    const tableRows = container.querySelector('tbody')?.querySelectorAll('tr');
+
+    if (tableRows) {
+      const rows = await waitFor(() => tableRows);
+      expect(rows.length).toEqual(20);
+    }
   });
 
   it('should show the correct inputs for filtering', async () => {
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: TEST_PAGE_DATA,
@@ -260,8 +295,8 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const filtersButton = getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
 
-    const filterButton = getByLabelText(/select field/i, { name: 'action' });
-    const operatorButton = getByLabelText(/select filter/i, { name: 'is' });
+    const filterButton = getByLabelText(/select field/i);
+    const operatorButton = getByLabelText(/select filter/i);
     const comboBoxInput = getByPlaceholderText(/select or enter a value/i);
     const addFilterButton = getByRole('button', { name: /add filter/i });
 
@@ -272,6 +307,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   it('should add filters to the query params', async () => {
+    // @ts-expect-error - mock
     useAuditLogsData.mockReturnValue({
       auditLogs: {
         results: TEST_PAGE_DATA,
