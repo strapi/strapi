@@ -15,7 +15,6 @@ import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-route
 
 import { DragLayer } from '../../../components/DragLayer';
 import { selectAdminPermissions } from '../../../selectors';
-import ModelsContext from '../../contexts/ModelsContext';
 import getTrad from '../../utils/getTrad';
 import ItemTypes from '../../utils/ItemTypes';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
@@ -63,8 +62,8 @@ function renderDraglayerItem({ type, item }) {
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
-  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
-    useContentManagerInitData();
+  const { status, collectionTypeLinks, singleTypeLinks, models } = useContentManagerInitData();
+
   const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], (model) =>
     model.title.toLowerCase()
   );
@@ -124,28 +123,26 @@ const App = () => {
   return (
     <Layout sideNav={<LeftMenu />}>
       <DragLayer renderItem={renderDraglayerItem} />
-      <ModelsContext.Provider value={{ refetchData }}>
-        <Switch>
-          <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
-              <ComponentSettingsView />
-            </CheckPagePermissions>
-          </Route>
-          <Route
-            path="/content-manager/collectionType/:slug"
-            component={CollectionTypeRecursivePath}
-          />
-          <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
+      <Switch>
+        <Route path="/content-manager/components/:uid/configurations/edit">
+          <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
+            <ComponentSettingsView />
+          </CheckPagePermissions>
+        </Route>
+        <Route
+          path="/content-manager/collectionType/:slug"
+          component={CollectionTypeRecursivePath}
+        />
+        <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
 
-          <Route path="/content-manager/403">
-            <NoPermissions />
-          </Route>
-          <Route path="/content-manager/no-content-types">
-            <NoContentType />
-          </Route>
-          <Route path="" component={AnErrorOccurred} />
-        </Switch>
-      </ModelsContext.Provider>
+        <Route path="/content-manager/403">
+          <NoPermissions />
+        </Route>
+        <Route path="/content-manager/no-content-types">
+          <NoContentType />
+        </Route>
+        <Route path="" component={AnErrorOccurred} />
+      </Switch>
     </Layout>
   );
 };

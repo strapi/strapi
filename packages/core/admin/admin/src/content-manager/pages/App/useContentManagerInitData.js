@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { useNotifyAT } from '@strapi/design-system';
 import {
@@ -9,6 +9,7 @@ import {
 } from '@strapi/helper-plugin';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { HOOKS } from '../../../constants';
@@ -24,7 +25,6 @@ const useContentManagerInitData = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const state = useSelector(selectAppDomain());
-  const fetchDataRef = useRef();
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();
   const CancelToken = axios.CancelToken;
@@ -33,72 +33,75 @@ const useContentManagerInitData = () => {
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
 
-  const fetchData = async () => {
-    dispatch(getInitData());
+  useQuery(
+    ['content-manager', 'initData'],
+    async () => {
+      dispatch(getInitData());
 
-    try {
-      const {
-        data: {
-          data: { components, contentTypes: models, fieldSizes },
-        },
-      } = await get('/content-manager/init', { cancelToken: source.token });
-      notifyStatus(
-        formatMessage({
-          id: getTrad('App.schemas.data-loaded'),
-          defaultMessage: 'The schemas have been successfully loaded.',
-        })
-      );
+      const response = await get('/content-manager/init');
 
-      const unmutatedContentTypeLinks = await getContentTypeLinks({
-        models,
-        userPermissions: allPermissions,
-        toggleNotification,
-      });
-
-      const { ctLinks: authorizedCollectionTypeLinks } = runHookWaterfall(
-        MUTATE_COLLECTION_TYPES_LINKS,
-        {
-          ctLinks: unmutatedContentTypeLinks.authorizedCollectionTypeLinks,
-          models,
+      return response.data;
+    },
+    {
+      onError(error) {
+        if (axios.isCancel(error)) {
+          return;
         }
-      );
-      const { stLinks: authorizedSingleTypeLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-        stLinks: unmutatedContentTypeLinks.authorizedSingleTypeLinks,
-        models,
-      });
+        // Handle error
+        console.error(error);
+        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+      },
+      async onSuccess(data) {
+        const {
+          data: { components, contentTypes: models, fieldSizes },
+        } = data;
+        // Handle success
+        notifyStatus(
+          formatMessage({
+            id: getTrad('App.schemas.data-loaded'),
+            defaultMessage: 'The schemas have been successfully loaded.',
+          })
+        );
 
-      const actionToDispatch = setInitData({
-        authorizedCollectionTypeLinks,
-        authorizedSingleTypeLinks,
-        contentTypeSchemas: models,
-        components,
-        fieldSizes,
-      });
+        const unmutatedContentTypeLinks = await getContentTypeLinks({
+          models,
+          userPermissions: allPermissions,
+          toggleNotification,
+        });
 
-      dispatch(actionToDispatch);
-    } catch (err) {
-      if (axios.isCancel(err)) {
-        return;
-      }
-      console.error(err);
+        const { ctLinks: authorizedCollectionTypeLinks } = runHookWaterfall(
+          MUTATE_COLLECTION_TYPES_LINKS,
+          {
+            ctLinks: unmutatedContentTypeLinks.authorizedCollectionTypeLinks,
+            models,
+          }
+        );
+        const { stLinks: authorizedSingleTypeLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
+          stLinks: unmutatedContentTypeLinks.authorizedSingleTypeLinks,
+          models,
+        });
 
-      toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+        const actionToDispatch = setInitData({
+          authorizedCollectionTypeLinks,
+          authorizedSingleTypeLinks,
+          contentTypeSchemas: models,
+          components,
+          fieldSizes,
+        });
+
+        dispatch(actionToDispatch);
+      },
     }
-  };
-
-  fetchDataRef.current = fetchData;
+  );
 
   useEffect(() => {
-    fetchDataRef.current();
-
     return () => {
       source.cancel('Operation canceled by the user.');
       dispatch(resetInitData());
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, toggleNotification]);
+  }, [dispatch, source]);
 
-  return { ...state, refetchData: fetchDataRef.current };
+  return { ...state };
 };
 
 export default useContentManagerInitData;
