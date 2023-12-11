@@ -72,7 +72,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `cd ${appDir} && yarn develop`,
+    command: `cd ${appDir} && npm run develop`,
     url: `http://127.0.0.1:${port}`,
     timeout: 60 * 1000,
     reuseExistingServer: true,
