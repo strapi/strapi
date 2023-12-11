@@ -80,7 +80,7 @@
     "prompts": "2.4.2",
     "rxjs": "7.8.1",
     "typescript": "5.2.2",
-    "vite": "4.4.9",
+    "vite": "4.4.12",
     "yup": "0.32.9"
   },
   "devDependencies": {
