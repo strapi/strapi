@@ -21,9 +21,9 @@ import type { Project } from '../project';
 type DependenciesEntries = Array<[name: string, version: Version.LiteralSemVer]>;
 
 export class Upgrader implements UpgraderInterface {
-  private project: Project;
+  private readonly project: Project;
 
-  private npmPackage: NPM.Package;
+  private readonly npmPackage: NPM.Package;
 
   private target: Version.SemVer;
 
