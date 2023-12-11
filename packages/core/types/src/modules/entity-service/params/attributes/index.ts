@@ -1,11 +1,11 @@
 import type { Attribute, Common, Utils } from '../../../../types';
 import type { OmitRelationsWithoutTarget, RelationInputValue } from './relation';
 import type { ID } from './id';
-import type * as Mocks from './mocks';
+import type * as Literals from './literals';
 
 export * from './id';
 export * from './utils';
-export * from './mocks';
+export * from './literals';
 
 /**
  * List of possible values for the scalar attributes
@@ -94,21 +94,21 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
           : never
       ],
       // Boolean
-      [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, Mocks.BooleanValue],
+      [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, Literals.BooleanValue],
       // Number
       [
         Utils.Expression.Extends<
           TAttribute,
           Attribute.Integer | Attribute.BigInteger | Attribute.Float | Attribute.Decimal
         >,
-        Mocks.NumberValue
+        Literals.NumberValue
       ],
       // Date / Time
-      [Utils.Expression.Extends<TAttribute, Attribute.Time>, Mocks.TimeValue],
-      [Utils.Expression.Extends<TAttribute, Attribute.Date>, Mocks.DateValue],
+      [Utils.Expression.Extends<TAttribute, Attribute.Time>, Literals.TimeValue],
+      [Utils.Expression.Extends<TAttribute, Attribute.Date>, Literals.DateValue],
       [
         Utils.Expression.Extends<TAttribute, Attribute.Timestamp | Attribute.DateTime>,
-        Mocks.DateTimeValue
+        Literals.DateTimeValue
       ],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
