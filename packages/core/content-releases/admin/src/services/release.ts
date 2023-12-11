@@ -131,7 +131,7 @@ const releaseApi = createApi({
             data,
           };
         },
-        invalidatesTags: ['Releases', 'Release'],
+        invalidatesTags: ['Releases'],
       }),
       updateRelease: build.mutation<
         void,
@@ -157,7 +157,7 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: ['ReleaseActions', 'Release', 'Releases'],
+        invalidatesTags: ['ReleaseActions', 'Release'],
       }),
     };
   },
