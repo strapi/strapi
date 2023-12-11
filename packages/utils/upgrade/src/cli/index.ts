@@ -15,6 +15,11 @@ const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description:
     .option('-n, --dry', 'Simulate the upgrade without updating any files', false)
     .option('-d, --debug', 'Get more logs in debug mode', false)
     .option('-s, --silent', "Don't log anything", false)
+    .option(
+      '-y, --yes',
+      'Automatically answer "yes" to any prompts that the CLI might print on the command line.',
+      false
+    )
     .action(async (options: CLIOptions) => {
       const { upgrade } = await import('./commands/upgrade.js');
 
