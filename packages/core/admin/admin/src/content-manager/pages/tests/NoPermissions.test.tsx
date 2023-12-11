@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { NoPermissions } from '../NoPermissions';
+import { NoPermissions } from '../NoPermissionsPage';
 
 describe('NoPermissions', () => {
   it('renders and matches the snapshot', () => {
