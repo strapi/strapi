@@ -25,6 +25,7 @@ import type { SanitizersRegistry } from './modules/sanitizers';
 import type { ValidatorsRegistry } from './modules/validators';
 
 import type { Container } from './container';
+import type { FeaturesService, FeaturesConfig } from './modules/features';
 
 export type * from './types';
 
@@ -41,6 +42,8 @@ export {
   TelemetryService,
   RequestContext,
   CustomFields,
+  FeaturesService,
+  FeaturesConfig,
   Fetch,
   AuthenticationService,
   ContentApi,
@@ -107,6 +110,7 @@ export interface Strapi {
   db?: Database;
   app: any;
   EE?: boolean;
+  features: FeaturesService;
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;

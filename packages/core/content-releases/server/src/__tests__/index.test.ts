@@ -13,6 +13,11 @@ jest.mock('@strapi/strapi/dist/utils/ee', () => ({
 }));
 describe('register', () => {
   const strapi = {
+    features: {
+      future: {
+        isEnabled: () => true,
+      },
+    },
     admin: {
       services: {
         permission: {

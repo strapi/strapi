@@ -1,5 +1,5 @@
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { render, server } from '@tests/utils';
 import { rest } from 'msw';
 
@@ -22,8 +22,13 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({ id: '1' }),
+}));
+
 describe('CMReleasesContainer', () => {
-  it('should not render the injection zone when creating an entry', () => {
+  it('should not render the container when creating an entry', () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValueOnce({
       isCreatingEntry: true,
@@ -42,7 +47,7 @@ describe('CMReleasesContainer', () => {
     expect(informationBox).not.toBeInTheDocument();
   });
 
-  it('should not render the injection zone without draft and publish enabled', () => {
+  it('should not render the container without draft and publish enabled', async () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValueOnce({
       isCreatingEntry: false,
@@ -61,11 +66,11 @@ describe('CMReleasesContainer', () => {
     expect(informationBox).not.toBeInTheDocument();
   });
 
-  it('should render the injection zone', () => {
+  it('should render the container', async () => {
     render(<CMReleasesContainer />);
 
-    const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     const informationBox = screen.getByRole('complementary', { name: 'Releases' });
+    const addToReleaseButton = await screen.findByRole('button', { name: 'Add to release' });
     expect(informationBox).toBeInTheDocument();
     expect(addToReleaseButton).toBeInTheDocument();
   });
@@ -89,7 +94,7 @@ describe('CMReleasesContainer', () => {
       rest.get('/content-releases', (req, res, ctx) => {
         return res(
           ctx.json({
-            data: [{ name: 'release1', id: '1' }],
+            data: [{ name: 'release1', id: '1', action: { type: 'publish' } }],
           })
         );
       })
@@ -107,5 +112,27 @@ describe('CMReleasesContainer', () => {
 
     const submitButtom = screen.getByRole('button', { name: 'Continue' });
     expect(submitButtom).toBeEnabled();
+  });
+
+  it('should list releases', async () => {
+    // Mock the response from the server
+    server.use(
+      rest.get('/content-releases', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [
+              { name: 'release1', id: '1', action: { type: 'publish' } },
+              { name: 'release2', id: '2', action: { type: 'unpublish' } },
+            ],
+          })
+        );
+      })
+    );
+
+    render(<CMReleasesContainer />);
+
+    const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
+    expect(within(informationBox).getByText('release1')).toBeInTheDocument();
+    expect(within(informationBox).getByText('release2')).toBeInTheDocument();
   });
 });

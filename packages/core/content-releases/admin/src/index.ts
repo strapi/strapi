@@ -12,7 +12,10 @@ import type { Plugin } from '@strapi/types';
 const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: any) {
-    if (window.strapi.features.isEnabled('cms-content-releases')) {
+    if (
+      window.strapi.features.isEnabled('cms-content-releases') &&
+      window.strapi.future.isEnabled('contentReleases')
+    ) {
       app.addMenuLink({
         to: `/plugins/${pluginId}`,
         icon: PaperPlane,

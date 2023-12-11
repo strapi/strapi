@@ -5,12 +5,15 @@ import type {
   GetReleases,
   CreateRelease,
   UpdateRelease,
+  PublishRelease,
   GetRelease,
   Release,
+  GetContentTypeEntryReleases,
 } from '../../../shared/contracts/releases';
 import type {
   CreateReleaseAction,
   GetReleaseActions,
+  ReleaseAction,
   UpdateReleaseAction,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
@@ -25,29 +28,92 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: releaseWithCreatorFields,
     });
   },
+  findOne(id: GetRelease.Request['params']['id'], query = {}) {
+    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
+  },
   findPage(query?: GetReleases.Request['query']) {
     return strapi.entityService.findPage(RELEASE_MODEL_UID, {
       ...query,
       populate: {
         actions: {
-          // @ts-expect-error TS error on populate, is not considering count
           count: true,
         },
       },
     });
   },
-  findOne(id: GetRelease.Request['params']['id'], query = {}) {
-    return strapi.entityService.findOne(RELEASE_MODEL_UID, id, query);
-  },
-  findMany(query?: GetReleases.Request['query']) {
-    return strapi.entityService.findMany(RELEASE_MODEL_UID, {
-      ...query,
-      populate: {
-        actions: {
-          // @ts-expect-error TS error on populate, is not considering count
-          count: true,
+  async findManyForContentTypeEntry(
+    contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
+    entryId: GetContentTypeEntryReleases.Request['query']['entryId'],
+    {
+      hasEntryAttached,
+    }: { hasEntryAttached?: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] } = {
+      hasEntryAttached: false,
+    }
+  ) {
+    const whereActions = hasEntryAttached
+      ? {
+          // Find all Releases where the content type entry is present
+          actions: {
+            target_type: contentTypeUid,
+            target_id: entryId,
+          },
+        }
+      : {
+          // Find all Releases where the content type entry is not present
+          $or: [
+            {
+              $not: {
+                actions: {
+                  target_type: contentTypeUid,
+                  target_id: entryId,
+                },
+              },
+            },
+            {
+              actions: null,
+            },
+          ],
+        };
+    const populateAttachedAction = hasEntryAttached
+      ? {
+          // Filter the action to get only the content type entry
+          actions: {
+            where: {
+              target_type: contentTypeUid,
+              target_id: entryId,
+            },
+          },
+        }
+      : {};
+
+    const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+      where: {
+        ...whereActions,
+        releasedAt: {
+          $null: true,
         },
       },
+      populate: {
+        ...populateAttachedAction,
+      },
+    });
+
+    return releases.map((release) => {
+      if (release.actions?.length) {
+        const [actionForEntry] = release.actions;
+
+        // Remove the actions key to replace it with an action key
+        delete release.actions;
+
+        return {
+          ...release,
+          action: {
+            type: actionForEntry.type,
+          },
+        };
+      }
+
+      return release;
     });
   },
   async update(
@@ -125,7 +191,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async countActions(query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>) {
     return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
   },
-  async findReleaseContentTypesMainFields(releaseId: Release['id']) {
+  async findReleaseContentTypes(releaseId: Release['id']) {
     const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] = await strapi.db
       .queryBuilder(RELEASE_ACTION_MODEL_UID)
       .select('content_type')
@@ -139,9 +205,10 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       .groupBy('content_type')
       .execute();
 
-    const contentTypesUids = contentTypesFromReleaseActions.map(
-      ({ contentType: contentTypeUid }) => contentTypeUid
-    );
+    return contentTypesFromReleaseActions.map(({ contentType: contentTypeUid }) => contentTypeUid);
+  },
+  async findReleaseContentTypesMainFields(releaseId: Release['id']) {
+    const contentTypesUids = await this.findReleaseContentTypes(releaseId);
 
     const contentManagerContentTypeService = strapi
       .plugin('content-manager')
@@ -161,6 +228,90 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     }
 
     return contentTypesMeta;
+  },
+  async publish(releaseId: PublishRelease.Request['params']['id']) {
+    // We need to pass the type because entityService.findOne is not returning the correct type
+    const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
+      RELEASE_MODEL_UID,
+      releaseId,
+      {
+        populate: {
+          actions: {
+            populate: {
+              entry: true,
+            },
+          },
+        },
+      }
+    )) as unknown as Release;
+
+    if (!releaseWithPopulatedActionEntries) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    if (releaseWithPopulatedActionEntries.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
+    if (releaseWithPopulatedActionEntries.actions.length === 0) {
+      throw new errors.ValidationError('No entries to publish');
+    }
+
+    /**
+     * We separate publish and unpublish actions group by content type
+     */
+    const actions: {
+      [key: UID.ContentType]: {
+        publish: ReleaseAction['entry'][];
+        unpublish: ReleaseAction['entry'][];
+      };
+    } = {};
+    for (const action of releaseWithPopulatedActionEntries.actions) {
+      const contentTypeUid = action.contentType;
+
+      if (!actions[contentTypeUid]) {
+        actions[contentTypeUid] = {
+          publish: [],
+          unpublish: [],
+        };
+      }
+
+      if (action.type === 'publish') {
+        actions[contentTypeUid].publish.push(action.entry);
+      } else {
+        actions[contentTypeUid].unpublish.push(action.entry);
+      }
+    }
+
+    const entityManagerService = strapi.plugin('content-manager').service('entity-manager');
+
+    // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
+    await strapi.db.transaction(async () => {
+      for (const contentTypeUid of Object.keys(actions)) {
+        const { publish, unpublish } = actions[contentTypeUid as UID.ContentType];
+
+        if (publish.length > 0) {
+          await entityManagerService.publishMany(publish, contentTypeUid);
+        }
+
+        if (unpublish.length > 0) {
+          await entityManagerService.unpublishMany(unpublish, contentTypeUid);
+        }
+      }
+    });
+
+    // When the transaction fails it throws an error, when it is successful proceed to updating the release
+    const release = await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
+      data: {
+        /*
+         * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">> looks like it's wrong
+         */
+        // @ts-expect-error see above
+        releasedAt: new Date(),
+      },
+    });
+
+    return release;
   },
   async updateAction(
     actionId: UpdateReleaseAction.Request['params']['actionId'],

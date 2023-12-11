@@ -83,6 +83,11 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 
+**Publish a release**:
+
+- method: `POST`
+- endpoint: `/content-releases/:id/publish`
+
 ### Release Action
 
 **Create a release action**

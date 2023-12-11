@@ -65,5 +65,21 @@ export default {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/:id/publish',
+      handler: 'release.publish',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.publish'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
