@@ -11,7 +11,7 @@ export const REQUIRE_GIT_CLEAN_REPOSITORY = requirementFactory(
 
     if (!status.isClean()) {
       throw new Error(
-        'Repository is not clean. Please commit or stash any changes before upgrading'
+        'Repository is not clean. Please consider committing or stashing any changes before upgrading'
       );
     }
   }
