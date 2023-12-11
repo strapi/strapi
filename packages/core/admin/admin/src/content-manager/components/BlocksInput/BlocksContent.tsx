@@ -188,6 +188,17 @@ const DragAndDropElement = ({
           }
         }
 
+        // If a list item is dragged into the another list block
+        if (newNode.type === 'list-item' && draggedNode.type === 'list-item') {
+          // Node is dragged downwards out of list block, as items are not shifting by 1 we move the item below the dragged index
+          if (newIndex[0] > currentIndex[0]) {
+            Transforms.moveNodes(editor, {
+              at: newIndex,
+              to: [newIndex[0], newIndex[1] + 1, ...newIndex.slice(2)],
+            });
+          }
+        }
+
         // If a dragged node is the only list-item then delete list block
         if (draggedNode.type === 'list-item') {
           const [listNode, listNodePath] = Editor.parent(editor, currentIndex);
