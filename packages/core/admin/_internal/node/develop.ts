@@ -13,7 +13,7 @@ import { createBuildContext } from './createBuildContext';
 import { build as buildWebpack } from './webpack/build';
 import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
 
-import strapiFactory from '@strapi/strapi';
+import { strapiFactory } from '@strapi/strapi';
 import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
