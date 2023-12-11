@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import { useNotifyAT } from '@strapi/design-system';
 import {
   useFetchClient,
@@ -15,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { HOOKS } from '../../../constants';
 import { getTrad } from '../../utils';
 
-import { getInitData, resetInitData, setInitData } from './actions';
+import { getInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';
 
@@ -27,8 +25,6 @@ const useContentManagerInitData = () => {
   const state = useSelector(selectAppDomain());
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();
-  const CancelToken = axios.CancelToken;
-  const source = CancelToken.source();
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
@@ -93,13 +89,6 @@ const useContentManagerInitData = () => {
       },
     }
   );
-
-  useEffect(() => {
-    return () => {
-      source.cancel('Operation canceled by the user.');
-      dispatch(resetInitData());
-    };
-  }, [dispatch, source]);
 
   return { ...state };
 };

@@ -1,10 +1,8 @@
-import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
+import { GET_INIT_DATA, SET_INIT_DATA } from './constants';
 
 export const getInitData = () => ({
   type: GET_INIT_DATA,
 });
-
-export const resetInitData = () => ({ type: RESET_INIT_DATA });
 
 export const setInitData = ({
   authorizedCollectionTypeLinks,

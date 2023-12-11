@@ -5,7 +5,7 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 
-import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
+import { GET_INIT_DATA, SET_INIT_DATA } from './constants';
 
 const initialState = {
   components: [],
@@ -25,9 +25,7 @@ const mainReducer = (state = initialState, action) =>
         draftState.status = 'loading';
         break;
       }
-      case RESET_INIT_DATA: {
-        return initialState;
-      }
+
       case SET_INIT_DATA: {
         draftState.collectionTypeLinks = action.data.authorizedCollectionTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed

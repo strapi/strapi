@@ -1,6 +1,6 @@
 import produce from 'immer';
 
-import { getInitData, resetInitData, setInitData } from '../actions';
+import { getInitData, setInitData } from '../actions';
 import mainReducer from '../reducer';
 
 describe('Content Manager | App | reducer', () => {
@@ -82,17 +82,5 @@ describe('Content Manager | App | reducer', () => {
         })
       )
     ).toEqual(expected);
-  });
-
-  it('should handle the resetInitData action correctly', () => {
-    state = 'test';
-
-    expect(mainReducer(state, resetInitData())).toEqual({
-      components: [],
-      models: [],
-      collectionTypeLinks: [],
-      singleTypeLinks: [],
-      status: 'loading',
-    });
   });
 });
