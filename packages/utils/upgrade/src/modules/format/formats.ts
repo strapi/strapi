@@ -5,7 +5,6 @@ import { constants as timerConstants } from '../timer';
 
 import type { Version } from '../version';
 import type { Report } from '../report';
-import { isSemVer } from '../version';
 
 export const path = (path: string) => chalk.blue(path);
 
