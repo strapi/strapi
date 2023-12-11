@@ -213,19 +213,25 @@ module.exports = {
   async forgotPassword(ctx) {
     const { email } = await validateForgotPasswordBody(ctx.request.body);
 
-    const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
-
-    const emailSettings = await pluginStore.get({ key: 'email' });
-    const advancedSettings = await pluginStore.get({ key: 'advanced' });
-
     // Find the user by email.
     const user = await strapi
       .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
-    if (!user || user.blocked) {
-      return ctx.send({ ok: true });
+    if (!user) {
+      throw new ApplicationError('User does not exist');
     }
+
+    if (user.blocked) {
+      throw new ApplicationError('User blocked');
+    }
+
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+
+    const [emailSettings, advancedSettings] = Promise.all([
+      pluginStore.get({ key: 'email' }),
+      pluginStore.get({ key: 'advanced' }),
+    ]);
 
     // Generate random token.
     const userInfo = await sanitizeUser(user, ctx);
