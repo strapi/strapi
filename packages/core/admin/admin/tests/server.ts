@@ -577,6 +577,29 @@ export const server = setupServer(
         );
       }
     ),
+    rest.get('/content-manager/relations/:contentType/:id/:fieldName', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          results: [
+            {
+              id: 1,
+              name: 'Relation entity 1',
+            },
+            {
+              id: 2,
+              name: 'Relation entity 2',
+            },
+            {
+              id: 3,
+              name: 'Relation entity 3',
+            },
+          ],
+          pagination: {
+            total: 1,
+          },
+        })
+      );
+    }),
     /**
      *
      * MARKETPLACE

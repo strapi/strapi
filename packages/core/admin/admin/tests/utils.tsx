@@ -23,10 +23,17 @@ import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
+import { RBACReducer } from '../src/components/RBACProvider';
 import { ThemeToggleProvider } from '../src/components/ThemeToggleProvider';
 import { ModelsContext } from '../src/content-manager/contexts/models';
+import { reducer as rbacManagerReducer } from '../src/content-manager/hooks/useSyncRbac';
+import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
+import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
+import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
+import { reducer as crudReducer } from '../src/content-manager/sharedReducers/crud/reducer';
 import { AdminContextProvider } from '../src/contexts/admin';
 import { ConfigurationContextProvider } from '../src/contexts/configuration';
+import { reducer as appReducer } from '../src/reducer';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -52,8 +59,17 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
   });
 
   const store = configureStore({
+    // @ts-expect-error – we've not filled up the entire initial state.
     preloadedState: initialState,
-    reducer: (state = initialState) => state,
+    reducer: {
+      admin_app: appReducer,
+      rbacProvider: RBACReducer,
+      'content-manager_app': cmAppReducer,
+      'content-manager_listView': listViewReducer,
+      'content-manager_rbacManager': rbacManagerReducer,
+      'content-manager_editViewLayoutManager': editViewReducer,
+      'content-manager_editViewCrudReducer': crudReducer,
+    },
   });
 
   // en is the default locale of the admin app.
