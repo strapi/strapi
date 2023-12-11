@@ -228,6 +228,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     // No handleConvert, list items are created when converting to the parent list
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,
+    dragHandleTopMargin: '-2px',
   },
 };
 

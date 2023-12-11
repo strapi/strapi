@@ -28,7 +28,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout } from '../hooks/useContentTypeLayout';
-import { useDragAndDrop, UseDragAndDropOptions } from '../hooks/useDragAndDrop';
+import { useDragAndDrop, type UseDragAndDropOptions } from '../hooks/useDragAndDrop';
 import { useLazyComponents } from '../hooks/useLazyComponents';
 import { ItemTypes } from '../utils/dragAndDrop';
 import { getMaxTempKey } from '../utils/fields';

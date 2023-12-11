@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout } from '../../hooks/useContentTypeLayout';
-import { UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
+import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { ItemTypes } from '../../utils/dragAndDrop';
 import { composeRefs } from '../../utils/refs';
 import { getTranslation } from '../../utils/translations';

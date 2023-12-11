@@ -583,13 +583,6 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     }
   };
 
-  const onDrop = () => {
-    // As we have our own handler to drag and drop the elements
-    // returing true will skip slate's own event handler
-
-    return true;
-  };
-
   return (
     <Box
       ref={blocksRef}
@@ -611,7 +604,13 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
-        onDrop={onDrop}
+        // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
+        onDrop={() => {
+          return true;
+        }}
+        onDragStart={() => {
+          return true;
+        }}
       />
       {modalElement}
     </Box>
