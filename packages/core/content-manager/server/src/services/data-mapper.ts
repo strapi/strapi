@@ -66,6 +66,7 @@ const formatAttribute = (key: any, attribute: Attribute.Any) => {
 const toRelation = (attribute: Attribute.Relation) => {
   return {
     ...attribute,
+    type: 'relation',
     targetModel: 'target' in attribute ? attribute.target : undefined,
     relationType: attribute.relation,
   };
