@@ -3937,7 +3937,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@koa/cors@npm:3.4.3, @koa/cors@npm:^3.1.0":
+"@koa/cors@npm:5.0.0":
+  version: 5.0.0
+  resolution: "@koa/cors@npm:5.0.0"
+  dependencies:
+    vary: "npm:^1.1.2"
+  checksum: 3a0e32fbc422a5f9a41540ce3b7499d46073ddb0e4e851394a74bac5ecd0eaa1f24a8f189b7bd6a50c5863788ae6945c52d990edf99fdd2151a4404f266fe2e7
+  languageName: node
+  linkType: hard
+
+"@koa/cors@npm:^3.1.0":
   version: 3.4.3
   resolution: "@koa/cors@npm:3.4.3"
   dependencies:
@@ -8430,7 +8439,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/strapi@workspace:packages/core/strapi"
   dependencies:
-    "@koa/cors": "npm:3.4.3"
+    "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:10.1.1"
     "@strapi/admin": "npm:4.15.5"
     "@strapi/data-transfer": "npm:4.15.5"
@@ -8529,7 +8538,7 @@ __metadata:
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
     "@casl/ability": "npm:6.5.0"
-    "@koa/cors": "npm:3.4.3"
+    "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:10.1.1"
     "@strapi/database": "npm:4.15.5"
     "@strapi/logger": "npm:4.15.5"
