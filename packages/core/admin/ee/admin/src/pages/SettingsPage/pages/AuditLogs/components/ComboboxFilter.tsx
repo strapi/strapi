@@ -1,12 +1,10 @@
-import React from 'react';
-
-import { Combobox, ComboboxOption } from '@strapi/design-system';
+import { Combobox, ComboboxOption, ComboboxProps } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 type ComboboxFilterProps = {
   value?: string;
   options?: { label: string; customValue: string }[];
-  onChange?: () => void;
+  onChange?: ComboboxProps['onChange'];
 };
 
 export const ComboboxFilter = (

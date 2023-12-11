@@ -12,14 +12,14 @@ import {
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
+import { QueryStatus, useQuery } from 'react-query';
 
 import { AuditLog, Get } from '../../../../../../../../shared/contracts/audit-logs';
 import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';
 import { actionTypes, getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
 type ActionBodyProps = {
-  status: 'idle' | 'loading' | 'error' | 'success';
+  status: QueryStatus;
   data: AuditLog;
   formattedDate: string;
 };
@@ -86,6 +86,9 @@ const ActionBody = ({ status, data, formattedDate }: ActionBodyProps) => {
   if (status === 'loading') {
     return (
       <Flex padding={7} justifyContent="center" alignItems="center">
+        {/**
+         * TODO: this will need to be translated.
+         */}
         <Loader>Loading content...</Loader>
       </Flex>
     );
