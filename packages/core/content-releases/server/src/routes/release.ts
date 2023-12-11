@@ -66,6 +66,22 @@ export default {
       },
     },
     {
+      method: 'DELETE',
+      path: '/:id',
+      handler: 'release.delete',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.delete'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'POST',
       path: '/:id/publish',
       handler: 'release.publish',

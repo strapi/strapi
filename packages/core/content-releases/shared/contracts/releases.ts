@@ -2,7 +2,6 @@ import type { Entity } from '../types';
 import type { ReleaseAction } from './release-actions';
 import type { UserInfo } from '../types';
 import { errors } from '@strapi/utils';
-import { UID } from '@strapi/types';
 
 export interface Release extends Entity {
   name: string;
@@ -123,6 +122,25 @@ export declare namespace UpdateRelease {
   export interface Response {
     data: ReleaseDataResponse;
     error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * DELETE /content-releases/:id - Delete a release
+ */
+export declare namespace DeleteRelease {
+  export interface Request {
+    state: {
+      user: UserInfo;
+    };
+    params: {
+      id: Release['id'];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
 
