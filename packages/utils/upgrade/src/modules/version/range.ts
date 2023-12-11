@@ -8,16 +8,24 @@ export const rangeFactory = (range: string): Version.Range => {
 };
 
 export const rangeFromReleaseType = (current: Version.SemVer, identifier: Version.ReleaseType) => {
-  const fromCurrentTo = (version: Version.LiteralVersion) => {
-    return rangeFactory(`>${current.raw} <=${version}`);
-  };
-
   switch (identifier) {
     case Version.ReleaseType.Major: {
       // semver.inc(_, 'major') will target <major + 1>.0.0 which is what we want
       // e.g. for 4.15.4, it'll return 5.0.0
       const nextMajor = semver.inc(current, 'major') as Version.LiteralSemVer;
-      return fromCurrentTo(nextMajor);
+      return rangeFactory(`>${current.raw} <=${nextMajor}`);
+    }
+    case Version.ReleaseType.Patch: {
+      // This will return the premionr for the next minor
+      // e.g. for 4.15.4, it'll return 4.16.0-0
+      const preMinor = semver.inc(current, 'preminor') as Version.LiteralSemVer;
+      return rangeFactory(`>${current.raw} <${preMinor}`);
+    }
+    case Version.ReleaseType.Minor: {
+      // This will return the premajor for the next major
+      // e.g. for 4.15.4, it'll return 5.0.0-0
+      const preMajor = semver.inc(current, 'premajor') as Version.LiteralSemVer;
+      return rangeFactory(`>${current.raw} <${preMajor}`);
     }
     default: {
       throw new Error('Not implemented');
