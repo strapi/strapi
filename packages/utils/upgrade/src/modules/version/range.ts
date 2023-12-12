@@ -18,13 +18,13 @@ export const rangeFromReleaseType = (current: Version.SemVer, identifier: Versio
     case Version.ReleaseType.Patch: {
       // This will return the minor for the next minor
       // e.g. for 4.15.4, it'll return 4.16.0
-      const minor = semver.inc(current, 'minor');
+      const minor = semver.inc(current, 'minor') as Version.LiteralSemVer;
       return rangeFactory(`>${current.raw} <${minor}`);
     }
     case Version.ReleaseType.Minor: {
       // This will return the major for the next major
       // e.g. for 4.15.4, it'll return 5.0.0
-      const major = semver.inc(current, 'major');
+      const major = semver.inc(current, 'major') as Version.LiteralSemVer;
       return rangeFactory(`>${current.raw} <${major}`);
     }
     default: {
