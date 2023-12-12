@@ -11,11 +11,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockImplementation(() => ({ releaseId: '1' })),
-}));
-
 describe('Releases details page', () => {
   it('renders the details page with no actions', async () => {
     server.use(
@@ -30,7 +25,9 @@ describe('Releases details page', () => {
       )
     );
 
-    const { user } = render(<ReleaseDetailsPage />);
+    const { user } = render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.noActionsHeaderData.data.name
@@ -81,7 +78,9 @@ describe('Releases details page', () => {
       )
     );
 
-    render(<ReleaseDetailsPage />);
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.withActionsHeaderData.data.name
