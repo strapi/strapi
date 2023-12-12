@@ -91,6 +91,21 @@ describe('Releases details page', () => {
     const releaseSubtitle = await screen.findAllByText('1 entry');
     expect(releaseSubtitle[0]).toBeInTheDocument();
 
+    // should show the entries
+    expect(
+      screen.getByText(
+        mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.contentType.mainFieldValue
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.contentType.displayName
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.locale.name)
+    ).toBeInTheDocument();
+
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationCombobox).toBeInTheDocument();
   });
