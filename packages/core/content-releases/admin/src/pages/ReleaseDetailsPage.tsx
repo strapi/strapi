@@ -10,9 +10,9 @@ import {
   Link,
   Main,
   Popover,
-  Typography,
   Tr,
   Td,
+  Typography,
 } from '@strapi/design-system';
 import {
   AnErrorOccurred,
@@ -36,10 +36,11 @@ import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
 import {
   GetReleaseActionsQueryParams,
-  useUpdateReleaseMutation,
-  useGetReleaseQuery,
   useGetReleaseActionsQuery,
+  useGetReleaseQuery,
+  useUpdateReleaseMutation,
 } from '../services/release';
+
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
@@ -90,11 +91,10 @@ export const ReleaseDetailsLayout = ({
   children,
 }: ReleaseDetailsLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { releaseId } = useParams<{ releaseId: string }>();
+  const { releaseId } = useParams<GetReleaseActions.Request['params']>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
-  const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
-
-  const { data, isLoading } = useGetReleaseQuery({ id: releaseId });
+  const moreButtonRef = React.useRef<HTMLButtonElement>(null);
+  const { data, isLoading: isLoadingDetails } = useGetReleaseQuery({ id: releaseId });
 
   const title = data?.data?.name;
   const createdAt = data?.data?.createdAt;
@@ -110,17 +110,21 @@ export const ReleaseDetailsLayout = ({
     toggleEditReleaseModal();
     handleTogglePopover();
   };
+
   return (
-    <Main aria-busy={isLoading}>
+    <Main aria-busy={isLoadingDetails}>
       <HeaderLayout
-        title={!isLoading && title ? title : undefined}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Details.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-          },
-          { number: totalEntries }
-        )}
+        title={title}
+        subtitle={
+          !isLoadingDetails &&
+          formatMessage(
+            {
+              id: 'content-releases.pages.Details.header-subtitle',
+              defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+            },
+            { number: totalEntries }
+          )
+        }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
             {formatMessage({
@@ -136,8 +140,8 @@ export const ReleaseDetailsLayout = ({
                 id: 'content-releases.header.actions.open-release-actions',
                 defaultMessage: 'Release actions',
               })}
-              onClick={handleTogglePopover}
               ref={moreButtonRef}
+              onClick={handleTogglePopover}
             >
               <More />
             </IconButton>
@@ -239,8 +243,9 @@ export const ReleaseDetailsLayout = ({
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
-const ReleaseDetailsBody = ({ releaseId }: { releaseId: GetReleaseActions.Request['params'] }) => {
+const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
+  const { releaseId } = useParams<GetReleaseActions.Request['params']>();
   const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
 
   const { isLoading, isError, data } = useGetReleaseActionsQuery({ ...query, releaseId });
@@ -261,7 +266,9 @@ const ReleaseDetailsBody = ({ releaseId }: { releaseId: GetReleaseActions.Reques
     );
   }
 
-  if (data?.data.length === 0) {
+  const zeroActions = data?.data?.length === 0;
+
+  if (zeroActions) {
     return (
       <ContentLayout>
         <EmptyStateLayout
@@ -278,7 +285,7 @@ const ReleaseDetailsBody = ({ releaseId }: { releaseId: GetReleaseActions.Reques
   return (
     <ContentLayout>
       <Flex gap={4} direction="column" alignItems="stretch">
-        <Table.Root rows={data?.data} colCount={data?.data.length} isLoading={isLoading}>
+        <Table.Root rows={data?.data} colCount={data?.data?.length} isLoading={isLoading}>
           <Table.Content>
             <Table.Head>
               <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
@@ -287,7 +294,7 @@ const ReleaseDetailsBody = ({ releaseId }: { releaseId: GetReleaseActions.Reques
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
-              {data?.data.map(({ contentType, entry }) => (
+            {data?.data.map(({ contentType, entry }) => (
                 <Tr key={entry.id}>
                   <Td>
                     <Typography>{entry.mainField || entry.id}</Typography>
@@ -326,14 +333,28 @@ const ReleaseDetailsPage = () => {
   const { formatAPIError } = useAPIErrorHandler();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
 
-  const { isLoading: isLoadingDetails, data } = useGetReleaseQuery({ id: releaseId });
+  const {
+    isLoading: isLoadingDetails,
+    data,
+    isSuccess: isSuccessDetails,
+  } = useGetReleaseQuery({ id: releaseId });
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
-
-  const title = data?.data?.name;
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
+
+  if (isLoadingDetails) {
+    return (
+      <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
+      </ReleaseDetailsLayout>
+    );
+  }
+
+  const title = (isSuccessDetails && data?.data?.name) || '';
 
   const handleEditRelease = async (values: FormValues) => {
     const response = await updateRelease({
@@ -367,19 +388,9 @@ const ReleaseDetailsPage = () => {
     toggleEditReleaseModal();
   };
 
-  if (isLoadingDetails) {
-    return (
-      <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </ReleaseDetailsLayout>
-    );
-  }
-
   return (
     <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
-      <ReleaseDetailsBody releaseId={releaseId} />
+      <ReleaseDetailsBody />
       {releaseModalShown && (
         <ReleaseModal
           handleClose={toggleEditReleaseModal}
