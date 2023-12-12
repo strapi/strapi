@@ -39,7 +39,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
-  tagTypes: ['Releases', 'Release', 'ReleaseActions', 'ReleasesForEntry'],
+  tagTypes: ['Releases', 'ReleaseActions'],
   endpoints: (build) => {
     return {
       getReleasesForEntry: build.query<
@@ -55,7 +55,6 @@ const releaseApi = createApi({
             },
           };
         },
-        providesTags: ['ReleasesForEntry'],
       }),
       getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
         query(
@@ -103,7 +102,7 @@ const releaseApi = createApi({
             method: 'GET',
           };
         },
-        providesTags: ['Release'],
+        providesTags: (result, error, id) => [{ type: 'Releases', id }],
       }),
       getReleaseActions: build.query<
         GetReleaseActions.Response,
@@ -144,7 +143,7 @@ const releaseApi = createApi({
             data,
           };
         },
-        invalidatesTags: ['Releases', 'Release'],
+        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
       }),
       createReleaseAction: build.mutation<
         CreateReleaseAction.Response,
@@ -157,7 +156,7 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: ['ReleaseActions', 'Release'],
+        invalidatesTags: ['ReleaseActions'],
       }),
     };
   },
