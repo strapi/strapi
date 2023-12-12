@@ -52,7 +52,7 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const PopoverButton = styled(Flex)`
+const StyledFlex = styled(Flex)`
   align-self: stretch;
 `;
 
@@ -72,14 +72,14 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
-interface PopoverWrapperProps {
+interface PopoverButtonProps {
   onClick?: () => void;
   children: React.ReactNode;
 }
 
-const PopoverWrapper = ({ onClick, children }: PopoverWrapperProps) => {
+const PopoverButton = ({ onClick, children }: PopoverButtonProps) => {
   return (
-    <PopoverButton
+    <StyledFlex
       paddingTop={2}
       paddingBottom={2}
       paddingLeft={4}
@@ -91,7 +91,7 @@ const PopoverWrapper = ({ onClick, children }: PopoverWrapperProps) => {
       onClick={onClick}
     >
       {children}
-    </PopoverButton>
+    </StyledFlex>
   );
 };
 
@@ -112,11 +112,6 @@ export const ReleaseDetailsLayout = ({
 
   const release = data?.data;
 
-  const title = release?.name;
-  const totalEntries = release?.actions?.meta?.count || 0;
-
-  const createdBy = `${release?.createdBy?.firstname} ${release?.createdBy?.lastname}` || '';
-
   const handleTogglePopover = () => {
     setIsPopoverVisible((prev) => !prev);
   };
@@ -126,11 +121,26 @@ export const ReleaseDetailsLayout = ({
     handleTogglePopover();
   };
 
+  if (isLoadingDetails || !release) {
+    return (
+      <Main aria-busy={isLoadingDetails}>
+        <Box paddingBottom={8}>
+          <LoadingIndicatorPage />
+        </Box>
+      </Main>
+    );
+  }
+
+  const title = release.name;
+  const totalEntries = release.actions.meta.count || 0;
+
+  const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}` || '';
+
   return (
     <Main aria-busy={isLoadingDetails}>
       <Box paddingBottom={8}>
         <HeaderLayout
-          title={title}
+          title={!isLoadingDetails && title}
           subtitle={
             !isLoadingDetails &&
             formatMessage(
@@ -171,7 +181,7 @@ export const ReleaseDetailsLayout = ({
                 >
                   <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
                     <CheckPermissions permissions={PERMISSIONS.update}>
-                      <PopoverWrapper onClick={openReleaseModal}>
+                      <PopoverButton onClick={openReleaseModal}>
                         <PencilIcon />
                         <Typography ellipsis>
                           {formatMessage({
@@ -179,9 +189,9 @@ export const ReleaseDetailsLayout = ({
                             defaultMessage: 'Edit',
                           })}
                         </Typography>
-                      </PopoverWrapper>
+                      </PopoverButton>
                     </CheckPermissions>
-                    <PopoverWrapper>
+                    <PopoverButton>
                       <TrashIcon />
                       <Typography ellipsis textColor="danger600">
                         {formatMessage({
@@ -189,7 +199,7 @@ export const ReleaseDetailsLayout = ({
                           defaultMessage: 'Delete',
                         })}
                       </Typography>
-                    </PopoverWrapper>
+                    </PopoverButton>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
@@ -205,7 +215,7 @@ export const ReleaseDetailsLayout = ({
                       })}
                     </Typography>
                     <Typography variant="pi" color="neutral300">
-                      <RelativeTime timestamp={new Date(release?.createdAt)} />
+                      <RelativeTime timestamp={new Date(release.createdAt)} />
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
