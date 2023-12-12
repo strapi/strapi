@@ -1,4 +1,5 @@
-import { useAdmin } from '../../contexts/admin';
+import { useStrapiApp } from '@strapi/helper-plugin';
+
 import {
   InjectionZoneArea,
   InjectionZoneBlock,
@@ -7,7 +8,7 @@ import {
 } from '../components/InjectionZone';
 
 export const useInjectionZone = (area: InjectionZoneArea) => {
-  const { getAdminInjectedComponents } = useAdmin();
+  const { getAdminInjectedComponents } = useStrapiApp();
 
   const [moduleName, page, position] = area.split('.') as [
     InjectionZoneModule,

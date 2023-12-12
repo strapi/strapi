@@ -31,7 +31,6 @@ import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
 import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
 import { reducer as crudReducer } from '../src/content-manager/sharedReducers/crud/reducer';
-import { AdminContextProvider } from '../src/contexts/admin';
 import { ConfigurationContextProvider } from '../src/contexts/configuration';
 import { reducer as appReducer } from '../src/reducer';
 
@@ -108,19 +107,17 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                     }}
                   >
                     <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                      <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
-                        <ConfigurationContextProvider
-                          showReleaseNotification={false}
-                          showTutorials={false}
-                          updateProjectSettings={jest.fn()}
-                          logos={{
-                            auth: { default: '' },
-                            menu: { default: '' },
-                          }}
-                        >
-                          {children}
-                        </ConfigurationContextProvider>
-                      </AdminContextProvider>
+                      <ConfigurationContextProvider
+                        showReleaseNotification={false}
+                        showTutorials={false}
+                        updateProjectSettings={jest.fn()}
+                        logos={{
+                          auth: { default: '' },
+                          menu: { default: '' },
+                        }}
+                      >
+                        {children}
+                      </ConfigurationContextProvider>
                     </ModelsContext.Provider>
                   </RBACContext.Provider>
                 </NotificationsProvider>

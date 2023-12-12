@@ -14,8 +14,6 @@ import {
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
-import { AdminContextProvider, AdminContextValue } from '../contexts/admin';
-
 import { GuidedTourProvider } from './GuidedTour/Provider';
 import { LanguageProvider, LanguageProviderProps } from './LanguageProvider';
 import { Theme, ThemeProps } from './Theme';
@@ -32,12 +30,12 @@ const queryClient = new QueryClient({
 
 interface ProvidersProps
   extends Pick<LanguageProviderProps, 'messages' | 'localeNames'>,
-    Pick<AdminContextValue, 'getAdminInjectedComponents'>,
     Pick<CustomFieldsProviderProps, 'customFields'>,
     Pick<LibraryProviderProps, 'components' | 'fields'>,
     Pick<
       StrapiAppProviderProps,
       | 'getPlugin'
+      | 'getAdminInjectedComponents'
       | 'menu'
       | 'plugins'
       | 'runHookParallel'
@@ -73,29 +71,28 @@ const Providers = ({
       <LanguageProvider messages={messages} localeNames={localeNames}>
         <Theme themes={themes}>
           <QueryClientProvider client={queryClient}>
-            <AdminContextProvider getAdminInjectedComponents={getAdminInjectedComponents}>
-              <StrapiAppProvider
-                getPlugin={getPlugin}
-                menu={menu}
-                plugins={plugins}
-                runHookParallel={runHookParallel}
-                runHookWaterfall={runHookWaterfall}
-                runHookSeries={runHookSeries}
-                settings={settings}
-              >
-                <LibraryProvider components={components} fields={fields}>
-                  <CustomFieldsProvider customFields={customFields}>
-                    <AutoReloadOverlayBlockerProvider>
-                      <OverlayBlockerProvider>
-                        <GuidedTourProvider>
-                          <NotificationsProvider>{children}</NotificationsProvider>
-                        </GuidedTourProvider>
-                      </OverlayBlockerProvider>
-                    </AutoReloadOverlayBlockerProvider>
-                  </CustomFieldsProvider>
-                </LibraryProvider>
-              </StrapiAppProvider>
-            </AdminContextProvider>
+            <StrapiAppProvider
+              getPlugin={getPlugin}
+              getAdminInjectedComponents={getAdminInjectedComponents}
+              menu={menu}
+              plugins={plugins}
+              runHookParallel={runHookParallel}
+              runHookWaterfall={runHookWaterfall}
+              runHookSeries={runHookSeries}
+              settings={settings}
+            >
+              <LibraryProvider components={components} fields={fields}>
+                <CustomFieldsProvider customFields={customFields}>
+                  <AutoReloadOverlayBlockerProvider>
+                    <OverlayBlockerProvider>
+                      <GuidedTourProvider>
+                        <NotificationsProvider>{children}</NotificationsProvider>
+                      </GuidedTourProvider>
+                    </OverlayBlockerProvider>
+                  </AutoReloadOverlayBlockerProvider>
+                </CustomFieldsProvider>
+              </LibraryProvider>
+            </StrapiAppProvider>
           </QueryClientProvider>
         </Theme>
       </LanguageProvider>

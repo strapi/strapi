@@ -26,6 +26,7 @@ const render = (settings: StrapiAppProviderProps['settings']) =>
               settings={settings}
               plugins={{}}
               getPlugin={jest.fn()}
+              getAdminInjectedComponents={jest.fn()}
               runHookParallel={jest.fn()}
               runHookWaterfall={jest.fn()}
               runHookSeries={jest.fn()}
