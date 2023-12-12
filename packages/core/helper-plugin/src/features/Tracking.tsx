@@ -58,6 +58,7 @@ interface EventWithoutProperties {
     | 'changeComponentsOrder'
     | 'didAccessAuthenticatedAdministration'
     | 'didAddComponentToDynamicZone'
+    | 'didBulkDeleteEntries'
     | 'didChangeDisplayedFields'
     | 'didCheckDraftRelations'
     | 'didClickGuidedTourHomepageApiTokens'
@@ -108,6 +109,7 @@ interface EventWithoutProperties {
     | 'willAddMoreFieldToContentType'
     | 'willBulkDeleteEntries'
     | 'willBulkUnpublishEntries'
+    | 'willChangeNumberOfEntriesPerPage'
     | 'willCheckDraftRelations'
     | 'willCreateComponent'
     | 'willCreateComponentFromAttributesModal'
@@ -265,7 +267,7 @@ interface DeleteEntryEvents {
 }
 
 interface CreateEntryEvents {
-  name: 'didCreateEntry' | 'didNotCreateEntry';
+  name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry';
   properties: {
     status?: string;
     error?: unknown;
@@ -280,6 +282,13 @@ interface UpdateEntryEvents {
   };
 }
 
+interface DidFilterEntriesEvent {
+  name: 'didFilterEntries';
+  properties: {
+    useRelation: boolean;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | DidAccessTokenListEvent
@@ -288,6 +297,7 @@ type EventsWithProperties =
   | DeleteEntryEvents
   | DidEditMediaLibraryElementsEvent
   | DidFilterMediaLibraryElementsEvent
+  | DidFilterEntriesEvent
   | DidSelectContentTypeFieldTypeEvent
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent

@@ -5,6 +5,7 @@ import prettier, { Config as PrettierConfig } from 'prettier';
 import prompts from 'prompts';
 
 import { isError } from '../core/errors';
+import { parseGlobalGitConfig } from '../core/git';
 import { Logger } from '../core/logger';
 
 import { Template, TemplateFeature, TemplateOption, TemplateOrTemplateResolver } from './types';
@@ -27,9 +28,11 @@ const createPackageFromTemplate = async (
 ) => {
   const { cwd, logger, template: templateOrResolver } = opts;
 
+  const gitConfig = await parseGlobalGitConfig();
+
   const template =
     typeof templateOrResolver === 'function'
-      ? await templateOrResolver({ cwd, logger, packagePath })
+      ? await templateOrResolver({ cwd, logger, packagePath, gitConfig })
       : templateOrResolver;
 
   logger.info('Creating a new package at: ', relative(cwd, packagePath));

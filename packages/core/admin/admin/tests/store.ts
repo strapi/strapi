@@ -22,11 +22,6 @@ const initialState = {
     ],
   },
   'content-manager_listView': {
-    data: [
-      { id: 1, publishedAt: null },
-      { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
-    ],
-    displayedHeaders: [],
     contentType: {
       uid: 'api::test.test',
       settings: {
@@ -35,9 +30,67 @@ const initialState = {
       attributes: {
         id: { type: 'integer' },
         name: { type: 'string', required: true },
+        createdAt: { type: 'datetime' },
+        updatedAt: { type: 'datetime' },
+      },
+      metadatas: {
+        id: {
+          edit: {},
+          list: { label: 'id', searchable: true, sortable: true },
+        },
+        name: {
+          edit: {
+            label: 'name',
+            description: '',
+            placeholder: '',
+            visible: true,
+            editable: true,
+          },
+          list: { label: 'name', searchable: true, sortable: true },
+        },
+        createdAt: {
+          edit: {
+            label: 'createdAt',
+            description: '',
+            placeholder: '',
+            visible: false,
+            editable: true,
+          },
+          list: { label: 'createdAt', searchable: true, sortable: true },
+        },
+        updatedAt: {
+          edit: {
+            label: 'updatedAt',
+            description: '',
+            placeholder: '',
+            visible: false,
+            editable: true,
+          },
+          list: { label: 'updatedAt', searchable: true, sortable: true },
+        },
       },
     },
-    components: [],
+    components: {},
+    data: [
+      { id: 1, publishedAt: null },
+      { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
+    ],
+    displayedHeaders: [
+      {
+        key: '__id_key__',
+        name: 'id',
+        fieldSchema: { type: 'integer' },
+        metadatas: { label: 'id', searchable: true, sortable: true },
+      },
+    ],
+    initialDisplayedHeaders: [
+      {
+        key: '__id_key__',
+        name: 'id',
+        fieldSchema: { type: 'integer' },
+        metadatas: { label: 'id', searchable: true, sortable: true },
+      },
+    ],
   },
 };
 
