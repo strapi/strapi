@@ -31,6 +31,7 @@ import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { GetReleaseActions } from '../../../shared/contracts/release-actions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -98,9 +99,9 @@ export const ReleaseDetailsLayout = ({
 
   const title = data?.data?.name;
   const createdAt = data?.data?.createdAt;
-  const totalEntries = data?.data?.actions?.meta?.total || 0;
+  const totalEntries = data?.data?.actions?.meta?.count || 0;
   const daysPassed = createdAt ? countDays(createdAt) : 0;
-  const createdBy = 'John Doe'; // TODO: replace it with the name of the user who created the release
+  const createdBy = `${data?.data?.createdBy?.firstname} ${data?.data?.createdBy?.lastname}` || '';
 
   const handleTogglePopover = () => {
     setIsPopoverVisible((prev) => !prev);
@@ -292,7 +293,12 @@ const ReleaseDetailsBody = () => {
     <ContentLayout>
       <Flex gap={4} direction="column" alignItems="stretch">
         <Table.Root
-          rows={data?.data.map((item) => ({ ...item, id: Number(item.id) })) || []}
+          rows={
+            data?.data.map((item: GetReleaseActions.Response['data']) => ({
+              ...item,
+              id: Number(item.id),
+            })) || []
+          }
           colCount={data?.data?.length || 0}
           isLoading={isLoading}
           isFetching={isFetching}
@@ -305,16 +311,16 @@ const ReleaseDetailsBody = () => {
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
-              {data?.data.map(({ contentType, entry }) => (
+              {data?.data.map(({ entry }) => (
                 <Tr key={entry.id}>
                   <Td>
                     <Typography>{`${entry.mainField ? entry.mainField : entry.id}`}</Typography>
                   </Td>
                   <Td>
-                    <Typography>{`${entry.locale ? entry.locale : '-'}`}</Typography>
+                    <Typography>{`${entry.locale.name ? entry.locale.name : '-'}`}</Typography>
                   </Td>
                   <Td>
-                    <Typography>{contentType}</Typography>
+                    <Typography>{entry.contentType.displayName || ''}</Typography>
                   </Td>
                 </Tr>
               ))}

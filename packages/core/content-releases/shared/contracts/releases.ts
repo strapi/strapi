@@ -17,7 +17,7 @@ export type Pagination = {
 };
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
-  actions: { meta: { count: number; total: number } };
+  actions: { meta: { count: number } };
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
