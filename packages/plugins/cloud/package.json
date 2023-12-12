@@ -26,7 +26,7 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "strapi plugin:build --force",
@@ -37,17 +37,17 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.1",
+    "@strapi/design-system": "1.13.2",
     "@strapi/helper-plugin": "4.15.5",
-    "@strapi/icons": "1.13.0",
+    "@strapi/icons": "1.13.2",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
     "@strapi/strapi": "4.15.5",
-    "@types/react": "18.2.7",
-    "@types/react-dom": "18.2.12",
+    "@types/react": "18.2.39",
+    "@types/react-dom": "18.2.17",
     "@types/react-router-dom": "^5.3.3",
-    "@types/styled-components": "5.1.26",
+    "@types/styled-components": "5.1.32",
     "eslint-config-custom": "4.15.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",

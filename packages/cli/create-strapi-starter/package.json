@@ -33,8 +33,8 @@
   "main": "",
   "bin": "./bin/index.js",
   "files": [
-    "./dist",
-    "./bin"
+    "dist/",
+    "bin/"
   ],
   "scripts": {
     "build": "pack-up build",

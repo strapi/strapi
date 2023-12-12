@@ -28,7 +28,7 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -44,7 +44,7 @@
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "10.0.0",
-    "knex": "2.5.0",
+    "knex": "3.0.1",
     "lodash": "4.17.21",
     "semver": "7.5.4",
     "umzug": "3.2.1"

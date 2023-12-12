@@ -38,7 +38,7 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
@@ -59,10 +59,10 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.13.1",
+    "@strapi/design-system": "1.13.2",
     "@strapi/generators": "4.15.5",
     "@strapi/helper-plugin": "4.15.5",
-    "@strapi/icons": "1.13.0",
+    "@strapi/icons": "1.13.2",
     "@strapi/utils": "4.15.5",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",

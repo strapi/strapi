@@ -1,8 +1,5 @@
-import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
-import {
-  ASSIGNEE_ATTRIBUTE_NAME,
-  STAGE_ATTRIBUTE_NAME,
-} from '../../EditView/InformationBox/constants';
+import { getTranslation } from '../../../../../../../admin/src/content-manager/utils/translations';
+import { ASSIGNEE_ATTRIBUTE_NAME, STAGE_ATTRIBUTE_NAME } from '../../EditView/components/constants';
 
 export const REVIEW_WORKFLOW_COLUMNS_EE = [
   {
@@ -14,7 +11,7 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
     metadatas: {
       // formatMessage() will be applied when the column is rendered
       label: {
-        id: getTrad(`containers.ListPage.table-headers.reviewWorkflows.stage`),
+        id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.stage`),
         defaultMessage: 'Review stage',
       },
       searchable: false,
@@ -35,7 +32,7 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
     },
     metadatas: {
       label: {
-        id: getTrad(`containers.ListPage.table-headers.reviewWorkflows.assignee`),
+        id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.assignee`),
         defaultMessage: 'Assignee',
       },
       searchable: false,

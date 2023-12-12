@@ -7,7 +7,8 @@ type SettingsPermissions =
   | 'sso'
   | 'transfer-tokens'
   | 'users'
-  | 'webhooks';
+  | 'webhooks'
+  | 'review-workflows';
 
 interface CRUDPermissions {
   main: Permission[];
@@ -19,6 +20,7 @@ interface CRUDPermissions {
 }
 
 interface PermissionMap {
+  contentManager: CRUDPermissions;
   marketplace: CRUDPermissions;
   settings: Record<SettingsPermissions, CRUDPermissions>;
 }

@@ -37,7 +37,7 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
@@ -53,9 +53,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.1",
+    "@strapi/design-system": "1.13.2",
     "@strapi/helper-plugin": "4.15.5",
-    "@strapi/icons": "1.13.0",
+    "@strapi/icons": "1.13.2",
     "@strapi/provider-email-sendmail": "4.15.5",
     "@strapi/utils": "4.15.5",
     "lodash": "4.17.21",

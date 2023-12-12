@@ -54,6 +54,13 @@ yargs
         const { concurrency, domains, setup } = argv;
 
         /**
+         * Publshing all pacakges to the yalc store
+         */
+        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')], {
+          stdio: 'inherit',
+        });
+
+        /**
          * We don't need to spawn more apps than we have domains,
          * but equally if someone sets the concurrency to 1
          * then we should only spawn one and run every domain on there.
