@@ -21,12 +21,9 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import {
-  ConfigurationProvider,
-  ConfigurationProviderProps,
-} from './components/ConfigurationProvider';
 import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from './constants';
+import { ConfigurationProvider, ConfigurationProviderProps } from './features/Configuration';
 import { useEnterprise } from './hooks/useEnterprise';
 import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';

@@ -14,7 +14,7 @@ import { Route, Switch } from 'react-router-dom';
 import { GuidedTourModal } from '../components/GuidedTour/Modal';
 import { LeftMenu } from '../components/LeftMenu';
 import { Onboarding } from '../components/Onboarding';
-import { useConfiguration } from '../contexts/configuration';
+import { useConfiguration } from '../features/Configuration';
 import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { AppLayout } from '../layouts/AppLayout';
@@ -61,7 +61,7 @@ const Admin = () => {
 
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
-  const { showTutorials } = useConfiguration();
+  const { showTutorials } = useConfiguration('Admin');
 
   /**
    * Make sure the event is only send once after accessing the admin panel
