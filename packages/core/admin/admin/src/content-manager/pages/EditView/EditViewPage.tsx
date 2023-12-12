@@ -17,10 +17,10 @@ import { Attribute } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { RouteComponentProps, useLocation } from 'react-router-dom';
 
+import { InjectionZone } from '../../../components/InjectionZone';
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { useOnce } from '../../../hooks/useOnce';
-import { InjectionZone } from '../../../shared/components/InjectionZone';
 import { ContentTypeFormWrapper } from '../../components/ContentTypeFormWrapper';
 import { DynamicZone } from '../../components/DynamicZone/Field';
 import { EditViewDataManagerProvider } from '../../components/EditViewDataManagerProvider/Provider';

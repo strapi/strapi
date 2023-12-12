@@ -45,11 +45,11 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 
+import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../../core/store/hooks';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { InjectionZone } from '../../../shared/components/InjectionZone';
 import { CREATOR_FIELDS } from '../../constants/attributes';
 import { buildValidGetParams } from '../../utils/api';
 import { FormattedLayouts, ListLayoutRow } from '../../utils/layouts';

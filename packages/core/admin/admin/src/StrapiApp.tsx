@@ -11,6 +11,14 @@ import { DefaultTheme } from 'styled-components';
 
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
+import {
+  INJECTION_ZONES,
+  InjectionZoneBlock,
+  InjectionZoneComponent,
+  InjectionZoneContainer,
+  InjectionZoneModule,
+  InjectionZones,
+} from './components/InjectionZone';
 import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
 import { Providers } from './components/Providers';
 import { HOOKS } from './constants';
@@ -23,14 +31,6 @@ import { Reducers } from './core/apis/Reducers';
 import { Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
-import {
-  INJECTION_ZONES,
-  InjectionZoneBlock,
-  InjectionZoneComponent,
-  InjectionZoneContainer,
-  InjectionZoneModule,
-  InjectionZones,
-} from './shared/components/InjectionZone';
 import { languageNativeNames } from './translations/languageNativeNames';
 
 const {
