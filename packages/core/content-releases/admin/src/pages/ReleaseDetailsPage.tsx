@@ -31,7 +31,6 @@ import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { GetReleaseActions } from '../../../shared/contracts/release-actions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -41,6 +40,8 @@ import {
   useGetReleaseQuery,
   useUpdateReleaseMutation,
 } from '../services/release';
+
+import { countDays } from './utils/getUnits';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -72,16 +73,6 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
-const countDays = (date: string) => {
-  const currentDateInMillis = new Date().getTime();
-  const startDateInMilliseconds = new Date(date).getTime();
-  const timeDiff = currentDateInMillis - startDateInMilliseconds;
-
-  const daysPassed = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-
-  return daysPassed;
-};
-
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
   children: React.ReactNode;
@@ -91,7 +82,7 @@ export const ReleaseDetailsLayout = ({
   toggleEditReleaseModal,
   children,
 }: ReleaseDetailsLayoutProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatRelativeTime } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
@@ -100,7 +91,8 @@ export const ReleaseDetailsLayout = ({
   const title = data?.data?.name;
   const createdAt = data?.data?.createdAt;
   const totalEntries = data?.data?.actions?.meta?.count || 0;
-  const daysPassed = createdAt ? countDays(createdAt) : 0;
+  const { unit, value } = createdAt ? countDays(createdAt) : { unit: 'day', value: 0 };
+
   const createdBy = `${data?.data?.createdBy?.firstname} ${data?.data?.createdBy?.lastname}` || '';
 
   const handleTogglePopover = () => {
@@ -214,9 +206,9 @@ export const ReleaseDetailsLayout = ({
                         {
                           id: 'content-releases.header.actions.created.description',
                           defaultMessage:
-                            '{number, plural, =0 {# days} one {# day} other {# days}} ago by {createdBy}',
+                            '{number, plural, =0 {# {unit}s} one {# {unit}} other {# {unit}s}} ago by {createdBy}',
                         },
-                        { number: daysPassed, createdBy }
+                        { number: -value, unit, createdBy }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
