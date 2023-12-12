@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout } from '../../hooks/useContentTypeLayout';
-import { useDragAndDrop } from '../../hooks/useDragAndDrop';
+import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { ItemTypes } from '../../utils/dragAndDrop';
 import { composeRefs } from '../../utils/refs';
 import { getTranslation } from '../../utils/translations';
@@ -27,7 +27,9 @@ import { FieldComponent } from '../FieldComponent';
 
 import type { ComponentPickerProps } from './ComponentPicker';
 
-interface DynamicComponentProps extends Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
+interface DynamicComponentProps
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
+    Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
   componentUid: string;
   formErrors?: Record<string, unknown>;
   index?: number;
@@ -36,9 +38,6 @@ interface DynamicComponentProps extends Pick<ComponentPickerProps, 'dynamicCompo
   onAddComponent?: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
-  onGrabItem?: (index: number) => void;
-  onDropItem?: (index: number) => void;
-  onCancel?: (index: number) => void;
 }
 
 const DynamicComponent = ({
@@ -110,8 +109,8 @@ const DynamicComponent = ({
         icon,
       },
       onMoveItem: onMoveComponent,
-      onGrabItem,
       onDropItem,
+      onGrabItem,
       onCancel,
     });
 
