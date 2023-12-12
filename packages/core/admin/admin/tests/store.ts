@@ -5,21 +5,18 @@ import { fixtures } from '@strapi/admin-test-utils';
  * The more we adopt it, the bigger it will get – which is okay.
  */
 const initialState = {
-  admin_app: { permissions: fixtures.permissions.app },
+  admin_app: {
+    permissions: fixtures.permissions.app,
+    theme: {
+      availableThemes: [],
+      currentTheme: 'light',
+    },
+  },
   'content-manager_app': {
     fieldSizes: {},
   },
   rbacProvider: {
-    allPermissions: [
-      ...fixtures.permissions.allPermissions,
-      {
-        id: 314,
-        action: 'admin::users.read',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-    ],
+    allPermissions: fixtures.permissions.allPermissions,
   },
   'content-manager_listView': {
     contentType: {

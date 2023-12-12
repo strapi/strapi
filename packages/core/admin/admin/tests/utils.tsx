@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
-import { DesignSystemProvider, darkTheme, lightTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   fireEvent,
@@ -24,7 +24,7 @@ import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { RBACReducer } from '../src/components/RBACProvider';
-import { ThemeToggleProvider } from '../src/components/ThemeToggleProvider';
+import { Theme } from '../src/components/Theme';
 import { ModelsContext } from '../src/content-manager/contexts/models';
 import { reducer as rbacManagerReducer } from '../src/content-manager/hooks/useSyncRbac';
 import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
@@ -76,60 +76,58 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
   return (
     <Provider store={store}>
       <MemoryRouter initialEntries={initialEntries}>
-        <ThemeToggleProvider
-          themes={{
-            light: lightTheme,
-            dark: darkTheme,
-          }}
-        >
-          <DesignSystemProvider locale="en">
-            <QueryClientProvider client={queryClient}>
-              <DndProvider backend={HTML5Backend}>
-                <LanguageProvider
-                  localeNames={{
-                    en: 'english',
-                  }}
-                  messages={{}}
-                >
-                  <NotificationsProvider>
-                    <RBACContext.Provider
-                      value={{
-                        refetchPermissions: jest.fn(),
-                        allPermissions: [
-                          ...fixtures.permissions.allPermissions,
-                          {
-                            id: 314,
-                            action: 'admin::users.read',
-                            subject: null,
-                            properties: {},
-                            conditions: [],
-                            actionParameters: {},
-                          },
-                        ] as Permission[],
-                      }}
-                    >
-                      <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                        <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
-                          <ConfigurationContextProvider
-                            showReleaseNotification={false}
-                            showTutorials={false}
-                            updateProjectSettings={jest.fn()}
-                            logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
-                            }}
-                          >
-                            {children}
-                          </ConfigurationContextProvider>
-                        </AdminContextProvider>
-                      </ModelsContext.Provider>
-                    </RBACContext.Provider>
-                  </NotificationsProvider>
-                </LanguageProvider>
-              </DndProvider>
-            </QueryClientProvider>
-          </DesignSystemProvider>
-        </ThemeToggleProvider>
+        <QueryClientProvider client={queryClient}>
+          <DndProvider backend={HTML5Backend}>
+            <LanguageProvider
+              localeNames={{
+                en: 'english',
+              }}
+              messages={{}}
+            >
+              <Theme
+                themes={{
+                  dark: darkTheme,
+                  light: lightTheme,
+                }}
+              >
+                <NotificationsProvider>
+                  <RBACContext.Provider
+                    value={{
+                      refetchPermissions: jest.fn(),
+                      allPermissions: [
+                        ...fixtures.permissions.allPermissions,
+                        {
+                          id: 314,
+                          action: 'admin::users.read',
+                          subject: null,
+                          properties: {},
+                          conditions: [],
+                          actionParameters: {},
+                        },
+                      ] as Permission[],
+                    }}
+                  >
+                    <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                      <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
+                        <ConfigurationContextProvider
+                          showReleaseNotification={false}
+                          showTutorials={false}
+                          updateProjectSettings={jest.fn()}
+                          logos={{
+                            auth: { default: '' },
+                            menu: { default: '' },
+                          }}
+                        >
+                          {children}
+                        </ConfigurationContextProvider>
+                      </AdminContextProvider>
+                    </ModelsContext.Provider>
+                  </RBACContext.Provider>
+                </NotificationsProvider>
+              </Theme>
+            </LanguageProvider>
+          </DndProvider>
+        </QueryClientProvider>
       </MemoryRouter>
     </Provider>
   );

@@ -18,8 +18,7 @@ import { AdminContextProvider, AdminContextValue } from '../contexts/admin';
 
 import { GuidedTourProvider } from './GuidedTour/Provider';
 import { LanguageProvider, LanguageProviderProps } from './LanguageProvider';
-import { Theme } from './Theme';
-import { ThemeToggleProvider, ThemeToggleProviderProps } from './ThemeToggleProvider';
+import { Theme, ThemeProps } from './Theme';
 
 import type { Store } from '../core/store/configure';
 
@@ -32,8 +31,7 @@ const queryClient = new QueryClient({
 });
 
 interface ProvidersProps
-  extends Pick<ThemeToggleProviderProps, 'themes'>,
-    Pick<LanguageProviderProps, 'messages' | 'localeNames'>,
+  extends Pick<LanguageProviderProps, 'messages' | 'localeNames'>,
     Pick<AdminContextValue, 'getAdminInjectedComponents'>,
     Pick<CustomFieldsProviderProps, 'customFields'>,
     Pick<LibraryProviderProps, 'components' | 'fields'>,
@@ -46,7 +44,8 @@ interface ProvidersProps
       | 'runHookSeries'
       | 'runHookWaterfall'
       | 'settings'
-    > {
+    >,
+    Pick<ThemeProps, 'themes'> {
   children: React.ReactNode;
   store: Store;
 }
@@ -70,39 +69,37 @@ const Providers = ({
   themes,
 }: ProvidersProps) => {
   return (
-    <LanguageProvider messages={messages} localeNames={localeNames}>
-      <ThemeToggleProvider themes={themes}>
-        <Theme>
+    <Provider store={store}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
+        <Theme themes={themes}>
           <QueryClientProvider client={queryClient}>
-            <Provider store={store}>
-              <AdminContextProvider getAdminInjectedComponents={getAdminInjectedComponents}>
-                <StrapiAppProvider
-                  getPlugin={getPlugin}
-                  menu={menu}
-                  plugins={plugins}
-                  runHookParallel={runHookParallel}
-                  runHookWaterfall={runHookWaterfall}
-                  runHookSeries={runHookSeries}
-                  settings={settings}
-                >
-                  <LibraryProvider components={components} fields={fields}>
-                    <CustomFieldsProvider customFields={customFields}>
-                      <AutoReloadOverlayBlockerProvider>
-                        <OverlayBlockerProvider>
-                          <GuidedTourProvider>
-                            <NotificationsProvider>{children}</NotificationsProvider>
-                          </GuidedTourProvider>
-                        </OverlayBlockerProvider>
-                      </AutoReloadOverlayBlockerProvider>
-                    </CustomFieldsProvider>
-                  </LibraryProvider>
-                </StrapiAppProvider>
-              </AdminContextProvider>
-            </Provider>
+            <AdminContextProvider getAdminInjectedComponents={getAdminInjectedComponents}>
+              <StrapiAppProvider
+                getPlugin={getPlugin}
+                menu={menu}
+                plugins={plugins}
+                runHookParallel={runHookParallel}
+                runHookWaterfall={runHookWaterfall}
+                runHookSeries={runHookSeries}
+                settings={settings}
+              >
+                <LibraryProvider components={components} fields={fields}>
+                  <CustomFieldsProvider customFields={customFields}>
+                    <AutoReloadOverlayBlockerProvider>
+                      <OverlayBlockerProvider>
+                        <GuidedTourProvider>
+                          <NotificationsProvider>{children}</NotificationsProvider>
+                        </GuidedTourProvider>
+                      </OverlayBlockerProvider>
+                    </AutoReloadOverlayBlockerProvider>
+                  </CustomFieldsProvider>
+                </LibraryProvider>
+              </StrapiAppProvider>
+            </AdminContextProvider>
           </QueryClientProvider>
         </Theme>
-      </ThemeToggleProvider>
-    </LanguageProvider>
+      </LanguageProvider>
+    </Provider>
   );
 };
 

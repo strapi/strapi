@@ -19,7 +19,10 @@ describe('ADMIN | new StrapiApp', () => {
       {
         "admin_app": {
           "permissions": {},
-          "status": "init",
+          "theme": {
+            "availableThemes": [],
+            "currentTheme": "system",
+          },
         },
         "content-manager_app": {
           "collectionTypeLinks": [],
