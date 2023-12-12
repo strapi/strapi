@@ -8,18 +8,17 @@ jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     create: jest.fn(),
     findActions: mockFindActions,
-    findReleaseContentTypesMainFields: jest.fn(() => ({
+    getContentTypesDataForActions: jest.fn(() => ({
       'api::contentTypeA.contentTypeA': {
         mainField: 'name',
+        displayName: 'contentTypeA',
       },
       'api::contentTypeB.contentTypeB': {
         mainField: 'name',
+        displayName: 'contentTypeB',
       },
     })),
   })),
-  getAllowedContentTypes: jest
-    .fn()
-    .mockReturnValue(['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB']),
   getPermissionsChecker: jest.fn(() => ({
     sanitizedQuery: {
       read: mockSanitizedQueryRead,
@@ -93,47 +92,6 @@ describe('Release Action controller', () => {
     });
   });
 
-  describe('findMany', () => {
-    const ctx = {
-      state: {
-        userAbility: {
-          can: jest.fn(),
-          cannot: jest.fn(),
-        },
-      },
-      params: {
-        releaseId: 1,
-      },
-    };
-
-    it('should call sanitizedQueryRead once for each contentType', async () => {
-      // @ts-expect-error Ignore missing properties
-      await releaseActionController.findMany(ctx);
-
-      expect(mockSanitizedQueryRead).toHaveBeenCalledTimes(2);
-    });
-
-    it('should call findActions with the right params', async () => {
-      // @ts-expect-error Ignore missing properties
-      await releaseActionController.findMany(ctx);
-
-      expect(mockFindActions).toHaveBeenCalledWith(
-        1,
-        ['api::contentTypeA.contentTypeA', 'api::contentTypeB.contentTypeB'],
-        {
-          populate: {
-            entry: {
-              on: {
-                'api::contentTypeA.contentTypeA': {},
-                'api::contentTypeB.contentTypeB': {},
-              },
-            },
-          },
-        }
-      );
-    });
-  });
-
   describe('update', () => {
     it('throws an error given bad request arguments', () => {
       const ctx = {
@@ -152,6 +110,100 @@ describe('Release Action controller', () => {
       expect(() => releaseActionController.update(ctx)).rejects.toThrow(
         'type must be one of the following values: publish, unpublish'
       );
+    });
+  });
+
+  describe('findMany', () => {
+    it('should return the data for an entry', async () => {
+      mockFindActions.mockResolvedValueOnce({
+        results: [
+          {
+            id: 1,
+            contentType: 'api::contentTypeA.contentTypeA',
+            entry: { id: 1, name: 'test 1', locale: 'en' },
+          },
+          {
+            id: 2,
+            contentType: 'api::contentTypeB.contentTypeB',
+            entry: { id: 2, name: 'test 2', locale: 'fr' },
+          },
+        ],
+        pagination: {},
+      });
+      global.strapi = {
+        plugins: {
+          // @ts-expect-error Ignore missing properties
+          i18n: {
+            services: {
+              locales: {
+                find: jest.fn().mockReturnValue([
+                  {
+                    id: 1,
+                    name: 'English (en)',
+                    code: 'en',
+                  },
+                  {
+                    id: 2,
+                    name: 'French (fr)',
+                    code: 'fr',
+                  },
+                ]),
+              },
+            },
+          },
+        },
+        // @ts-expect-error Ignore missing properties
+        admin: {
+          services: {
+            permission: {
+              createPermissionsManager: jest.fn(() => ({
+                ability: {
+                  can: jest.fn(),
+                },
+                validateQuery: jest.fn(),
+                sanitizeQuery: jest.fn(() => ctx.query),
+              })),
+            },
+          },
+        },
+      };
+
+      const ctx = {
+        state: {
+          userAbility: {},
+        },
+        params: {
+          releaseId: 1,
+        },
+        query: {},
+      };
+      // @ts-expect-error Ignore missing properties
+      await releaseActionController.findMany(ctx);
+
+      // @ts-expect-error Ignore missing properties
+      expect(ctx.body.data[0].entry).toEqual({
+        id: 1,
+        contentType: {
+          displayName: 'contentTypeA',
+          mainFieldValue: 'test 1',
+        },
+        locale: {
+          code: 'en',
+          name: 'English (en)',
+        },
+      });
+      // @ts-expect-error Ignore missing properties
+      expect(ctx.body.data[1].entry).toEqual({
+        id: 2,
+        contentType: {
+          displayName: 'contentTypeB',
+          mainFieldValue: 'test 2',
+        },
+        locale: {
+          code: 'fr',
+          name: 'French (fr)',
+        },
+      });
     });
   });
 });

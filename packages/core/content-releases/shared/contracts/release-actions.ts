@@ -3,11 +3,23 @@ import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
-import { UserInfo } from '@strapi/helper-plugin';
 
 type ReleaseActionEntry = Entity & {
   // Entity attributes
   [key: string]: Attribute.Any;
+} & {
+  locale: string;
+};
+
+type ReleaseActionEntryData = {
+  locale?: {
+    name: string;
+    code: string;
+  };
+  contentType: {
+    mainFieldValue?: string;
+    displayName: string;
+  };
 };
 
 export interface ReleaseAction extends Entity {
@@ -52,7 +64,7 @@ export declare namespace GetReleaseActions {
   }
 
   export interface Response {
-    data: ReleaseAction[];
+    data: ReleaseAction & { entry: ReleaseActionEntryData }[];
     meta: {
       pagination: Pagination;
     };
@@ -82,7 +94,7 @@ export declare namespace DeleteReleaseAction {
 export declare namespace UpdateReleaseAction {
   export interface Request {
     params: {
-      actionId: ReleaseAction['id']
+      actionId: ReleaseAction['id'];
       releaseId: ReleaseAction['id'];
     };
     body: {

@@ -13,7 +13,7 @@ import type {
   GetReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
-import { getAllowedContentTypes, getService } from '../utils';
+import { getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
@@ -71,23 +71,16 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
 
-    const allowedContentTypes = getAllowedContentTypes({
-      strapi,
-      userAbility: ctx.state.userAbility,
+    const release = await releaseService.findOne(id, { populate: ['createdBy'] });
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
     });
+    const sanitizedRelease = await permissionsManager.sanitizeOutput(release);
 
-    const release = await releaseService.findOne(id);
-    const total = await releaseService.countActions({
+    const count = await releaseService.countActions({
       filters: {
         release: id,
-      },
-    });
-    const totalHidden = await releaseService.countActions({
-      filters: {
-        release: id,
-        contentType: {
-          $notIn: allowedContentTypes,
-        },
       },
     });
 
@@ -97,11 +90,10 @@ const releaseController = {
 
     // Format the data object
     const data = {
-      ...release,
+      ...sanitizedRelease,
       actions: {
         meta: {
-          total,
-          totalHidden,
+          count,
         },
       },
     };
