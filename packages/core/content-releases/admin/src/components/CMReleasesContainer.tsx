@@ -32,7 +32,12 @@ import { GetContentTypeEntryReleases } from '../../../shared/contracts/releases'
 import { PERMISSIONS } from '../constants';
 import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../services/release';
 
+import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
+
+/* -------------------------------------------------------------------------------------------------
+ * AddActionToReleaseModal
+ * -----------------------------------------------------------------------------------------------*/
 
 const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
   type: yup.string().oneOf(['publish', 'unpublish']).required(),
@@ -199,8 +204,12 @@ const AddActionToReleaseModal = ({
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * CMReleasesContainer
+ * -----------------------------------------------------------------------------------------------*/
+
 export const CMReleasesContainer = () => {
-  const [showModal, setShowModal] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
   const {
     isCreatingEntry,
@@ -237,7 +246,7 @@ export const CMReleasesContainer = () => {
     return null;
   }
 
-  const toggleAddActionToReleaseModal = () => setShowModal((prev) => !prev);
+  const toggleModal = () => setIsModalOpen((prev) => !prev);
 
   const getReleaseColorVariant = (
     actionType: 'publish' | 'unpublish',
@@ -306,11 +315,12 @@ export const CMReleasesContainer = () => {
                     )}
                   </Typography>
                 </Box>
-                <Box padding={4}>
+                <Flex padding={4} direction="column" gap={3} width="100%" alignItems="flex-start">
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
-                </Box>
+                  <ReleaseActionMenu releaseId={release.id} actionId={release.action.id} />
+                </Flex>
               </Flex>
             );
           })}
@@ -322,7 +332,7 @@ export const CMReleasesContainer = () => {
               color="neutral700"
               variant="tertiary"
               startIcon={<Plus />}
-              onClick={toggleAddActionToReleaseModal}
+              onClick={toggleModal}
             >
               {formatMessage({
                 id: 'content-releases.content-manager-edit-view.add-to-release',
@@ -331,9 +341,9 @@ export const CMReleasesContainer = () => {
             </Button>
           </CheckPermissions>
         </Flex>
-        {showModal && (
+        {isModalOpen && (
           <AddActionToReleaseModal
-            handleClose={toggleAddActionToReleaseModal}
+            handleClose={toggleModal}
             contentTypeUid={contentType.uid}
             entryId={params.id}
           />
