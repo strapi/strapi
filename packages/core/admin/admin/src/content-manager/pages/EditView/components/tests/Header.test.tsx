@@ -73,7 +73,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #ffffff;
       }
 
-      .c15 {
+      .c16 {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
@@ -104,6 +104,10 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border-color: #4945ff;
         border: 1px solid #4945ff;
         cursor: pointer;
+      }
+
+      .c14 {
+        padding-left: 8px;
       }
 
       .c5 {
@@ -268,55 +272,55 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         fill: #271fe0;
       }
 
-      .c14 {
+      .c15 {
         height: 2rem;
       }
 
-      .c14 svg {
+      .c15 svg {
         height: 0.75rem;
         width: auto;
       }
 
-      .c14[aria-disabled='true'] {
+      .c15[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true'] .c3 {
+      .c15[aria-disabled='true'] .c3 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c15[aria-disabled='true'] svg > g,
+      .c15[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14[aria-disabled='true']:active {
+      .c15[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true']:active .c3 {
+      .c15[aria-disabled='true']:active .c3 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c15[aria-disabled='true']:active svg > g,
+      .c15[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c14:hover {
+      .c15:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c14:active {
+      .c15:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
+      .c15 svg > g,
+      .c15 svg path {
         fill: #ffffff;
       }
 
@@ -432,9 +436,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
               class="c7"
             >
               <button
-                aria-disabled="true"
-                class="c10 c9 c11 c12"
-                disabled=""
+                aria-disabled="false"
+                class="c9 c10 c11 c12"
                 type="button"
               >
                 <div
@@ -460,15 +463,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                   Publish
                 </span>
               </button>
-              <button
-                aria-disabled="true"
-                class="c10 c9 c11 c14"
-                disabled=""
-                type="submit"
+              <div
+                class="c14"
               >
                 <button
                   aria-disabled="true"
-                  class="c9 c10 c11 c12"
+                  class="c9 c10 c11 c15"
                   disabled=""
                   type="submit"
                 >
@@ -482,7 +482,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
           </div>
           <p
-            class="c3 c15"
+            class="c3 c16"
           >
             API ID  : undefined
           </p>

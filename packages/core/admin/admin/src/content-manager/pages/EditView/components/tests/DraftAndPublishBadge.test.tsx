@@ -6,7 +6,6 @@ import { DraftAndPublishBadge } from '../DraftAndPublishBadge';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useCMEditViewDataManager: jest.fn().mockReturnValue({
-    hasDraftAndPublish: true,
     initialData: {
       publishedAt: '2021-08-10T14:00:00.000Z',
     },
@@ -33,18 +32,5 @@ describe('DraftAndPublishBadge', () => {
     });
 
     render(<DraftAndPublishBadge />);
-  });
-
-  it('should show return null when hasDraftAndPublish even if it has a publishedAt value', () => {
-    // @ts-expect-error – mocking for testing
-    jest.mocked(useCMEditViewDataManager).mockReturnValue({
-      initialData: {
-        publishedAt: '2021-08-10T14:00:00.000Z',
-      },
-    });
-
-    render(<DraftAndPublishBadge />);
-
-    expect(screen.queryByText('Editing')).not.toBeInTheDocument();
   });
 });
