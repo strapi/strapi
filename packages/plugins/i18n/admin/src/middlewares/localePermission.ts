@@ -1,6 +1,5 @@
 import { Middleware } from '@reduxjs/toolkit';
 import { Permission } from '@strapi/helper-plugin';
-import get from 'lodash/get';
 
 import { RootState } from '../store/reducers';
 
@@ -15,13 +14,13 @@ const localePermissionMiddleware: () => Middleware<object, RootState> =
       return next(action);
     }
 
-    const containerName = get(action, '__meta__.containerName', null);
+    const containerName = action.__meta__?.containerName ?? null;
 
     if (!['editView', 'listView'].includes(containerName)) {
       return next(action);
     }
 
-    const locale = get(action, '__meta__.plugins.i18n.locale', null);
+    const locale = action.__meta__?.plugins?.i18n?.locale;
 
     if (!locale) {
       return next(action);
@@ -31,8 +30,7 @@ const localePermissionMiddleware: () => Middleware<object, RootState> =
 
     const nextPermissions = Object.keys(permissions).reduce<Record<string, Permission[]>>(
       (acc, key) => {
-        const currentPermission = permissions[key];
-        const filteredPermissions = currentPermission.filter(
+        const filteredPermissions = permissions[key].filter(
           (permission: Permission) => (permission.properties?.locales ?? []).indexOf(locale) !== -1
         );
 

@@ -25,11 +25,10 @@ import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { ItemTypes } from '../utils/dragAndDrop';
 import { getTranslation } from '../utils/translations';
 
-import { CollectionTypeRecursivePath } from './CollectionTypeRecursivePath';
+import { CollectionTypePages } from './CollectionTypePages';
 import { ComponentSettingsView } from './ComponentSettingsView';
-import { NoContentType } from './NoContentType';
-import { NoPermissions } from './NoPermissions';
-import { SingleTypeRecursivePath } from './SingleTypeRecursivePath';
+import { NoContentType } from './NoContentTypePage';
+import { NoPermissions } from './NoPermissionsPage';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -124,11 +123,7 @@ const App = () => {
                 <ComponentSettingsView />
               </CheckPagePermissions>
             </Route>
-            <Route
-              path="/content-manager/collectionType/:slug"
-              component={CollectionTypeRecursivePath}
-            />
-            <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
+            <Route path="/content-manager/:collectionType/:slug" component={CollectionTypePages} />
 
             <Route path="/content-manager/403">
               <NoPermissions />

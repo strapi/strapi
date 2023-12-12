@@ -98,7 +98,6 @@ const reducer = (state: EditViewState = initialState, action: Action) =>
         break;
       }
       case SET_LAYOUT: {
-        // @ts-expect-error – recursive type.
         draftState.currentLayout = action.layout;
         break;
       }

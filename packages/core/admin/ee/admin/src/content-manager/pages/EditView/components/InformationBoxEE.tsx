@@ -2,9 +2,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import { Information } from '../../../../../../../admin/src/content-manager/pages/EditView/components/Information';
 
-// @ts-expect-error – TODO: when RW settings is merged
 import { AssigneeSelect } from './AssigneeSelect';
-// @ts-expect-error – TODO: when RW settings is merged
 import { StageSelect } from './StageSelect';
 
 const InformationBoxEE = () => {

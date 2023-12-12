@@ -49,7 +49,7 @@ interface RenderChildProps {
     body: Contracts.SingleTypes.CreateOrUpdate.Request['body'],
     trackerProperty: Extract<
       TrackingEvent,
-      { name: 'didCreateEntry' | 'didNotCreateEntry' }
+      { name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry' }
     >['properties']
   ) => Promise<Contracts.SingleTypes.CreateOrUpdate.Response>;
   onDraftRelationCheck: () => Promise<Contracts.SingleTypes.CountDraftRelations.Response['data']>;

@@ -40,7 +40,6 @@ const Filters = ({ displayedFilters }: FitlersProps) => {
           />
         )}
       </Box>
-      {/* @ts-expect-error – TODO: fix this, maybe filtersSchema is supposed to be the same as FilterPopoverURLQueryProps['diplayedFilters'] so we can simplify? */}
       <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
   );
