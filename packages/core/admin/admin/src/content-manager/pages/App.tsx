@@ -123,8 +123,15 @@ const App = () => {
                 <ComponentSettingsView />
               </CheckPagePermissions>
             </Route>
+            <Redirect
+              from="/content-manager/collectionType/:slug"
+              to="/content-manager/collection-types/:slug"
+            />
+            <Redirect
+              from="/content-manager/singleType/:slug"
+              to="/content-manager/single-types/:slug"
+            />
             <Route path="/content-manager/:collectionType/:slug" component={CollectionTypePages} />
-
             <Route path="/content-manager/403">
               <NoPermissions />
             </Route>

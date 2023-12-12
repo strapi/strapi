@@ -13,21 +13,18 @@ import {
   AllowedActions,
 } from '@strapi/helper-plugin';
 import { Layer, Pencil } from '@strapi/icons';
-import { Attribute, Entity } from '@strapi/types';
+import { Attribute } from '@strapi/types';
 import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
 import { RouteComponentProps, useLocation } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../selectors';
 import { InjectionZone } from '../../../shared/components/InjectionZone';
-import { CollectionTypeFormWrapper } from '../../components/CollectionTypeFormWrapper';
+import { ContentTypeFormWrapper } from '../../components/ContentTypeFormWrapper';
 import { DynamicZone } from '../../components/DynamicZone/Field';
 import { EditViewDataManagerProvider } from '../../components/EditViewDataManagerProvider/Provider';
 import { FieldComponent } from '../../components/FieldComponent';
 import { Inputs } from '../../components/Inputs';
-import { SingleTypeFormWrapper } from '../../components/SingleTypeFormWrapper';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import {
   generatePermissionsObject,
@@ -51,28 +48,29 @@ const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject:
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-interface EditViewPageProps {
-  allowedActions: AllowedActions;
-  goBack: RouteComponentProps['history']['goBack'];
-  id?: Entity.ID;
-  isSingleType?: boolean;
-  origin?: string;
+interface EditViewPageParams {
+  collectionType: string;
   slug: string;
+  id?: string;
+  origin?: string;
+}
+
+interface EditViewPageProps extends RouteComponentProps<EditViewPageParams> {
+  allowedActions: AllowedActions;
   userPermissions?: Permission[];
 }
 
 const EditViewPage = ({
   allowedActions,
-  isSingleType = false,
-  goBack,
-  slug,
-  id,
-  origin,
+  history: { goBack },
+  match: {
+    params: { slug, collectionType, id, origin },
+  },
   userPermissions = [],
 }: EditViewPageProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const location = useLocation<{ error?: string }>();
   const toggleNotification = useNotification();
   const Information = useEnterprise(
@@ -109,16 +107,9 @@ const EditViewPage = ({
     getFieldsActionMatchingPermissions(userPermissions, slug);
 
   const configurationPermissions =
-    (isSingleType
+    (collectionType === 'single-types'
       ? permissions.contentManager?.singleTypesConfigurations
       : permissions.contentManager?.collectionTypesConfigurations) ?? [];
-
-  // // FIXME when changing the routing
-  const configurationsURL = `/content-manager/${
-    isSingleType ? 'singleType' : 'collectionType'
-  }/${slug}/configurations/edit`;
-
-  const DataManagementWrapper = isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper;
 
   // Check if a block is a dynamic zone
   const isDynamicZone = (
@@ -143,7 +134,7 @@ const EditViewPage = ({
   }
 
   return (
-    <DataManagementWrapper slug={slug} id={id} origin={origin}>
+    <ContentTypeFormWrapper collectionType={collectionType} slug={slug} id={id} origin={origin}>
       {({
         componentsDataStructure,
         contentTypeDataStructure,
@@ -169,7 +160,7 @@ const EditViewPage = ({
             initialValues={data}
             isCreatingEntry={isCreatingEntry}
             isLoadingForData={isLoadingForData}
-            isSingleType={isSingleType}
+            isSingleType={collectionType === 'single-types'}
             onPost={onPost}
             onPublish={onPublish}
             onDraftRelationCheck={onDraftRelationCheck}
@@ -332,7 +323,7 @@ const EditViewPage = ({
                               startIcon={<Layer />}
                               style={{ width: '100%' }}
                               // @ts-expect-error – Remove deprecated component
-                              to={configurationsURL}
+                              to={`/content-manager/${collectionType}/${slug}/configurations/edit`}
                               variant="secondary"
                             >
                               {formatMessage({
@@ -355,7 +346,7 @@ const EditViewPage = ({
           </EditViewDataManagerProvider>
         );
       }}
-    </DataManagementWrapper>
+    </ContentTypeFormWrapper>
   );
 };
 
@@ -438,11 +429,13 @@ const selectCustomFieldUids = createSelector(
 interface ProtectedEditViewPageProps extends Omit<EditViewPageProps, 'allowedActions'> {}
 
 const ProtectedEditViewPage = ({
-  slug,
   userPermissions = [],
   ...restProps
 }: ProtectedEditViewPageProps) => {
-  const viewPermissions = React.useMemo(() => generatePermissionsObject(slug), [slug]);
+  const viewPermissions = React.useMemo(
+    () => generatePermissionsObject(restProps.match.params.slug),
+    [restProps.match.params.slug]
+  );
   const { isLoading, allowedActions } = useRBAC(
     viewPermissions,
     // TODO: just make usePermissions undefined by default in the reducer?
@@ -457,11 +450,10 @@ const ProtectedEditViewPage = ({
     <EditViewPage
       {...restProps}
       allowedActions={allowedActions}
-      slug={slug}
       userPermissions={userPermissions}
     />
   );
 };
 
 export { EditViewPage, ProtectedEditViewPage };
-export type { EditViewPageProps, ProtectedEditViewPageProps };
+export type { EditViewPageProps, EditViewPageParams, ProtectedEditViewPageProps };

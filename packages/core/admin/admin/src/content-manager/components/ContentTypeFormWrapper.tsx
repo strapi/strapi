@@ -17,6 +17,7 @@ import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useFindRedirectionLink } from '../hooks/useFindRedirectionLink';
 import {
   getData,
   getDataSucceeded,
@@ -26,11 +27,11 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
-import { EntityData } from '../sharedReducers/crud/reducer';
-import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
+import type { EditViewPageParams } from '../pages/EditView/EditViewPage';
+import type { EntityData } from '../sharedReducers/crud/reducer';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 interface RenderChildProps {
@@ -66,34 +67,45 @@ interface RenderChildProps {
   status: string;
 }
 
-interface SingleTypeFormWrapperProps {
-  slug: string;
+interface ContentTypeFormWrapperProps extends EditViewPageParams {
   children: (props: RenderChildProps) => React.JSX.Element;
 }
 
 // This container is used to handle the CRUD
-const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) => {
+const ContentTypeFormWrapper = ({
+  children,
+  slug,
+  id = '',
+  origin,
+  collectionType,
+}: ContentTypeFormWrapperProps) => {
   const allLayoutData = useTypedSelector(
     (state) => state['content-manager_editViewLayoutManager'].currentLayout
   );
   const queryClient = useQueryClient();
-  const { trackUsage } = useTracking();
-  const { push } = useHistory();
-  const { setCurrentStep } = useGuidedTour();
-  const [isCreatingEntry, setIsCreatingEntry] = React.useState(true);
-  const [{ query, rawQuery }] = useQueryParams();
-  /**
-   * If you don't memoize this, the entire form dies in recursion.
-   */
-  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const toggleNotification = useNotification();
+  const { setCurrentStep } = useGuidedTour();
+  const { trackUsage } = useTracking();
+  const { push, replace } = useHistory();
+  const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useTypedDispatch();
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
-  const fetchClient = useFetchClient();
-  const { post, put, del } = fetchClient;
-
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useTypedSelector((state) => state['content-manager_editViewCrudReducer']);
+  const redirectionLink = useFindRedirectionLink(slug);
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+
+  const isMounted = React.useRef(true);
+
+  const fetchClient = useFetchClient();
+  const { put, post, del } = fetchClient;
+
+  const isSingleType = collectionType === 'single-types';
+  const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
+
+  const requestURL =
+    isCreatingEntry && !origin
+      ? null
+      : `/content-manager/${collectionType}/${slug}/${origin || id}`;
 
   const cleanReceivedData = React.useCallback(
     (data: EntityData) => {
@@ -103,23 +115,13 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
         allLayoutData.components
       );
 
-      // This is needed in order to add a unique id for the repeatable components, in order to make the reorder easier
       return formatContentTypeData(cleaned, allLayoutData.contentType!, allLayoutData.components);
     },
     [allLayoutData]
   );
 
+  // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   React.useEffect(() => {
-    return () => {
-      dispatch(resetProps());
-    };
-  }, [dispatch]);
-
-  React.useEffect(() => {
-    if (!allLayoutData) {
-      return;
-    }
-
     const componentsDataStructure = Object.keys(allLayoutData.components).reduce<
       Record<string, any>
     >((acc, current) => {
@@ -142,6 +144,7 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
       allLayoutData.contentType!.attributes,
       allLayoutData.components
     );
+
     const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
       allLayoutData.contentType!,
@@ -151,52 +154,85 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
     dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
   }, [allLayoutData, dispatch]);
 
-  // Check if creation mode or editing mode
+  React.useEffect(() => {
+    return () => {
+      dispatch(resetProps());
+    };
+  }, [dispatch]);
+
   React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
     const fetchData = async (source: CancelTokenSource) => {
+      if (!requestURL) {
+        return;
+      }
+
       dispatch(getData());
 
-      setIsCreatingEntry(true);
-
       try {
-        const { data } = await fetchClient.get(`/content-manager/single-types/${slug}`, {
-          cancelToken: source.token,
-          params,
-        });
+        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
-
-        setIsCreatingEntry(false);
       } catch (err) {
         if (axios.isCancel(err)) {
           return;
         }
+        const resStatus = get(err, 'response.status', null);
 
-        const responseStatus = get(err, 'response.status', null);
+        if (resStatus === 404 && !isSingleType) {
+          push(redirectionLink);
 
-        // Creating a single type
-        if (responseStatus === 404) {
+          return;
+        } else if (resStatus === 404 && isSingleType) {
+          // Creating a single type
+          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         }
 
-        if (responseStatus === 403) {
+        // Not allowed to read a document
+        if (resStatus === 403) {
           toggleNotification({
             type: 'info',
             message: { id: getTranslation('permissions.not-allowed.update') },
           });
 
-          push('/');
+          push(redirectionLink);
         }
       }
     };
 
-    fetchData(source);
+    // This is needed in order to reset the form when the query changes
+    const init = async () => {
+      dispatch(getData());
+      dispatch(initForm(rawQuery));
+    };
 
-    return () => source.cancel('Operation canceled by the user.');
-  }, [fetchClient, cleanReceivedData, push, slug, dispatch, params, rawQuery, toggleNotification]);
+    if (!isMounted.current) {
+      return () => {};
+    }
+
+    if (requestURL) {
+      fetchData(source);
+    } else {
+      init();
+    }
+
+    return () => {
+      source.cancel('Operation canceled by the user.');
+    };
+  }, [
+    fetchClient,
+    cleanReceivedData,
+    push,
+    requestURL,
+    dispatch,
+    rawQuery,
+    redirectionLink,
+    toggleNotification,
+    isSingleType,
+  ]);
 
   const displayErrors = React.useCallback(
     (err: AxiosError<{ error: ApiError }>) => {
@@ -210,11 +246,8 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
       try {
         trackUsage('willDeleteEntry', trackerProperty);
 
-        const { data } = await del<Contracts.SingleTypes.Delete.Response>(
-          `/content-manager/single-types/${slug}`,
-          {
-            params,
-          }
+        const { data } = await del<Contracts.CollectionTypes.Delete.Response>(
+          `/content-manager/${collectionType}/${slug}/${id}`
         );
 
         toggleNotification({
@@ -224,35 +257,65 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
 
         trackUsage('didDeleteEntry', trackerProperty);
 
-        setIsCreatingEntry(true);
-        dispatch(initForm(rawQuery, true));
+        if (isSingleType) {
+          setIsCreatingEntry(true);
+          dispatch(initForm(rawQuery, true));
+        } else {
+          replace(redirectionLink);
+        }
 
         return Promise.resolve(data);
       } catch (err) {
         trackUsage('didNotDeleteEntry', { error: err, ...trackerProperty });
 
-        if (err instanceof AxiosError) {
-          displayErrors(err);
-        }
-
         return Promise.reject(err);
       }
     },
-    [trackUsage, del, slug, params, toggleNotification, dispatch, rawQuery, displayErrors]
+    [
+      trackUsage,
+      del,
+      collectionType,
+      slug,
+      id,
+      toggleNotification,
+      isSingleType,
+      dispatch,
+      rawQuery,
+      replace,
+      redirectionLink,
+    ]
   );
 
   const onPost: RenderChildProps['onPost'] = React.useCallback(
     async (body, trackerProperty) => {
+      const isCloning = typeof origin === 'string';
+      /**
+       * If we're cloning we want to post directly to this endpoint
+       * so that the relations even if they're not listed in the EditView
+       * are correctly attached to the entry.
+       */
       try {
+        // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await put<
-          Contracts.SingleTypes.CreateOrUpdate.Response,
-          AxiosResponse<Contracts.SingleTypes.CreateOrUpdate.Response>,
-          Contracts.SingleTypes.CreateOrUpdate.Request['body']
-        >(`/content-manager/single-types/${slug}`, body, {
-          params: query,
-        });
+        const { id: _id, ...restBody } = body;
+
+        const { data } = await (isSingleType ? put : post)<
+          Contracts.CollectionTypes.Create.Response | Contracts.CollectionTypes.Clone.Response,
+          AxiosResponse<
+            Contracts.CollectionTypes.Create.Response | Contracts.CollectionTypes.Clone.Response
+          >,
+          | Contracts.CollectionTypes.Create.Request['body']
+          | Contracts.CollectionTypes.Clone.Request['body']
+        >(
+          isCloning
+            ? `/content-manager/${collectionType}/${slug}/clone/${origin}`
+            : `/content-manager/${collectionType}/${slug}`,
+          isCloning ? restBody : body,
+          {
+            params: query,
+          }
+        );
 
         trackUsage('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -264,35 +327,46 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
 
         // TODO: need to find a better place, or a better abstraction
         queryClient.invalidateQueries(['relation']);
-
-        dispatch(submitSucceeded(cleanReceivedData(data)));
         setIsCreatingEntry(false);
 
+        dispatch(submitSucceeded(cleanReceivedData(data)));
+
+        // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
+
+        if (!isSingleType) {
+          // @ts-expect-error – TODO: look into this, the type is probably wrong.
+          replace(`/content-manager/${collectionType}/${slug}/${data.id}${rawQuery}`);
+        }
 
         return Promise.resolve(data);
       } catch (err) {
-        trackUsage('didNotCreateEntry', { error: err, ...trackerProperty });
-
         if (err instanceof AxiosError) {
           displayErrors(err);
         }
 
+        trackUsage('didNotCreateEntry', { error: err, ...trackerProperty });
         dispatch(setStatus('resolved'));
 
         return Promise.reject(err);
       }
     },
     [
-      slug,
+      origin,
       dispatch,
+      collectionType,
       put,
+      post,
+      slug,
       query,
       trackUsage,
       toggleNotification,
       setCurrentStep,
       queryClient,
       cleanReceivedData,
+      isSingleType,
+      replace,
+      rawQuery,
       displayErrors,
     ]
   );
@@ -306,8 +380,10 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
 
         const {
           data: { data },
-        } = await fetchClient.get<Contracts.SingleTypes.CountDraftRelations.Response>(
-          `/content-manager/single-types/${slug}/actions/countDraftRelations`
+        } = await fetchClient.get<Contracts.CollectionTypes.CountDraftRelations.Response>(
+          isSingleType
+            ? `/content-manager/${collectionType}/${slug}/actions/countDraftRelations`
+            : `/content-manager/${collectionType}/${slug}/${id}/actions/countDraftRelations`
         );
         trackUsage('didCheckDraftRelations');
 
@@ -322,7 +398,7 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
 
         return Promise.reject(err);
       }
-    }, [trackUsage, slug, dispatch, fetchClient, displayErrors]);
+    }, [trackUsage, dispatch, fetchClient, isSingleType, collectionType, slug, id, displayErrors]);
 
   const onPublish: RenderChildProps['onPublish'] = React.useCallback(async () => {
     try {
@@ -330,23 +406,21 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await post<Contracts.SingleTypes.Publish.Response>(
-        `/content-manager/single-types/${slug}/actions/publish`,
-        {},
-        {
-          params,
-        }
+      const { data } = await post<Contracts.CollectionTypes.Publish.Response>(
+        isSingleType
+          ? `/content-manager/${collectionType}/${slug}/actions/publish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`
       );
 
       trackUsage('didPublishEntry');
+
+      dispatch(submitSucceeded(cleanReceivedData(data)));
+      dispatch(setStatus('resolved'));
+
       toggleNotification({
         type: 'success',
         message: { id: getTranslation('success.record.publish') },
       });
-
-      dispatch(submitSucceeded(cleanReceivedData(data)));
-
-      dispatch(setStatus('resolved'));
 
       return Promise.resolve(data);
     } catch (err) {
@@ -360,12 +434,14 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
     }
   }, [
     trackUsage,
-    slug,
     dispatch,
     post,
-    params,
-    toggleNotification,
+    isSingleType,
+    collectionType,
+    slug,
+    id,
     cleanReceivedData,
+    toggleNotification,
     displayErrors,
   ]);
 
@@ -377,19 +453,16 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
         dispatch(setStatus('submit-pending'));
 
         const { data } = await put<
-          Contracts.SingleTypes.CreateOrUpdate.Response,
-          AxiosResponse<Contracts.SingleTypes.CreateOrUpdate.Response>,
-          Contracts.SingleTypes.CreateOrUpdate.Request['body']
-        >(`/content-manager/single-types/${slug}`, body, {
-          params: query,
-        });
+          Contracts.CollectionTypes.Update.Response,
+          AxiosResponse<Contracts.CollectionTypes.Update.Response>,
+          Contracts.CollectionTypes.Update.Request['body']
+        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
 
+        trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
           type: 'success',
           message: { id: getTranslation('success.record.save') },
         });
-
-        trackUsage('didEditEntry', trackerProperty);
 
         // TODO: need to find a better place, or a better abstraction
         queryClient.invalidateQueries(['relation']);
@@ -400,11 +473,11 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
 
         return Promise.resolve(data);
       } catch (err) {
+        trackUsage('didNotEditEntry', { error: err, ...trackerProperty });
+
         if (err instanceof AxiosError) {
           displayErrors(err);
         }
-
-        trackUsage('didNotEditEntry', { error: err, ...trackerProperty });
 
         dispatch(setStatus('resolved'));
 
@@ -412,11 +485,12 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
       }
     },
     [
-      slug,
       trackUsage,
       dispatch,
       put,
-      query,
+      collectionType,
+      slug,
+      id,
       toggleNotification,
       queryClient,
       cleanReceivedData,
@@ -424,18 +498,16 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
     ]
   );
 
-  const onUnpublish = React.useCallback(async () => {
+  const onUnpublish: RenderChildProps['onUnpublish'] = React.useCallback(async () => {
     dispatch(setStatus('unpublish-pending'));
 
     try {
       trackUsage('willUnpublishEntry');
 
-      const { data } = await post<Contracts.SingleTypes.UnPublish.Response>(
-        `/content-manager/single-types/${slug}/actions/unpublish`,
-        {},
-        {
-          params,
-        }
+      const { data } = await post<Contracts.CollectionTypes.Unpublish.Response>(
+        isSingleType
+          ? `/content-manager/${collectionType}/${slug}/actions/unpublish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`
       );
 
       trackUsage('didUnpublishEntry');
@@ -445,20 +517,24 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
       });
 
       dispatch(submitSucceeded(cleanReceivedData(data)));
-
       dispatch(setStatus('resolved'));
     } catch (err) {
       dispatch(setStatus('resolved'));
+
       if (err instanceof AxiosError) {
         displayErrors(err);
       }
+
+      return Promise.reject(err);
     }
   }, [
-    slug,
     dispatch,
     trackUsage,
     post,
-    params,
+    isSingleType,
+    collectionType,
+    slug,
+    id,
     toggleNotification,
     cleanReceivedData,
     displayErrors,
@@ -472,14 +548,14 @@ const SingleTypeFormWrapper = ({ children, slug }: SingleTypeFormWrapperProps) =
     isLoadingForData: isLoading,
     onDelete,
     onPost,
-    onDraftRelationCheck,
     onPublish,
+    onDraftRelationCheck,
     onPut,
     onUnpublish,
-    redirectionLink: '/',
     status,
+    redirectionLink,
   });
 };
 
-export { SingleTypeFormWrapper };
-export type { RenderChildProps };
+export { ContentTypeFormWrapper };
+export type { ContentTypeFormWrapperProps, RenderChildProps };

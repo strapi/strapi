@@ -59,7 +59,7 @@ export const LinkToCMSettingsView = memo(
       }
 
       if (isInContentTypeView) {
-        push(`/content-manager/collectionType/${targetUid}/configurations/edit`);
+        push(`/content-manager/collection-types/${targetUid}/configurations/edit`);
       } else {
         push(`/content-manager/components/${targetUid}/configurations/edit`);
       }

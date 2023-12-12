@@ -27,7 +27,11 @@ const EditViewLayoutManager = ({ layout, ...rest }: EditViewLayoutManagerProps) 
   const dispatch = useTypedDispatch();
   const [{ query }] = useQueryParams();
   const { runHookWaterfall } = useStrapiApp();
-  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, rest.slug, 'editView');
+  const { permissions, isValid: isValidPermissions } = useSyncRbac(
+    query,
+    rest.match.params.slug,
+    'editView'
+  );
 
   React.useEffect(() => {
     // Allow the plugins to extend the edit view layout

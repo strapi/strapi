@@ -6,7 +6,7 @@
 import * as React from 'react';
 
 import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { useTypedSelector } from '../../core/store/hooks';
 import { NotFoundPage } from '../../pages/NotFoundPage';
@@ -63,7 +63,7 @@ const CollectionTypePages = (props: CollectionTypePagesProps) => {
   /**
    * We only support two types of collections.
    */
-  if (collectionType !== 'collectionType' && collectionType !== 'singleType') {
+  if (collectionType !== 'collection-types' && collectionType !== 'single-types') {
     return <NotFoundPage />;
   }
 
@@ -71,20 +71,25 @@ const CollectionTypePages = (props: CollectionTypePagesProps) => {
     return <LoadingIndicatorPage />;
   }
 
+  /**
+   * We do this cast so the params are correctly inferred on the render props.
+   */
+  const currentPath = path as `/content-manager/:collectionType/:slug`;
+
   return (
     <Switch>
       <Route
-        path={path}
+        path={currentPath}
         exact
-        render={({ history: { goBack } }) =>
-          collectionType === 'collectionType' ? (
+        render={(props) =>
+          collectionType === 'collection-types' ? (
             <ListViewLayoutManager slug={slug} layout={layout} />
           ) : (
-            <EditViewLayoutManager layout={layout} slug={slug} isSingleType goBack={goBack} />
+            <EditViewLayoutManager layout={layout} {...props} />
           )
         }
       />
-      <Route exact path={`${path}/configurations/edit`}>
+      <Route exact path={`${currentPath}/configurations/edit`}>
         <CheckPagePermissions
           permissions={permissions.contentManager?.collectionTypesConfigurations}
         >
@@ -97,9 +102,9 @@ const CollectionTypePages = (props: CollectionTypePagesProps) => {
           />
         </CheckPagePermissions>
       </Route>
-      {collectionType === 'collectionType' ? (
+      {collectionType === 'collection-types' ? (
         <>
-          <Route path={`${path}/configurations/list`}>
+          <Route path={`${currentPath}/configurations/list`}>
             <CheckPagePermissions
               permissions={permissions.contentManager?.collectionTypesConfigurations}
             >
@@ -111,28 +116,14 @@ const CollectionTypePages = (props: CollectionTypePagesProps) => {
             </CheckPagePermissions>
           </Route>
           <Route
-            path={`${path}/create/clone/:origin`}
+            path={`${currentPath}/create/clone/:origin`}
             exact
-            render={({
-              history: { goBack },
-              match: {
-                params: { origin },
-              },
-            }) => (
-              <EditViewLayoutManager slug={slug} layout={layout} goBack={goBack} origin={origin} />
-            )}
+            render={(props) => <EditViewLayoutManager layout={layout} {...props} />}
           />
           <Route
-            path={[`${path}/create`, `${path}/:id`]}
+            path={[`${currentPath}/create`, `${currentPath}/:id`]}
             exact
-            render={({ history: { goBack }, match: { params } }) => (
-              <EditViewLayoutManager
-                slug={slug}
-                layout={layout}
-                goBack={goBack}
-                id={'id' in params ? params.id : undefined}
-              />
-            )}
+            render={(props) => <EditViewLayoutManager layout={layout} {...props} />}
           />
         </>
       ) : null}
