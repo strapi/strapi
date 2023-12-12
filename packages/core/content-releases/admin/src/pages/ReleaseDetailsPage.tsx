@@ -21,6 +21,7 @@ import {
   LoadingIndicatorPage,
   PageSizeURLQuery,
   PaginationURLQuery,
+  RelativeTime,
   Table,
   useAPIErrorHandler,
   useNotification,
@@ -40,8 +41,6 @@ import {
   useGetReleaseQuery,
   useUpdateReleaseMutation,
 } from '../services/release';
-
-import { countDays } from './utils/getUnits';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -73,6 +72,29 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
+interface PopoverWrapperProps {
+  onClick?: () => void;
+  children: React.ReactNode;
+}
+
+const PopoverWrapper = ({ onClick, children }: PopoverWrapperProps) => {
+  return (
+    <PopoverButton
+      paddingTop={2}
+      paddingBottom={2}
+      paddingLeft={4}
+      paddingRight={4}
+      alignItems="center"
+      gap={2}
+      as="button"
+      hasRadius
+      onClick={onClick}
+    >
+      {children}
+    </PopoverButton>
+  );
+};
+
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
   children: React.ReactNode;
@@ -82,18 +104,18 @@ export const ReleaseDetailsLayout = ({
   toggleEditReleaseModal,
   children,
 }: ReleaseDetailsLayoutProps) => {
-  const { formatMessage, formatRelativeTime } = useIntl();
+  const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const { data, isLoading: isLoadingDetails } = useGetReleaseQuery({ id: releaseId });
 
-  const title = data?.data?.name;
-  const createdAt = data?.data?.createdAt;
-  const totalEntries = data?.data?.actions?.meta?.count || 0;
-  const { unit, value } = createdAt ? countDays(createdAt) : { unit: 'day', value: 0 };
+  const release = data?.data;
 
-  const createdBy = `${data?.data?.createdBy?.firstname} ${data?.data?.createdBy?.lastname}` || '';
+  const title = release?.name;
+  const totalEntries = release?.actions?.meta?.count || 0;
+
+  const createdBy = `${release?.createdBy?.firstname} ${release?.createdBy?.lastname}` || '';
 
   const handleTogglePopover = () => {
     setIsPopoverVisible((prev) => !prev);
@@ -149,17 +171,7 @@ export const ReleaseDetailsLayout = ({
                 >
                   <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
                     <CheckPermissions permissions={PERMISSIONS.update}>
-                      <PopoverButton
-                        paddingTop={2}
-                        paddingBottom={2}
-                        paddingLeft={4}
-                        paddingRight={4}
-                        alignItems="center"
-                        gap={2}
-                        as="button"
-                        hasRadius
-                        onClick={openReleaseModal}
-                      >
+                      <PopoverWrapper onClick={openReleaseModal}>
                         <PencilIcon />
                         <Typography ellipsis>
                           {formatMessage({
@@ -167,18 +179,9 @@ export const ReleaseDetailsLayout = ({
                             defaultMessage: 'Edit',
                           })}
                         </Typography>
-                      </PopoverButton>
+                      </PopoverWrapper>
                     </CheckPermissions>
-                    <PopoverButton
-                      paddingTop={2}
-                      paddingBottom={2}
-                      paddingLeft={4}
-                      paddingRight={4}
-                      alignItems="center"
-                      gap={2}
-                      as="button"
-                      hasRadius
-                    >
+                    <PopoverWrapper>
                       <TrashIcon />
                       <Typography ellipsis textColor="danger600">
                         {formatMessage({
@@ -186,7 +189,7 @@ export const ReleaseDetailsLayout = ({
                           defaultMessage: 'Delete',
                         })}
                       </Typography>
-                    </PopoverButton>
+                    </PopoverWrapper>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
@@ -202,13 +205,13 @@ export const ReleaseDetailsLayout = ({
                       })}
                     </Typography>
                     <Typography variant="pi" color="neutral300">
+                      <RelativeTime timestamp={new Date(release?.createdAt)} />
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage:
-                            '{number, plural, =0 {# {unit}s} one {# {unit}} other {# {unit}s}} ago by {createdBy}',
+                          defaultMessage: ' by {createdBy}',
                         },
-                        { number: -value, unit, createdBy }
+                        { createdBy }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
@@ -220,7 +223,7 @@ export const ReleaseDetailsLayout = ({
                   defaultMessage: 'Refresh',
                 })}
               </Button>
-              <Button size="S" disabled={true} variant="default">
+              <Button size="S" variant="default">
                 {formatMessage({
                   id: 'content-releases.header.actions.release',
                   defaultMessage: 'Release',
@@ -230,12 +233,10 @@ export const ReleaseDetailsLayout = ({
           }
         />
       </Box>
-
       {children}
     </Main>
   );
 };
-
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
@@ -265,9 +266,10 @@ const ReleaseDetailsBody = () => {
     );
   }
 
-  const zeroActions = data?.data?.length === 0;
+  const releaseActions = data?.data;
+  const releaseMeta = data?.meta;
 
-  if (zeroActions) {
+  if (!releaseActions || !releaseActions.length) {
     return (
       <ContentLayout>
         <EmptyStateLayout
@@ -285,25 +287,44 @@ const ReleaseDetailsBody = () => {
     <ContentLayout>
       <Flex gap={4} direction="column" alignItems="stretch">
         <Table.Root
-          rows={
-            data?.data.map((item) => ({
-              ...item,
-              id: Number(item.entry.id),
-            })) || []
-          }
-          colCount={data?.data?.length || 0}
+          rows={releaseActions.map((item) => ({
+            ...item,
+            id: Number(item.entry.id),
+          }))}
+          colCount={releaseActions.length}
           isLoading={isLoading}
           isFetching={isFetching}
         >
           <Table.Content>
             <Table.Head>
-              <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
-              <Table.HeaderCell fieldSchemaType="string" label="locale" name="locale" />
-              <Table.HeaderCell fieldSchemaType="string" label="content-type" name="content-type" />
+              <Table.HeaderCell
+                fieldSchemaType="string"
+                label={formatMessage({
+                  id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+                  defaultMessage: 'name',
+                })}
+                name="name"
+              />
+              <Table.HeaderCell
+                fieldSchemaType="string"
+                label={formatMessage({
+                  id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+                  defaultMessage: 'locale',
+                })}
+                name="locale"
+              />
+              <Table.HeaderCell
+                fieldSchemaType="string"
+                label={formatMessage({
+                  id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
+                  defaultMessage: 'content-type',
+                })}
+                name="content-type"
+              />
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
-              {data?.data.map(({ entry }) => (
+              {releaseActions.map(({ entry }) => (
                 <Tr key={entry.id}>
                   <Td>
                     <Typography>{`${entry.contentType.mainFieldValue || entry.id}`}</Typography>
@@ -320,10 +341,10 @@ const ReleaseDetailsBody = () => {
           </Table.Content>
         </Table.Root>
         <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
-          <PageSizeURLQuery defaultValue={data?.meta?.pagination?.pageSize.toString()} />
+          <PageSizeURLQuery defaultValue={releaseMeta?.pagination?.pageSize.toString()} />
           <PaginationURLQuery
             pagination={{
-              pageCount: data?.meta?.pagination?.pageCount || 0,
+              pageCount: releaseMeta?.pagination?.pageCount || 0,
             }}
           />
         </Flex>
