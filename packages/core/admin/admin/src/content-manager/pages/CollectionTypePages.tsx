@@ -6,7 +6,7 @@
 import * as React from 'react';
 
 import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
-import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { useTypedSelector } from '../../core/store/hooks';
 import { NotFoundPage } from '../../pages/NotFoundPage';

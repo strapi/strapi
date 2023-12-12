@@ -123,6 +123,7 @@ const App = () => {
                 <ComponentSettingsView />
               </CheckPagePermissions>
             </Route>
+            {/* These redirects exist because we've changed to use the same term in `:collectionType` as the admin API for simplicity */}
             <Redirect
               from="/content-manager/collectionType/:slug"
               to="/content-manager/collection-types/:slug"
