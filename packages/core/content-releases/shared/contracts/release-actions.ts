@@ -12,6 +12,7 @@ type ReleaseActionEntry = Entity & {
 };
 
 type ReleaseActionEntryData = {
+  id: ReleaseActionEntry['id'];
   locale?: {
     name: string;
     code: string;

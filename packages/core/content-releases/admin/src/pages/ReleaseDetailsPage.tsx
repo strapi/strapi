@@ -294,9 +294,9 @@ const ReleaseDetailsBody = () => {
       <Flex gap={4} direction="column" alignItems="stretch">
         <Table.Root
           rows={
-            data?.data.map((item: GetReleaseActions.Response['data']) => ({
+            data?.data.map((item) => ({
               ...item,
-              id: Number(item.id),
+              id: Number(item.entry.id),
             })) || []
           }
           colCount={data?.data?.length || 0}
@@ -314,10 +314,10 @@ const ReleaseDetailsBody = () => {
               {data?.data.map(({ entry }) => (
                 <Tr key={entry.id}>
                   <Td>
-                    <Typography>{`${entry.mainField ? entry.mainField : entry.id}`}</Typography>
+                    <Typography>{`${entry.contentType.mainFieldValue || entry.id}`}</Typography>
                   </Td>
                   <Td>
-                    <Typography>{`${entry.locale.name ? entry.locale.name : '-'}`}</Typography>
+                    <Typography>{`${entry?.locale?.name ? entry.locale.name : '-'}`}</Typography>
                   </Td>
                   <Td>
                     <Typography>{entry.contentType.displayName || ''}</Typography>

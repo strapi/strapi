@@ -18,6 +18,12 @@ export type Pagination = {
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: { meta: { count: number } };
+  createdBy: {
+    id: string;
+    firstname: string;
+    lastname: string;
+    username: string;
+  };
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
