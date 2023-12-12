@@ -19,6 +19,7 @@ import { RouteComponentProps, useLocation } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { useOnce } from '../../../hooks/useOnce';
 import { InjectionZone } from '../../../shared/components/InjectionZone';
 import { ContentTypeFormWrapper } from '../../components/ContentTypeFormWrapper';
 import { DynamicZone } from '../../components/DynamicZone/Field';
@@ -36,7 +37,6 @@ import { DeleteLink } from './components/DeleteLink';
 import { DraftAndPublishBadge } from './components/DraftAndPublishBadge';
 import { Header } from './components/Header';
 import { InformationBoxCE } from './components/InformationBoxCE';
-import { useOnce } from './hooks/useOnce';
 
 import type { RootState } from '../../../core/store/configure';
 import type { EditLayoutRow, FormattedLayouts } from '../../utils/layouts';

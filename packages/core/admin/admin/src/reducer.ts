@@ -1,47 +1,28 @@
-import produce from 'immer';
+import { createSlice } from '@reduxjs/toolkit';
 
-import { ACTION_SET_APP_RUNTIME_STATUS, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
 import { PermissionMap } from './types/permissions';
 
+import type { PayloadAction } from '@reduxjs/toolkit';
+
 interface AppState {
-  status: 'init' | 'runtime';
   permissions: Partial<PermissionMap>;
 }
 
-const initialState = {
-  permissions: {},
-  status: 'init',
-} satisfies AppState;
+const adminSlice = createSlice({
+  name: 'admin',
+  initialState: {
+    permissions: {},
+  } as AppState,
+  reducers: {
+    setAdminPermissions(state, action: PayloadAction<Partial<PermissionMap>>) {
+      state.permissions = action.payload;
+    },
+  },
+});
 
-interface SetAppRuntimeStatusAction {
-  type: typeof ACTION_SET_APP_RUNTIME_STATUS;
-}
+const reducer = adminSlice.reducer;
 
-interface SetAdminPermissionsAction {
-  type: typeof ACTION_SET_ADMIN_PERMISSIONS;
-  payload: Record<string, unknown>;
-}
+const { setAdminPermissions } = adminSlice.actions;
 
-type Action = SetAppRuntimeStatusAction | SetAdminPermissionsAction;
-
-const reducer = (state: AppState = initialState, action: Action) =>
-  /* eslint-disable-next-line consistent-return */
-  produce(state, (draftState) => {
-    switch (action.type) {
-      case ACTION_SET_APP_RUNTIME_STATUS: {
-        draftState.status = 'runtime';
-        break;
-      }
-
-      case ACTION_SET_ADMIN_PERMISSIONS: {
-        draftState.permissions = action.payload;
-        break;
-      }
-
-      default:
-        return draftState;
-    }
-  });
-
-export { reducer, initialState };
-export type { AppState, Action, SetAppRuntimeStatusAction, SetAdminPermissionsAction };
+export { reducer, setAdminPermissions };
+export type { AppState };
