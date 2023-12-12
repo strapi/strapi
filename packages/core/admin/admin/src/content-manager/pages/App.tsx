@@ -20,7 +20,6 @@ import { CardDragPreview } from '../components/DragPreviews/CardDragPreview';
 import { ComponentDragPreview } from '../components/DragPreviews/ComponentDragPreview';
 import { RelationDragPreview } from '../components/DragPreviews/RelationDragPreview';
 import { LeftMenu } from '../components/LeftMenu';
-import { ModelsContext } from '../contexts/models';
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { ItemTypes } from '../utils/dragAndDrop';
 import { getTranslation } from '../utils/translations';
@@ -40,11 +39,7 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
-  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
-    useContentManagerInitData();
-  const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
-    a.title.localeCompare(b.title)
-  );
+  const { isLoading, collectionTypeLinks, models, singleTypeLinks } = useContentManagerInitData();
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
@@ -57,7 +52,7 @@ const App = () => {
     }
   }, []);
 
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       <Main aria-busy="true">
         <Helmet
@@ -77,6 +72,9 @@ const App = () => {
     );
   }
 
+  const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
   // Array of models that are displayed in the content manager
   const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);
 
@@ -115,30 +113,28 @@ const App = () => {
       />
       <Layout sideNav={<LeftMenu />}>
         <DragLayer renderItem={renderDraglayerItem} />
-        <ModelsContext.Provider value={{ refetchData }}>
-          <Switch>
-            <Route path="/content-manager/components/:uid/configurations/edit">
-              <CheckPagePermissions
-                permissions={permissions.contentManager?.componentsConfigurations}
-              >
-                <ComponentSettingsView />
-              </CheckPagePermissions>
-            </Route>
-            <Route
-              path="/content-manager/collectionType/:slug"
-              component={CollectionTypeRecursivePath}
-            />
-            <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
+        <Switch>
+          <Route path="/content-manager/components/:uid/configurations/edit">
+            <CheckPagePermissions
+              permissions={permissions.contentManager?.componentsConfigurations}
+            >
+              <ComponentSettingsView />
+            </CheckPagePermissions>
+          </Route>
+          <Route
+            path="/content-manager/collectionType/:slug"
+            component={CollectionTypeRecursivePath}
+          />
+          <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
 
-            <Route path="/content-manager/403">
-              <NoPermissions />
-            </Route>
-            <Route path="/content-manager/no-content-types">
-              <NoContentType />
-            </Route>
-            <Route path="" component={AnErrorOccurred} />
-          </Switch>
-        </ModelsContext.Provider>
+          <Route path="/content-manager/403">
+            <NoPermissions />
+          </Route>
+          <Route path="/content-manager/no-content-types">
+            <NoContentType />
+          </Route>
+          <Route path="" component={AnErrorOccurred} />
+        </Switch>
       </Layout>
     </>
   );
@@ -186,13 +182,8 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
  * reducer
  * -----------------------------------------------------------------------------------------------*/
 
-const GET_INIT_DATA = 'ContentManager/App/GET_INIT_DATA';
 const RESET_INIT_DATA = 'ContentManager/App/RESET_INIT_DATA';
 const SET_INIT_DATA = 'ContentManager/App/SET_INIT_DATA';
-
-interface GetInitDataAction {
-  type: typeof GET_INIT_DATA;
-}
 
 interface ResetInitDataAction {
   type: typeof RESET_INIT_DATA;
@@ -200,16 +191,14 @@ interface ResetInitDataAction {
 
 interface SetInitDataAction {
   type: typeof SET_INIT_DATA;
-  data: {
-    authorizedCollectionTypeLinks: ContentManagerAppState['collectionTypeLinks'];
-    authorizedSingleTypeLinks: ContentManagerAppState['singleTypeLinks'];
-    components: ContentManagerAppState['components'];
-    contentTypeSchemas: ContentManagerAppState['models'];
-    fieldSizes: ContentManagerAppState['fieldSizes'];
-  };
+  authorizedCollectionTypeLinks: ContentManagerAppState['collectionTypeLinks'];
+  authorizedSingleTypeLinks: ContentManagerAppState['singleTypeLinks'];
+  components: ContentManagerAppState['components'];
+  contentTypeSchemas: ContentManagerAppState['models'];
+  fieldSizes: ContentManagerAppState['fieldSizes'];
 }
 
-type Action = GetInitDataAction | ResetInitDataAction | SetInitDataAction;
+type Action = ResetInitDataAction | SetInitDataAction;
 
 interface ContentManagerAppState {
   collectionTypeLinks: ContentManagerLink[];
@@ -217,7 +206,6 @@ interface ContentManagerAppState {
   fieldSizes: Contracts.Init.GetInitData.Response['data']['fieldSizes'];
   models: Contracts.Init.GetInitData.Response['data']['contentTypes'];
   singleTypeLinks: ContentManagerLink[];
-  status: 'loading' | 'resolved' | 'error';
 }
 
 const initialState = {
@@ -226,7 +214,6 @@ const initialState = {
   fieldSizes: {},
   models: [],
   singleTypeLinks: [],
-  status: 'loading',
 } satisfies ContentManagerAppState;
 
 const selectSchemas = createSelector(
@@ -239,26 +226,21 @@ const selectSchemas = createSelector(
 const reducer = (state: ContentManagerAppState = initialState, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
-      case GET_INIT_DATA: {
-        draftState.status = 'loading';
-        break;
-      }
       case RESET_INIT_DATA: {
         return initialState;
       }
       case SET_INIT_DATA: {
-        draftState.collectionTypeLinks = action.data.authorizedCollectionTypeLinks.filter(
+        draftState.collectionTypeLinks = action.authorizedCollectionTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
-        draftState.singleTypeLinks = action.data.authorizedSingleTypeLinks.filter(
+        draftState.singleTypeLinks = action.authorizedSingleTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
         // @ts-expect-error – recursive types
-        draftState.components = action.data.components;
+        draftState.components = action.components;
         // @ts-expect-error – issues with immer types not working quite right....
-        draftState.models = action.data.contentTypeSchemas;
-        draftState.fieldSizes = action.data.fieldSizes;
-        draftState.status = 'resolved';
+        draftState.models = action.contentTypeSchemas;
+        draftState.fieldSizes = action.fieldSizes;
         break;
       }
       default:

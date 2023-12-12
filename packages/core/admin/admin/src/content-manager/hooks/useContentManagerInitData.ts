@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { useNotifyAT } from '@strapi/design-system';
 import {
@@ -12,6 +12,7 @@ import {
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
@@ -30,11 +31,9 @@ interface ContentManagerLink {
   isDisplayed: boolean;
 }
 
-/**
- * TODO: refactor this whole thing.
- */
 const useContentManagerInitData = () => {
   const dispatch = useTypedDispatch();
+
   const toggleNotification = useNotification();
   const state = useTypedSelector((state) => state['content-manager_app']);
 
@@ -44,39 +43,78 @@ const useContentManagerInitData = () => {
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
 
-  const fetchDataRef = useRef(async () => {
-    dispatch({
-      type: 'ContentManager/App/GET_INIT_DATA',
-    });
+  const fetchInitialData = async () => {
+    const {
+      data: {
+        data: { components, contentTypes, fieldSizes },
+      },
+    } = await get<Contracts.Init.GetInitData.Response>('/content-manager/init');
 
-    try {
-      const {
-        data: {
-          data: { components, contentTypes: models, fieldSizes },
-        },
-      } = await get<Contracts.Init.GetInitData.Response>('/content-manager/init');
-      notifyStatus(
-        formatMessage({
-          id: getTranslation('App.schemas.data-loaded'),
-          defaultMessage: 'The schemas have been successfully loaded.',
-        })
-      );
+    return { components, contentTypes, fieldSizes };
+  };
 
-      const {
-        data: { data: contentTypeConfigurations },
-      } = await get<Contracts.ContentTypes.FindContentTypesSettings.Response>(
-        '/content-manager/content-types-settings'
-      );
+  const fetchContentTypeSettings = async () => {
+    const {
+      data: { data: contentTypeConfigurations },
+    } = await get<Contracts.ContentTypes.FindContentTypesSettings.Response>(
+      '/content-manager/content-types-settings'
+    );
 
-      /**
-       * We group these by the two types we support. We do with an object because we can use default
-       * values of arrays to make sure we always have an array to manipulate further on if, for example,
-       * a user has not made any single types.
-       *
-       * This means we have to manually add new content types to this hook if we add a new type – but
-       * the safety is worth it.
-       */
-      const { collectionType: collectionTypeLinks, singleType: singleTypeLinks } = models.reduce<{
+    return contentTypeConfigurations;
+  };
+
+  const handleError = (error: any) => {
+    console.error(error);
+    toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+  };
+
+  const handleSuccess = () => {
+    notifyStatus(
+      formatMessage({
+        id: getTranslation('App.schemas.data-loaded'),
+        defaultMessage: 'The schemas have been successfully loaded.',
+      })
+    );
+  };
+
+  const initialDataQuery = useQuery(['contentManager', 'init', 'data'], fetchInitialData, {
+    onError: handleError,
+    onSuccess: handleSuccess,
+  });
+
+  const contentTypeSettingsQuery = useQuery(
+    ['contentManager', 'init', 'contentTypeSettings'],
+    fetchContentTypeSettings,
+    {
+      onError: handleError,
+    }
+  );
+
+  const formatData = async (
+    components: Contracts.Components.Component[],
+    contentTypes: Contracts.ContentTypes.ContentType[],
+    fieldSizes: Record<
+      string,
+      {
+        default: number;
+        isResizeable: boolean;
+      }
+    >,
+    contentTypeConfigurations: {
+      uid: string;
+      settings: Contracts.ContentTypes.Settings;
+    }[]
+  ) => {
+    /**
+     * We group these by the two types we support. We do with an object because we can use default
+     * values of arrays to make sure we always have an array to manipulate further on if, for example,
+     * a user has not made any single types.
+     *
+     * This means we have to manually add new content types to this hook if we add a new type – but
+     * the safety is worth it.
+     */
+    const { collectionType: collectionTypeLinks, singleType: singleTypeLinks } =
+      contentTypes.reduce<{
         collectionType: Contracts.ContentTypes.ContentType[];
         singleType: Contracts.ContentTypes.ContentType[];
       }>(
@@ -89,70 +127,73 @@ const useContentManagerInitData = () => {
           singleType: [],
         }
       );
+    const collectionTypeSectionLinks = generateLinks(
+      collectionTypeLinks,
+      'collectionTypes',
+      contentTypeConfigurations
+    );
+    const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
+    // Collection Types verifications
+    const collectionTypeLinksPermissions = await Promise.all(
+      collectionTypeSectionLinks.map(({ permissions }) =>
+        hasPermissions(allPermissions, permissions)
+      )
+    );
+    const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
+      (_, index) => collectionTypeLinksPermissions[index]
+    );
+    // Single Types verifications
+    const singleTypeLinksPermissions = await Promise.all(
+      singleTypeSectionLinks.map(({ permissions }) => hasPermissions(allPermissions, permissions))
+    );
+    const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
+      (_, index) => singleTypeLinksPermissions[index]
+    );
+    const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
+      ctLinks: authorizedCollectionTypeLinks,
+      models: contentTypes,
+    });
+    const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
+      stLinks: authorizedSingleTypeLinks,
+      models: contentTypes,
+    });
 
-      const collectionTypeSectionLinks = generateLinks(
-        collectionTypeLinks,
-        'collectionTypes',
-        contentTypeConfigurations
-      );
+    dispatch({
+      type: 'ContentManager/App/SET_INIT_DATA',
+      authorizedCollectionTypeLinks: ctLinks,
+      authorizedSingleTypeLinks: stLinks,
+      contentTypeSchemas: contentTypes,
+      components,
+      fieldSizes,
+    });
+  };
 
-      const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
-
-      // Collection Types verifications
-      const collectionTypeLinksPermissions = await Promise.all(
-        collectionTypeSectionLinks.map(({ permissions }) =>
-          hasPermissions(allPermissions, permissions)
-        )
-      );
-      const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
-        (_, index) => collectionTypeLinksPermissions[index]
-      );
-
-      // Single Types verifications
-      const singleTypeLinksPermissions = await Promise.all(
-        singleTypeSectionLinks.map(({ permissions }) => hasPermissions(allPermissions, permissions))
-      );
-      const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
-        (_, index) => singleTypeLinksPermissions[index]
-      );
-
-      const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
-        ctLinks: authorizedCollectionTypeLinks,
-        models,
-      });
-      const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-        stLinks: authorizedSingleTypeLinks,
-        models,
-      });
-
-      dispatch({
-        type: 'ContentManager/App/SET_INIT_DATA',
-        data: {
-          authorizedCollectionTypeLinks: ctLinks,
-          authorizedSingleTypeLinks: stLinks,
-          contentTypeSchemas: models,
-          components,
-          fieldSizes,
-        },
-      });
-    } catch (err) {
-      console.error(err);
-
-      toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
-    }
-  });
+  const isLoading = initialDataQuery.isLoading || contentTypeSettingsQuery.isLoading;
 
   useEffect(() => {
-    fetchDataRef.current();
+    const formatAndSetData = async () => {
+      if (!isLoading && initialDataQuery.data && contentTypeSettingsQuery.data) {
+        await formatData(
+          initialDataQuery.data.components,
+          initialDataQuery.data.contentTypes,
+          initialDataQuery.data.fieldSizes,
+          contentTypeSettingsQuery.data
+        );
+      }
+    };
 
+    formatAndSetData();
+  }, [isLoading, initialDataQuery.data, contentTypeSettingsQuery.data]);
+
+  useEffect(() => {
     return () => {
       dispatch({
         type: 'ContentManager/App/RESET_INIT_DATA',
       });
     };
-  }, [dispatch, toggleNotification]);
+  }, [dispatch]);
 
-  return { ...state, refetchData: fetchDataRef.current };
+  return { ...state, isLoading };
 };
 
 const generateLinks = (
