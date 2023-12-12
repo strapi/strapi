@@ -1,4 +1,5 @@
 import { SanitizedAdminUserForAuditLogs } from '../../../../../../../../shared/contracts/audit-logs';
+import { TableHeader } from '../components/TableRows';
 
 export const tableHeaders = [
   {
@@ -33,6 +34,7 @@ export const tableHeaders = [
       },
       sortable: false,
     },
-    cellFormatter: (user: SanitizedAdminUserForAuditLogs) => (user ? user.displayName : ''),
+    cellFormatter: (user: any) =>
+      user ? (user as SanitizedAdminUserForAuditLogs).displayName : '',
   },
-];
+] as const;

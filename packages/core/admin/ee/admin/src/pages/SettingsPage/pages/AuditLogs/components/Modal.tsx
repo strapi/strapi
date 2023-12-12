@@ -59,9 +59,7 @@ export const Modal = ({ handleClose, logId }: ModalProps) => {
   });
 
   const formatTimeStamp = useFormatTimeStamp();
-  // Remove this when the API will fix the auditlogs Get Api call response.
-  // @ts-expect-error - Since Get.Response can be either {date: ...} or {error: ...} This can't be typed properly.
-  const formattedDate = data?.date ? formatTimeStamp(data.date) : '';
+  const formattedDate = data && 'date' in data ? formatTimeStamp(data.date) : '';
 
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">

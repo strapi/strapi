@@ -3,24 +3,23 @@ import React from 'react';
 import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
-import { Entity } from '@strapi/types';
+import { Attribute, Entity } from '@strapi/types';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { ListLayoutRow } from '../../../../../../../../admin/src/content-manager/utils/layouts';
 import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
 import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
-export type TableHeader = {
-  key: string;
-  name: keyof AuditLog;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  cellFormatter?: (cellValue: any) => string;
-  metadatas: {
+export interface TableHeader extends Omit<ListLayoutRow, 'metadatas' | 'fieldSchema' | 'name'> {
+  metadatas: Omit<ListLayoutRow['metadatas'], 'label'> & {
     label: string;
-    sortable: boolean;
   };
-};
+  name: keyof AuditLog;
+  fieldSchema?: Attribute.Any | { type: 'custom' };
+  cellFormatter?: (data?: AuditLog[keyof AuditLog]) => React.ReactNode;
+}
 
 type TableRowsProps = {
   headers: TableHeader[];
@@ -64,14 +63,14 @@ export const TableRows = ({ headers, rows, onOpenModal }: TableRowsProps) => {
             })}
           >
             {headers?.map(({ key, name, cellFormatter }) => {
-              const rowvalue = data[name];
+              const rowValue = data[name];
 
               return (
                 <Td key={key}>
                   <Typography textColor="neutral800">
                     {getCellValue({
                       type: key,
-                      value: cellFormatter ? cellFormatter(rowvalue) : rowvalue,
+                      value: cellFormatter ? cellFormatter(rowValue) : rowValue,
                       model: data.payload?.model,
                     })}
                   </Typography>
