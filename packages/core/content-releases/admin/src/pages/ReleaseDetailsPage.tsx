@@ -31,7 +31,6 @@ import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { GetReleaseActions } from '../../../shared/contracts/release-actions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -92,9 +91,9 @@ export const ReleaseDetailsLayout = ({
   children,
 }: ReleaseDetailsLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { releaseId } = useParams<GetReleaseActions.Request['params']>();
+  const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
-  const moreButtonRef = React.useRef<HTMLButtonElement>(null);
+  const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const { data, isLoading: isLoadingDetails } = useGetReleaseQuery({ id: releaseId });
 
   const title = data?.data?.name;
@@ -249,10 +248,13 @@ export const ReleaseDetailsLayout = ({
  * -----------------------------------------------------------------------------------------------*/
 const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
-  const { releaseId } = useParams<GetReleaseActions.Request['params']>();
+  const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
 
-  const { isLoading, isError, data } = useGetReleaseActionsQuery({ ...query, releaseId });
+  const { isLoading, isFetching, isError, data } = useGetReleaseActionsQuery({
+    ...query,
+    releaseId,
+  });
 
   if (isLoading) {
     return (
@@ -289,7 +291,12 @@ const ReleaseDetailsBody = () => {
   return (
     <ContentLayout>
       <Flex gap={4} direction="column" alignItems="stretch">
-        <Table.Root rows={data?.data} colCount={data?.data?.length} isLoading={isLoading}>
+        <Table.Root
+          rows={data?.data.map((item) => ({ ...item, id: Number(item.id) })) || []}
+          colCount={data?.data?.length || 0}
+          isLoading={isLoading}
+          isFetching={isFetching}
+        >
           <Table.Content>
             <Table.Head>
               <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
@@ -301,10 +308,10 @@ const ReleaseDetailsBody = () => {
               {data?.data.map(({ contentType, entry }) => (
                 <Tr key={entry.id}>
                   <Td>
-                    <Typography>{entry.mainField || entry.id}</Typography>
+                    <Typography>{`${entry.mainField ? entry.mainField : entry.id}`}</Typography>
                   </Td>
                   <Td>
-                    <Typography>{entry.locale || '-'}</Typography>
+                    <Typography>{`${entry.locale ? entry.locale : '-'}`}</Typography>
                   </Td>
                   <Td>
                     <Typography>{contentType}</Typography>
@@ -332,7 +339,7 @@ const ReleaseDetailsBody = () => {
  * -----------------------------------------------------------------------------------------------*/
 const ReleaseDetailsPage = () => {
   const { formatMessage } = useIntl();
-  const { releaseId } = useParams<GetReleaseActions.Request['params']>();
+  const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
