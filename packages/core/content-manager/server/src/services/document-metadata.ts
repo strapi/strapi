@@ -1,11 +1,11 @@
 import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
-export interface Document {
+export interface DocumentVersionSelector {
   id: string;
   locale: string;
-  status: string;
-  publishedAt: string;
+  publishedAt: string | null | Date;
+  status?: string;
 }
 
 /**
@@ -26,7 +26,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  async getAvailableLocales(uid: Common.UID.ContentType, document: Document) {
+  async getAvailableLocales(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
     if (!document.locale) return [];
 
     // TODO: Use document service instead of query engine
@@ -43,7 +43,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     }) as unknown as DocumentMetadata['availableLocales'];
   },
 
-  async getAvailableStatus(uid: Common.UID.ContentType, document: Document) {
+  async getAvailableStatus(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
     if (!document.locale) return null;
 
     // Find if the other status of the document is available
@@ -57,19 +57,24 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   // TODO: Modified status
-  async getStatus(uid: Common.UID.ContentType, document: Document) {
+  async getStatus(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
     if (document.publishedAt) return 'published';
     return 'draft';
   },
 
   async getMetadata(
     uid: Common.UID.ContentType,
-    document: Document,
+    document: DocumentVersionSelector,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
+    const documentWithMetadata = {
+      ...document,
+      status: await this.getStatus(uid, document),
+    } as any;
+
     const [availableLocalesResult, availableStatusResult] = await Promise.all([
-      availableLocales ? this.getAvailableLocales(uid, document) : [],
-      availableStatus ? this.getAvailableStatus(uid, document) : null,
+      availableLocales ? this.getAvailableLocales(uid, documentWithMetadata) : [],
+      availableStatus ? this.getAvailableStatus(uid, documentWithMetadata) : null,
     ]);
 
     return {
@@ -85,20 +90,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    */
   async formatDocumentWithMetadata(
     uid: Common.UID.ContentType,
-    document: Document,
+    document: DocumentVersionSelector,
     opts: GetMetadataOptions = {}
   ) {
     if (!document) return document;
 
-    const documentWithMetadata = {
-      ...document,
-      status: await this.getStatus(uid, document),
-    } as any;
-
-    // TODO: Return { data, meta } format when UI is ready
     // TODO: Sanitize output of metadata
-    documentWithMetadata.__meta__ = await this.getMetadata(uid, documentWithMetadata, opts);
+    // @ts-expect-error -  TODO: Return { data, meta } format when UI is ready
+    document.__meta__ = await this.getMetadata(uid, document, opts);
 
-    return documentWithMetadata;
+    return document;
   },
 });
