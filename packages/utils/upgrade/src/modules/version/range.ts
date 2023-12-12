@@ -16,16 +16,16 @@ export const rangeFromReleaseType = (current: Version.SemVer, identifier: Versio
       return rangeFactory(`>${current.raw} <=${nextMajor}`);
     }
     case Version.ReleaseType.Patch: {
-      // This will return the premionr for the next minor
-      // e.g. for 4.15.4, it'll return 4.16.0-0
-      const preMinor = semver.inc(current, 'preminor') as Version.LiteralSemVer;
-      return rangeFactory(`>${current.raw} <${preMinor}`);
+      // This will return the minor for the next minor
+      // e.g. for 4.15.4, it'll return 4.16.0
+      const minor = semver.inc(current, 'minor');
+      return rangeFactory(`>${current.raw} <${minor}`);
     }
     case Version.ReleaseType.Minor: {
-      // This will return the premajor for the next major
-      // e.g. for 4.15.4, it'll return 5.0.0-0
-      const preMajor = semver.inc(current, 'premajor') as Version.LiteralSemVer;
-      return rangeFactory(`>${current.raw} <${preMajor}`);
+      // This will return the major for the next major
+      // e.g. for 4.15.4, it'll return 5.0.0
+      const major = semver.inc(current, 'major');
+      return rangeFactory(`>${current.raw} <${major}`);
     }
     default: {
       throw new Error('Not implemented');
