@@ -8,6 +8,7 @@ import type {
   PublishRelease,
   GetRelease,
   Release,
+  DeleteRelease,
   GetContentTypeEntryReleases,
 } from '../../../shared/contracts/releases';
 import type {
@@ -228,6 +229,38 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     }
 
     return contentTypesMeta;
+  },
+  async delete(releaseId: DeleteRelease.Request['params']['id']) {
+    const release = (await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
+      populate: {
+        actions: {
+          fields: ['id'],
+        },
+      },
+    })) as unknown as Release;
+
+    if (!release) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
+    // Only delete the release and its actions is you in fact can delete all the actions and the release
+    // Otherwise, if the transaction fails it throws an error
+    await strapi.db.transaction(async () => {
+      await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+        where: {
+          id: {
+            $in: release.actions.map((action) => action.id),
+          },
+        },
+      });
+      await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
+    });
+
+    return release;
   },
   async publish(releaseId: PublishRelease.Request['params']['id']) {
     // We need to pass the type because entityService.findOne is not returning the correct type

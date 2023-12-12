@@ -126,6 +126,25 @@ export declare namespace UpdateRelease {
 }
 
 /**
+ * DELETE /content-releases/:id - Delete a release
+ */
+export declare namespace DeleteRelease {
+  export interface Request {
+    state: {
+      user: UserInfo;
+    };
+    params: {
+      id: Release['id'];
+    };
+  }
+
+  export interface Response {
+    data: ReleaseDataResponse;
+    error?: errors.ApplicationError | errors.NotFoundError;
+  }
+}
+
+/**
  * POST /content-releases/:releaseId/publish - Publish a release
  */
 export declare namespace PublishRelease {
