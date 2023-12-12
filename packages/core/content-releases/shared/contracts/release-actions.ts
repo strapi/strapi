@@ -11,7 +11,7 @@ type ReleaseActionEntry = Entity & {
   locale: string;
 };
 
-type ReleaseActionEntryMeta = {
+type ReleaseActionEntryData = {
   locale?: {
     name: string;
     code: string;
@@ -64,8 +64,7 @@ export declare namespace GetReleaseActions {
   }
 
   export interface Response {
-    data: ReleaseAction &
-      { entry: { id: ReleaseActionEntry['id']; meta: ReleaseActionEntryMeta } }[];
+    data: ReleaseAction & { entry: ReleaseActionEntryData }[];
     meta: {
       pagination: Pagination;
     };

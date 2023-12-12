@@ -8,7 +8,7 @@ jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     create: jest.fn(),
     findActions: mockFindActions,
-    getContentTypesMetaFromActions: jest.fn(() => ({
+    getContentTypesDataForActions: jest.fn(() => ({
       'api::contentTypeA.contentTypeA': {
         mainField: 'name',
         displayName: 'contentTypeA',
@@ -114,7 +114,7 @@ describe('Release Action controller', () => {
   });
 
   describe('findMany', () => {
-    it('should return the correct entry meta data', async () => {
+    it('should return the data for an entry', async () => {
       mockFindActions.mockResolvedValueOnce({
         results: [
           {
@@ -183,29 +183,25 @@ describe('Release Action controller', () => {
       // @ts-expect-error Ignore missing properties
       expect(ctx.body.data[0].entry).toEqual({
         id: 1,
-        meta: {
-          contentType: {
-            displayName: 'contentTypeA',
-            mainFieldValue: 'test 1',
-          },
-          locale: {
-            code: 'en',
-            name: 'English (en)',
-          },
+        contentType: {
+          displayName: 'contentTypeA',
+          mainFieldValue: 'test 1',
+        },
+        locale: {
+          code: 'en',
+          name: 'English (en)',
         },
       });
       // @ts-expect-error Ignore missing properties
       expect(ctx.body.data[1].entry).toEqual({
         id: 2,
-        meta: {
-          contentType: {
-            displayName: 'contentTypeB',
-            mainFieldValue: 'test 2',
-          },
-          locale: {
-            code: 'fr',
-            name: 'French (fr)',
-          },
+        contentType: {
+          displayName: 'contentTypeB',
+          mainFieldValue: 'test 2',
+        },
+        locale: {
+          code: 'fr',
+          name: 'French (fr)',
         },
       });
     });

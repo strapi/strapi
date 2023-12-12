@@ -221,14 +221,14 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     return contentTypesFromReleaseActions.map(({ contentType: contentTypeUid }) => contentTypeUid);
   },
 
-  async getContentTypesMetaFromActions(releaseId: Release['id']) {
+  async getContentTypesDataForActions(releaseId: Release['id']) {
     const contentTypesUids = await this.getAllContentTypeUids(releaseId);
 
     const contentManagerContentTypeService = strapi
       .plugin('content-manager')
       .service('content-types');
 
-    const contentTypesMetaData: Record<
+    const contentTypesData: Record<
       UID.ContentType,
       { mainField: string; displayName: string }
     > = {};
@@ -237,13 +237,13 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         uid: contentTypeUid,
       });
 
-      contentTypesMetaData[contentTypeUid] = {
+      contentTypesData[contentTypeUid] = {
         mainField: contentTypeConfig.settings.mainField,
         displayName: strapi.getModel(contentTypeUid).info.displayName,
       };
     }
 
-    return contentTypesMetaData;
+    return contentTypesData;
   },
 
   async delete(releaseId: DeleteRelease.Request['params']['id']) {

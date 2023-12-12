@@ -10,7 +10,7 @@ jest.mock('../../utils', () => ({
     findPage: mockFindPage,
     findManyForContentTypeEntry: mockFindManyForContentTypeEntry,
     countActions: mockCountActions,
-    getContentTypesMetaFromActions: jest.fn(),
+    getContentTypesDataForActions: jest.fn(),
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
 }));

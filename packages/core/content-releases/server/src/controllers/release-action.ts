@@ -48,7 +48,7 @@ const releaseActionController = {
 
     const releaseService = getService('release', { strapi });
     const { results, pagination } = await releaseService.findActions(releaseId, query);
-    const allReleaseContentTypesDictionary = await releaseService.getContentTypesMetaFromActions(
+    const allReleaseContentTypesDictionary = await releaseService.getContentTypesDataForActions(
       releaseId
     );
 
@@ -66,13 +66,11 @@ const releaseActionController = {
         ...action,
         entry: {
           id: action.entry.id,
-          meta: {
-            contentType: {
-              displayName,
-              mainFieldValue: action.entry[mainField],
-            },
-            locale: allLocalesDictionary[action.entry.locale],
+          contentType: {
+            displayName,
+            mainFieldValue: action.entry[mainField],
           },
+          locale: allLocalesDictionary[action.entry.locale],
         },
       };
     });
