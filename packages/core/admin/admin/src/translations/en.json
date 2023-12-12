@@ -636,7 +636,7 @@
   "components.Blocks.popover.link": "Link",
   "components.Blocks.popover.save": "Save",
   "components.Blocks.popover.cancel": "Cancel",
-  "components.Blocks.popover.delete": "Delete",
+  "components.Blocks.popover.remove": "Remove",
   "components.Blocks.popover.edit": "Edit",
   "components.Blocks.blocks.selectBlock": "Select a block",
   "components.Blocks.blocks.text": "Text",

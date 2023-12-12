@@ -5,14 +5,10 @@ import {
   Button,
   Field,
   FieldInput,
-  FieldLabel,
+  FieldLabel as BaseFieldLabel,
   Flex,
-  Icon,
   Popover,
-  Tooltip,
-  Typography,
 } from '@strapi/design-system';
-import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { type Element, Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
@@ -27,16 +23,12 @@ const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
 `;
 
-// Make sure the tooltip is above the popover
-const TooltipCustom = styled(Tooltip)`
-  z-index: 6;
+const FieldLabel = styled(BaseFieldLabel)`
+  margin-bottom: ${({ theme }) => theme.spaces[1]};
 `;
 
-// Used for the Edit and Cancel buttons in the link popover
-const CustomButton = styled(Button)`
-  & > span {
-    line-height: normal;
-  }
+const RemoveButton = styled(Button)<{ visible: boolean }>`
+  visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
 `;
 
 interface LinkContentProps extends RenderElementProps {
@@ -51,15 +43,17 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const [popoverOpen, setPopoverOpen] = React.useState(
       editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
     );
-    const [isEditing, setIsEditing] = React.useState(link.url === '');
     const linkRef = React.useRef<HTMLAnchorElement>(null!);
     const elementText = link.children.map((child) => child.text).join('');
     const [linkText, setLinkText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(link.url);
+    const linkInputRef = React.useRef<HTMLInputElement>(null);
+    const [showRemoveButton, setShowRemoveButton] = React.useState(false);
 
     const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
       e.preventDefault();
       setPopoverOpen(true);
+      setShowRemoveButton(true);
     };
 
     const handleSave: React.FormEventHandler = (e) => {
@@ -72,15 +66,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       }
 
       editLink(editor, { url: linkUrl, text: linkText });
-      setIsEditing(false);
-    };
-
-    const handleCancel = () => {
-      setIsEditing(false);
-
-      if (link.url === '') {
-        removeLink(editor);
-      }
+      setPopoverOpen(false);
     };
 
     const handleDismiss = () => {
@@ -95,6 +81,16 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
 
     const composedRefs = composeRefs(linkRef, forwardedRef);
 
+    const isSaveDisabled =
+      !linkText ||
+      !linkUrl ||
+      (link.url && link.url === linkUrl && elementText && elementText === linkText);
+
+    React.useEffect(() => {
+      // Focus on the link input element when the popover opens
+      if (popoverOpen) linkInputRef.current?.focus();
+    }, [popoverOpen]);
+
     return (
       <>
         <StyledBaseLink
@@ -108,47 +104,60 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         </StyledBaseLink>
         {popoverOpen && (
           <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
-            {isEditing ? (
-              <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
-                <Field width="300px">
-                  <FieldLabel>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.text',
-                      defaultMessage: 'Text',
-                    })}
-                  </FieldLabel>
-                  <FieldInput
-                    name="text"
-                    placeholder={formatMessage({
-                      id: 'components.Blocks.popover.text.placeholder',
-                      defaultMessage: 'Enter link text',
-                    })}
-                    value={linkText}
-                    onChange={(e) => setLinkText(e.target.value)}
-                  />
-                </Field>
-                <Field width="300px">
-                  <FieldLabel>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.link',
-                      defaultMessage: 'Link',
-                    })}
-                  </FieldLabel>
-                  <FieldInput
-                    name="url"
-                    placeholder="https://strapi.io"
-                    value={linkUrl}
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                  />
-                </Field>
-                <Flex justifyContent="end" width="100%" gap={2}>
-                  <Button variant="tertiary" onClick={handleCancel}>
+            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
+              <Field width="368px">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.text',
+                    defaultMessage: 'Text',
+                  })}
+                </FieldLabel>
+                <FieldInput
+                  name="text"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.text.placeholder',
+                    defaultMessage: 'Enter link text',
+                  })}
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                />
+              </Field>
+              <Field width="368px">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.link',
+                    defaultMessage: 'Link',
+                  })}
+                </FieldLabel>
+                <FieldInput
+                  ref={linkInputRef}
+                  name="url"
+                  placeholder="https://strapi.io"
+                  value={linkUrl}
+                  onChange={(e) => {
+                    setLinkUrl(e.target.value);
+                  }}
+                />
+              </Field>
+              <Flex justifyContent="space-between" width="100%">
+                <RemoveButton
+                  variant="danger-light"
+                  onClick={() => removeLink(editor)}
+                  visible={showRemoveButton}
+                >
+                  {formatMessage({
+                    id: 'components.Blocks.popover.remove',
+                    defaultMessage: 'Remove',
+                  })}
+                </RemoveButton>
+                <Flex gap={2}>
+                  <Button variant="tertiary" onClick={handleDismiss}>
                     {formatMessage({
                       id: 'components.Blocks.popover.cancel',
                       defaultMessage: 'Cancel',
                     })}
                   </Button>
-                  <Button type="submit" disabled={!linkText || !linkUrl}>
+                  <Button type="submit" disabled={Boolean(isSaveDisabled)}>
                     {formatMessage({
                       id: 'components.Blocks.popover.save',
                       defaultMessage: 'Save',
@@ -156,61 +165,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   </Button>
                 </Flex>
               </Flex>
-            ) : (
-              <Flex direction="column" gap={4} alignItems="start" width="400px">
-                <Typography>{elementText}</Typography>
-                <Typography>
-                  <StyledBaseLink href={link.url} target="_blank" color="primary600">
-                    {link.url}
-                  </StyledBaseLink>
-                </Typography>
-                <Flex justifyContent="end" width="100%" gap={2}>
-                  <TooltipCustom
-                    description={formatMessage({
-                      id: 'components.Blocks.popover.delete',
-                      defaultMessage: 'Delete',
-                    })}
-                  >
-                    <CustomButton
-                      size="S"
-                      width="2rem"
-                      variant="danger-light"
-                      onClick={() => removeLink(editor)}
-                      aria-label={formatMessage({
-                        id: 'components.Blocks.popover.delete',
-                        defaultMessage: 'Delete',
-                      })}
-                      type="button"
-                      justifyContent="center"
-                    >
-                      <Icon width={3} height={3} as={Trash} />
-                    </CustomButton>
-                  </TooltipCustom>
-
-                  <TooltipCustom
-                    description={formatMessage({
-                      id: 'components.Blocks.popover.edit',
-                      defaultMessage: 'Edit',
-                    })}
-                  >
-                    <CustomButton
-                      size="S"
-                      width="2rem"
-                      variant="tertiary"
-                      onClick={() => setIsEditing(true)}
-                      aria-label={formatMessage({
-                        id: 'components.Blocks.popover.edit',
-                        defaultMessage: 'Edit',
-                      })}
-                      type="button"
-                      justifyContent="center"
-                    >
-                      <Icon width={3} height={3} as={Pencil} />
-                    </CustomButton>
-                  </TooltipCustom>
-                </Flex>
-              </Flex>
-            )}
+            </Flex>
           </Popover>
         )}
       </>
