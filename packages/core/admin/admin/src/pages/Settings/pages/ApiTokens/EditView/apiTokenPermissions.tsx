@@ -4,8 +4,8 @@ import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
 
-import { List as ListContentApiPermissions } from '../../../shared/contracts/content-api/permissions';
-import { List as ListContentApiRoutes } from '../../../shared/contracts/content-api/routes';
+import { List as ListContentApiPermissions } from '../../../../../../../shared/contracts/content-api/permissions';
+import { List as ListContentApiRoutes } from '../../../../../../../shared/contracts/content-api/routes';
 
 export interface PseudoEvent {
   target: { value: string };

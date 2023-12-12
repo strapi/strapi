@@ -3,8 +3,8 @@ import produce from 'immer';
 import pull from 'lodash/pull';
 
 import { ContentApiPermission } from '../../../../../../../shared/contracts/content-api/permissions';
-import { ApiTokenPermissionsContextValue } from '../../../../../contexts/apiTokenPermissions';
 
+import { ApiTokenPermissionsContextValue } from './apiTokenPermissions';
 import { transformPermissionsData } from './utils/transformPermissionsData';
 
 type InitialState = Pick<
