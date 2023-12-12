@@ -228,7 +228,7 @@ module.exports = {
 
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
-    const [emailSettings, advancedSettings] = Promise.all([
+    const [emailSettings, advancedSettings] = await Promise.all([
       pluginStore.get({ key: 'email' }),
       pluginStore.get({ key: 'advanced' }),
     ]);
