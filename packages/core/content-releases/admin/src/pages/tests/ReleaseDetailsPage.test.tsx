@@ -61,7 +61,7 @@ describe('Releases details page', () => {
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
     expect(deleteButton).toBeInTheDocument();
 
-    const createdByAuthor = screen.getByText(/by John Doe/i);
+    const createdByAuthor = screen.getByText(/by Admin Admin/i);
     expect(createdByAuthor).toBeInTheDocument();
 
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });

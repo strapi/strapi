@@ -9,10 +9,15 @@ const RELEASE_NO_ACTIONS_HEADER_MOCK_DATA = {
     createdAt: '2023-11-16T15:18:32.560Z',
     updatedAt: '2023-11-16T15:18:32.560Z',
     releasedAt: null,
+    createdBy: {
+      id: 1,
+      firstname: 'Admin',
+      lastname: 'Admin',
+      username: null,
+    },
     actions: {
       meta: {
-        total: 0,
-        totalHidden: 0,
+        count: 0,
       },
     },
   },
@@ -45,10 +50,15 @@ const RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
     createdAt: '2023-11-16T15:18:32.560Z',
     updatedAt: '2023-11-16T15:18:32.560Z',
     releasedAt: null,
+    createdBy: {
+      id: 1,
+      firstname: 'Admin',
+      lastname: 'Admin',
+      username: null,
+    },
     actions: {
       meta: {
-        total: 1,
-        totalHidden: 0,
+        count: 1,
       },
     },
   },
@@ -67,8 +77,14 @@ const RELEASE_WITH_ACTIONS_BODY_MOCK_DATA = {
       updatedAt: '2023-12-05T09:03:57.155Z',
       entry: {
         id: 1,
-        mainField: 'cat1',
-        locale: 'en',
+        contentType: {
+          displayName: 'Category',
+          mainFieldValue: 'cat1',
+        },
+        locale: {
+          name: 'English (en)',
+          code: 'en',
+        },
       },
     },
   ],
