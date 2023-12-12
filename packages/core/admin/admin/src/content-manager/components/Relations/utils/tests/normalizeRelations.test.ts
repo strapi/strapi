@@ -28,9 +28,9 @@ describe('RelationInputDataManager || normalizeRelations', () => {
         mainFieldName: '',
       })
     ).toStrictEqual([
-      expect.objectContaining({ href: '/content-manager/collectionType/something/3' }),
-      expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
-      expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
+      expect.objectContaining({ href: '/content-manager/collection-types/something/3' }),
+      expect.objectContaining({ href: '/content-manager/collection-types/something/2' }),
+      expect.objectContaining({ href: '/content-manager/collection-types/something/1' }),
     ]);
   });
 
