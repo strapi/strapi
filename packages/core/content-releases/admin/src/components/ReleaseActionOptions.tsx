@@ -5,6 +5,7 @@ import {
   FieldLabel,
   VisuallyHidden,
   Field,
+  Flex,
   type FieldProps,
 } from '@strapi/design-system';
 import styled from 'styled-components';
@@ -55,13 +56,14 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
 interface ActionOptionProps {
   selected: 'publish' | 'unpublish';
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  name: string;
 }
 
 interface OptionProps extends ActionOptionProps {
   actionType: 'publish' | 'unpublish';
 }
 
-const ActionOption = ({ selected, actionType, handleChange }: OptionProps) => {
+const ActionOption = ({ selected, actionType, handleChange, name }: OptionProps) => {
   return (
     <FieldWrapper
       actionType={actionType}
@@ -72,12 +74,12 @@ const ActionOption = ({ selected, actionType, handleChange }: OptionProps) => {
       cursor="pointer"
       data-checked={selected === actionType}
     >
-      <FieldLabel htmlFor={`release-action-${actionType}`}>
+      <FieldLabel htmlFor={`${name}-${actionType}`}>
         <VisuallyHidden>
           <FieldInput
             type="radio"
-            id={`release-action-${actionType}`}
-            name="type"
+            id={`${name}-${actionType}`}
+            name={name}
             checked={selected === actionType}
             onChange={handleChange}
             value={actionType}
@@ -89,11 +91,21 @@ const ActionOption = ({ selected, actionType, handleChange }: OptionProps) => {
   );
 };
 
-export const ReleaseActionOptions = ({ selected, handleChange }: ActionOptionProps) => {
+export const ReleaseActionOptions = ({ selected, handleChange, name }: ActionOptionProps) => {
   return (
-    <>
-      <ActionOption actionType="publish" selected={selected} handleChange={handleChange} />
-      <ActionOption actionType="unpublish" selected={selected} handleChange={handleChange} />
-    </>
+    <Flex>
+      <ActionOption
+        actionType="publish"
+        selected={selected}
+        handleChange={handleChange}
+        name={name}
+      />
+      <ActionOption
+        actionType="unpublish"
+        selected={selected}
+        handleChange={handleChange}
+        name={name}
+      />
+    </Flex>
   );
 };

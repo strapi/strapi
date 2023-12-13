@@ -380,12 +380,11 @@ const ReleaseDetailsBody = () => {
                     <Typography>{entry.contentType.displayName || ''}</Typography>
                   </Td>
                   <Td>
-                    <Flex>
-                      <ReleaseActionOptions
-                        selected={type}
-                        handleChange={(e) => handleChangeType(e, id)}
-                      />
-                    </Flex>
+                    <ReleaseActionOptions
+                      selected={type}
+                      handleChange={(e) => handleChangeType(e, id)}
+                      name={`release-action-${id}-type`}
+                    />
                   </Td>
                 </Tr>
               ))}
