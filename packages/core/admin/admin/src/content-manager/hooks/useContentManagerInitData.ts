@@ -33,15 +33,13 @@ interface ContentManagerLink {
 
 const useContentManagerInitData = () => {
   const dispatch = useTypedDispatch();
-
   const toggleNotification = useNotification();
-  const state = useTypedSelector((state) => state['content-manager_app']);
-
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
+  const state = useTypedSelector((state) => state['content-manager_app']);
 
   const fetchInitialData = async () => {
     const {
@@ -93,17 +91,8 @@ const useContentManagerInitData = () => {
   const formatData = async (
     components: Contracts.Components.Component[],
     contentTypes: Contracts.ContentTypes.ContentType[],
-    fieldSizes: Record<
-      string,
-      {
-        default: number;
-        isResizeable: boolean;
-      }
-    >,
-    contentTypeConfigurations: {
-      uid: string;
-      settings: Contracts.ContentTypes.Settings;
-    }[]
+    fieldSizes: Contracts.Init.GetInitData.Response['data']['fieldSizes'],
+    contentTypeConfigurations: Contracts.ContentTypes.FindContentTypesSettings.Response['data']
   ) => {
     /**
      * We group these by the two types we support. We do with an object because we can use default
@@ -133,6 +122,7 @@ const useContentManagerInitData = () => {
       contentTypeConfigurations
     );
     const singleTypeSectionLinks = generateLinks(singleTypeLinks, 'singleTypes');
+
     // Collection Types verifications
     const collectionTypeLinksPermissions = await Promise.all(
       collectionTypeSectionLinks.map(({ permissions }) =>
@@ -142,6 +132,7 @@ const useContentManagerInitData = () => {
     const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
       (_, index) => collectionTypeLinksPermissions[index]
     );
+
     // Single Types verifications
     const singleTypeLinksPermissions = await Promise.all(
       singleTypeSectionLinks.map(({ permissions }) => hasPermissions(allPermissions, permissions))
