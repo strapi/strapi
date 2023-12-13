@@ -65,7 +65,7 @@ export declare namespace GetReleaseActions {
   }
 
   export interface Response {
-    data: ReleaseAction & { entry: ReleaseActionEntryData }[];
+    data: (ReleaseAction & { entry: ReleaseActionEntryData })[];
     meta: {
       pagination: Pagination;
     };

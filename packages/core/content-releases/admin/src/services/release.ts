@@ -39,7 +39,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
-  tagTypes: ['Releases', 'ReleaseActions'],
+  tagTypes: ['Release', 'ReleaseAction'],
   endpoints: (build) => {
     return {
       getReleasesForEntry: build.query<
@@ -55,6 +55,8 @@ const releaseApi = createApi({
             },
           };
         },
+        providesTags: (result) =>
+          result ? [...result.data.map(({ id }) => ({ type: 'Release' as const, id }))] : [],
       }),
       getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
         query(
@@ -73,9 +75,13 @@ const releaseApi = createApi({
             method: 'GET',
             config: {
               params: {
-                page,
-                pageSize,
-                filters,
+                page: page || 1,
+                pageSize: pageSize || 16,
+                filters: filters || {
+                  releasedAt: {
+                    $notNull: false,
+                  },
+                },
               },
             },
           };
@@ -93,7 +99,13 @@ const releaseApi = createApi({
 
           return newResponse;
         },
-        providesTags: ['Releases'],
+        providesTags: (result) =>
+          result
+            ? [
+                ...result.data.map(({ id }) => ({ type: 'Release' as const, id })),
+                { type: 'Release', id: 'LIST' },
+              ]
+            : [{ type: 'Release', id: 'LIST' }],
       }),
       getRelease: build.query<GetRelease.Response, GetRelease.Request['params']>({
         query({ id }) {
@@ -102,7 +114,7 @@ const releaseApi = createApi({
             method: 'GET',
           };
         },
-        providesTags: (result, error, id) => [{ type: 'Releases', id }],
+        providesTags: (result, error, arg) => [{ type: 'Release' as const, id: arg.id }],
       }),
       getReleaseActions: build.query<
         GetReleaseActions.Response,
@@ -120,7 +132,13 @@ const releaseApi = createApi({
             },
           };
         },
-        providesTags: ['ReleaseActions'],
+        providesTags: (result, error, arg) =>
+          result
+            ? [
+                ...result.data.map(({ id }) => ({ type: 'ReleaseAction' as const, id })),
+                { type: 'ReleaseAction', id: 'LIST' },
+              ]
+            : [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
       createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
         query(data) {
@@ -130,7 +148,7 @@ const releaseApi = createApi({
             data,
           };
         },
-        invalidatesTags: ['Releases'],
+        invalidatesTags: [{ type: 'Release', id: 'LIST' }],
       }),
       updateRelease: build.mutation<
         void,
@@ -156,7 +174,7 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: ['ReleaseActions'],
+        invalidatesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
     };
   },
