@@ -1,12 +1,16 @@
 import { useTypedSelector } from '../store/hooks';
+import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
 
 const useContentTypeHasI18n = (): boolean => {
   const pluginOptions = useTypedSelector(
-    // @ts-expect-error – we've not typed the CM ListView yet.
-    (state) => state['content-manager_listView'].contentType.pluginOptions
+    (state) => state['content-manager_listView'].contentType?.pluginOptions
   );
 
-  return pluginOptions?.i18n?.localized ?? false;
+  if (doesPluginOptionsHaveI18nLocalized(pluginOptions)) {
+    return pluginOptions.i18n.localized;
+  }
+
+  return false;
 };
 
 export { useContentTypeHasI18n };

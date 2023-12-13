@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-export interface UseKeyboardDragAndDropCallbacks {
-  onCancel?: (index: number) => void;
-  onDropItem?: (index: number) => void;
-  onGrabItem?: (index: number) => void;
-  onMoveItem: (toIndex: number, fromIndex: number) => void;
-}
+export type UseKeyboardDragAndDropCallbacks<TIndex extends number | Array<number> = number> = {
+  onCancel?: (index: TIndex) => void;
+  onDropItem?: (currentIndex: TIndex, newIndex?: TIndex) => void;
+  onGrabItem?: (index: TIndex) => void;
+  onMoveItem?: (newIndex: TIndex, currentIndex: TIndex) => void;
+};
 
 /**
  * Utility hook designed to implement keyboard accessibile drag and drop by
@@ -13,10 +13,10 @@ export interface UseKeyboardDragAndDropCallbacks {
  *
  * @internal - You should use `useDragAndDrop` instead.
  */
-export const useKeyboardDragAndDrop = (
+export const useKeyboardDragAndDrop = <TIndex extends number | Array<number> = number>(
   active: boolean,
-  index: number,
-  { onCancel, onDropItem, onGrabItem, onMoveItem }: UseKeyboardDragAndDropCallbacks
+  index: TIndex,
+  { onCancel, onDropItem, onGrabItem, onMoveItem }: UseKeyboardDragAndDropCallbacks<TIndex>
 ) => {
   const [isSelected, setIsSelected] = React.useState(false);
 
@@ -24,11 +24,12 @@ export const useKeyboardDragAndDrop = (
     if (!isSelected) {
       return;
     }
-
-    if (movement === 'UP') {
-      onMoveItem(index - 1, index);
-    } else if (movement === 'DOWN') {
-      onMoveItem(index + 1, index);
+    if (typeof index === 'number' && onMoveItem) {
+      if (movement === 'UP') {
+        onMoveItem((index - 1) as TIndex, index);
+      } else if (movement === 'DOWN') {
+        onMoveItem((index + 1) as TIndex, index);
+      }
     }
   };
 

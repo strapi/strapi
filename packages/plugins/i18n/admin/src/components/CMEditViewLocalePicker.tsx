@@ -84,12 +84,12 @@ const CMEditViewLocalePicker = ({
 
     if (status === 'did-not-create-locale') {
       push({
-        pathname: `/content-manager/collectionType/${slug}/create`,
+        pathname: `/content-manager/collection-types/${slug}/create`,
         search: stringify(defaultParams, { encode: false }),
       });
     } else {
       push({
-        pathname: `/content-manager/collectionType/${slug}/${id}`,
+        pathname: `/content-manager/collection-types/${slug}/${id}`,
         search: stringify(defaultParams, { encode: false }),
       });
     }

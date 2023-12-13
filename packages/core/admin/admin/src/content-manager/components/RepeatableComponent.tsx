@@ -28,7 +28,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useContentTypeLayout } from '../hooks/useContentTypeLayout';
-import { UseDragAndDropOptions, useDragAndDrop } from '../hooks/useDragAndDrop';
+import { useDragAndDrop, type UseDragAndDropOptions } from '../hooks/useDragAndDrop';
 import { useLazyComponents } from '../hooks/useLazyComponents';
 import { ItemTypes } from '../utils/dragAndDrop';
 import { getMaxTempKey } from '../utils/fields';
@@ -418,9 +418,9 @@ interface ComponentProps
   isOpen?: boolean;
   isReadOnly?: boolean;
   mainField: string;
-  moveComponentField: (newIndex: number, currentIndex: number) => void;
   onClickToggle: () => void;
   toggleCollapses: () => void;
+  moveComponentField: (newIndex: number, currentIndex: number) => void;
 }
 
 const Component = ({
@@ -463,7 +463,6 @@ const Component = ({
         index,
         displayedValue,
       },
-      onMoveItem: moveComponentField,
       onStart() {
         // Close all collapses
         toggleCollapses();
@@ -472,8 +471,9 @@ const Component = ({
         // Update the errors
         triggerFormValidation();
       },
-      onGrabItem,
+      onMoveItem: moveComponentField,
       onDropItem,
+      onGrabItem,
       onCancel,
     });
 

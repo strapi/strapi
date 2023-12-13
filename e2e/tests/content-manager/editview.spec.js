@@ -24,7 +24,7 @@ test.describe('Edit View', () => {
     /**
      * Now we're in the edit view.
      */
-    await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create');
+    await page.waitForURL('**/content-manager/collection-types/api::testing.testing/create');
 
     await page.getByRole('textbox', { name: 'title' }).fill('my content');
 
@@ -70,7 +70,7 @@ test.describe('Edit View', () => {
      * We're back on the list view
      */
     await page.waitForURL(
-      '**/content-manager/collectionType/api::testing.testing?page=1&pageSize=10&sort=title:ASC'
+      '**/content-manager/collection-types/api::testing.testing?page=1&pageSize=10&sort=title:ASC'
     );
 
     await expect(page.getByRole('link', { name: /Create new entry/ }).nth(1)).toBeVisible();
