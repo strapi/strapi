@@ -37,7 +37,12 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       admin_app: (state = initialState) => state,
       rbacProvider: (state = initialState) => state,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(releaseApi.middleware),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        // We needed to increase the timeout because randomly the unit tests are failing for that.
+        immutableCheck: { warnAfter: 128 },
+        serializableCheck: { warnAfter: 128 },
+      }).concat(releaseApi.middleware),
   });
 
   // en is the default locale of the admin app.
