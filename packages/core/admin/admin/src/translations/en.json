@@ -634,6 +634,7 @@
   "components.Blocks.popover.text": "Text",
   "components.Blocks.popover.text.placeholder": "Enter link text",
   "components.Blocks.popover.link": "Link",
+  "components.Blocks.popover.link.error": "Please enter valid link",
   "components.Blocks.popover.save": "Save",
   "components.Blocks.popover.cancel": "Cancel",
   "components.Blocks.popover.remove": "Remove",

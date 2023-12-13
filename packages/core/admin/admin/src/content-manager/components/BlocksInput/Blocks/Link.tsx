@@ -5,9 +5,10 @@ import {
   Button,
   Field,
   FieldInput,
-  FieldLabel as BaseFieldLabel,
+  FieldLabel,
   Flex,
   Popover,
+  FieldError,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { type Element, Editor, Path, Range, Transforms } from 'slate';
@@ -21,10 +22,6 @@ import { type Block } from '../utils/types';
 
 const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
-`;
-
-const FieldLabel = styled(BaseFieldLabel)`
-  margin-bottom: ${({ theme }) => theme.spaces[1]};
 `;
 
 const RemoveButton = styled(Button)<{ visible: boolean }>`
@@ -49,6 +46,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const [linkUrl, setLinkUrl] = React.useState(link.url);
     const linkInputRef = React.useRef<HTMLInputElement>(null);
     const [showRemoveButton, setShowRemoveButton] = React.useState(false);
+    const [invalidLinkError, setInvalidLinkError] = React.useState('');
 
     const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
       e.preventDefault();
@@ -59,14 +57,30 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const handleSave: React.FormEventHandler = (e) => {
       e.stopPropagation();
 
-      // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
-      if (editor.selection && Range.isCollapsed(editor.selection)) {
-        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
-        Transforms.select(editor, parentPath);
-      }
+      try {
+        // eslint-disable-next-line no-new
+        new URL(linkUrl);
 
-      editLink(editor, { url: linkUrl, text: linkText });
-      setPopoverOpen(false);
+        // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
+        if (editor.selection && Range.isCollapsed(editor.selection)) {
+          const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+          Transforms.select(editor, parentPath);
+        }
+
+        editLink(editor, { url: linkUrl, text: linkText });
+        setPopoverOpen(false);
+        return;
+      } catch (error) {
+        // Do not save if link is not valid and throw error
+        e.preventDefault();
+
+        setInvalidLinkError(
+          formatMessage({
+            id: 'components.Blocks.popover.link.error',
+            defaultMessage: 'Please enter valid link',
+          })
+        );
+      }
     };
 
     const handleDismiss = () => {
@@ -106,38 +120,46 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
           <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
             <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
               <Field width="368px">
-                <FieldLabel>
-                  {formatMessage({
-                    id: 'components.Blocks.popover.text',
-                    defaultMessage: 'Text',
-                  })}
-                </FieldLabel>
-                <FieldInput
-                  name="text"
-                  placeholder={formatMessage({
-                    id: 'components.Blocks.popover.text.placeholder',
-                    defaultMessage: 'Enter link text',
-                  })}
-                  value={linkText}
-                  onChange={(e) => setLinkText(e.target.value)}
-                />
+                <Flex direction="column" gap={1} alignItems="stretch">
+                  <FieldLabel>
+                    {formatMessage({
+                      id: 'components.Blocks.popover.text',
+                      defaultMessage: 'Text',
+                    })}
+                  </FieldLabel>
+                  <FieldInput
+                    name="text"
+                    placeholder={formatMessage({
+                      id: 'components.Blocks.popover.text.placeholder',
+                      defaultMessage: 'Enter link text',
+                    })}
+                    value={linkText}
+                    onChange={(e) => {
+                      setLinkText(e.target.value);
+                    }}
+                  />
+                </Flex>
               </Field>
-              <Field width="368px">
-                <FieldLabel>
-                  {formatMessage({
-                    id: 'components.Blocks.popover.link',
-                    defaultMessage: 'Link',
-                  })}
-                </FieldLabel>
-                <FieldInput
-                  ref={linkInputRef}
-                  name="url"
-                  placeholder="https://strapi.io"
-                  value={linkUrl}
-                  onChange={(e) => {
-                    setLinkUrl(e.target.value);
-                  }}
-                />
+              <Field width="368px" error={invalidLinkError}>
+                <Flex direction="column" gap={1} alignItems="stretch">
+                  <FieldLabel>
+                    {formatMessage({
+                      id: 'components.Blocks.popover.link',
+                      defaultMessage: 'Link',
+                    })}
+                  </FieldLabel>
+                  <FieldInput
+                    ref={linkInputRef}
+                    name="url"
+                    placeholder="https://strapi.io"
+                    value={linkUrl}
+                    onChange={(e) => {
+                      setInvalidLinkError('');
+                      setLinkUrl(e.target.value);
+                    }}
+                  />
+                  <FieldError />
+                </Flex>
               </Field>
               <Flex justifyContent="space-between" width="100%">
                 <RemoveButton
