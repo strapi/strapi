@@ -189,7 +189,7 @@ const RelationInput = ({
 
   const handleMenuOpen = (isOpen?: boolean) => {
     if (isOpen) {
-      onSearch();
+      onSearch(textValue);
     }
   };
 
@@ -241,7 +241,7 @@ const RelationInput = ({
         <ComboboxWrapper marginRight="auto" maxWidth={size <= 6 ? '100%' : '70%'} width="100%">
           <Combobox
             ref={fieldRef}
-            autocomplete="list"
+            autocomplete="none"
             error={error}
             name={name}
             hint={description}
