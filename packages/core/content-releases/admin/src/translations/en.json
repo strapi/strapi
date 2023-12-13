@@ -18,7 +18,7 @@
   "header.actions.edit": "Edit",
   "header.actions.delete": "Delete",
   "header.actions.created": "Created",
-  "header.actions.created.description": "{number, plural, =0 {# days} one {# day} other {# days}} ago by {createdBy}",
+  "header.actions.created.description": " by {createdBy}",
   "modal.release-created-notification-success": "Release created",
   "modal.release-updated-notification-success": "Release updated",
   "modal.add-release-title": "New Release",
@@ -29,5 +29,10 @@
   "pages.Releases.tab.pending": "Pending",
   "pages.Releases.tab.done": "Done",
   "page.Releases.tab.emptyEntries": "No releases",
-  "page.Releases.release-item.entries": "{number, plural, =0 {No entries} one {# entry} other {# entries}}"
+  "page.Releases.release-item.entries": "{number, plural, =0 {No entries} one {# entry} other {# entries}}",
+  "page.ReleaseDetails.table.header.label.name": "name",
+  "page.ReleaseDetails.table.header.label.locale": "locale",
+  "page.ReleaseDetails.table.header.label.content-type": "content-type"
+
+
 }
