@@ -1,5 +1,7 @@
 import { StrapiAppSettingLink } from '@strapi/helper-plugin';
 
+import { PermissionMap } from './types/permissions';
+
 export const ADMIN_PERMISSIONS_CE = {
   contentManager: {
     main: [],
@@ -89,7 +91,7 @@ export const ADMIN_PERMISSIONS_CE = {
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
   },
-};
+} satisfies Partial<PermissionMap>;
 
 export const HOOKS = {
   /**
@@ -120,9 +122,6 @@ export const HOOKS = {
    */
   MUTATE_SINGLE_TYPES_LINKS: 'Admin/CM/pages/App/mutate-single-types-links',
 };
-
-export const ACTION_SET_APP_RUNTIME_STATUS = 'StrapiAdmin/APP/SET_APP_RUNTIME_STATUS';
-export const ACTION_SET_ADMIN_PERMISSIONS = 'StrapiAdmin/App/SET_ADMIN_PERMISSIONS';
 
 export interface SettingsMenuLink
   extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {

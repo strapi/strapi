@@ -4,9 +4,10 @@ import { transformPermissionsData } from '../utils/transformPermissionsData';
 describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
   const initialState = {
     selectedAction: null,
-    routes: [],
+    routes: {},
     selectedActions: [],
     data: transformPermissionsData({
+      // @ts-expect-error - mocking
       'api::address': {
         controllers: {
           address: ['find', 'findOne'],
@@ -23,6 +24,7 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
   it('should return the initialState when the type is undefined', () => {
     const action = { type: undefined };
 
+    // @ts-expect-error – testing default action case...
     expect(reducer(initialState, action)).toEqual(initialState);
   });
 
@@ -30,14 +32,14 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
     const action = {
       type: 'ON_CHANGE',
       value: 'api::address.address.find',
-    };
+    } as const;
 
     expect(reducer(initialState, action).selectedActions).toEqual(['api::address.address.find']);
   });
 
   it('should select all actions of a permission', () => {
     const action = {
-      type: 'SELECT_ALL_IN_PERMISSION',
+      type: 'SELECT_ALL_IN_PERMISSION' as const,
       value: [
         {
           action: 'find',
@@ -78,7 +80,7 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
 
   it('should select all actions', () => {
     const action = {
-      type: 'SELECT_ALL_ACTIONS',
+      type: 'SELECT_ALL_ACTIONS' as const,
     };
 
     expect(reducer(initialState, action).selectedActions).toEqual(initialState.data.allActionsIds);
@@ -86,7 +88,7 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
 
   it('should select read-only actions', () => {
     const action = {
-      type: 'ON_CHANGE_READ_ONLY',
+      type: 'ON_CHANGE_READ_ONLY' as const,
     };
 
     expect(reducer(initialState, action).selectedActions).toEqual([
@@ -99,7 +101,7 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
 
   it('should update all selected actions', () => {
     const action = {
-      type: 'UPDATE_PERMISSIONS',
+      type: 'UPDATE_PERMISSIONS' as const,
       value: [
         'api::address.address.find',
         'api::address.address.findOne',
@@ -118,7 +120,7 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
 
   it('should add a selectedAction', () => {
     const action = {
-      type: 'SET_SELECTED_ACTION',
+      type: 'SET_SELECTED_ACTION' as const,
       value: 'api::address.address.find',
     };
 

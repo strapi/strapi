@@ -1,10 +1,9 @@
 import { render } from '@tests/utils';
 
-import { useConfiguration } from '../../contexts/configuration';
-import { ConfigurationProvider } from '../ConfigurationProvider';
+import { useConfiguration, ConfigurationProvider } from '../Configuration';
 
 const TestComponent = () => {
-  const context = useConfiguration();
+  const context = useConfiguration('TestComponent');
 
   return (
     <div>

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { createContext } from '@radix-ui/react-context';
 import {
   prefixFileUrlWithBackendUrl,
   useAPIErrorHandler,
@@ -7,17 +8,63 @@ import {
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
+import { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
+import { UseMutateFunction, useMutation, useQuery } from 'react-query';
 
 import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
-import {
-  ConfigurationContextProvider,
-  ConfigurationContextValue,
-  UpdateProjectSettingsBody,
-} from '../contexts/configuration';
 
-import type { AxiosError } from 'axios';
+/* -------------------------------------------------------------------------------------------------
+ * Configuration Context
+ * -----------------------------------------------------------------------------------------------*/
+
+interface UpdateProjectSettingsBody {
+  authLogo:
+    | ((UpdateProjectSettings.Request['body']['authLogo'] | ConfigurationLogo['custom']) & {
+        rawFile?: File;
+      })
+    | null;
+  menuLogo:
+    | ((UpdateProjectSettings.Request['body']['menuLogo'] | ConfigurationLogo['custom']) & {
+        rawFile?: File;
+      })
+    | null;
+}
+
+interface ConfigurationLogo {
+  custom?: {
+    name?: string;
+    url?: string;
+  };
+  default: string;
+}
+
+interface ConfigurationContextValue {
+  logos: {
+    auth: ConfigurationLogo;
+    menu: ConfigurationLogo;
+  };
+  showTutorials: boolean;
+  showReleaseNotification: boolean;
+  updateProjectSettings: UseMutateFunction<
+    { menuLogo: boolean; authLogo: boolean },
+    AxiosError<Required<UpdateProjectSettings.Response>>,
+    UpdateProjectSettingsBody
+  >;
+}
+
+/**
+ * TODO: it would be nice if this context actually lived in redux.
+ * But we'd probably need to reconcile the fact we get the data three
+ * different ways and what that actually looks like.
+ */
+
+const [ConfigurationContextProvider, useConfiguration] =
+  createContext<ConfigurationContextValue>('ConfigurationContext');
+
+/* -------------------------------------------------------------------------------------------------
+ * ConfigurationProvider
+ * -----------------------------------------------------------------------------------------------*/
 
 interface ConfigurationProviderProps extends Required<Logos> {
   children: React.ReactNode;
@@ -183,5 +230,14 @@ const ConfigurationProvider = ({
   );
 };
 
-export { ConfigurationProvider };
-export type { ConfigurationProviderProps };
+export {
+  ConfigurationContextProvider as _internalConfigurationContextProvider,
+  ConfigurationProvider,
+  useConfiguration,
+};
+export type {
+  ConfigurationProviderProps,
+  ConfigurationContextValue,
+  ConfigurationLogo,
+  UpdateProjectSettingsBody,
+};

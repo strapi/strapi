@@ -18,8 +18,17 @@ describe('ADMIN | new StrapiApp', () => {
     expect(store.getState()).toMatchInlineSnapshot(`
       {
         "admin_app": {
+          "language": {
+            "locale": "en",
+            "localeNames": {
+              "en": "English",
+            },
+          },
           "permissions": {},
-          "status": "init",
+          "theme": {
+            "availableThemes": [],
+            "currentTheme": "system",
+          },
         },
         "content-manager_app": {
           "collectionTypeLinks": [],
