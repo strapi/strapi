@@ -121,7 +121,7 @@ export const ReleaseDetailsLayout = ({
     handleTogglePopover();
   };
 
-  if (isLoadingDetails) {
+  if (isLoadingDetails || !release) {
     return (
       <Main aria-busy={isLoadingDetails}>
         <Box paddingBottom={8}>
