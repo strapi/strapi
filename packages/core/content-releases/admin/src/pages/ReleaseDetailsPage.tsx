@@ -73,7 +73,7 @@ const TrashIcon = styled(Trash)`
 `;
 
 interface PopoverButtonProps {
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   children: React.ReactNode;
 }
 
@@ -334,8 +334,8 @@ const ReleaseDetailsBody = () => {
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
-              {releaseActions.map(({ entry }) => (
-                <Tr key={entry.id}>
+              {releaseActions.map(({ id, entry }) => (
+                <Tr key={id}>
                   <Td>
                     <Typography>{`${entry.contentType.mainFieldValue || entry.id}`}</Typography>
                   </Td>
