@@ -142,7 +142,6 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-
   const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}`;
 
   return (
