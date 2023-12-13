@@ -8,6 +8,7 @@ import { axiosBaseQuery } from './axios';
 import type { GetReleaseActions } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
+  DeleteRelease,
   GetContentTypeEntryReleases,
   GetReleases,
   UpdateRelease,
@@ -176,6 +177,15 @@ const releaseApi = createApi({
         },
         invalidatesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
+      deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request>({
+        query({ id }) {
+          return {
+            url: `/content-releases/${id}`,
+            method: 'DELETE',
+          };
+        },
+        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+      }),
     };
   },
 });
@@ -188,6 +198,7 @@ const {
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
+  useDeleteReleaseMutation,
 } = releaseApi;
 
 export {
@@ -198,5 +209,6 @@ export {
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
+  useDeleteReleaseMutation,
   releaseApi,
 };

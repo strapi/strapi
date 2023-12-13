@@ -32,7 +32,6 @@
   "page.Releases.release-item.entries": "{number, plural, =0 {No entries} one {# entry} other {# entries}}",
   "page.ReleaseDetails.table.header.label.name": "name",
   "page.ReleaseDetails.table.header.label.locale": "locale",
-  "page.ReleaseDetails.table.header.label.content-type": "content-type"
-
-
+  "page.ReleaseDetails.table.header.label.content-type": "content-type",
+  "dialog.confirmation-message": "Are you sure you want to delete this release?"
 }
