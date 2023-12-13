@@ -108,7 +108,7 @@ export const ReleaseDetailsLayout = ({
   const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
-  const { data, isLoading: isLoadingDetails } = useGetReleaseQuery({ id: releaseId });
+  const { data, isLoading: isLoadingDetails, isError } = useGetReleaseQuery({ id: releaseId });
 
   const release = data?.data;
 
@@ -121,7 +121,7 @@ export const ReleaseDetailsLayout = ({
     handleTogglePopover();
   };
 
-  if (isLoadingDetails || !release) {
+  if (isLoadingDetails) {
     return (
       <Main aria-busy={isLoadingDetails}>
         <Box paddingBottom={8}>
@@ -131,26 +131,32 @@ export const ReleaseDetailsLayout = ({
     );
   }
 
-  const title = release.name;
+  if (isError) {
+    return (
+      <Main>
+        <Box paddingBottom={8}>
+          <AnErrorOccurred />
+        </Box>
+      </Main>
+    );
+  }
+
   const totalEntries = release.actions.meta.count || 0;
 
-  const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}` || '';
+  const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}`;
 
   return (
     <Main aria-busy={isLoadingDetails}>
       <Box paddingBottom={8}>
         <HeaderLayout
-          title={!isLoadingDetails && title}
-          subtitle={
-            !isLoadingDetails &&
-            formatMessage(
-              {
-                id: 'content-releases.pages.Details.header-subtitle',
-                defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-              },
-              { number: totalEntries }
-            )
-          }
+          title={release.name}
+          subtitle={formatMessage(
+            {
+              id: 'content-releases.pages.Details.header-subtitle',
+              defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+            },
+            { number: totalEntries }
+          )}
           navigationAction={
             <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
               {formatMessage({
