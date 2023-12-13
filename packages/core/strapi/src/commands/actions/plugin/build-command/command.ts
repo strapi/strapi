@@ -1,3 +1,4 @@
+import { createCommand } from 'commander';
 import { forceOption } from '../../../utils/commander';
 import type { StrapiCommand } from '../../../types';
 import { runAction } from '../../../utils/helpers';
@@ -6,9 +7,8 @@ import action from './action';
 /**
  * `$ strapi plugin:build`
  */
-const command: StrapiCommand = ({ command }) => {
-  command
-    .command('plugin:build')
+const command: StrapiCommand = () => {
+  return createCommand('plugin:build')
     .description('Bundle your strapi plugin for publishing.')
     .addOption(forceOption)
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)

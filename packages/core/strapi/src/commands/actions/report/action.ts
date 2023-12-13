@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import strapi from '../../../Strapi';
+import { strapiFactory } from '@strapi/core';
 
 interface CmdOptions {
   uuid: boolean;
@@ -13,8 +13,8 @@ export default async ({ uuid, dependencies, all }: CmdOptions) => {
     reportDependencies: Boolean(all || dependencies),
   };
 
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).register();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).register();
 
   let debugInfo = `Launched In: ${Date.now() - app.config.launchedAt} ms
 Environment: ${app.config.environment}

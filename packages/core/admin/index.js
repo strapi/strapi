@@ -6,7 +6,7 @@ const os = require('os');
 const chalk = require('chalk');
 const ora = require('ora');
 const ts = require('typescript');
-const strapi = require('@strapi/strapi');
+const { strapiFactory } = require('@strapi/strapi');
 const { build: nodeBuild, develop: nodeDevelop } = require('./dist/cli');
 
 /**
@@ -37,7 +37,7 @@ async function build({ optimize }) {
 
   const distDir = tsconfig?.config.options.outDir ?? '';
 
-  const strapiInstance = strapi({
+  const strapiInstance = strapiFactory({
     // Directories
     appDir: cwd,
     distDir,

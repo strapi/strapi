@@ -2,11 +2,11 @@ import CLITable from 'cli-table3';
 import chalk from 'chalk';
 import { toUpper } from 'lodash/fp';
 
-import strapi from '../../../../Strapi';
+import { strapiFactory } from '@strapi/core';
 
 export default async () => {
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).load();
 
   const list = app.server.mount().listRoutes();
 

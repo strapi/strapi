@@ -2,7 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
-import strapiFactory, { CLIContext } from '@strapi/strapi';
+import { strapiFactory, CLIContext } from '@strapi/strapi';
 import { getConfigUrls } from '@strapi/utils';
 
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
