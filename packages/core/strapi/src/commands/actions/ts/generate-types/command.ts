@@ -1,3 +1,4 @@
+import { createCommand } from 'commander';
 import type { StrapiCommand } from '../../../types';
 import { runAction } from '../../../utils/helpers';
 import action from './action';
@@ -5,9 +6,8 @@ import action from './action';
 /**
  * `$ strapi ts:generate-types`
  */
-const command: StrapiCommand = ({ command }) => {
-  command
-    .command('ts:generate-types')
+const command: StrapiCommand = () => {
+  return createCommand('ts:generate-types')
     .description(`Generate TypeScript typings for your schemas`)
     .option('--verbose', `[DEPRECATED] The verbose option has been replaced by debug`, false)
     .option('-d, --debug', `Run the generation with debug messages`, false)

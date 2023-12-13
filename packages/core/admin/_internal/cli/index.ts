@@ -53,4 +53,4 @@ const develop: StrapiCommand = ({ command, ctx }) => {
     });
 };
 
-export { build, develop };
+export const commands = [build, develop];

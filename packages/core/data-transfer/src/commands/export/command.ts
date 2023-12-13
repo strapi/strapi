@@ -1,4 +1,4 @@
-import { Command, Option } from 'commander';
+import { createCommand, Option } from 'commander';
 import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
 import { promptEncryptionKey } from '../commander';
 import action from './action';
@@ -6,9 +6,8 @@ import action from './action';
 /**
  * `$ strapi export`
  */
-const command = ({ command }: { command: Command }) => {
-  command
-    .command('export')
+const command = () => {
+  return createCommand('export')
     .description('Export data from Strapi to file')
     .allowExcessArguments(false)
     .addOption(

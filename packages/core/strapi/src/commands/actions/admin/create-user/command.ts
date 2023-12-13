@@ -1,3 +1,4 @@
+import { createCommand } from 'commander';
 import { runAction } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
 import action from './action';
@@ -5,9 +6,8 @@ import action from './action';
 /**
  * `$ strapi admin:create-user`
  */
-const command: StrapiCommand = ({ command }) => {
-  command
-    .command('admin:create-user')
+const command: StrapiCommand = () => {
+  return createCommand('admin:create-user')
     .alias('admin:create')
     .description('Create a new admin')
     .option('-e, --email <email>', 'Email of the new admin')
