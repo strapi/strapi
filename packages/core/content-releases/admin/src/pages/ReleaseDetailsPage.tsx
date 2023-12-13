@@ -32,6 +32,7 @@ import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -40,7 +41,10 @@ import {
   useGetReleaseActionsQuery,
   useGetReleaseQuery,
   useUpdateReleaseMutation,
+  useUpdateReleaseActionMutation,
 } from '../services/release';
+
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -265,6 +269,23 @@ const ReleaseDetailsBody = () => {
     releaseId,
   });
 
+  const [updateReleaseAction] = useUpdateReleaseActionMutation();
+
+  const handleChangeType = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    actionId: ReleaseAction['id']
+  ) => {
+    updateReleaseAction({
+      params: {
+        releaseId,
+        actionId,
+      },
+      body: {
+        type: e.target.value as ReleaseAction['type'],
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <ContentLayout>
@@ -336,10 +357,18 @@ const ReleaseDetailsBody = () => {
                 })}
                 name="content-type"
               />
+              <Table.HeaderCell
+                fieldSchemaType="string"
+                label={formatMessage({
+                  id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+                  defaultMessage: 'action',
+                })}
+                name="action"
+              />
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
-              {releaseActions.map(({ id, entry }) => (
+              {releaseActions.map(({ id, type, entry }) => (
                 <Tr key={id}>
                   <Td>
                     <Typography>{`${entry.contentType.mainFieldValue || entry.id}`}</Typography>
@@ -349,6 +378,14 @@ const ReleaseDetailsBody = () => {
                   </Td>
                   <Td>
                     <Typography>{entry.contentType.displayName || ''}</Typography>
+                  </Td>
+                  <Td>
+                    <Flex>
+                      <ReleaseActionOptions
+                        selected={type}
+                        handleChange={(e) => handleChangeType(e, id)}
+                      />
+                    </Flex>
                   </Td>
                 </Tr>
               ))}
