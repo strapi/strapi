@@ -77,12 +77,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       <MemoryRouter initialEntries={initialEntries}>
         <QueryClientProvider client={queryClient}>
           <DndProvider backend={HTML5Backend}>
-            <LanguageProvider
-              localeNames={{
-                en: 'english',
-              }}
-              messages={{}}
-            >
+            <LanguageProvider messages={{}}>
               <Theme
                 themes={{
                   dark: darkTheme,

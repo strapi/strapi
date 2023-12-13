@@ -41,9 +41,8 @@ import { useMutation, useQuery } from 'react-query';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
-import { useLocales } from '../components/LanguageProvider';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
-import { AppState, setAppTheme } from '../reducer';
+import { AppState, setAppTheme, setLocale } from '../reducer';
 import { getFullName } from '../utils/getFullName';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
@@ -69,7 +68,7 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
  * -----------------------------------------------------------------------------------------------*/
 
 const ProfilePage = () => {
-  const { changeLocale, localeNames } = useLocales();
+  const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { setUserDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -177,7 +176,7 @@ const ProfilePage = () => {
         setUserDisplayName(userDisplayName);
 
         if (data.preferedLanguage) {
-          changeLocale(data.preferedLanguage);
+          dispatch(setLocale(data.preferedLanguage));
         }
 
         dispatch(setAppTheme(data.currentTheme));

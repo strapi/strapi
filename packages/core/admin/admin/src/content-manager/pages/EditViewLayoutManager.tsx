@@ -78,7 +78,7 @@ const setLayout = (layout: SetLayoutAction['layout'], query: SetLayoutAction['qu
     query,
   } satisfies SetLayoutAction);
 
-interface EditViewState {
+interface EditViewLayoutManagerState {
   currentLayout: {
     components: EditViewLayoutManagerProps['layout']['components'];
     contentType: EditViewLayoutManagerProps['layout']['contentType'] | null;
@@ -90,11 +90,11 @@ const initialState = {
     components: {},
     contentType: null,
   },
-} satisfies EditViewState;
+} satisfies EditViewLayoutManagerState;
 
 type Action = ResetPropsAction | SetLayoutAction;
 
-const reducer = (state: EditViewState = initialState, action: Action) =>
+const reducer = (state: EditViewLayoutManagerState = initialState, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case RESET_PROPS: {
@@ -111,4 +111,4 @@ const reducer = (state: EditViewState = initialState, action: Action) =>
   });
 
 export { EditViewLayoutManager, reducer };
-export type { EditViewLayoutManagerProps, EditViewState };
+export type { EditViewLayoutManagerProps, EditViewLayoutManagerState };

@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 });
 
 interface ProvidersProps
-  extends Pick<LanguageProviderProps, 'messages' | 'localeNames'>,
+  extends Pick<LanguageProviderProps, 'messages'>,
     Pick<CustomFieldsProviderProps, 'customFields'>,
     Pick<LibraryProviderProps, 'components' | 'fields'>,
     Pick<
@@ -55,7 +55,6 @@ const Providers = ({
   fields,
   getAdminInjectedComponents,
   getPlugin,
-  localeNames,
   menu,
   messages,
   plugins,
@@ -68,7 +67,7 @@ const Providers = ({
 }: ProvidersProps) => {
   return (
     <Provider store={store}>
-      <LanguageProvider messages={messages} localeNames={localeNames}>
+      <LanguageProvider messages={messages}>
         <Theme themes={themes}>
           <QueryClientProvider client={queryClient}>
             <StrapiAppProvider

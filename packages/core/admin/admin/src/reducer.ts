@@ -7,6 +7,10 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 type ThemeName = 'light' | 'dark' | 'system';
 
 interface AppState {
+  language: {
+    locale: string;
+    localeNames: Record<string, string>;
+  };
   permissions: Partial<PermissionMap>;
   theme: {
     currentTheme: ThemeName;
@@ -14,16 +18,21 @@ interface AppState {
   };
 }
 
-const THEME_KEY = 'STRAPI_THEME';
+const THEME_LOCAL_STORAGE_KEY = 'STRAPI_THEME';
+const LANGUAGE_LOCAL_STORAGE_KEY = 'strapi-admin-language';
 
 const adminSlice = createSlice({
   name: 'admin',
   initialState: () => {
     return {
+      language: {
+        locale: 'en',
+        localeNames: { en: 'English' },
+      },
       permissions: {},
       theme: {
         availableThemes: [],
-        currentTheme: localStorage.getItem(THEME_KEY) || 'system',
+        currentTheme: localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system',
       },
     } as AppState;
   },
@@ -33,17 +42,31 @@ const adminSlice = createSlice({
     },
     setAppTheme(state, action: PayloadAction<ThemeName>) {
       state.theme.currentTheme = action.payload;
-      localStorage.setItem(THEME_KEY, action.payload);
+      window.localStorage.setItem(THEME_LOCAL_STORAGE_KEY, action.payload);
     },
     setAvailableThemes(state, action: PayloadAction<AppState['theme']['availableThemes']>) {
       state.theme.availableThemes = action.payload;
+    },
+    setLocale(state, action: PayloadAction<string>) {
+      state.language.locale = action.payload;
+
+      window.localStorage.setItem(LANGUAGE_LOCAL_STORAGE_KEY, action.payload);
+      document.documentElement.setAttribute('lang', action.payload);
     },
   },
 });
 
 const reducer = adminSlice.reducer;
 
-const { setAdminPermissions, setAppTheme, setAvailableThemes } = adminSlice.actions;
+const { setAdminPermissions, setAppTheme, setAvailableThemes, setLocale } = adminSlice.actions;
 
-export { reducer, setAdminPermissions, setAppTheme, setAvailableThemes };
-export type { AppState };
+export {
+  reducer,
+  setAdminPermissions,
+  setAppTheme,
+  setAvailableThemes,
+  setLocale,
+  THEME_LOCAL_STORAGE_KEY,
+  LANGUAGE_LOCAL_STORAGE_KEY,
+};
+export type { AppState, ThemeName };

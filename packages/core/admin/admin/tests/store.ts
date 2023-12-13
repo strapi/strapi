@@ -6,6 +6,10 @@ import { fixtures } from '@strapi/admin-test-utils';
  */
 const initialState = {
   admin_app: {
+    language: {
+      locale: 'en',
+      localeNames: { en: 'English' },
+    },
     permissions: fixtures.permissions.app,
     theme: {
       availableThemes: [],
