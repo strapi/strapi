@@ -16,7 +16,7 @@
   "pages.Releases.header-subtitle": "{number, plural, =0 {No releases} one {# release} other {# releases}}",
   "header.actions.add-release": "New Release",
   "header.actions.refresh": "Refresh",
-  "header.actions.release": "Release",
+  "header.actions.publish": "Publish",
   "header.actions.open-release-actions": "Release actions",
   "header.actions.edit": "Edit",
   "header.actions.delete": "Delete",
@@ -36,5 +36,7 @@
   "page.ReleaseDetails.table.header.label.name": "name",
   "page.ReleaseDetails.table.header.label.locale": "locale",
   "page.ReleaseDetails.table.header.label.content-type": "content-type",
-  "page.ReleaseDetails.table.header.label.action": "action"
+  "page.ReleaseDetails.table.header.label.action": "action",
+  "page.ReleaseDetails.table.action-published": "This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.",
+  "pages.ReleaseDetails.publish-notification-success": "Release was published successfully."
 }
