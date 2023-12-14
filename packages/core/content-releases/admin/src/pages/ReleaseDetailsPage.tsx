@@ -263,6 +263,8 @@ const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const { isLoading, isFetching, isError, data } = useGetReleaseActionsQuery({
     ...query,
@@ -271,11 +273,11 @@ const ReleaseDetailsBody = () => {
 
   const [updateReleaseAction] = useUpdateReleaseActionMutation();
 
-  const handleChangeType = (
+  const handleChangeType = async (
     e: React.ChangeEvent<HTMLInputElement>,
     actionId: ReleaseAction['id']
   ) => {
-    updateReleaseAction({
+    const response = await updateReleaseAction({
       params: {
         releaseId,
         actionId,
@@ -284,6 +286,22 @@ const ReleaseDetailsBody = () => {
         type: e.target.value as ReleaseAction['type'],
       },
     });
+
+    if ('error' in response) {
+      if (isAxiosError(response.error)) {
+        // When the response returns an object with 'error', handle axios error
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(response.error),
+        });
+      } else {
+        // Otherwise, the response returns an object with 'error', handle a generic error
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        });
+      }
+    }
   };
 
   if (isLoading) {
