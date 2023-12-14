@@ -19,6 +19,7 @@ import type {
   GetReleases,
   UpdateRelease,
   GetRelease,
+  PublishRelease,
 } from '../../../shared/contracts/releases';
 
 export interface GetReleasesQueryParams {
@@ -221,6 +222,15 @@ const releaseApi = createApi({
           { type: 'ReleaseAction', id: 'LIST' },
         ],
       }),
+      publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
+        query({ id }) {
+          return {
+            url: `/content-releases/${id}/publish`,
+            method: 'POST',
+          };
+        },
+        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+      }),
       deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request['params']>({
         query({ id }) {
           return {
@@ -243,6 +253,7 @@ const {
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
+  usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
 } = releaseApi;
@@ -256,6 +267,7 @@ export {
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
+  usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
   releaseApi,

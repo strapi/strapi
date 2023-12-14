@@ -8,6 +8,7 @@ interface PermissionMap {
   delete: Permission[];
   createAction: Permission[];
   deleteAction: Permission[];
+  publish: Permission[];
 }
 
 export const PERMISSIONS: PermissionMap = {
@@ -44,6 +45,12 @@ export const PERMISSIONS: PermissionMap = {
   deleteAction: [
     {
       action: 'plugin::content-releases.delete-action',
+      subject: null,
+    },
+  ],
+  publish: [
+    {
+      action: 'plugin::content-releases.publish',
       subject: null,
     },
   ],

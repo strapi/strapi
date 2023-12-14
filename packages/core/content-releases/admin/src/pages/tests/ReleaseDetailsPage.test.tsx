@@ -43,8 +43,9 @@ describe('Releases details page', () => {
     const refreshButton = screen.getByRole('button', { name: 'Refresh' });
     expect(refreshButton).toBeInTheDocument();
 
-    const releaseButton = screen.getByRole('button', { name: 'Release' });
-    expect(releaseButton).toBeInTheDocument();
+    const publishButton = screen.getByRole('button', { name: 'Publish' });
+    expect(publishButton).toBeInTheDocument();
+    expect(publishButton).toBeDisabled();
 
     const noContent = screen.getByText(/This release is empty./i);
     expect(noContent).toBeInTheDocument();
@@ -111,5 +112,36 @@ describe('Releases details page', () => {
 
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationCombobox).toBeInTheDocument();
+  });
+
+  it('renders the details page with no action buttons if release is published', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsAndPublishedHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsBodyData))
+      )
+    );
+
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    // There is no publish button because it's already published
+    const publishButton = screen.queryByRole('button', { name: 'Publish' });
+    expect(publishButton).not.toBeInTheDocument();
+
+    expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
+    const container = screen.getByText(/This entry was/);
+    expect(container.querySelector('span')).toHaveTextContent('published');
   });
 });
