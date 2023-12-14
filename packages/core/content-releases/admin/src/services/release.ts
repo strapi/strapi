@@ -14,6 +14,7 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
+  DeleteRelease,
   GetContentTypeEntryReleases,
   GetReleases,
   UpdateRelease,
@@ -230,6 +231,15 @@ const releaseApi = createApi({
         },
         invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
       }),
+      deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request['params']>({
+        query({ id }) {
+          return {
+            url: `/content-releases/${id}`,
+            method: 'DELETE',
+          };
+        },
+        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+      }),
     };
   },
 });
@@ -245,6 +255,7 @@ const {
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
+  useDeleteReleaseMutation,
 } = releaseApi;
 
 export {
@@ -258,5 +269,6 @@ export {
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
+  useDeleteReleaseMutation,
   releaseApi,
 };

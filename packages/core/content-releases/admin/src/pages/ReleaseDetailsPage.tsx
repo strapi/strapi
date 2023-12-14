@@ -26,10 +26,11 @@ import {
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
+  ConfirmDialog,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -43,6 +44,7 @@ import {
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
+  useDeleteReleaseMutation,
 } from '../services/release';
 
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -102,11 +104,13 @@ const PopoverButton = ({ onClick, children }: PopoverButtonProps) => {
 
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
+  toggleWarningSubmit: () => void;
   children: React.ReactNode;
 }
 
 export const ReleaseDetailsLayout = ({
   toggleEditReleaseModal,
+  toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
   const { formatMessage } = useIntl();
@@ -154,6 +158,11 @@ export const ReleaseDetailsLayout = ({
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
+  };
+
+  const openWarningConfirmDialog = () => {
+    toggleWarningSubmit();
+    handleTogglePopover();
   };
 
   if (isLoadingDetails) {
@@ -237,15 +246,17 @@ export const ReleaseDetailsLayout = ({
                           </Typography>
                         </PopoverButton>
                       </CheckPermissions>
-                      <PopoverButton>
-                        <TrashIcon />
-                        <Typography ellipsis textColor="danger600">
-                          {formatMessage({
-                            id: 'content-releases.header.actions.delete',
-                            defaultMessage: 'Delete',
-                          })}
-                        </Typography>
-                      </PopoverButton>
+                      <CheckPermissions permissions={PERMISSIONS.delete}>
+                        <PopoverButton onClick={openWarningConfirmDialog}>
+                          <TrashIcon />
+                          <Typography ellipsis textColor="danger600">
+                            {formatMessage({
+                              id: 'content-releases.header.actions.delete',
+                              defaultMessage: 'Delete',
+                            })}
+                          </Typography>
+                        </PopoverButton>
+                      </CheckPermissions>
                     </Flex>
                     <ReleaseInfoWrapper
                       direction="column"
@@ -501,7 +512,9 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
+  const { push } = useHistory();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
   const {
     isLoading: isLoadingDetails,
@@ -509,14 +522,20 @@ const ReleaseDetailsPage = () => {
     isSuccess: isSuccessDetails,
   } = useGetReleaseQuery({ id: releaseId });
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
+  const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
+  const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
+
   if (isLoadingDetails) {
     return (
-      <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
+      <ReleaseDetailsLayout
+        toggleEditReleaseModal={toggleEditReleaseModal}
+        toggleWarningSubmit={toggleWarningSubmit}
+      >
         <ContentLayout>
           <LoadingIndicatorPage />
         </ContentLayout>
@@ -558,8 +577,33 @@ const ReleaseDetailsPage = () => {
     toggleEditReleaseModal();
   };
 
+  const handleDeleteRelease = async () => {
+    const response = await deleteRelease({
+      id: releaseId,
+    });
+
+    if ('data' in response) {
+      push('/plugins/content-releases');
+    } else if (isAxiosError(response.error)) {
+      // When the response returns an object with 'error', handle axios error
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(response.error),
+      });
+    } else {
+      // Otherwise, the response returns an object with 'error', handle a generic error
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
+  };
+
   return (
-    <ReleaseDetailsLayout toggleEditReleaseModal={toggleEditReleaseModal}>
+    <ReleaseDetailsLayout
+      toggleEditReleaseModal={toggleEditReleaseModal}
+      toggleWarningSubmit={toggleWarningSubmit}
+    >
       <ReleaseDetailsBody />
       {releaseModalShown && (
         <ReleaseModal
@@ -569,6 +613,16 @@ const ReleaseDetailsPage = () => {
           initialValues={{ name: title || '' }}
         />
       )}
+      <ConfirmDialog
+        bodyText={{
+          id: 'content-releases.dialog.confirmation-message',
+          defaultMessage: 'Are you sure you want to delete this release?',
+        }}
+        isOpen={showWarningSubmit}
+        isConfirmButtonLoading={isDeletingRelease}
+        onToggleDialog={toggleWarningSubmit}
+        onConfirm={handleDeleteRelease}
+      />
     </ReleaseDetailsLayout>
   );
 };
