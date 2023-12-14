@@ -1,6 +1,6 @@
 import type { Common } from '../../types';
-import type * as Params from './params/document-service';
-import type * as Result from './result/document-service';
+import type * as Params from './params/document-repository';
+import type * as Result from './result/document-repository';
 
 export type ID = string;
 
@@ -10,7 +10,7 @@ export type UploadFile = (
   files: Record<string, unknown>
 ) => Promise<void>;
 
-export interface DocumentService {
+export interface DocumentRepository {
   uploadFiles: UploadFile;
 
   findMany<

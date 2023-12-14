@@ -64,7 +64,7 @@ import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import convertCustomFieldType from './utils/convert-custom-field-type';
 import { transformContentTypesToModels } from './utils/transform-content-types-to-models';
-import { createDocumentRepository } from './services/document-service/document-repository';
+import { createDocumentEngine } from './services/document-service/document-engine';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -502,7 +502,7 @@ class Strapi extends Container implements StrapiI {
       entityValidator: this.entityValidator,
     });
 
-    this.documents = createDocumentRepository(this);
+    this.documents = createDocumentEngine(this);
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});

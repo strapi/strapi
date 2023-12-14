@@ -1,5 +1,5 @@
 import type { Attribute, Common, Utils } from '../../../types';
-import type { Params } from '../index';
+import type { Params } from '..';
 
 type Pagination = { page: number; pageSize: number; pageCount: number; total: number };
 

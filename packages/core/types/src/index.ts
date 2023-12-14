@@ -99,7 +99,7 @@ export interface Strapi extends Container {
   store?: CoreStore;
   entityValidator?: EntityValidator;
   entityService?: EntityService.EntityService;
-  documents?: Documents.Repository;
+  documents?: Documents.Engine;
   telemetry: TelemetryService;
   requestContext: RequestContext;
   customFields: CustomFields.CustomFields;

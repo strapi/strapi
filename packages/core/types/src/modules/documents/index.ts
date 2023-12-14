@@ -1,16 +1,16 @@
 import { Common } from '../..';
-import { ID, type DocumentService } from './document-service';
+import { ID, type DocumentRepository } from './document-repository';
 import type * as Middleware from './middleware';
-import type * as Params from './params/document-service';
-import type * as Result from './result/document-service';
+import type * as Params from './params/document-repository';
+import type * as Result from './result/document-repository';
 
-export { ID, DocumentService as Service } from './document-service';
+export { ID, DocumentRepository as Repository } from './document-repository';
 export type * as Middleware from './middleware';
 export * as Params from './params';
 export * from './plugin';
 export * from './result';
 
-export type RepositoryInstance<
+export type EngineInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
 > = {
   findMany: <TParams extends Params.FindMany<TContentTypeUID>>(
@@ -74,7 +74,7 @@ export type RepositoryInstance<
    *    return result;
    *  })
    */
-  use: <TAction extends keyof DocumentService>(
+  use: <TAction extends keyof DocumentRepository>(
     action: TAction,
     // QUESTION: How do we type the result type of next?
     //           Should we send params + document id attribute?
@@ -82,7 +82,7 @@ export type RepositoryInstance<
       | Middleware.Middleware<Common.UID.ContentType, TAction>
       | Middleware.Middleware<Common.UID.ContentType, TAction>[],
     opts?: Middleware.Options
-  ) => ThisType<RepositoryInstance<TContentTypeUID>>;
+  ) => ThisType<EngineInstance<TContentTypeUID>>;
 
   /**
    * `.with()` instantiates a new document repository with default parameters
@@ -99,13 +99,13 @@ export type RepositoryInstance<
    */
   with: <TParams extends Params.With<TContentTypeUID>>(
     params?: TParams
-  ) => RepositoryInstance<TContentTypeUID>;
+  ) => EngineInstance<TContentTypeUID>;
 };
 
-export type Repository = {
+export type Engine = {
   <TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID
-  ): RepositoryInstance<TContentTypeUID>;
+  ): EngineInstance<TContentTypeUID>;
 
   /** Add a middleware for all uid's and a specific action
    *  @example - Add a default locale
@@ -114,13 +114,13 @@ export type Repository = {
    *    return next(ctx)
    *  })
    */
-  use: <TAction extends keyof DocumentService>(
+  use: <TAction extends keyof DocumentRepository>(
     action: TAction,
     cb:
       | Middleware.Middleware<Common.UID.ContentType, TAction>
       | Middleware.Middleware<Common.UID.ContentType, TAction>[],
     opts?: Middleware.Options
-  ) => Repository;
+  ) => Engine;
 
   middlewares: Middleware.Manager;
-} & DocumentService;
+} & DocumentRepository;
