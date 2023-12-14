@@ -194,7 +194,7 @@ const releaseApi = createApi({
       }),
       updateReleaseAction: build.mutation<
         UpdateReleaseAction.Response,
-        UpdateReleaseAction.Request
+        UpdateReleaseAction.Request & { query: GetReleaseActions.Request['query'] }
       >({
         query({ body, params }) {
           return {
@@ -206,6 +206,30 @@ const releaseApi = createApi({
         invalidatesTags: (result, error, arg) => [
           { type: 'ReleaseAction', id: arg.params.actionId },
         ],
+        async onQueryStarted({ body, params, query }, { dispatch, queryFulfilled }) {
+          // We need to mimic the same params received by the getReleaseActions query
+          const paramsWithoutActionId = {
+            releaseId: params.releaseId,
+            ...query,
+          };
+
+          const patchResult = dispatch(
+            releaseApi.util.updateQueryData('getReleaseActions', paramsWithoutActionId, (draft) => {
+              // @ts-expect-error Type instantiation is excessively deep and possibly infinite.
+              const action = draft.data.find((action) => action.id === params.actionId);
+
+              if (action) {
+                action.type = body.type;
+              }
+            })
+          );
+
+          try {
+            await queryFulfilled;
+          } catch {
+            patchResult.undo();
+          }
+        },
       }),
       deleteReleaseAction: build.mutation<
         DeleteReleaseAction.Response,

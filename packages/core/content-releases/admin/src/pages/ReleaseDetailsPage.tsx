@@ -349,6 +349,7 @@ const ReleaseDetailsBody = () => {
       body: {
         type: e.target.value as ReleaseAction['type'],
       },
+      query, // We are passing the query params to make optimistic updates
     });
 
     if ('error' in response) {
