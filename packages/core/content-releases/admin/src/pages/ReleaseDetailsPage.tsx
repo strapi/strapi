@@ -105,6 +105,7 @@ interface ReleaseDetailsLayoutProps {
 
 export const ReleaseDetailsLayout = ({
   toggleEditReleaseModal,
+  toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
   const { formatMessage } = useIntl();
