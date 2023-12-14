@@ -834,5 +834,123 @@ export const server = setupServer(
         })
       );
     }),
+    /**
+     * Audit Logs
+     */
+    rest.get('/admin/audit-logs', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          results: [
+            {
+              id: 1,
+              action: 'admin.logout',
+              date: '2023-10-31T15:56:54.873Z',
+              payload: {
+                user: {
+                  id: 1,
+                  firstname: 'test',
+                  lastname: 'testing',
+                  username: null,
+                  email: 'test@testing.com',
+                  isActive: true,
+                  blocked: false,
+                  preferedLanguage: null,
+                  createdAt: '2023-10-26T19:19:38.245Z',
+                  updatedAt: '2023-10-26T19:19:38.245Z',
+                  roles: [
+                    {
+                      id: 1,
+                      name: 'Super Admin',
+                      description: 'Super Admins can access and manage all features and settings.',
+                      code: 'strapi-super-admin',
+                    },
+                  ],
+                },
+              },
+              user: {
+                id: 1,
+                email: 'test@testing.com',
+                displayName: 'test testing',
+              },
+            },
+            {
+              id: 2,
+              action: 'user.create',
+              date: '2023-10-31T15:57:38.957Z',
+              payload: {
+                user: {
+                  id: 2,
+                  firstname: 'editor',
+                  lastname: 'test',
+                  username: null,
+                  email: 'editor@testing.com',
+                  isActive: true,
+                  blocked: false,
+                  preferedLanguage: null,
+                  createdAt: '2023-10-31T15:57:38.948Z',
+                  updatedAt: '2023-10-31T15:57:38.948Z',
+                  roles: [
+                    {
+                      id: 2,
+                      name: 'Editor',
+                      description:
+                        'Editors can manage and publish contents including those of other users.',
+                      code: 'strapi-editor',
+                    },
+                  ],
+                },
+              },
+              user: {
+                id: 1,
+                email: 'test@testing.com',
+                displayName: 'test testing',
+              },
+            },
+          ],
+          pagination: {
+            page: 1,
+            pageSize: 2,
+            pageCount: 1,
+            total: 2,
+          },
+        })
+      );
+    }),
+    rest.get('/admin/audit-logs/:id', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          id: 1,
+          action: 'admin.logout',
+          date: '2023-10-31T15:56:54.873Z',
+          payload: {
+            user: {
+              id: 1,
+              firstname: 'test',
+              lastname: 'testing',
+              username: null,
+              email: 'test@testing.com',
+              isActive: true,
+              blocked: false,
+              preferedLanguage: null,
+              createdAt: '2023-10-26T19:19:38.245Z',
+              updatedAt: '2023-10-26T19:19:38.245Z',
+              roles: [
+                {
+                  id: 1,
+                  name: 'Super Admin',
+                  description: 'Super Admins can access and manage all features and settings.',
+                  code: 'strapi-super-admin',
+                },
+              ],
+            },
+          },
+          user: {
+            id: 1,
+            email: 'test@testing.com',
+            displayName: 'test testing',
+          },
+        })
+      );
+    }),
   ]
 );

@@ -40,7 +40,9 @@ interface StorageItems {
 type StorageItemValues = StorageItems[keyof StorageItems];
 
 /**
- * @deprecated you use should use the `useAuth` hook instead.
+ * @deprecated if you're trying to interact with the token or current user you use should use the `useAuth` hook instead.
+ * If you're generally interacting with localStorage, then access this directly e.g. `localStorage.getItem('myKey')`.
+ *
  * This will be removed in V5.
  */
 const auth = {

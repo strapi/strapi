@@ -23,7 +23,6 @@ import {
   LoadingIndicatorPage,
   pxToRem,
   translatedErrors,
-  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -35,20 +34,18 @@ import { Formik, FormikHelpers } from 'formik';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
 import { AppState, setAppTheme } from '../reducer';
-import { useUpdateMeMutation } from '../services/auth';
+import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getFullName } from '../utils/getFullName';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
-import type { IsSSOLocked } from '../../../shared/contracts/providers';
 import type { UpdateMe } from '../../../shared/contracts/users';
 
 const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
@@ -77,7 +74,6 @@ const ProfilePage = () => {
   const { notifyStatus } = useNotifyAT();
   const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
   const dispatch = useTypedDispatch();
-  const { get } = useFetchClient();
   const {
     _unstableFormatValidationErrors: formatValidationErrors,
     _unstableFormatAPIError: formatApiError,
@@ -105,25 +101,22 @@ const ProfilePage = () => {
 
   const [updateMe, { isLoading: isSubmittingForm }] = useUpdateMeMutation();
 
-  const { isLoading, data: dataSSO } = useQuery(
-    ['providers', 'isSSOLocked'],
-    async () => {
-      const {
-        data: { data },
-      } = await get<IsSSOLocked.Response>('/admin/providers/isSSOLocked');
+  const {
+    isLoading,
+    data: dataSSO,
+    error,
+  } = useIsSSOLockedQuery(undefined, {
+    skip: !(window.strapi.isEE && window.strapi.features.isEnabled('sso')),
+  });
 
-      return data;
-    },
-    {
-      enabled: window.strapi.isEE && window.strapi.features.isEnabled('sso'),
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'Settings.permissions.users.sso.provider.error' },
-        });
-      },
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'Settings.permissions.users.sso.provider.error' },
+      });
     }
-  );
+  }, [error, toggleNotification]);
 
   type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;

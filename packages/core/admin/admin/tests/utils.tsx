@@ -34,7 +34,7 @@ import { reducer as crudReducer } from '../src/content-manager/sharedReducers/cr
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
 import { reducer as appReducer } from '../src/reducer';
-import { adminApi } from '../src/services/admin';
+import { adminApi } from '../src/services/api';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -72,6 +72,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       'content-manager_editViewLayoutManager': editViewReducer,
       'content-manager_editViewCrudReducer': crudReducer,
     },
+    // @ts-expect-error – this fails.
     middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), adminApi.middleware],
   });
 

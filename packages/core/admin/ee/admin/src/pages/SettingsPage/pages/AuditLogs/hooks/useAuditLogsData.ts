@@ -1,9 +1,9 @@
-import { useFetchClient, useNotification, useQueryParams } from '@strapi/helper-plugin';
-import { useQuery } from 'react-query';
-import { useLocation } from 'react-router-dom';
+import * as React from 'react';
 
-import { useAdminUsers } from '../../../../../../../../admin/src/hooks/useAdminUsers';
-import { GetAll } from '../../../../../../../../shared/contracts/audit-logs';
+import { useAPIErrorHandler, useNotification, useQueryParams } from '@strapi/helper-plugin';
+
+import { useAdminUsers } from '../../../../../../../../admin/src/services/users';
+import { useGetAuditLogsQuery } from '../../../../../services/auditLogs';
 
 export const useAuditLogsData = ({
   canReadAuditLogs,
@@ -12,53 +12,48 @@ export const useAuditLogsData = ({
   canReadAuditLogs: boolean;
   canReadUsers: boolean;
 }) => {
-  const { get } = useFetchClient();
-  const { search } = useLocation();
   const toggleNotification = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams();
 
-  const queryOptions = {
-    keepPreviousData: true,
-    retry: false,
-    staleTime: 1000 * 20, // 20 seconds
-    onError: (error: Error) => toggleNotification({ type: 'warning', message: error.message }),
-  };
-
   const {
-    users,
+    data,
+    error,
     isError: isUsersError,
     isLoading: isLoadingUsers,
   } = useAdminUsers(
     {},
     {
-      ...queryOptions,
-      enabled: canReadUsers,
-      staleTime: 2 * (1000 * 60), // 2 minutes
+      skip: !canReadUsers,
+      refetchOnMountOrArgChange: true,
     }
   );
+
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({ type: 'warning', message: formatAPIError(error) });
+    }
+  }, [error, toggleNotification, formatAPIError]);
 
   const {
     data: auditLogs,
     isLoading: isLoadingAuditLogs,
     isError: isAuditLogsError,
-  } = useQuery(
-    ['auditLogs', search],
-    async () => {
-      const { data } = await get<GetAll.Response['data']>(`/admin/audit-logs`, {
-        params: query,
-      });
+    error: auditLogsError,
+  } = useGetAuditLogsQuery(query, {
+    refetchOnMountOrArgChange: true,
+    skip: !canReadAuditLogs,
+  });
 
-      return data;
-    },
-    {
-      ...queryOptions,
-      enabled: canReadAuditLogs,
+  React.useEffect(() => {
+    if (auditLogsError) {
+      toggleNotification({ type: 'warning', message: formatAPIError(auditLogsError) });
     }
-  );
+  }, [auditLogsError, toggleNotification, formatAPIError]);
 
   return {
     auditLogs,
-    users,
+    users: data?.users ?? [],
     isLoading: isLoadingUsers || isLoadingAuditLogs,
     hasError: isAuditLogsError || isUsersError,
   };

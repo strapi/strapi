@@ -7,7 +7,6 @@ import {
   NoPermissions,
   SettingsPageTitle,
   useAPIErrorHandler,
-  useFetchClient,
   useFocusWhenNavigate,
   useGuidedTour,
   useNotification,
@@ -15,18 +14,16 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { AxiosError } from 'axios';
+import { Entity } from '@strapi/types';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../selectors';
+import { useTypedSelector } from '../../../../core/store/hooks';
+import { useOnce } from '../../../../hooks/useOnce';
+import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { Table } from '../../components/Tokens/Table';
-
-import type { List } from '../../../../../../shared/contracts/api-token';
 
 const TABLE_HEADERS = [
   {
@@ -77,25 +74,22 @@ const TABLE_HEADERS = [
 
 export const ListView = () => {
   useFocusWhenNavigate();
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['api-tokens']
+  );
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-  } = useRBAC(permissions.settings?.['api-tokens']);
+  } = useRBAC(permissions);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
   const { startSection } = useGuidedTour();
-  const startSectionRef = React.useRef(startSection);
-  const { get, del } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
-    if (startSectionRef.current) {
-      startSectionRef.current('apiTokens');
-    }
-  }, []);
+    startSection('apiTokens');
+  }, [startSection]);
 
   React.useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
@@ -109,58 +103,59 @@ export const ListView = () => {
     },
   }));
 
-  const { data: apiTokens, isLoading: isLoadingTokens } = useQuery(
-    ['api-tokens'],
-    async () => {
-      trackUsage('willAccessTokenList', {
-        tokenType: API_TOKEN_TYPE,
+  useOnce(() => {
+    trackUsage('willAccessTokenList', {
+      tokenType: API_TOKEN_TYPE,
+    });
+  });
+
+  const {
+    data: apiTokens = [],
+    isLoading,
+    error,
+  } = useGetAPITokensQuery(undefined, {
+    skip: !canRead,
+  });
+
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
       });
-
-      const {
-        data: { data },
-      } = await get<List.Response>(`/admin/api-tokens`);
-
-      trackUsage('didAccessTokenList', { number: data.length, tokenType: API_TOKEN_TYPE });
-
-      return data;
-    },
-    {
-      cacheTime: 0,
-      enabled: canRead,
-      onError(error) {
-        if (error instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(error),
-          });
-        }
-      },
     }
-  );
+  }, [error, formatAPIError, toggleNotification]);
 
-  const isLoading = isLoadingTokens;
+  React.useEffect(() => {
+    trackUsage('didAccessTokenList', { number: apiTokens.length, tokenType: API_TOKEN_TYPE });
+  }, [apiTokens, trackUsage]);
 
-  const deleteMutation = useMutation(
-    async (id) => {
-      await del(`/admin/api-tokens/${id}`);
-    },
-    {
-      async onSuccess() {
-        await queryClient.invalidateQueries(['api-tokens']);
-        trackUsage('didDeleteToken');
-      },
-      onError(error) {
-        if (error instanceof AxiosError) {
-          toggleNotification({ type: 'warning', message: formatAPIError(error) });
-        }
-      },
+  const [deleteToken] = useDeleteAPITokenMutation();
+
+  const handleDelete = async (id: Entity.ID) => {
+    try {
+      const res = await deleteToken(id);
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+
+        return;
+      }
+
+      trackUsage('didDeleteToken');
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'Something went wrong',
+        },
+      });
     }
-  );
-
-  const hasApiTokens = apiTokens && apiTokens.length > 0;
-  const shouldDisplayDynamicTable = canRead && hasApiTokens;
-  const shouldDisplayNoContent = canRead && !hasApiTokens && !canCreate;
-  const shouldDisplayNoContentWithCreationButton = canRead && !hasApiTokens && canCreate;
+  };
 
   return (
     <Main aria-busy={isLoading}>
@@ -195,19 +190,18 @@ export const ListView = () => {
       />
       <ContentLayout>
         {!canRead && <NoPermissions />}
-        {shouldDisplayDynamicTable && (
+        {canRead && apiTokens.length > 0 && (
           <Table
             permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="api-tokens"
             isLoading={isLoading}
-            // @ts-expect-error not converted yet
-            onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
+            onConfirmDelete={handleDelete}
             tokens={apiTokens}
             tokenType={API_TOKEN_TYPE}
           />
         )}
-        {shouldDisplayNoContentWithCreationButton && (
+        {canRead && canCreate && apiTokens.length === 0 && (
           <NoContent
             content={{
               id: 'Settings.apiTokens.addFirstToken',
@@ -223,7 +217,7 @@ export const ListView = () => {
             }
           />
         )}
-        {shouldDisplayNoContent && (
+        {canRead && !canCreate && apiTokens.length === 0 && (
           <NoContent
             content={{
               id: 'Settings.apiTokens.emptyStateLayout',
@@ -237,10 +231,12 @@ export const ListView = () => {
 };
 
 export const ProtectedListView = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['api-tokens'].main
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.['api-tokens'].main}>
+    <CheckPagePermissions permissions={permissions}>
       <ListView />
     </CheckPagePermissions>
   );

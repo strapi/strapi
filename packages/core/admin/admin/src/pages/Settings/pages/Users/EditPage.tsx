@@ -34,10 +34,9 @@ import * as yup from 'yup';
 
 import { Update } from '../../../../../../shared/contracts/user';
 import { useTypedSelector } from '../../../../core/store/hooks';
-import { useAdminUsers } from '../../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
-import { useUpdateUserMutation } from '../../../../services/users';
+import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { getFullName } from '../../../../utils/getFullName';
 
@@ -95,35 +94,39 @@ const EditPage = () => {
   useFocusWhenNavigate();
 
   const {
-    users: [user],
+    data,
+    error,
     isLoading: isLoadingAdminUsers,
   } = useAdminUsers(
     { id },
     {
-      cacheTime: 0,
-      onError(error) {
-        const { status } = error.response ?? {};
-
-        // Redirect the use to the homepage if is not allowed to read
-        if (status === 403) {
-          toggleNotification({
-            type: 'info',
-            message: {
-              id: 'notification.permission.not-allowed-read',
-              defaultMessage: 'You are not allowed to see this document',
-            },
-          });
-
-          push('/');
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
-          });
-        }
-      },
+      refetchOnMountOrArgChange: true,
     }
   );
+
+  const [user] = data?.users ?? [];
+
+  React.useEffect(() => {
+    if (error) {
+      // Redirect the use to the homepage if is not allowed to read
+      if (error.name === 'UnauthorizedError') {
+        toggleNotification({
+          type: 'info',
+          message: {
+            id: 'notification.permission.not-allowed-read',
+            defaultMessage: 'You are not allowed to see this document',
+          },
+        });
+
+        push('/');
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: formatAPIError(error) },
+        });
+      }
+    }
+  }, [error, formatAPIError, push, toggleNotification]);
 
   const isLoading = isLoadingAdminUsers || !MagicLink || isLoadingRBAC;
 

@@ -1,12 +1,6 @@
 import * as React from 'react';
 
-import {
-  AppInfoProvider,
-  LoadingIndicatorPage,
-  useFetchClient,
-  useGuidedTour,
-} from '@strapi/helper-plugin';
-import { useQueries } from 'react-query';
+import { AppInfoProvider, LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 //  TODO: DS add loader
@@ -14,15 +8,14 @@ import valid from 'semver/functions/valid';
 import packageJSON from '../../../package.json';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
+import { useInformationQuery } from '../services/admin';
+import { useGetMyPermissionsQuery } from '../services/auth';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
 
 import { NpsSurvey } from './NpsSurvey';
 import { PluginsInitializer } from './PluginsInitializer';
 import { RBACProvider } from './RBACProvider';
-
-import type { Information } from '../../../shared/contracts/admin';
-import type { GetOwnPermissions, GetMe } from '../../../shared/contracts/users';
 
 const strapiVersion = packageJSON.version;
 
@@ -46,27 +39,23 @@ const AuthenticatedApp = () => {
   }, [userInfo]);
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
-  const { get } = useFetchClient();
-  const [
-    { data: appInfos, status },
-    { data: tagName, isLoading },
-    { data: permissions, status: fetchPermissionsStatus, refetch, isFetching },
-    { data: userRoles },
-  ] = useQueries([
-    {
-      queryKey: 'app-infos',
-      async queryFn() {
-        const { data } = await get<Information.Response>('/admin/information');
 
-        return data.data;
-      },
-    },
-    {
-      queryKey: 'strapi-release',
-      async queryFn() {
-        try {
-          const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
+  const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
+  /**
+   * TODO: in V5 remove the `RBACProvider` and fire this in the Auth provider instead.
+   */
+  const {
+    data: permissions,
+    isLoading: isLoadingPermissions,
+    refetch,
+  } = useGetMyPermissionsQuery();
 
+  const [tagName, setTagName] = React.useState<string>(strapiVersion);
+
+  React.useEffect(() => {
+    if (showReleaseNotification) {
+      fetch('https://api.github.com/repos/strapi/strapi/releases/latest')
+        .then(async (res) => {
           if (!res.ok) {
             throw new Error();
           }
@@ -77,52 +66,27 @@ const AuthenticatedApp = () => {
             throw new Error();
           }
 
-          return response.tag_name;
-        } catch (err) {
-          // Don't throw an error
-          return strapiVersion;
-        }
-      },
-      enabled: showReleaseNotification,
-      initialData: strapiVersion,
-    },
-    {
-      queryKey: 'admin-users-permission',
-      async queryFn() {
-        const { data } = await get<GetOwnPermissions.Response>('/admin/users/me/permissions');
+          setTagName(response.tag_name);
+        })
+        .catch(() => {
+          /**
+           * silence is golden & we'll use the strapiVersion as a fallback
+           */
+        });
+    }
+  }, [showReleaseNotification]);
 
-        return data.data;
-      },
-      initialData: [],
-    },
-    {
-      queryKey: 'user-roles',
-      async queryFn() {
-        const {
-          data: {
-            data: { roles },
-          },
-        } = await get<GetMe.Response>('/admin/users/me');
+  const userRoles = useAuth('AuthenticatedApp', (state) => state.user?.roles);
 
-        return roles;
-      },
-    },
-  ]);
-
-  const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tagName);
-
-  /**
-   * TODO: does this actually need to be an effect?
-   */
   React.useEffect(() => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
 
-      if (isUserSuperAdmin && appInfos?.autoReload) {
+      if (isUserSuperAdmin && appInfo?.autoReload) {
         setGuidedTourVisibility(true);
       }
     }
-  }, [userRoles, appInfos, setGuidedTourVisibility]);
+  }, [userRoles, appInfo?.autoReload, setGuidedTourVisibility]);
 
   React.useEffect(() => {
     hashAdminUserEmail(userInfo).then((id) => {
@@ -134,30 +98,24 @@ const AuthenticatedApp = () => {
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
-  const shouldShowNotDependentQueriesLoader =
-    isFetching || status === 'loading' || fetchPermissionsStatus === 'loading';
-
-  const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
-
-  if (shouldShowLoader) {
+  if (isLoadingAppInfo || isLoadingPermissions) {
     return <LoadingIndicatorPage />;
   }
 
-  // TODO: add error state
-  if (status === 'error') {
-    return <div>error...</div>;
-  }
+  const refetchPermissions = () => {
+    refetch();
+  };
 
   return (
     <AppInfoProvider
-      {...appInfos}
+      {...appInfo}
       userId={userId}
       latestStrapiReleaseTag={tagName}
       setUserDisplayName={setUserDisplayName}
-      shouldUpdateStrapi={shouldUpdateStrapi}
+      shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
       userDisplayName={userDisplayName}
     >
-      <RBACProvider permissions={permissions ?? []} refetchPermissions={refetch}>
+      <RBACProvider permissions={permissions ?? []} refetchPermissions={refetchPermissions}>
         <NpsSurvey />
         <PluginsInitializer />
       </RBACProvider>

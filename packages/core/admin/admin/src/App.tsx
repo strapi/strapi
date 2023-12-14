@@ -12,7 +12,6 @@ import {
   MenuItem,
   TrackingProvider,
   useAppInfo,
-  useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import merge from 'lodash/merge';
@@ -71,7 +70,6 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const appInfo = useAppInfo();
-  const { post } = useFetchClient();
   const token = useAuth('App', (state) => state.token);
 
   const authRoutes = React.useMemo(() => {
@@ -129,7 +127,7 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
         },
       });
     }
-  }, [appInfo.currentEnvironment, telemetryPropertiesQuery.data, uuid, post]);
+  }, [appInfo.currentEnvironment, telemetryPropertiesQuery.data, uuid]);
 
   const trackingInfo = React.useMemo(
     () => ({

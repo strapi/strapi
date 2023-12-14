@@ -5,9 +5,9 @@ export const ROUTES_EE: Route[] = [
     ? [
         {
           async Component() {
-            const { ProtectedAuditLogsListPage } = await import('./pages/AuditLogs/ListPage');
+            const { ProtectedListPage } = await import('./pages/AuditLogs/ListPage');
 
-            return ProtectedAuditLogsListPage;
+            return ProtectedListPage;
           },
           to: '/settings/audit-logs',
           exact: true,

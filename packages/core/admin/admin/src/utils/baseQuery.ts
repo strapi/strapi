@@ -8,46 +8,53 @@ import { isAxiosError, type AxiosRequestConfig } from 'axios';
  * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments {
   url: string;
-  method: AxiosRequestConfig['method'];
+  method?: AxiosRequestConfig['method'];
   data?: AxiosRequestConfig['data'];
   config?: AxiosRequestConfig;
 }
 
-interface UnknownApiError {
+export interface UnknownApiError {
   name: 'UnknownError';
   message: string;
   details?: unknown;
   status?: number;
 }
 
-type BaseQueryError = ApiError | UnknownApiError;
+export type BaseQueryError = ApiError | UnknownApiError;
 
 const axiosBaseQuery =
-  (): BaseQueryFn<QueryArguments, unknown, BaseQueryError> =>
-  async ({ url, method, data, config }, { signal }) => {
+  (): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
+  async (query, { signal }) => {
     try {
       const { get, post, del, put } = getFetchClient();
 
-      if (method === 'POST') {
-        const result = await post(url, data, { ...config, signal });
+      if (typeof query === 'string') {
+        const result = await get(query, { signal });
+        return { data: result.data };
+      } else {
+        const { url, method = 'GET', data, config } = query;
+
+        if (method === 'POST') {
+          const result = await post(url, data, { ...config, signal });
+          return { data: result.data };
+        }
+
+        if (method === 'DELETE') {
+          const result = await del(url, { ...config, signal });
+          return { data: result.data };
+        }
+
+        if (method === 'PUT') {
+          const result = await put(url, data, { ...config, signal });
+          return { data: result.data };
+        }
+
+        /**
+         * Default is GET.
+         */
+        const result = await get(url, { ...config, signal });
         return { data: result.data };
       }
-
-      if (method === 'DELETE') {
-        const result = await del(url, { ...config, signal });
-        return { data: result.data };
-      }
-
-      if (method === 'PUT') {
-        const result = await put(url, data, { ...config, signal });
-        return { data: result.data };
-      }
-
-      /**
-       * Default is GET.
-       */
-      const result = await get(url, { ...config, signal });
-      return { data: result.data };
     } catch (err) {
       /**
        * Handle error of type AxiosError

@@ -13,7 +13,7 @@ import { reducer as editViewReducer } from '../../content-manager/pages/EditView
 import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
 import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
-import { adminApi } from '../../services/admin';
+import { adminApi } from '../../services/api';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.

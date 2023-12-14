@@ -17,7 +17,6 @@ import { useNotification, useAppInfo, usePersistentState } from '@strapi/helper-
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
 
@@ -147,45 +146,6 @@ const NpsSurvey = () => {
     license: 'Enterprise' | 'Community';
   }
 
-  const { mutate, isLoading } = useMutation<unknown, unknown, NpsSurveyMutationBody>(
-    async (form) => {
-      const res = await fetch('https://analytics.strapi.io/submit-nps', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to submit NPS survey');
-      }
-
-      return res;
-    },
-    {
-      onSuccess() {
-        setNpsSurveySettings((settings) => ({
-          ...settings,
-          lastResponseDate: new Date().toString(),
-          firstDismissalDate: null,
-          lastDismissalDate: null,
-        }));
-        setIsFeedbackResponse(true);
-        // Thank you message displayed in the banner should disappear after few seconds.
-        setTimeout(() => {
-          setSurveyIsShown(false);
-        }, 3000);
-      },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-        });
-      },
-    }
-  );
-
   // Only check on first render if the survey should be shown
   const [surveyIsShown, setSurveyIsShown] = React.useState(
     checkIfShouldShowSurvey(npsSurveySettings)
@@ -214,21 +174,51 @@ const NpsSurvey = () => {
     return null;
   }
 
-  const handleSubmitResponse = ({
+  const handleSubmitResponse = async ({
     npsSurveyRating,
     npsSurveyFeedback,
   }: {
     npsSurveyRating: NpsSurveyMutationBody['rating'];
     npsSurveyFeedback: NpsSurveyMutationBody['comment'];
   }) => {
-    mutate({
-      email: typeof user === 'object' && user.email ? user.email : '',
-      rating: npsSurveyRating,
-      comment: npsSurveyFeedback,
-      environment: currentEnvironment,
-      version: strapiVersion ?? undefined,
-      license: window.strapi.projectType,
-    });
+    try {
+      const body = {
+        email: typeof user === 'object' && user.email ? user.email : '',
+        rating: npsSurveyRating,
+        comment: npsSurveyFeedback,
+        environment: currentEnvironment,
+        version: strapiVersion ?? undefined,
+        license: window.strapi.projectType,
+      };
+      const res = await fetch('https://analytics.strapi.io/submit-nps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit NPS survey');
+      }
+
+      setNpsSurveySettings((settings) => ({
+        ...settings,
+        lastResponseDate: new Date().toString(),
+        firstDismissalDate: null,
+        lastDismissalDate: null,
+      }));
+      setIsFeedbackResponse(true);
+      // Thank you message displayed in the banner should disappear after few seconds.
+      setTimeout(() => {
+        setSurveyIsShown(false);
+      }, 3000);
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
   };
 
   const handleDismiss = () => {
@@ -262,7 +252,7 @@ const NpsSurvey = () => {
           npsSurveyRating: yup.number().required(),
         })}
       >
-        {({ values, handleChange, setFieldValue }) => (
+        {({ values, handleChange, setFieldValue, isSubmitting }) => (
           <Form name="npsSurveyForm">
             <Flex
               hasRadius
@@ -369,7 +359,7 @@ const NpsSurvey = () => {
                           {values.npsSurveyFeedback}
                         </Textarea>
                       </Box>
-                      <Button marginBottom={2} type="submit" loading={isLoading}>
+                      <Button marginBottom={2} type="submit" loading={isSubmitting}>
                         {formatMessage({
                           id: 'app.components.NpsSurvey.submit-feedback',
                           defaultMessage: 'Submit Feedback',

@@ -1,3 +1,4 @@
+import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
   type RenewToken,
   type Login,
@@ -7,10 +8,10 @@ import {
   type RegistrationInfo,
   ForgotPassword,
 } from '../../../shared/contracts/authentication';
+import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
+import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shared/contracts/users';
 
-import { adminApi } from './admin';
-
-import type { GetMe, UpdateMe } from '../../../shared/contracts/users';
+import { adminApi } from './api';
 
 const authService = adminApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -26,6 +27,15 @@ const authService = adminApi.injectEndpoints({
         return res.data;
       },
       providesTags: (res) => (res ? ['Me', { type: 'User', id: res.id }] : ['Me']),
+    }),
+    getMyPermissions: builder.query<GetOwnPermissions.Response['data'], void>({
+      query: () => ({
+        method: 'GET',
+        url: '/admin/users/me/permissions',
+      }),
+      transformResponse(res: GetOwnPermissions.Response) {
+        return res.data;
+      },
     }),
     updateMe: builder.mutation<UpdateMe.Response['data'], UpdateMe.Request['body']>({
       query: (body) => ({
@@ -123,6 +133,45 @@ const authService = adminApi.injectEndpoints({
         data: body,
       }),
     }),
+    isSSOLocked: builder.query<IsSSOLocked.Response['data'], void>({
+      query: () => ({
+        url: '/admin/providers/isSSOLocked',
+        method: 'GET',
+      }),
+      transformResponse(res: IsSSOLocked.Response) {
+        return res.data;
+      },
+    }),
+    getProviders: builder.query<GetProviders.Response, void>({
+      query: () => ({
+        url: '/admin/providers',
+        method: 'GET',
+      }),
+    }),
+    getProviderOptions: builder.query<ProvidersOptions.Response['data'], void>({
+      query: () => ({
+        url: '/admin/providers/options',
+        method: 'GET',
+      }),
+      transformResponse(res: ProvidersOptions.Response) {
+        return res.data;
+      },
+      providesTags: ['ProvidersOptions'],
+    }),
+    updateProviderOptions: builder.mutation<
+      ProvidersOptions.Response['data'],
+      ProvidersOptions.Request['body']
+    >({
+      query: (body) => ({
+        url: '/admin/providers/options',
+        method: 'PUT',
+        data: body,
+      }),
+      transformResponse(res: ProvidersOptions.Response) {
+        return res.data;
+      },
+      invalidatesTags: ['ProvidersOptions'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -138,6 +187,11 @@ const {
   useRegisterUserMutation,
   useGetRegistrationInfoQuery,
   useForgotPasswordMutation,
+  useGetMyPermissionsQuery,
+  useIsSSOLockedQuery,
+  useGetProvidersQuery,
+  useGetProviderOptionsQuery,
+  useUpdateProviderOptionsMutation,
 } = authService;
 
 export {
@@ -151,4 +205,9 @@ export {
   useRegisterUserMutation,
   useGetRegistrationInfoQuery,
   useForgotPasswordMutation,
+  useGetMyPermissionsQuery,
+  useIsSSOLockedQuery,
+  useGetProvidersQuery,
+  useGetProviderOptionsQuery,
+  useUpdateProviderOptionsMutation,
 };
