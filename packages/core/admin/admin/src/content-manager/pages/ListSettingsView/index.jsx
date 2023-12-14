@@ -19,6 +19,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import { usePluginsQueryParams } from '../../hooks';
+import { queryKeyPrefix as initDataQueryKey } from '../../hooks/useContentManagerInitData';
 import { checkIfAttributeIsDisplayable } from '../../utils';
 import { getTranslation } from '../../utils/translations';
 
@@ -82,7 +83,7 @@ export const ListSettingsView = ({ layout, slug }) => {
     {
       onSuccess() {
         trackUsage('didEditListSettings');
-        queryClient.invalidateQueries(['contentManager', 'init']);
+        queryClient.invalidateQueries(initDataQueryKey);
       },
       onError() {
         toggleNotification({

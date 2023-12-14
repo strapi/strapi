@@ -27,6 +27,7 @@ describe('ADMIN | new StrapiApp', () => {
           "fieldSizes": {},
           "models": [],
           "singleTypeLinks": [],
+          "status": "loading",
         },
         "content-manager_editViewCrudReducer": {
           "componentsDataStructure": {},

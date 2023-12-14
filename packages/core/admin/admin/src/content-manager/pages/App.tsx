@@ -182,8 +182,13 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
  * reducer
  * -----------------------------------------------------------------------------------------------*/
 
-const RESET_INIT_DATA = 'ContentManager/App/RESET_INIT_DATA';
-const SET_INIT_DATA = 'ContentManager/App/SET_INIT_DATA';
+export const GET_INIT_DATA = 'ContentManager/App/GET_INIT_DATA';
+export const RESET_INIT_DATA = 'ContentManager/App/RESET_INIT_DATA';
+export const SET_INIT_DATA = 'ContentManager/App/SET_INIT_DATA';
+
+interface GetInitDataAction {
+  type: typeof GET_INIT_DATA;
+}
 
 interface ResetInitDataAction {
   type: typeof RESET_INIT_DATA;
@@ -191,14 +196,16 @@ interface ResetInitDataAction {
 
 interface SetInitDataAction {
   type: typeof SET_INIT_DATA;
-  authorizedCollectionTypeLinks: ContentManagerAppState['collectionTypeLinks'];
-  authorizedSingleTypeLinks: ContentManagerAppState['singleTypeLinks'];
-  components: ContentManagerAppState['components'];
-  contentTypeSchemas: ContentManagerAppState['models'];
-  fieldSizes: ContentManagerAppState['fieldSizes'];
+  data: {
+    authorizedCollectionTypeLinks: ContentManagerAppState['collectionTypeLinks'];
+    authorizedSingleTypeLinks: ContentManagerAppState['singleTypeLinks'];
+    components: ContentManagerAppState['components'];
+    contentTypeSchemas: ContentManagerAppState['models'];
+    fieldSizes: ContentManagerAppState['fieldSizes'];
+  };
 }
 
-type Action = ResetInitDataAction | SetInitDataAction;
+type Action = GetInitDataAction | ResetInitDataAction | SetInitDataAction;
 
 interface ContentManagerAppState {
   collectionTypeLinks: ContentManagerLink[];
@@ -206,6 +213,7 @@ interface ContentManagerAppState {
   fieldSizes: Contracts.Init.GetInitData.Response['data']['fieldSizes'];
   models: Contracts.Init.GetInitData.Response['data']['contentTypes'];
   singleTypeLinks: ContentManagerLink[];
+  status: 'loading' | 'resolved' | 'error';
 }
 
 const initialState = {
@@ -214,6 +222,7 @@ const initialState = {
   fieldSizes: {},
   models: [],
   singleTypeLinks: [],
+  status: 'loading',
 } satisfies ContentManagerAppState;
 
 const selectSchemas = createSelector(
@@ -230,17 +239,18 @@ const reducer = (state: ContentManagerAppState = initialState, action: Action) =
         return initialState;
       }
       case SET_INIT_DATA: {
-        draftState.collectionTypeLinks = action.authorizedCollectionTypeLinks.filter(
+        draftState.collectionTypeLinks = action.data.authorizedCollectionTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
-        draftState.singleTypeLinks = action.authorizedSingleTypeLinks.filter(
+        draftState.singleTypeLinks = action.data.authorizedSingleTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
         // @ts-expect-error – recursive types
-        draftState.components = action.components;
+        draftState.components = action.data.components;
         // @ts-expect-error – issues with immer types not working quite right....
-        draftState.models = action.contentTypeSchemas;
-        draftState.fieldSizes = action.fieldSizes;
+        draftState.models = action.data.contentTypeSchemas;
+        draftState.fieldSizes = action.data.fieldSizes;
+        draftState.status = 'resolved';
         break;
       }
       default:

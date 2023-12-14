@@ -8,14 +8,17 @@ import {
   useNotification,
   useRBACProvider,
   useStrapiApp,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { AxiosError } from 'axios';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { SET_INIT_DATA, RESET_INIT_DATA } from '../pages/App';
 import { getTranslation } from '../utils/translations';
 
 const { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } = HOOKS;
@@ -31,6 +34,8 @@ interface ContentManagerLink {
   isDisplayed: boolean;
 }
 
+export const queryKeyPrefix = ['contentManager', 'init'];
+
 const useContentManagerInitData = () => {
   const dispatch = useTypedDispatch();
   const toggleNotification = useNotification();
@@ -39,6 +44,8 @@ const useContentManagerInitData = () => {
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+
   const state = useTypedSelector((state) => state['content-manager_app']);
 
   const fetchInitialData = async () => {
@@ -61,30 +68,35 @@ const useContentManagerInitData = () => {
     return contentTypeConfigurations;
   };
 
-  const handleError = (error: any) => {
-    console.error(error);
-    toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
-  };
-
-  const handleSuccess = () => {
-    notifyStatus(
-      formatMessage({
-        id: getTranslation('App.schemas.data-loaded'),
-        defaultMessage: 'The schemas have been successfully loaded.',
-      })
-    );
-  };
-
-  const initialDataQuery = useQuery(['contentManager', 'init', 'data'], fetchInitialData, {
-    onError: handleError,
-    onSuccess: handleSuccess,
+  const initialDataQuery = useQuery([...queryKeyPrefix, 'data'], fetchInitialData, {
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        toggleNotification({ type: 'warning', message: formatAPIError(error) });
+      } else {
+        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+      }
+    },
+    onSuccess: () => {
+      notifyStatus(
+        formatMessage({
+          id: getTranslation('App.schemas.data-loaded'),
+          defaultMessage: 'The schemas have been successfully loaded.',
+        })
+      );
+    },
   });
 
   const contentTypeSettingsQuery = useQuery(
-    ['contentManager', 'init', 'contentTypeSettings'],
+    [...queryKeyPrefix, 'contentTypeSettings'],
     fetchContentTypeSettings,
     {
-      onError: handleError,
+      onError: (error) => {
+        if (error instanceof AxiosError) {
+          toggleNotification({ type: 'warning', message: formatAPIError(error) });
+        } else {
+          toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+        }
+      },
     }
   );
 
@@ -150,12 +162,14 @@ const useContentManagerInitData = () => {
     });
 
     dispatch({
-      type: 'ContentManager/App/SET_INIT_DATA',
-      authorizedCollectionTypeLinks: ctLinks,
-      authorizedSingleTypeLinks: stLinks,
-      contentTypeSchemas: contentTypes,
-      components,
-      fieldSizes,
+      type: SET_INIT_DATA,
+      data: {
+        authorizedCollectionTypeLinks: ctLinks,
+        authorizedSingleTypeLinks: stLinks,
+        contentTypeSchemas: contentTypes,
+        components,
+        fieldSizes,
+      },
     });
   };
 
@@ -179,7 +193,7 @@ const useContentManagerInitData = () => {
   useEffect(() => {
     return () => {
       dispatch({
-        type: 'ContentManager/App/RESET_INIT_DATA',
+        type: RESET_INIT_DATA,
       });
     };
   }, [dispatch]);
