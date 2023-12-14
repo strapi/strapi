@@ -33,5 +33,7 @@
   "page.ReleaseDetails.table.header.label.name": "name",
   "page.ReleaseDetails.table.header.label.locale": "locale",
   "page.ReleaseDetails.table.header.label.content-type": "content-type",
-  "page.ReleaseDetails.table.header.label.action": "action"
+  "page.ReleaseDetails.table.header.label.action": "action",
+  "page.ReleaseDetails.table.action-published": "This entry was {isPublish, select, true {published} other {unpublished}}.",
+  "pages.ReleaseDetails.publish-notification-success": "Release was published successfully."
 }
