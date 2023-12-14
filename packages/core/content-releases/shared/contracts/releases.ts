@@ -23,7 +23,7 @@ export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
-  action: { type: ReleaseAction['type'] };
+  action: ReleaseAction;
 }
 
 /**

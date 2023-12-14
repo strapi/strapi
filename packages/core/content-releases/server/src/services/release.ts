@@ -116,9 +116,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
         return {
           ...release,
-          action: {
-            type: actionForEntry.type,
-          },
+          action: actionForEntry
         };
       }
 
