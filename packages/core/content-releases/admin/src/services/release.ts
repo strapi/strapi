@@ -5,7 +5,10 @@ import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
 
-import type { GetReleaseActions } from '../../../shared/contracts/release-actions';
+import type {
+  GetReleaseActions,
+  UpdateReleaseAction,
+} from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
   GetContentTypeEntryReleases,
@@ -56,7 +59,12 @@ const releaseApi = createApi({
           };
         },
         providesTags: (result) =>
-          result ? [...result.data.map(({ id }) => ({ type: 'Release' as const, id }))] : [],
+          result
+            ? [
+                ...result.data.map(({ id }) => ({ type: 'Release' as const, id })),
+                { type: 'Release', id: 'LIST' },
+              ]
+            : [],
       }),
       getReleases: build.query<GetReleasesTabResponse, GetReleasesQueryParams | void>({
         query(
@@ -174,7 +182,25 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      }),
+      updateReleaseAction: build.mutation<
+        UpdateReleaseAction.Response,
+        UpdateReleaseAction.Request
+      >({
+        query({ body, params }) {
+          return {
+            url: `/content-releases/${params.releaseId}/actions/${params.actionId}`,
+            method: 'PUT',
+            data: body,
+          };
+        },
+        invalidatesTags: (result, error, arg) => [
+          { type: 'ReleaseAction', id: arg.params.actionId },
+        ],
       }),
     };
   },
@@ -188,6 +214,7 @@ const {
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
+  useUpdateReleaseActionMutation,
 } = releaseApi;
 
 export {
@@ -198,5 +225,6 @@ export {
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
   useUpdateReleaseMutation,
+  useUpdateReleaseActionMutation,
   releaseApi,
 };
