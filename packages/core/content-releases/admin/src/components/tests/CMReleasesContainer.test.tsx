@@ -132,7 +132,9 @@ describe('CMReleasesContainer', () => {
     render(<CMReleasesContainer />);
 
     const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
-    expect(within(informationBox).getByText('release1')).toBeInTheDocument();
-    expect(within(informationBox).getByText('release2')).toBeInTheDocument();
+    const release1 = await within(informationBox).findByText('release1');
+    const release2 = await within(informationBox).findByText('release2');
+    expect(release1).toBeInTheDocument();
+    expect(release2).toBeInTheDocument();
   });
 });

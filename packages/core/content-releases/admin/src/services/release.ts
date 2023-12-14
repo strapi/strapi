@@ -1,6 +1,9 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
-import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
+import {
+  CreateReleaseAction,
+  DeleteReleaseAction,
+} from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
 
 import { axiosBaseQuery } from './axios';
@@ -203,6 +206,21 @@ const releaseApi = createApi({
           { type: 'ReleaseAction', id: arg.params.actionId },
         ],
       }),
+      deleteReleaseAction: build.mutation<
+        DeleteReleaseAction.Response,
+        DeleteReleaseAction.Request
+      >({
+        query({ params }) {
+          return {
+            url: `/content-releases/${params.releaseId}/actions/${params.actionId}`,
+            method: 'DELETE',
+          };
+        },
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      }),
       publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
         query({ id }) {
           return {
@@ -226,6 +244,7 @@ const {
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
+  useDeleteReleaseActionMutation,
 } = releaseApi;
 
 export {
@@ -238,5 +257,6 @@ export {
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
+  useDeleteReleaseActionMutation,
   releaseApi,
 };
