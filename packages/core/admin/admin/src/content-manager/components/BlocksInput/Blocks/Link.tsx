@@ -70,9 +70,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         editLink(editor, { url: linkUrl, text: linkText });
         setPopoverOpen(false);
         editor.lastInsertedLinkPath = null;
-        return;
       } catch (error) {
-        // Do not save if link is not valid and throw error
         e.preventDefault();
 
         setInvalidLinkError(
