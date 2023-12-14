@@ -19,6 +19,10 @@ const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
   });
 };
 
+const symbols = {
+  CustomController: Symbol('StrapiCustomCoreController'),
+} as const;
+
 const createCoreController = <
   TUID extends Common.UID.ContentType,
   TController extends CoreApi.Controller.Extendable<TUID>
@@ -38,6 +42,16 @@ const createCoreController = <
     }
 
     Object.setPrototypeOf(userCtrl, baseController);
+
+    const isCustomController = typeof cfg !== 'undefined';
+    if (isCustomController) {
+      Object.defineProperty(userCtrl, symbols.CustomController, {
+        writable: false,
+        configurable: false,
+        enumerable: false,
+      });
+    }
+
     return userCtrl;
   };
 };
@@ -101,4 +115,4 @@ function createCoreRouter<T extends Common.UID.ContentType>(
   };
 }
 
-export { createCoreController, createCoreService, createCoreRouter };
+export { createCoreController, createCoreService, createCoreRouter, symbols };
