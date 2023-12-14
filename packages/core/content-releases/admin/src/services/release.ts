@@ -177,7 +177,7 @@ const releaseApi = createApi({
         },
         invalidatesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
-      deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request>({
+      deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request['params']>({
         query({ id }) {
           return {
             url: `/content-releases/${id}`,
