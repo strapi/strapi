@@ -57,7 +57,7 @@ const TEST_SINGLE_DATA = {
   },
 };
 
-const getBigTestPageData = (quantity) => {
+const getBigTestPageData = (quantity: number) => {
   const data = [];
 
   for (let i = 0; i < quantity; i++) {

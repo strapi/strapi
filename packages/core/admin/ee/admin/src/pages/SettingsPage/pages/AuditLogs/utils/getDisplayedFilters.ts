@@ -1,4 +1,7 @@
-import ComboboxFilter from '../ComboboxFilter';
+import { IntlShape } from 'react-intl';
+
+import { SanitizedAdminUser } from '../../../../../../../../shared/contracts/shared';
+import { ComboboxFilter } from '../components/ComboboxFilter';
 
 import { actionTypes, getDefaultMessage } from './getActionTypesDefaultMessages';
 
@@ -13,8 +16,17 @@ const customOperators = [
   },
 ];
 
-const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
-  const actionOptions = Object.keys(actionTypes).map((action) => {
+export const getDisplayedFilters = ({
+  formatMessage,
+  users,
+  canReadUsers,
+}: {
+  formatMessage: IntlShape['formatMessage'];
+  users: SanitizedAdminUser[];
+  canReadUsers: boolean;
+}) => {
+  // Default return of Object.keys function is string
+  const actionOptions = (Object.keys(actionTypes) as (keyof typeof actionTypes)[]).map((action) => {
     return {
       label: formatMessage(
         {
@@ -54,7 +66,7 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
   ];
 
   if (canReadUsers && users) {
-    const getDisplayNameFromUser = (user) => {
+    const getDisplayNameFromUser = (user: SanitizedAdminUser) => {
       if (user.username) {
         return user.username;
       }
@@ -103,5 +115,3 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
 
   return filters;
 };
-
-export default getDisplayedFilters;
