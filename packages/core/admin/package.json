@@ -164,6 +164,7 @@
     "style-loader": "3.3.1",
     "styled-components": "5.3.3",
     "typescript": "5.2.2",
+    "use-context-selector": "1.4.1",
     "webpack": "^5.88.1",
     "webpack-bundle-analyzer": "^4.9.0",
     "webpack-dev-middleware": "6.1.1",

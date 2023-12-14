@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   AppInfoProvider,
-  auth,
   LoadingIndicatorPage,
   useFetchClient,
   useGuidedTour,
@@ -13,6 +12,7 @@ import valid from 'semver/functions/valid';
 //  TODO: DS add loader
 
 import packageJSON from '../../../package.json';
+import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
@@ -28,10 +28,22 @@ const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
-  const userInfo = auth.get('userInfo');
+  const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
   const [userDisplayName, setUserDisplayName] = React.useState<string>(() =>
     userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
   );
+  /**
+   * Keep this in sync with the user info we return from the useAuth hook.
+   * We can't remove the above state because it's used in `useAppInfo` which
+   * is a public API.
+   *
+   * TODO: remove this workaround in V5.
+   */
+  React.useEffect(() => {
+    setUserDisplayName(
+      userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
+    );
+  }, [userInfo]);
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
   const { get } = useFetchClient();
@@ -113,17 +125,11 @@ const AuthenticatedApp = () => {
   }, [userRoles, appInfos, setGuidedTourVisibility]);
 
   React.useEffect(() => {
-    const getUserId = async () => {
-      if (userInfo) {
-        const userId = await hashAdminUserEmail(userInfo);
-
-        if (userId) {
-          setUserId(userId);
-        }
+    hashAdminUserEmail(userInfo).then((id) => {
+      if (id) {
+        setUserId(id);
       }
-    };
-
-    getUserId();
+    });
   }, [userInfo]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins

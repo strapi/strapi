@@ -13,11 +13,13 @@ import { reducer as editViewReducer } from '../../content-manager/pages/EditView
 import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
 import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
+import { adminApi } from '../../services/admin';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.
  */
 const staticReducers = {
+  [adminApi.reducerPath]: adminApi.reducer,
   admin_app: appReducer,
   rbacProvider: RBACReducer,
   'content-manager_app': cmAppReducer,
@@ -74,6 +76,7 @@ const configureStoreImpl = (
     devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) => [
       ...getDefaultMiddleware(),
+      adminApi.middleware,
       ...appMiddlewares.map((m) => m()),
     ],
     enhancers: [injectReducerStoreEnhancer(coreReducers)],

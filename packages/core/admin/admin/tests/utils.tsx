@@ -31,6 +31,7 @@ import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
 import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
 import { reducer as crudReducer } from '../src/content-manager/sharedReducers/crud/reducer';
+import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
 import { reducer as appReducer } from '../src/reducer';
 
@@ -73,55 +74,57 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
 
   // en is the default locale of the admin app.
   return (
-    <Provider store={store}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <QueryClientProvider client={queryClient}>
-          <DndProvider backend={HTML5Backend}>
-            <LanguageProvider messages={{}}>
-              <Theme
-                themes={{
-                  dark: darkTheme,
-                  light: lightTheme,
-                }}
-              >
-                <NotificationsProvider>
-                  <RBACContext.Provider
-                    value={{
-                      refetchPermissions: jest.fn(),
-                      allPermissions: [
-                        ...fixtures.permissions.allPermissions,
-                        {
-                          id: 314,
-                          action: 'admin::users.read',
-                          subject: null,
-                          properties: {},
-                          conditions: [],
-                          actionParameters: {},
-                        },
-                      ] as Permission[],
-                    }}
-                  >
-                    <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                      <ConfigurationContextProvider
-                        showReleaseNotification={false}
-                        showTutorials={false}
-                        logos={{
-                          auth: { default: '' },
-                          menu: { default: '' },
-                        }}
-                        updateProjectSettings={jest.fn()}
-                      >
-                        {children}
-                      </ConfigurationContextProvider>
-                    </ModelsContext.Provider>
-                  </RBACContext.Provider>
-                </NotificationsProvider>
-              </Theme>
-            </LanguageProvider>
-          </DndProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
-    </Provider>
+    <MemoryRouter initialEntries={initialEntries}>
+      <Provider store={store}>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <DndProvider backend={HTML5Backend}>
+              <LanguageProvider messages={{}}>
+                <Theme
+                  themes={{
+                    dark: darkTheme,
+                    light: lightTheme,
+                  }}
+                >
+                  <NotificationsProvider>
+                    <RBACContext.Provider
+                      value={{
+                        refetchPermissions: jest.fn(),
+                        allPermissions: [
+                          ...fixtures.permissions.allPermissions,
+                          {
+                            id: 314,
+                            action: 'admin::users.read',
+                            subject: null,
+                            properties: {},
+                            conditions: [],
+                            actionParameters: {},
+                          },
+                        ] as Permission[],
+                      }}
+                    >
+                      <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                        <ConfigurationContextProvider
+                          showReleaseNotification={false}
+                          showTutorials={false}
+                          logos={{
+                            auth: { default: '' },
+                            menu: { default: '' },
+                          }}
+                          updateProjectSettings={jest.fn()}
+                        >
+                          {children}
+                        </ConfigurationContextProvider>
+                      </ModelsContext.Provider>
+                    </RBACContext.Provider>
+                  </NotificationsProvider>
+                </Theme>
+              </LanguageProvider>
+            </DndProvider>
+          </QueryClientProvider>
+        </AuthProvider>
+      </Provider>
+    </MemoryRouter>
   );
 };
 

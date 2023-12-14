@@ -13,13 +13,15 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { auth, useNotification, useAppInfo, usePersistentState } from '@strapi/helper-plugin';
+import { useNotification, useAppInfo, usePersistentState } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
+
+import { useAuth } from '../features/Auth';
 
 const FieldWrapper = styled(Field)`
   height: ${32 / 16}rem;
@@ -202,6 +204,8 @@ const NpsSurvey = () => {
     };
   }, []);
 
+  const user = useAuth('NpsSurvey', (state) => state.user);
+
   if (!displaySurvey) {
     return null;
   }
@@ -217,9 +221,8 @@ const NpsSurvey = () => {
     npsSurveyRating: NpsSurveyMutationBody['rating'];
     npsSurveyFeedback: NpsSurveyMutationBody['comment'];
   }) => {
-    const userInfo = auth.getUserInfo();
     mutate({
-      email: typeof userInfo === 'object' && userInfo !== null ? userInfo.email : '',
+      email: typeof user === 'object' && user.email ? user.email : '',
       rating: npsSurveyRating,
       comment: npsSurveyFeedback,
       environment: currentEnvironment,

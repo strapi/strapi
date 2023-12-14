@@ -21,7 +21,9 @@ describe('PrivateRoute', () => {
       <Router history={history}>
         <Switch>
           <Route path="/auth/login" component={LoginPage} />
-          <PrivateRoute path="/" component={ProtectedPage} />
+          <PrivateRoute path="/">
+            <ProtectedPage />
+          </PrivateRoute>
         </Switch>
       </Router>
     );
