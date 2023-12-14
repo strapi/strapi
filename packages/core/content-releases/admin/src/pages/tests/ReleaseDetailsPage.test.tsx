@@ -135,9 +135,9 @@ describe('Releases details page', () => {
     );
     expect(releaseTitle).toBeInTheDocument();
 
-    // There is no release button because it's already published
-    const releaseButton = screen.queryByRole('button', { name: 'Release' });
-    expect(releaseButton).not.toBeInTheDocument();
+    // There is no publish button because it's already published
+    const publishButton = screen.queryByRole('button', { name: 'Publish' });
+    expect(publishButton).not.toBeInTheDocument();
 
     expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
     expect(screen.getByText('This entry was published.')).toBeInTheDocument();
