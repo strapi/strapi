@@ -285,6 +285,7 @@ export const ReleaseDetailsLayout = ({
                     variant="default"
                     onClick={handlePublishRelease}
                     loading={isPublishing}
+                    disabled={release.actions.meta.count === 0}
                   >
                     {formatMessage({
                       id: 'content-releases.header.actions.publish',
@@ -301,8 +302,6 @@ export const ReleaseDetailsLayout = ({
     </Main>
   );
 };
-
-const Bold = (children: React.ReactNode) => <Typography fontWeight="bold">{children}</Typography>;
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
@@ -460,7 +459,12 @@ const ReleaseDetailsBody = () => {
                             defaultMessage:
                               'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
                           },
-                          { isPublish: type === 'publish', b: Bold }
+                          {
+                            isPublish: type === 'publish',
+                            b: (children: React.ReactNode) => (
+                              <Typography fontWeight="bold">{children}</Typography>
+                            ),
+                          }
                         )}
                       </Typography>
                     ) : (

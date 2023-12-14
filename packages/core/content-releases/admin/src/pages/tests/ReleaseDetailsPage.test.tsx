@@ -43,8 +43,9 @@ describe('Releases details page', () => {
     const refreshButton = screen.getByRole('button', { name: 'Refresh' });
     expect(refreshButton).toBeInTheDocument();
 
-    const releaseButton = screen.getByRole('button', { name: 'Release' });
-    expect(releaseButton).toBeInTheDocument();
+    const publishButton = screen.getByRole('button', { name: 'Publish' });
+    expect(publishButton).toBeInTheDocument();
+    expect(publishButton).toBeDisabled();
 
     const noContent = screen.getByText(/This release is empty./i);
     expect(noContent).toBeInTheDocument();
@@ -140,6 +141,7 @@ describe('Releases details page', () => {
     expect(publishButton).not.toBeInTheDocument();
 
     expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
-    expect(screen.getByText('This entry was published.')).toBeInTheDocument();
+    const container = screen.getByText(/This entry was/);
+    expect(container.querySelector('span')).toHaveTextContent('published');
   });
 });
