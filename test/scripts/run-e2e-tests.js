@@ -5,9 +5,9 @@ const execa = require('execa');
 const fs = require('node:fs/promises');
 const yargs = require('yargs');
 
+const chalk = require('chalk');
 const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
 const { createConfig } = require('../../playwright.base.config');
-const chalk = require('chalk');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'e2e');
@@ -23,7 +23,7 @@ yargs
   .command({
     command: '*',
     description: 'run the E2E test suite',
-    builder: async (yarg) => {
+    async builder(yarg) {
       const domains = await fs.readdir(path.join(cwd, 'e2e', 'tests'));
 
       yarg.option('concurrency', {
@@ -49,7 +49,7 @@ yargs
         default: false,
       });
     },
-    handler: async (argv) => {
+    async handler(argv) {
       try {
         const { concurrency, domains, setup } = argv;
 
@@ -215,7 +215,7 @@ module.exports = config
   .command({
     command: 'clean',
     description: 'clean the test app directory of all test apps',
-    handler: async () => {
+    async handler() {
       try {
         const currentTestApps = await fs.readdir(testAppDirectory);
 
