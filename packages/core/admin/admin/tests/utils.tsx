@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
-import { DesignSystemProvider, darkTheme, lightTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   fireEvent,
@@ -24,15 +24,14 @@ import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { RBACReducer } from '../src/components/RBACProvider';
-import { ThemeToggleProvider } from '../src/components/ThemeToggleProvider';
+import { Theme } from '../src/components/Theme';
 import { ModelsContext } from '../src/content-manager/contexts/models';
 import { reducer as rbacManagerReducer } from '../src/content-manager/hooks/useSyncRbac';
 import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
 import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
 import { reducer as crudReducer } from '../src/content-manager/sharedReducers/crud/reducer';
-import { AdminContextProvider } from '../src/contexts/admin';
-import { ConfigurationContextProvider } from '../src/contexts/configuration';
+import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
 import { reducer as appReducer } from '../src/reducer';
 
 import { server } from './server';
@@ -76,60 +75,51 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
   return (
     <Provider store={store}>
       <MemoryRouter initialEntries={initialEntries}>
-        <ThemeToggleProvider
-          themes={{
-            light: lightTheme,
-            dark: darkTheme,
-          }}
-        >
-          <DesignSystemProvider locale="en">
-            <QueryClientProvider client={queryClient}>
-              <DndProvider backend={HTML5Backend}>
-                <LanguageProvider
-                  localeNames={{
-                    en: 'english',
-                  }}
-                  messages={{}}
-                >
-                  <NotificationsProvider>
-                    <RBACContext.Provider
-                      value={{
-                        refetchPermissions: jest.fn(),
-                        allPermissions: [
-                          ...fixtures.permissions.allPermissions,
-                          {
-                            id: 314,
-                            action: 'admin::users.read',
-                            subject: null,
-                            properties: {},
-                            conditions: [],
-                            actionParameters: {},
-                          },
-                        ] as Permission[],
-                      }}
-                    >
-                      <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                        <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
-                          <ConfigurationContextProvider
-                            showReleaseNotification={false}
-                            showTutorials={false}
-                            updateProjectSettings={jest.fn()}
-                            logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
-                            }}
-                          >
-                            {children}
-                          </ConfigurationContextProvider>
-                        </AdminContextProvider>
-                      </ModelsContext.Provider>
-                    </RBACContext.Provider>
-                  </NotificationsProvider>
-                </LanguageProvider>
-              </DndProvider>
-            </QueryClientProvider>
-          </DesignSystemProvider>
-        </ThemeToggleProvider>
+        <QueryClientProvider client={queryClient}>
+          <DndProvider backend={HTML5Backend}>
+            <LanguageProvider messages={{}}>
+              <Theme
+                themes={{
+                  dark: darkTheme,
+                  light: lightTheme,
+                }}
+              >
+                <NotificationsProvider>
+                  <RBACContext.Provider
+                    value={{
+                      refetchPermissions: jest.fn(),
+                      allPermissions: [
+                        ...fixtures.permissions.allPermissions,
+                        {
+                          id: 314,
+                          action: 'admin::users.read',
+                          subject: null,
+                          properties: {},
+                          conditions: [],
+                          actionParameters: {},
+                        },
+                      ] as Permission[],
+                    }}
+                  >
+                    <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+                      <ConfigurationContextProvider
+                        showReleaseNotification={false}
+                        showTutorials={false}
+                        logos={{
+                          auth: { default: '' },
+                          menu: { default: '' },
+                        }}
+                        updateProjectSettings={jest.fn()}
+                      >
+                        {children}
+                      </ConfigurationContextProvider>
+                    </ModelsContext.Provider>
+                  </RBACContext.Provider>
+                </NotificationsProvider>
+              </Theme>
+            </LanguageProvider>
+          </DndProvider>
+        </QueryClientProvider>
       </MemoryRouter>
     </Provider>
   );

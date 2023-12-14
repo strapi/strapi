@@ -703,5 +703,127 @@ export const server = setupServer(
     rest.post('https://analytics.strapi.io/submit-nps', (req, res, ctx) => {
       return res(ctx.status(200));
     }),
+    /**
+     * CONTENT-API (API TOKENS)
+     */
+    rest.get('/admin/content-api/permissions', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            'api::address': {
+              controllers: {
+                address: ['find', 'findOne'],
+              },
+            },
+            'plugin::myplugin': {
+              controllers: {
+                test: ['findOne', 'find'],
+              },
+            },
+          },
+        })
+      );
+    }),
+    rest.get('/admin/content-api/routes', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            'api::address': [
+              {
+                method: 'GET',
+                path: '/api/addresses',
+                handler: 'api::address.address.find',
+                config: {
+                  auth: {
+                    scope: ['api::address.address.find'],
+                  },
+                },
+                info: {
+                  apiName: 'address',
+                  type: 'content-api',
+                },
+              },
+              {
+                method: 'GET',
+                path: '/api/addresses/:id',
+                handler: 'api::address.address.findOne',
+                config: {
+                  auth: {
+                    scope: ['api::address.address.findOne'],
+                  },
+                },
+                info: {
+                  apiName: 'address',
+                  type: 'content-api',
+                },
+              },
+            ],
+            'plugin::myplugin': [
+              {
+                method: 'GET',
+                path: '/api/myplugin/tests',
+                handler: 'plugin::myplugin.test.find',
+                config: {
+                  auth: {
+                    scope: ['plugin::myplugin.test.find'],
+                  },
+                },
+                info: {
+                  pluginName: 'myplugin',
+                  type: 'content-api',
+                },
+              },
+              {
+                method: 'GET',
+                path: '/api/myplugin/tests/:id',
+                handler: 'plugin::myplugin.test.findOne',
+                config: {
+                  auth: {
+                    scope: ['plugin::myplugin.test.findOne'],
+                  },
+                },
+                info: {
+                  pluginName: 'myplugin',
+                  type: 'content-api',
+                },
+              },
+            ],
+          },
+        })
+      );
+    }),
+    /**
+     * API TOKENS
+     */
+    rest.get('/admin/api-tokens', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: [
+            {
+              id: '1',
+              name: 'My super token',
+              description: 'This describe my super token',
+              type: 'read-only',
+              createdAt: '2021-11-15T00:00:00.000Z',
+              permissions: [],
+            },
+          ],
+        })
+      );
+    }),
+    rest.get('/admin/api-tokens/:id', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            id: '1',
+            name: 'My super token',
+            description: 'This describe my super token',
+            type: 'read-only',
+            createdAt: '2021-11-15T00:00:00.000Z',
+            permissions: [],
+          },
+        })
+      );
+    }),
   ]
 );

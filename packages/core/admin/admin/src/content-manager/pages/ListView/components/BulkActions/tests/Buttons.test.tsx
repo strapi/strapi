@@ -12,7 +12,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../../../../shared/hooks/useInjectionZone');
+jest.mock('../../../../../../hooks/useInjectionZone');
 jest.mock('../SelectedEntriesModal', () => ({
   SelectedEntriesModal: () => <div>SelectedEntriesModal</div>,
 }));

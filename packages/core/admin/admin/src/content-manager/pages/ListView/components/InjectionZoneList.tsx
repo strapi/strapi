@@ -1,7 +1,7 @@
 import { Box } from '@strapi/design-system';
 
-import { InjectionZoneArea } from '../../../../shared/components/InjectionZone';
-import { useInjectionZone } from '../../../../shared/hooks/useInjectionZone';
+import { InjectionZoneArea } from '../../../../components/InjectionZone';
+import { useInjectionZone } from '../../../../hooks/useInjectionZone';
 
 interface InjectionZoneListProps {
   area: InjectionZoneArea;

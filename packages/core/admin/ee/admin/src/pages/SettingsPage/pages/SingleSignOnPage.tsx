@@ -341,7 +341,7 @@ export const ProtectedSSO = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.sso.main}>
+    <CheckPagePermissions permissions={permissions.settings?.sso?.main}>
       <SingleSignOnPage />
     </CheckPagePermissions>
   );

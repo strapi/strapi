@@ -414,7 +414,7 @@ export const ProtectedReviewWorkflowsPage = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.['review-workflows'].main}>
+    <CheckPagePermissions permissions={permissions.settings?.['review-workflows']?.main}>
       <ReviewWorkflowsListView />
     </CheckPagePermissions>
   );

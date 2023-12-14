@@ -20,16 +20,16 @@ import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useLocation, useHistory, useRouteMatch } from 'react-router-dom';
 
-import {
-  ApiTokenPermissionsContextValue,
-  ApiTokenPermissionsProvider,
-} from '../../../../../contexts/apiTokenPermissions';
 import { selectAdminPermissions } from '../../../../../selectors';
 import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import { FormHead } from '../../../components/Tokens/FormHead';
 import { TokenBox } from '../../../components/Tokens/TokenBox';
 
+import {
+  ApiTokenPermissionsContextValue,
+  ApiTokenPermissionsProvider,
+} from './apiTokenPermissions';
 import { FormApiTokenContainer } from './components/FormApiTokenContainer';
 import { LoadingView } from './components/LoadingView';
 import { Permissions } from './components/Permissions';

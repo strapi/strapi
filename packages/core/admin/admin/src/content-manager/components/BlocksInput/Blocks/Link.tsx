@@ -11,14 +11,14 @@ import {
   FieldError,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { type Element, Editor, Path, Range, Transforms } from 'slate';
+import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
 import { composeRefs } from '../../../utils/refs';
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
-import { type Block } from '../utils/types';
+import { isLinkNode, type Block } from '../utils/types';
 
 const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
@@ -194,12 +194,8 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
   }
 );
 
-const isLink = (element: Element): element is Block<'link'> => {
-  return element.type === 'link';
-};
-
 const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>((props, forwardedRef) => {
-  if (!isLink(props.element)) {
+  if (!isLinkNode(props.element)) {
     return null;
   }
 

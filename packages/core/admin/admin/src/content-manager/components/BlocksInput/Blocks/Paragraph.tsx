@@ -22,6 +22,7 @@ const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
     },
     matchNode: (node) => node.type === 'paragraph',
     isInBlocksSelector: true,
+    dragHandleTopMargin: '-2px',
     handleConvert(editor) {
       baseHandleConvert<Block<'paragraph'>>(editor, { type: 'paragraph' });
     },

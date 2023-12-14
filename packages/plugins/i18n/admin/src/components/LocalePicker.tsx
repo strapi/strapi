@@ -23,7 +23,7 @@ const LocalePicker = () => {
   }
 
   const [{ query }, setQuery] = useQueryParams<Query>();
-  const match = useRouteMatch<{ slug: string }>('/content-manager/collectionType/:slug');
+  const match = useRouteMatch<{ slug: string }>('/content-manager/:collectiontype/:slug');
   const isContentTypeLocalized = useContentTypeHasI18n();
   const { createPermissions, readPermissions } = useContentTypePermissions(match?.params.slug);
 
