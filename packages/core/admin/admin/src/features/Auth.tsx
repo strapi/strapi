@@ -13,12 +13,13 @@ import {
   useLogoutMutation,
   useRenewTokenMutation,
 } from '../services/auth';
-import { isBaseQueryError } from '../utils/baseQuery';
 
 import type { SanitizedAdminUser } from '../../../shared/contracts/shared';
 
 interface AuthContextValue {
-  login: (body: Login.Request['body'] & { rememberMe: boolean }) => Promise<void>;
+  login: (
+    body: Login.Request['body'] & { rememberMe: boolean }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
   logout: () => Promise<void>;
   setToken: (token: string | null) => void;
   token: string | null;
@@ -129,13 +130,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         setToken(token);
       }
 
-      if ('error' in res) {
-        if (isBaseQueryError(res.error)) {
-          throw new Error(res.error.message);
-        } else {
-          throw new Error();
-        }
-      }
+      return res;
     },
     [loginMutation]
   );

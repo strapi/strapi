@@ -13,24 +13,19 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  auth,
   Form,
   GenericInput,
   LoadingIndicatorPage,
   SettingsPageTitle,
   translatedErrors,
   useAPIErrorHandler,
-  useAppInfo,
-  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { AxiosError } from 'axios';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
-import get from 'lodash/get';
+import { Formik, FormikHelpers } from 'formik';
 import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { useIntl } from 'react-intl';
@@ -42,7 +37,8 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminUsers } from '../../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
-import { formatAPIErrors } from '../../../../utils/formatAPIErrors';
+import { useUpdateUserMutation } from '../../../../services/users';
+import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { getFullName } from '../../../../utils/getFullName';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
@@ -64,12 +60,10 @@ const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 
  * -----------------------------------------------------------------------------------------------*/
 
 const EditPage = () => {
-  const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const match = useRouteMatch<{ id: string }>('/settings/users/:id');
   const id = match?.params?.id ?? '';
   const { push } = useHistory();
-  const { setUserDisplayName } = useAppInfo();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const MagicLink = useEnterprise(
@@ -81,7 +75,10 @@ const EditPage = () => {
         )
       ).MagicLinkEE
   );
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
 
   const permissions = useTypedSelector(selectAdminPermissions);
 
@@ -92,6 +89,8 @@ const EditPage = () => {
     read: permissions.settings?.users.read ?? [],
     update: permissions.settings?.users.update ?? [],
   });
+
+  const [updateUser] = useUpdateUserMutation();
 
   useFocusWhenNavigate();
 
@@ -181,51 +180,31 @@ const EditPage = () => {
   const handleSubmit = async (body: InitialData, actions: FormikHelpers<InitialData>) => {
     lockApp?.();
 
-    try {
-      const {
-        data: { data },
-      } = await put<Update.Response>(`/admin/users/${id}`, omit(body, 'confirmPassword'));
+    const res = await updateUser({
+      id,
+      ...omit(body, 'confirmPassword'),
+    });
 
+    if ('error' in res && isBaseQueryError(res.error)) {
+      if (res.error.name === 'ValidationError') {
+        actions.setErrors(formatValidationErrors(res.error));
+      }
+
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(res.error),
+      });
+    } else {
       toggleNotification({
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
 
-      const userInfos = auth.getUserInfo();
-
-      // The user is updating himself
-      if (id.toString() === userInfos?.id.toString()) {
-        auth.setUserInfo(data);
-
-        const userDisplayName =
-          get(body, 'username') || getFullName(body?.firstname ?? '', body.lastname);
-
-        setUserDisplayName(userDisplayName);
-      }
       actions.setValues({
         ...pick(body, fieldsToPick),
         password: '',
         confirmPassword: '',
       });
-    } catch (err) {
-      if (err instanceof AxiosError && err.response) {
-        // FIXME when API errors are ready
-        const errors = formatAPIErrors(err.response.data);
-        const fieldsErrors = Object.keys(errors).reduce<FormikErrors<InitialData>>(
-          (acc, current) => {
-            acc[current as keyof InitialData] = errors[current].id;
-
-            return acc;
-          },
-          {}
-        );
-
-        actions.setErrors(fieldsErrors);
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(err),
-        });
-      }
     }
 
     unlockApp?.();

@@ -303,6 +303,15 @@ export const server = setupServer(
         })
       );
     }),
+    rest.post('/admin/renew-token', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            token: 'renewed-test-token',
+          },
+        })
+      );
+    }),
     /**
      * WEBHOOKS
      */

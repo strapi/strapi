@@ -5,6 +5,21 @@ import { ApiError } from '../types';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 
+interface UnknownApiError {
+  name: 'UnknownError';
+  message: string;
+  details?: unknown;
+  status?: number;
+}
+
+type BaseQueryError = ApiError | UnknownApiError;
+
+interface YupFormattedError {
+  path: string[];
+  message: string;
+  name: string;
+}
+
 /**
  * Hook that exports an error message formatting function.
  */
@@ -14,6 +29,57 @@ export function useAPIErrorHandler(
   const { formatMessage } = useIntl();
 
   return {
+    /**
+     * @alpha
+     * Convert ValidationErrors from the API into an object that can be used by forms.
+     */
+    _unstableFormatValidationErrors(
+      error: Extract<BaseQueryError, { name: 'ValidationError' }>
+    ): Record<string, string> {
+      if (typeof error.details === 'object' && error.details !== null) {
+        if ('errors' in error.details && Array.isArray(error.details.errors)) {
+          const validationErrors = error.details.errors as YupFormattedError[];
+
+          return validationErrors.reduce((acc, err) => {
+            const { path, message } = err;
+
+            return {
+              ...acc,
+              [path.join('.')]: message,
+            };
+          }, {});
+        } else {
+          const details = error.details as Record<string, string[]>;
+
+          return Object.keys(details).reduce((acc, key) => {
+            const messages = details[key];
+
+            return {
+              ...acc,
+              [key]: messages.join(', '),
+            };
+          }, {});
+        }
+      } else {
+        return {};
+      }
+    },
+    /**
+     * @alpha
+     * This handles the errors given from `redux-toolkit`'s axios based baseQuery function.
+     */
+    _unstableFormatAPIError(error: BaseQueryError) {
+      const err = {
+        response: {
+          data: {
+            error,
+          },
+        },
+      } as AxiosError<{ error: BaseQueryError }>;
+
+      // @ts-expect-error – UnknownApiError is in the same shape as ApiError, but we don't want to expose this to users yet.
+      return this.formatAPIError(err);
+    },
     formatAPIError(error: AxiosError<{ error: ApiError }>) {
       // Try to normalize the passed error first. This will fail for e.g. network
       // errors which are thrown by Axios directly.

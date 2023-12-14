@@ -34,6 +34,7 @@ import { reducer as crudReducer } from '../src/content-manager/sharedReducers/cr
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
 import { reducer as appReducer } from '../src/reducer';
+import { adminApi } from '../src/services/admin';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -62,6 +63,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     // @ts-expect-error – we've not filled up the entire initial state.
     preloadedState: initialState,
     reducer: {
+      [adminApi.reducerPath]: adminApi.reducer,
       admin_app: appReducer,
       rbacProvider: RBACReducer,
       'content-manager_app': cmAppReducer,
@@ -70,6 +72,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       'content-manager_editViewLayoutManager': editViewReducer,
       'content-manager_editViewCrudReducer': crudReducer,
     },
+    middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), adminApi.middleware],
   });
 
   // en is the default locale of the admin app.
