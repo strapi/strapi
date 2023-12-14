@@ -28,8 +28,8 @@ export const upgrade = async (options: UpgradeOptions) => {
 
   if (options.target === Version.ReleaseType.Major) {
     upgrader
-      .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR.asOptional())
-      .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR.asOptional());
+      .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR)
+      .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR);
   }
 
   upgrader.addRequirement(requirements.common.REQUIRE_GIT.asOptional());
