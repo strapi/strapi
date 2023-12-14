@@ -1,7 +1,9 @@
 {
   "extends": "tsconfig/base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext"
   },
   "include": ["src"],
   "exclude": ["node_modules"]

@@ -1,7 +1,7 @@
 import { Flex, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useApiTokenPermissions } from '../../../../../../contexts/apiTokenPermissions';
+import { useApiTokenPermissions } from '../apiTokenPermissions';
 
 import { BoundRoute } from './BoundRoute';
 

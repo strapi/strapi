@@ -42,7 +42,7 @@ import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { ConfigurationProviderProps } from '../../../../../components/ConfigurationProvider';
+import { ConfigurationProviderProps } from '../../../../../features/Configuration';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
 import { ImageAsset, ParsingFileError, parseFileMetadatas } from '../utils/files';
 

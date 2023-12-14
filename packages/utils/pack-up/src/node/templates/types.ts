@@ -1,5 +1,6 @@
 import { PromptObject } from 'prompts';
 
+import { GitConfig } from '../core/git';
 import { Logger } from '../core/logger';
 
 interface TemplateFeature<T extends string = string> extends Pick<PromptObject<T>, 'initial'> {
@@ -45,6 +46,7 @@ interface Template {
 
 interface TemplateContext {
   cwd: string;
+  gitConfig: GitConfig | null;
   logger: Logger;
   packagePath: string;
 }

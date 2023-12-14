@@ -1,6 +1,11 @@
 import { errors } from '@strapi/utils';
 import { Entity, Pagination, SanitizedAdminUser } from './shared';
 
+// displayName seems to be used only for audit logs
+export interface SanitizedAdminUserForAuditLogs extends SanitizedAdminUser {
+  displayName: string;
+}
+
 interface AuditLog extends Pick<Entity, 'id'> {
   date: string;
   action: string;
@@ -9,7 +14,7 @@ interface AuditLog extends Pick<Entity, 'id'> {
    * However, we know it's JSON.
    */
   payload: Record<string, unknown>;
-  user?: SanitizedAdminUser;
+  user?: SanitizedAdminUserForAuditLogs;
 }
 
 namespace GetAll {

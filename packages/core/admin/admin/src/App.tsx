@@ -21,16 +21,15 @@ import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import {
-  ConfigurationProvider,
-  ConfigurationProviderProps,
-} from './components/ConfigurationProvider';
 import { PrivateRoute } from './components/PrivateRoute';
-import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
+import { ADMIN_PERMISSIONS_CE } from './constants';
+import { ConfigurationProvider, ConfigurationProviderProps } from './features/Configuration';
 import { useEnterprise } from './hooks/useEnterprise';
 import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UseCasePage } from './pages/UseCasePage';
+import { setAdminPermissions } from './reducer';
+import { PermissionMap } from './types/permissions';
 import { createRoute } from './utils/createRoute';
 
 type StrapiRoute = Pick<MenuItem, 'exact' | 'to'> & Required<Pick<MenuItem, 'Component'>>;
@@ -47,7 +46,8 @@ interface AppProps extends Omit<ConfigurationProviderProps, 'children' | 'authLo
 }
 
 export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials }: AppProps) => {
-  const adminPermissions = useEnterprise(
+  // @ts-expect-error – we need to type the useEnterprise hook better, in this circumstance we know it'll either be the CE data or a merge of the two.
+  const adminPermissions: Partial<PermissionMap> = useEnterprise(
     ADMIN_PERMISSIONS_CE,
     async () => (await import('../../ee/admin/src/constants')).ADMIN_PERMISSIONS_EE,
     {
@@ -99,7 +99,7 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
   const [telemetryProperties, setTelemetryProperties] = React.useState(undefined);
 
   React.useEffect(() => {
-    dispatch({ type: ACTION_SET_ADMIN_PERMISSIONS, payload: adminPermissions });
+    dispatch(setAdminPermissions(adminPermissions));
   }, [adminPermissions, dispatch]);
 
   React.useEffect(() => {

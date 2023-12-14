@@ -27,6 +27,7 @@ import versionCommand from './actions/version/command';
 import watchAdminCommand from './actions/watch-admin/command';
 
 import buildPluginCommand from './actions/plugin/build-command/command';
+import initPluginCommand from './actions/plugin/init/command';
 import watchPluginCommand from './actions/plugin/watch/command';
 
 import { createLogger } from './utils/logger';
@@ -63,6 +64,7 @@ const strapiCommands = {
    * Plugins
    */
   buildPluginCommand,
+  initPluginCommand,
   watchPluginCommand,
 } as const;
 

@@ -13,7 +13,7 @@ import valid from 'semver/functions/valid';
 //  TODO: DS add loader
 
 import packageJSON from '../../../package.json';
-import { useConfiguration } from '../contexts/configuration';
+import { useConfiguration } from '../features/Configuration';
 import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
 
@@ -33,7 +33,7 @@ const AuthenticatedApp = () => {
     userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
   );
   const [userId, setUserId] = React.useState<string>();
-  const { showReleaseNotification } = useConfiguration();
+  const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
   const { get } = useFetchClient();
   const [
     { data: appInfos, status },

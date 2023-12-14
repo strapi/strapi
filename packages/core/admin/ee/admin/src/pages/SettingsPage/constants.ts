@@ -5,10 +5,9 @@ export const ROUTES_EE: Route[] = [
     ? [
         {
           async Component() {
-            // @ts-expect-error – No types, yet.
-            const component = await import('./pages/AuditLogs/ProtectedListPage');
+            const { ProtectedAuditLogsListPage } = await import('./pages/AuditLogs/ListPage');
 
-            return component;
+            return ProtectedAuditLogsListPage;
           },
           to: '/settings/audit-logs',
           exact: true,

@@ -1,47 +1,72 @@
-import produce from 'immer';
+import { createSlice } from '@reduxjs/toolkit';
 
-import { ACTION_SET_APP_RUNTIME_STATUS, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
 import { PermissionMap } from './types/permissions';
 
+import type { PayloadAction } from '@reduxjs/toolkit';
+
+type ThemeName = 'light' | 'dark' | 'system';
+
 interface AppState {
-  status: 'init' | 'runtime';
+  language: {
+    locale: string;
+    localeNames: Record<string, string>;
+  };
   permissions: Partial<PermissionMap>;
+  theme: {
+    currentTheme: ThemeName;
+    availableThemes: string[];
+  };
 }
 
-const initialState = {
-  permissions: {},
-  status: 'init',
-} satisfies AppState;
+const THEME_LOCAL_STORAGE_KEY = 'STRAPI_THEME';
+const LANGUAGE_LOCAL_STORAGE_KEY = 'strapi-admin-language';
 
-interface SetAppRuntimeStatusAction {
-  type: typeof ACTION_SET_APP_RUNTIME_STATUS;
-}
+const adminSlice = createSlice({
+  name: 'admin',
+  initialState: () => {
+    return {
+      language: {
+        locale: 'en',
+        localeNames: { en: 'English' },
+      },
+      permissions: {},
+      theme: {
+        availableThemes: [],
+        currentTheme: localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system',
+      },
+    } as AppState;
+  },
+  reducers: {
+    setAdminPermissions(state, action: PayloadAction<Partial<PermissionMap>>) {
+      state.permissions = action.payload;
+    },
+    setAppTheme(state, action: PayloadAction<ThemeName>) {
+      state.theme.currentTheme = action.payload;
+      window.localStorage.setItem(THEME_LOCAL_STORAGE_KEY, action.payload);
+    },
+    setAvailableThemes(state, action: PayloadAction<AppState['theme']['availableThemes']>) {
+      state.theme.availableThemes = action.payload;
+    },
+    setLocale(state, action: PayloadAction<string>) {
+      state.language.locale = action.payload;
 
-interface SetAdminPermissionsAction {
-  type: typeof ACTION_SET_ADMIN_PERMISSIONS;
-  payload: Record<string, unknown>;
-}
+      window.localStorage.setItem(LANGUAGE_LOCAL_STORAGE_KEY, action.payload);
+      document.documentElement.setAttribute('lang', action.payload);
+    },
+  },
+});
 
-type Action = SetAppRuntimeStatusAction | SetAdminPermissionsAction;
+const reducer = adminSlice.reducer;
 
-const reducer = (state: AppState = initialState, action: Action) =>
-  /* eslint-disable-next-line consistent-return */
-  produce(state, (draftState) => {
-    switch (action.type) {
-      case ACTION_SET_APP_RUNTIME_STATUS: {
-        draftState.status = 'runtime';
-        break;
-      }
+const { setAdminPermissions, setAppTheme, setAvailableThemes, setLocale } = adminSlice.actions;
 
-      case ACTION_SET_ADMIN_PERMISSIONS: {
-        draftState.permissions = action.payload;
-        break;
-      }
-
-      default:
-        return draftState;
-    }
-  });
-
-export { reducer, initialState };
-export type { AppState, Action, SetAppRuntimeStatusAction, SetAdminPermissionsAction };
+export {
+  reducer,
+  setAdminPermissions,
+  setAppTheme,
+  setAvailableThemes,
+  setLocale,
+  THEME_LOCAL_STORAGE_KEY,
+  LANGUAGE_LOCAL_STORAGE_KEY,
+};
+export type { AppState, ThemeName };

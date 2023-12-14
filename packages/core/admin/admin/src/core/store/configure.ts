@@ -10,8 +10,7 @@ import { RBACReducer, RBACState } from '../../components/RBACProvider';
 import { reducer as rbacManagerReducer } from '../../content-manager/hooks/useSyncRbac';
 import { reducer as cmAppReducer } from '../../content-manager/pages/App';
 import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
-// @ts-expect-error no types, yet.
-import listViewReducer from '../../content-manager/pages/ListView/reducer';
+import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
 import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
 
@@ -52,17 +51,25 @@ const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => Stor
     };
   };
 
+type PreloadState = Partial<{
+  admin_app: AppState;
+}>;
+
 /**
  * @description This is the main store configuration function, injected Reducers use our legacy app.addReducer API,
  * which we're trying to phase out. App Middlewares could potentially be improved...?
  */
 const configureStoreImpl = (
+  preloadedState: PreloadState = {},
   appMiddlewares: Array<() => Middleware> = [],
   injectedReducers: Record<string, Reducer> = {}
 ) => {
   const coreReducers = { ...staticReducers, ...injectedReducers } as const;
 
   const store = configureStore({
+    preloadedState: {
+      admin_app: preloadedState.admin_app,
+    },
     reducer: coreReducers,
     devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) => [
@@ -83,4 +90,4 @@ type Store = ReturnType<typeof configureStoreImpl> & {
 type RootState = ReturnType<Store['getState']>;
 
 export { configureStoreImpl as configureStore };
-export type { RootState, AppState, RBACState, Store };
+export type { RootState, AppState, RBACState, Store, PreloadState };
