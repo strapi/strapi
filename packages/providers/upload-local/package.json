@@ -52,8 +52,8 @@
     "@strapi/plugin-upload": "4.15.5",
     "@types/jest": "29.5.2",
     "eslint-config-custom": "4.15.5",
-    "tsconfig": "4.15.5",
-    "memfs": "4.6.0"
+    "memfs": "4.6.0",
+    "tsconfig": "4.15.5"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

@@ -9795,6 +9795,7 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:4.15.5"
     fs-extra: "npm:10.1.0"
+    memfs: "npm:4.6.0"
     tsconfig: "npm:4.15.5"
   languageName: unknown
   linkType: soft
