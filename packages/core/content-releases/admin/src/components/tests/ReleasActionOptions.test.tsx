@@ -6,7 +6,9 @@ import { ReleaseActionOptions } from '../ReleaseActionOptions';
 describe('ReleaseActionOptions', () => {
   it('should render the component', () => {
     const handleChange = jest.fn();
-    render(<ReleaseActionOptions selected="publish" handleChange={handleChange} />);
+    render(
+      <ReleaseActionOptions selected="publish" handleChange={handleChange} name="test-radio" />
+    );
 
     const publishOption = screen.getByRole('radio', { name: 'publish' });
     const unpublishOption = screen.getByRole('radio', { name: 'unpublish' });

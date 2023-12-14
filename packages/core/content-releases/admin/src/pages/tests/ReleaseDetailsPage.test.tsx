@@ -8,7 +8,7 @@ import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
+  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
 }));
 
 describe('Releases details page', () => {
@@ -104,6 +104,10 @@ describe('Releases details page', () => {
     expect(
       screen.getByText(mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.locale.name)
     ).toBeInTheDocument();
+
+    // There is one column with actions and the right one is checked
+    expect(screen.getByRole('radio', { name: 'publish' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'unpublish' })).not.toBeChecked();
 
     const paginationCombobox = screen.queryByRole('combobox', { name: /entries per page/i });
     expect(paginationCombobox).toBeInTheDocument();

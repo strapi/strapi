@@ -162,12 +162,11 @@ const AddActionToReleaseModal = ({
                       defaultMessage: 'What do you want to do with this entry?',
                     })}
                   </FieldLabel>
-                  <Flex>
-                    <ReleaseActionOptions
-                      selected={values.type}
-                      handleChange={(e) => setFieldValue('type', e.target.value)}
-                    />
-                  </Flex>
+                  <ReleaseActionOptions
+                    selected={values.type}
+                    handleChange={(e) => setFieldValue('type', e.target.value)}
+                    name="type"
+                  />
                 </Flex>
               </ModalBody>
               <ModalFooter

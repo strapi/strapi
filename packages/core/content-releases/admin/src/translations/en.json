@@ -33,5 +33,5 @@
   "page.ReleaseDetails.table.header.label.name": "name",
   "page.ReleaseDetails.table.header.label.locale": "locale",
   "page.ReleaseDetails.table.header.label.content-type": "content-type",
-  "dialog.confirmation-message": "Are you sure you want to delete this release?"
+  "page.ReleaseDetails.table.header.label.action": "action"
 }

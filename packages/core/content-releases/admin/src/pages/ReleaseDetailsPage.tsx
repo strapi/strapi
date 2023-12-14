@@ -33,6 +33,7 @@ import { useIntl } from 'react-intl';
 import { useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -41,8 +42,11 @@ import {
   useGetReleaseActionsQuery,
   useGetReleaseQuery,
   useUpdateReleaseMutation,
+  useUpdateReleaseActionMutation,
   useDeleteReleaseMutation,
 } from '../services/release';
+
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -270,11 +274,46 @@ const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const { isLoading, isFetching, isError, data } = useGetReleaseActionsQuery({
     ...query,
     releaseId,
   });
+
+  const [updateReleaseAction] = useUpdateReleaseActionMutation();
+
+  const handleChangeType = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    actionId: ReleaseAction['id']
+  ) => {
+    const response = await updateReleaseAction({
+      params: {
+        releaseId,
+        actionId,
+      },
+      body: {
+        type: e.target.value as ReleaseAction['type'],
+      },
+    });
+
+    if ('error' in response) {
+      if (isAxiosError(response.error)) {
+        // When the response returns an object with 'error', handle axios error
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(response.error),
+        });
+      } else {
+        // Otherwise, the response returns an object with 'error', handle a generic error
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        });
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -347,10 +386,18 @@ const ReleaseDetailsBody = () => {
                 })}
                 name="content-type"
               />
+              <Table.HeaderCell
+                fieldSchemaType="string"
+                label={formatMessage({
+                  id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+                  defaultMessage: 'action',
+                })}
+                name="action"
+              />
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
-              {releaseActions.map(({ id, entry }) => (
+              {releaseActions.map(({ id, type, entry }) => (
                 <Tr key={id}>
                   <Td>
                     <Typography>{`${entry.contentType.mainFieldValue || entry.id}`}</Typography>
@@ -360,6 +407,13 @@ const ReleaseDetailsBody = () => {
                   </Td>
                   <Td>
                     <Typography>{entry.contentType.displayName || ''}</Typography>
+                  </Td>
+                  <Td>
+                    <ReleaseActionOptions
+                      selected={type}
+                      handleChange={(e) => handleChangeType(e, id)}
+                      name={`release-action-${id}-type`}
+                    />
                   </Td>
                 </Tr>
               ))}
