@@ -3,7 +3,7 @@ import { Transforms, Editor, Element as SlateElement, Node, Range } from 'slate'
 import { type Block } from './types';
 
 const addProtocol = (url: string, protocol = 'https://') => {
-  const allowedProtocols = ['http://', 'https://', 'mailto:', 'tel:'];
+  const allowedProtocols = ['http://', 'https://', 'mailto:', 'tel:', '/'];
 
   if (allowedProtocols.some((allowedProtocol) => url.startsWith(allowedProtocol))) {
     return url;
