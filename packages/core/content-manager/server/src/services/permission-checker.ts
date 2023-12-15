@@ -8,7 +8,7 @@ const ACTIONS = {
   delete: 'plugin::content-manager.explorer.delete',
   publish: 'plugin::content-manager.explorer.publish',
   unpublish: 'plugin::content-manager.explorer.publish',
-};
+} as const;
 
 type Entity = EntityService.Result<Common.UID.ContentType>;
 type Query = {
@@ -18,7 +18,7 @@ type Query = {
 };
 
 const createPermissionChecker =
-  (strapi: { strapi: Strapi }) =>
+  (strapi: Strapi) =>
   ({ userAbility, model }: { userAbility: any; model: string }) => {
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
