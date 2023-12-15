@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "4.15.4-0.1.0",
+  "version": "4.15.5-0.1.0",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -74,15 +74,15 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/data-transfer": "4.15.4",
+    "@strapi/data-transfer": "4.15.5",
     "@strapi/design-system": "1.13.1",
-    "@strapi/helper-plugin": "4.15.4",
+    "@strapi/helper-plugin": "4.15.5",
     "@strapi/icons": "1.13.0",
-    "@strapi/permissions": "4.15.4",
-    "@strapi/provider-audit-logs-local": "4.15.4",
-    "@strapi/types": "4.15.4",
-    "@strapi/typescript-utils": "4.15.4",
-    "@strapi/utils": "4.15.4",
+    "@strapi/permissions": "4.15.5",
+    "@strapi/provider-audit-logs-local": "4.15.5",
+    "@strapi/types": "4.15.5",
+    "@strapi/typescript-utils": "4.15.5",
+    "@strapi/utils": "4.15.5",
     "axios": "1.6.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
@@ -173,9 +173,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "4.15.4",
-    "@strapi/pack-up": "4.15.4",
-    "@strapi/strapi": "4.15.4",
+    "@strapi/admin-test-utils": "4.15.5",
+    "@strapi/pack-up": "4.15.5",
+    "@strapi/strapi": "4.15.5",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -194,7 +194,7 @@
     "vite": "4.4.9"
   },
   "peerDependencies": {
-    "@strapi/data-transfer": "4.15.4",
+    "@strapi/data-transfer": "4.15.5",
     "@strapi/strapi": "^4.3.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
