@@ -1,9 +1,10 @@
 import { pipe, omit, pick } from 'lodash/fp';
 import type { Strapi, Common, CoreApi, Utils } from '@strapi/types';
 
-import { createController } from './core-api/controller';
-import { createService } from './core-api/service';
-import { createRoutes } from './core-api/routes';
+import { createController } from '../core-api/controller';
+import { createService } from '../core-api/service';
+import { createRoutes } from '../core-api/routes';
+import { symbols } from './constants';
 
 type WithStrapiCallback<T> = T | (<S extends { strapi: Strapi }>(params: S) => T);
 
@@ -18,10 +19,6 @@ const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
     },
   });
 };
-
-const symbols = {
-  CustomController: Symbol('StrapiCustomCoreController'),
-} as const;
 
 const createCoreController = <
   TUID extends Common.UID.ContentType,
@@ -115,4 +112,4 @@ function createCoreRouter<T extends Common.UID.ContentType>(
   };
 }
 
-export { createCoreController, createCoreService, createCoreRouter, symbols };
+export { createCoreController, createCoreService, createCoreRouter };

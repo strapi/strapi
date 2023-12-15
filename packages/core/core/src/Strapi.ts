@@ -32,7 +32,8 @@ import type {
 
 import loadConfiguration from './core/app-configuration';
 
-import * as factories from './factories';
+import * as factories from './factories/factories';
+import * as factoriesConstants from './factories/constants';
 import compile from './compile';
 
 import * as utils from './utils';
@@ -371,7 +372,7 @@ class Strapi extends Container implements StrapiI {
         numberOfComponents: _.size(this.components),
         numberOfDynamicZones: getNumberOfDynamicZones(),
         numberOfCustomControllers: Object.values<Common.Controller>(this.controllers).filter(
-          (controller) => factories.symbols.CustomController in controller
+          (controller) => factoriesConstants.symbols.CustomController in controller
         ).length,
         environment: this.config.environment,
         // TODO: to add back
