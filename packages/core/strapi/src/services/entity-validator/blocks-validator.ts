@@ -24,12 +24,21 @@ const linkNodeValidator = yup.object().shape({
   children: yup.array().of(textNodeValidator).required(),
 });
 
+const lazyLinkNodeValidator = yup.object().shape({
+  type: yup.string().equals(['link']).required(),
+  children: yup.array().of(textNodeValidator).required(),
+});
+
 // TODO: remove any with a correct Type
-const inlineNodeValidator: any = yup.lazy((value: { type: string }) => {
+const inlineNodeValidator: any = yup.lazy((value: { type: string, url: string }) => {
+  const lazyCheckProtocols = ['mailto:', 'tel:', '/'];
   switch (value.type) {
     case 'text':
       return textNodeValidator;
     case 'link':
+      if (lazyCheckProtocols.some((lazyCheckProtocols) => value.url.startsWith(lazyCheckProtocols))) {
+        return lazyLinkNodeValidator;
+      }
       return linkNodeValidator;
     default:
       return yup.mixed().test('invalid-type', 'Inline node must be Text or Link', () => {
