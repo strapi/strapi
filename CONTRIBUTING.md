@@ -51,7 +51,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
-- Fork the repository and create your new branch from `main`.
+- Fork the repository and create your new branch from `develop`.
 - Run `yarn install` in the root of the repository.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
