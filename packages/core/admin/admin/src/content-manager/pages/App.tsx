@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createSelector } from '@reduxjs/toolkit';
+import { AnyAction, createSelector } from '@reduxjs/toolkit';
 import { HeaderLayout, Layout, Main } from '@strapi/design-system';
 import {
   AnErrorOccurred,
@@ -182,30 +182,16 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
  * reducer
  * -----------------------------------------------------------------------------------------------*/
 
-export const GET_INIT_DATA = 'ContentManager/App/GET_INIT_DATA';
-export const RESET_INIT_DATA = 'ContentManager/App/RESET_INIT_DATA';
 export const SET_INIT_DATA = 'ContentManager/App/SET_INIT_DATA';
-
-interface GetInitDataAction {
-  type: typeof GET_INIT_DATA;
-}
-
-interface ResetInitDataAction {
-  type: typeof RESET_INIT_DATA;
-}
 
 interface SetInitDataAction {
   type: typeof SET_INIT_DATA;
-  data: {
-    authorizedCollectionTypeLinks: ContentManagerAppState['collectionTypeLinks'];
-    authorizedSingleTypeLinks: ContentManagerAppState['singleTypeLinks'];
-    components: ContentManagerAppState['components'];
-    contentTypeSchemas: ContentManagerAppState['models'];
-    fieldSizes: ContentManagerAppState['fieldSizes'];
-  };
+  authorizedCollectionTypeLinks: ContentManagerAppState['collectionTypeLinks'];
+  authorizedSingleTypeLinks: ContentManagerAppState['singleTypeLinks'];
+  components: ContentManagerAppState['components'];
+  contentTypeSchemas: ContentManagerAppState['models'];
+  fieldSizes: ContentManagerAppState['fieldSizes'];
 }
-
-type Action = GetInitDataAction | ResetInitDataAction | SetInitDataAction;
 
 interface ContentManagerAppState {
   collectionTypeLinks: ContentManagerLink[];
@@ -213,7 +199,6 @@ interface ContentManagerAppState {
   fieldSizes: Contracts.Init.GetInitData.Response['data']['fieldSizes'];
   models: Contracts.Init.GetInitData.Response['data']['contentTypes'];
   singleTypeLinks: ContentManagerLink[];
-  status: 'loading' | 'resolved' | 'error';
 }
 
 const initialState = {
@@ -222,7 +207,6 @@ const initialState = {
   fieldSizes: {},
   models: [],
   singleTypeLinks: [],
-  status: 'loading',
 } satisfies ContentManagerAppState;
 
 const selectSchemas = createSelector(
@@ -232,29 +216,22 @@ const selectSchemas = createSelector(
   }
 );
 
-const reducer = (state: ContentManagerAppState = initialState, action: Action) =>
+const reducer = (state: ContentManagerAppState = initialState, action: AnyAction) =>
   produce(state, (draftState) => {
     switch (action.type) {
-      case GET_INIT_DATA: {
-        draftState.status = 'loading';
-        break;
-      }
-      case RESET_INIT_DATA: {
-        return initialState;
-      }
       case SET_INIT_DATA: {
-        draftState.collectionTypeLinks = action.data.authorizedCollectionTypeLinks.filter(
+        const initDataAction = action as SetInitDataAction;
+        draftState.collectionTypeLinks = initDataAction.authorizedCollectionTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
-        draftState.singleTypeLinks = action.data.authorizedSingleTypeLinks.filter(
+        draftState.singleTypeLinks = initDataAction.authorizedSingleTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
         // @ts-expect-error – recursive types
-        draftState.components = action.data.components;
+        draftState.components = initDataAction.components;
         // @ts-expect-error – issues with immer types not working quite right....
-        draftState.models = action.data.contentTypeSchemas;
-        draftState.fieldSizes = action.data.fieldSizes;
-        draftState.status = 'resolved';
+        draftState.models = initDataAction.contentTypeSchemas;
+        draftState.fieldSizes = initDataAction.fieldSizes;
         break;
       }
       default:

@@ -18,7 +18,7 @@ import { useQuery } from 'react-query';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
-import { SET_INIT_DATA, RESET_INIT_DATA, GET_INIT_DATA } from '../pages/App';
+import { SET_INIT_DATA } from '../pages/App';
 import { getTranslation } from '../utils/translations';
 
 const { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } = HOOKS;
@@ -163,44 +163,26 @@ const useContentManagerInitData = () => {
 
     dispatch({
       type: SET_INIT_DATA,
-      data: {
-        authorizedCollectionTypeLinks: ctLinks,
-        authorizedSingleTypeLinks: stLinks,
-        contentTypeSchemas: contentTypes,
-        components,
-        fieldSizes,
-      },
+      authorizedCollectionTypeLinks: ctLinks,
+      authorizedSingleTypeLinks: stLinks,
+      contentTypeSchemas: contentTypes,
+      components,
+      fieldSizes,
     });
   };
 
   const isLoading = initialDataQuery.isLoading || contentTypeSettingsQuery.isLoading;
 
   useEffect(() => {
-    const formatAndSetData = async () => {
-      if (!isLoading && initialDataQuery.data && contentTypeSettingsQuery.data) {
-        await formatData(
-          initialDataQuery.data.components,
-          initialDataQuery.data.contentTypes,
-          initialDataQuery.data.fieldSizes,
-          contentTypeSettingsQuery.data
-        );
-      }
-    };
-
-    formatAndSetData();
+    if (!isLoading && initialDataQuery.data && contentTypeSettingsQuery.data) {
+      formatData(
+        initialDataQuery.data.components,
+        initialDataQuery.data.contentTypes,
+        initialDataQuery.data.fieldSizes,
+        contentTypeSettingsQuery.data
+      );
+    }
   }, [isLoading, initialDataQuery.data, contentTypeSettingsQuery.data]);
-
-  useEffect(() => {
-    dispatch({
-      type: GET_INIT_DATA,
-    });
-
-    return () => {
-      dispatch({
-        type: RESET_INIT_DATA,
-      });
-    };
-  }, [dispatch]);
 
   return { ...state, isLoading };
 };
