@@ -235,6 +235,10 @@ const selectSchemas = createSelector(
 const reducer = (state: ContentManagerAppState = initialState, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
+      case GET_INIT_DATA: {
+        draftState.status = 'loading';
+        break;
+      }
       case RESET_INIT_DATA: {
         return initialState;
       }
