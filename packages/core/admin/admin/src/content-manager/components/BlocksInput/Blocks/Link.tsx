@@ -136,7 +136,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   </FieldLabel>
                   <FieldInput
                     name="url"
-                    placeholder="https://strapi.io"
+                    placeholder="https://example.com"
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
                   />
