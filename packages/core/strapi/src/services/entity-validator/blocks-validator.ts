@@ -30,13 +30,15 @@ const lazyLinkNodeValidator = yup.object().shape({
 });
 
 // TODO: remove any with a correct Type
-const inlineNodeValidator: any = yup.lazy((value: { type: string, url: string }) => {
+const inlineNodeValidator: any = yup.lazy((value: { type: string; url: string }) => {
   const lazyCheckProtocols = ['mailto:', 'tel:', '/'];
   switch (value.type) {
     case 'text':
       return textNodeValidator;
     case 'link':
-      if (lazyCheckProtocols.some((lazyCheckProtocols) => value.url.startsWith(lazyCheckProtocols))) {
+      if (
+        lazyCheckProtocols.some((lazyCheckProtocols) => value.url.startsWith(lazyCheckProtocols))
+      ) {
         return lazyLinkNodeValidator;
       }
       return linkNodeValidator;
