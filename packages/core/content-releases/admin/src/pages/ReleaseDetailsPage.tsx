@@ -284,12 +284,13 @@ export const ReleaseDetailsLayout = ({
                     </ReleaseInfoWrapper>
                   </Popover>
                 )}
+                {/* TODO: uncomment the code when we implement the refresh feature 
                 <Button size="S" variant="tertiary">
                   {formatMessage({
                     id: 'content-releases.header.actions.refresh',
                     defaultMessage: 'Refresh',
                   })}
-                </Button>
+                </Button> */}
                 <CheckPermissions permissions={PERMISSIONS.publish}>
                   <Button
                     size="S"

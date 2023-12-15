@@ -40,8 +40,9 @@ describe('Releases details page', () => {
     const moreButton = screen.getByRole('button', { name: 'Release actions' });
     expect(moreButton).toBeInTheDocument();
 
-    const refreshButton = screen.getByRole('button', { name: 'Refresh' });
-    expect(refreshButton).toBeInTheDocument();
+    // TODO: uncomment when the refresh button is added
+    // const refreshButton = screen.getByRole('button', { name: 'Refresh' });
+    // expect(refreshButton).toBeInTheDocument();
 
     const publishButton = screen.getByRole('button', { name: 'Publish' });
     expect(publishButton).toBeInTheDocument();
