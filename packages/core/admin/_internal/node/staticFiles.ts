@@ -36,6 +36,7 @@ const getEntryModule = (ctx: BuildContext): string => {
           document.getElementById("strapi"),
           {
             ${ctx.customisations?.modulePath ? 'customisations,' : ''}
+            ${ctx.features ? `features: ${JSON.stringify(ctx.features)},` : ''}
             plugins: {
         ${pluginsObject}
             }
