@@ -10,7 +10,7 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
-import { Strapi } from '@strapi/types';
+import { Strapi, FeaturesService } from '@strapi/types';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 
 interface BuildContext {
@@ -47,6 +47,10 @@ interface BuildContext {
    * The environment variables to be included in the JS bundle
    */
   env: Record<string, string>;
+  /**
+   * Features object with future flags
+   */
+  features?: FeaturesService['config'];
   logger: CLIContext['logger'];
   /**
    * The build options
@@ -160,6 +164,8 @@ const createBuildContext = async ({
 
   const customisations = await loadUserAppFile({ appDir, runtimeDir });
 
+  const features = strapiInstance.config.get('features', undefined);
+
   const buildContext = {
     appDir,
     basePath: `${adminPath}/`,
@@ -176,6 +182,7 @@ const createBuildContext = async ({
     strapi: strapiInstance,
     target,
     tsconfig,
+    features,
   } satisfies BuildContext;
 
   return buildContext;
