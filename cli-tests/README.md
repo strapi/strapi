@@ -40,6 +40,6 @@ module.exports = () => {
 };
 ```
 
-### CLI Testing Framework
+### How to run and test CLI commands
 
 To be implemented
