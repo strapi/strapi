@@ -12,7 +12,7 @@ export function useCurrentUserIsSuperadmin() {
                 const _isSuperAdmin = !!me?.roles?.find((role: { code: string }) => role.code === 'strapi-super-admin')
                 setIsSuperadmin(_isSuperAdmin)
             })
-    })
+    }, [])
 
     return isSuperAdmin
 }
