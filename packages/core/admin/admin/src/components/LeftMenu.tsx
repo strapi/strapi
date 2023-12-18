@@ -25,6 +25,7 @@ import styled from 'styled-components';
 
 import { useConfiguration } from '../contexts/configuration';
 import { Menu } from '../hooks/useMenu';
+import { useCurrentUserIsSuperadmin } from '../hooks/useCurrentUserIsSuperadmin';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -33,7 +34,7 @@ const LinkUserWrapper = styled(Box)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
+const LinkUser = styled(RouterNavLink) <{ logout?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,7 +44,7 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
 
   &:hover {
     background: ${({ theme, logout }) =>
-      logout ? theme.colors.danger100 : theme.colors.primary100};
+    logout ? theme.colors.danger100 : theme.colors.primary100};
     text-decoration: none;
   }
 
@@ -54,7 +55,7 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   }
 `;
 
-interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
+interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> { }
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const navUserRef = React.useRef<HTMLDivElement>(null!);
@@ -69,6 +70,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const { pathname } = useLocation();
   const history = useHistory();
   const { post } = getFetchClient();
+  const isSuperAdmin = useCurrentUserIsSuperadmin()
 
   const initials = userDisplayName
     .split(' ')
@@ -129,23 +131,27 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       <Divider />
 
       <NavSections>
-        <NavLink
-          as={RouterNavLink}
-          // @ts-expect-error the props from the passed as prop are not inferred // joined together
-          to="/content-manager"
-          icon={<Write />}
-          onClick={() => handleClickOnLink('/content-manager')}
-        >
-          {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
-        </NavLink>
+        {
+          isSuperAdmin && (
+            <NavLink
+              as={RouterNavLink}
+              // @ts-expect-error the props from the passed as prop are not inferred // joined together
+              to="/content-manager"
+              icon={<Write />}
+              onClick={() => handleClickOnLink('/content-manager')}
+            >
+              {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
+            </NavLink>
+          )
+        }
 
-        {pluginsSectionLinks.length > 0 ? (
+        {/* {pluginsSectionLinks.length > 0 ? (
           <NavSection
             label={formatMessage({
               id: 'app.components.LeftMenu.plugins',
               defaultMessage: 'Plugins',
             })}
-          >
+          > */}
             {pluginsSectionLinks.map((link) => {
               const Icon = link.icon;
 
@@ -162,40 +168,45 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                 </NavLink>
               );
             })}
-          </NavSection>
-        ) : null}
+          {/* </NavSection>
+        ) : null} */}
 
-        {generalSectionLinks.length > 0 ? (
-          <NavSection
-            label={formatMessage({
-              id: 'app.components.LeftMenu.general',
-              defaultMessage: 'General',
-            })}
-          >
-            {generalSectionLinks.map((link) => {
-              const LinkIcon = link.icon;
+        {
+          isSuperAdmin && (
+            generalSectionLinks.length > 0 ? (
+              <NavSection
+                label={formatMessage({
+                  id: 'app.components.LeftMenu.general',
+                  defaultMessage: 'General',
+                })}
+              >
+                {generalSectionLinks.map((link) => {
+                  const LinkIcon = link.icon;
+    
+                  return (
+                    <NavLink
+                      as={RouterNavLink}
+                      badgeContent={
+                        link.notificationsCount && link.notificationsCount > 0
+                          ? link.notificationsCount.toString()
+                          : undefined
+                      }
+                      // @ts-expect-error the props from the passed as prop are not inferred // joined together
+                      to={link.to}
+                      key={link.to}
+                      icon={<LinkIcon />}
+                      onClick={() => handleClickOnLink(link.to)}
+                    >
+                      {formatMessage(link.intlLabel)}
+                    </NavLink>
+                  );
+                })}
+              </NavSection>
+            ) : null
+          )
+        } 
 
-              return (
-                <NavLink
-                  as={RouterNavLink}
-                  badgeContent={
-                    link.notificationsCount && link.notificationsCount > 0
-                      ? link.notificationsCount.toString()
-                      : undefined
-                  }
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                  to={link.to}
-                  key={link.to}
-                  icon={<LinkIcon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                </NavLink>
-              );
-            })}
-          </NavSection>
-        ) : null}
-      </NavSections>
+      </NavSections> 
 
       <NavFooter>
         <NavUser
@@ -241,13 +252,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         <NavCondense onClick={() => setCondensed((s) => !s)}>
           {condensed
             ? formatMessage({
-                id: 'app.components.LeftMenu.expand',
-                defaultMessage: 'Expand the navbar',
-              })
+              id: 'app.components.LeftMenu.expand',
+              defaultMessage: 'Expand the navbar',
+            })
             : formatMessage({
-                id: 'app.components.LeftMenu.collapse',
-                defaultMessage: 'Collapse the navbar',
-              })}
+              id: 'app.components.LeftMenu.collapse',
+              defaultMessage: 'Collapse the navbar',
+            })}
         </NavCondense>
       </NavFooter>
     </MainNav>

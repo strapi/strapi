@@ -98,7 +98,7 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const [{ query }] = useQueryParams();
   const { pathname } = useLocation();
-  const { push } = useHistory();
+  const { push, goBack } = useHistory();
   const { formatMessage, locale } = useIntl();
   const fetchClient = useFetchClient();
   const formatter = useCollator(locale, {
@@ -640,12 +640,28 @@ function ListView({ canCreate, canDelete, canRead, canPublish, layout, slug }) {
         subtitle={subtitle}
         title={headerLayoutTitle}
         navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/content-manager/">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
+          // <Link startIcon={<ArrowLeft />} to="/content-manager/">
+          //   {formatMessage({
+          //     id: 'global.back',
+          //     defaultMessage: 'Back',
+          //   })}
+          // </Link>
+          <Link
+          startIcon={<ArrowLeft />}
+          // Needed in order to redirect the user with the correct search params
+          // Since parts is using a link from react-router-dom the best way to do it is to disable the
+          // event
+          onClick={(e) => {
+            e.preventDefault();
+            goBack();
+          }}
+          to="/"
+        >
+          {formatMessage({
+            id: 'global.back',
+            defaultMessage: 'Back',
+          })}
+        </Link>
         }
       />
       {!canRead && (

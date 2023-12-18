@@ -25,7 +25,7 @@ import {
 } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ContentType } from '../../../shared/schema';
@@ -37,11 +37,17 @@ import cornerOrnamentPath from './assets/corner-ornament.svg';
 import cloudIconBackgroundImage from './assets/strapi-cloud-background.png';
 import cloudFlagsImage from './assets/strapi-cloud-flags.svg';
 
+const WELCOME_PAGE_REDIRECT_KEY = 'WELCOME_PAGE_REDIRECT_TO'
+
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE
  * -----------------------------------------------------------------------------------------------*/
 
 const HomePageCE = () => {
+  const redirectTo = localStorage.getItem(WELCOME_PAGE_REDIRECT_KEY) || '/alerts'
+
+  return <Redirect to={redirectTo} />
+
   const { formatMessage } = useIntl();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();

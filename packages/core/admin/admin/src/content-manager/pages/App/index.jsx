@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { HeaderLayout, Layout, Main } from '@strapi/design-system';
 import {
   AnErrorOccurred,
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useFetchClient,
   useGuidedTour,
 } from '@strapi/helper-plugin';
 import sortBy from 'lodash/sortBy';
@@ -29,6 +30,7 @@ import { ComponentDragPreview } from './components/ComponentDragPreview';
 import { RelationDragPreview } from './components/RelationDragPreview';
 import LeftMenu from './LeftMenu';
 import useContentManagerInitData from './useContentManagerInitData';
+import { useCurrentUserIsSuperadmin } from '../../../hooks/useCurrentUserIsSuperadmin';
 
 function renderDraglayerItem({ type, item }) {
   if ([ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(type)) {
@@ -73,6 +75,8 @@ const App = () => {
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
   const permissions = useSelector(selectAdminPermissions);
+  const isSuperadmin = useCurrentUserIsSuperadmin()
+
 
   useEffect(() => {
     if (startSectionRef.current) {
@@ -114,15 +118,14 @@ const App = () => {
   if (!contentTypeMatch && authorisedModels.length > 0) {
     return (
       <Redirect
-        to={`${authorisedModels[0].to}${
-          authorisedModels[0].search ? `?${authorisedModels[0].search}` : ''
-        }`}
+        to={`${authorisedModels[0].to}${authorisedModels[0].search ? `?${authorisedModels[0].search}` : ''
+          }`}
       />
     );
   }
 
-  return (
-    <Layout sideNav={<LeftMenu />}>
+  const content = (
+    <>
       <DragLayer renderItem={renderDraglayerItem} />
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
@@ -146,7 +149,19 @@ const App = () => {
           <Route path="" component={AnErrorOccurred} />
         </Switch>
       </ModelsContext.Provider>
-    </Layout>
+    </>
+  )
+
+  return (
+    isSuperadmin ? (
+      <Layout sideNav={<LeftMenu />}>
+        {content}
+      </Layout>
+    ) : (
+      <Main>
+        {content}
+      </Main>
+    )
   );
 };
 

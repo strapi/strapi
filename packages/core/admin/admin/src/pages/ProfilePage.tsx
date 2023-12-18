@@ -303,17 +303,17 @@ const ProfilePage = () => {
                       values={{
                         firstname,
                         lastname,
-                        username,
+                        // username,
                         email,
                       }}
                     />
-                    {!hasLockedRole && (
+                    {/* {!hasLockedRole && (
                       <PasswordSection
                         errors={errors}
                         onChange={handleChange}
                         values={passwordValues}
                       />
-                    )}
+                    )} */}
                     <PreferencesSection
                       allApplicationThemes={allApplicationThemes}
                       onChange={handleChange}
@@ -569,29 +569,13 @@ const PreferencesSection = ({
               {
                 id: 'Settings.profile.form.section.experience.interfaceLanguageHelp',
                 defaultMessage:
-                  'Preference changes will apply only to you. More information is available {here}.',
+                  'Preference changes will apply only to you',
               },
-              {
-                here: (
-                  <Box
-                    as="a"
-                    color="primary600"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
-                  >
-                    {formatMessage({
-                      id: 'Settings.profile.form.section.experience.here',
-                      defaultMessage: 'here',
-                    })}
-                  </Box>
-                ),
-              }
             )}
           </Typography>
         </Flex>
         <Grid gap={5}>
-          <GridItem s={12} col={6}>
+          {/* <GridItem s={12} col={6}>
             <SingleSelect
               label={formatMessage({
                 id: 'Settings.profile.form.section.experience.interfaceLanguage',
@@ -627,7 +611,7 @@ const PreferencesSection = ({
                 </SingleSelectOption>
               ))}
             </SingleSelect>
-          </GridItem>
+          </GridItem> */}
           <GridItem s={12} col={6}>
             <SingleSelect
               label={formatMessage({
@@ -749,10 +733,11 @@ const UserInfoSection = ({ errors, onChange, values }: UserInfoSectionProps) => 
               value={values.email}
               type="email"
               name="email"
+              disabled={true}
               required
             />
           </GridItem>
-          <GridItem s={12} col={6}>
+          {/* <GridItem s={12} col={6}>
             <GenericInput
               intlLabel={{
                 id: 'Auth.form.username.label',
@@ -764,7 +749,7 @@ const UserInfoSection = ({ errors, onChange, values }: UserInfoSectionProps) => 
               type="text"
               name="username"
             />
-          </GridItem>
+          </GridItem> */}
         </Grid>
       </Flex>
     </Box>
