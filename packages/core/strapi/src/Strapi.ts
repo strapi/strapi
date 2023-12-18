@@ -372,18 +372,23 @@ class Strapi implements StrapiI {
     // Emit started event.
     // do not await to avoid slower startup
     // This event is anonymous
-    this.telemetry.send('didStartServer', {
-      groupProperties: {
-        database: this.config.get('database.connection.client'),
-        plugins: Object.keys(this.plugins),
-        numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
-        numberOfComponents: _.size(this.components),
-        numberOfDynamicZones: getNumberOfDynamicZones(),
-        environment: this.config.environment,
-        // TODO: to add back
-        // providers: this.config.installedProviders,
-      },
-    });
+    this.telemetry
+      .send('didStartServer', {
+        groupProperties: {
+          database: this.config.get('database.connection.client'),
+          plugins: Object.keys(this.plugins),
+          numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
+          numberOfComponents: _.size(this.components),
+          numberOfDynamicZones: getNumberOfDynamicZones(),
+          numberOfCustomControllers: Object.values<Common.Controller>(this.controllers).filter(
+            factories.isCustomController
+          ).length,
+          environment: this.config.environment,
+          // TODO: to add back
+          // providers: this.config.installedProviders,
+        },
+      })
+      .catch(this.log.error);
   }
 
   async openAdmin({ isInitialized }: { isInitialized: boolean }) {
