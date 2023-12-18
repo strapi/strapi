@@ -9,4 +9,5 @@ export interface UpgradeOptions {
   cwd?: string;
   dry?: boolean;
   target: Version.ReleaseType | Version.SemVer;
+  codemodsOnly?: boolean;
 }

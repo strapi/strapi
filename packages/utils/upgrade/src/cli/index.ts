@@ -27,6 +27,18 @@ const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description:
     });
 };
 
+program
+  .command('codemods')
+  .description(
+    'Run the upgrade process with the selected codemods without updating the Strapi dependencies'
+  )
+  .option('-p, --project-path <project-path>', 'Path to the Strapi project')
+  .action(async (options) => {
+    const { upgrade } = await import('./commands/upgrade.js');
+    // TODO: Change this to target major version
+    return upgrade({ ...options, codemodsOnly: true, target: Version.ReleaseType.Minor });
+  });
+
 addReleaseUpgradeCommand(
   Version.ReleaseType.Major,
   'Upgrade to the next available major version of Strapi'

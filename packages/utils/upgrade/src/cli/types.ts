@@ -6,7 +6,7 @@ export interface CLIOptions {
   debug: boolean;
   silent: boolean;
   yes: boolean;
-
+  codemodsOnly?: boolean;
   projectPath?: string;
 }
 
