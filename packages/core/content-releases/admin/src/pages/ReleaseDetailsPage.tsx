@@ -121,6 +121,7 @@ export const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
+  const { push } = useHistory();
 
   const release = data?.data;
 
@@ -176,13 +177,9 @@ export const ReleaseDetailsLayout = ({
   }
 
   if (isError || !release) {
-    return (
-      <Main>
-        <Box paddingBottom={8}>
-          <AnErrorOccurred />
-        </Box>
-      </Main>
-    );
+    push('/plugins/content-releases');
+
+    return;
   }
 
   const totalEntries = release.actions.meta.count || 0;
@@ -321,6 +318,7 @@ const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
+  const { push } = useHistory();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const {
@@ -377,11 +375,9 @@ const ReleaseDetailsBody = () => {
   }
 
   if (isError || isReleaseError || !release) {
-    return (
-      <ContentLayout>
-        <AnErrorOccurred />
-      </ContentLayout>
-    );
+    push('/plugins/content-releases');
+
+    return;
   }
 
   const releaseActions = data?.data;
