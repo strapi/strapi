@@ -16,7 +16,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  AnErrorOccurred,
   CheckPermissions,
   LoadingIndicatorPage,
   PageSizeURLQuery,
@@ -30,7 +29,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -121,7 +120,6 @@ export const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
 
   const release = data?.data;
 
@@ -177,9 +175,7 @@ export const ReleaseDetailsLayout = ({
   }
 
   if (isError || !release) {
-    push('/plugins/content-releases');
-
-    return;
+    return <Redirect to={'/plugins/content-releases'} />;
   }
 
   const totalEntries = release.actions.meta.count || 0;
@@ -318,7 +314,6 @@ const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
-  const { push } = useHistory();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const {
@@ -375,9 +370,7 @@ const ReleaseDetailsBody = () => {
   }
 
   if (isError || isReleaseError || !release) {
-    push('/plugins/content-releases');
-
-    return;
+    return <Redirect to={'/plugins/content-releases'} />;
   }
 
   const releaseActions = data?.data;
