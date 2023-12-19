@@ -4,9 +4,9 @@ import { promisify } from 'node:util';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import { webpack } from 'webpack';
-import type { BuildContext } from '../createBuildContext';
+import { Common } from '@strapi/types';
+import type { BuildContext } from '../create-build-context';
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
-import { Common, Strapi } from '@strapi/types';
 
 interface WebpackWatcher {
   close(): Promise<void>;
@@ -23,7 +23,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
 
     const devMiddleware = webpackDevMiddleware(compiler);
 
-    // @ts-ignore
+    // @ts-expect-error ignored
     const hotMiddleware = webpackHotMiddleware(compiler, {
       log: false,
       path: '/__webpack_hmr',
@@ -40,7 +40,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
 
     ctx.strapi.server.app.use((context, next) => {
       // wait for webpack-dev-middleware to signal that the build is ready
-      const ready = new Promise((resolve, reject) => {
+      const ready = new Promise((resolve) => {
         devMiddleware.waitUntilValid(() => {
           resolve(true);
         });
@@ -50,14 +50,14 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
         devMiddleware(
           context.req,
           {
-            // @ts-expect-error
-            end: (content) => {
+            // @ts-expect-error ignored
+            end(content) {
               // eslint-disable-next-line no-param-reassign
               context.body = content;
               resolve(true);
             },
             getHeader: context.get.bind(context),
-            // @ts-expect-error
+            // @ts-expect-error ignored
             setHeader: context.set.bind(context),
             locals: context.state,
           },
@@ -80,6 +80,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
           return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
         const filename = path.resolve(finalConfig.output?.path!, 'index.html');
         ctx.type = 'html';
         ctx.body = devMiddleware.context.outputFileSystem.createReadStream(filename);

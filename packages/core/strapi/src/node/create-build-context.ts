@@ -2,79 +2,36 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
-import { strapiFactory, CLIContext } from '@strapi/strapi';
+import { strapiFactory } from '@strapi/core';
 import { getConfigUrls } from '@strapi/utils';
+import { Strapi } from '@strapi/types';
 
+import type { CLIContext } from '../commands/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
-import type { BuildOptions } from './build';
-import { DevelopOptions } from './develop';
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
-import { Strapi } from '@strapi/types';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
+import type { BaseContext } from './types';
 
-interface BuildContext {
-  /**
-   * The absolute path to the app directory defined by the Strapi instance
-   */
-  appDir: string;
-  /**
-   * If a user is deploying the project under a nested public path, we use
-   * this path so all asset paths will be rewritten accordingly
-   */
-  basePath: string;
+interface BuildContext<TOptions = unknown> extends BaseContext {
   /**
    * The customisations defined by the user in their app.js file
    */
   customisations?: AppFile;
   /**
-   * The current working directory
-   */
-  cwd: string;
-  /**
-   * The absolute path to the dist directory
-   */
-  distPath: string;
-  /**
-   * The relative path to the dist directory
-   */
-  distDir: string;
-  /**
-   * The absolute path to the entry file
-   */
-  entry: string;
-  /**
-   * The environment variables to be included in the JS bundle
-   */
-  env: Record<string, string>;
-  logger: CLIContext['logger'];
-  /**
    * The build options
    */
-  options: Pick<BuildOptions, 'minify' | 'sourcemaps' | 'stats'> & Pick<DevelopOptions, 'open'>;
+  options: TOptions;
   /**
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
    */
   plugins: PluginMeta[];
-  /**
-   * The absolute path to the runtime directory
-   */
-  runtimeDir: string;
-  /**
-   * The Strapi instance
-   */
-  strapi: Strapi;
-  /**
-   * The browserslist target either loaded from the user's workspace or falling back to the default
-   */
-  target: string[];
-  tsconfig?: CLIContext['tsconfig'];
 }
 
-interface CreateBuildContextArgs extends CLIContext {
+interface CreateBuildContextArgs<TOptions = unknown> extends CLIContext {
   strapi?: Strapi;
-  options?: BuildContext['options'];
+  options?: TOptions;
 }
 
 const DEFAULT_BROWSERSLIST = [
@@ -84,13 +41,13 @@ const DEFAULT_BROWSERSLIST = [
   'not dead',
 ];
 
-const createBuildContext = async ({
+const createBuildContext = async <TOptions>({
   cwd,
   logger,
   tsconfig,
   strapi,
-  options = {},
-}: CreateBuildContextArgs): Promise<BuildContext> => {
+  options = {} as TOptions,
+}: CreateBuildContextArgs<TOptions>): Promise<BuildContext<TOptions>> => {
   /**
    * If you make a new strapi instance when one already exists,
    * you will overwrite the global and the app will _most likely_
@@ -176,7 +133,7 @@ const createBuildContext = async ({
     strapi: strapiInstance,
     target,
     tsconfig,
-  } satisfies BuildContext;
+  } satisfies BuildContext<TOptions>;
 
   return buildContext;
 };
