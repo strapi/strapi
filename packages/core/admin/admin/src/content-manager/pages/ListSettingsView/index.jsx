@@ -16,10 +16,10 @@ import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
-import { ModelsContext } from '../../contexts/models';
 import { usePluginsQueryParams } from '../../hooks';
+import { queryKeyPrefix as initDataQueryKey } from '../../hooks/useContentManagerInitData';
 import { checkIfAttributeIsDisplayable } from '../../utils';
 import { getTranslation } from '../../utils/translations';
 
@@ -30,12 +30,12 @@ import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 import reducer, { initialState } from './reducer';
 
 export const ListSettingsView = ({ layout, slug }) => {
+  const queryClient = useQueryClient();
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
-  const { refetchData } = React.useContext(ModelsContext);
   const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
     reducer,
     initialState,
@@ -83,7 +83,7 @@ export const ListSettingsView = ({ layout, slug }) => {
     {
       onSuccess() {
         trackUsage('didEditListSettings');
-        refetchData();
+        queryClient.invalidateQueries(initDataQueryKey);
       },
       onError() {
         toggleNotification({
