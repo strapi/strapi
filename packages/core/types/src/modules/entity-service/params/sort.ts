@@ -75,11 +75,11 @@ export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID
  * type F = 'title'; // ❌
  */
 export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
-  [key in ObjectNotationKeys<TSchemaUID>]?: key extends SingleAttribute<TSchemaUID>
+  [TKey in ObjectNotationKeys<TSchemaUID>]?: TKey extends SingleAttribute<TSchemaUID>
     ? // First level sort (scalar attributes, id, ...)
       OrderKind.Any
     : // Deep sort (relations with a target, components, media, ...)
-      ObjectNotation<Attribute.GetTarget<TSchemaUID, key>>;
+      ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>;
 };
 
 /**
