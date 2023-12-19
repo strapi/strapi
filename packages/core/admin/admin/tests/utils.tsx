@@ -24,7 +24,6 @@ import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { ThemeToggleProvider } from '../src/components/ThemeToggleProvider';
-import { ModelsContext } from '../src/content-manager/contexts/models';
 import { AdminContextProvider } from '../src/contexts/admin';
 import { ConfigurationContextProvider } from '../src/contexts/configuration';
 
@@ -92,21 +91,19 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                         ] as Permission[],
                       }}
                     >
-                      <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-                        <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
-                          <ConfigurationContextProvider
-                            showReleaseNotification={false}
-                            showTutorials={false}
-                            updateProjectSettings={jest.fn()}
-                            logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
-                            }}
-                          >
-                            {children}
-                          </ConfigurationContextProvider>
-                        </AdminContextProvider>
-                      </ModelsContext.Provider>
+                      <AdminContextProvider getAdminInjectedComponents={jest.fn()}>
+                        <ConfigurationContextProvider
+                          showReleaseNotification={false}
+                          showTutorials={false}
+                          updateProjectSettings={jest.fn()}
+                          logos={{
+                            auth: { default: '' },
+                            menu: { default: '' },
+                          }}
+                        >
+                          {children}
+                        </ConfigurationContextProvider>
+                      </AdminContextProvider>
                     </RBACContext.Provider>
                   </NotificationsProvider>
                 </LanguageProvider>
