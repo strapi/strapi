@@ -2,24 +2,20 @@ import assert from 'node:assert';
 import chalk from 'chalk';
 import { packageManager } from '@strapi/utils';
 
-import inquirer from 'inquirer';
-import {
-  codemodRepositoryFactory,
-  constants as codemodRepositoryConstants,
-} from '../codemod-repository';
 import { createJSONTransformAPI, saveJSON } from '../json';
 import { constants as projectConstants } from '../project';
 import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
 import { unknownToError } from '../error';
 import * as f from '../format';
 
-import type { ConfirmationCallback, Upgrader as UpgraderInterface, UpgradeReport } from './types';
+import type { Upgrader as UpgraderInterface, UpgradeReport } from './types';
 import type { Version } from '../version';
 import type { Logger } from '../logger';
 import type { Requirement } from '../requirement';
 import type { NPM } from '../npm';
 import type { Project } from '../project';
-import type { Codemod } from '../codemod';
+import { ConfirmationCallback } from '../common/types';
+import { codemodRunnerFactory } from '../codemod-runner';
 
 type DependenciesEntries = Array<[name: string, version: Version.LiteralSemVer]>;
 
@@ -38,8 +34,6 @@ export class Upgrader implements UpgraderInterface {
 
   private confirmationCallback: ConfirmationCallback | null;
 
-  private selectedCodemodsOnly: boolean;
-
   constructor(project: Project, target: Version.SemVer, npmPackage: NPM.Package) {
     this.project = project;
     this.target = target;
@@ -51,7 +45,6 @@ export class Upgrader implements UpgraderInterface {
 
     this.logger = null;
     this.confirmationCallback = null;
-    this.selectedCodemodsOnly = false;
   }
 
   setRequirements(requirements: Requirement.Requirement[]) {
@@ -66,11 +59,6 @@ export class Upgrader implements UpgraderInterface {
 
   setLogger(logger: Logger) {
     this.logger = logger;
-    return this;
-  }
-
-  setRunSelectedCodemodsOnly(enabled: boolean) {
-    this.selectedCodemodsOnly = enabled;
     return this;
   }
 
@@ -114,13 +102,11 @@ export class Upgrader implements UpgraderInterface {
         target: this.target,
       });
 
-      if (!this.selectedCodemodsOnly) {
-        this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [2, 4]));
-        await this.updateDependencies();
+      this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [2, 4]));
+      await this.updateDependencies();
 
-        this.logger?.info(f.upgradeStep('Installing dependencies', [3, 4]));
-        await this.installDependencies();
-      }
+      this.logger?.info(f.upgradeStep('Installing dependencies', [3, 4]));
+      await this.installDependencies();
 
       this.logger?.info(f.upgradeStep('Applying the latest code modifications', [4, 4]));
       await this.runCodemods(range);
@@ -247,67 +233,13 @@ export class Upgrader implements UpgraderInterface {
     });
   }
 
-  private async selectCodemodsToRun(
-    allVersionedCodemods: Codemod.VersionedCollection[]
-  ): Promise<Codemod.VersionedCollection[]> {
-    const selectableCodemods = allVersionedCodemods
-      .map(({ version, codemods }) =>
-        codemods.map((codemod) => ({
-          name: `(${version}) ${codemod.filename}`,
-          value: codemod,
-          checked: true,
-        }))
-      )
-      .flat();
-
-    const question = [
-      {
-        type: 'checkbox',
-        name: 'selectedCodemods',
-        message: 'Choose the codemods you would like to run:',
-        choices: selectableCodemods,
-      },
-    ];
-
-    const { selectedCodemods } = await inquirer.prompt<{
-      selectedCodemods: Codemod.Codemod[];
-    }>(question);
-
-    return selectedCodemods.map<Codemod.VersionedCollection>((codemod) => ({
-      version: codemod.version,
-      codemods: [codemod],
-    }));
-  }
-
   private async runCodemods(range: Version.Range): Promise<void> {
-    const repository = codemodRepositoryFactory(
-      codemodRepositoryConstants.INTERNAL_CODEMODS_DIRECTORY
-    );
-
-    // Make sure we have access to the latest snapshots of codemods on the system
-    repository.refresh();
-
-    const allVersionedCodemods = repository.findByRange(range);
-    const versionedCodemods = this.selectedCodemodsOnly
-      ? await this.selectCodemodsToRun(allVersionedCodemods)
-      : allVersionedCodemods;
-
-    const hasCodemodsToRun = versionedCodemods.length > 0;
-    if (!hasCodemodsToRun) {
-      this.logger?.debug(`Found no codemods to run for ${f.version(this.target)}`);
-      return;
+    const codemodRunner = codemodRunnerFactory(this.project, range);
+    codemodRunner.dry(this.isDry);
+    if (this.logger) {
+      codemodRunner.setLogger(this.logger);
     }
-
-    this.logger?.debug(`Found codemods for ${f.highlight(versionedCodemods.length)} version(s)`);
-    versionedCodemods.forEach(({ version, codemods }) =>
-      this.logger?.debug(`- ${f.version(version)} (${codemods.length})`)
-    );
-    // Flatten the collection to a single list of codemods, the original list should already be sorted
-    const codemods = versionedCodemods.map(({ codemods }) => codemods).flat();
-
-    const reports = await this.project.runCodemods(codemods, { dry: this.isDry });
-
-    this.logger?.raw(f.reports(reports));
+    await codemodRunner.run();
   }
 }
 
@@ -318,12 +250,9 @@ export const upgraderFactory = (
 ) => {
   const range = rangeFromVersions(project.strapiVersion, target);
   const npmVersionsMatches = npmPackage.findVersionsInRange(range);
-
   // The targeted version is the latest one that matches the given range
   const targetedNPMVersion = npmVersionsMatches.at(-1);
-  // console.log('range', range);
-  // console.log('npm', npmVersionsMatches);
-  // console.log('first', targetedNPMVersion);
+
   assert(targetedNPMVersion, `Could not find any version in the range ${f.versionRange(range)}`);
 
   // Make sure the latest version matched in the range is the same as the targeted one (only if target is a semver)

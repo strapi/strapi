@@ -24,8 +24,7 @@ export const upgrade = async (options: UpgradeOptions) => {
   const upgrader = upgraderFactory(project, options.target, npmPackage)
     .dry(options.dry ?? false)
     .onConfirm(options.confirm ?? null)
-    .setLogger(logger)
-    .setRunSelectedCodemodsOnly(options.codemodsOnly ?? false);
+    .setLogger(logger);
 
   if (options.target === Version.ReleaseType.Major) {
     upgrader

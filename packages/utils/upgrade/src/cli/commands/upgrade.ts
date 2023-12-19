@@ -36,7 +36,6 @@ export const upgrade: Command = async (options) => {
       dry: options.dry,
       cwd: options.projectPath,
       target: options.target,
-      codemodsOnly: options.codemodsOnly,
     });
   } catch (err) {
     handleError(err);
