@@ -4,6 +4,7 @@ import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
 import compose from 'koa-compose';
+
 import { resolveRouteMiddlewares } from './middleware';
 import { resolvePolicies } from './policy';
 
@@ -34,21 +35,9 @@ const createAuthorizeMiddleware =
 
     const authService = strapi.container.get('auth');
 
-    try {
-      await authService.verify(auth, getAuthConfig(route));
-
-      return await next();
-    } catch (error) {
-      if (error instanceof errors.UnauthorizedError) {
-        return ctx.unauthorized();
-      }
-
-      if (error instanceof errors.ForbiddenError) {
-        return ctx.forbidden();
-      }
-
-      throw error;
-    }
+    // Allow errors thrown by verify to bubble up so that user extended errors aren't overridden
+    await authService.verify(auth, getAuthConfig(route));
+    return next();
   };
 
 const createAuthenticateMiddleware =
