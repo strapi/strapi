@@ -5,19 +5,22 @@ import { constants as timerConstants } from '../timer';
 
 import type { Version } from '../version';
 import type { Report } from '../report';
-import { isSemVer } from '../version';
 
 export const path = (path: string) => chalk.blue(path);
 
 export const version = (version: Version.LiteralVersion | Version.SemVer) => {
-  return chalk.italic.yellow(isSemVer(version) ? version.raw : version);
+  return chalk.italic.yellow(`v${version}`);
 };
 
-export const versionRange = (range: string) => chalk.bold.green(range);
+export const versionRange = (range: Version.Range) => chalk.italic.yellow(range);
 
 export const transform = (transformFilePath: string) => chalk.cyan(transformFilePath);
 
-export const highlight = (text: string) => chalk.bold.underline(text);
+export const highlight = (arg: unknown) => chalk.bold.underline(arg);
+
+export const upgradeStep = (text: string, step: [current: number, total: number]) => {
+  return chalk.bold(`(${step[0]}/${step[1]}) ${text}...`);
+};
 
 export const reports = (reports: Report.CodemodReport[]) => {
   const rows = reports.map(({ codemod, report }, i) => {

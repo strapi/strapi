@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import chalk from 'chalk';
 import { packageManager } from '@strapi/utils';
 
 import {
@@ -21,9 +22,9 @@ import type { Project } from '../project';
 type DependenciesEntries = Array<[name: string, version: Version.LiteralSemVer]>;
 
 export class Upgrader implements UpgraderInterface {
-  private project: Project;
+  private readonly project: Project;
 
-  private npmPackage: NPM.Package;
+  private readonly npmPackage: NPM.Package;
 
   private target: Version.SemVer;
 
@@ -79,19 +80,37 @@ export class Upgrader implements UpgraderInterface {
   }
 
   async upgrade(): Promise<UpgradeReport> {
+    if (this.isDry) {
+      this.logger?.warn(
+        'Running the upgrade in dry mode. No files will be modified during the process.'
+      );
+    }
+    this.logger?.debug(
+      `Upgrading from ${f.version(this.project.strapiVersion)} to ${f.version(this.target)}`
+    );
+
     const range = rangeFromVersions(this.project.strapiVersion, this.target);
     const npmVersionsMatches = this.npmPackage?.findVersionsInRange(range) ?? [];
 
+    this.logger?.debug(
+      `Found ${f.highlight(npmVersionsMatches.length)} versions satisfying ${f.versionRange(range)}`
+    );
+
     try {
+      this.logger?.info(f.upgradeStep('Checking requirement', [1, 4]));
       await this.checkRequirements(this.requirements, {
         npmVersionsMatches,
         project: this.project,
         target: this.target,
       });
 
+      this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [2, 4]));
       await this.updateDependencies();
+
+      this.logger?.info(f.upgradeStep('Installing dependencies', [3, 4]));
       await this.installDependencies();
 
+      this.logger?.info(f.upgradeStep('Applying the latest code modifications', [4, 4]));
       await this.runCodemods(range);
     } catch (e) {
       return erroredReport(unknownToError(e));
@@ -130,8 +149,11 @@ export class Upgrader implements UpgraderInterface {
     requirement: Requirement.Requirement,
     originalError: Error
   ): Promise<void> {
-    const errorMessage = `Upgrade requirement "${requirement.name}" failed: ${originalError.message}`;
-    const confirmationMessage = `Optional requirement "${requirement.name}" failed with "${originalError.message}", do you want to proceed anyway?`;
+    const errorMessage = `Requirement failed: ${originalError.message} (${f.highlight(
+      requirement.name
+    )})`;
+    const warningMessage = originalError.message;
+    const confirmationMessage = `Ignore optional requirement "${f.highlight(requirement.name)}" ?`;
 
     const error = new Error(errorMessage);
 
@@ -139,13 +161,13 @@ export class Upgrader implements UpgraderInterface {
       throw error;
     }
 
+    this.logger?.warn(warningMessage);
+
     const response = await this.confirmationCallback?.(confirmationMessage);
 
     if (!response) {
       throw error;
     }
-
-    this.logger?.warn(errorMessage);
   }
 
   private async updateDependencies(): Promise<void> {
@@ -156,6 +178,11 @@ export class Upgrader implements UpgraderInterface {
     const dependencies = json.get<Record<string, string>>('dependencies', {});
     const strapiDependencies = this.getScopedStrapiDependencies(dependencies);
 
+    this.logger?.debug(`Found ${f.highlight(strapiDependencies.length)} dependency(ies) to update`);
+    strapiDependencies.forEach((dependency) =>
+      this.logger?.debug(`- ${dependency[0]} (${dependency[1]} -> ${this.target})`)
+    );
+
     if (strapiDependencies.length === 0) {
       return;
     }
@@ -164,9 +191,12 @@ export class Upgrader implements UpgraderInterface {
 
     const updatedPackageJSON = json.root();
 
-    if (!this.isDry) {
-      await saveJSON(packageJSONPath, updatedPackageJSON);
+    if (this.isDry) {
+      this.logger?.debug(`Skipping dependencies update (${chalk.italic('dry mode')}`);
+      return;
     }
+
+    await saveJSON(packageJSONPath, updatedPackageJSON);
   }
 
   private getScopedStrapiDependencies(dependencies: Record<string, string>): DependenciesEntries {
@@ -192,6 +222,13 @@ export class Upgrader implements UpgraderInterface {
 
     const packageManagerName = await packageManager.getPreferred(projectPath);
 
+    this.logger?.debug(`Using ${f.highlight(packageManagerName)} as package manager`);
+
+    if (this.isDry) {
+      this.logger?.debug(`Skipping dependencies installation (${chalk.italic('dry mode')}`);
+      return;
+    }
+
     await packageManager.installDependencies(projectPath, packageManagerName, {
       stdout: this.logger?.stdout,
       stderr: this.logger?.stderr,
@@ -210,9 +247,14 @@ export class Upgrader implements UpgraderInterface {
 
     const hasCodemodsToRun = versionedCodemods.length > 0;
     if (!hasCodemodsToRun) {
-      this.logger?.debug(`Found no codemods to run for ${this.target}`);
+      this.logger?.debug(`Found no codemods to run for ${f.version(this.target)}`);
       return;
     }
+
+    this.logger?.debug(`Found codemods for ${f.highlight(versionedCodemods.length)} version(s)`);
+    versionedCodemods.forEach(({ version, codemods }) =>
+      this.logger?.debug(`- ${f.version(version)} (${codemods.length})`)
+    );
 
     // Flatten the collection to a single list of codemods, the original list should already be sorted
     const codemods = versionedCodemods.map(({ codemods }) => codemods).flat();
@@ -234,12 +276,14 @@ export const upgraderFactory = (
   // The targeted version is the latest one that matches the given range
   const targetedNPMVersion = npmVersionsMatches.at(-1);
 
-  assert(targetedNPMVersion, `No available version found for ${range}`);
+  assert(targetedNPMVersion, `Could not find any version in the range ${f.versionRange(range)}`);
 
   // Make sure the latest version matched in the range is the same as the targeted one (only if target is a semver)
   if (isSemVer(target) && target.raw !== targetedNPMVersion.version) {
     throw new Error(
-      `${target} doesn't exist on the registry. Closest one found is ${targetedNPMVersion.version}`
+      `${f.version(target)} doesn't exist on the registry. Closest version found is ${
+        targetedNPMVersion.version
+      }`
     );
   }
 

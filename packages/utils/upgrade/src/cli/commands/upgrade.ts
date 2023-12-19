@@ -8,11 +8,27 @@ import type { Command } from '../types';
 
 export const upgrade: Command = async (options) => {
   try {
-    const logger = loggerFactory({ silent: options.silent, debug: options.debug });
+    const { silent, debug, yes } = options;
+    const logger = loggerFactory({ silent, debug });
 
     logger.warn(
       "Please make sure you've created a backup of your codebase and files before upgrading"
     );
+
+    const confirm = async (message: string) => {
+      if (yes) {
+        return true;
+      }
+
+      const { confirm } = await prompts({
+        name: 'confirm',
+        type: 'confirm',
+        message,
+      });
+
+      // If confirm is undefined (Ctrl + C), default to false
+      return confirm ?? false;
+    };
 
     await tasks.upgrade({
       logger,
@@ -24,15 +40,4 @@ export const upgrade: Command = async (options) => {
   } catch (err) {
     handleError(err);
   }
-};
-
-const confirm = async (message: string) => {
-  const { confirm } = await prompts({
-    name: 'confirm',
-    type: 'confirm',
-    message,
-  });
-
-  // If confirm is undefined (Ctrl + C), default to false
-  return confirm ?? false;
 };
