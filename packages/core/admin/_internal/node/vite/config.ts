@@ -82,9 +82,6 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       ...baseConfig.resolve,
       alias: {
         ...baseConfig.resolve?.alias,
-        /**
-         * TODO: this can be enabled when we have converting the monorepo to TypeScript.
-         */
         ...getMonorepoAliases({ monorepo }),
       },
     },
