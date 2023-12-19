@@ -28,13 +28,12 @@ yargs
     async builder(yarg) {
       // each directory in testDir is a domain
       const domains = await fs.readdir(testsDir);
-    
+
       yarg.option('concurrency', {
         alias: 'c',
         type: 'number',
         default: domains.length,
-        describe:
-          'Number of concurrent test domains to run',
+        describe: 'Number of concurrent test domains to run',
       });
 
       yarg.option('domains', {
@@ -73,8 +72,7 @@ yargs
               return await config(argv);
             }
             return config;
-          }
-          catch(e) {
+          } catch (e) {
             // use default config
             return {
               testApps: 1,
@@ -84,17 +82,19 @@ yargs
 
         // Load the domain configs into an object with keys of the name of the test domain
         const domainConfigs = {};
-        await Promise.all(domains.map(async (domain) => {
-          domainConfigs[domain] = await loadDomainConfigs(domain);
-        }));
+        await Promise.all(
+          domains.map(async (domain) => {
+            domainConfigs[domain] = await loadDomainConfigs(domain);
+          })
+        );
 
         // Determine the number of simultaneous test apps we need by taking the concurrency number of highest testApps requested from config
         const testAppsRequired = Object.entries(domainConfigs)
-        .map(([, value]) => value.testApps) // Extract testApps values
-        .sort((a, b) => b - a) // Sort in descending order
-        .slice(0, concurrency) // Take the first X values
-        .reduce((acc, value) => acc + value, 0); // Sum up the X values
-    
+          .map(([, value]) => value.testApps) // Extract testApps values from config
+          .sort((a, b) => b - a) // Sort in descending order
+          .slice(0, concurrency) // Take the top X values
+          .reduce((acc, value) => acc + value, 0); // Sum up the values
+
         if (testAppsRequired === 0) {
           throw new Error('No test apps to spawn');
         }
@@ -177,20 +177,20 @@ yargs
          * */
         const availableTestApps = [...currentTestApps];
 
-        console.log("domain configs", domainConfigs);
-        console.log("availableTestApps", availableTestApps);
+        console.log('domain configs', domainConfigs);
+        console.log('availableTestApps', availableTestApps);
 
         const batches = [];
 
         for (let i = 0; i < domains.length; i += concurrency) {
-            batches.push(domains.slice(i, i + concurrency));
+          batches.push(domains.slice(i, i + concurrency));
         }
-        console.log("batches", batches);
+        console.log('batches', batches);
 
         // eslint-disable-next-line no-plusplus
-        for(let i = 0; i < batches.length; i++) {
+        for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
-          console.log("running batch ", i, batch);
+          console.log('running batch ', i, batch);
           await Promise.all(
             batch.map(async (domain) => {
               const config = domainConfigs[domain];
@@ -205,20 +205,19 @@ yargs
               try {
                 const env = {
                   TEST_APPS: testApps.join(','),
-                }
+                };
                 const domainDir = path.join(testsDir, domain);
-                console.log("running jest for domain", domain, "with env", env, "in", domainDir)
-                // run the command 'jest --rootDir <domainDir>' 
+                console.log('running jest for domain', domain, 'with env', env, 'in', domainDir);
+                // run the command 'jest --rootDir <domainDir>'
                 const { stdout, stderr } = await execa('jest', ['--rootDir', domainDir], {
                   cwd: domainDir, // run from the domain directory
-                  env // pass it our custom env values
+                  env, // pass it our custom env values
                 });
 
                 // TODO: add logging of results
                 console.log('Command output:', stdout);
                 console.error('Command error:', stderr);
-              }
-              catch(err) {
+              } catch (err) {
                 console.error('Command error:', err);
               }
 

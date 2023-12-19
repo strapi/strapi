@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = () => {
-  return  {
-    testApps: 1
-  }
+  return {
+    testApps: 1,
+  };
 };
