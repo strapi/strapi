@@ -42,21 +42,6 @@ const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description:
     });
 };
 
-program
-  .command('codemods')
-  .description(
-    'Run a set of available codemods for the selected target version without updating the Strapi dependencies'
-  )
-  .addOption(projectPathOption)
-  .addOption(dryOption)
-  .addOption(debugOption)
-  .addOption(silentOption)
-  .addOption(automaticConfirmationOption)
-  .action(async (options) => {
-    const { runCodemods } = await import('./commands/run-codemods.js');
-    return runCodemods({ ...options, target: Version.ReleaseType.Major });
-  });
-
 addReleaseUpgradeCommand(
   Version.ReleaseType.Major,
   'Upgrade to the next available major version of Strapi'
@@ -71,6 +56,21 @@ addReleaseUpgradeCommand(
   Version.ReleaseType.Patch,
   'Upgrade to latest patch version of Strapi for the current major and minor'
 );
+
+program
+  .command('codemods')
+  .description(
+    'Run a set of available codemods for the selected target version without updating the Strapi dependencies'
+  )
+  .addOption(projectPathOption)
+  .addOption(dryOption)
+  .addOption(debugOption)
+  .addOption(silentOption)
+  .addOption(automaticConfirmationOption)
+  .action(async (options) => {
+    const { runCodemods } = await import('./commands/codemods.js');
+    return runCodemods({ ...options, target: Version.ReleaseType.Major });
+  });
 
 program
   .usage('<command> [options]')

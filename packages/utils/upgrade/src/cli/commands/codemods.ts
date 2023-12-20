@@ -34,7 +34,7 @@ export const runCodemods: Command = async (options) => {
       const selectableCodemods = codemods
         .map(({ version, codemods }) =>
           codemods.map((codemod) => ({
-            title: `(${version}) ${codemod.filename}`,
+            title: `(${version}) ${codemod.format()}`,
             value: codemod,
             selected: true,
           }))
@@ -52,6 +52,11 @@ export const runCodemods: Command = async (options) => {
         message: 'Choose the codemods you would like to run:',
         choices: selectableCodemods,
       });
+
+      if (!selectedCodemods || selectedCodemods.length === 0) {
+        logger.info('No codemods selected');
+        return [];
+      }
 
       return selectedCodemods.map<Codemod.VersionedCollection>((codemod) => ({
         version: codemod.version,
