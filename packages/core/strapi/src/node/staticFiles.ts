@@ -4,10 +4,9 @@ import outdent from 'outdent';
 import { format } from 'prettier';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import camelCase from 'lodash/camelCase';
-import { DefaultDocument as Document } from '../../admin/src/components/DefaultDocument';
+import { DefaultDocument } from '@strapi/admin/_internal';
 
-import type { BuildContext } from './createBuildContext';
+import type { BuildContext } from './create-build-context';
 
 const getEntryModule = (ctx: BuildContext): string => {
   const pluginsObject = ctx.plugins
@@ -48,7 +47,7 @@ const getEntryModule = (ctx: BuildContext): string => {
  * to load a user's Document component?
  */
 const getDocumentHTML = async ({ logger }: Pick<BuildContext, 'logger'>) => {
-  const result = renderToStaticMarkup(createElement(Document));
+  const result = renderToStaticMarkup(createElement(DefaultDocument));
   logger.debug('Rendered the HTML');
 
   return outdent`<!DOCTYPE html>${result}`;

@@ -1,19 +1,18 @@
-import type { CLIContext } from '@strapi/strapi';
 import * as tsUtils from '@strapi/typescript-utils';
 import { joinBy } from '@strapi/utils';
 import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
 import cluster from 'node:cluster';
+import { strapiFactory } from '@strapi/core';
 
+import type { CLIContext } from '../commands/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
-import { createBuildContext } from './createBuildContext';
+import { createBuildContext } from './create-build-context';
 import { build as buildWebpack } from './webpack/build';
 import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
 
-import { strapiFactory } from '@strapi/strapi';
 import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
@@ -44,7 +43,7 @@ const cleanupDistDirectory = async ({
     return;
   }
 
-  const timerName = 'cleaningDist' + Date.now();
+  const timerName = `cleaningDist${Date.now()}`;
   timer.start(timerName);
   const cleaningSpinner = logger.spinner(`Cleaning dist dir ${distDir}`).start();
 

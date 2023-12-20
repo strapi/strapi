@@ -51,9 +51,9 @@ const loadFile = async (path: string): Promise<undefined | any> => {
 const convertSystemPathToModulePath = (sysPath: string) => {
   if (process.platform === 'win32') {
     return sysPath.split(path.sep).join(path.posix.sep);
-  } else {
-    return sysPath;
   }
+
+  return sysPath;
 };
 
 /**
@@ -66,9 +66,9 @@ const convertSystemPathToModulePath = (sysPath: string) => {
 const convertModulePathToSystemPath = (modulePath: string) => {
   if (process.platform === 'win32') {
     return modulePath.split(path.posix.sep).join(path.sep);
-  } else {
-    return modulePath;
   }
+
+  return modulePath;
 };
 
 export { pathExists, loadFile, convertSystemPathToModulePath, convertModulePathToSystemPath };

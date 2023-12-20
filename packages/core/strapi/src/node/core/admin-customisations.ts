@@ -1,6 +1,6 @@
 import path from 'node:path';
-import { convertSystemPathToModulePath, pathExists } from '../core/files';
-import { BuildContext } from '../createBuildContext';
+import { convertSystemPathToModulePath, pathExists } from './files';
+import type { BaseContext } from '../types';
 
 const ADMIN_APP_FILES = ['app.js', 'app.mjs', 'app.ts', 'app.jsx', 'app.tsx'];
 
@@ -8,7 +8,7 @@ interface AdminCustomisations {
   config?: {
     locales?: string[];
   };
-  bootstrap?: Function;
+  bootstrap?: (...args: any[]) => any;
 }
 
 interface AppFile {
@@ -25,7 +25,7 @@ interface AppFile {
 const loadUserAppFile = async ({
   runtimeDir,
   appDir,
-}: Pick<BuildContext, 'appDir' | 'runtimeDir'>): Promise<AppFile | undefined> => {
+}: Pick<BaseContext, 'appDir' | 'runtimeDir'>): Promise<AppFile | undefined> => {
   for (const file of ADMIN_APP_FILES) {
     const filePath = path.join(appDir, 'src', 'admin', file);
 

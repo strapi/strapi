@@ -1,8 +1,8 @@
-import type { CLIContext } from '@strapi/strapi';
 import * as tsUtils from '@strapi/typescript-utils';
+import type { CLIContext } from '../commands/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime } from './core/timer';
-import { createBuildContext } from './createBuildContext';
+import { createBuildContext } from './create-build-context';
 import { writeStaticClientFiles } from './staticFiles';
 import { build as buildWebpack } from './webpack/build';
 
@@ -67,6 +67,7 @@ const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: Build
     tsconfig,
     options,
   });
+
   const contextDuration = timer.end('createBuildContext');
   contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
   contextSpinner.succeed();

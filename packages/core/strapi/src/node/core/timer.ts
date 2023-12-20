@@ -31,5 +31,5 @@ export function getTimer(): TimeMeasurer {
 }
 
 export const prettyTime = (timeInMs: number): string => {
-  return Math.ceil(timeInMs) + 'ms';
+  return `${Math.ceil(timeInMs)}ms`;
 };
