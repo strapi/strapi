@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   ContentLayout,
-  EmptyStateLayout,
   Flex,
   Grid,
   GridItem,
@@ -22,15 +21,16 @@ import {
   AnErrorOccurred,
   CheckPermissions,
   LoadingIndicatorPage,
+  NoContent,
   PageSizeURLQuery,
   PaginationURLQuery,
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
 } from '@strapi/helper-plugin';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases } from '../../../shared/contracts/releases';
@@ -116,17 +116,27 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   if (releases?.length === 0) {
     return (
-      <EmptyStateLayout
-        content={formatMessage(
-          {
-            id: 'content-releases.page.Releases.tab.emptyEntries',
-            defaultMessage: 'No releases',
-          },
-          {
-            target: sectionTitle,
-          }
-        )}
-        icon={<EmptyDocuments width="10rem" />}
+      <NoContent
+        content={{
+          id: 'content-releases.page.Releases.tab.emptyEntries',
+          defaultMessage:
+            'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+        }}
+        action={
+          <Button
+            forwardedAs={ReactRouterLink}
+            to={{
+              pathname: '/content-manager',
+            }}
+            style={{ textDecoration: 'none' }}
+            variant="secondary"
+          >
+            {formatMessage({
+              id: 'content-releases.page.Releases.button.openContentManager',
+              defaultMessage: 'Open the Content Manager',
+            })}
+          </Button>
+        }
       />
     );
   }
