@@ -1,5 +1,7 @@
 import { setCreatorFields, errors } from '@strapi/utils';
+
 import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
+
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
@@ -116,7 +118,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
         return {
           ...release,
-          action: actionForEntry
+          action: actionForEntry,
         };
       }
 
@@ -181,9 +183,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     releaseId: GetReleaseActions.Request['params']['releaseId'],
     query?: GetReleaseActions.Request['query']
   ) {
-    const result = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
 
-    if (!result) {
+    if (!release) {
       throw new errors.NotFoundError(`No release found for id ${releaseId}`);
     }
 
@@ -226,10 +228,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       .plugin('content-manager')
       .service('content-types');
 
-    const contentTypesData: Record<
-      UID.ContentType,
-      { mainField: string; displayName: string }
-    > = {};
+    const contentTypesData: Record<UID.ContentType, { mainField: string; displayName: string }> =
+      {};
     for (const contentTypeUid of contentTypesUids) {
       const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
         uid: contentTypeUid,

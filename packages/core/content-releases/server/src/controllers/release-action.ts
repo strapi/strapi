@@ -1,4 +1,5 @@
 import type Koa from 'koa';
+import _ from 'lodash/fp';
 import { Entity } from '../../../shared/types';
 
 import {
@@ -22,6 +23,17 @@ interface Locale extends Entity {
 
 type LocaleDictionary = {
   [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
+};
+
+const getGroupName = (queryValue?: 'action' | 'locale') => {
+  switch (queryValue) {
+    case 'action':
+      return 'type';
+    case 'locale':
+      return 'entry.locale.name';
+    default:
+      return 'entry.contentType.displayName';
+  }
 };
 
 const releaseActionController = {
@@ -59,7 +71,7 @@ const releaseActionController = {
       return acc;
     }, {});
 
-    const data = results.map((action: ReleaseAction) => {
+    const formattedData = results.map((action: ReleaseAction) => {
       const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
 
       return {
@@ -75,8 +87,11 @@ const releaseActionController = {
       };
     });
 
+    const groupName = getGroupName(query.groupBy);
+    const groupedData = _.groupBy(groupName)(formattedData);
+
     ctx.body = {
-      data,
+      data: groupedData,
       meta: {
         pagination,
       },

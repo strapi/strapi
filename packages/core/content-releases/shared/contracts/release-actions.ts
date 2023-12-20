@@ -61,11 +61,15 @@ export declare namespace GetReleaseActions {
     params: {
       releaseId: Release['id'];
     };
-    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
+      groupBy: 'action' | 'locale';
+    };
   }
 
   export interface Response {
-    data: Array<ReleaseAction & { entry: ReleaseActionEntryData }>;
+    data: {
+      [key: string]: Array<ReleaseAction & { entry: ReleaseActionEntryData }>;
+    };
     meta: {
       pagination: Pagination;
     };

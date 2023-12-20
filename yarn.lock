@@ -8779,6 +8779,7 @@ __metadata:
     axios: "npm:1.6.0"
     formik: "npm:2.4.0"
     koa: "npm:2.13.4"
+    lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"

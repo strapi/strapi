@@ -114,7 +114,7 @@ describe('Release Action controller', () => {
   });
 
   describe('findMany', () => {
-    it('should return the data for an entry', async () => {
+    it('should return the data grouped by contentType', async () => {
       mockFindActions.mockResolvedValueOnce({
         results: [
           {
@@ -181,28 +181,41 @@ describe('Release Action controller', () => {
       await releaseActionController.findMany(ctx);
 
       // @ts-expect-error Ignore missing properties
-      expect(ctx.body.data[0].entry).toEqual({
-        id: 1,
-        contentType: {
-          displayName: 'contentTypeA',
-          mainFieldValue: 'test 1',
-        },
-        locale: {
-          code: 'en',
-          name: 'English (en)',
-        },
-      });
-      // @ts-expect-error Ignore missing properties
-      expect(ctx.body.data[1].entry).toEqual({
-        id: 2,
-        contentType: {
-          displayName: 'contentTypeB',
-          mainFieldValue: 'test 2',
-        },
-        locale: {
-          code: 'fr',
-          name: 'French (fr)',
-        },
+      expect(ctx.body.data).toEqual({
+        contentTypeA: [
+          {
+            id: 1,
+            contentType: 'api::contentTypeA.contentTypeA',
+            entry: {
+              id: 1,
+              contentType: {
+                displayName: 'contentTypeA',
+                mainFieldValue: 'test 1',
+              },
+              locale: {
+                code: 'en',
+                name: 'English (en)',
+              },
+            },
+          },
+        ],
+        contentTypeB: [
+          {
+            id: 2,
+            contentType: 'api::contentTypeB.contentTypeB',
+            entry: {
+              id: 2,
+              contentType: {
+                displayName: 'contentTypeB',
+                mainFieldValue: 'test 2',
+              },
+              locale: {
+                code: 'fr',
+                name: 'French (fr)',
+              },
+            },
+          },
+        ],
       });
     });
   });
