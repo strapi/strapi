@@ -14,6 +14,7 @@ import {
   Td,
   Typography,
 } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import {
   AnErrorOccurred,
   CheckPermissions,
@@ -28,7 +29,7 @@ import {
   useQueryParams,
   ConfirmDialog,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
+import { ArrowLeft, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -390,15 +391,16 @@ const ReleaseDetailsBody = () => {
   if (!releaseActions || !releaseActions.length) {
     return (
       <ContentLayout>
-        <NoContent 
+        <NoContent
           content={{
             id: 'content-releases.pages.Details.tab.emptyEntries',
             defaultMessage:
               'This release is empty. Open the Content Manager, select an entry and add it to the release.',
           }}
           action={
-            <Button
-              forwardedAs={ReactRouterLink}
+            <LinkButton
+              as={ReactRouterLink}
+              // @ts-expect-error - types are not inferred correctly through the as prop.
               to={{
                 pathname: '/content-manager',
               }}
@@ -409,7 +411,7 @@ const ReleaseDetailsBody = () => {
                 id: 'content-releases.page.Details.button.openContentManager',
                 defaultMessage: 'Open the Content Manager',
               })}
-            </Button>
+            </LinkButton>
           }
         />
       </ContentLayout>
