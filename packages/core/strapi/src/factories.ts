@@ -5,6 +5,10 @@ import { createController } from './core-api/controller';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
 
+const symbols = {
+  CustomController: Symbol('StrapiCustomCoreController'),
+} as const;
+
 type WithStrapiCallback<T> = T | (<S extends { strapi: Strapi }>(params: S) => T);
 
 // Content type is proxied to allow for dynamic content type updates
@@ -38,6 +42,16 @@ const createCoreController = <
     }
 
     Object.setPrototypeOf(userCtrl, baseController);
+
+    const isCustomController = typeof cfg !== 'undefined';
+    if (isCustomController) {
+      Object.defineProperty(userCtrl, symbols.CustomController, {
+        writable: false,
+        configurable: false,
+        enumerable: false,
+      });
+    }
+
     return userCtrl;
   };
 };
@@ -101,4 +115,8 @@ function createCoreRouter<T extends Common.UID.ContentType>(
   };
 }
 
-export { createCoreController, createCoreService, createCoreRouter };
+const isCustomController = <T extends Common.Controller>(controller: T): boolean => {
+  return symbols.CustomController in controller;
+};
+
+export { createCoreController, createCoreService, createCoreRouter, isCustomController };
