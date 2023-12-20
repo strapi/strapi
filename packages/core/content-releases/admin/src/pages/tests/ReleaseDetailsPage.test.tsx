@@ -9,6 +9,10 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  useRBAC: jest.fn().mockImplementation(() => ({
+    isLoading: false,
+    allowedActions: { canUpdate: true, canDelete: true },
+  })),
 }));
 
 describe('Releases details page', () => {
