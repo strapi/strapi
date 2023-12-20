@@ -45,7 +45,7 @@ const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description:
 program
   .command('codemods')
   .description(
-    'Run the upgrade process with the selected codemods without updating the Strapi dependencies'
+    'Run a set of available codemods for the selected target version without updating the Strapi dependencies'
   )
   .addOption(projectPathOption)
   .addOption(dryOption)
@@ -54,7 +54,7 @@ program
   .addOption(automaticConfirmationOption)
   .action(async (options) => {
     const { runCodemods } = await import('./commands/run-codemods.js');
-    return runCodemods({ ...options, codemodsOnly: true, target: Version.ReleaseType.Major });
+    return runCodemods({ ...options, target: Version.ReleaseType.Major });
   });
 
 addReleaseUpgradeCommand(

@@ -1,12 +1,11 @@
 import prompts from 'prompts';
-
 import inquirer from 'inquirer';
 import { loggerFactory } from '../../modules/logger';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 
 import type { Command } from '../types';
-import { Codemod } from '../../modules/codemod';
+import type { Codemod } from '../../modules/codemod';
 
 export const runCodemods: Command = async (options) => {
   try {
@@ -14,7 +13,7 @@ export const runCodemods: Command = async (options) => {
     const logger = loggerFactory({ silent, debug });
 
     logger.warn(
-      "Please make sure you've created a backup of your codebase and files before upgrading"
+      "Please make sure you've created a backup of your codebase and files before running the codemods"
     );
 
     const confirm = async (message: string) => {
@@ -38,14 +37,14 @@ export const runCodemods: Command = async (options) => {
           codemods.map((codemod) => ({
             name: `(${version}) ${codemod.filename}`,
             value: codemod,
-            checked: true,
+            selected: true,
           }))
         )
         .flat();
 
       const prompt = [
         {
-          type: 'checkbox',
+          type: 'multiselect',
           name: 'selectedCodemods',
           message: 'Choose the codemods you would like to run:',
           choices: selectableCodemods,

@@ -2,6 +2,7 @@ import {
   codemodRepositoryFactory,
   constants as codemodRepositoryConstants,
 } from '../codemod-repository';
+import { unknownToError } from '../error';
 import * as f from '../format';
 
 import type { Logger } from '../logger';
@@ -9,7 +10,6 @@ import type { Project } from '../project';
 import type { UpgradeReport } from '../upgrader/types';
 import type { CodemodRunnerInterface, CodemodRunnerReport, SelectCodemodsCallback } from './types';
 import type { Version } from '../version';
-import { unknownToError } from '../error';
 
 export class CodemodRunner implements CodemodRunnerInterface {
   private readonly project: Project;

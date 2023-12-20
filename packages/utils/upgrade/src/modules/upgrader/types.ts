@@ -1,7 +1,7 @@
 import type { Version } from '../version';
 import type { Requirement } from '../requirement';
 import type { Logger } from '../logger';
-import { ConfirmationCallback } from '../common/types';
+import type { ConfirmationCallback } from '../common/types';
 
 export interface Upgrader {
   setTarget(target: Version.ReleaseType | Version.SemVer): this;

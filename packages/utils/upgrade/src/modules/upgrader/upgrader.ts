@@ -7,6 +7,7 @@ import { constants as projectConstants } from '../project';
 import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
 import { unknownToError } from '../error';
 import * as f from '../format';
+import { codemodRunnerFactory } from '../codemod-runner';
 
 import type { Upgrader as UpgraderInterface, UpgradeReport } from './types';
 import type { Version } from '../version';
@@ -14,8 +15,7 @@ import type { Logger } from '../logger';
 import type { Requirement } from '../requirement';
 import type { NPM } from '../npm';
 import type { Project } from '../project';
-import { ConfirmationCallback } from '../common/types';
-import { codemodRunnerFactory } from '../codemod-runner';
+import type { ConfirmationCallback } from '../common/types';
 
 type DependenciesEntries = Array<[name: string, version: Version.LiteralSemVer]>;
 
