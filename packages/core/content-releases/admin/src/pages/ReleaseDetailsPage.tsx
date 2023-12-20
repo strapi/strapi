@@ -116,7 +116,12 @@ export const ReleaseDetailsLayout = ({
   const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
-  const { data, isLoading: isLoadingDetails, isError } = useGetReleaseQuery({ id: releaseId });
+  const {
+    data,
+    isLoading: isLoadingDetails,
+    isError,
+    error,
+  } = useGetReleaseQuery({ id: releaseId });
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -175,7 +180,20 @@ export const ReleaseDetailsLayout = ({
   }
 
   if (isError || !release) {
-    return <Redirect to={'/plugins/content-releases'} />;
+    return (
+      <Redirect
+        to={{
+          pathname: '/plugins/content-releases',
+          state: {
+            errors: [
+              {
+                code: error?.code,
+              },
+            ],
+          },
+        }}
+      />
+    );
   }
 
   const totalEntries = release.actions.meta.count || 0;
@@ -320,10 +338,17 @@ const ReleaseDetailsBody = () => {
     data: releaseData,
     isLoading: isReleaseLoading,
     isError: isReleaseError,
+    error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
   const release = releaseData?.data;
 
-  const { isLoading, isFetching, isError, data } = useGetReleaseActionsQuery({
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    data,
+    error: releaseActionsError,
+  } = useGetReleaseActionsQuery({
     ...query,
     releaseId,
   });
@@ -370,7 +395,23 @@ const ReleaseDetailsBody = () => {
   }
 
   if (isError || isReleaseError || !release) {
-    return <Redirect to={'/plugins/content-releases'} />;
+    return (
+      <Redirect
+        to={{
+          pathname: '/plugins/content-releases',
+          state: {
+            errors: [
+              {
+                code: releaseError?.code,
+              },
+              {
+                code: releaseActionsError?.code,
+              },
+            ],
+          },
+        }}
+      />
+    );
   }
 
   const releaseActions = data?.data;

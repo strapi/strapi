@@ -30,7 +30,7 @@ import {
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases } from '../../../shared/contracts/releases';
@@ -172,15 +172,20 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 /* -------------------------------------------------------------------------------------------------
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
+interface CustomLocationState {
+  errors?: Record<string, string>[];
+}
+
 const INITIAL_FORM_VALUES = {
   name: '',
 } satisfies FormValues;
 
 const ReleasesPage = () => {
+  const location = useLocation<CustomLocationState>();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
@@ -191,6 +196,22 @@ const ReleasesPage = () => {
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
+
+  // Check if we have some errors and show a notification to the user to explain the error
+  if (location?.state?.errors) {
+    toggleNotification({
+      type: 'warning',
+      title: formatMessage({
+        id: 'content-releases.pages.Releases.notification.error.title',
+        defaultMessage: 'Your request could not be processed.',
+      }),
+      message: formatMessage({
+        id: 'content-releases.pages.Releases.notification.error.message',
+        defaultMessage: 'Please try again or open another release.',
+      }),
+    });
+    replace({ state: null });
+  }
 
   if (isLoading) {
     return (

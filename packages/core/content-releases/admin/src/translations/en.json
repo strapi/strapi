@@ -39,5 +39,7 @@
   "page.ReleaseDetails.table.header.label.action": "action",
   "page.ReleaseDetails.table.action-published": "This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.",
   "pages.ReleaseDetails.publish-notification-success": "Release was published successfully.",
-  "dialog.confirmation-message": "Are you sure you want to delete this release?"
+  "dialog.confirmation-message": "Are you sure you want to delete this release?",
+  "pages.Releases.notification.error.title": "Your request could not be processed.",
+  "pages.Releases.notification.error.message": "Please try again or open another release."
 }
