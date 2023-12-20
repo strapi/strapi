@@ -44,10 +44,6 @@ const createAuthorizeMiddleware =
        * not leaking data, but rather enforcing a policy.
        *
        * This must come before ForbiddenError check because they are a subclass of ForbiddenError
-       *
-       * TODO: this could be improved by adding a PrivatePolicyError or a `private` property to PolicyError,
-       * to indicate that it should not be returned to the client, but currently PolicyErrors are expected
-       * to return only publicly safe error messages.
        * */
       if (error instanceof errors.PolicyError) {
         throw error;
