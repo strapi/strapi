@@ -56,13 +56,15 @@ export declare namespace CreateReleaseAction {
 /**
  * GET /content-releases/:id/actions - Get all release actions
  */
+
+export type ReleaseActionGroupBy = 'contentType' | 'action' | 'locale';
 export declare namespace GetReleaseActions {
   export interface Request {
     params: {
       releaseId: Release['id'];
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
-      groupBy: 'action' | 'locale';
+      groupBy: ReleaseActionGroupBy;
     };
   }
 

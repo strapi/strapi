@@ -183,7 +183,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     releaseId: GetReleaseActions.Request['params']['releaseId'],
     query?: GetReleaseActions.Request['query']
   ) {
-    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
+      fields: ['id'],
+    });
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${releaseId}`);

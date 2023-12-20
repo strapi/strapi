@@ -12,6 +12,7 @@ import type {
   ReleaseAction,
   UpdateReleaseAction,
   DeleteReleaseAction,
+  ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
@@ -25,8 +26,10 @@ type LocaleDictionary = {
   [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
 };
 
-const getGroupName = (queryValue?: 'action' | 'locale') => {
+const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   switch (queryValue) {
+    case 'contentType':
+      return 'entry.contentType.displayName';
     case 'action':
       return 'type';
     case 'locale':
