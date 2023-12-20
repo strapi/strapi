@@ -1,5 +1,4 @@
 import prompts from 'prompts';
-import inquirer from 'inquirer';
 import { loggerFactory } from '../../modules/logger';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
@@ -35,25 +34,24 @@ export const runCodemods: Command = async (options) => {
       const selectableCodemods = codemods
         .map(({ version, codemods }) =>
           codemods.map((codemod) => ({
-            name: `(${version}) ${codemod.filename}`,
+            title: `(${version}) ${codemod.filename}`,
             value: codemod,
             selected: true,
           }))
         )
         .flat();
 
-      const prompt = [
-        {
-          type: 'multiselect',
-          name: 'selectedCodemods',
-          message: 'Choose the codemods you would like to run:',
-          choices: selectableCodemods,
-        },
-      ];
+      if (selectableCodemods.length === 0) {
+        logger.info('No codemods to run');
+        return [];
+      }
 
-      const { selectedCodemods } = await inquirer.prompt<{
-        selectedCodemods: Codemod.Codemod[];
-      }>(prompt);
+      const { selectedCodemods }: { selectedCodemods: Codemod.Codemod[] } = await prompts({
+        type: 'autocompleteMultiselect',
+        name: 'selectedCodemods',
+        message: 'Choose the codemods you would like to run:',
+        choices: selectableCodemods,
+      });
 
       return selectedCodemods.map<Codemod.VersionedCollection>((codemod) => ({
         version: codemod.version,

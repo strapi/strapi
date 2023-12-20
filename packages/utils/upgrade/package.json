@@ -66,7 +66,6 @@
     "esbuild-register": "3.5.0",
     "fs-extra": "10.1.0",
     "glob": "10.3.10",
-    "inquirer": "8.2.5",
     "jscodeshift": "0.15.1",
     "lodash": "4.17.21",
     "memfs": "4.6.0",
