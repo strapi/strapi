@@ -35,9 +35,37 @@ const createAuthorizeMiddleware =
 
     const authService = strapi.container.get('auth');
 
-    // Allow errors thrown by verify to bubble up so that user extended errors aren't overridden
-    await authService.verify(auth, getAuthConfig(route));
-    return next();
+    try {
+      await authService.verify(auth, getAuthConfig(route));
+      return await next();
+    } catch (error) {
+      /**
+       * Allow policy errors (thrown by user policies) to bubble up, since in those cases we are
+       * not leaking data, but rather enforcing a policy.
+       *
+       * This must come before ForbiddenError check because they are a subclass of ForbiddenError
+       *
+       * TODO: this could be improved by adding a PrivatePolicyError or a `private` property to PolicyError,
+       * to indicate that it should not be returned to the client, but currently PolicyErrors are expected
+       * to return only publicly safe error messages.
+       * */
+      if (error instanceof errors.PolicyError) {
+        throw error;
+      }
+
+      // Prevent leaking data from an UnauthorizedError to the content API
+      if (error instanceof errors.UnauthorizedError) {
+        return ctx.unauthorized();
+      }
+
+      // Prevent leaking data from a ForbiddenError to the content API
+      if (error instanceof errors.ForbiddenError) {
+        return ctx.forbidden();
+      }
+
+      // any unknown error bubbled up from the auth service will be treated as a 500
+      throw error;
+    }
   };
 
 const createAuthenticateMiddleware =
