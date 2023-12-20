@@ -199,10 +199,7 @@ const findOne = async (id, populate = ['roles']) => {
  * @returns
  */
 const findOneByEmail = async (email, populate = []) => {
-  return strapi.query('admin::user').findOne({
-    where: { email },
-    populate,
-  });
+  return strapi.query('admin::user').findOne({ where: { email: { $eqi: email } }, populate });
 };
 
 /** Find many users (paginated)
