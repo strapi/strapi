@@ -29,7 +29,7 @@ describe('Releases home page', () => {
     expect(paginationCombobox).not.toBeInTheDocument();
 
     const pendingTabPanel = screen.getByRole('tabpanel', { name: /pending/i });
-    const emptyPendingBodyContent = within(pendingTabPanel).getByText(/This release is empty./i);
+    const emptyPendingBodyContent = within(pendingTabPanel).getByText(/no releases/i);
 
     expect(emptyPendingBodyContent).toBeInTheDocument();
   });

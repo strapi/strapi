@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   ContentLayout,
-  EmptyStateLayout,
   Flex,
   HeaderLayout,
   IconButton,
@@ -19,6 +18,7 @@ import {
   AnErrorOccurred,
   CheckPermissions,
   LoadingIndicatorPage,
+  NoContent,
   PageSizeURLQuery,
   PaginationURLQuery,
   RelativeTime,
@@ -30,7 +30,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -390,12 +390,27 @@ const ReleaseDetailsBody = () => {
   if (!releaseActions || !releaseActions.length) {
     return (
       <ContentLayout>
-        <EmptyStateLayout
-          content={formatMessage({
-            id: 'content-releases.pages.Details.empty-state.content',
-            defaultMessage: 'This release is empty.',
-          })}
-          icon={<EmptyDocuments width="10rem" />}
+        <NoContent 
+          content={{
+            id: 'content-releases.pages.Details.tab.emptyEntries',
+            defaultMessage:
+              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+          }}
+          action={
+            <Button
+              forwardedAs={ReactRouterLink}
+              to={{
+                pathname: '/content-manager',
+              }}
+              style={{ textDecoration: 'none' }}
+              variant="secondary"
+            >
+              {formatMessage({
+                id: 'content-releases.page.Details.button.openContentManager',
+                defaultMessage: 'Open the Content Manager',
+              })}
+            </Button>
+          }
         />
       </ContentLayout>
     );
