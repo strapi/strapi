@@ -1,3 +1,4 @@
+import { useRBAC } from '@strapi/helper-plugin';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 
@@ -147,5 +148,42 @@ describe('Releases details page', () => {
     expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
     const container = screen.getByText(/This entry was/);
     expect(container.querySelector('span')).toHaveTextContent('published');
+  });
+
+  it('renders the details page with the delete and edit buttons disabled', async () => {
+    useRBAC.mockReturnValue({
+      isLoading: false,
+      allowedActions: { canUpdate: false, canDelete: false },
+    });
+
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.noActionsHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.noActionsBodyData))
+      )
+    );
+
+    const { user } = render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    await screen.findByText(mockReleaseDetailsPageData.noActionsHeaderData.data.name);
+
+    const moreButton = screen.getByRole('button', { name: 'Release actions' });
+    expect(moreButton).toBeInTheDocument();
+
+    await user.click(moreButton);
+
+    // shows the popover actions
+    const editButton = screen.getByRole('button', { name: 'Edit' });
+    expect(editButton).toBeDisabled();
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    expect(deleteButton).toBeDisabled();
   });
 });

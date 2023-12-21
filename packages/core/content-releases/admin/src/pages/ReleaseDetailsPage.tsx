@@ -8,6 +8,7 @@ import {
   Flex,
   HeaderLayout,
   IconButton,
+  Icon,
   Link,
   Main,
   Popover,
@@ -69,11 +70,6 @@ const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
   }
   span {
     color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
-  }
-
-  &:hover svg path,
-  &:focus svg path {
-    fill: ${({ theme, disabled }) => !disabled && theme.colors.neutral500};
   }
 `;
 
@@ -264,7 +260,7 @@ export const ReleaseDetailsLayout = ({
                         </Typography>
                       </PopoverButton>
                       <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
-                        <TrashIcon />
+                        <Icon as={TrashIcon} textColor="danger600" />
                         <Typography ellipsis textColor="danger600">
                           {formatMessage({
                             id: 'content-releases.header.actions.delete',
