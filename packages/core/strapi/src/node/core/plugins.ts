@@ -5,7 +5,7 @@ import camelCase from 'lodash/camelCase';
 import { env } from '@strapi/utils';
 import { getModule, PackageJson } from './dependencies';
 import { convertModulePathToSystemPath, convertSystemPathToModulePath, loadFile } from './files';
-import { BuildContext } from '../createBuildContext';
+import type { BaseContext } from '../types';
 import { isError } from './errors';
 
 interface LocalPluginMeta {
@@ -75,7 +75,7 @@ const getEnabledPlugins = async ({
   logger,
   runtimeDir,
   strapi,
-}: Pick<BuildContext, 'cwd' | 'logger' | 'strapi' | 'runtimeDir'>): Promise<
+}: Pick<BaseContext, 'cwd' | 'logger' | 'strapi' | 'runtimeDir'>): Promise<
   Record<string, PluginMeta>
 > => {
   const plugins: Record<string, PluginMeta> = {};

@@ -16,7 +16,7 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { loadFile } from '../core/files';
 import { loadStrapiMonorepo } from '../core/monorepo';
-import type { BuildContext } from '../createBuildContext';
+import type { BuildContext } from '../create-build-context';
 import { getAliases } from './aliases';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
@@ -225,16 +225,16 @@ const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContex
     if (typeof userConfig === 'function') {
       const webpack = await import('webpack');
       return userConfig(config, webpack);
-    } else {
-      ctx.logger.warn(
-        `You've exported something other than a function from ${path.join(
-          ctx.appDir,
-          'src',
-          'admin',
-          'webpack.config'
-        )}, this will ignored.`
-      );
     }
+
+    ctx.logger.warn(
+      `You've exported something other than a function from ${path.join(
+        ctx.appDir,
+        'src',
+        'admin',
+        'webpack.config'
+      )}, this will ignored.`
+    );
   }
 
   return config;

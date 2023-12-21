@@ -136,9 +136,9 @@ const checkRequiredDependencies = async ({
        */
       await execa(file, args, { cwd, stdio: 'inherit' });
       return { didInstall: true };
-    } else {
-      return { didInstall: false };
     }
+
+    return { didInstall: false };
   }
 
   if (review.length) {
