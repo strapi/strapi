@@ -52,9 +52,9 @@ export class CodemodRunner implements CodemodRunnerInterface {
     return this;
   }
 
-  async run(): Promise<CodemodRunnerReport> {
+  async run(codemodsDirectory?: string): Promise<CodemodRunnerReport> {
     const repository = codemodRepositoryFactory(
-      codemodRepositoryConstants.INTERNAL_CODEMODS_DIRECTORY
+      codemodsDirectory ?? codemodRepositoryConstants.INTERNAL_CODEMODS_DIRECTORY
     );
 
     // Make sure we have access to the latest snapshots of codemods on the system

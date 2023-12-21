@@ -21,5 +21,5 @@ export interface CodemodRunnerInterface {
   dry(enabled?: boolean): this;
   onSelectCodemods(callback: SelectCodemodsCallback | null): this;
 
-  run(): Promise<CodemodRunnerReport>;
+  run(codemodsDirectory?: string): Promise<CodemodRunnerReport>;
 }
