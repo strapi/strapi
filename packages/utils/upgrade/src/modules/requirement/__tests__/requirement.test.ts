@@ -1,4 +1,4 @@
-import { Requirement, requirementFactory } from '../Requirement';
+import { Requirement, requirementFactory } from '../requirement';
 import type { RequirementTestCallback, TestContext } from '../types';
 
 describe('Requirement', () => {
