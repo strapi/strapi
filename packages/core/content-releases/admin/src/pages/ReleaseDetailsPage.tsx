@@ -8,7 +8,6 @@ import {
   Flex,
   HeaderLayout,
   IconButton,
-  Icon,
   Link,
   Main,
   Popover,
