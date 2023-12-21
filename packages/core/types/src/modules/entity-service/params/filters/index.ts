@@ -58,23 +58,19 @@ export type AttributesFiltering<TSchemaUID extends Common.UID.Schema> = Utils.Gu
  * Definition of scalar attribute filtering for a given schema UID.
  * @template TSchemaUID - The UID of the schema.
  */
-export type ScalarAttributesFiltering<TSchemaUID extends Common.UID.Schema> =
-  AttributeUtils.GetScalarKeys<TSchemaUID> extends infer TKeys
-    ? TKeys extends AttributeUtils.GetScalarKeys<TSchemaUID>
-      ? IDFiltering & { [TKey in TKeys]?: AttributeCondition<TSchemaUID, TKey> }
-      : never
-    : never;
+export type ScalarAttributesFiltering<TSchemaUID extends Common.UID.Schema> = IDFiltering & {
+  [TKey in AttributeUtils.GetScalarKeys<TSchemaUID>]?: AttributeCondition<TSchemaUID, TKey>;
+};
 
 /**
  * Filters object for nested schema attributes.
  * @template TSchemaUID - The UID of the schema to perform filtering on.
  */
-export type NestedAttributeFiltering<TSchemaUID extends Common.UID.Schema> =
-  AttributeUtils.GetNestedKeys<TSchemaUID> extends infer TKeys
-    ? TKeys extends AttributeUtils.GetNestedKeys<TSchemaUID>
-      ? { [TKey in TKeys]?: ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>> }
-      : never
-    : never;
+export type NestedAttributeFiltering<TSchemaUID extends Common.UID.Schema> = {
+  [TKey in AttributeUtils.GetNestedKeys<TSchemaUID>]?: ObjectNotation<
+    Attribute.GetTarget<TSchemaUID, TKey>
+  >;
+};
 
 type IDFiltering = { id?: AttributeCondition<never, IDKey> };
 
