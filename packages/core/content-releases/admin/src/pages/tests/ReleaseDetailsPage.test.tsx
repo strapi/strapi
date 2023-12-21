@@ -10,7 +10,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
-  useRBAC: jest.fn().mockImplementation(() => ({
+  useRBAC: jest.fn(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true },
   })),
@@ -151,10 +151,11 @@ describe('Releases details page', () => {
   });
 
   it('renders the details page with the delete and edit buttons disabled', async () => {
-    useRBAC.mockReturnValue({
+    // @ts-expect-error – mocking
+    useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canUpdate: false, canDelete: false },
-    });
+    }));
 
     server.use(
       rest.get('/content-releases/:releaseId', (req, res, ctx) =>

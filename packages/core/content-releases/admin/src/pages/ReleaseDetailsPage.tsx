@@ -260,7 +260,7 @@ export const ReleaseDetailsLayout = ({
                         </Typography>
                       </PopoverButton>
                       <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
-                        <Icon as={TrashIcon} textColor="danger600" />
+                        <TrashIcon />
                         <Typography ellipsis textColor="danger600">
                           {formatMessage({
                             id: 'content-releases.header.actions.delete',
