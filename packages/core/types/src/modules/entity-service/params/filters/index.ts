@@ -21,7 +21,13 @@ export type Any<TSchemaUID extends Common.UID.Schema> = ObjectNotation<TSchemaUI
  * @template TSchemaUID The UID of the schema defining the object notation.
  */
 export type ObjectNotation<TSchemaUID extends Common.UID.Schema> =
-  RootLevelOperatorFiltering<TSchemaUID> & AttributesFiltering<TSchemaUID>;
+  TSchemaUID extends infer TUIDs extends Common.UID.Schema
+    ? // The intermediary mapping step below allows TypeScript's generic inference to correctly distribute the
+      // TSchemaUID union into the individual keys of AttributesFiltering and RootLevelOperatorFiltering types
+      {
+        [TUID in TUIDs]: RootLevelOperatorFiltering<TUID> & AttributesFiltering<TUID>;
+      }[TSchemaUID]
+    : never;
 
 /**
  * Object for root level operator filtering.
