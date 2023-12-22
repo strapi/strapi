@@ -1,25 +1,40 @@
 import os from 'os';
 import chalk from 'chalk';
-import { program } from 'commander';
+import { Option, program } from 'commander';
 
 import { version as packageJSONVersion } from '../../package.json';
 import { Version } from '../modules/version';
 
 import type { CLIOptions } from './types';
 
+const projectPathOption = new Option(
+  '-p, --project-path <project-path>',
+  'Path to the Strapi project'
+);
+
+const dryOption = new Option(
+  '-n, --dry',
+  'Simulate the upgrade without updating any files'
+).default(false);
+
+const debugOption = new Option('-d, --debug', 'Get more logs in debug mode').default(false);
+
+const silentOption = new Option('-s, --silent', "Don't log anything").default(false);
+
+const automaticConfirmationOption = new Option(
+  '-y, --yes',
+  'Automatically answer "yes" to any prompts that the CLI might print on the command line.'
+).default(false);
+
 const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description: string) => {
   program
     .command(releaseType)
     .description(description)
-    .option('-p, --project-path <project-path>', 'Path to the Strapi project')
-    .option('-n, --dry', 'Simulate the upgrade without updating any files', false)
-    .option('-d, --debug', 'Get more logs in debug mode', false)
-    .option('-s, --silent', "Don't log anything", false)
-    .option(
-      '-y, --yes',
-      'Automatically answer "yes" to any prompts that the CLI might print on the command line.',
-      false
-    )
+    .addOption(projectPathOption)
+    .addOption(dryOption)
+    .addOption(debugOption)
+    .addOption(silentOption)
+    .addOption(automaticConfirmationOption)
     .action(async (options: CLIOptions) => {
       const { upgrade } = await import('./commands/upgrade.js');
 
@@ -41,6 +56,20 @@ addReleaseUpgradeCommand(
   Version.ReleaseType.Patch,
   'Upgrade to latest patch version of Strapi for the current major and minor'
 );
+
+program
+  .command('codemods')
+  .description(
+    'Run a set of available codemods for the selected target version without updating the Strapi dependencies'
+  )
+  .addOption(projectPathOption)
+  .addOption(dryOption)
+  .addOption(debugOption)
+  .addOption(silentOption)
+  .action(async (options) => {
+    const { codemods } = await import('./commands/codemods.js');
+    return codemods({ ...options, target: Version.ReleaseType.Major });
+  });
 
 program
   .usage('<command> [options]')

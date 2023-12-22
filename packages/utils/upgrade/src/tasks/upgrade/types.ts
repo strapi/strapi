@@ -1,7 +1,7 @@
 import type { Version } from '../../modules/version';
 
 import type { Logger } from '../../modules/logger';
-import type { ConfirmationCallback } from '../../modules/upgrader';
+import type { ConfirmationCallback } from '../../modules/common/types';
 
 export interface UpgradeOptions {
   logger: Logger;
