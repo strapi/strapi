@@ -53,7 +53,10 @@ export type GetValues<TSchemaUID extends Common.UID.Schema> = {
  *
  * Fallback to unknown if never is found
  */
-export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.If<
+export type GetValue<
+  TAttribute extends Attribute.Attribute,
+  TGuard = unknown
+> = Utils.Expression.If<
   Utils.Expression.IsNotNever<TAttribute>,
   Utils.Expression.MatchFirst<
     [
@@ -112,7 +115,7 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
       ],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
-      [Utils.Expression.True, Attribute.GetValue<TAttribute, unknown>]
+      [Utils.Expression.True, Attribute.GetValue<TAttribute, TGuard>]
     ],
     unknown
   >,
