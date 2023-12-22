@@ -1,12 +1,12 @@
 import semver from 'semver';
-import { codemods } from '../codemods';
-import { Version, rangeFactory, semVerFactory } from '../../../modules/version';
-import { projectFactory } from '../../../modules/project';
-import { codemodRunnerFactory } from '../../../modules/codemod-runner';
-import { loggerFactory } from '../../../modules/logger';
+import { codemods } from '../codemods/codemods';
+import { Version, rangeFactory, semVerFactory } from '../../modules/version';
+import { projectFactory } from '../../modules/project';
+import { codemodRunnerFactory } from '../../modules/codemod-runner';
+import { loggerFactory } from '../../modules/logger';
 
-jest.mock('../../../modules/codemod-runner');
-jest.mock('../../../modules/project', () => ({
+jest.mock('../../modules/codemod-runner');
+jest.mock('../../modules/project', () => ({
   projectFactory: jest.fn().mockReturnValue({
     refresh: jest.fn().mockReturnThis(),
     runCodemods: jest.fn().mockResolvedValue({ success: true }),
@@ -14,7 +14,7 @@ jest.mock('../../../modules/project', () => ({
   }),
 }));
 
-jest.mock('../../../modules/logger', () => ({
+jest.mock('../../modules/logger', () => ({
   loggerFactory: jest.fn().mockReturnValue({
     info: jest.fn(),
     error: jest.fn(),
@@ -51,9 +51,6 @@ describe('codemods task', () => {
     isDry: false,
   });
 
-  const mockProject = projectFactory('/mock/path');
-  const mockCodemodRunner = codemodRunnerFactory(mockProject, rangeFactory('4.0.0'));
-
   afterAll(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
@@ -64,6 +61,8 @@ describe('codemods task', () => {
   });
 
   it('throws an error on codemod execution failure', async () => {
+    const mockProject = projectFactory('/mock/path');
+    const mockCodemodRunner = codemodRunnerFactory(mockProject, rangeFactory('4.0.0'));
     (mockCodemodRunner.run as jest.Mock).mockResolvedValue({
       success: false,
       error: new Error('Mock error'),
