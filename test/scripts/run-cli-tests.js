@@ -189,6 +189,12 @@ yargs
           await Promise.all(
             batch.map(async (domain) => {
               const config = domainConfigs[domain];
+
+              if (availableTestApps.length < config.testApps) {
+                console.error('Not enough test apps available; aborting');
+                process.exit();
+              }
+
               // claim testApps for this domain to use
               const testApps = availableTestApps.splice(-1 * config.testApps);
 
