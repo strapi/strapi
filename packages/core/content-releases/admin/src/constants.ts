@@ -1,6 +1,6 @@
 import { Permission as StrapiPermission } from '@strapi/helper-plugin';
 
-export const PERMISSIONS: Record<string, StrapiPermission[]> = {
+export const PERMISSIONS = {
   main: [
     {
       action: 'plugin::content-releases.read',
@@ -71,4 +71,4 @@ export const PERMISSIONS: Record<string, StrapiPermission[]> = {
       conditions: [],
     },
   ],
-};
+} satisfies Record<string, StrapiPermission[]>;
