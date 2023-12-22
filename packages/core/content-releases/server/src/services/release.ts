@@ -2,6 +2,7 @@ import { setCreatorFields, errors } from '@strapi/utils';
 
 import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
 
+import _ from 'lodash/fp';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
@@ -19,9 +20,32 @@ import type {
   ReleaseAction,
   UpdateReleaseAction,
   DeleteReleaseAction,
+  ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
-import type { UserInfo } from '../../../shared/types';
+import type { Entity, UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
+
+interface Locale extends Entity {
+  name: string;
+  code: string;
+}
+
+type LocaleDictionary = {
+  [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
+};
+
+const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
+  switch (queryValue) {
+    case 'contentType':
+      return 'entry.contentType.displayName';
+    case 'action':
+      return 'type';
+    case 'locale':
+      return 'entry.locale.name';
+    default:
+      return 'entry.contentType.displayName';
+  }
+};
 
 const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
@@ -168,6 +192,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       data: {
         type,
         contentType: entry.contentType,
+        locale: entry.locale,
         entry: {
           id: entry.id,
           __type: entry.contentType,
@@ -206,26 +231,45 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
   },
 
-  async getAllContentTypeUids(releaseId: Release['id']) {
-    const contentTypesFromReleaseActions: { contentType: UID.ContentType }[] = await strapi.db
-      .queryBuilder(RELEASE_ACTION_MODEL_UID)
-      .select('content_type')
-      .where({
-        $and: [
-          {
-            release: releaseId,
-          },
-        ],
-      })
-      .groupBy('content_type')
-      .execute();
+  async groupActions(actions: ReleaseAction[], groupBy: ReleaseActionGroupBy) {
+    const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
+      if (!acc.includes(action.contentType)) {
+        acc.push(action.contentType);
+      }
 
-    return contentTypesFromReleaseActions.map(({ contentType: contentTypeUid }) => contentTypeUid);
+      return acc;
+    }, []);
+    const allReleaseContentTypesDictionary = await this.getContentTypesDataForActions(
+      contentTypeUids
+    );
+    const allLocales: Locale[] = await strapi.plugin('i18n').service('locales').find();
+    const allLocalesDictionary = allLocales.reduce<LocaleDictionary>((acc, locale) => {
+      acc[locale.code] = { name: locale.name, code: locale.code };
+
+      return acc;
+    }, {});
+
+    const formattedData = actions.map((action: ReleaseAction) => {
+      const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
+
+      return {
+        ...action,
+        entry: {
+          id: action.entry.id,
+          contentType: {
+            displayName,
+            mainFieldValue: action.entry[mainField],
+          },
+          locale: action.locale ? allLocalesDictionary[action.locale] : null,
+        },
+      };
+    });
+
+    const groupName = getGroupName(groupBy);
+    return _.groupBy(groupName)(formattedData);
   },
 
-  async getContentTypesDataForActions(releaseId: Release['id']) {
-    const contentTypesUids = await this.getAllContentTypeUids(releaseId);
-
+  async getContentTypesDataForActions(contentTypesUids: ReleaseAction['contentType'][]) {
     const contentManagerContentTypeService = strapi
       .plugin('content-manager')
       .service('content-types');
