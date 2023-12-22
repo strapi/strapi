@@ -124,7 +124,7 @@ yargs
           await Promise.all(
             currentTestApps.map(async (testAppName) => {
               const appPath = path.join(testAppDirectory, testAppName);
-              console.log(`cleaning test app at path: ${chalk.bold(appPath)}`);
+              console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
               await cleanTestApp(appPath);
             })
           );
@@ -134,7 +134,7 @@ yargs
            */
           await Promise.all(
             testAppPaths.map(async (appPath) => {
-              console.log(`generating test apps at path: ${chalk.bold(appPath)}`);
+              console.log(`Generating test apps at path: ${chalk.bold(appPath)}`);
               await generateTestApp({
                 appPath,
                 database: {
@@ -177,9 +177,6 @@ yargs
          * */
         const availableTestApps = [...currentTestApps];
 
-        console.log('domain configs', domainConfigs);
-        console.log('availableTestApps', availableTestApps);
-
         const batches = [];
 
         for (let i = 0; i < domains.length; i += concurrency) {
@@ -189,7 +186,6 @@ yargs
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
-          console.log('running batch ', i, batch);
           await Promise.all(
             batch.map(async (domain) => {
               const config = domainConfigs[domain];
@@ -206,7 +202,7 @@ yargs
                   TEST_APPS: testApps.join(','),
                 };
                 const domainDir = path.join(testsDir, domain);
-                console.log('running jest for domain', domain, 'with env', env, 'in', domainDir);
+                console.log('Running jest for domain', domain, 'with env', env, 'in', domainDir);
                 // run the command 'jest --rootDir <domainDir>'
                 const { stdout, stderr } = await execa('jest', ['--rootDir', domainDir], {
                   cwd: domainDir, // run from the domain directory
@@ -255,7 +251,7 @@ yargs
         await Promise.all(
           currentTestApps.map(async (testAppName) => {
             const appPath = path.join(testAppDirectory, testAppName);
-            console.log(`cleaning test app at path: ${chalk.bold(appPath)}`);
+            console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
             await cleanTestApp(appPath);
           })
         );
