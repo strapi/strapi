@@ -8,7 +8,7 @@ import type { Codemod } from '../../modules/codemod';
 
 export const codemods: Command = async (options) => {
   try {
-    const { silent, debug, yes } = options;
+    const { silent, debug } = options;
     const logger = loggerFactory({ silent, debug });
 
     logger.warn(
@@ -16,10 +16,6 @@ export const codemods: Command = async (options) => {
     );
 
     const confirm = async (message: string) => {
-      if (yes) {
-        return true;
-      }
-
       const { confirm } = await prompts({
         name: 'confirm',
         type: 'confirm',

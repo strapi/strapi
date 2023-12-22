@@ -5,7 +5,7 @@ export interface CLIOptions {
   dry: boolean;
   debug: boolean;
   silent: boolean;
-  yes: boolean;
+  yes?: boolean;
   projectPath?: string;
 }
 

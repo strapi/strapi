@@ -66,7 +66,6 @@ program
   .addOption(dryOption)
   .addOption(debugOption)
   .addOption(silentOption)
-  .addOption(automaticConfirmationOption)
   .action(async (options) => {
     const { codemods } = await import('./commands/codemods.js');
     return codemods({ ...options, target: Version.ReleaseType.Major });
