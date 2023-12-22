@@ -58,9 +58,11 @@ yargs
         /**
          * Publishing all packages to the yalc store
          */
+        console.log('Running yalc...');
         await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')], {
           stdio: 'inherit',
         });
+        console.log('Complete');
 
         const loadDomainConfigs = async (domain) => {
           try {
