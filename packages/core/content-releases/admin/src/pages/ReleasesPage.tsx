@@ -194,25 +194,27 @@ const ReleasesPage = () => {
 
   const { isLoading, isSuccess, isError } = response;
 
+  // Check if we have some errors and show a notification to the user to explain the error
+  React.useEffect(() => {
+    if (location?.state?.errors) {
+      toggleNotification({
+        type: 'warning',
+        title: formatMessage({
+          id: 'content-releases.pages.Releases.notification.error.title',
+          defaultMessage: 'Your request could not be processed.',
+        }),
+        message: formatMessage({
+          id: 'content-releases.pages.Releases.notification.error.message',
+          defaultMessage: 'Please try again or open another release.',
+        }),
+      });
+      replace({ state: null });
+    }
+  }, [formatMessage, location?.state?.errors, replace, toggleNotification]);
+
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
-
-  // Check if we have some errors and show a notification to the user to explain the error
-  if (location?.state?.errors) {
-    toggleNotification({
-      type: 'warning',
-      title: formatMessage({
-        id: 'content-releases.pages.Releases.notification.error.title',
-        defaultMessage: 'Your request could not be processed.',
-      }),
-      message: formatMessage({
-        id: 'content-releases.pages.Releases.notification.error.message',
-        defaultMessage: 'Please try again or open another release.',
-      }),
-    });
-    replace({ state: null });
-  }
 
   if (isLoading) {
     return (
