@@ -273,12 +273,6 @@ export const ReleaseDetailsLayout = ({
                   </ReleaseInfoWrapper>
                 </Popover>
               )}
-              <Button size="S" variant="tertiary">
-                {formatMessage({
-                  id: 'content-releases.header.actions.refresh',
-                  defaultMessage: 'Refresh',
-                })}
-              </Button>
               <CheckPermissions permissions={PERMISSIONS.publish}>
                 <Button
                   size="S"
@@ -297,7 +291,6 @@ export const ReleaseDetailsLayout = ({
           )
         }
       />
-
       {children}
     </Main>
   );
