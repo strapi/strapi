@@ -217,11 +217,17 @@ yargs
                   env, // pass it our custom env values
                 });
 
-                // TODO: add logging of results
-                console.log('Command output:', stdout);
-                console.error('Command error:', stderr);
+                // TODO: determine the best way to log this for the CI (stream it rather than wait for completion)
+                if (stdout) {
+                  console.log(stdout);
+                }
+                if (stderr) {
+                  console.log(stderr);
+                }
               } catch (err) {
-                console.error('Command error:', err);
+                // If any tests fail
+                console.error('Test suite failed for', domain);
+                // TODO: determine how to integrate this with the CI, probably ending the process and returning an error exit code
               }
 
               // make them available again for the next batch
