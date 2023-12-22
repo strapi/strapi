@@ -26,6 +26,7 @@ import {
   useNotification,
   useQueryParams,
   ConfirmDialog,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -58,8 +59,16 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledFlex = styled(Flex)`
+const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
   align-self: stretch;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+
+  svg path {
+    fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
+  span {
+    color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
 `;
 
 const PencilIcon = styled(Pencil)`
@@ -80,10 +89,11 @@ const TrashIcon = styled(Trash)`
 
 interface PopoverButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  disabled?: boolean;
   children: React.ReactNode;
 }
 
-const PopoverButton = ({ onClick, children }: PopoverButtonProps) => {
+const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
   return (
     <StyledFlex
       paddingTop={2}
@@ -95,6 +105,7 @@ const PopoverButton = ({ onClick, children }: PopoverButtonProps) => {
       as="button"
       hasRadius
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </StyledFlex>
@@ -120,6 +131,9 @@ export const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
+  const {
+    allowedActions: { canUpdate, canDelete },
+  } = useRBAC(PERMISSIONS);
 
   const release = data?.data;
 
@@ -224,28 +238,24 @@ export const ReleaseDetailsLayout = ({
                   minWidth="242px"
                 >
                   <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                    <CheckPermissions permissions={PERMISSIONS.update}>
-                      <PopoverButton onClick={openReleaseModal}>
-                        <PencilIcon />
-                        <Typography ellipsis>
-                          {formatMessage({
-                            id: 'content-releases.header.actions.edit',
-                            defaultMessage: 'Edit',
-                          })}
-                        </Typography>
-                      </PopoverButton>
-                    </CheckPermissions>
-                    <CheckPermissions permissions={PERMISSIONS.delete}>
-                      <PopoverButton onClick={openWarningConfirmDialog}>
-                        <TrashIcon />
-                        <Typography ellipsis textColor="danger600">
-                          {formatMessage({
-                            id: 'content-releases.header.actions.delete',
-                            defaultMessage: 'Delete',
-                          })}
-                        </Typography>
-                      </PopoverButton>
-                    </CheckPermissions>
+                    <PopoverButton disabled={!canUpdate} onClick={openReleaseModal}>
+                      <PencilIcon />
+                      <Typography ellipsis>
+                        {formatMessage({
+                          id: 'content-releases.header.actions.edit',
+                          defaultMessage: 'Edit',
+                        })}
+                      </Typography>
+                    </PopoverButton>
+                    <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
+                      <TrashIcon />
+                      <Typography ellipsis textColor="danger600">
+                        {formatMessage({
+                          id: 'content-releases.header.actions.delete',
+                          defaultMessage: 'Delete',
+                        })}
+                      </Typography>
+                    </PopoverButton>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"

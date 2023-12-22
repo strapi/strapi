@@ -1,3 +1,4 @@
+import { useRBAC } from '@strapi/helper-plugin';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 
@@ -9,6 +10,10 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  useRBAC: jest.fn(() => ({
+    isLoading: false,
+    allowedActions: { canUpdate: true, canDelete: true },
+  })),
 }));
 
 describe('Releases details page', () => {
@@ -140,5 +145,43 @@ describe('Releases details page', () => {
     expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
     const container = screen.getByText(/This entry was/);
     expect(container.querySelector('span')).toHaveTextContent('published');
+  });
+
+  it('renders the details page with the delete and edit buttons disabled', async () => {
+    // @ts-expect-error – mocking
+    useRBAC.mockImplementation(() => ({
+      isLoading: false,
+      allowedActions: { canUpdate: false, canDelete: false },
+    }));
+
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.noActionsHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.noActionsBodyData))
+      )
+    );
+
+    const { user } = render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    await screen.findByText(mockReleaseDetailsPageData.noActionsHeaderData.data.name);
+
+    const moreButton = screen.getByRole('button', { name: 'Release actions' });
+    expect(moreButton).toBeInTheDocument();
+
+    await user.click(moreButton);
+
+    // shows the popover actions
+    const editButton = screen.getByRole('button', { name: 'Edit' });
+    expect(editButton).toBeDisabled();
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    expect(deleteButton).toBeDisabled();
   });
 });
