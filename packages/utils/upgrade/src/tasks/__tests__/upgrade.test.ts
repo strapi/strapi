@@ -48,14 +48,13 @@ jest.mock('../../modules/logger', () => ({
   }),
 }));
 
-describe('codemods task', () => {
+describe('Upgrade task', () => {
   const logger = loggerFactory();
   const addRequirementMock = jest.fn().mockReturnThis();
   const options = {
     target: Version.ReleaseType.Major,
     logger,
     dry: false,
-    selectCodemods: (options) => Promise.resolve(options),
   };
 
   (upgraderFactory as jest.Mock).mockReturnValue({
@@ -65,16 +64,6 @@ describe('codemods task', () => {
     upgrade: jest.fn().mockResolvedValue({ success: true }),
     isDry: false,
     addRequirement: addRequirementMock,
-  });
-
-  (projectFactory as jest.Mock).mockReturnValue({
-    dry: jest.fn().mockReturnThis(),
-    onSelectCodemods: jest.fn().mockReturnThis(),
-    setLogger: jest.fn().mockReturnThis(),
-    run: jest.fn().mockResolvedValue({ success: true }),
-    target: Version.ReleaseType.Major,
-    strapiVersion: semVerFactory('3.6.0'),
-    isDry: false,
   });
 
   afterAll(() => {
