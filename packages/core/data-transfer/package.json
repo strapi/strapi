@@ -40,8 +40,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
+    "@strapi/core": "4.15.5",
     "@strapi/logger": "4.15.5",
-    "@strapi/strapi": "4.15.5",
     "@strapi/types": "4.15.5",
     "@strapi/utils": "4.15.5",
     "chalk": "4.1.2",
@@ -61,7 +61,6 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "4.15.5",
-    "@strapi/strapi": "4.15.5",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
@@ -77,9 +76,6 @@
     "koa": "2.13.4",
     "rimraf": "3.0.2",
     "typescript": "5.3.2"
-  },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.14.4"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
