@@ -68,8 +68,8 @@ program
   .addOption(silentOption)
   .addOption(automaticConfirmationOption)
   .action(async (options) => {
-    const { runCodemods } = await import('./commands/codemods.js');
-    return runCodemods({ ...options, target: Version.ReleaseType.Major });
+    const { codemods } = await import('./commands/codemods.js');
+    return codemods({ ...options, target: Version.ReleaseType.Major });
   });
 
 program

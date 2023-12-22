@@ -6,7 +6,7 @@ import type { RunCodemodsOptions } from './types';
 import { codemodRunnerFactory } from '../../modules/codemod-runner';
 import { Version, isSemVer, rangeFactory } from '../../modules/version';
 
-export const runCodemods = async (options: RunCodemodsOptions) => {
+export const codemods = async (options: RunCodemodsOptions) => {
   const timer = timerFactory();
   const { logger } = options;
 

@@ -6,7 +6,7 @@ import * as tasks from '../../tasks';
 import type { Command } from '../types';
 import type { Codemod } from '../../modules/codemod';
 
-export const runCodemods: Command = async (options) => {
+export const codemods: Command = async (options) => {
   try {
     const { silent, debug, yes } = options;
     const logger = loggerFactory({ silent, debug });
@@ -64,7 +64,7 @@ export const runCodemods: Command = async (options) => {
       }));
     };
 
-    await tasks.runCodemods({
+    await tasks.codemods({
       logger,
       confirm,
       selectCodemods,
