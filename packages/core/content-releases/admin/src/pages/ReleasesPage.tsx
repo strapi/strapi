@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   ContentLayout,
+  Divider,
   EmptyStateLayout,
   Flex,
   Grid,
@@ -298,6 +299,7 @@ const ReleasesPage = () => {
                   })}
                 </Tab>
               </Tabs>
+              <Divider />
             </Box>
             <TabPanels>
               {/* Pending releases */}
