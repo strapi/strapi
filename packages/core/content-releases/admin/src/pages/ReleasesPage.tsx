@@ -173,7 +173,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
 interface CustomLocationState {
-  errors?: Record<string, string>[];
+  errors?: Record<'code', string>[];
 }
 
 const INITIAL_FORM_VALUES = {

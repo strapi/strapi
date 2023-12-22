@@ -395,19 +395,23 @@ const ReleaseDetailsBody = () => {
   }
 
   if (isError || isReleaseError || !release) {
+    const errorsArray = [];
+    if (releaseError) {
+      errorsArray.push({
+        code: releaseError.code,
+      });
+    }
+    if (releaseActionsError) {
+      errorsArray.push({
+        code: releaseActionsError.code,
+      });
+    }
     return (
       <Redirect
         to={{
           pathname: '/plugins/content-releases',
           state: {
-            errors: [
-              {
-                code: releaseError?.code,
-              },
-              {
-                code: releaseActionsError?.code,
-              },
-            ],
+            errors: errorsArray,
           },
         }}
       />
