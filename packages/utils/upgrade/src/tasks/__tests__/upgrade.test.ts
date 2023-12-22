@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { Version, semVerFactory } from '../../modules/version';
+import { Version } from '../../modules/version';
 import { projectFactory } from '../../modules/project';
 import { loggerFactory } from '../../modules/logger';
 import { upgraderFactory, constants as upgraderConstants } from '../../modules/upgrader';
