@@ -15,7 +15,6 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
-  AnErrorOccurred,
   CheckPermissions,
   LoadingIndicatorPage,
   NoContent,
@@ -31,7 +30,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams, useHistory, Link as ReactRouterLink } from 'react-router-dom';
+import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -128,7 +127,12 @@ export const ReleaseDetailsLayout = ({
   const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
-  const { data, isLoading: isLoadingDetails, isError } = useGetReleaseQuery({ id: releaseId });
+  const {
+    data,
+    isLoading: isLoadingDetails,
+    isError,
+    error,
+  } = useGetReleaseQuery({ id: releaseId });
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -189,9 +193,18 @@ export const ReleaseDetailsLayout = ({
 
   if (isError || !release) {
     return (
-      <Main>
-        <AnErrorOccurred />
-      </Main>
+      <Redirect
+        to={{
+          pathname: '/plugins/content-releases',
+          state: {
+            errors: [
+              {
+                code: error?.code,
+              },
+            ],
+          },
+        }}
+      />
     );
   }
 
@@ -320,10 +333,17 @@ const ReleaseDetailsBody = () => {
     data: releaseData,
     isLoading: isReleaseLoading,
     isError: isReleaseError,
+    error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
   const release = releaseData?.data;
 
-  const { isLoading, isFetching, isError, data } = useGetReleaseActionsQuery({
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    data,
+    error: releaseActionsError,
+  } = useGetReleaseActionsQuery({
     ...query,
     releaseId,
   });
@@ -370,10 +390,26 @@ const ReleaseDetailsBody = () => {
   }
 
   if (isError || isReleaseError || !release) {
+    const errorsArray = [];
+    if (releaseError) {
+      errorsArray.push({
+        code: releaseError.code,
+      });
+    }
+    if (releaseActionsError) {
+      errorsArray.push({
+        code: releaseActionsError.code,
+      });
+    }
     return (
-      <ContentLayout>
-        <AnErrorOccurred />
-      </ContentLayout>
+      <Redirect
+        to={{
+          pathname: '/plugins/content-releases',
+          state: {
+            errors: errorsArray,
+          },
+        }}
+      />
     );
   }
 
