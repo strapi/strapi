@@ -185,7 +185,6 @@ yargs
         for (let i = 0; i < domains.length; i += concurrency) {
           batches.push(domains.slice(i, i + concurrency));
         }
-        console.log('batches', batches);
 
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < batches.length; i++) {
