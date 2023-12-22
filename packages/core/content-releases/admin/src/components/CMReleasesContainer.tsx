@@ -62,6 +62,34 @@ interface AddActionToReleaseModalProps {
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
 }
 
+const NoReleases = () => {
+  const { formatMessage } = useIntl();
+  return (
+    <NoContent
+      content={{
+        id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
+        defaultMessage:
+          'No available releases. Open the list of releases and create a new one from there.',
+      }}
+      action={
+        <LinkButton
+          // @ts-expect-error - types are not inferred correctly through the as prop.
+          to={{
+            pathname: '/plugins/content-releases',
+          }}
+          as={ReactRouterLink}
+          variant="secondary"
+        >
+          {formatMessage({
+            id: 'content-releases.content-manager-edit-view.add-to-release.redirect-button',
+            defaultMessage: 'Open the list of releases',
+          })}
+        </LinkButton>
+      }
+    />
+  );
+};
+
 const AddActionToReleaseModal = ({
   handleClose,
   contentTypeUid,
@@ -141,28 +169,7 @@ const AddActionToReleaseModal = ({
           return (
             <Form>
               {releases?.length === 0 ? (
-                <NoContent
-                  content={{
-                    id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
-                    defaultMessage:
-                      'No available releases. Open the list of releases and create a new one from there.',
-                  }}
-                  action={
-                    <LinkButton
-                      // @ts-expect-error - types are not inferred correctly through the as prop.
-                      to={{
-                        pathname: '/plugins/content-releases',
-                      }}
-                      as={ReactRouterLink}
-                      variant="secondary"
-                    >
-                      {formatMessage({
-                        id: 'content-releases.content-manager-edit-view.add-to-release.redirect-button',
-                        defaultMessage: 'Open the list of releases',
-                      })}
-                    </LinkButton>
-                  }
-                />
+                <NoReleases />
               ) : (
                 <ModalBody>
                   <Flex direction="column" alignItems="stretch" gap={2}>
