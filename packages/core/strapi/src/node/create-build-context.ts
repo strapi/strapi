@@ -6,7 +6,7 @@ import { strapiFactory } from '@strapi/core';
 import { getConfigUrls } from '@strapi/utils';
 import { Strapi } from '@strapi/types';
 
-import type { CLIContext } from '../commands/types';
+import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
