@@ -134,4 +134,79 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
       expected
     );
   });
+
+  it('should add the current locale to a link search', () => {
+    const links = [
+      {
+        uid: 'foo',
+        to: 'cm/collectionType/foo',
+        isDisplayed: true,
+        search: 'page=1',
+      },
+      { uid: 'bar', to: 'cm/collectionType/bar', isDisplayed: true },
+    ];
+    const schemas = [
+      { uid: 'foo', pluginOptions: { i18n: { localized: true } } },
+      { uid: 'bar', pluginOptions: { i18n: { localized: true } } },
+    ];
+    const permissions = {
+      foo: {
+        'plugin::content-manager.explorer.create': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['fr'],
+            },
+          },
+        ],
+        'plugin::content-manager.explorer.read': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['en'],
+            },
+          },
+        ],
+      },
+      bar: {
+        'plugin::content-manager.explorer.create': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['fr'],
+            },
+          },
+        ],
+        'plugin::content-manager.explorer.read': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['en'],
+            },
+          },
+        ],
+      },
+    };
+    const expected = [
+      {
+        uid: 'foo',
+        to: 'cm/collectionType/foo',
+        isDisplayed: true,
+        search: 'page=1&plugins[i18n][locale]=fr',
+      },
+      {
+        uid: 'bar',
+        to: 'cm/collectionType/bar',
+        isDisplayed: true,
+        search: 'plugins[i18n][locale]=fr',
+      },
+    ];
+    const locales = [{ code: 'en', isDefault: true }, { code: 'fr' }];
+    delete window.location;
+    window.location = { search: '?plugins[i18n][locale]=fr' };
+
+    expect(addLocaleToLinksSearch(links, 'collectionType', schemas, locales, permissions)).toEqual(
+      expected
+    );
+  });
 });

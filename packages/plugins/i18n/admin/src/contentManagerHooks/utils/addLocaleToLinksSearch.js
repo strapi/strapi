@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import { parse, stringify } from 'qs';
 
 import getDefaultLocale from '../../utils/getDefaultLocale';
+import getLocaleFromQuery from '../../utils/getLocaleFromQuery';
 
 const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permissions) => {
   return links.map((link) => {
@@ -36,7 +37,10 @@ const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permis
       {}
     );
 
+    const currentSearchQuery = parse(window.location.search.slice(1)); // skip `?` in search string
+    const currentLocale = getLocaleFromQuery(currentSearchQuery);
     const defaultLocale = getDefaultLocale(contentTypeNeededPermissions, locales);
+    const newLinkLocale = currentLocale || defaultLocale;
 
     if (!defaultLocale) {
       return { ...link, isDisplayed: false };
@@ -45,8 +49,8 @@ const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permis
     const linkParams = link.search ? parse(link.search) : {};
 
     const params = linkParams
-      ? { ...linkParams, plugins: { ...linkParams.plugins, i18n: { locale: defaultLocale } } }
-      : { plugins: { i18n: { locale: defaultLocale } } };
+      ? { ...linkParams, plugins: { ...linkParams.plugins, i18n: { locale: newLinkLocale } } }
+      : { plugins: { i18n: { locale: newLinkLocale } } };
 
     const search = stringify(params, { encode: false });
 
