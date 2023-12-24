@@ -5,7 +5,7 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 
-import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
+import { UPDATE_LINKS, GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
 
 const initialState = {
   components: [],
@@ -39,6 +39,15 @@ const mainReducer = (state = initialState, action) =>
         draftState.models = action.data.contentTypeSchemas;
         draftState.fieldSizes = action.data.fieldSizes;
         draftState.status = 'resolved';
+        break;
+      }
+      case UPDATE_LINKS: {
+        draftState.collectionTypeLinks = action.data.authorizedCollectionTypeLinks.filter(
+          ({ isDisplayed }) => isDisplayed
+        );
+        draftState.singleTypeLinks = action.data.authorizedSingleTypeLinks.filter(
+          ({ isDisplayed }) => isDisplayed
+        );
         break;
       }
       default:

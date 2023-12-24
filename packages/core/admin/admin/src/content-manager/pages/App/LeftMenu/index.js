@@ -20,12 +20,14 @@ import { NavLink } from 'react-router-dom';
 
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
+import useUpdateContentManagerLinks from '../useUpdateContentManagerLinks';
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
   const { formatMessage, locale } = useIntl();
   const modelLinksSelector = useMemo(makeSelectModelLinks, []);
   const { collectionTypeLinks, singleTypeLinks } = useSelector(modelLinksSelector, shallowEqual);
+  useUpdateContentManagerLinks();
 
   const { startsWith } = useFilter(locale, {
     sensitivity: 'base',
