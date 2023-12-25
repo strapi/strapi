@@ -20,7 +20,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../../App/selectors';
+import { selectAdminPermissions } from '../../../../../selectors';
 import Filters from '../../../components/Filters';
 
 import { CreateActionCE } from './CreateAction';
@@ -60,7 +60,7 @@ export const UserListPageCE = () => {
     async () =>
       (
         await import(
-          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/CreateAction'
+          '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage/CreateAction'
         )
       ).CreateActionEE
   );
@@ -186,7 +186,7 @@ const UsersListPageSwitch = () => {
     UserListPageCE,
     async () =>
       // eslint-disable-next-line import/no-cycle
-      (await import('../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage'))
+      (await import('../../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
         .UserListPageEE
   );
 

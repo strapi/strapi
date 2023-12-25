@@ -26,7 +26,7 @@ const {
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
-const { ApplicationError, ValidationError } = utils.errors;
+const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
@@ -99,6 +99,10 @@ module.exports = {
     // Connect the user with the third-party provider.
     try {
       const user = await getService('providers').connect(provider, ctx.query);
+
+      if (user.blocked) {
+        throw new ForbiddenError('Your account has been blocked by an administrator');
+      }
 
       return ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),

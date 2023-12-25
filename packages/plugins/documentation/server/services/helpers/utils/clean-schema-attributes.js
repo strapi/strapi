@@ -84,7 +84,8 @@ const cleanSchemaAttributes = (
         attributesCopy[prop] = { type: 'string', pattern: '^\\d*$', example: '123456789' };
         break;
       }
-      case 'json': {
+      case 'json':
+      case 'blocks': {
         attributesCopy[prop] = {};
         break;
       }
@@ -201,7 +202,9 @@ const cleanSchemaAttributes = (
             properties: {
               data: {
                 type: 'array',
-                items: componentSchemaRefName.length ? { $ref: componentSchemaRefName } : {},
+                items: componentSchemaRefName.length
+                  ? { $ref: `${componentSchemaRefName}ListResponseDataItemLocalized` }
+                  : {},
               },
             },
           };

@@ -2,6 +2,8 @@ import { MutableRefObject, useEffect, useState } from 'react';
 
 import { useQuery } from './useQuery';
 
+type InputFieldRefs = HTMLElement | { input: MutableRefObject<HTMLInputElement> } | null;
+
 /**
  * @description Given the name of an input field (this does not need to be the name you pass as a prop to the DOM element),
  * when the query param `field` matches the name the field will be focused & scrolled into the center of the view.
@@ -16,7 +18,7 @@ import { useQuery } from './useQuery';
  * );
  * ```
  */
-export const useFocusInputField = (name: string): ((node: HTMLElement) => void) => {
+export const useFocusInputField = (name: string): ((node: InputFieldRefs) => void) => {
   const search = useQuery();
 
   /**
@@ -25,9 +27,7 @@ export const useFocusInputField = (name: string): ((node: HTMLElement) => void) 
    * Realistically, it will only be an `HTMLElement` but `TextInput` in the design-system
    * has an imperativeHandle we can't remove until v2 of the design-system.
    */
-  const [field, setField] = useState<
-    HTMLElement | { input: MutableRefObject<HTMLInputElement> } | null
-  >(null);
+  const [field, setField] = useState<InputFieldRefs>(null);
 
   useEffect(() => {
     if (search.has('field') && search.get('field') === name && field) {

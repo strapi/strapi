@@ -4,6 +4,7 @@
 module.exports = {
   WORKFLOW_MODEL_UID: 'admin::workflow',
   STAGE_MODEL_UID: 'admin::workflow-stage',
+  STAGE_TRANSITION_UID: 'admin::review-workflows.stage.transition',
   STAGE_DEFAULT_COLOR: '#4945FF',
   ENTITY_STAGE_ATTRIBUTE: 'strapi_stage',
   ENTITY_ASSIGNEE_ATTRIBUTE: 'strapi_assignee',
@@ -16,5 +17,17 @@ module.exports = {
     STAGES_LIMIT:
       'You’ve reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
     DUPLICATED_STAGE_NAME: 'Stage names must be unique.',
+  },
+  WORKFLOW_POPULATE: {
+    stages: {
+      populate: {
+        permissions: {
+          fields: ['action', 'actionParameters'],
+          populate: {
+            role: { fields: ['id', 'name'] },
+          },
+        },
+      },
+    },
   },
 };

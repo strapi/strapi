@@ -30,6 +30,18 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #ffffff;
 }
 
+.c34 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c36 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
 .c39 {
   font-weight: 500;
   font-size: 1rem;
@@ -59,7 +71,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c66 {
+.c65 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -69,13 +81,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #32324d;
 }
 
-.c68 {
+.c67 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #666687;
 }
 
-.c74 {
+.c73 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -141,13 +153,23 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
 .c29 {
   padding-top: 12px;
+}
+
+.c33 {
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+}
+
+.c35 {
+  padding-right: 4px;
+  padding-left: 4px;
 }
 
 .c38 {
@@ -198,11 +220,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   right: 16px;
 }
 
-.c64 {
+.c63 {
   padding-top: 16px;
 }
 
-.c67 {
+.c66 {
   padding-left: 8px;
 }
 
@@ -356,6 +378,34 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   justify-content: center;
 }
 
+.c30 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c32 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
 .c49 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
@@ -384,21 +434,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: column;
 }
 
-.c61 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c65 {
+.c64 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -416,7 +452,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c69 {
+.c68 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -500,7 +536,8 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c19[aria-disabled='true'] svg > g,.c19[aria-disabled='true'] svg path {
+.c19[aria-disabled='true'] svg > g,
+.c19[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -513,7 +550,8 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c19[aria-disabled='true']:active svg > g,.c19[aria-disabled='true']:active svg path {
+.c19[aria-disabled='true']:active svg > g,
+.c19[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -534,16 +572,16 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   fill: #32324d;
 }
 
-.c62 > * {
+.c61 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c62 > * + * {
+.c61 > * + * {
   margin-left: 8px;
 }
 
-.c63 {
+.c62 {
   position: absolute;
   top: 12px;
 }
@@ -597,7 +635,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-wrap: wrap;
 }
 
-.c76[data-state='checked'] .c11 {
+.c75[data-state='checked'] .c11 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -613,75 +651,26 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   max-width: 100%;
 }
 
-.c27 svg > g,
+.c27 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c27 svg g,
 .c27 svg path {
   fill: #8e8ea9;
 }
 
-.c27:hover svg > g,
-.c27:hover svg path {
+.c27:hover svg g,
+.c27:focus svg g,
+.c27:hover svg path,
+.c27:focus svg path {
   fill: #666687;
-}
-
-.c27:active svg > g,
-.c27:active svg path {
-  fill: #a5a5ba;
 }
 
 .c27[aria-disabled='true'] svg path {
   fill: #666687;
-}
-
-.c33 {
-  padding-top: 4px;
-  padding-right: 8px;
-  padding-bottom: 4px;
-  padding-left: 8px;
-}
-
-.c35 {
-  padding-right: 4px;
-  padding-left: 4px;
-}
-
-.c34 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c36 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c30 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c32 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
 }
 
 .c31:first-child {
@@ -744,11 +733,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   outline-offset: -2px;
 }
 
-.c75 {
+.c74 {
   line-height: revert;
 }
 
-.c70 {
+.c69 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -761,7 +750,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   outline: none;
 }
 
-.c70:after {
+.c69:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -776,11 +765,55 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c70:focus-visible {
+.c69:focus-visible {
   outline: none;
 }
 
-.c70:focus-visible:after {
+.c69:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c71 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c71:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c71:focus-visible {
+  outline: none;
+}
+
+.c71:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -792,69 +825,25 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 }
 
 .c72 {
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c72:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c72:focus-visible {
-  outline: none;
-}
-
-.c72:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c73 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c73:hover {
+.c72:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c71 {
+.c70 {
   font-size: 0.7rem;
   pointer-events: none;
 }
 
-.c71 svg path {
+.c70 svg path {
   fill: #c0c0cf;
 }
 
-.c71:focus svg path,
-.c71:hover svg path {
+.c70:focus svg path,
+.c70:hover svg path {
   fill: #c0c0cf;
 }
 
@@ -1075,7 +1064,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
             >
               <span
                 aria-current="false"
-                class="c34"
+                class="c11 c34"
               >
                 Media Library
               </span>
@@ -1085,7 +1074,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               class="c35"
             >
               <span
-                class="c36"
+                class="c11 c36"
               >
                 /
               </span>
@@ -1105,7 +1094,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               class="c35"
             >
               <span
-                class="c36"
+                class="c11 c36"
               >
                 /
               </span>
@@ -1207,7 +1196,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 class="c58 c59"
               >
                 <div
-                  class="c60 c61 c62 c63"
+                  class="c60 c30 c61 c62"
                 >
                   <button
                     aria-disabled="false"
@@ -1244,10 +1233,10 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c64 c65"
+      class="c63 c64"
     >
       <div
-        class="c61"
+        class="c30"
       >
         <div
           class=""
@@ -1273,7 +1262,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 class="c9 c10"
               >
                 <span
-                  class="c11 c66 c13"
+                  class="c11 c65 c13"
                 >
                   <span
                     class="c14"
@@ -1309,10 +1298,10 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </div>
         </div>
         <div
-          class="c67"
+          class="c66"
         >
           <label
-            class="c11 c68"
+            class="c11 c67"
             for="page-size"
           >
             Entries per page
@@ -1324,12 +1313,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
         class=""
       >
         <ul
-          class="c69"
+          class="c68"
         >
           <li>
             <button
               aria-disabled="true"
-              class="c70 c71"
+              class="c69 c70"
               tabindex="-1"
               type="button"
             >
@@ -1355,7 +1344,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </li>
           <li>
             <button
-              class="c72 c73"
+              class="c71 c72"
               type="button"
             >
               <div
@@ -1365,7 +1354,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               </div>
               <span
                 aria-hidden="true"
-                class="c11 c74 c75"
+                class="c11 c73 c74"
               >
                 1
               </span>
@@ -1374,7 +1363,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           <li>
             <button
               aria-disabled="true"
-              class="c70 c71"
+              class="c69 c70"
               tabindex="-1"
               type="button"
             >

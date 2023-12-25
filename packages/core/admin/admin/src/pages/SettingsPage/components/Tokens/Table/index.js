@@ -27,102 +27,24 @@ const Table = ({
   tokenType,
 }) => {
   const { canDelete, canUpdate, canRead } = permissions;
-  const withBulkActions = canDelete || canUpdate || canRead;
-  const [{ query }] = useQueryParams();
-  const { formatMessage } = useIntl();
-  const [, sortOrder] = query ? query.sort.split(':') : 'ASC';
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
-  const { trackUsage } = useTracking();
 
-  const sortedTokens = tokens.sort((a, b) => {
-    const comparison = a.name.localeCompare(b.name);
-
-    return sortOrder === 'DESC' ? -comparison : comparison;
-  });
-
+  /**
+   * TODO: This needs refactoring to the new `Table` component.
+   */
   return (
     <DynamicTable
       headers={headers}
       contentType={contentType}
       rows={tokens}
-      withBulkActions={withBulkActions}
+      withBulkActions={canDelete || canUpdate || canRead}
       isLoading={isLoading}
       onConfirmDelete={onConfirmDelete}
     >
-      <Tbody>
-        {sortedTokens.map((token) => {
-          return (
-            <Tr
-              key={token.id}
-              {...onRowClick({
-                fn() {
-                  trackUsage('willEditTokenFromList', {
-                    tokenType,
-                  });
-                  push(`${pathname}/${token.id}`);
-                },
-                condition: canUpdate,
-              })}
-            >
-              <Td maxWidth={pxToRem(250)}>
-                <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                  {token.name}
-                </Typography>
-              </Td>
-              <Td maxWidth={pxToRem(250)}>
-                <Typography textColor="neutral800" ellipsis>
-                  {token.description}
-                </Typography>
-              </Td>
-              <Td>
-                <Typography textColor="neutral800">
-                  <RelativeTime timestamp={new Date(token.createdAt)} />
-                </Typography>
-              </Td>
-              <Td>
-                {token.lastUsedAt && (
-                  <Typography textColor="neutral800">
-                    <RelativeTime
-                      timestamp={new Date(token.lastUsedAt)}
-                      customIntervals={[
-                        {
-                          unit: 'hours',
-                          threshold: 1,
-                          text: formatMessage({
-                            id: 'Settings.apiTokens.lastHour',
-                            defaultMessage: 'last hour',
-                          }),
-                        },
-                      ]}
-                    />
-                  </Typography>
-                )}
-              </Td>
-
-              {withBulkActions && (
-                <Td>
-                  <Flex justifyContent="end">
-                    {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
-                    {!canUpdate && canRead && (
-                      <ReadButton tokenName={token.name} tokenId={token.id} />
-                    )}
-                    {canDelete && (
-                      <DeleteButton
-                        tokenName={token.name}
-                        onClickDelete={() => onConfirmDelete(token.id)}
-                        tokenType={tokenType}
-                      />
-                    )}
-                  </Flex>
-                </Td>
-              )}
-            </Tr>
-          );
-        })}
-      </Tbody>
+      <TableRows
+        tokenType={tokenType}
+        permissions={permissions}
+        onConfirmDelete={onConfirmDelete}
+      />
     </DynamicTable>
   );
 };
@@ -159,3 +81,113 @@ Table.defaultProps = {
 };
 
 export default Table;
+
+const TableRows = ({ tokenType, permissions, rows, withBulkActions, onConfirmDelete }) => {
+  const { canDelete, canUpdate, canRead } = permissions;
+
+  const [{ query }] = useQueryParams();
+  const { formatMessage } = useIntl();
+  const [, sortOrder] = query ? query.sort.split(':') : 'ASC';
+  const {
+    push,
+    location: { pathname },
+  } = useHistory();
+  const { trackUsage } = useTracking();
+
+  const sortedTokens = rows.sort((a, b) => {
+    const comparison = a.name.localeCompare(b.name);
+
+    return sortOrder === 'DESC' ? -comparison : comparison;
+  });
+
+  return (
+    <Tbody>
+      {sortedTokens.map((token) => {
+        return (
+          <Tr
+            key={token.id}
+            {...onRowClick({
+              fn() {
+                trackUsage('willEditTokenFromList', {
+                  tokenType,
+                });
+                push(`${pathname}/${token.id}`);
+              },
+              condition: canUpdate,
+            })}
+          >
+            <Td maxWidth={pxToRem(250)}>
+              <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                {token.name}
+              </Typography>
+            </Td>
+            <Td maxWidth={pxToRem(250)}>
+              <Typography textColor="neutral800" ellipsis>
+                {token.description}
+              </Typography>
+            </Td>
+            <Td>
+              <Typography textColor="neutral800">
+                <RelativeTime timestamp={new Date(token.createdAt)} />
+              </Typography>
+            </Td>
+            <Td>
+              {token.lastUsedAt && (
+                <Typography textColor="neutral800">
+                  <RelativeTime
+                    timestamp={new Date(token.lastUsedAt)}
+                    customIntervals={[
+                      {
+                        unit: 'hours',
+                        threshold: 1,
+                        text: formatMessage({
+                          id: 'Settings.apiTokens.lastHour',
+                          defaultMessage: 'last hour',
+                        }),
+                      },
+                    ]}
+                  />
+                </Typography>
+              )}
+            </Td>
+
+            {withBulkActions && (
+              <Td>
+                <Flex justifyContent="end">
+                  {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
+                  {!canUpdate && canRead && (
+                    <ReadButton tokenName={token.name} tokenId={token.id} />
+                  )}
+                  {canDelete && (
+                    <DeleteButton
+                      tokenName={token.name}
+                      onClickDelete={() => onConfirmDelete(token.id)}
+                      tokenType={tokenType}
+                    />
+                  )}
+                </Flex>
+              </Td>
+            )}
+          </Tr>
+        );
+      })}
+    </Tbody>
+  );
+};
+
+TableRows.defaultProps = {
+  rows: [],
+  withBulkActions: false,
+};
+
+TableRows.propTypes = {
+  rows: PropTypes.array,
+  permissions: PropTypes.shape({
+    canRead: PropTypes.bool,
+    canDelete: PropTypes.bool,
+    canUpdate: PropTypes.bool,
+  }).isRequired,
+  onConfirmDelete: PropTypes.func.isRequired,
+  tokenType: PropTypes.string.isRequired,
+  withBulkActions: PropTypes.bool,
+};

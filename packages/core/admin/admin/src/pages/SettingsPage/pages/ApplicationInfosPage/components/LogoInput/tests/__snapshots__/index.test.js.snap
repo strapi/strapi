@@ -126,8 +126,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
@@ -419,7 +417,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c51[aria-disabled='true'] svg > g,.c51[aria-disabled='true'] svg path {
+.c51[aria-disabled='true'] svg > g,
+.c51[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -432,7 +431,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c51[aria-disabled='true']:active svg > g,.c51[aria-disabled='true']:active svg path {
+.c51[aria-disabled='true']:active svg > g,
+.c51[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -471,7 +471,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c55[aria-disabled='true'] svg > g,.c55[aria-disabled='true'] svg path {
+.c55[aria-disabled='true'] svg > g,
+.c55[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -484,7 +485,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #666687;
 }
 
-.c55[aria-disabled='true']:active svg > g,.c55[aria-disabled='true']:active svg path {
+.c55[aria-disabled='true']:active svg > g,
+.c55[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -539,19 +541,22 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   margin: 0;
 }
 
-.c17 svg > g,
+.c17 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c17 svg g,
 .c17 svg path {
   fill: #8e8ea9;
 }
 
-.c17:hover svg > g,
-.c17:hover svg path {
+.c17:hover svg g,
+.c17:focus svg g,
+.c17:hover svg path,
+.c17:focus svg path {
   fill: #666687;
-}
-
-.c17:active svg > g,
-.c17:active svg path {
-  fill: #a5a5ba;
 }
 
 .c17[aria-disabled='true'] svg path {
@@ -1091,8 +1096,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
@@ -1321,7 +1324,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c47[aria-disabled='true'] svg > g,.c47[aria-disabled='true'] svg path {
+.c47[aria-disabled='true'] svg > g,
+.c47[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1334,7 +1338,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c47[aria-disabled='true']:active svg > g,.c47[aria-disabled='true']:active svg path {
+.c47[aria-disabled='true']:active svg > g,
+.c47[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1373,7 +1378,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
+.c46[aria-disabled='true'] svg > g,
+.c46[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -1386,7 +1392,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
+.c46[aria-disabled='true']:active svg > g,
+.c46[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -1502,19 +1509,22 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c17 svg > g,
+.c17 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c17 svg g,
 .c17 svg path {
   fill: #8e8ea9;
 }
 
-.c17:hover svg > g,
-.c17:hover svg path {
+.c17:hover svg g,
+.c17:focus svg g,
+.c17:hover svg path,
+.c17:focus svg path {
   fill: #666687;
-}
-
-.c17:active svg > g,
-.c17:active svg path {
-  fill: #a5a5ba;
 }
 
 .c17[aria-disabled='true'] svg path {
@@ -1976,8 +1986,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
@@ -2122,19 +2130,22 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   align-items: center;
 }
 
-.c16 svg > g,
+.c16 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c16 svg g,
 .c16 svg path {
   fill: #8e8ea9;
 }
 
-.c16:hover svg > g,
-.c16:hover svg path {
+.c16:hover svg g,
+.c16:focus svg g,
+.c16:hover svg path,
+.c16:focus svg path {
   fill: #666687;
-}
-
-.c16:active svg > g,
-.c16:active svg path {
-  fill: #a5a5ba;
 }
 
 .c16[aria-disabled='true'] svg path {

@@ -1,9 +1,22 @@
 import type { ReadStream } from 'node:fs';
 import { getOr } from 'lodash/fp';
-import AWS from 'aws-sdk';
-import { isUrlFromBucket } from './utils';
+import {
+  S3Client,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  DeleteObjectCommandOutput,
+  PutObjectCommandInput,
+  CompleteMultipartUploadCommandOutput,
+  AbortMultipartUploadCommandOutput,
+  S3ClientConfig,
+  ObjectCannedACL,
+} from '@aws-sdk/client-s3';
+import type { AwsCredentialIdentity } from '@aws-sdk/types';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Upload } from '@aws-sdk/lib-storage';
+import { extractCredentials, isUrlFromBucket } from './utils';
 
-interface File {
+export interface File {
   name: string;
   alternativeText?: string;
   caption?: string;
@@ -23,120 +36,119 @@ interface File {
   buffer?: Buffer;
 }
 
-// TODO V5: Migrate to aws-sdk v3
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+export type UploadCommandOutput = (
+  | CompleteMultipartUploadCommandOutput
+  | AbortMultipartUploadCommandOutput
+) & {
+  Location: string;
+};
 
-function hasUrlProtocol(url: string) {
-  // Regex to test protocol like "http://", "https://"
-  return /^\w*:\/\//.test(url);
+export interface AWSParams {
+  Bucket: string; // making it required
+  ACL?: ObjectCannedACL;
+  signedUrlExpires?: number;
 }
 
-interface InitOptions extends Partial<AWS.S3.ClientConfiguration> {
+export interface DefaultOptions extends S3ClientConfig {
+  // TODO Remove this in V5
+  accessKeyId?: AwsCredentialIdentity['accessKeyId'];
+  secretAccessKey?: AwsCredentialIdentity['secretAccessKey'];
+  // Keep this for V5
+  credentials?: AwsCredentialIdentity;
+  params?: AWSParams;
+  [k: string]: any;
+}
+
+export type InitOptions = (DefaultOptions | { s3Options: DefaultOptions }) & {
   baseUrl?: string;
   rootPath?: string;
-  s3Options: AWS.S3.ClientConfiguration & {
-    params: {
-      Bucket: string; // making it required
-      ACL?: string;
-      signedUrlExpires?: string;
-    };
+  [k: string]: any;
+};
+
+const assertUrlProtocol = (url: string) => {
+  // Regex to test protocol like "http://", "https://"
+  return /^\w*:\/\//.test(url);
+};
+
+const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) => {
+  if (Object.keys(legacyS3Options).length > 0) {
+    process.emitWarning(
+      "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
+    );
+  }
+  const credentials = extractCredentials({ s3Options, ...legacyS3Options });
+  const config = {
+    ...s3Options,
+    ...legacyS3Options,
+    ...(credentials ? { credentials } : {}),
   };
-}
 
-export = {
+  config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
+
+  return config;
+};
+
+export default {
   init({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) {
-    if (Object.keys(legacyS3Options).length > 0) {
-      process.emitWarning(
-        "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
-      );
-    }
-
-    const config = { ...s3Options, ...legacyS3Options };
-
-    const S3 = new AWS.S3({
-      apiVersion: '2006-03-01',
-      ...config,
-    });
-
+    // TODO V5 change config structure to avoid having to do this
+    const config = getConfig({ baseUrl, rootPath, s3Options, ...legacyS3Options });
+    const s3Client = new S3Client(config);
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
     const getFileKey = (file: File) => {
       const path = file.path ? `${file.path}/` : '';
-
       return `${filePrefix}${path}${file.hash}${file.ext}`;
     };
 
-    const ACL = getOr('public-read', ['params', 'ACL'], config);
-
-    const upload = (file: File, customParams = {}): Promise<void> =>
-      new Promise((resolve, reject) => {
-        const fileKey = getFileKey(file);
-
-        if (!file.stream && !file.buffer) {
-          reject(new Error('Missing file stream or buffer'));
-          return;
-        }
-
-        const params = {
-          Key: fileKey,
+    const upload = async (file: File, customParams: Partial<PutObjectCommandInput> = {}) => {
+      const fileKey = getFileKey(file);
+      const uploadObj = new Upload({
+        client: s3Client,
+        params: {
           Bucket: config.params.Bucket,
-          Body: file.stream || file.buffer,
-          ACL,
+          Key: fileKey,
+          Body: file.stream || Buffer.from(file.buffer as any, 'binary'),
+          ACL: config.params.ACL,
           ContentType: file.mime,
           ...customParams,
-        };
-
-        const onUploaded = (err: Error, data: AWS.S3.ManagedUpload.SendData) => {
-          if (err) {
-            return reject(err);
-          }
-
-          // set the bucket file url
-          if (baseUrl) {
-            // Construct the url with the baseUrl
-            file.url = `${baseUrl}/${fileKey}`;
-          } else {
-            // Add the protocol if it is missing
-            // Some providers like DigitalOcean Spaces return the url without the protocol
-            file.url = hasUrlProtocol(data.Location) ? data.Location : `https://${data.Location}`;
-          }
-          resolve();
-        };
-
-        S3.upload(params, onUploaded);
+        },
       });
+
+      const upload = (await uploadObj.done()) as UploadCommandOutput;
+
+      if (assertUrlProtocol(upload.Location)) {
+        file.url = baseUrl ? `${baseUrl}/${fileKey}` : upload.Location;
+      } else {
+        // Default protocol to https protocol
+        file.url = `https://${upload.Location}`;
+      }
+    };
 
     return {
       isPrivate() {
-        return ACL === 'private';
+        return config.params.ACL === 'private';
       },
-      async getSignedUrl(file: File): Promise<{ url: string }> {
+
+      async getSignedUrl(file: File, customParams: any): Promise<{ url: string }> {
         // Do not sign the url if it does not come from the same bucket.
         if (!isUrlFromBucket(file.url, config.params.Bucket, baseUrl)) {
           return { url: file.url };
         }
+        const fileKey = getFileKey(file);
 
-        const signedUrlExpires: string = getOr(15 * 60, ['params', 'signedUrlExpires'], config); // 15 minutes
+        const url = await getSignedUrl(
+          s3Client,
+          new GetObjectCommand({
+            Bucket: config.params.Bucket,
+            Key: fileKey,
+            ...customParams,
+          }),
+          {
+            expiresIn: getOr(15 * 60, ['params', 'signedUrlExpires'], config),
+          }
+        );
 
-        return new Promise((resolve, reject) => {
-          const fileKey = getFileKey(file);
-
-          S3.getSignedUrl(
-            'getObject',
-            {
-              Bucket: config.params.Bucket,
-              Key: fileKey,
-              Expires: parseInt(signedUrlExpires, 10),
-            },
-            (err, url) => {
-              if (err) {
-                return reject(err);
-              }
-              resolve({ url });
-            }
-          );
-        });
+        return { url };
       },
       uploadStream(file: File, customParams = {}) {
         return upload(file, customParams);
@@ -144,25 +156,13 @@ export = {
       upload(file: File, customParams = {}) {
         return upload(file, customParams);
       },
-      delete(file: File, customParams = {}): Promise<void> {
-        return new Promise((resolve, reject) => {
-          // delete file on S3 bucket
-          const fileKey = getFileKey(file);
-          S3.deleteObject(
-            {
-              Key: fileKey,
-              Bucket: config.params.Bucket,
-              ...customParams,
-            },
-            (err) => {
-              if (err) {
-                return reject(err);
-              }
-
-              resolve();
-            }
-          );
+      delete(file: File, customParams = {}): Promise<DeleteObjectCommandOutput> {
+        const command = new DeleteObjectCommand({
+          Bucket: config.params.Bucket,
+          Key: getFileKey(file),
+          ...customParams,
         });
+        return s3Client.send(command);
       },
     };
   },

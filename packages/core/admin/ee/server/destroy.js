@@ -1,6 +1,6 @@
 'use strict';
 
-const { features } = require('@strapi/strapi/lib/utils/ee');
+const { features } = require('@strapi/strapi/dist/utils/ee');
 const executeCEDestroy = require('../../server/destroy');
 
 module.exports = async ({ strapi }) => {

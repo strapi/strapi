@@ -1,6 +1,6 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
-    
+
     "compilerOptions": {
         "module": "CommonJS",
         "moduleResolution": "Node",
@@ -14,6 +14,7 @@
         "incremental": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "noEmitOnError": true
+        "noEmitOnError": true,
+        "noImplicitThis": true
     }
 }

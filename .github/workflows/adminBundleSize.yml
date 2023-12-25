@@ -22,7 +22,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v3
         with:
@@ -31,8 +31,12 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
 
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
       - uses: preactjs/compressed-size-action@v2
         with:
+          build-script: 'build:size'
           pattern: '**/build/**/*.{js,css,html,svg}'
           strip-hash: "\\.(?:(\\w{8})\\.chunk)|(?:\\.(\\w{8}))"
           minimum-change-threshold: 10

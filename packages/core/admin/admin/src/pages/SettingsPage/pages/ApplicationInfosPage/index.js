@@ -29,9 +29,9 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
-import { useConfigurations } from '../../../../hooks';
+import { useConfiguration } from '../../../../contexts/configuration';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../App/selectors';
+import { selectAdminPermissions } from '../../../../selectors';
 
 import CustomizationInfos from './components/CustomizationInfos';
 import getFormData from './utils/getFormData';
@@ -44,7 +44,7 @@ const ApplicationInfosPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { get, post } = useFetchClient();
-  const { updateProjectSettings } = useConfigurations();
+  const { updateProjectSettings } = useConfiguration();
   const permissions = useSelector(selectAdminPermissions);
   const { formatAPIError } = useAPIErrorHandler();
 
@@ -61,7 +61,7 @@ const ApplicationInfosPage = () => {
     async () =>
       (
         await import(
-          '../../../../../../ee/admin/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
   );

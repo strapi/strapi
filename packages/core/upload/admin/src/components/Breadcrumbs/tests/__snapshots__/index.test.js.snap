@@ -13,6 +13,26 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   width: 1px;
 }
 
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c12 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c4 {
   padding-right: 4px;
   padding-left: 4px;
@@ -36,26 +56,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   padding-right: 8px;
   padding-bottom: 4px;
   padding-left: 8px;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c12 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c0 {
@@ -99,26 +99,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c1:first-child {
-  margin-left: calc(-1*8px);
-}
-
-.c3 {
-  border-radius: 4px;
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.43;
-  padding: 4px 8px;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.c3:hover,
-.c3:focus {
-  background-color: #dcdce4;
-  color: #4a4a6a;
 }
 
 .c9 {
@@ -190,7 +170,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #666687;
 }
 
-.c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
+.c10[aria-disabled='true'] svg > g,
+.c10[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -203,7 +184,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #666687;
 }
 
-.c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
+.c10[aria-disabled='true']:active svg > g,
+.c10[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -223,6 +205,26 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 .c10 svg > g,
 .c10 svg path {
   fill: #8e8ea9;
+}
+
+.c1:first-child {
+  margin-left: calc(-1*8px);
+}
+
+.c3 {
+  border-radius: 4px;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.43;
+  padding: 4px 8px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c3:hover,
+.c3:focus {
+  background-color: #dcdce4;
+  color: #4a4a6a;
 }
 
 .c11 {
@@ -272,7 +274,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Get more ascendants folders"
-          class="c7 c8 c9 c10 c11 sc-hGnimi c10"
+          class="c7 c8 c9 c10 c11 sc-iwjdpV c10"
           data-state="closed"
           id="radix-:r1:"
           label="..."

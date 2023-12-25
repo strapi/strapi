@@ -8,8 +8,8 @@ module.exports = async () => {
     strapi.webhookStore.addAllowedEvent(key, value);
   });
 
+  getService('field-sizes').setCustomFieldInputSizes();
   await getService('components').syncConfigurations();
   await getService('content-types').syncConfigurations();
   await getService('permission').registerPermissions();
-  getService('field-sizes').setCustomFieldInputSizes();
 };

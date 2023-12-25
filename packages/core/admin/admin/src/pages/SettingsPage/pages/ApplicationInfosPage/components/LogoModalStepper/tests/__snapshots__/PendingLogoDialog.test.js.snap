@@ -279,7 +279,8 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   color: #666687;
 }
 
-.c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
+.c10[aria-disabled='true'] svg > g,
+.c10[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -292,7 +293,8 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   color: #666687;
 }
 
-.c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
+.c10[aria-disabled='true']:active svg > g,
+.c10[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -343,7 +345,8 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   color: #666687;
 }
 
-.c31[aria-disabled='true'] svg > g,.c31[aria-disabled='true'] svg path {
+.c31[aria-disabled='true'] svg > g,
+.c31[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -356,7 +359,8 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active svg > g,.c31[aria-disabled='true']:active svg path {
+.c31[aria-disabled='true']:active svg > g,
+.c31[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -395,7 +399,8 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   color: #666687;
 }
 
-.c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,
+.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -408,7 +413,8 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   color: #666687;
 }
 
-.c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,
+.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 

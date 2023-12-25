@@ -78,7 +78,6 @@ import { createComponentUid, createUid } from './utils/createUid';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
-
 const FormModal = () => {
   const {
     onCloseModal,

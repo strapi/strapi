@@ -5,7 +5,7 @@ const { isSsoLocked } = require('../sso-lock');
 // allow toggling the feature within tests
 let ssoEnabled = true;
 
-jest.mock('@strapi/strapi/ee', () => {
+jest.mock('@strapi/strapi/dist/utils/ee', () => {
   return {
     features: {
       isEnabled() {

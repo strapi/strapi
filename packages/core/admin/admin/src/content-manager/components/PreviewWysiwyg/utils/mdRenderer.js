@@ -12,7 +12,7 @@ import sub from 'markdown-it-sub';
 import sup from 'markdown-it-sup';
 
 const loadCss = async () => {
-  await import(/* webpackChunkName: "highlight.js" */ 'highlight.js/styles/solarized-dark.css');
+  await import('highlight.js/styles/solarized-dark.css');
 };
 
 loadCss();
