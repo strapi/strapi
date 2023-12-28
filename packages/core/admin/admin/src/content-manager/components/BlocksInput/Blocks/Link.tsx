@@ -57,17 +57,12 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       setIsSaveDisabled(false);
       setLinkUrl(e.target.value);
 
-      const delayValidation = setTimeout(() => {
-        try {
-          // eslint-disable-next-line no-new
-          new URL(e.target.value);
-        } catch (error) {
-          e.preventDefault();
-          setIsSaveDisabled(true);
-        }
-      }, 500);
-
-      return () => clearTimeout(delayValidation);
+      try {
+        // eslint-disable-next-line no-new
+        new URL(e.target.value);
+      } catch (error) {
+        setIsSaveDisabled(true);
+      }
     };
 
     const handleSave: React.FormEventHandler = (e) => {
