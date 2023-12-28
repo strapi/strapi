@@ -53,7 +53,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       setShowRemoveButton(true);
     };
 
-    const onLinkChange: React.FormEventHandler = (e) => {
+    const onLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setIsSaveDisabled(false);
       setLinkUrl(e.target.value);
 
