@@ -8,15 +8,21 @@ import styled from 'styled-components';
 
 import { getTranslation } from '../../utils/translations';
 
+import { useBlocksEditorContext } from './BlocksEditor';
+
 const CollapseIconButton = styled(IconButton)`
   position: absolute;
   bottom: ${pxToRem(12)};
   right: ${pxToRem(12)};
 `;
 
+const ExpandWrapper = styled(Flex)`
+  // Background with 20% opacity
+  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
+`;
+
 interface EditorLayoutProps {
   children: React.ReactNode;
-  isExpandMode: boolean;
   error?: string;
   onCollapse: () => void;
   disabled: boolean;
@@ -25,20 +31,20 @@ interface EditorLayoutProps {
 
 const EditorLayout = ({
   children,
-  isExpandMode,
   error,
   disabled,
   onCollapse,
   ariaDescriptionId,
 }: EditorLayoutProps) => {
   const { formatMessage } = useIntl();
+  const { isExpandedMode } = useBlocksEditorContext('editorLayout');
 
-  useLockScroll({ lockScroll: isExpandMode });
+  useLockScroll({ lockScroll: isExpandedMode });
 
-  if (isExpandMode) {
+  if (isExpandedMode) {
     return (
       <Portal role="dialog" aria-modal={false}>
-        <FocusTrap onEscape={onCollapse} skipAutoFocus>
+        <FocusTrap onEscape={onCollapse}>
           <ExpandWrapper
             position="fixed"
             top={0}
@@ -48,7 +54,6 @@ const EditorLayout = ({
             zIndex={4}
             justifyContent="center"
             onClick={onCollapse}
-            data-testid="blocks-expand"
           >
             <Box
               background="neutral0"
@@ -96,13 +101,4 @@ const EditorLayout = ({
   );
 };
 
-const ExpandWrapper = styled(Flex)`
-  // Background with 10% opacity
-  background: ${({ theme }) =>
-    `${theme.colors.neutral900}${Math.floor(0.1 * 255)
-      .toString(16)
-      .padStart(2, '0')}`};
-`;
-
 export { EditorLayout };
-export type { EditorLayoutProps };

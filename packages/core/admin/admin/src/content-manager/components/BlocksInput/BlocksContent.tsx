@@ -18,7 +18,7 @@ import { type ModifiersStore } from './Modifiers';
 import { getAttributesToClear } from './utils/conversions';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
-const StyledEditable = styled(Editable)<{ isExpandMode: boolean }>`
+const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
   outline: none;
   display: flex;
@@ -26,7 +26,7 @@ const StyledEditable = styled(Editable)<{ isExpandMode: boolean }>`
   gap: ${({ theme }) => theme.spaces[3]};
   height: 100%;
   // For fullscreen align input in the center with fixed width
-  width: ${(props) => (props.isExpandMode ? '512px' : '100%')};
+  width: ${(props) => (props.isExpandedMode ? '512px' : '100%')};
   margin: auto;
 
   > *:last-child {
@@ -392,11 +392,10 @@ const baseRenderElement = ({
 
 interface BlocksInputProps {
   placeholder?: string;
-  isExpandMode: boolean;
 }
 
-const BlocksContent = ({ placeholder, isExpandMode }: BlocksInputProps) => {
-  const { editor, disabled, blocks, modifiers, setLiveText } =
+const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
@@ -624,7 +623,7 @@ const BlocksContent = ({ placeholder, isExpandMode }: BlocksInputProps) => {
       <StyledEditable
         readOnly={disabled}
         placeholder={placeholder}
-        isExpandMode={isExpandMode}
+        isExpandedMode={isExpandedMode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

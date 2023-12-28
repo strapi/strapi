@@ -95,21 +95,22 @@ describe('BlocksInput', () => {
   });
 
   it('should open editor expand portal when clicking on expand button', async () => {
-    const { queryByTestId } = setup({ value: blocksData });
+    const { queryByText } = setup({ value: blocksData });
 
-    expect(queryByTestId('blocks-expand')).not.toBeInTheDocument();
+    expect(queryByText('Collapse')).not.toBeInTheDocument();
 
-    await user.click(screen.getByText('Expand'));
-
-    expect(screen.getByTestId('blocks-expand')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Expand/ }));
+    expect(screen.getByRole('button', { name: /Collapse/ })).toBeInTheDocument();
   });
 
   it('should close editor expand portal when clicking on collapse button', async () => {
-    const { queryByTestId } = setup({ value: blocksData });
+    const { queryByText } = setup({ value: blocksData });
 
-    await user.click(screen.getByText('Expand'));
-    await user.click(screen.getByText('Collapse'));
+    await user.click(screen.getByRole('button', { name: /Expand/ }));
+    const collapseButton = screen.getByRole('button', { name: /Collapse/ });
+    expect(collapseButton).toBeInTheDocument();
 
-    expect(queryByTestId('wysiwyg-expand')).not.toBeInTheDocument();
+    await user.click(collapseButton);
+    expect(queryByText('Collapse')).not.toBeInTheDocument();
   });
 });

@@ -87,6 +87,7 @@ interface BlocksEditorContextValue {
   disabled: boolean;
   name: string;
   setLiveText: (text: string) => void;
+  isExpandedMode: boolean;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -178,14 +179,14 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
-    const [isExpandMode, setIsExpandMode] = React.useState(false);
+    const [isExpandedMode, setIsExpandedMode] = React.useState(false);
 
     const formattedPlaceholder =
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
 
     const handleToggleExpand = () => {
-      setIsExpandMode((prev) => !prev);
+      setIsExpandedMode((prev) => !prev);
     };
 
     /**
@@ -250,9 +251,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             disabled={disabled}
             name={name}
             setLiveText={setLiveText}
+            isExpandedMode={isExpandedMode}
           >
             <EditorLayout
-              isExpandMode={isExpandMode}
               error={error}
               disabled={disabled}
               onCollapse={handleToggleExpand}
@@ -260,8 +261,8 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent placeholder={formattedPlaceholder} isExpandMode={isExpandMode} />
-              {!isExpandMode && (
+              <BlocksContent placeholder={formattedPlaceholder} />
+              {!isExpandedMode && (
                 <ExpandIconButton
                   aria-label={formatMessage({
                     id: getTranslation('components.Blocks.expand'),
