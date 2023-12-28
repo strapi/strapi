@@ -402,15 +402,6 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
 
-  // Set the selection back to editor when editor is rendered in expand mode
-  React.useEffect(() => {
-    if (editor.selection) {
-      ReactEditor.focus(editor);
-      Transforms.select(editor, editor.selection);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
     (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
