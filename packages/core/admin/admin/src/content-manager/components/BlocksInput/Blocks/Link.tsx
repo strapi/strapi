@@ -8,7 +8,6 @@ import {
   FieldLabel,
   Flex,
   Popover,
-  FieldError,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
@@ -46,7 +45,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const [linkUrl, setLinkUrl] = React.useState(link.url);
     const linkInputRef = React.useRef<HTMLInputElement>(null);
     const [showRemoveButton, setShowRemoveButton] = React.useState(false);
-    const [invalidLinkError, setInvalidLinkError] = React.useState('');
+    const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
 
     const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
       e.preventDefault();
@@ -54,32 +53,35 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       setShowRemoveButton(true);
     };
 
+    const onLinkChange: React.FormEventHandler = (e) => {
+      setIsSaveDisabled(false);
+      setLinkUrl(e.target.value);
+
+      const delayValidation = setTimeout(() => {
+        try {
+          // eslint-disable-next-line no-new
+          new URL(e.target.value);
+        } catch (error) {
+          e.preventDefault();
+          setIsSaveDisabled(true);
+        }
+      }, 500);
+
+      return () => clearTimeout(delayValidation);
+    };
+
     const handleSave: React.FormEventHandler = (e) => {
       e.stopPropagation();
 
-      try {
-        // eslint-disable-next-line no-new
-        new URL(linkUrl);
-
-        // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
-        if (editor.selection && Range.isCollapsed(editor.selection)) {
-          const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
-          Transforms.select(editor, parentPath);
-        }
-
-        editLink(editor, { url: linkUrl, text: linkText });
-        setPopoverOpen(false);
-        editor.lastInsertedLinkPath = null;
-      } catch (error) {
-        e.preventDefault();
-
-        setInvalidLinkError(
-          formatMessage({
-            id: 'components.Blocks.popover.link.error',
-            defaultMessage: 'Please enter valid link',
-          })
-        );
+      // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
+      if (editor.selection && Range.isCollapsed(editor.selection)) {
+        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+        Transforms.select(editor, parentPath);
       }
+
+      editLink(editor, { url: linkUrl, text: linkText });
+      setPopoverOpen(false);
+      editor.lastInsertedLinkPath = null;
     };
 
     const handleDismiss = () => {
@@ -92,12 +94,12 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       ReactEditor.focus(editor);
     };
 
-    const composedRefs = composeRefs(linkRef, forwardedRef);
-
-    const isSaveDisabled =
+    const inputNotDirty =
       !linkText ||
       !linkUrl ||
       (link.url && link.url === linkUrl && elementText && elementText === linkText);
+
+    const composedRefs = composeRefs(linkRef, forwardedRef);
 
     React.useEffect(() => {
       // Focus on the link input element when the popover opens
@@ -139,7 +141,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   />
                 </Flex>
               </Field>
-              <Field width="368px" error={invalidLinkError}>
+              <Field width="368px">
                 <Flex direction="column" gap={1} alignItems="stretch">
                   <FieldLabel>
                     {formatMessage({
@@ -152,12 +154,8 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                     name="url"
                     placeholder="https://strapi.io"
                     value={linkUrl}
-                    onChange={(e) => {
-                      setInvalidLinkError('');
-                      setLinkUrl(e.target.value);
-                    }}
+                    onChange={onLinkChange}
                   />
-                  <FieldError />
                 </Flex>
               </Field>
               <Flex justifyContent="space-between" width="100%">
@@ -178,7 +176,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                       defaultMessage: 'Cancel',
                     })}
                   </Button>
-                  <Button type="submit" disabled={Boolean(isSaveDisabled)}>
+                  <Button type="submit" disabled={Boolean(inputNotDirty) || isSaveDisabled}>
                     {formatMessage({
                       id: 'components.Blocks.popover.save',
                       defaultMessage: 'Save',
