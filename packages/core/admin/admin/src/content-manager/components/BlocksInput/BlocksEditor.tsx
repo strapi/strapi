@@ -1,7 +1,9 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { InputWrapper, Divider, VisuallyHidden } from '@strapi/design-system';
+import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Expand } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
@@ -20,6 +22,7 @@ import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
@@ -109,6 +112,12 @@ const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
 
+const ExpandIconButton = styled(IconButton)`
+  position: absolute;
+  bottom: ${pxToRem(12)};
+  right: ${pxToRem(12)};
+`;
+
 /**
  * Forces an update of the Slate editor when the value prop changes from outside of Slate.
  * The root cause is that Slate is not a controlled component: https://github.com/ianstormtaylor/slate/issues/4612
@@ -169,10 +178,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
+    const [isExpandMode, setIsExpandMode] = React.useState(false);
 
     const formattedPlaceholder =
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
+
+    const handleToggleExpand = () => {
+      setIsExpandMode((prev) => !prev);
+    };
 
     /**
      * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
@@ -237,19 +251,28 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             name={name}
             setLiveText={setLiveText}
           >
-            <InputWrapper
-              direction="column"
-              alignItems="flex-start"
-              height="512px"
+            <EditorLayout
+              isExpandMode={isExpandMode}
+              error={error}
               disabled={disabled}
-              hasError={Boolean(error)}
-              style={{ overflow: 'hidden' }}
-              aria-describedby={ariaDescriptionId}
+              onCollapse={handleToggleExpand}
+              ariaDescriptionId={ariaDescriptionId}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent placeholder={formattedPlaceholder} />
-            </InputWrapper>
+              <BlocksContent placeholder={formattedPlaceholder} isExpandMode={isExpandMode} />
+              {!isExpandMode && (
+                <ExpandIconButton
+                  aria-label={formatMessage({
+                    id: getTranslation('components.Blocks.expand'),
+                    defaultMessage: 'Expand',
+                  })}
+                  onClick={handleToggleExpand}
+                >
+                  <Expand />
+                </ExpandIconButton>
+              )}
+            </EditorLayout>
           </BlocksEditorProvider>
         </Slate>
       </>

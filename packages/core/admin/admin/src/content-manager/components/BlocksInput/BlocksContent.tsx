@@ -18,13 +18,16 @@ import { type ModifiersStore } from './Modifiers';
 import { getAttributesToClear } from './utils/conversions';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
-const StyledEditable = styled(Editable)`
+const StyledEditable = styled(Editable)<{ isExpandMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
   outline: none;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spaces[3]};
   height: 100%;
+  // For fullscreen align input in the center with fixed width
+  width: ${(props) => (props.isExpandMode ? '512px' : '100%')};
+  margin: auto;
 
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
@@ -389,15 +392,25 @@ const baseRenderElement = ({
 
 interface BlocksInputProps {
   placeholder?: string;
+  isExpandMode: boolean;
 }
 
-const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder, isExpandMode }: BlocksInputProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText } =
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
+
+  // Set the selection back to editor when editor is rendered in expand mode
+  React.useEffect(() => {
+    if (editor.selection) {
+      ReactEditor.focus(editor);
+      Transforms.select(editor, editor.selection);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -611,6 +624,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       <StyledEditable
         readOnly={disabled}
         placeholder={placeholder}
+        isExpandMode={isExpandMode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

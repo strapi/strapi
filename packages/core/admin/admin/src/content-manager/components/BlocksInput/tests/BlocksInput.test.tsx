@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
@@ -10,6 +11,8 @@ import { IntlProvider } from 'react-intl';
 import { BlocksInput } from '../BlocksInput';
 
 import { blocksData } from './mock-schema';
+
+const user = userEvent.setup();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -89,5 +92,24 @@ describe('BlocksInput', () => {
     expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
 
     expect(screen.getByRole('img')).toBeInTheDocument();
+  });
+
+  it('should open editor expand portal when clicking on expand button', async () => {
+    const { queryByTestId } = setup({ value: blocksData });
+
+    expect(queryByTestId('blocks-expand')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('Expand'));
+
+    expect(screen.getByTestId('blocks-expand')).toBeInTheDocument();
+  });
+
+  it('should close editor expand portal when clicking on collapse button', async () => {
+    const { queryByTestId } = setup({ value: blocksData });
+
+    await user.click(screen.getByText('Expand'));
+    await user.click(screen.getByText('Collapse'));
+
+    expect(queryByTestId('wysiwyg-expand')).not.toBeInTheDocument();
   });
 });
