@@ -54,7 +54,6 @@
     "check": "node -r esbuild-register scripts/check",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test": "test:ts && test:unit",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
