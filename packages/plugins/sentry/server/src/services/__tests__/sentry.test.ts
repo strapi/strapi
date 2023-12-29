@@ -1,35 +1,36 @@
-'use strict';
+import Sentry, { type NodeOptions } from '@sentry/node';
+
+import sentryServiceLoader from '../sentry';
+import defaultConfig from '../../config';
 
 const INVALID_DSN = 'an_invalid_dsn';
 const VALID_DSN = 'a_valid_dsn';
-const mockCaptureException = jest.fn();
 
-// FIXME
-/* eslint-disable import/extensions */
 jest.mock('@sentry/node', () => {
   return {
-    init(options = {}) {
+    init(options: NodeOptions = {}) {
       if (options.dsn !== VALID_DSN) {
-        throw Error();
+        throw Error('invalid dsn');
       }
     },
-    captureException: mockCaptureException,
-    withScope(configureScope) {
+    captureException: jest.fn(),
+    withScope(configureScope: () => void) {
       configureScope();
     },
   };
 });
-
-const sentryServiceLoader = require('../sentry');
-const defaultConfig = require('../../config').default;
 
 describe('Sentry service', () => {
   beforeEach(() => {
     // Reset Strapi state
     global.strapi = {
       config: {
+        // @ts-expect-error - ignore the generic type
         get: () => defaultConfig,
+        set: jest.fn(),
+        has: jest.fn(),
       },
+      // @ts-expect-error - we only need a subset of the strapi log object
       log: {
         warn: jest.fn(),
         info: jest.fn(),
@@ -52,6 +53,7 @@ describe('Sentry service', () => {
   });
 
   it('disables Sentry when an invalid DSN is provided', () => {
+    // @ts-expect-error - ignore the generic type
     global.strapi.config.get = () => ({ dsn: INVALID_DSN });
     const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
@@ -68,6 +70,7 @@ describe('Sentry service', () => {
   });
 
   it('initializes and sends errors', () => {
+    // @ts-expect-error - ignore the generic type
     global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: true });
     const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
@@ -84,11 +87,13 @@ describe('Sentry service', () => {
     const configureScope = jest.fn();
     sentryService.sendError(error, configureScope);
     expect(configureScope).toHaveBeenCalled();
-    expect(mockCaptureException).toHaveBeenCalled();
+    const captureExceptionSpy = jest.spyOn(Sentry, 'captureException');
+    expect(captureExceptionSpy).toHaveBeenCalled();
   });
 
-  it('does not not send metadata when the option is disabled', () => {
+  it('does not send metadata when the option is disabled', () => {
     // Init with metadata option disabled
+    // @ts-expect-error - ignore the generic type
     global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: false });
     const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
