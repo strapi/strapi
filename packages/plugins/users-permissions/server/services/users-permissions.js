@@ -112,7 +112,7 @@ module.exports = ({ strapi }) => ({
         }
 
         return route;
-      }).filter((route) => route.info.type === 'content-api');
+      }).filter((route) => route.info && route.info.type === 'content-api');
 
       if (routes.length === 0) {
         return;
