@@ -67,7 +67,6 @@ const authService = adminApi.injectEndpoints({
         method: 'POST',
         url: '/admin/logout',
       }),
-      invalidatesTags: ['Me'],
     }),
     resetPassword: builder.mutation<ResetPassword.Response['data'], ResetPassword.Request['body']>({
       query: (body) => ({
