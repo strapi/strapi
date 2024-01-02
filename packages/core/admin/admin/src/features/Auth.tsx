@@ -115,6 +115,24 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     auth.setToken(token, false);
   }, [token]);
 
+  React.useEffect(() => {
+    /**
+     * This will log a user out of all tabs if they log out in one tab.
+     */
+    const handleUserStorageChange = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEYS.USER && event.newValue === null) {
+        clearStorage();
+        push('/auth/login');
+      }
+    };
+
+    window.addEventListener('storage', handleUserStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleUserStorageChange);
+    };
+  });
+
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {
       const res = await loginMutation(body);
