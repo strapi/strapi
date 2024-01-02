@@ -1,18 +1,17 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import {
-  prefixFileUrlWithBackendUrl,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { AxiosError } from 'axios';
+import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { UseMutateFunction, useMutation, useQuery } from 'react-query';
 
-import { GetProjectSettings, UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { UpdateProjectSettings } from '../../../shared/contracts/admin';
+import {
+  ConfigurationLogo,
+  useProjectSettingsQuery,
+  useUpdateProjectSettingsMutation,
+} from '../services/admin';
+
+import { useAuth } from './Auth';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Context
@@ -31,14 +30,6 @@ interface UpdateProjectSettingsBody {
     | null;
 }
 
-interface ConfigurationLogo {
-  custom?: {
-    name?: string;
-    url?: string;
-  };
-  default: string;
-}
-
 interface ConfigurationContextValue {
   logos: {
     auth: ConfigurationLogo;
@@ -46,11 +37,7 @@ interface ConfigurationContextValue {
   };
   showTutorials: boolean;
   showReleaseNotification: boolean;
-  updateProjectSettings: UseMutateFunction<
-    { menuLogo: boolean; authLogo: boolean },
-    AxiosError<Required<UpdateProjectSettings.Response>>,
-    UpdateProjectSettingsBody
-  >;
+  updateProjectSettings: (body: UpdateProjectSettingsBody) => Promise<void>;
 }
 
 /**
@@ -86,60 +73,17 @@ const ConfigurationProvider = ({
 }: ConfigurationProviderProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { get, post } = useFetchClient();
   const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const token = useAuth('ConfigurationProvider', (state) => state.token);
 
-  const { data, refetch, isSuccess } = useQuery<
-    GetProjectSettings.Response,
-    GetProjectSettings.Response,
-    {
-      [K in keyof Logos]?: ConfigurationProviderProps['authLogo']['custom'];
-    }
-  >(
-    ['project-settings'],
-    async () => {
-      const { data, status } = await get<GetProjectSettings.Response>('/admin/project-settings', {
-        /**
-         * needed because the interceptors of the fetchClient redirect to
-         * /login when receive a 401 and it would end up in an infinite
-         * loop when the user doesn't have a session.
-         */
-        validateStatus: (status) => status < 500,
-      });
+  const { data, isSuccess } = useProjectSettingsQuery(undefined, {
+    skip: !token,
+  });
 
-      /**
-       * However, we do need to know that the query failed. Because then
-       * we want to fallback to our defaults.
-       */
-      if (status === 401) {
-        throw new Error('Unauthenticated');
-      }
+  const [updateProjectSettingsMutation] = useUpdateProjectSettingsMutation();
 
-      return data;
-    },
-    {
-      retry: false,
-      select(data) {
-        return {
-          authLogo: data.authLogo
-            ? {
-                name: data.authLogo.name,
-                url: prefixFileUrlWithBackendUrl(data.authLogo.url),
-              }
-            : undefined,
-          menuLogo: data.menuLogo
-            ? {
-                name: data.menuLogo.name,
-                url: prefixFileUrlWithBackendUrl(data.menuLogo.url),
-              }
-            : undefined,
-        };
-      },
-    }
-  );
-
-  const { mutate } = useMutation(
+  const updateProjectSettings = React.useCallback(
     async (body: UpdateProjectSettingsBody) => {
       const formData = new FormData();
 
@@ -156,42 +100,19 @@ const ConfigurationProvider = ({
         }
       });
 
-      const { data } = await post<UpdateProjectSettings.Response>(
-        '/admin/project-settings',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const res = await updateProjectSettingsMutation(formData);
 
-      /**
-       * cooerce the response to a boolean so we can decide
-       * if we need to send events in the `onSuccess` handler
-       */
-      return {
-        menuLogo: !!data.menuLogo && !!body.menuLogo?.rawFile,
-        authLogo: !!data.authLogo && !!body.menuLogo?.rawFile,
-      };
-    },
-    {
-      onError(error: AxiosError<Required<UpdateProjectSettings.Response>>) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-      async onSuccess(data) {
-        const { menuLogo, authLogo } = data;
+      if ('data' in res) {
+        const updatedMenuLogo = !!res.data.menuLogo && !!body.menuLogo?.rawFile;
+        const updatedAuthLogo = !!res.data.authLogo && !!body.authLogo?.rawFile;
 
-        if (menuLogo) {
+        if (updatedMenuLogo) {
           trackUsage('didChangeLogo', {
             logo: 'menu',
           });
         }
 
-        if (authLogo) {
+        if (updatedAuthLogo) {
           trackUsage('didChangeLogo', {
             logo: 'auth',
           });
@@ -201,13 +122,15 @@ const ConfigurationProvider = ({
           type: 'success',
           message: formatMessage({ id: 'app', defaultMessage: 'Saved' }),
         });
-
-        refetch();
-      },
-    }
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+      }
+    },
+    [formatAPIError, formatMessage, toggleNotification, trackUsage, updateProjectSettingsMutation]
   );
-
-  const updateProjectSettings = React.useCallback(mutate, [mutate]);
 
   return (
     <ConfigurationContextProvider

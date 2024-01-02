@@ -558,38 +558,38 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Providers
-        components={components}
-        fields={fields}
-        customFields={this.customFields}
-        localeNames={localeNames}
-        getAdminInjectedComponents={this.getAdminInjectedComponents}
-        getPlugin={this.getPlugin}
-        messages={this.configurations.translations}
-        menu={this.menu}
-        plugins={this.plugins}
-        runHookParallel={this.runHookParallel}
-        runHookWaterfall={(name, initialValue, async = false) => {
-          return this.runHookWaterfall(name, initialValue, async, store);
-        }}
-        // @ts-expect-error – context issue. TODO: fix this.
-        runHookSeries={this.runHookSeries}
-        themes={this.configurations.themes}
-        settings={this.settings}
-        store={store}
-      >
-        <Helmet
-          htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
-        />
-        <BrowserRouter basename={getBasename()}>
+      <BrowserRouter basename={getBasename()}>
+        <Providers
+          components={components}
+          fields={fields}
+          customFields={this.customFields}
+          localeNames={localeNames}
+          getAdminInjectedComponents={this.getAdminInjectedComponents}
+          getPlugin={this.getPlugin}
+          messages={this.configurations.translations}
+          menu={this.menu}
+          plugins={this.plugins}
+          runHookParallel={this.runHookParallel}
+          runHookWaterfall={(name, initialValue, async = false) => {
+            return this.runHookWaterfall(name, initialValue, async, store);
+          }}
+          // @ts-expect-error – context issue. TODO: fix this.
+          runHookSeries={this.runHookSeries}
+          themes={this.configurations.themes}
+          settings={this.settings}
+          store={store}
+        >
+          <Helmet
+            htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
+          />
           <App
             authLogo={this.configurations.authLogo}
             menuLogo={this.configurations.menuLogo}
             showTutorials={this.configurations.tutorials}
             showReleaseNotification={this.configurations.notifications.releases}
           />
-        </BrowserRouter>
-      </Providers>
+        </Providers>
+      </BrowserRouter>
     );
   }
 }

@@ -21,23 +21,23 @@ import {
   SettingsPageTitle,
   translatedErrors,
   useAPIErrorHandler,
-  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { AxiosError } from 'axios';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
 import * as yup from 'yup';
 
+import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
-import { selectAdminPermissions } from '../../../../../../admin/src/selectors';
-import { formatAPIErrors } from '../../../../../../admin/src/utils/formatAPIErrors';
+import {
+  useGetProviderOptionsQuery,
+  useUpdateProviderOptionsMutation,
+} from '../../../../../../admin/src/services/auth';
+import { isBaseQueryError } from '../../../../../../admin/src/utils/baseQuery';
 import { ProvidersOptions } from '../../../../../../shared/contracts/admin';
 
 const schema = yup.object().shape({
@@ -59,52 +59,18 @@ export const SingleSignOnPage = () => {
   useFocusWhenNavigate();
 
   const { formatMessage } = useIntl();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
 
-  const { get, put } = useFetchClient();
+  const { isLoading: isLoadingProviderOptions, data } = useGetProviderOptionsQuery();
 
-  const { isLoading: isLoadingProviderOptions, data } = useQuery(
-    ['providers', 'options'],
-    async () => {
-      const { data } = await get<ProvidersOptions.Response>('/admin/providers/options');
-
-      return data.data;
-    },
-    {
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
-    }
-  );
-
-  const submitMutation = useMutation<
-    ProvidersOptions.Response['data'],
-    AxiosError<ProvidersOptions.Response>,
-    ProvidersOptions.Request['body']
-  >(
-    async (body) => {
-      const { autoRegister, defaultRole, ssoLockedRoles } = body;
-      const { data } = await put<ProvidersOptions.Response>('/admin/providers/options', {
-        autoRegister,
-        defaultRole,
-        ssoLockedRoles,
-      });
-
-      return data.data;
-    },
-    {
-      async onSettled() {
-        // @ts-expect-error – we're going to implement a context assertion to avoid this
-        unlockApp();
-      },
-    }
-  );
+  const [updateProviderOptions, { isLoading: isSubmittingForm }] =
+    useUpdateProviderOptionsMutation();
 
   const {
     isLoading: isLoadingPermissions,
@@ -115,59 +81,65 @@ export const SingleSignOnPage = () => {
   });
 
   const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
-    enabled: canReadRoles,
+    skip: !canReadRoles,
   });
 
   const handleSubmit = async (
     body: ProvidersOptions.Request['body'],
-    { resetForm, setErrors }: FormikHelpers<ProvidersOptions.Request['body']>
+    formik: FormikHelpers<ProvidersOptions.Request['body']>
   ) => {
     // @ts-expect-error - context assertation
     lockApp();
 
-    submitMutation.mutate(body, {
-      onSuccess(data) {
-        resetForm({ values: data });
-        toggleNotification({
-          type: 'success',
-          message: { id: 'notification.success.saved' },
-        });
-      },
-      onError(err) {
-        if (err instanceof AxiosError && err.response) {
-          // @ts-expect-error formatApiErrors is waiting for a Record<string, string[]> while response.data contains different value types than string.
-          const errors = formatAPIErrors(err.response.data);
-          const fieldsErrors = Object.keys(errors).reduce<
-            FormikErrors<ProvidersOptions.Request['body']>
-          >((acc, current) => {
-            acc[current as keyof ProvidersOptions.Request['body']] = errors[current].id;
-            return acc;
-          }, {});
-          setErrors(fieldsErrors);
+    try {
+      const res = await updateProviderOptions(body);
+
+      if ('error' in res) {
+        if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          formik.setErrors(formatValidationErrors(res.error));
+        } else {
           toggleNotification({
             type: 'warning',
-            // @ts-expect-error formatAPIError is waiting for "err" to be AxiosError<{ error: ApiError }> while few lines above we need error.data there's a conflict between these two functions
-            message: formatAPIError(err),
+            message: formatAPIError(res.error),
           });
         }
-      },
-    });
+
+        return;
+      }
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.saved' },
+      });
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred, please try again.',
+        },
+      });
+    } finally {
+      // @ts-expect-error - context assertation
+      unlockApp();
+    }
   };
 
-  const { isLoading: isSubmittingForm } = submitMutation;
-  const initialValues = {
-    autoRegister: false,
-    defaultRole: null,
-    ssoLockedRoles: null,
-  };
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
+
   return (
     <Layout>
       <SettingsPageTitle name="SSO" />
       <Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
         <Formik
           onSubmit={handleSubmit}
-          initialValues={data || initialValues}
+          initialValues={
+            data || {
+              autoRegister: false,
+              defaultRole: null,
+              ssoLockedRoles: null,
+            }
+          }
           validationSchema={schema}
           validateOnChange={false}
           enableReinitialize
@@ -177,7 +149,6 @@ export const SingleSignOnPage = () => {
               <HeaderLayout
                 primaryAction={
                   <Button
-                    data-testid="save-button"
                     disabled={!dirty}
                     loading={isSubmitting}
                     startIcon={<Check />}
@@ -221,7 +192,6 @@ export const SingleSignOnPage = () => {
                     <Grid gap={4}>
                       <GridItem col={6} s={12}>
                         <ToggleInput
-                          data-testid="autoRegister"
                           disabled={!canUpdate}
                           checked={values.autoRegister}
                           hint={formatMessage({
@@ -338,10 +308,10 @@ export const SingleSignOnPage = () => {
 };
 
 export const ProtectedSSO = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.sso?.main);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.sso?.main}>
+    <CheckPagePermissions permissions={permissions}>
       <SingleSignOnPage />
     </CheckPagePermissions>
   );

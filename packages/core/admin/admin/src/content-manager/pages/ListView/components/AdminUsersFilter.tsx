@@ -1,14 +1,16 @@
 import { Combobox, ComboboxOption, ComboboxProps } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useAdminUsers } from '../../../../hooks/useAdminUsers';
+import { useAdminUsers } from '../../../../services/users';
 import { getDisplayName } from '../../../utils/users';
 
 interface AdminUsersFilterProps extends Pick<ComboboxProps, 'value' | 'onChange'> {}
 
 const AdminUsersFilter = ({ value, onChange }: AdminUsersFilterProps) => {
   const { formatMessage } = useIntl();
-  const { users, isLoading } = useAdminUsers();
+  const { data, isLoading } = useAdminUsers();
+
+  const users = data?.users || [];
 
   return (
     <Combobox

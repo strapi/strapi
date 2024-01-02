@@ -14,7 +14,7 @@ export interface TelemetryProperties {
 }
 
 export interface TrackingContextValue {
-  uuid: string | boolean;
+  uuid?: string | boolean;
   deviceId?: string;
   telemetryProperties?: TelemetryProperties;
 }
