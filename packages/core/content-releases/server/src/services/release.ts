@@ -41,7 +41,7 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
     case 'action':
       return 'type';
     case 'locale':
-      return 'entry.locale.name';
+      return _.getOr('No locale', 'entry.locale.name');
     default:
       return 'entry.contentType.displayName';
   }

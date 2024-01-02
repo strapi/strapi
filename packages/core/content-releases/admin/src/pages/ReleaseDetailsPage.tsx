@@ -14,6 +14,9 @@ import {
   Tr,
   Td,
   Typography,
+  Badge,
+  SingleSelect,
+  SingleSelectOption,
 } from '@strapi/design-system';
 import {
   AnErrorOccurred,
@@ -47,7 +50,10 @@ import {
   useDeleteReleaseMutation,
 } from '../services/release';
 
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
+import type {
+  ReleaseAction,
+  ReleaseActionGroupBy,
+} from '../../../shared/contracts/release-actions';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -314,13 +320,28 @@ export const ReleaseDetailsLayout = ({
   );
 };
 
+const GROUP_BY_OPTIONS = [
+  {
+    label: 'Content Type',
+    value: 'contentType',
+  },
+  {
+    label: 'Locale',
+    value: 'locale',
+  },
+  {
+    label: 'Action',
+    value: 'action',
+  },
+];
+
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
 const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
-  const [{ query }] = useQueryParams<GetReleaseActionsQueryParams>();
+  const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const {
@@ -376,7 +397,10 @@ const ReleaseDetailsBody = () => {
     );
   }
 
-  if (isError || isReleaseError || !release) {
+  const releaseActions = data?.data;
+  const releaseMeta = data?.meta;
+
+  if (isError || isReleaseError || !release || !releaseActions) {
     return (
       <ContentLayout>
         <AnErrorOccurred />
@@ -384,10 +408,7 @@ const ReleaseDetailsBody = () => {
     );
   }
 
-  const releaseActions = data?.data;
-  const releaseMeta = data?.meta;
-
-  if (!releaseActions || !releaseActions.length) {
+  if (Object.keys(releaseActions).length === 0) {
     return (
       <ContentLayout>
         <EmptyStateLayout
@@ -403,94 +424,135 @@ const ReleaseDetailsBody = () => {
 
   return (
     <ContentLayout>
-      <Flex gap={4} direction="column" alignItems="stretch">
-        <Table.Root
-          rows={releaseActions.map((item) => ({
-            ...item,
-            id: Number(item.entry.id),
-          }))}
-          colCount={releaseActions.length}
-          isLoading={isLoading}
-          isFetching={isFetching}
-        >
-          <Table.Content>
-            <Table.Head>
-              <Table.HeaderCell
-                fieldSchemaType="string"
-                label={formatMessage({
-                  id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-                  defaultMessage: 'name',
-                })}
-                name="name"
-              />
-              <Table.HeaderCell
-                fieldSchemaType="string"
-                label={formatMessage({
-                  id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                  defaultMessage: 'locale',
-                })}
-                name="locale"
-              />
-              <Table.HeaderCell
-                fieldSchemaType="string"
-                label={formatMessage({
-                  id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
-                  defaultMessage: 'content-type',
-                })}
-                name="content-type"
-              />
-              <Table.HeaderCell
-                fieldSchemaType="string"
-                label={formatMessage({
-                  id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-                  defaultMessage: 'action',
-                })}
-                name="action"
-              />
-            </Table.Head>
-            <Table.LoadingBody />
-            <Table.Body>
-              {releaseActions.map(({ id, type, entry }) => (
-                <Tr key={id}>
-                  <Td>
-                    <Typography>{`${entry.contentType.mainFieldValue || entry.id}`}</Typography>
-                  </Td>
-                  <Td>
-                    <Typography>{`${entry?.locale?.name ? entry.locale.name : '-'}`}</Typography>
-                  </Td>
-                  <Td>
-                    <Typography>{entry.contentType.displayName || ''}</Typography>
-                  </Td>
-                  <Td>
-                    {release.releasedAt ? (
-                      <Typography>
-                        {formatMessage(
-                          {
-                            id: 'content-releases.page.ReleaseDetails.table.action-published',
-                            defaultMessage:
-                              'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
-                          },
-                          {
-                            isPublish: type === 'publish',
-                            b: (children: React.ReactNode) => (
-                              <Typography fontWeight="bold">{children}</Typography>
-                            ),
-                          }
-                        )}
-                      </Typography>
-                    ) : (
-                      <ReleaseActionOptions
-                        selected={type}
-                        handleChange={(e) => handleChangeType(e, id)}
-                        name={`release-action-${id}-type`}
-                      />
-                    )}
-                  </Td>
-                </Tr>
+      <Flex gap={8} direction="column" alignItems="stretch">
+        <Flex justifyContent="space-between" alignItems="flex-start">
+          <Flex>
+            <SingleSelect
+              aria-label={formatMessage({
+                id: 'pages.ReleaseDetails.groupBy.label',
+                defaultMessage: 'Group by',
+              })}
+              customizeContent={(value) =>
+                formatMessage(
+                  {
+                    id: `pages.ReleaseDetails.groupBy.label}`,
+                    defaultMessage: `Group by {groupBy}`,
+                  },
+                  {
+                    groupBy: value,
+                  }
+                )
+              }
+              value={query?.groupBy || 'contentType'}
+              onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
+            >
+              {GROUP_BY_OPTIONS.map((option) => (
+                <SingleSelectOption key={option.value} value={option.value}>
+                  {option.label}
+                </SingleSelectOption>
               ))}
-            </Table.Body>
-          </Table.Content>
-        </Table.Root>
+            </SingleSelect>
+          </Flex>
+        </Flex>
+        {Object.keys(releaseActions).map((key) => (
+          <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
+            <Flex>
+              <Badge>{key}</Badge>
+            </Flex>
+            <Table.Root
+              rows={releaseActions[key].map((item) => ({
+                ...item,
+                id: Number(item.entry.id),
+              }))}
+              colCount={releaseActions[key].length}
+              isLoading={isLoading}
+              isFetching={isFetching}
+            >
+              <Table.Content>
+                <Table.Head>
+                  <Table.HeaderCell
+                    fieldSchemaType="string"
+                    label={formatMessage({
+                      id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+                      defaultMessage: 'name',
+                    })}
+                    name="name"
+                  />
+                  <Table.HeaderCell
+                    fieldSchemaType="string"
+                    label={formatMessage({
+                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+                      defaultMessage: 'locale',
+                    })}
+                    name="locale"
+                  />
+                  <Table.HeaderCell
+                    fieldSchemaType="string"
+                    label={formatMessage({
+                      id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
+                      defaultMessage: 'content-type',
+                    })}
+                    name="content-type"
+                  />
+                  <Table.HeaderCell
+                    fieldSchemaType="string"
+                    label={formatMessage({
+                      id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+                      defaultMessage: 'action',
+                    })}
+                    name="action"
+                  />
+                </Table.Head>
+                <Table.LoadingBody />
+                <Table.Body>
+                  {releaseActions[key].map(({ id, type, entry }) => (
+                    <Tr key={id}>
+                      <Td width={'25%'}>
+                        <Typography ellipsis>{`${
+                          entry.contentType.mainFieldValue || entry.id
+                        }`}</Typography>
+                      </Td>
+                      <Td>
+                        <Typography>{`${
+                          entry?.locale?.name ? entry.locale.name : '-'
+                        }`}</Typography>
+                      </Td>
+                      <Td>
+                        <Typography>{entry.contentType.displayName || ''}</Typography>
+                      </Td>
+                      <Td>
+                        {release.releasedAt ? (
+                          <Typography>
+                            {formatMessage(
+                              {
+                                id: 'content-releases.page.ReleaseDetails.table.action-published',
+                                defaultMessage:
+                                  'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
+                              },
+                              {
+                                isPublish: type === 'publish',
+                                b: (children: React.ReactNode) => (
+                                  <Typography fontWeight="bold">{children}</Typography>
+                                ),
+                              }
+                            )}
+                          </Typography>
+                        ) : (
+                          <ReleaseActionOptions
+                            selected={type}
+                            handleChange={(e) => handleChangeType(e, id)}
+                            name={`release-action-${id}-type`}
+                          />
+                        )}
+                      </Td>
+                    </Tr>
+                  ))}
+                </Table.Body>
+              </Table.Content>
+            </Table.Root>
+          </Flex>
+        ))}
+
         <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
           <PageSizeURLQuery defaultValue={releaseMeta?.pagination?.pageSize.toString()} />
           <PaginationURLQuery

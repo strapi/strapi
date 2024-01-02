@@ -38,7 +38,7 @@ const releaseActionController = {
 
     const releaseService = getService('release', { strapi });
     const { results, pagination } = await releaseService.findActions(releaseId, {
-      sort: query.groupBy,
+      sort: query.groupBy === 'action' ? 'type' : query.groupBy,
       ...query,
     });
     const groupedData = await releaseService.groupActions(results, query.groupBy);

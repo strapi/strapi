@@ -93,26 +93,102 @@ const PUBLISHED_RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
  * RELEASE_WITH_ACTIONS_BODY_MOCK_DATA
  * -----------------------------------------------------------------------------------------------*/
 const RELEASE_WITH_ACTIONS_BODY_MOCK_DATA = {
-  data: [
-    {
-      id: 3,
-      type: 'publish',
-      contentType: 'api::category.category',
-      createdAt: '2023-12-05T09:03:57.155Z',
-      updatedAt: '2023-12-05T09:03:57.155Z',
-      entry: {
-        id: 1,
-        contentType: {
-          displayName: 'Category',
-          mainFieldValue: 'cat1',
-        },
-        locale: {
-          name: 'English (en)',
-          code: 'en',
+  data: {
+    Category: [
+      {
+        id: 3,
+        type: 'publish',
+        contentType: 'api::category.category',
+        createdAt: '2023-12-05T09:03:57.155Z',
+        updatedAt: '2023-12-05T09:03:57.155Z',
+        entry: {
+          id: 1,
+          contentType: {
+            displayName: 'Category',
+            mainFieldValue: 'cat1',
+          },
+          locale: {
+            name: 'English (en)',
+            code: 'en',
+          },
         },
       },
+    ],
+  },
+  meta: {
+    pagination: {
+      page: 1,
+      pageSize: 10,
+      total: 1,
+      pageCount: 1,
     },
-  ],
+  },
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA
+ * -----------------------------------------------------------------------------------------------*/
+const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
+  data: {
+    Category: [
+      {
+        id: 3,
+        type: 'publish',
+        contentType: 'api::category.category',
+        createdAt: '2023-12-05T09:03:57.155Z',
+        updatedAt: '2023-12-05T09:03:57.155Z',
+        entry: {
+          id: 1,
+          contentType: {
+            displayName: 'Category',
+            mainFieldValue: 'cat1',
+          },
+          locale: {
+            name: 'English (en)',
+            code: 'en',
+          },
+        },
+      },
+      {
+        id: 4,
+        type: 'publish',
+        contentType: 'api::category.category',
+        createdAt: '2023-12-05T09:03:57.155Z',
+        updatedAt: '2023-12-05T09:03:57.155Z',
+        entry: {
+          id: 2,
+          contentType: {
+            displayName: 'Category',
+            mainFieldValue: 'cat1',
+          },
+          locale: {
+            name: 'English (en)',
+            code: 'en',
+          },
+        },
+      },
+    ],
+    Address: [
+      {
+        id: 5,
+        type: 'publish',
+        contentType: 'api::address.address',
+        createdAt: '2023-12-05T09:03:57.155Z',
+        updatedAt: '2023-12-05T09:03:57.155Z',
+        entry: {
+          id: 1,
+          contentType: {
+            displayName: 'Address',
+            mainFieldValue: 'add1',
+          },
+          locale: {
+            name: 'English (en)',
+            code: 'en',
+          },
+        },
+      },
+    ],
+  },
   meta: {
     pagination: {
       page: 1,
@@ -128,6 +204,7 @@ const mockReleaseDetailsPageData = {
   noActionsBodyData: RELEASE_NO_ACTIONS_BODY_MOCK_DATA,
   withActionsHeaderData: RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA,
   withActionsBodyData: RELEASE_WITH_ACTIONS_BODY_MOCK_DATA,
+  withMultipleActionsBodyData: RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA,
   withActionsAndPublishedHeaderData: PUBLISHED_RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA,
 } as const;
 
