@@ -33,6 +33,7 @@ import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
@@ -450,9 +451,9 @@ const ReleaseDetailsBody = () => {
     <ContentLayout>
       <Flex gap={4} direction="column" alignItems="stretch">
         <Table.Root
-          rows={releaseActions.map((item) => ({
-            ...item,
-            id: Number(item.entry.id),
+          rows={releaseActions.map((action) => ({
+            ...action,
+            id: Number(action.entry.id),
           }))}
           colCount={releaseActions.length}
           isLoading={isLoading}
@@ -492,6 +493,7 @@ const ReleaseDetailsBody = () => {
                 })}
                 name="action"
               />
+              <Table.HeaderHiddenActionsCell />
             </Table.Head>
             <Table.LoadingBody />
             <Table.Body>
@@ -530,6 +532,11 @@ const ReleaseDetailsBody = () => {
                         name={`release-action-${id}-type`}
                       />
                     )}
+                  </Td>
+                  <Td>
+                    <Flex justifyContent="flex-end">
+                      <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                    </Flex>
                   </Td>
                 </Tr>
               ))}
