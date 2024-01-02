@@ -507,6 +507,21 @@ describe('User', () => {
 
       expect(res).toBeNull();
     });
+
+    test('Using findOneByEmail should make a case insensitive lookup', async () => {
+      const findOne = jest.fn();
+      const fakeEmail = 'admin@admin.com';
+
+      global.strapi = { query: () => ({ findOne }) };
+
+      await userService.findOneByEmail(fakeEmail);
+
+      expect(findOne).toHaveBeenCalledWith({
+        where: { email: { $eqi: fakeEmail } },
+        //                  ^ Case Insensitive $eq
+        populate: [],
+      });
+    });
   });
 
   describe('findRegistrationInfo', () => {

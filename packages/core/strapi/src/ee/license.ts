@@ -21,6 +21,7 @@ const DEFAULT_FEATURES = {
     // The default of 90 days is set in the audit logs service
     { name: 'audit-logs', options: { retentionDays: null } },
     { name: 'review-workflows' },
+    { name: 'cms-content-releases' },
   ],
 };
 
