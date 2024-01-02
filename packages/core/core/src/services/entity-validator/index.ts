@@ -38,11 +38,12 @@ interface AttributeValidatorMetas {
   updatedAttribute: { name: string; value: unknown };
   model: Schema.ContentType | Schema.Component;
   entity?: Entity;
+  locale?: string;
 }
 
 interface ModelValidatorMetas {
   model: Schema.ContentType | Schema.Component;
-  data: Record<string, unknown>;
+  data: Record<string, unknown> & { locale?: string };
   entity?: Entity;
 }
 
@@ -285,7 +286,10 @@ const createModelValidator =
         entity,
       };
 
-      const validator = createAttributeValidator(createOrUpdate)(metas, options);
+      const validator = createAttributeValidator(createOrUpdate)(
+        data?.locale ? { ...metas, locale: data.locale } : metas,
+        options
+      );
 
       validators[attributeName] = validator;
 

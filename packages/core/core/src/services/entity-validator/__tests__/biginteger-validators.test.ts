@@ -21,21 +21,21 @@ describe('BigInteger validator', () => {
   };
 
   describe('unique', () => {
-    const fakeFindOne = jest.fn();
+    const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      query: jest.fn(() => ({
-        findOne: fakeFindOne,
-      })),
+      documents: {
+        findFirst: fakeFindFirst,
+      },
     } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
-      fakeFindOne.mockReset();
+      fakeFindFirst.mockReset();
     });
 
     test('it does not validate the unique constraint if the attribute is not set as unique', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+      fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.biginteger({
@@ -51,11 +51,11 @@ describe('BigInteger validator', () => {
 
       await validator(1);
 
-      expect(fakeFindOne).not.toHaveBeenCalled();
+      expect(fakeFindFirst).not.toHaveBeenCalled();
     });
 
     test('it does not validate the unique constraint if the attribute value is `null`', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+      fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators
@@ -73,11 +73,11 @@ describe('BigInteger validator', () => {
 
       await validator(null);
 
-      expect(fakeFindOne).not.toHaveBeenCalled();
+      expect(fakeFindFirst).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+      fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.biginteger({
@@ -96,7 +96,7 @@ describe('BigInteger validator', () => {
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
+      fakeFindFirst.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
         validators.biginteger({
@@ -118,7 +118,7 @@ describe('BigInteger validator', () => {
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
+      fakeFindFirst.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
         validators.biginteger({
@@ -136,7 +136,7 @@ describe('BigInteger validator', () => {
     });
 
     test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+      fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.biginteger({
@@ -147,19 +147,19 @@ describe('BigInteger validator', () => {
             value: 4,
           },
           entity: null,
+          locale: 'en',
         })
       );
 
       await validator(4);
 
-      expect(fakeFindOne).toHaveBeenCalledWith({
-        select: ['id'],
-        where: { attrBigIntegerUnique: 4 },
+      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+        filters: { attrBigIntegerUnique: 4, locale: 'en' },
       });
     });
 
     test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+      fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.biginteger({
@@ -170,14 +170,14 @@ describe('BigInteger validator', () => {
             value: 5,
           },
           entity: { id: 1, attrBigIntegerUnique: 42 },
+          locale: 'en',
         })
       );
 
       await validator(5);
 
-      expect(fakeFindOne).toHaveBeenCalledWith({
-        select: ['id'],
-        where: { $and: [{ attrBigIntegerUnique: 5 }, { $not: { id: 1 } }] },
+      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+        filters: { attrBigIntegerUnique: 5, locale: 'en' },
       });
     });
   });

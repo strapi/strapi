@@ -10,6 +10,7 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
   model: Schema.ContentType;
   updatedAttribute: { name: string; value: unknown };
   entity: Record<string, unknown> | null;
+  locale?: string;
 }
 
 interface ValidatorOptions {
@@ -138,7 +139,13 @@ const addStringRegexValidator = (
  */
 const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   validator: T,
-  { attr, model, updatedAttribute, entity }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>
+  {
+    attr,
+    model,
+    updatedAttribute,
+    entity,
+    locale,
+  }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>
 ): T => {
   if (attr.type !== 'uid' && !attr.unique) {
     return validator;
@@ -163,13 +170,15 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
       return true;
     }
 
-    const whereParams = entity
-      ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
+    /**
+     * At this point we know that we are creating a new entry or that the unique field value has changed
+     * We check if there is an entry of this content type in the same locale with the same unique field value
+     */
+    const filters = locale
+      ? { [updatedAttribute.name]: value, locale }
       : { [updatedAttribute.name]: value };
-
-    const record = await strapi.query(model.uid).findOne({
-      select: ['id'],
-      where: whereParams,
+    const record = await strapi.documents.findFirst(model.uid, {
+      filters,
     });
 
     return !record;
