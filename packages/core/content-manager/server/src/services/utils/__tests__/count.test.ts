@@ -72,6 +72,7 @@ describe('getDeepRelationsCount', () => {
     test('with many to many', () => {
       const count = getDeepRelationsCount(
         {
+          id: 1,
           relationAttrName: [
             {
               id: 2,
@@ -83,7 +84,7 @@ describe('getDeepRelationsCount', () => {
             },
           ],
         },
-        'relationMTM'
+        'admin::relationMTM'
       );
 
       expect(count).toEqual({
@@ -96,12 +97,13 @@ describe('getDeepRelationsCount', () => {
     test('with one to one', () => {
       const count = getDeepRelationsCount(
         {
+          id: 1,
           relationAttrName: {
             id: 2,
             name: 'rel1',
           },
         },
-        'relationOTO'
+        'admin::relationOTO'
       );
 
       expect(count).toEqual({
@@ -115,9 +117,10 @@ describe('getDeepRelationsCount', () => {
   describe('media fields', () => {
     test('with media', () => {
       const mediaEntity = {
+        id: 1,
         mediaAttrName: { id: 1, name: 'img1' },
       };
-      const count = getDeepRelationsCount(mediaEntity, 'media');
+      const count = getDeepRelationsCount(mediaEntity, 'admin::media');
 
       expect(count).toEqual(mediaEntity);
     });
@@ -127,6 +130,7 @@ describe('getDeepRelationsCount', () => {
     test('with component', () => {
       const count = getDeepRelationsCount(
         {
+          id: 1,
           componentAttrName: {
             relationAttrName: [
               {
@@ -140,7 +144,7 @@ describe('getDeepRelationsCount', () => {
             ],
           },
         },
-        'component'
+        'component.component'
       );
 
       expect(count).toEqual({
@@ -155,9 +159,10 @@ describe('getDeepRelationsCount', () => {
     test('with empty component', () => {
       const count = getDeepRelationsCount(
         {
+          id: 1,
           componentAttrName: null,
         },
-        'component'
+        'component.component'
       );
 
       expect(count).toEqual({
@@ -168,6 +173,7 @@ describe('getDeepRelationsCount', () => {
     test('with repeatable component', () => {
       const count = getDeepRelationsCount(
         {
+          id: 1,
           repeatableComponentAttrName: [
             {
               relationAttrName: [
@@ -183,7 +189,7 @@ describe('getDeepRelationsCount', () => {
             },
           ],
         },
-        'repeatableComponent'
+        'component.repeatableComponent'
       );
 
       expect(count).toEqual({
@@ -202,6 +208,7 @@ describe('getDeepRelationsCount', () => {
     test('with dynamic zone', () => {
       const count = getDeepRelationsCount(
         {
+          id: 1,
           dynZoneAttrName: [
             {
               __component: 'component',
@@ -220,7 +227,7 @@ describe('getDeepRelationsCount', () => {
             },
           ],
         },
-        'dynZone'
+        'component.dynZone'
       );
 
       expect(count).toEqual({

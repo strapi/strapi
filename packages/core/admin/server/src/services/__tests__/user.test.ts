@@ -512,6 +512,7 @@ describe('User', () => {
       const findOne = jest.fn();
       const fakeEmail = 'admin@admin.com';
 
+      // @ts-expect-error - test purpose
       global.strapi = { query: () => ({ findOne }) };
 
       await userService.findOneByEmail(fakeEmail);

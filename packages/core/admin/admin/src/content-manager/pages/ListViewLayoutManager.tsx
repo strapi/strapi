@@ -156,7 +156,6 @@ type Action =
   | onResetListHeadersAction;
 
 const reducer = (state: ListViewLayoutManagerState = initialState, action: Action) =>
-  // @ts-expect-error – recursive types!
   produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
@@ -189,7 +188,7 @@ const reducer = (state: ListViewLayoutManagerState = initialState, action: Actio
             fieldSchema: attributes[name],
             metadatas: metas,
             key: `__${name}_key__`,
-          };
+          } satisfies ListLayoutRow;
 
           const attribute = attributes[name];
 
