@@ -54,6 +54,7 @@ const ListPage = () => {
   } = useRBAC(permissions.settings?.roles);
 
   const { roles, refetch: refetchRoles } = useAdminRoles(
+    // @ts-expect-error – we know that the `admin::role` content-type has a name attribute, but the EntityService uses a registry which we don't have.
     { filters: query?._q ? { name: { $containsi: query._q } } : undefined },
     {
       cacheTime: 0,

@@ -163,7 +163,7 @@ const ListViewPage = ({
     }, []) ?? [];
 
   const { users, isLoading: isLoadingAdminUsers } = useAdminUsers(
-    { filters: { id: { in: selectedUserIds } } },
+    { filters: { id: { $in: selectedUserIds } } },
     {
       // fetch the list of admin users only if the filter contains users and the
       // current user has permissions to display users

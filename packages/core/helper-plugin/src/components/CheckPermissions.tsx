@@ -14,6 +14,7 @@ export interface CheckPermissionsProps {
 
 const CheckPermissions = ({ permissions = [], children }: CheckPermissionsProps) => {
   const { allPermissions } = useRBACProvider();
+
   const toggleNotification = useNotification();
   const [state, setState] = React.useState({ isLoading: true, canAccess: false });
   const isMounted = React.useRef(true);
