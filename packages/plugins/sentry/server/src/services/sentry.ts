@@ -1,6 +1,6 @@
 import type { Strapi } from '@strapi/strapi';
 import type { Config } from 'src/config';
-import Sentry, { Scope } from '@sentry/node';
+import * as Sentry from '@sentry/node';
 
 const createSentryService = (strapi: Strapi) => {
   let isReady = false;
@@ -52,7 +52,7 @@ const createSentryService = (strapi: Strapi) => {
     /**
      * Higher level method to send exception events to Sentry
      */
-    sendError(error: Error, configureScope?: (scope: Scope) => void) {
+    sendError(error: Error, configureScope?: (scope: Sentry.Scope) => void) {
       // Make sure Sentry is ready
       if (!isReady || !instance) {
         strapi.log.warn("Sentry wasn't properly initialized, cannot send event");

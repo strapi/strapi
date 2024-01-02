@@ -1,12 +1,10 @@
 import type { NodeOptions } from '@sentry/node';
 
-interface Config {
+export interface Config {
   dsn: string | null;
   sendMetadata: boolean;
   init: NodeOptions;
 }
-
-export type { Config };
 
 export default {
   default: {
