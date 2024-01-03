@@ -29,6 +29,7 @@ import watchAdminCommand from './actions/watch-admin/command';
 import buildPluginCommand from './actions/plugin/build-command/command';
 import initPluginCommand from './actions/plugin/init/command';
 import watchPluginCommand from './actions/plugin/watch/command';
+import verifyPluginCommand from './actions/plugin/verify/command';
 
 import { createLogger } from './utils/logger';
 import { loadTsConfig } from './utils/tsconfig';
@@ -66,6 +67,7 @@ const strapiCommands = {
   buildPluginCommand,
   initPluginCommand,
   watchPluginCommand,
+  verifyPluginCommand,
 } as const;
 
 const buildStrapiCommand = async (argv: string[], command = new Command()) => {

@@ -13,14 +13,10 @@ import {
 import {
   useCMEditViewDataManager,
   useAPIErrorHandler,
-  useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { Entity } from '@strapi/types';
-import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 import { LimitsModal } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
@@ -28,23 +24,29 @@ import {
   CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
   CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
 } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
-import { useReviewWorkflowsStages } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflowsStages';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
+import { useGetStagesQuery, useUpdateStageMutation } from '../../../../services/reviewWorkflows';
 
 import { STAGE_ATTRIBUTE_NAME } from './constants';
 
 export const StageSelect = () => {
   const { initialData, layout: contentType, isSingleType, onChange } = useCMEditViewDataManager();
-  const { put } = useFetchClient();
   const { formatMessage } = useIntl();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { meta, stages, isLoading, refetch } = useReviewWorkflowsStages(
-    { id: initialData.id!, layout: contentType! },
+  const { data, isLoading } = useGetStagesQuery(
     {
-      enabled: !!initialData?.id,
+      slug: isSingleType ? 'single-types' : 'collection-types',
+      model: contentType!.uid,
+      id: initialData!.id!,
+    },
+    {
+      skip: !initialData?.id || !contentType?.uid,
     }
   );
+
+  const { meta, stages = [] } = data ?? {};
+
   const { getFeature } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState<'stage' | 'workflow' | null>(null);
 
@@ -54,57 +56,7 @@ export const StageSelect = () => {
   // the entity is flagged as modified
   const activeWorkflowStage = initialData?.[STAGE_ATTRIBUTE_NAME] ?? null;
 
-  const mutation = useMutation<
-    Contracts.ReviewWorkflows.UpdateStage.Response['data'],
-    AxiosError<Required<Pick<Contracts.ReviewWorkflows.UpdateStage.Response, 'error'>>>,
-    {
-      stageId: Contracts.ReviewWorkflows.UpdateStage.Request['body']['data']['id'];
-      uid: Contracts.ReviewWorkflows.UpdateStage.Params['model'];
-      entityId: Contracts.ReviewWorkflows.UpdateStage.Params['id'];
-    }
-  >(
-    async ({ entityId, stageId, uid }) => {
-      const typeSlug = isSingleType ? 'single-types' : 'collection-types';
-
-      const {
-        data: { data: createdEntity },
-      } = await put<
-        Contracts.ReviewWorkflows.UpdateStage.Response,
-        AxiosResponse<Contracts.ReviewWorkflows.UpdateStage.Response>,
-        Contracts.ReviewWorkflows.UpdateStage.Request['body']
-      >(`/admin/content-manager/${typeSlug}/${uid}/${entityId}/stage`, {
-        data: { id: stageId },
-      });
-
-      // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
-      // as modified, which is what the boolean flag is for
-      onChange?.(
-        {
-          target: {
-            name: STAGE_ATTRIBUTE_NAME,
-            value: createdEntity[STAGE_ATTRIBUTE_NAME],
-            type: '',
-          },
-        },
-        true
-      );
-
-      await refetch();
-
-      return createdEntity;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: 'content-manager.reviewWorkflows.stage.notification.saved',
-            defaultMessage: 'Review stage updated',
-          },
-        });
-      },
-    }
-  );
+  const [updateStage, { error }] = useUpdateStageMutation();
 
   const handleChange = async (stageId: Entity.ID) => {
     try {
@@ -120,7 +72,7 @@ export const StageSelect = () => {
 
       if (
         limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) < meta.workflowCount
+        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) < (meta?.workflowCount ?? 0)
       ) {
         setShowLimitModal('workflow');
 
@@ -140,11 +92,35 @@ export const StageSelect = () => {
         setShowLimitModal('stage');
       } else {
         if (initialData.id && contentType) {
-          mutation.mutateAsync({
-            entityId: initialData.id,
-            stageId,
-            uid: contentType.uid,
+          const res = await updateStage({
+            model: contentType.uid,
+            id: initialData.id,
+            slug: isSingleType ? 'single-types' : 'collection-types',
+            data: { id: stageId },
           });
+
+          if ('data' in res) {
+            // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
+            // as modified, which is what the boolean flag is for
+            onChange?.(
+              {
+                target: {
+                  name: STAGE_ATTRIBUTE_NAME,
+                  value: res.data[STAGE_ATTRIBUTE_NAME],
+                  type: '',
+                },
+              },
+              true
+            );
+
+            toggleNotification({
+              type: 'success',
+              message: {
+                id: 'content-manager.reviewWorkflows.stage.notification.saved',
+                defaultMessage: 'Review stage updated',
+              },
+            });
+          }
         }
       }
     } catch (error) {
@@ -171,7 +147,7 @@ export const StageSelect = () => {
         <Flex direction="column" gap={2} alignItems="stretch">
           <SingleSelect
             disabled={stages.length === 0}
-            error={(mutation.error && formatAPIError(mutation.error)) || undefined}
+            error={(error && formatAPIError(error)) || undefined}
             name={STAGE_ATTRIBUTE_NAME}
             id={STAGE_ATTRIBUTE_NAME}
             value={activeWorkflowStage?.id}

@@ -1,5 +1,4 @@
 import { SanitizedAdminUserForAuditLogs } from '../../../../../../../../shared/contracts/audit-logs';
-import { TableHeader } from '../components/TableRows';
 
 export const tableHeaders = [
   {

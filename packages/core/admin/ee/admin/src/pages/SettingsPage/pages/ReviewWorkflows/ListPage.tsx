@@ -21,23 +21,18 @@ import {
   onRowClick,
   pxToRem,
   useAPIErrorHandler,
-  useFetchClient,
   useNotification,
   useRBAC,
   useTracking,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
-import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
-import { Update } from '../../../../../../../shared/contracts/review-workflows';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
 import * as Layout from './components/Layout';
@@ -79,42 +74,20 @@ export const ReviewWorkflowsListView = () => {
   const [workflowToDelete, setWorkflowToDelete] = React.useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = React.useState<boolean>(false);
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
-  const { meta, workflows, isLoading, refetch } = useReviewWorkflows();
-  const { del } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { meta, workflows, isLoading, deleteWorkflow } = useReviewWorkflows();
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['review-workflows']
+  );
   const {
     allowedActions: { canCreate, canDelete },
-  } = useRBAC(permissions.settings?.['review-workflows']);
+  } = useRBAC(permissions);
 
   const limits = getFeature('review-workflows');
   const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] as string;
-
-  const { mutateAsync, isLoading: isLoadingMutation } = useMutation<
-    Update.Response['data'],
-    AxiosError<Update.Response>,
-    { workflowId: string; stages?: Update.Request['body'] }
-  >(
-    async ({ workflowId, stages }) => {
-      const {
-        data: { data },
-      } = await del(`/admin/review-workflows/workflows/${workflowId}`, {
-        data: stages,
-      });
-
-      return data;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: { id: 'notification.success.deleted', defaultMessage: 'Deleted' },
-        });
-      },
-    }
-  );
 
   const getContentTypeDisplayName = (uid: string) => {
     const contentType = [...collectionTypes, ...singleTypes].find(
@@ -136,21 +109,35 @@ export const ReviewWorkflowsListView = () => {
     if (!workflowToDelete) return;
 
     try {
-      const res = await mutateAsync({ workflowId: workflowToDelete });
+      setIsDeleting(true);
 
-      await refetch();
-      setWorkflowToDelete(null);
+      const res = await deleteWorkflow({ id: workflowToDelete });
 
-      return res;
-    } catch (error) {
-      if (error instanceof AxiosError) {
+      if ('error' in res) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIError(res.error),
         });
+
+        return;
       }
 
-      return null;
+      setWorkflowToDelete(null);
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.deleted', defaultMessage: 'Deleted' },
+      });
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error.unexpected',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -384,7 +371,7 @@ export const ReviewWorkflowsListView = () => {
             defaultMessage:
               'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
           }}
-          isConfirmButtonLoading={isLoadingMutation}
+          isConfirmButtonLoading={isDeleting}
           isOpen={!!workflowToDelete}
           onToggleDialog={toggleConfirmDeleteDialog}
           onConfirm={handleConfirmDeleteDialog}
@@ -411,10 +398,12 @@ export const ReviewWorkflowsListView = () => {
 };
 
 export const ProtectedReviewWorkflowsPage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['review-workflows']?.main
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.['review-workflows']?.main}>
+    <CheckPagePermissions permissions={permissions}>
       <ReviewWorkflowsListView />
     </CheckPagePermissions>
   );

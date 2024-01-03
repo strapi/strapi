@@ -14,7 +14,7 @@ import { Link } from '@strapi/design-system/v2';
 import { Form } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
 import { Webhook } from '@strapi/types';
-import { Field, FormikProvider, useFormik } from 'formik';
+import { Field, FormikHelpers, FormikProvider, useFormik } from 'formik';
 import { IntlShape, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import * as yup from 'yup';
@@ -35,7 +35,10 @@ interface WebhookFormValues {
 
 interface WebhookFormProps {
   data?: Webhook;
-  handleSubmit: (values: WebhookFormValues) => void;
+  handleSubmit: (
+    values: WebhookFormValues,
+    formik: FormikHelpers<WebhookFormValues>
+  ) => Promise<void>;
   isCreating: boolean;
   isTriggering: boolean;
   triggerWebhook: () => void;
@@ -80,11 +83,10 @@ const WebhookForm = ({
       headers: mapHeaders(data?.headers || {}),
       events: data?.events || [],
     },
-    onSubmit(values, { resetForm, setSubmitting }) {
-      handleSubmit(values);
+    async onSubmit(values, formik) {
+      await handleSubmit(values, formik);
 
-      resetForm({ values });
-      setSubmitting(false);
+      formik.resetForm({ values });
     },
     validationSchema: makeWebhookValidationSchema({ formatMessage }),
     validateOnChange: false,

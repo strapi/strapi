@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { configureStore } from '@reduxjs/toolkit';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Matcher, SelectorMatcherOptions, render, waitFor, screen } from '@testing-library/react';
@@ -12,10 +10,11 @@ import { Provider } from 'react-redux';
 
 import { Workflow } from '../../../../../../../../../shared/contracts/review-workflows';
 import { AdminRole } from '../../../../../../../../../shared/contracts/shared';
-import { ContentType } from '../../../../../../../../../shared/schema';
 import { REDUX_NAMESPACE } from '../../constants';
 import { reducer } from '../../reducer';
 import { WorkflowAttributes, WorkflowAttributesProps } from '../WorkflowAttributes';
+
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 const WORKFLOWS_FIXTURE = [
   {
@@ -103,8 +102,8 @@ const setup = ({
   currentWorkflow,
   ...props
 }: {
-  collectionTypes?: ContentType[];
-  singleTypes?: ContentType[];
+  collectionTypes?: Contracts.ContentTypes.ContentType[];
+  singleTypes?: Contracts.ContentTypes.ContentType[];
   currentWorkflow?: Partial<Workflow>;
 } & ComponentFixtureType = {}) => ({
   ...render(<ComponentFixture currentWorkflow={currentWorkflow} {...props} />, {

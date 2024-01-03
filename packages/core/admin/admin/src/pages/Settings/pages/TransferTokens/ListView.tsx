@@ -6,7 +6,7 @@ import {
   NoContent,
   NoPermissions,
   SettingsPageTitle,
-  useFetchClient,
+  useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
   useNotification,
@@ -15,14 +15,16 @@ import {
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
-import { AxiosError } from 'axios';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectAdminPermissions } from '../../../../selectors';
+import { useTypedSelector } from '../../../../core/store/hooks';
+import { useOnce } from '../../../../hooks/useOnce';
+import {
+  useDeleteTransferTokenMutation,
+  useGetTransferTokensQuery,
+} from '../../../../services/transferTokens';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { Table } from '../../components/Tokens/Table';
 
@@ -81,27 +83,26 @@ const ListView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['transfer-tokens']
+  );
   const {
+    isLoading: isLoadingRBAC,
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-    // @ts-expect-error this is fine
-  } = useRBAC(permissions.settings['transfer-tokens']);
+  } = useRBAC(permissions);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
-
-  const { startSection } = useGuidedTour();
-  const startSectionRef = React.useRef(startSection);
-  const { get, del } = useFetchClient();
-
-  React.useEffect(() => {
-    if (startSectionRef.current) {
-      startSectionRef.current('transferTokens');
-    }
-  }, []);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
+
+  useOnce(() => {
+    trackUsage('willAccessTokenList', {
+      tokenType: TRANSFER_TOKEN_TYPE,
+    });
+  });
 
   const headers = tableHeaders.map((header) => ({
     ...header,
@@ -112,89 +113,52 @@ const ListView = () => {
   }));
 
   const {
-    data: transferTokens,
-    status,
-    isFetching,
-    refetch,
-  } = useQuery(
-    ['transfer-tokens'],
-    async () => {
-      trackUsage('willAccessTokenList', {
+    data: transferTokens = [],
+    isLoading: isLoadingTokens,
+    error,
+  } = useGetTransferTokensQuery(undefined, {
+    skip: !canRead,
+  });
+
+  React.useEffect(() => {
+    if (transferTokens) {
+      trackUsage('didAccessTokenList', {
+        number: transferTokens.length,
         tokenType: TRANSFER_TOKEN_TYPE,
       });
-      const {
-        data: { data },
-      } = await get(`/admin/transfer/tokens`);
-
-      trackUsage('didAccessTokenList', { number: data.length, tokenType: TRANSFER_TOKEN_TYPE });
-
-      return data;
-    },
-    {
-      enabled: canRead,
-      onError(err) {
-        if (err instanceof AxiosError) {
-          if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-            toggleNotification({
-              type: 'warning',
-              message: {
-                id: 'notification.error.invalid.configuration',
-                defaultMessage:
-                  'You have an invalid configuration, check your server log for more information.',
-              },
-            });
-          } else {
-            toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.error', defaultMessage: 'An error occured' },
-            });
-          }
-        }
-      },
     }
-  );
+  }, [trackUsage, transferTokens]);
 
-  const isLoading =
-    canRead &&
-    ((status !== 'success' && status !== 'error') || (status === 'success' && isFetching));
-
-  const deleteMutation = useMutation(
-    async (id: Entity.ID) => {
-      await del(`/admin/transfer/tokens/${id}`);
-    },
-    {
-      async onSuccess() {
-        // @ts-expect-error this is fine
-        await refetch(['transfer-tokens']);
-      },
-      onError(err) {
-        if (err instanceof AxiosError) {
-          if (err?.response?.data?.data) {
-            toggleNotification({ type: 'warning', message: err.response.data.data });
-          } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-            toggleNotification({
-              type: 'warning',
-              message: {
-                id: 'notification.error.invalid.configuration',
-                defaultMessage:
-                  'You have an invalid configuration, check your server log for more information.',
-              },
-            });
-          } else {
-            toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.error', defaultMessage: 'An error occured' },
-            });
-          }
-        }
-      },
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
     }
-  );
+  }, [error, formatAPIError, toggleNotification]);
 
-  const hasTransferTokens = transferTokens && transferTokens?.length > 0;
-  const shouldDisplayDynamicTable = canRead && hasTransferTokens;
-  const shouldDisplayNoContent = canRead && !hasTransferTokens && !canCreate;
-  const shouldDisplayNoContentWithCreationButton = canRead && !hasTransferTokens && canCreate;
+  const [deleteToken] = useDeleteTransferTokenMutation();
+
+  const handleDelete = async (id: Entity.ID) => {
+    try {
+      const res = await deleteToken(id);
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+      }
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+    }
+  };
+
+  const isLoading = isLoadingTokens || isLoadingRBAC;
 
   return (
     <Main aria-busy={isLoading}>
@@ -231,18 +195,18 @@ const ListView = () => {
       />
       <ContentLayout>
         {!canRead && <NoPermissions />}
-        {shouldDisplayDynamicTable && (
+        {canRead && transferTokens.length > 0 && (
           <Table
             permissions={{ canRead, canDelete, canUpdate }}
             headers={headers}
             contentType="trasfer-tokens"
             isLoading={isLoading}
-            onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
+            onConfirmDelete={handleDelete}
             tokens={transferTokens}
             tokenType={TRANSFER_TOKEN_TYPE}
           />
         )}
-        {shouldDisplayNoContentWithCreationButton && (
+        {canRead && canCreate && transferTokens.length === 0 && (
           <NoContent
             content={{
               id: 'Settings.transferTokens.addFirstToken',
@@ -262,7 +226,7 @@ const ListView = () => {
             }
           />
         )}
-        {shouldDisplayNoContent && (
+        {canRead && !canCreate && transferTokens.length === 0 && (
           <NoContent
             content={{
               id: 'Settings.transferTokens.emptyStateLayout',
@@ -280,10 +244,12 @@ const ListView = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListView = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['transfer-tokens'].main
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.['transfer-tokens'].main}>
+    <CheckPagePermissions permissions={permissions}>
       <ListView />
     </CheckPagePermissions>
   );
