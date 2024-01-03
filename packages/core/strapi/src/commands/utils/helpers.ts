@@ -120,6 +120,14 @@ const assertCwdContainsStrapiProject = (name: string) => {
   };
 
   try {
+    /**
+     * This is basically a generator function & therefore you can use `npx` to create
+     * a plugin in a non-Strapi project.
+     */
+    if (name === 'plugin:init') {
+      return;
+    }
+
     const pkgJSON = require(`${process.cwd()}/package.json`);
     if (
       !has('dependencies.@strapi/strapi', pkgJSON) &&
