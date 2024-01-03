@@ -12,7 +12,7 @@ import { useDeleteReleaseActionMutation } from '../services/release';
 
 const StyledMenuItem = styled(Menu.Item)`
   &:hover {
-    background: transparent;
+    background: ${({ theme }) => theme.colors.danger100};
   }
 
   svg {
@@ -100,11 +100,11 @@ export const ReleaseActionMenu = ({ releaseId, actionId }: ReleaseActionMenuProp
           // @ts-expect-error See above
           icon={<More />}
         />
-        {/* 
+        {/*
           TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
           Refactor this once fixed in the DS
          */}
-        <Menu.Content top={1}>
+        <Menu.Content top={1} popoverPlacement="bottom-end">
           <CheckPermissions permissions={PERMISSIONS.deleteAction}>
             <StyledMenuItem color="danger600" onSelect={handleDeleteAction}>
               <Flex gap={2}>

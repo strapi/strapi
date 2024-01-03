@@ -14,8 +14,10 @@ import {
   Typography,
   ModalFooter,
 } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
+  NoContent,
   useAPIErrorHandler,
   useCMEditViewDataManager,
   useNotification,
@@ -24,7 +26,7 @@ import { Plus } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams, Link as ReactRouterLink } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
@@ -59,6 +61,34 @@ interface AddActionToReleaseModalProps {
   contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'];
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
 }
+
+const NoReleases = () => {
+  const { formatMessage } = useIntl();
+  return (
+    <NoContent
+      content={{
+        id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
+        defaultMessage:
+          'No available releases. Open the list of releases and create a new one from there.',
+      }}
+      action={
+        <LinkButton
+          // @ts-expect-error - types are not inferred correctly through the as prop.
+          to={{
+            pathname: '/plugins/content-releases',
+          }}
+          as={ReactRouterLink}
+          variant="secondary"
+        >
+          {formatMessage({
+            id: 'content-releases.content-manager-edit-view.add-to-release.redirect-button',
+            defaultMessage: 'Open the list of releases',
+          })}
+        </LinkButton>
+      }
+    />
+  );
+};
 
 const AddActionToReleaseModal = ({
   handleClose,
@@ -141,42 +171,46 @@ const AddActionToReleaseModal = ({
         {({ values, setFieldValue }) => {
           return (
             <Form>
-              <ModalBody>
-                <Flex direction="column" alignItems="stretch" gap={2}>
-                  <Box paddingBottom={6}>
-                    <SingleSelect
-                      required
-                      label={formatMessage({
-                        id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
-                        defaultMessage: 'Select a release',
+              {releases?.length === 0 ? (
+                <NoReleases />
+              ) : (
+                <ModalBody>
+                  <Flex direction="column" alignItems="stretch" gap={2}>
+                    <Box paddingBottom={6}>
+                      <SingleSelect
+                        required
+                        label={formatMessage({
+                          id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
+                          defaultMessage: 'Select a release',
+                        })}
+                        placeholder={formatMessage({
+                          id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
+                          defaultMessage: 'Select',
+                        })}
+                        onChange={(value) => setFieldValue('releaseId', value)}
+                        value={values.releaseId}
+                      >
+                        {releases?.map((release) => (
+                          <SingleSelectOption key={release.id} value={release.id}>
+                            {release.name}
+                          </SingleSelectOption>
+                        ))}
+                      </SingleSelect>
+                    </Box>
+                    <FieldLabel>
+                      {formatMessage({
+                        id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
+                        defaultMessage: 'What do you want to do with this entry?',
                       })}
-                      placeholder={formatMessage({
-                        id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
-                        defaultMessage: 'Select',
-                      })}
-                      onChange={(value) => setFieldValue('releaseId', value)}
-                      value={values.releaseId}
-                    >
-                      {releases?.map((release) => (
-                        <SingleSelectOption key={release.id} value={release.id}>
-                          {release.name}
-                        </SingleSelectOption>
-                      ))}
-                    </SingleSelect>
-                  </Box>
-                  <FieldLabel>
-                    {formatMessage({
-                      id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
-                      defaultMessage: 'What do you want to do with this entry?',
-                    })}
-                  </FieldLabel>
-                  <ReleaseActionOptions
-                    selected={values.type}
-                    handleChange={(e) => setFieldValue('type', e.target.value)}
-                    name="type"
-                  />
-                </Flex>
-              </ModalBody>
+                    </FieldLabel>
+                    <ReleaseActionOptions
+                      selected={values.type}
+                      handleChange={(e) => setFieldValue('type', e.target.value)}
+                      name="type"
+                    />
+                  </Flex>
+                </ModalBody>
+              )}
               <ModalFooter
                 startActions={
                   <Button onClick={handleClose} variant="tertiary" name="cancel">

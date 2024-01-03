@@ -1,10 +1,8 @@
 import * as React from 'react';
 
 import {
-  Box,
   Button,
   ContentLayout,
-  EmptyStateLayout,
   Flex,
   HeaderLayout,
   IconButton,
@@ -18,10 +16,11 @@ import {
   SingleSelect,
   SingleSelectOption,
 } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import {
-  AnErrorOccurred,
   CheckPermissions,
   LoadingIndicatorPage,
+  NoContent,
   PageSizeURLQuery,
   PaginationURLQuery,
   RelativeTime,
@@ -30,12 +29,14 @@ import {
   useNotification,
   useQueryParams,
   ConfirmDialog,
+  useRBAC,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, EmptyDocuments, More, Pencil, Trash } from '@strapi/icons';
+import { ArrowLeft, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
@@ -65,8 +66,16 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledFlex = styled(Flex)`
+const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
   align-self: stretch;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+
+  svg path {
+    fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
+  span {
+    color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
 `;
 
 const PencilIcon = styled(Pencil)`
@@ -87,10 +96,11 @@ const TrashIcon = styled(Trash)`
 
 interface PopoverButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  disabled?: boolean;
   children: React.ReactNode;
 }
 
-const PopoverButton = ({ onClick, children }: PopoverButtonProps) => {
+const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
   return (
     <StyledFlex
       paddingTop={2}
@@ -102,6 +112,7 @@ const PopoverButton = ({ onClick, children }: PopoverButtonProps) => {
       as="button"
       hasRadius
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </StyledFlex>
@@ -123,10 +134,18 @@ export const ReleaseDetailsLayout = ({
   const { releaseId } = useParams<{ releaseId: string }>();
   const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
-  const { data, isLoading: isLoadingDetails, isError } = useGetReleaseQuery({ id: releaseId });
+  const {
+    data,
+    isLoading: isLoadingDetails,
+    isError,
+    error,
+  } = useGetReleaseQuery({ id: releaseId });
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
+  const {
+    allowedActions: { canUpdate, canDelete },
+  } = useRBAC(PERMISSIONS);
 
   const release = data?.data;
 
@@ -174,20 +193,25 @@ export const ReleaseDetailsLayout = ({
   if (isLoadingDetails) {
     return (
       <Main aria-busy={isLoadingDetails}>
-        <Box paddingBottom={8}>
-          <LoadingIndicatorPage />
-        </Box>
+        <LoadingIndicatorPage />
       </Main>
     );
   }
 
   if (isError || !release) {
     return (
-      <Main>
-        <Box paddingBottom={8}>
-          <AnErrorOccurred />
-        </Box>
-      </Main>
+      <Redirect
+        to={{
+          pathname: '/plugins/content-releases',
+          state: {
+            errors: [
+              {
+                code: error?.code,
+              },
+            ],
+          },
+        }}
+      />
     );
   }
 
@@ -196,125 +220,108 @@ export const ReleaseDetailsLayout = ({
 
   return (
     <Main aria-busy={isLoadingDetails}>
-      <Box paddingBottom={8}>
-        <HeaderLayout
-          title={release.name}
-          subtitle={formatMessage(
-            {
-              id: 'content-releases.pages.Details.header-subtitle',
-              defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-            },
-            { number: totalEntries }
-          )}
-          navigationAction={
-            <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
-              {formatMessage({
-                id: 'global.back',
-                defaultMessage: 'Back',
-              })}
-            </Link>
-          }
-          primaryAction={
-            !release.releasedAt && (
-              <Flex gap={2}>
-                <IconButton
-                  label={formatMessage({
-                    id: 'content-releases.header.actions.open-release-actions',
-                    defaultMessage: 'Release actions',
-                  })}
-                  ref={moreButtonRef}
-                  onClick={handleTogglePopover}
+      <HeaderLayout
+        title={release.name}
+        subtitle={formatMessage(
+          {
+            id: 'content-releases.pages.Details.header-subtitle',
+            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+          },
+          { number: totalEntries }
+        )}
+        navigationAction={
+          <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
+            {formatMessage({
+              id: 'global.back',
+              defaultMessage: 'Back',
+            })}
+          </Link>
+        }
+        primaryAction={
+          !release.releasedAt && (
+            <Flex gap={2}>
+              <IconButton
+                label={formatMessage({
+                  id: 'content-releases.header.actions.open-release-actions',
+                  defaultMessage: 'Release actions',
+                })}
+                ref={moreButtonRef}
+                onClick={handleTogglePopover}
+              >
+                <More />
+              </IconButton>
+              {isPopoverVisible && (
+                <Popover
+                  source={moreButtonRef}
+                  placement="bottom-end"
+                  onDismiss={handleTogglePopover}
+                  spacing={4}
+                  minWidth="242px"
                 >
-                  <More />
-                </IconButton>
-                {isPopoverVisible && (
-                  <Popover
-                    source={moreButtonRef}
-                    placement="bottom-end"
-                    onDismiss={handleTogglePopover}
-                    spacing={4}
-                    minWidth="242px"
-                  >
-                    <Flex
-                      alignItems="center"
-                      justifyContent="center"
-                      direction="column"
-                      padding={1}
-                    >
-                      <CheckPermissions permissions={PERMISSIONS.update}>
-                        <PopoverButton onClick={openReleaseModal}>
-                          <PencilIcon />
-                          <Typography ellipsis>
-                            {formatMessage({
-                              id: 'content-releases.header.actions.edit',
-                              defaultMessage: 'Edit',
-                            })}
-                          </Typography>
-                        </PopoverButton>
-                      </CheckPermissions>
-                      <CheckPermissions permissions={PERMISSIONS.delete}>
-                        <PopoverButton onClick={openWarningConfirmDialog}>
-                          <TrashIcon />
-                          <Typography ellipsis textColor="danger600">
-                            {formatMessage({
-                              id: 'content-releases.header.actions.delete',
-                              defaultMessage: 'Delete',
-                            })}
-                          </Typography>
-                        </PopoverButton>
-                      </CheckPermissions>
-                    </Flex>
-                    <ReleaseInfoWrapper
-                      direction="column"
-                      justifyContent="center"
-                      alignItems="flex-start"
-                      gap={1}
-                      padding={5}
-                    >
-                      <Typography variant="pi" fontWeight="bold">
+                  <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
+                    <PopoverButton disabled={!canUpdate} onClick={openReleaseModal}>
+                      <PencilIcon />
+                      <Typography ellipsis>
                         {formatMessage({
-                          id: 'content-releases.header.actions.created',
-                          defaultMessage: 'Created',
+                          id: 'content-releases.header.actions.edit',
+                          defaultMessage: 'Edit',
                         })}
                       </Typography>
-                      <Typography variant="pi" color="neutral300">
-                        <RelativeTime timestamp={new Date(release.createdAt)} />
-                        {formatMessage(
-                          {
-                            id: 'content-releases.header.actions.created.description',
-                            defaultMessage: ' by {createdBy}',
-                          },
-                          { createdBy }
-                        )}
+                    </PopoverButton>
+                    <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
+                      <TrashIcon />
+                      <Typography ellipsis textColor="danger600">
+                        {formatMessage({
+                          id: 'content-releases.header.actions.delete',
+                          defaultMessage: 'Delete',
+                        })}
                       </Typography>
-                    </ReleaseInfoWrapper>
-                  </Popover>
-                )}
-                <Button size="S" variant="tertiary">
+                    </PopoverButton>
+                  </Flex>
+                  <ReleaseInfoWrapper
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-start"
+                    gap={1}
+                    padding={5}
+                  >
+                    <Typography variant="pi" fontWeight="bold">
+                      {formatMessage({
+                        id: 'content-releases.header.actions.created',
+                        defaultMessage: 'Created',
+                      })}
+                    </Typography>
+                    <Typography variant="pi" color="neutral300">
+                      <RelativeTime timestamp={new Date(release.createdAt)} />
+                      {formatMessage(
+                        {
+                          id: 'content-releases.header.actions.created.description',
+                          defaultMessage: ' by {createdBy}',
+                        },
+                        { createdBy }
+                      )}
+                    </Typography>
+                  </ReleaseInfoWrapper>
+                </Popover>
+              )}
+              <CheckPermissions permissions={PERMISSIONS.publish}>
+                <Button
+                  size="S"
+                  variant="default"
+                  onClick={handlePublishRelease}
+                  loading={isPublishing}
+                  disabled={release.actions.meta.count === 0}
+                >
                   {formatMessage({
-                    id: 'content-releases.header.actions.refresh',
-                    defaultMessage: 'Refresh',
+                    id: 'content-releases.header.actions.publish',
+                    defaultMessage: 'Publish',
                   })}
                 </Button>
-                <CheckPermissions permissions={PERMISSIONS.publish}>
-                  <Button
-                    size="S"
-                    variant="default"
-                    onClick={handlePublishRelease}
-                    loading={isPublishing}
-                    disabled={release.actions.meta.count === 0}
-                  >
-                    {formatMessage({
-                      id: 'content-releases.header.actions.publish',
-                      defaultMessage: 'Publish',
-                    })}
-                  </Button>
-                </CheckPermissions>
-              </Flex>
-            )
-          }
-        />
-      </Box>
+              </CheckPermissions>
+            </Flex>
+          )
+        }
+      />
       {children}
     </Main>
   );
@@ -348,10 +355,17 @@ const ReleaseDetailsBody = () => {
     data: releaseData,
     isLoading: isReleaseLoading,
     isError: isReleaseError,
+    error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
   const release = releaseData?.data;
 
-  const { isLoading, isFetching, isError, data } = useGetReleaseActionsQuery({
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    data,
+    error: releaseActionsError,
+  } = useGetReleaseActionsQuery({
     ...query,
     releaseId,
   });
@@ -401,22 +415,54 @@ const ReleaseDetailsBody = () => {
   const releaseMeta = data?.meta;
 
   if (isError || isReleaseError || !release || !releaseActions) {
+    const errorsArray = [];
+    if (releaseError) {
+      errorsArray.push({
+        code: releaseError.code,
+      });
+    }
+    if (releaseActionsError) {
+      errorsArray.push({
+        code: releaseActionsError.code,
+      });
+    }
     return (
-      <ContentLayout>
-        <AnErrorOccurred />
-      </ContentLayout>
+      <Redirect
+        to={{
+          pathname: '/plugins/content-releases',
+          state: {
+            errors: errorsArray,
+          },
+        }}
+      />
     );
   }
 
   if (Object.keys(releaseActions).length === 0) {
     return (
       <ContentLayout>
-        <EmptyStateLayout
-          content={formatMessage({
-            id: 'content-releases.pages.Details.empty-state.content',
-            defaultMessage: 'This release is empty.',
-          })}
-          icon={<EmptyDocuments width="10rem" />}
+        <NoContent
+          content={{
+            id: 'content-releases.pages.Details.tab.emptyEntries',
+            defaultMessage:
+              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+          }}
+          action={
+            <LinkButton
+              as={ReactRouterLink}
+              // @ts-expect-error - types are not inferred correctly through the as prop.
+              to={{
+                pathname: '/content-manager',
+              }}
+              style={{ textDecoration: 'none' }}
+              variant="secondary"
+            >
+              {formatMessage({
+                id: 'content-releases.page.Details.button.openContentManager',
+                defaultMessage: 'Open the Content Manager',
+              })}
+            </LinkButton>
+          }
         />
       </ContentLayout>
     );
@@ -542,6 +588,11 @@ const ReleaseDetailsBody = () => {
                             name={`release-action-${id}-type`}
                           />
                         )}
+                      </Td>
+                      <Td>
+                        <Flex justifyContent="flex-end">
+                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                        </Flex>
                       </Td>
                     </Tr>
                   ))}
