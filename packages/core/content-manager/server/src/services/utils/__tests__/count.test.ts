@@ -84,10 +84,12 @@ describe('getDeepRelationsCount', () => {
             },
           ],
         },
-        'admin::relationMTM'
+        // @ts-expect-error – fake model, the data would have to change to satisfy the type
+        'relationMTM'
       );
 
       expect(count).toEqual({
+        id: 1,
         relationAttrName: {
           count: 2,
         },
@@ -103,10 +105,12 @@ describe('getDeepRelationsCount', () => {
             name: 'rel1',
           },
         },
-        'admin::relationOTO'
+        // @ts-expect-error – fake model, the data would have to change to satisfy the type
+        'relationOTO'
       );
 
       expect(count).toEqual({
+        id: 1,
         relationAttrName: {
           count: 1,
         },
@@ -120,7 +124,8 @@ describe('getDeepRelationsCount', () => {
         id: 1,
         mediaAttrName: { id: 1, name: 'img1' },
       };
-      const count = getDeepRelationsCount(mediaEntity, 'admin::media');
+      // @ts-expect-error – fake model, the data would have to change to satisfy the type
+      const count = getDeepRelationsCount(mediaEntity, 'media');
 
       expect(count).toEqual(mediaEntity);
     });
@@ -144,10 +149,12 @@ describe('getDeepRelationsCount', () => {
             ],
           },
         },
-        'component.component'
+        // @ts-expect-error – fake model, the data would have to change to satisfy the type
+        'component'
       );
 
       expect(count).toEqual({
+        id: 1,
         componentAttrName: {
           relationAttrName: {
             count: 2,
@@ -162,10 +169,12 @@ describe('getDeepRelationsCount', () => {
           id: 1,
           componentAttrName: null,
         },
-        'component.component'
+        // @ts-expect-error – fake model, the data would have to change to satisfy the type
+        'component'
       );
 
       expect(count).toEqual({
+        id: 1,
         componentAttrName: null,
       });
     });
@@ -189,10 +198,12 @@ describe('getDeepRelationsCount', () => {
             },
           ],
         },
-        'component.repeatableComponent'
+        // @ts-expect-error – fake model, the data would have to change to satisfy the type
+        'repeatableComponent'
       );
 
       expect(count).toEqual({
+        id: 1,
         repeatableComponentAttrName: [
           {
             relationAttrName: {
@@ -227,10 +238,12 @@ describe('getDeepRelationsCount', () => {
             },
           ],
         },
-        'component.dynZone'
+        // @ts-expect-error – fake model, the data would have to change to satisfy the type
+        'dynZone'
       );
 
       expect(count).toEqual({
+        id: 1,
         dynZoneAttrName: [
           {
             __component: 'component',
