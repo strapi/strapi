@@ -42,9 +42,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.13.2",
+    "@strapi/design-system": "1.14.0",
     "@strapi/helper-plugin": "4.16.2",
-    "@strapi/icons": "1.13.2",
+    "@strapi/icons": "1.14.0",
     "@strapi/provider-upload-local": "4.16.2",
     "@strapi/utils": "4.16.2",
     "axios": "1.6.0",
