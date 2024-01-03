@@ -66,7 +66,7 @@ export declare namespace GetReleaseActions {
       releaseId: Release['id'];
     };
     query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
-      groupBy: ReleaseActionGroupBy;
+      groupBy?: ReleaseActionGroupBy;
     };
   }
 
