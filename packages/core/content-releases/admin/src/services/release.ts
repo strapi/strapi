@@ -134,16 +134,12 @@ const releaseApi = createApi({
         GetReleaseActions.Response,
         GetReleaseActions.Request['params'] & GetReleaseActions.Request['query']
       >({
-        query({ releaseId, page, pageSize, groupBy }) {
+        query({ releaseId, ...params }) {
           return {
             url: `/content-releases/${releaseId}/actions`,
             method: 'GET',
             config: {
-              params: {
-                page,
-                pageSize,
-                groupBy,
-              },
+              params,
             },
           };
         },

@@ -425,34 +425,32 @@ const ReleaseDetailsBody = () => {
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
-        <Flex justifyContent="space-between" alignItems="flex-start">
-          <Flex>
-            <SingleSelect
-              aria-label={formatMessage({
-                id: 'pages.ReleaseDetails.groupBy.label',
-                defaultMessage: 'Group by',
-              })}
-              customizeContent={(value) =>
-                formatMessage(
-                  {
-                    id: `pages.ReleaseDetails.groupBy.label}`,
-                    defaultMessage: `Group by {groupBy}`,
-                  },
-                  {
-                    groupBy: value,
-                  }
-                )
-              }
-              value={query?.groupBy || 'contentType'}
-              onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
-            >
-              {GROUP_BY_OPTIONS.map((option) => (
-                <SingleSelectOption key={option.value} value={option.value}>
-                  {option.label}
-                </SingleSelectOption>
-              ))}
-            </SingleSelect>
-          </Flex>
+        <Flex>
+          <SingleSelect
+            aria-label={formatMessage({
+              id: 'pages.ReleaseDetails.groupBy.label',
+              defaultMessage: 'Group by',
+            })}
+            customizeContent={(value) =>
+              formatMessage(
+                {
+                  id: `pages.ReleaseDetails.groupBy.label}`,
+                  defaultMessage: `Group by {groupBy}`,
+                },
+                {
+                  groupBy: value,
+                }
+              )
+            }
+            value={query?.groupBy || 'contentType'}
+            onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
+          >
+            {GROUP_BY_OPTIONS.map((option) => (
+              <SingleSelectOption key={option.value} value={option.value}>
+                {option.label}
+              </SingleSelectOption>
+            ))}
+          </SingleSelect>
         </Flex>
         {Object.keys(releaseActions).map((key) => (
           <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
@@ -552,7 +550,6 @@ const ReleaseDetailsBody = () => {
             </Table.Root>
           </Flex>
         ))}
-
         <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
           <PageSizeURLQuery defaultValue={releaseMeta?.pagination?.pageSize.toString()} />
           <PaginationURLQuery
