@@ -239,6 +239,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         files: ['dist'],
         scripts: {
           build: 'strapi plugin:build',
+          'link-watch': 'strapi plugin:link-watch',
           watch: 'strapi plugin:watch',
           verify: 'strapi plugin:verify',
         },
@@ -310,7 +311,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                 };
 
                 pkgJson.devDependencies = {
-                  ...pkgJson.dependencies,
+                  ...pkgJson.devDependencies,
                   react: '*',
                   'react-dom': '*',
                   'react-router-dom': '5.3.4',

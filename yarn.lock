@@ -8553,6 +8553,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:4.17.0"
     typescript: "npm:5.2.2"
+    yalc: "npm:1.0.0-pre.53"
     yup: "npm:0.32.9"
   bin:
     strapi: ./bin/strapi.js
@@ -14535,7 +14536,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"detect-indent@npm:^6.1.0":
+"detect-indent@npm:^6.0.0, detect-indent@npm:^6.1.0":
   version: 6.1.0
   resolution: "detect-indent@npm:6.1.0"
   checksum: ab953a73c72dbd4e8fc68e4ed4bfd92c97eb6c43734af3900add963fd3a9316f3bc0578b018b24198d4c31a358571eff5f0656e81a1f3b9ad5c547d58b2d093d
@@ -17070,6 +17071,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fs-extra@npm:^8.0.1":
+  version: 8.1.0
+  resolution: "fs-extra@npm:8.1.0"
+  dependencies:
+    graceful-fs: "npm:^4.2.0"
+    jsonfile: "npm:^4.0.0"
+    universalify: "npm:^0.1.0"
+  checksum: 6fb12449f5349be724a138b4a7b45fe6a317d2972054517f5971959c26fbd17c0e145731a11c7324460262baa33e0a799b183ceace98f7a372c95fbb6f20f5de
+  languageName: node
+  linkType: hard
+
 "fs-jetpack@npm:^4.3.1":
   version: 4.3.1
   resolution: "fs-jetpack@npm:4.3.1"
@@ -17575,7 +17587,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:7.2.3, glob@npm:^7.0.5, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.2.0, glob@npm:~7.2.0":
+"glob@npm:7.2.3, glob@npm:^7.0.5, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6, glob@npm:^7.2.0, glob@npm:~7.2.0":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
   dependencies:
@@ -18509,6 +18521,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ignore-walk@npm:^3.0.3":
+  version: 3.0.4
+  resolution: "ignore-walk@npm:3.0.4"
+  dependencies:
+    minimatch: "npm:^3.0.4"
+  checksum: 4f56a0a40aa1c8784955c106c13953d042f0ae0b71139af392d57452cbcc74ea5abe45b5c61c88b822b879d34f4dcad626828acd41eb52f9637a4552c182ef7b
+  languageName: node
+  linkType: hard
+
 "ignore-walk@npm:^5.0.1":
   version: 5.0.1
   resolution: "ignore-walk@npm:5.0.1"
@@ -18633,6 +18654,13 @@ __metadata:
   version: 1.3.8
   resolution: "ini@npm:1.3.8"
   checksum: 314ae176e8d4deb3def56106da8002b462221c174ddb7ce0c49ee72c8cd1f9044f7b10cc555a7d8850982c3b9ca96fc212122749f5234bc2b6fb05fb942ed566
+  languageName: node
+  linkType: hard
+
+"ini@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ini@npm:2.0.0"
+  checksum: 04e24ba05c4f6947e15560824e153b4610bceea2f5a3ab68651d221a4aab3c77d4e3e90a917ebc8bf5ad71a30a8575de56c39d6b4c4b1375a28016b9f3625f9d
   languageName: node
   linkType: hard
 
@@ -20388,6 +20416,18 @@ __metadata:
   version: 3.2.0
   resolution: "jsonc-parser@npm:3.2.0"
   checksum: bd68b902e5f9394f01da97921f49c5084b2dc03a0c5b4fdb2a429f8d6f292686c1bf87badaeb0a8148d024192a88f5ad2e57b2918ba43fe25cf15f3371db64d4
+  languageName: node
+  linkType: hard
+
+"jsonfile@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "jsonfile@npm:4.0.0"
+  dependencies:
+    graceful-fs: "npm:^4.1.6"
+  dependenciesMeta:
+    graceful-fs:
+      optional: true
+  checksum: 17796f0ab1be8479827d3683433f97ebe0a1c6932c3360fa40348eac36904d69269aab26f8b16da311882d94b42e9208e8b28e490bf926364f3ac9bff134c226
   languageName: node
   linkType: hard
 
@@ -23356,7 +23396,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-bundled@npm:^1.1.2":
+"npm-bundled@npm:^1.1.1, npm-bundled@npm:^1.1.2":
   version: 1.1.2
   resolution: "npm-bundled@npm:1.1.2"
   dependencies:
@@ -23443,6 +23483,20 @@ __metadata:
   bin:
     npm-packlist: bin/index.js
   checksum: 938299a48c7d2435199c8245f3ed79ad38c26f2256fe223d8654702d5e84d91a4193ee552333cf66d1716a94bc19a03b8ba43e1c5cd0535323de958b8dc7049e
+  languageName: node
+  linkType: hard
+
+"npm-packlist@npm:^2.1.5":
+  version: 2.2.2
+  resolution: "npm-packlist@npm:2.2.2"
+  dependencies:
+    glob: "npm:^7.1.6"
+    ignore-walk: "npm:^3.0.3"
+    npm-bundled: "npm:^1.1.1"
+    npm-normalize-package-bin: "npm:^1.0.1"
+  bin:
+    npm-packlist: bin/index.js
+  checksum: 600a8ae254a1be7fe73b43579698949ab4a5e51a578788fe6c62e613ffd593f4149bd73086d2fcbc0e468547ced5427e59e097c3463e9a33d53bd6c1c921f11f
   languageName: node
   linkType: hard
 
@@ -29655,7 +29709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"universalify@npm:^0.1.2":
+"universalify@npm:^0.1.0, universalify@npm:^0.1.2":
   version: 0.1.2
   resolution: "universalify@npm:0.1.2"
   checksum: 40cdc60f6e61070fe658ca36016a8f4ec216b29bf04a55dce14e3710cc84c7448538ef4dad3728d0bfe29975ccd7bfb5f414c45e7b78883567fb31b246f02dff
@@ -30701,6 +30755,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yalc@npm:1.0.0-pre.53":
+  version: 1.0.0-pre.53
+  resolution: "yalc@npm:1.0.0-pre.53"
+  dependencies:
+    chalk: "npm:^4.1.0"
+    detect-indent: "npm:^6.0.0"
+    fs-extra: "npm:^8.0.1"
+    glob: "npm:^7.1.4"
+    ignore: "npm:^5.0.4"
+    ini: "npm:^2.0.0"
+    npm-packlist: "npm:^2.1.5"
+    yargs: "npm:^16.1.1"
+  bin:
+    yalc: src/yalc.js
+  checksum: 881076d106c18b7830b97e60908f9fec6156a0cf62b3d87f1da28c8b22f42a25e09b9337e46f304bb6aa7a7ed468ccc51a96ca1f55f7c82c01462b6286f00c5c
+  languageName: node
+  linkType: hard
+
 "yallist@npm:^2.1.2":
   version: 2.1.2
   resolution: "yallist@npm:2.1.2"
@@ -30757,7 +30829,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:16.2.0, yargs@npm:^16.1.0, yargs@npm:^16.2.0":
+"yargs@npm:16.2.0, yargs@npm:^16.1.0, yargs@npm:^16.1.1, yargs@npm:^16.2.0":
   version: 16.2.0
   resolution: "yargs@npm:16.2.0"
   dependencies:
