@@ -168,6 +168,9 @@ describe('Releases details page', () => {
 
     const { user } = render(<ReleaseDetailsPage />, {
       initialEntries: [{ pathname: `/content-releases/1` }],
+      userEventOptions: {
+        skipHover: true,
+      },
     });
 
     await screen.findByText(mockReleaseDetailsPageData.noActionsHeaderData.data.name);
