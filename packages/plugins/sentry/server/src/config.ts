@@ -11,6 +11,6 @@ export default {
     dsn: null,
     sendMetadata: true,
     init: {},
-  } as Config,
+  } satisfies Config,
   validator() {},
 };
