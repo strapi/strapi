@@ -631,6 +631,8 @@
   "components.Blocks.modifiers.strikethrough": "Strikethrough",
   "components.Blocks.modifiers.code": "Inline code",
   "components.Blocks.link": "Link",
+  "components.Blocks.expand": "Expand",
+  "components.Blocks.collapse": "Collapse",
   "components.Blocks.popover.text": "Text",
   "components.Blocks.popover.text.placeholder": "Enter link text",
   "components.Blocks.popover.link": "Link",
