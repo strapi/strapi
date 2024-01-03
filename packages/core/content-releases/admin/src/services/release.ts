@@ -11,6 +11,7 @@ import { axiosBaseQuery } from './axios';
 import type {
   GetReleaseActions,
   UpdateReleaseAction,
+  ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
@@ -36,7 +37,7 @@ export interface GetReleasesQueryParams {
 export interface GetReleaseActionsQueryParams {
   page?: number;
   pageSize?: number;
-  groupBy?: GetReleaseActions.Request['query']['groupBy'];
+  groupBy?: ReleaseActionGroupBy;
 }
 
 type GetReleasesTabResponse = GetReleases.Response & {
