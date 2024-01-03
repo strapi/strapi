@@ -1,18 +1,18 @@
 ---
-title: plugin:link-watch
-description: An in depth look at the plugin:link-watch command of the Strapi CLI
+title: plugin:watch:link
+description: An in depth look at the plugin:watch:link command of the Strapi CLI
 tags:
   - CLI
   - commands
   - plugins
 ---
 
-The `plugin:link-watch` command recompiles your plugin and pushes those changes to your local yalc registry to simulate using your plugin as a node_module in another project.
+The `plugin:watch:link` command recompiles your plugin and pushes those changes to your local yalc registry to simulate using your plugin as a node_module in another project.
 
 ## Usage
 
 ```bash
-strapi plugin:link-watch
+strapi plugin:watch:link
 ```
 
 ### Options

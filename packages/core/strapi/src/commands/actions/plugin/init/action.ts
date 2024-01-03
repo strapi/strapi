@@ -239,8 +239,8 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         files: ['dist'],
         scripts: {
           build: 'strapi plugin:build',
-          'link-watch': 'strapi plugin:link-watch',
           watch: 'strapi plugin:watch',
+          'watch:link': 'strapi plugin:watch:link',
           verify: 'strapi plugin:verify',
         },
         dependencies: {},
@@ -297,7 +297,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
             case 'client-code': {
               if (answer) {
                 pkgJson.exports['./strapi-admin'] = {
-                  source: './src/admin/index.js',
+                  source: './admin/src/index.js',
                   import: './dist/admin/index.mjs',
                   require: './dist/admin/index.js',
                   default: './dist/admin/index.js',
@@ -332,7 +332,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
             case 'server-code': {
               if (answer) {
                 pkgJson.exports['./strapi-server'] = {
-                  source: './src/server/index.js',
+                  source: './server/src/index.js',
                   import: './dist/server/index.mjs',
                   require: './dist/server/index.js',
                   default: './dist/server/index.js',
@@ -357,7 +357,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
 
               if (isTypescript) {
                 if (isRecord(pkgJson.exports['./strapi-admin'])) {
-                  pkgJson.exports['./strapi-admin'].source = './src/admin/index.ts';
+                  pkgJson.exports['./strapi-admin'].source = './admin/src/index.ts';
 
                   pkgJson.exports['./strapi-admin'] = {
                     types: './dist/admin/src/index.d.ts',
@@ -383,7 +383,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                 }
 
                 if (isRecord(pkgJson.exports['./strapi-server'])) {
-                  pkgJson.exports['./strapi-server'].source = './src/server/index.ts';
+                  pkgJson.exports['./strapi-server'].source = './server/src/index.ts';
 
                   pkgJson.exports['./strapi-server'] = {
                     types: './dist/server/src/index.d.ts',

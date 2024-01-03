@@ -17,7 +17,7 @@ export default async (_opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIC
     /**
      * Notify users this is an experimental command.
      */
-    await notifyExperimentalCommand('plugin:link-watch', { force: true });
+    await notifyExperimentalCommand('plugin:watch:link', { force: true });
 
     const outDir = './dist';
     const extensions = 'ts,js,png,svg,gif,jpeg,css';
