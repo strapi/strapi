@@ -1,6 +1,11 @@
 const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./app-template/template/src/constants');
 
-const ALLOWED_CONTENT_TYPES = ['admin::user', 'admin::role', 'admin::permission'];
+const ALLOWED_CONTENT_TYPES = [
+  'admin::user',
+  'admin::role',
+  'admin::permission',
+  'plugin::i18n.locale',
+];
 
 // TODO: we should start using @strapi.io addresses to have the chance one day to
 // actually receive and check the emails; also: it is not nice to spam other peoples

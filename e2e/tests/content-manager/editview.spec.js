@@ -9,9 +9,6 @@ test.describe('Edit View', () => {
     await login({ page });
   });
 
-  /**
-   * @note There is only one field in this content-type.
-   */
   test('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
     page,
   }) => {
@@ -24,7 +21,7 @@ test.describe('Edit View', () => {
     /**
      * Now we're in the edit view.
      */
-    await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create');
+    await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create?**');
 
     await page.getByRole('textbox', { name: 'title' }).fill('my content');
 
@@ -46,6 +43,7 @@ test.describe('Edit View', () => {
 
     await page.getByRole('button', { name: 'Save' }).click();
 
+    // TODO why is this failing
     await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
 
     await page.getByRole('button', { name: 'Unpublish' }).click();
