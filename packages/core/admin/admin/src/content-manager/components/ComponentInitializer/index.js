@@ -48,7 +48,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
             <Typography textColor="primary600" variant="pi" fontWeight="bold">
               {formatMessage({
                 id: getTrad('components.empty-repeatable'),
-                defaultMessage: 'No entry yet. Click on the button below to add one.',
+                defaultMessage: 'No entry yet. Click to add one.',
               })}
             </Typography>
           </Flex>
