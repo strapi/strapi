@@ -1,6 +1,6 @@
-import { auth } from '@strapi/helper-plugin';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
+import { useAuth } from '../../features/Auth';
 import { useEnterprise } from '../../hooks/useEnterprise';
 
 import { Login as LoginCE } from './components/Login';
@@ -38,6 +38,8 @@ const AuthPage = ({ hasAdmin }: AuthPageProps) => {
     }
   );
 
+  const token = useAuth('AuthPage', (state) => state.token);
+
   if (!authType || !forms) {
     return <Redirect to="/" />;
   }
@@ -48,7 +50,7 @@ const AuthPage = ({ hasAdmin }: AuthPageProps) => {
   // the endpoint does not exist or
   // there is already an admin user oo
   // the user is already logged in
-  if (!Component || (hasAdmin && authType === 'register-admin') || auth.getToken()) {
+  if (!Component || (hasAdmin && authType === 'register-admin') || token) {
     return <Redirect to="/" />;
   }
 

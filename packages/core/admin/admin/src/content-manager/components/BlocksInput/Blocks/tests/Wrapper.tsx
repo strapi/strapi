@@ -40,7 +40,13 @@ const Wrapper = ({ children, baseEditor = defaultBaseEditor }: WrapperProps) => 
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={baseEditor.children} editor={editor}>
-          <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={false}>
+          <BlocksEditorProvider
+            blocks={blocks}
+            modifiers={modifiers}
+            disabled={false}
+            name="blocks"
+            setLiveText={() => {}}
+          >
             {children}
           </BlocksEditorProvider>
         </Slate>

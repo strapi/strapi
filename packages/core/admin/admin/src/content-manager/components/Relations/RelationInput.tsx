@@ -23,7 +23,11 @@ import { useIntl } from 'react-intl';
 import { FixedSizeList, FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
-import { UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
+import {
+  UseDragAndDropOptions,
+  useDragAndDrop,
+  DROP_SENSITIVITY,
+} from '../../hooks/useDragAndDrop';
 import { usePrev } from '../../hooks/usePrev';
 import { ItemTypes } from '../../utils/dragAndDrop';
 import { composeRefs } from '../../utils/refs';
@@ -189,7 +193,7 @@ const RelationInput = ({
 
   const handleMenuOpen = (isOpen?: boolean) => {
     if (isOpen) {
-      onSearch();
+      onSearch(textValue);
     }
   };
 
@@ -241,7 +245,7 @@ const RelationInput = ({
         <ComboboxWrapper marginRight="auto" maxWidth={size <= 6 ? '100%' : '70%'} width="100%">
           <Combobox
             ref={fieldRef}
-            autocomplete="list"
+            autocomplete="none"
             error={error}
             name={name}
             hint={description}
@@ -607,11 +611,11 @@ const RelationItem = ({
         id,
         index,
       },
-      onGrabItem,
-      onDropItem,
-      onCancel,
       onMoveItem: updatePositionOfRelation,
-      dropSensitivity: 'immediate',
+      onDropItem,
+      onGrabItem,
+      onCancel,
+      dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
     });
 
   const composedRefs = composeRefs(relationRef, dragRef);

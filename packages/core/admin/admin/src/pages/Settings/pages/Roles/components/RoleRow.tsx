@@ -1,10 +1,8 @@
-import * as React from 'react';
-
 import { Box, Flex, IconButton, IconButtonProps, Td, Tr, Typography } from '@strapi/design-system';
 import { onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { AdminRole } from '../../../../../hooks/useAdminRoles';
+import type { AdminRole } from '../../../../../hooks/useAdminRoles';
 
 interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | 'usersCount'> {
   icons: Array<Required<Pick<IconButtonProps, 'icon' | 'label' | 'onClick'>>>;

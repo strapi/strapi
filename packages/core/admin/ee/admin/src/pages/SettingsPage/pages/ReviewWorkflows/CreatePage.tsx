@@ -1,26 +1,17 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
-import set from 'lodash/set';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { ValidationError } from 'yup';
 
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../admin/src/hooks/useInjectReducer';
-import { Create, Workflow } from '../../../../../../../shared/contracts/review-workflows';
+import { isBaseQueryError } from '../../../../../../../admin/src/utils/baseQuery';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
 import {
@@ -52,16 +43,16 @@ import { validateWorkflow } from './utils/validateWorkflow';
 
 export const ReviewWorkflowsCreatePage = () => {
   const { formatMessage } = useIntl();
-  const { post } = useFetchClient();
   const { push } = useHistory();
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const { collectionTypes, singleTypes, isLoading: isLoadingContentTypes } = useContentTypes();
-  const { isLoading: isLoadingWorkflow, meta, workflows } = useReviewWorkflows();
-  const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles(undefined, {
-    retry: false,
-  });
+  const { isLoading: isLoadingWorkflow, meta, workflows, createWorkflow } = useReviewWorkflows();
+  const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles();
   const isLoading = useSelector(selectIsLoading);
   const currentWorkflowIsDirty = useSelector(selectIsWorkflowDirty);
   const currentWorkflow = useSelector(selectCurrentWorkflow);
@@ -76,69 +67,43 @@ export const ReviewWorkflowsCreatePage = () => {
   const stagesPerWorkflow = limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME];
   const contentTypesFromOtherWorkflows = workflows?.flatMap((workflow) => workflow.contentTypes);
 
-  const { mutateAsync } = useMutation<
-    Create.Response['data'],
-    AxiosError<Create.Response>,
-    { workflow: Create.Request['body'] }
-  >(
-    async ({ workflow }) => {
-      const {
-        data: { data },
-      } = await post(`/admin/review-workflows/workflows`, {
-        data: workflow,
-      });
-
-      return data;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: 'Settings.review-workflows.create.page.notification.success',
-            defaultMessage: 'Workflow successfully created',
-          },
-        });
-      },
-    }
-  );
-
   const submitForm = async () => {
     setSavePrompts({});
 
     try {
-      const workflow = await mutateAsync({ workflow: currentWorkflow as Workflow });
+      // @ts-expect-error – currentWorkflow will have already been validated by formik before it gets here.
+      const res = await createWorkflow(currentWorkflow);
 
-      push(`/settings/review-workflows/${workflow.id}`);
-
-      return workflow;
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        // TODO: this would benefit from a utility to get a formik error
-        // representation from an API error
-        if (
-          error.response?.data?.error?.name === 'ValidationError' &&
-          error.response?.data?.error?.details?.errors?.length > 0
-        ) {
-          setInitialErrors(
-            (error.response?.data?.error?.details?.errors as ValidationError[]).reduce(
-              (acc, error) => {
-                if (error.path) set(acc, error.path, error.message);
-
-                return acc;
-              },
-              {}
-            )
-          );
+      if ('error' in res) {
+        if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          setInitialErrors(formatValidationErrors(res.error));
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(res.error),
+          });
         }
 
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-
-        return null;
+        return;
       }
+
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: 'Settings.review-workflows.create.page.notification.success',
+          defaultMessage: 'Workflow successfully created',
+        },
+      });
+
+      push(`/settings/review-workflows/${res.data.id}`);
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'Settings.review-workflows.create.page.notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
     }
   };
 
