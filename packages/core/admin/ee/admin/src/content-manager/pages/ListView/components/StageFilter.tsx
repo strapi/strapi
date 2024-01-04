@@ -20,7 +20,6 @@ const StageFilter = ({ value, onChange, uid }: StageFilterProps) => {
   const {
     workflows: [workflow],
     isLoading,
-    // @ts-expect-error – we know that the `admin::review-workflow` content-type has a contentTypes attribute, but the EntityService uses a registry which we don't have.
   } = useReviewWorkflows({ filters: { contentTypes: uid } });
 
   return (
