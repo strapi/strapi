@@ -34,7 +34,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
+import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
@@ -179,7 +179,7 @@ interface ReleaseDetailsLayoutProps {
   children: React.ReactNode;
 }
 
-export const ReleaseDetailsLayout = ({
+const ReleaseDetailsLayout = ({
   toggleEditReleaseModal,
   toggleWarningSubmit,
   children,
@@ -193,7 +193,12 @@ export const ReleaseDetailsLayout = ({
     isLoading: isLoadingDetails,
     isError,
     error,
-  } = useGetReleaseQuery({ id: releaseId });
+  } = useGetReleaseQuery(
+    { id: releaseId! },
+    {
+      skip: !releaseId,
+    }
+  );
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -212,8 +217,8 @@ export const ReleaseDetailsLayout = ({
     handleTogglePopover();
   };
 
-  const handlePublishRelease = async () => {
-    const response = await publishRelease({ id: releaseId });
+  const handlePublishRelease = (id: string) => async () => {
+    const response = await publishRelease({ id });
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -254,16 +259,14 @@ export const ReleaseDetailsLayout = ({
 
   if (isError || !release) {
     return (
-      <Redirect
-        to={{
-          pathname: '/plugins/content-releases',
-          state: {
-            errors: [
-              {
-                code: error?.code,
-              },
-            ],
-          },
+      <Navigate
+        to=".."
+        state={{
+          errors: [
+            {
+              code: error?.code,
+            },
+          ],
         }}
       />
     );
@@ -364,7 +367,7 @@ export const ReleaseDetailsLayout = ({
                 <Button
                   size="S"
                   variant="default"
-                  onClick={handlePublishRelease}
+                  onClick={handlePublishRelease(release.id.toString())}
                   loading={isPublishing}
                   disabled={release.actions.meta.count === 0}
                 >
@@ -408,9 +411,12 @@ const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   };
 };
 
-const ReleaseDetailsBody = () => {
+interface ReleaseDetailsBodyProps {
+  releaseId: string;
+}
+
+const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const { formatMessage } = useIntl();
-  const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -492,12 +498,10 @@ const ReleaseDetailsBody = () => {
       });
     }
     return (
-      <Redirect
-        to={{
-          pathname: '/plugins/content-releases',
-          state: {
-            errors: errorsArray,
-          },
+      <Navigate
+        to=".."
+        state={{
+          errors: errorsArray,
         }}
       />
     );
@@ -702,7 +706,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -710,7 +714,12 @@ const ReleaseDetailsPage = () => {
     isLoading: isLoadingDetails,
     data,
     isSuccess: isSuccessDetails,
-  } = useGetReleaseQuery({ id: releaseId });
+  } = useGetReleaseQuery(
+    { id: releaseId! },
+    {
+      skip: !releaseId,
+    }
+  );
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
 
@@ -731,6 +740,10 @@ const ReleaseDetailsPage = () => {
         </ContentLayout>
       </ReleaseDetailsLayout>
     );
+  }
+
+  if (!releaseId) {
+    return <Navigate to=".." />;
   }
 
   const title = (isSuccessDetails && data?.data?.name) || '';
@@ -773,7 +786,7 @@ const ReleaseDetailsPage = () => {
     });
 
     if ('data' in response) {
-      push('/plugins/content-releases');
+      navigate('..');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -794,7 +807,7 @@ const ReleaseDetailsPage = () => {
       toggleEditReleaseModal={toggleEditReleaseModal}
       toggleWarningSubmit={toggleWarningSubmit}
     >
-      <ReleaseDetailsBody />
+      <ReleaseDetailsBody releaseId={releaseId} />
       {releaseModalShown && (
         <ReleaseModal
           handleClose={toggleEditReleaseModal}

@@ -11,7 +11,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Switch, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';
 
@@ -21,7 +21,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const render = () => ({
-  ...renderRTL(<Route path="/settings/users-permissions/roles/:id" component={EditPage} />, {
+  ...renderRTL(<Route path="/settings/users-permissions/roles/:id" element={<EditPage />} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -37,7 +37,7 @@ const render = () => ({
             <QueryClientProvider client={client}>
               <NotificationsProvider>
                 <MemoryRouter initialEntries={[`/settings/users-permissions/roles/1`]}>
-                  <Switch>{children}</Switch>
+                  <Routes>{children}</Routes>
                 </MemoryRouter>
               </NotificationsProvider>
             </QueryClientProvider>

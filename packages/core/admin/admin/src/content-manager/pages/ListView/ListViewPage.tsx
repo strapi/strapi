@@ -43,7 +43,13 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
-import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
+import {
+  useNavigate,
+  useLocation,
+  Link as ReactRouterLink,
+  useParams,
+  Navigate,
+} from 'react-router-dom';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
@@ -141,7 +147,7 @@ const ListViewPage = ({
     };
   }>();
   const { pathname } = useLocation();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { formatMessage, locale } = useIntl();
   const { get, post, del } = useFetchClient();
   const formatter = useCollator(locale, {
@@ -362,7 +368,7 @@ const ListViewPage = ({
             message: { id: getTranslation('permissions.not-allowed.update') },
           });
 
-          push('/');
+          navigate('/');
 
           return;
         }
@@ -380,11 +386,15 @@ const ListViewPage = ({
             page: pagination.pageCount,
           };
 
-          push({
-            pathname,
-            state: { from: pathname },
-            search: stringify(query),
-          });
+          navigate(
+            {
+              pathname,
+              search: stringify(query),
+            },
+            {
+              state: { from: pathname },
+            }
+          );
 
           return;
         }
@@ -580,11 +590,15 @@ const ListViewPage = ({
 
   const handleRowClick = (id: Entity.ID) => () => {
     trackUsage('willEditEntryFromList');
-    push({
-      pathname: `${pathname}/${id}`,
-      state: { from: pathname },
-      search: pluginsQueryParams,
-    });
+    navigate(
+      {
+        pathname: id.toString(),
+        search: pluginsQueryParams,
+      },
+      {
+        state: { from: pathname },
+      }
+    );
   };
 
   const handleCloneClick =
@@ -595,19 +609,27 @@ const ListViewPage = ({
         );
 
         if ('id' in data) {
-          push({
-            pathname: `${pathname}/${data.id}`,
-            state: { from: pathname },
-            search: pluginsQueryParams,
-          });
+          navigate(
+            {
+              pathname: data.id.toString(),
+              search: pluginsQueryParams,
+            },
+            {
+              state: { from: pathname },
+            }
+          );
         }
       } catch (err) {
         if (err instanceof AxiosError) {
-          push({
-            pathname: `${pathname}/create/clone/${id}`,
-            state: { from: pathname, error: formatAPIError(err) },
-            search: pluginsQueryParams,
-          });
+          navigate(
+            {
+              pathname: `create/clone/${id}`,
+              search: pluginsQueryParams,
+            },
+            {
+              state: { from: pathname, error: formatAPIError(err) },
+            }
+          );
         }
       }
     };
@@ -640,7 +662,14 @@ const ListViewPage = ({
         }
         title={headerLayoutTitle}
         navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/content-manager/">
+          <Link
+            startIcon={<ArrowLeft />}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(-1);
+            }}
+            to=""
+          >
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',
@@ -878,7 +907,6 @@ interface CreateButtonProps extends Pick<ButtonProps, 'variant'> {
 const CreateButton = ({ params = '', variant }: CreateButtonProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { pathname } = useLocation();
 
   return (
     <Button
@@ -891,7 +919,7 @@ const CreateButton = ({ params = '', variant }: CreateButtonProps) => {
       style={{ textDecoration: 'none' }}
       // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
-        pathname: `${pathname}/create`,
+        pathname: 'create',
         search: params,
       }}
     >
@@ -907,15 +935,13 @@ const CreateButton = ({ params = '', variant }: CreateButtonProps) => {
  * ProtectedListViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-interface ProtectedListViewPageProps extends ListViewPageProps {
+interface ProtectedListViewPageProps extends Omit<ListViewPageProps, 'slug'> {
   permissions?: Permission[] | null;
 }
 
 const ProtectedListViewPage = ({ permissions, ...restProps }: ProtectedListViewPageProps) => {
-  const viewPermissions = React.useMemo(
-    () => generatePermissionsObject(restProps.slug),
-    [restProps.slug]
-  );
+  const { slug } = useParams<{ slug: string }>();
+  const viewPermissions = React.useMemo(() => generatePermissionsObject(slug), [slug]);
 
   const { isLoading, allowedActions } = useRBAC(viewPermissions, permissions ?? []);
 
@@ -923,7 +949,11 @@ const ProtectedListViewPage = ({ permissions, ...restProps }: ProtectedListViewP
     return <LoadingIndicatorPage />;
   }
 
-  return <ListViewPage {...restProps} {...allowedActions} />;
+  if (!slug) {
+    return <Navigate to="no-content-type" />;
+  }
+
+  return <ListViewPage slug={slug} {...restProps} {...allowedActions} />;
 };
 
 export { ListViewPage, ProtectedListViewPage };

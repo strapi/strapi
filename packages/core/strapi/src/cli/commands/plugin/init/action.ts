@@ -313,7 +313,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                   ...pkgJson.dependencies,
                   react: '*',
                   'react-dom': '*',
-                  'react-router-dom': '5.3.4',
+                  'react-router-dom': '*',
                   'styled-components': '5.3.3',
                 };
 
@@ -321,8 +321,8 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                   ...pkgJson.peerDependencies,
                   react: '^17.0.0 || ^18.0.0',
                   'react-dom': '^17.0.0 || ^18.0.0',
-                  'react-router-dom': '5.2.0',
-                  'styled-components': '5.2.1',
+                  'react-router-dom': '^6.0.0',
+                  'styled-components': '^5.2.1',
                 };
               }
 
@@ -372,7 +372,6 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                     ...pkgJson.devDependencies,
                     '@types/react': '*',
                     '@types/react-dom': '*',
-                    '@types/react-router-dom': '5.3.3',
                     '@types/styled-components': '5.1.26',
                   };
 

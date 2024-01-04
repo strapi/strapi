@@ -2,20 +2,14 @@ import * as React from 'react';
 
 import { AnyAction, createSelector } from '@reduxjs/toolkit';
 import { HeaderLayout, Layout, Main } from '@strapi/design-system';
-import {
-  AnErrorOccurred,
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useGuidedTour,
-} from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import produce from 'immer';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from '../../components/DragLayer';
 import { RootState } from '../../core/store/configure';
-import { useTypedSelector } from '../../core/store/hooks';
 import { CardDragPreview } from '../components/DragPreviews/CardDragPreview';
 import { ComponentDragPreview } from '../components/DragPreviews/ComponentDragPreview';
 import { RelationDragPreview } from '../components/DragPreviews/RelationDragPreview';
@@ -23,11 +17,6 @@ import { LeftMenu } from '../components/LeftMenu';
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { ItemTypes } from '../utils/dragAndDrop';
 import { getTranslation } from '../utils/translations';
-
-import { CollectionTypePages } from './CollectionTypePages';
-import { ComponentSettingsView } from './ComponentSettingsView';
-import { NoContentType } from './NoContentTypePage';
-import { NoPermissions } from './NoPermissionsPage';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -37,13 +26,12 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
  * -----------------------------------------------------------------------------------------------*/
 
 const App = () => {
-  const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
+  const contentTypeMatch = useMatch('/content-manager/:kind/:uid/*');
   const { isLoading, collectionTypeLinks, models, singleTypeLinks } = useContentManagerInitData();
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
   const startSectionRef = React.useRef(startSection);
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
 
   React.useEffect(() => {
     if (startSectionRef.current) {
@@ -74,6 +62,7 @@ const App = () => {
   const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
     a.title.localeCompare(b.title)
   );
+
   // Array of models that are displayed in the content manager
   const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);
 
@@ -83,17 +72,17 @@ const App = () => {
     supportedModelsToDisplay.length > 0 &&
     pathname !== '/content-manager/403'
   ) {
-    return <Redirect to="/content-manager/403" />;
+    return <Navigate to="/403" />;
   }
 
   // Redirect the user to the create content type page
-  if (supportedModelsToDisplay.length === 0 && pathname !== '/content-manager/no-content-types') {
-    return <Redirect to="/content-manager/no-content-types" />;
+  if (supportedModelsToDisplay.length === 0 && pathname !== '/no-content-types') {
+    return <Navigate to="/no-content-types" />;
   }
 
   if (!contentTypeMatch && authorisedModels.length > 0) {
     return (
-      <Redirect
+      <Navigate
         to={{
           pathname: authorisedModels[0].to,
           search: authorisedModels[0].search ?? '',
@@ -112,32 +101,7 @@ const App = () => {
       />
       <Layout sideNav={<LeftMenu />}>
         <DragLayer renderItem={renderDraglayerItem} />
-        <Switch>
-          <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions
-              permissions={permissions.contentManager?.componentsConfigurations}
-            >
-              <ComponentSettingsView />
-            </CheckPagePermissions>
-          </Route>
-          {/* These redirects exist because we've changed to use the same term in `:collectionType` as the admin API for simplicity */}
-          <Redirect
-            from="/content-manager/collectionType/:slug"
-            to="/content-manager/collection-types/:slug"
-          />
-          <Redirect
-            from="/content-manager/singleType/:slug"
-            to="/content-manager/single-types/:slug"
-          />
-          <Route path="/content-manager/:collectionType/:slug" component={CollectionTypePages} />
-          <Route path="/content-manager/403">
-            <NoPermissions />
-          </Route>
-          <Route path="/content-manager/no-content-types">
-            <NoContentType />
-          </Route>
-          <Route path="" component={AnErrorOccurred} />
-        </Switch>
+        <Outlet />
       </Layout>
     </>
   );
@@ -202,6 +166,7 @@ interface ContentManagerAppState {
   fieldSizes: Contracts.Init.GetInitData.Response['data']['fieldSizes'];
   models: Contracts.Init.GetInitData.Response['data']['contentTypes'];
   singleTypeLinks: ContentManagerLink[];
+  isLoading: boolean;
 }
 
 const initialState = {
@@ -210,6 +175,7 @@ const initialState = {
   fieldSizes: {},
   models: [],
   singleTypeLinks: [],
+  isLoading: true,
 } satisfies ContentManagerAppState;
 
 const selectSchemas = createSelector(
@@ -233,6 +199,7 @@ const reducer = (state: ContentManagerAppState = initialState, action: AnyAction
         draftState.components = initDataAction.components;
         draftState.models = initDataAction.contentTypeSchemas;
         draftState.fieldSizes = initDataAction.fieldSizes;
+        draftState.isLoading = false;
         break;
       }
       default:

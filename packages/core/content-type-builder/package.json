@@ -79,20 +79,18 @@
     "@strapi/pack-up": "4.17.0",
     "@strapi/types": "4.17.0",
     "@testing-library/react": "14.0.0",
-    "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
     "@types/pluralize": "0.0.30",
-    "history": "^4.9.0",
     "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
+    "react-router-dom": "6.21.1",
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "^6.0.0",
     "styled-components": "^5.2.1"
   },
   "engines": {

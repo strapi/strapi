@@ -147,7 +147,7 @@ export const RolesListPage = () => {
           primaryAction={
             <CheckPermissions permissions={PERMISSIONS.createRole}>
               <LinkButton
-                to="/settings/users-permissions/roles/new"
+                to="new"
                 onClick={() => trackUsage('willCreateRole')}
                 startIcon={<Plus />}
                 size="S"

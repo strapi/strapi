@@ -6,7 +6,7 @@ import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Switch, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { CreatePage } from '../CreatePage';
 
@@ -16,7 +16,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const render = () => ({
-  ...renderRTL(<Route path="/settings/users-permissions/roles/new" component={CreatePage} />, {
+  ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -32,7 +32,7 @@ const render = () => ({
             <QueryClientProvider client={client}>
               <NotificationsProvider>
                 <MemoryRouter initialEntries={[`/settings/users-permissions/roles/new`]}>
-                  <Switch>{children}</Switch>
+                  <Routes>{children}</Routes>
                 </MemoryRouter>
               </NotificationsProvider>
             </QueryClientProvider>

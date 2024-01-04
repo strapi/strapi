@@ -1,9 +1,3 @@
-// NOTE TO PLUGINS DEVELOPERS:
-// If you modify this file by adding new options to the plugin entry point
-// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
-// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
-// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
-// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import pluginPkg from '../../package.json';
@@ -31,12 +25,8 @@ export default {
             defaultMessage: 'Roles',
           },
           id: 'roles',
-          to: `/settings/users-permissions/roles`,
-          async Component() {
-            const component = await import('./pages/Roles');
-
-            return component;
-          },
+          to: `users-permissions/roles`,
+          Component: () => import('./pages/Roles'),
           permissions: PERMISSIONS.accessRoles,
         },
         {
@@ -45,12 +35,8 @@ export default {
             defaultMessage: 'Providers',
           },
           id: 'providers',
-          to: `/settings/users-permissions/providers`,
-          async Component() {
-            const component = await import('./pages/Providers');
-
-            return component;
-          },
+          to: `users-permissions/providers`,
+          Component: () => import('./pages/Providers'),
           permissions: PERMISSIONS.readProviders,
         },
         {
@@ -59,12 +45,8 @@ export default {
             defaultMessage: 'Email templates',
           },
           id: 'email-templates',
-          to: `/settings/users-permissions/email-templates`,
-          async Component() {
-            const component = await import('./pages/EmailTemplates');
-
-            return component;
-          },
+          to: `users-permissions/email-templates`,
+          Component: () => import('./pages/EmailTemplates'),
           permissions: PERMISSIONS.readEmailTemplates,
         },
         {
@@ -73,12 +55,8 @@ export default {
             defaultMessage: 'Advanced Settings',
           },
           id: 'advanced-settings',
-          to: `/settings/users-permissions/advanced-settings`,
-          async Component() {
-            const component = await import('./pages/AdvancedSettings');
-
-            return component;
-          },
+          to: `users-permissions/advanced-settings`,
+          Component: () => import('./pages/AdvancedSettings'),
           permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]

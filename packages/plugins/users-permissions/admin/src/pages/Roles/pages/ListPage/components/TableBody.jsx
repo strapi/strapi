@@ -5,7 +5,7 @@ import { CheckPermissions, onRowClick, pxToRem, stopPropagation } from '@strapi/
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const EditLink = styled(Link)`
@@ -37,7 +37,7 @@ const EditLink = styled(Link)`
 
 const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [showConfirmDelete, setShowConfirmDelete] = onDelete;
 
   const checkCanDeleteRole = (role) =>
@@ -48,14 +48,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
     setShowConfirmDelete(!showConfirmDelete);
   };
 
-  const handleClickEdit = (id) => {
-    push(`/settings/users-permissions/roles/${id}`);
-  };
-
   return (
     <Tbody>
       {sortedRoles?.map((role) => (
-        <Tr key={role.name} {...onRowClick({ fn: () => handleClickEdit(role.id) })}>
+        <Tr key={role.name} {...onRowClick({ fn: () => navigate(role.id.toString()) })}>
           <Td width="20%">
             <Typography>{role.name}</Typography>
           </Td>
@@ -77,7 +73,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
             <Flex justifyContent="end" {...stopPropagation}>
               <CheckPermissions permissions={permissions.updateRole}>
                 <EditLink
-                  to={`/settings/users-permissions/roles/${role.id}`}
+                  to={role.id.toString()}
                   aria-label={formatMessage(
                     { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                     { target: `${role.name}` }
@@ -90,7 +86,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
               {checkCanDeleteRole(role) && (
                 <CheckPermissions permissions={permissions.deleteRole}>
                   <IconButton
-                    onClick={() => handleClickDelete(role.id)}
+                    onClick={() => handleClickDelete(role.id.toString())}
                     noBorder
                     icon={<Trash />}
                     label={formatMessage(

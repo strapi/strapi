@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { auth } from '@strapi/helper-plugin';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
@@ -57,7 +57,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
      */
     skip: !token,
   });
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
   const [renewTokenMutation] = useRenewTokenMutation();
@@ -86,11 +86,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
           setToken(res.data.token);
         } else {
           clearStorage();
-          push('/auth/login');
+          navigate('/auth/login');
         }
       });
     }
-  }, [renewTokenMutation, clearStorage, push]);
+  }, [renewTokenMutation, clearStorage, navigate]);
 
   /**
    * Backwards compat – store the user info in the session storage
@@ -122,7 +122,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     const handleUserStorageChange = (event: StorageEvent) => {
       if (event.key === STORAGE_KEYS.USER && event.newValue === null) {
         clearStorage();
-        push('/auth/login');
+        navigate('/auth/login');
       }
     };
 
@@ -156,8 +156,8 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = React.useCallback(async () => {
     await logoutMutation();
     clearStorage();
-    push('/auth/login');
-  }, [clearStorage, logoutMutation, push]);
+    navigate('/auth/login');
+  }, [clearStorage, logoutMutation, navigate]);
 
   return (
     <Provider token={token} user={user} login={login} logout={logout} setToken={setToken}>

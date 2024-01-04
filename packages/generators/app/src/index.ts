@@ -59,7 +59,7 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
     additionalsDependencies: {
       react: '^18.0.0',
       'react-dom': '^18.0.0',
-      'react-router-dom': '5.3.4',
+      'react-router-dom': '^6.0.0',
       'styled-components': '5.3.3',
     },
     useTypescript: Boolean(options.typescript),

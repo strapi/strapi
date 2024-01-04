@@ -29,7 +29,7 @@ import { Formik, FormikHelpers } from 'formik';
 import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { useIntl } from 'react-intl';
-import { NavLink, Redirect, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { NavLink, Navigate, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Update } from '../../../../../../shared/contracts/user';
@@ -60,9 +60,9 @@ const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const match = useRouteMatch<{ id: string }>('/settings/users/:id');
+  const match = useMatch('/settings/users/:id');
   const id = match?.params?.id ?? '';
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const MagicLink = useEnterprise(
@@ -118,7 +118,7 @@ const EditPage = () => {
           },
         });
 
-        push('/');
+        navigate('/');
       } else {
         toggleNotification({
           type: 'warning',
@@ -126,7 +126,7 @@ const EditPage = () => {
         });
       }
     }
-  }, [error, formatAPIError, push, toggleNotification]);
+  }, [error, formatAPIError, navigate, toggleNotification]);
 
   const isLoading = isLoadingAdminUsers || !MagicLink || isLoadingRBAC;
 
@@ -473,7 +473,7 @@ const ProtectedEditPage = () => {
     read: permissions.settings?.users.read ?? [],
     update: permissions.settings?.users.update ?? [],
   });
-  const { state } = useLocation<{ from: string }>();
+  const { state } = useLocation();
   const from = state?.from ?? '/';
 
   React.useEffect(() => {
@@ -495,7 +495,7 @@ const ProtectedEditPage = () => {
   }
 
   if (!canRead && !canUpdate) {
-    return <Redirect to={from} />;
+    return <Navigate to={from} />;
   }
 
   return <EditPage />;

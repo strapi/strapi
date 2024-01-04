@@ -25,7 +25,7 @@ import { Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
 import { PERMISSIONS } from '../../../constants';
@@ -36,7 +36,7 @@ import { usePlugins } from '../hooks/usePlugins';
 export const CreatePage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { goBack } = useHistory();
+  const navigate = useNavigate();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
@@ -65,7 +65,7 @@ export const CreatePage = () => {
       });
 
       // Forcing redirecting since we don't have the id in the response
-      goBack();
+      navigate(-1);
     },
   });
 

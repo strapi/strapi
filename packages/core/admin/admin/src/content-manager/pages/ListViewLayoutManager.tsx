@@ -1,38 +1,41 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import produce from 'immer';
-import { useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useTypedDispatch } from '../../core/store/hooks';
 import { useFindRedirectionLink } from '../hooks/useFindRedirectionLink';
+import { useContentTypeLayout } from '../hooks/useLayouts';
 import { useSyncRbac } from '../hooks/useSyncRbac';
 import { FormattedLayouts, ListLayoutRow } from '../utils/layouts';
 
-import { ProtectedListViewPageProps, ProtectedListViewPage } from './ListView/ListViewPage';
+import { ProtectedListViewPage } from './ListView/ListViewPage';
 
 /* -------------------------------------------------------------------------------------------------
  * ListViewLayoutManager
  * -----------------------------------------------------------------------------------------------*/
 
-interface ListViewLayoutManagerProps extends ProtectedListViewPageProps {}
-
-const ListViewLayoutManager = ({ layout, ...props }: ListViewLayoutManagerProps) => {
+const ListViewLayoutManager = () => {
   const dispatch = useTypedDispatch();
-  const { replace } = useHistory();
+  const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
   const [{ query, rawQuery }] = useQueryParams();
-  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, props.slug, 'listView');
-  const redirectionLink = useFindRedirectionLink(props.slug);
+  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, slug, 'listView');
+  const { isLoading, layout } = useContentTypeLayout(slug);
+  const redirectionLink = useFindRedirectionLink(slug ?? '');
 
   React.useEffect(() => {
     if (!rawQuery) {
-      replace(redirectionLink);
+      navigate(redirectionLink, { replace: true });
     }
-  }, [rawQuery, replace, redirectionLink]);
+  }, [rawQuery, navigate, redirectionLink]);
 
   React.useEffect(() => {
-    dispatch(setLayout(layout));
+    if (layout) {
+      dispatch(setLayout(layout));
+    }
   }, [dispatch, layout]);
 
   React.useEffect(() => {
@@ -41,11 +44,15 @@ const ListViewLayoutManager = ({ layout, ...props }: ListViewLayoutManagerProps)
     };
   }, [dispatch]);
 
-  if (!isValidPermissions) {
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  if (!isValidPermissions || !layout) {
     return null;
   }
 
-  return <ProtectedListViewPage {...props} layout={layout} permissions={permissions} />;
+  return <ProtectedListViewPage layout={layout} permissions={permissions} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -266,4 +273,4 @@ export {
   onChangeListHeaders,
   onResetListHeaders,
 };
-export type { ListViewLayoutManagerState, ListViewLayoutManagerProps };
+export type { ListViewLayoutManagerState };

@@ -53,7 +53,7 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
     additionalsDependencies: {
       react: '18.2.0',
       'react-dom': '18.2.0',
-      'react-router-dom': '5.3.4',
+      'react-router-dom': '^6.0.0',
       'styled-components': '5.3.3',
     },
     template: template ? path.resolve(template) : template,

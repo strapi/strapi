@@ -72,7 +72,7 @@ export const SortDisplayedFields = ({
                 onClickEditField={onClickEditField}
                 onRemoveField={(e) => handleRemoveField(e, index)}
                 name={field}
-                labelField={metadatas[field].list.label || field}
+                labelField={metadatas[field]?.list?.label || field}
                 setIsDraggingSibling={setIsDraggingSibling}
               />
             ))}
@@ -99,7 +99,7 @@ export const SortDisplayedFields = ({
           <Menu.Content>
             {listRemainingFields.map((field) => (
               <Menu.Item key={field} onSelect={() => handleAddField(field)}>
-                {metadatas[field].list.label || field}
+                {metadatas[field]?.list?.label || field}
               </Menu.Item>
             ))}
           </Menu.Content>

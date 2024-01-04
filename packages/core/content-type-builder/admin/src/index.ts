@@ -15,18 +15,14 @@ export default {
   register(app: any) {
     app.addReducers(reducers);
     app.addMenuLink({
-      to: `/plugins/${pluginId}`,
+      to: `plugins/${pluginId}`,
       icon: PluginIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Content Types Builder',
       },
       permissions: PERMISSIONS.main,
-      async Component() {
-        const component = await import('./pages/App');
-
-        return component;
-      },
+      Component: () => import('./pages/App'),
     });
 
     app.registerPlugin({

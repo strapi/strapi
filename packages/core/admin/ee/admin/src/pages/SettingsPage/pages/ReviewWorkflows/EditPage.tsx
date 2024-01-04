@@ -47,7 +47,7 @@ import {
 import { validateWorkflow } from './utils/validateWorkflow';
 
 export const ReviewWorkflowsEditPage = () => {
-  const { workflowId } = useParams<{ workflowId: string }>();
+  const { workflowId = '' } = useParams();
   const permissions = useSelector(selectAdminPermissions);
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();

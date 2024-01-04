@@ -6,7 +6,7 @@ import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
@@ -43,7 +43,7 @@ import { validateWorkflow } from './utils/validateWorkflow';
 
 export const ReviewWorkflowsCreatePage = () => {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -95,7 +95,7 @@ export const ReviewWorkflowsCreatePage = () => {
         },
       });
 
-      push(`/settings/review-workflows/${res.data.id}`);
+      navigate(res.data.id.toString());
     } catch (error) {
       toggleNotification({
         type: 'warning',

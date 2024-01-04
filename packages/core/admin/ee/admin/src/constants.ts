@@ -1,7 +1,6 @@
-import { AuthResponse } from './pages/AuthResponse';
-
 import type { SettingsMenu } from '../../../admin/src/constants';
 import type { PermissionMap } from '../../../admin/src/types/permissions';
+import type { RouteObject } from 'react-router-dom';
 
 export const ADMIN_PERMISSIONS_EE = {
   settings: {
@@ -27,13 +26,26 @@ export const ADMIN_PERMISSIONS_EE = {
   settings: Pick<PermissionMap['settings'], 'auditLogs' | 'review-workflows' | 'sso'>;
 };
 
-export const ROUTES_EE = [
-  {
-    Component: () => ({ default: AuthResponse }),
-    to: '/auth/login/:authResponse',
-    exact: true,
-  },
-];
+/**
+ * Base EE routes, these are relative to the `root` of the app.
+ * We use a function to get them so we're not looking at window
+ * during build time.
+ */
+export const getEERoutes = (): RouteObject[] =>
+  window.strapi.isEE
+    ? [
+        {
+          path: 'auth/login/:authResponse',
+          lazy: async () => {
+            const { AuthResponse } = await import('./pages/AuthResponse');
+
+            return {
+              Component: AuthResponse,
+            };
+          },
+        },
+      ]
+    : [];
 
 // TODO: the constants.js file is imported before the React application is setup and
 // therefore `window.strapi` might not exist at import-time. We should probably define
