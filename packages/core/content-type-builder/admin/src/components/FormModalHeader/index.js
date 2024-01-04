@@ -87,7 +87,9 @@ const FormModalHeader = ({
   ];
 
   if (modalType === 'chooseAttribute') {
-    icon = ['component', 'components'].includes(forTarget) ? 'component' : schema.schema.kind;
+    icon = ['component', 'components'].includes(forTarget)
+      ? 'component'
+      : schema?.schema?.kind ?? '';
   }
 
   if (modalType === 'addComponentToDynamicZone') {
