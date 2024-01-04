@@ -6,9 +6,7 @@
     "singularName": "homepage",
     "pluralName": "homepages"
   },
-  "options": {
-    "draftAndPublish": true
-  },
+  "options": {},
   "pluginOptions": {
     "i18n": {
       "localized": true

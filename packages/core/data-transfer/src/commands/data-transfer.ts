@@ -2,10 +2,10 @@ import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger } from '@strapi/logger';
-import strapiFactory from '@strapi/strapi';
+import { strapiFactory } from '@strapi/strapi';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
-import type { LoadedStrapi } from '@strapi/types';
+import type { LoadedStrapi, Strapi } from '@strapi/types';
 
 import { readableBytes, exitWith } from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
@@ -148,7 +148,9 @@ const setSignalHandler = async (
   });
 };
 
-const createStrapiInstance = async (opts: { logLevel?: string } = {}) => {
+const createStrapiInstance = async (
+  opts: { logLevel?: string } = {}
+): Promise<Strapi & Required<Strapi>> => {
   try {
     const appContext = await strapiFactory.compile();
     const app = strapiFactory({ ...opts, ...appContext });

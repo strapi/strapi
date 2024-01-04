@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "4.14.3",
+  "version": "4.15.5",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
@@ -46,13 +46,12 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "watch": "pack-up watch"
   },
   "dependencies": {
@@ -60,13 +59,13 @@
     "nodemailer": "6.9.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
+    "@strapi/pack-up": "4.15.5",
     "@types/nodemailer": "6.4.7",
-    "eslint-config-custom": "4.14.3",
-    "tsconfig": "4.14.3"
+    "eslint-config-custom": "4.15.5",
+    "tsconfig": "4.15.5"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

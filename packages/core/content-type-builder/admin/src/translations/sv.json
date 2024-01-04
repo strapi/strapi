@@ -51,8 +51,6 @@
   "contentType.collectionName.description": "Användbart när namnet på din innehållstyp och din tabell är olika",
   "contentType.collectionName.label": "Samlingsnamn",
   "contentType.displayName.label": "Visningsnamn",
-  "contentType.draftAndPublish.description": "Skapa ett utkast av varje inlägg innan det publiceras",
-  "contentType.draftAndPublish.label": "Utkast/publiceringssystem",
   "contentType.kind.change.warning": "Du ändrade typen på en innehållstyp: API:n kommer återskapas (rutter, kontroller, och tjänster kommer bli överskrivna).",
   "error.attributeName.reserved-name": "Namnet kan inte användas för att det kan påverka annan funktionalitet",
   "error.contentType.pluralName-used": "Värdet kan inte vara samma som namnet i singular",

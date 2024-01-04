@@ -8,9 +8,7 @@
     "name": "temp",
     "description": ""
   },
-  "options": {
-    "draftAndPublish": true
-  },
+  "options": {},
   "pluginOptions": {},
   "attributes": {
     "name": {

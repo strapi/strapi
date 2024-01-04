@@ -1,7 +1,7 @@
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
 import inquirer from 'inquirer';
-import strapi from '../../../../index';
+import { strapiFactory } from '@strapi/core';
 
 interface CmdOptions {
   email?: string;
@@ -104,8 +104,8 @@ export default async (cmdOptions: CmdOptions = {}) => {
 };
 
 async function createAdmin({ email, password, firstname, lastname }: CmdOptions) {
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).load();
 
   const user = await app.admin.services.user.exists({ email });
 

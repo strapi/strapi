@@ -25,12 +25,12 @@ const mock = {
   admin,
 };
 
-jest.mock('../../../../../index', () => {
-  const impl: any = jest.fn(() => mock);
+jest.mock('@strapi/core', () => {
+  const strapiFactory: any = jest.fn(() => mock);
 
-  impl.compile = jest.fn();
+  strapiFactory.compile = jest.fn();
 
-  return impl;
+  return { strapiFactory };
 });
 
 describe('admin:create command', () => {

@@ -7,8 +7,16 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.PrivateOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.DefaultOption<JsonValue>;
+  Attribute.DefaultOption<JSONValue>;
 
-export type JsonValue<T extends object = object> = T;
+type JSONValue = string | number | boolean | null;
+
+type JSONArray = JsonValue[] | readonly JsonValue[];
+
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
+
+export type JsonValue = JSONValue | JSONObject | JSONArray;
 
 export type GetJsonValue<T extends Attribute.Attribute> = T extends JSON ? JsonValue : never;

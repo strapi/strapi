@@ -7,7 +7,6 @@ export default {
     displayName: 'Audit Log',
   },
   options: {
-    draftAndPublish: false,
     timestamps: false,
   },
   pluginOptions: {

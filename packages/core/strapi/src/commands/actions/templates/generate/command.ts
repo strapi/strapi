@@ -1,14 +1,15 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { createCommand } from 'commander';
 import type { StrapiCommand } from '../../../types';
+import { runAction } from '../../../utils/helpers';
+import action from './action';
 
 /**
  *`$ strapi templates:generate <directory>`
  */
-const command: StrapiCommand = ({ command }) => {
-  command
-    .command('templates:generate <directory>')
+const command: StrapiCommand = () => {
+  return createCommand('templates:generate <directory>')
     .description('Generate template from Strapi project')
-    .action(getLocalScript('templates/generate'));
+    .action(runAction('templates:generate', action));
 };
 
 export default command;

@@ -50,8 +50,6 @@
   "contentType.collectionName.description": "Útil quando o nome do seu Tipo de Conteúdo e o nome da sua tabela diferem",
   "contentType.collectionName.label": "Nome da coleção",
   "contentType.displayName.label": "Mostrar nome",
-  "contentType.draftAndPublish.description": "Escreva uma versão de rascunho de cada entrada antes de publicá-la",
-  "contentType.draftAndPublish.label": "Sistema de rascunho/publicação",
   "contentType.kind.change.warning": "Você acabou de alterar o tipo de um tipo de conteúdo: a API será redefinida (rotas, controladores e serviços serão substituídos).",
   "error.attributeName.reserved-name": "Este nome não pode ser usado em seu tipo de conteúdo, pois pode quebrar outras funcionalidades",
   "error.contentType.pluralName-used": "Este valor não pode ser igual ao singular",

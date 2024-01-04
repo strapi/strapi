@@ -3,7 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const dotenv = require('dotenv');
-const strapi = require('../../core/strapi');
+const { strapiFactory } = require('../../core/strapi');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {
@@ -30,10 +30,10 @@ const createStrapiInstance = async ({
     appDir: baseDir,
     distDir: baseDir,
   };
-  const instance = strapi(options);
+  const instance = strapiFactory(options);
 
   if (bypassAuth) {
-    instance.container.get('auth').register('content-api', {
+    instance.get('auth').register('content-api', {
       name: 'test-auth',
       authenticate() {
         return { authenticated: true };
@@ -43,7 +43,7 @@ const createStrapiInstance = async ({
   }
 
   if (bootstrap) {
-    const modules = instance.container.get('modules');
+    const modules = instance.get('modules');
     const originalBootstrap = modules.bootstrap;
     // decorate modules bootstrap
     modules.bootstrap = async () => {

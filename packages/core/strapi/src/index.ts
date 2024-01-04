@@ -1,8 +1,4 @@
-import strapiFactory from './Strapi';
+export * from '@strapi/core';
 
 export type * from '@strapi/types';
-
-export * as factories from './factories';
-export { default as compile } from './compile';
-
-export default strapiFactory;
+export type * from './commands/types';

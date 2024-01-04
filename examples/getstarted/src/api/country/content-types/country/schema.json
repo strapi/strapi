@@ -9,7 +9,6 @@
     "name": "Country"
   },
   "options": {
-    "draftAndPublish": false,
     "comment": ""
   },
   "pluginOptions": {

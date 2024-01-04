@@ -39,7 +39,7 @@ export type Pick<
     [HasMember<TKind, 'pagination:offset'>, Pagination.OffsetNotation],
     [HasMember<TKind, 'pagination:page'>, Pagination.PageNotation],
     // Publication State
-    [HasMember<TKind, 'publicationState'>, PublicationState.For<TSchemaUID>],
+    [HasMember<TKind, 'publicationState'>, PublicationState.Param],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data

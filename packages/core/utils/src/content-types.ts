@@ -14,6 +14,8 @@ const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
+const DOC_ID_ATTRIBUTE = 'documentId';
+
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
 const CREATED_BY_ATTRIBUTE = 'createdBy';
 const UPDATED_BY_ATTRIBUTE = 'updatedBy';
@@ -27,6 +29,7 @@ const DP_PUB_STATES = [DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW];
 
 const constants = {
   ID_ATTRIBUTE,
+  DOC_ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
@@ -76,7 +79,12 @@ const getNonWritableAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonWritableAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonWritableAttributes,
+  ]);
 };
 
 const getWritableAttributes = (model: Model) => {
@@ -96,7 +104,7 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
 };
 
 const getVisibleAttributes = (model: Model) => {
@@ -107,14 +115,9 @@ const isVisibleAttribute = (model: Model, attributeName: string) => {
   return getVisibleAttributes(model).includes(attributeName);
 };
 
-const getOptions = (model: Model) =>
-  _.assign({ draftAndPublish: false }, _.get(model, 'options', {}));
+const getOptions = (model: Model) => _.get(model, 'options', {});
 
-const hasDraftAndPublish = (model: Model) =>
-  _.get(model, 'options.draftAndPublish', false) === true;
-
-const isDraft = <T extends object>(data: T, model: Model) =>
-  hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
+const isDraft = <T extends object>(data: T) => _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
@@ -221,7 +224,6 @@ export {
   getTimestamps,
   getCreatorFields,
   isVisibleAttribute,
-  hasDraftAndPublish,
   getOptions,
   isDraft,
   isSingleType,

@@ -73,12 +73,11 @@ export interface Model {
   kind?: Kind;
   info?: {
     displayName: string;
-    singularName: string;
-    pluralName: string;
+    singularName?: string;
+    pluralName?: string;
   };
   options?: {
     populateCreatorFields?: boolean;
-    draftAndPublish?: boolean;
   };
   privateAttributes?: string[];
   attributes: Record<string, AnyAttribute>;

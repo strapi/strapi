@@ -1,5 +1,5 @@
 import fs from 'fs';
-import strapi from '../../../../index';
+import { strapiFactory } from '@strapi/core';
 
 interface CmdOptions {
   file?: string;
@@ -28,8 +28,8 @@ const CHUNK_SIZE = 100;
 export default async ({ file: filePath, pretty }: CmdOptions) => {
   const output: Output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).load();
 
   const count = await app.query('strapi::core-store').count();
 

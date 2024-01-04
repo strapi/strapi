@@ -47,8 +47,6 @@
   "contentType.apiId-plural.label": "API ID（复数形式）",
   "contentType.apiId-singular.description": "UID 用于生成 API 路由和数据库表/集合。",
   "contentType.apiId-singular.label": "API ID（单数形式）",
-  "contentType.draftAndPublish.description": "允许编写条目的草稿版本，在发布之前进行修改",
-  "contentType.draftAndPublish.label": "草稿 & 发布",
   "contentType.kind.change.warning": "您刚刚更改了内容类型的种类：API 将被重置（路由、控制器和服务将被覆盖）。",
   "error.contentTypeName.reserved-name": "此名称不能在项目中使用，因为它可能会破坏其他功能",
   "error.validation.minSupMax": "不能更高",

@@ -41,7 +41,6 @@ const productWithCompoAndDP = {
       repeatable: true,
     },
   },
-  draftAndPublish: true,
   displayName: 'product-with-compo-and-dp',
   singularName: 'product-with-compo-and-dp',
   pluralName: 'product-with-compo-and-dps',
@@ -49,7 +48,7 @@ const productWithCompoAndDP = {
   collectionName: '',
 };
 
-describe('Core API - Basic + compo + draftAndPublish', () => {
+describe('Core API - Basic + compo ', () => {
   beforeAll(async () => {
     await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 

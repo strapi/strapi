@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import inquirer from 'inquirer';
-import strapi from '../../../../index';
+import { strapiFactory } from '@strapi/core';
 
 interface CmdOptions {
   email?: string;
@@ -48,8 +48,8 @@ export default async (cmdOptions: CmdOptions = {}) => {
 };
 
 async function changePassword({ email, password }: CmdOptions) {
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).load();
 
   await app.admin.services.user.resetPasswordByEmail(email, password);
 

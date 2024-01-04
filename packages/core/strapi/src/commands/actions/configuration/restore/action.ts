@@ -2,7 +2,7 @@ import fs from 'fs';
 import _ from 'lodash';
 import type { Database } from '@strapi/database';
 
-import strapi from '../../../../index';
+import { strapiFactory } from '@strapi/core';
 
 type Strategy = 'replace' | 'merge' | 'keep';
 
@@ -17,8 +17,8 @@ interface CmdOptions {
 export default async ({ file: filePath, strategy = 'replace' }: CmdOptions) => {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin();
 
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).load();
 
   let dataToImport;
   try {

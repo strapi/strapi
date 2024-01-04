@@ -1,7 +1,12 @@
-import type { RequestInit, Response } from 'node-fetch';
-import type { HttpsProxyAgent } from 'https-proxy-agent';
+import type { ProxyAgent } from 'undici';
+
+/**
+ * strapi.fetch interface is currently an identical wrapper for Node fetch()
+ * See createStrapiFetch in strapi/utils
+ * However, we want to retain the ability to extend it in the future.
+ * */
 
 export interface Fetch {
-  (url: string, options: RequestInit): Promise<Response>;
-  agent?: HttpsProxyAgent;
+  (input: RequestInfo | URL, init?: RequestInit | undefined): Promise<Response>;
+  dispatcher?: ProxyAgent;
 }

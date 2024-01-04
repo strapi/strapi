@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "documentId": "Article1",
+    "title": "Article1-Draft-EN",
+    "publishedAt": null,
+    "password": "$2a$10$4EP.Y8crWYRpfk2rVmmoce8raDqGYVwMlcI//GDQdO6z06bO50igu",
+    "private": "private",
+    "locale": "en"
+  },
+  {
+    "id": 2,
+    "documentId": "Article2",
+    "title": "Article2-Draft-EN",
+    "publishedAt": null,
+    "password": null,
+    "private": "private",
+    "locale": "en"
+  },
+  {
+    "id": 3,
+    "documentId": "Article1",
+    "title": "Article1-Draft-FR",
+    "publishedAt": null,
+    "password": null,
+    "private": "private",
+    "locale": "fr"
+  },
+  {
+    "id": 4,
+    "documentId": "Article1",
+    "title": "Article1-Draft-IT",
+    "publishedAt": null,
+    "password": null,
+    "private": "private",
+    "locale": "it"
+  },
+  {
+    "id": 25,
+    "documentId": "Article2",
+    "title": "Article2-Published-EN",
+    "publishedAt": "2019-01-01T00:00:00.000Z",
+    "password": null,
+    "private": "private",
+    "locale": "en"
+  }
+]

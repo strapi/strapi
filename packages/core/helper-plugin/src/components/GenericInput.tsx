@@ -29,7 +29,7 @@ import { FieldSchema, useFieldHint } from '../hooks/useFieldHint';
 import { useFocusInputField } from '../hooks/useFocusInputField';
 import { pxToRem } from '../utils/pxToRem';
 
-import type { InputType, TranslationMessage } from '../types';
+import type { TranslationMessage } from '../types';
 import type { Attribute } from '@strapi/types';
 
 interface InputOption {
@@ -49,7 +49,7 @@ interface CustomInputProps<TAttribute extends Attribute.Any>
 }
 
 export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
-  attribute: TAttribute;
+  attribute?: TAttribute;
   autoComplete?: string;
   customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
   description?: TranslationMessage;
@@ -63,7 +63,7 @@ export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.
       target: {
         name: string;
         value: Attribute.GetValue<TAttribute>;
-        type?: InputType;
+        type?: string;
       };
     },
     shouldSetInitialValue?: boolean
@@ -72,7 +72,7 @@ export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.
   placeholder?: TranslationMessage;
   required?: boolean;
   step?: number;
-  type: InputType;
+  type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: Attribute.GetValue<TAttribute>;
   isNullable?: boolean;
@@ -101,7 +101,7 @@ const GenericInput = ({
   const { formatMessage } = useIntl();
 
   // TODO: Workaround to get the field hint values if they exist on the type
-  const getFieldHintValue = (attribute: Attribute.Any, key: keyof FieldSchema) => {
+  const getFieldHintValue = (attribute?: Attribute.Any, key?: keyof FieldSchema) => {
     if (!attribute) return;
 
     if (key === 'minLength' && key in attribute) {
@@ -227,7 +227,9 @@ const GenericInput = ({
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value
             const value =
-              'required' in attribute && !attribute?.required && !json.length ? null : json;
+              attribute && 'required' in attribute && !attribute?.required && !json.length
+                ? null
+                : json;
             onChange({ target: { name, value } }, false);
           }}
           minHeight={pxToRem(252)}

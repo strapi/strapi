@@ -2,12 +2,13 @@
 title: Telemetry Service
 slug: /api/Telemetry
 tags:
-- module
-- public
+  - module
+  - public
 
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
+
 import Type from '@site/docs/api/components/type';
 
 # Telemetry
@@ -21,6 +22,7 @@ Current state: **Stable**
 The telemetry service is responsible for collecting and sending anonymous usage data to Strapi. This service is disabled by default, but can be enabled or disabled via configuration.
 
 ## Usage Information
+
 The collected usage data is used to help Strapi improve the product by identifying areas of improvement, tracking feature adoption, and measuring performance. You can learn more about the usage data that is collected by visiting the following link:
 
 https://docs.strapi.io/developer-docs/latest/getting-started/usage-information.html
@@ -74,6 +76,7 @@ telemetry.destroy();
 ```
 
 ### `telemetry.send(event, payload)`
+
 - `event`: <Type>String</Type> - The event to be sent.
 - `payload`: [<Type>TelemetryPayload</Type>](#telemetrypayload) - The payload to be sent with the event.
 - Returns: Promise
@@ -89,13 +92,14 @@ telemetry.send('event_name', { key: 'value' });
 ## Types
 
 ### `TelemetryPayload`
+
 - <Type>Object</Type>
 
   - `eventProperties`: <Type>Object</Type> An object that contains additional information about the event.
   - `userProperties`: <Type>Object</Type> An object that defines the identity of the user who triggered the event.
   - `groupProperties`: <Type>Object</Type> An object that defines properties of the application or environment in which the event occurred.
 
-Examples of event properties in Strapi include model, containsRelationalFields, displayedFields, kind, and hasDraftAndPublish. These properties are specific to the event and are used to provide additional context about what happened.
+Examples of event properties in Strapi include model, containsRelationalFields, displayedFields, kind. These properties are specific to the event and are used to provide additional context about what happened.
 
 User properties can include information such as the user's operating system, node version, and hostname. These properties are typically used to group events by user or to filter events based on certain user characteristics.
 

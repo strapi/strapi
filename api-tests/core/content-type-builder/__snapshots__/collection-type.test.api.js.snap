@@ -18,7 +18,6 @@ exports[`Content Type Builder - Content types Collection Types Get collection ty
       "collectionName": "test_collection_types",
       "description": "",
       "displayName": "Test Collection Type",
-      "draftAndPublish": false,
       "kind": "collectionType",
       "pluginOptions": {
         "i18n": {
@@ -35,7 +34,7 @@ exports[`Content Type Builder - Content types Collection Types Get collection ty
 }
 `;
 
-exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations with draftAndPublish 1`] = `
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations 1`] = `
 {
   "data": {
     "apiID": "ct-with-dp",
@@ -48,7 +47,6 @@ exports[`Content Type Builder - Content types Collection Types Get collection ty
       "collectionName": "ct_with_dps",
       "description": "",
       "displayName": "CT with DP",
-      "draftAndPublish": true,
       "kind": "collectionType",
       "pluralName": "ct-with-dps",
       "restrictRelationsTo": null,

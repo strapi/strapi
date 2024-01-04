@@ -1,3 +1,3 @@
-export { createPushController, PushHandler } from './push';
-export { createPullController, PullHandler } from './pull';
-export { handlerControllerFactory, HandlerOptions } from './utils';
+export { createPushController, type PushHandler } from './push';
+export { createPullController, type PullHandler } from './pull';
+export { handlerControllerFactory, type HandlerOptions } from './utils';

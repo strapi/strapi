@@ -20,7 +20,6 @@ const documentModel = {
       type: 'richtext',
     },
   },
-  draftAndPublish: true,
   singularName: 'document',
   pluralName: 'documents',
   displayName: 'Document',

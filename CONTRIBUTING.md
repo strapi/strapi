@@ -46,7 +46,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v16 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version >= v18 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -58,6 +58,8 @@ The Strapi core team will review your pull request and either merge it, request 
 - Ensure the following test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
+  - `yarn test:e2e --setup --concurrency=1`
+    - you **_may_** need to install Playwright browsers first: `yarn playwright install`
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 
@@ -110,6 +112,7 @@ The administration panel should now be available at http://localhost:4000/admin.
 
 - `yarn watch` starts yarn watch in all packages.
 - `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
 - `yarn setup` installs dependencies.
 - `yarn lint` lints the codebase.
 - `yarn test:clean` removes the coverage reports.
@@ -155,6 +158,51 @@ In order to run the Enterprise Edition tests you need a valid license. To specif
 ```bash
 $ STRAPI_LICENSE=<license> yarn test:api
 ```
+
+---
+
+## Git Conventions
+
+### Commit messages
+
+We use the following convention:
+
+```
+type: subject
+
+body
+```
+
+The goal of this convention is to help us generate changelogs that can be communicated to our users.
+
+#### Type
+
+The types are based on our GitHub label, here are a subset:
+
+- `fix` – When fixing an issue.
+- `chore` – When doing some cleanup, working on tooling, some refactoring. (usually reserved for **internal** work)
+- `doc` – When writing documentation.
+- `feat` – When working on a feature.
+
+You can see the complete list [here](https://github.com/strapi/strapi/blob/1cb6f95889ccaad897759cfa14d2804adeaeb7ee/.commitlintrc.ts#L11).
+
+#### Subject
+
+The subject of a commit should be a summary of what the commit is about. It should not describe what the code is doing:
+
+- `feat: what the feature is`
+- `fix: what the problem is`
+- `chore: what the PR is about`
+- `doc: what is documented`
+
+Examples:
+
+- `feat: introduce document service`
+- `fix: unable to publish documents due to missing permissions`
+- `chore: refactor data-fetching in EditView to use react-query`
+- `doc: document service API reference`
+
+> ⚠️ For a `fix` commit the message should explain what the commit is fixing. Not what the solution is.
 
 ---
 

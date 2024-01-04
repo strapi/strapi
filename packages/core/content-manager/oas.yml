@@ -736,8 +736,6 @@ components:
               maxItems: 2
               items:
                 type: string
-            draftAndPublish:
-              type: boolean
         attributes:
           type: object
           additionalProperties:

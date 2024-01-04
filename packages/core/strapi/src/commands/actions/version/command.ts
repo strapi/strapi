@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+import { createCommand } from 'commander';
 import type { StrapiCommand } from '../../types';
 
 /**
  * `$ strapi version`
  */
-const command: StrapiCommand = ({ command }) => {
-  // load the Strapi package.json to get version and other information
-  const packageJSON = require('../../../../package.json');
 
-  command.version(packageJSON.version, '-v, --version', 'Output the version number');
-  command
-    .command('version')
+const command: StrapiCommand = () => {
+  // load the Strapi package.json to get version and other information
+  return createCommand('version')
     .description('Output the version of Strapi')
     .action(() => {
-      process.stdout.write(`${packageJSON.version}\n`);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { version } = require('../../../../package.json');
+
+      process.stdout.write(`${version}\n`);
       process.exit(0);
     });
 };

@@ -12,10 +12,11 @@ import type { Server } from './modules/server';
 import type { EventHub } from './modules/event-hub';
 import type { CronService } from './modules/cron';
 import type { WebhookRunner } from './modules/webhook-runner';
-import type { WebhookStore } from './modules/webhook-store';
+import type { WebhookStore, Webhook } from './modules/webhook-store';
 import type { CoreStore } from './modules/core-store';
 import type { EntityValidator } from './modules/entity-validator';
 import type * as EntityService from './modules/entity-service';
+import type * as Documents from './modules/documents';
 import type { TelemetryService } from './modules/metrics';
 import type { RequestContext } from './modules/request-context';
 
@@ -39,11 +40,13 @@ export {
   Server,
   EventHub,
   CronService,
+  Webhook,
   WebhookRunner,
   WebhookStore,
   CoreStore,
   EntityValidator,
   EntityService,
+  Documents,
   TelemetryService,
   RequestContext,
   CustomFields,
@@ -90,9 +93,8 @@ export interface ConfigProvider {
   [key: string]: any;
 }
 
-export interface Strapi {
+export interface Strapi extends Container {
   server: Server;
-  container: Container;
   log: Logger;
   fs: StrapiFS;
   eventHub: EventHub;
@@ -103,6 +105,7 @@ export interface Strapi {
   store?: CoreStore;
   entityValidator?: EntityValidator;
   entityService?: EntityService.EntityService;
+  documents?: Documents.Repository;
   telemetry: TelemetryService;
   requestContext: RequestContext;
   customFields: CustomFields.CustomFields;
@@ -113,6 +116,15 @@ export interface Strapi {
   db?: Database;
   app: any;
   EE?: boolean;
+  ee: {
+    seats: number | null | undefined;
+    isEE: boolean;
+    features: {
+      isEnabled: (feature: string) => boolean;
+      list: () => { name: string; [key: string]: any }[];
+      get: (feature: string) => { name: string; [key: string]: any };
+    };
+  };
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;
@@ -144,15 +156,6 @@ export interface Strapi {
   listen(): Promise<void>;
   stopWithError(err: unknown, customMessage?: string): never;
   stop(exitCode?: number): never;
-  loadAdmin(): Promise<void>;
-  loadPlugins(): Promise<void>;
-  loadPolicies(): Promise<void>;
-  loadAPIs(): Promise<void>;
-  loadComponents(): Promise<void>;
-  loadMiddlewares(): Promise<void>;
-  loadApp(): Promise<void>;
-  loadSanitizers(): Promise<void>;
-  loadValidators(): Promise<void>;
   registerInternalHooks(): void;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;

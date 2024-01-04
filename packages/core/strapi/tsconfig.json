@@ -2,6 +2,7 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
+    "rootDir": "./src"
   },
   "include": ["src"],
   "exclude": ["node_modules"]

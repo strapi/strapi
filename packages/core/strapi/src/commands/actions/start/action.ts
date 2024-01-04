@@ -1,6 +1,6 @@
 import fs from 'fs';
 import tsUtils from '@strapi/typescript-utils';
-import strapi from '../../../index';
+import { strapiFactory } from '@strapi/core';
 
 /**
  * `$ strapi start`
@@ -19,5 +19,5 @@ export default async () => {
       `${outDir} directory not found. Please run the build command before starting your application`
     );
 
-  return strapi({ appDir, distDir }).start();
+  strapiFactory({ appDir, distDir }).start();
 };

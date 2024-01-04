@@ -1,5 +1,5 @@
 import tsUtils from '@strapi/typescript-utils';
-import strapi from '../../../../index';
+import { strapiFactory } from '@strapi/core';
 
 interface CmdOptions {
   debug?: boolean;
@@ -14,8 +14,8 @@ export default async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     process.exit(1);
   }
 
-  const appContext = await strapi.compile({ ignoreDiagnostics: true });
-  const app = await strapi(appContext).register();
+  const appContext = await strapiFactory.compile({ ignoreDiagnostics: true });
+  const app = await strapiFactory(appContext).register();
 
   await tsUtils.generators.generate({
     strapi: app,

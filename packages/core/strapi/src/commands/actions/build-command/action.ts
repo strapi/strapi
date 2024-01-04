@@ -1,21 +1,20 @@
-import strapi from '../../..';
-import { buildAdmin } from '../../builders';
+import { build as nodeBuild, BuildOptions } from '../../../node/build';
+import { handleUnexpectedError } from '../../../node/core/errors';
 
-interface CmdOptions {
-  forceBuild?: boolean;
+interface BuildCLIOptions extends BuildOptions {
+  /**
+   * @deprecated use `minify` instead
+   */
   optimization?: boolean;
 }
 
-/**
- * `$ strapi build`
- */
-export default async ({ optimization, forceBuild = true }: CmdOptions) => {
-  const { appDir, distDir } = await strapi.compile();
-
-  await buildAdmin({
-    forceBuild,
-    optimization,
-    buildDestDir: distDir,
-    srcDir: appDir,
-  });
+const build = async (options: BuildCLIOptions) => {
+  try {
+    await nodeBuild(options);
+  } catch (err) {
+    handleUnexpectedError(err);
+  }
 };
+
+export default build;
+export type { BuildCLIOptions };

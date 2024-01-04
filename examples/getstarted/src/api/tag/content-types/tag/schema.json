@@ -7,9 +7,7 @@
     "pluralName": "tags",
     "description": ""
   },
-  "options": {
-    "draftAndPublish": true
-  },
+  "options": {},
   "pluginOptions": {},
   "attributes": {
     "name": {

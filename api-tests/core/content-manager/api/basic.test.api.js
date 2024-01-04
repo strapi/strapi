@@ -70,7 +70,7 @@ describe('CM API - Basic', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(omit('hiddenAttribute', product));
     expect(res.body).not.toHaveProperty('hiddenAttribute');
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.products.push(res.body);
   });
 
@@ -91,7 +91,7 @@ describe('CM API - Basic', () => {
         }),
       ])
     );
-    res.body.results.forEach((p) => expect(p.publishedAt).toBeUndefined());
+    res.body.results.forEach((p) => expect(p.publishedAt).toBeDefined());
   });
 
   test('Update product', async () => {
@@ -109,7 +109,7 @@ describe('CM API - Basic', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(omit('hiddenAttribute', product));
     expect(res.body.id).toEqual(data.products[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.products[0] = res.body;
   });
 
@@ -122,7 +122,7 @@ describe('CM API - Basic', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.products[0]);
     expect(res.body.id).toEqual(data.products[0].id);
-    expect(res.body.publishedAt).toBeUndefined();
+    expect(res.body.publishedAt).toBeDefined();
     data.products.shift();
   });
 
@@ -176,15 +176,21 @@ describe('CM API - Basic', () => {
   });
 
   describe('validators', () => {
-    test('Cannot create a product - minLength', async () => {
+    test('Cannot publish a product - minLength', async () => {
       const product = {
         name: 'Product 1',
         description: '',
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product.product',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -206,27 +212,33 @@ describe('CM API - Basic', () => {
       });
     });
 
-    test('Cannot create a product - required', async () => {
+    test('Cannot publish a product - required', async () => {
       const product = {
         description: 'Product description',
       };
-      const res = await rq({
+
+      const creationRes = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product.product',
         body: product,
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.id}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         data: null,
         error: {
-          message: 'name must be defined.',
+          message: 'name must be a `string` type, but the final value was: `null`.',
           name: 'ValidationError',
           details: {
             errors: [
               {
                 path: ['name'],
-                message: 'name must be defined.',
+                message: 'name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],
@@ -240,6 +252,7 @@ describe('CM API - Basic', () => {
         name: 'Product 1',
         description: "I'm a product description that is very long. At least thirty characters.",
       };
+
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product.product',

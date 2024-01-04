@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.14.3",
+  "version": "4.15.5",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
@@ -22,14 +22,14 @@
   ],
   "exports": {
     "./strapi-admin": {
-      "types": "./dist/admin/index.d.ts",
+      "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
@@ -38,58 +38,54 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
-  "strapi": {
-    "name": "color-picker",
-    "description": "Color picker custom field",
-    "kind": "plugin",
-    "displayName": "Color Picker"
-  },
   "scripts": {
-    "build": "NODE_ENV=production strapi plugin:build --force",
-    "watch": "run -T tsc -w --preserveWatchOutput",
+    "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
-    "prepublishOnly": "yarn clean && yarn build",
+    "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "lint": "yarn lint:project && yarn lint:back && yarn lint:front",
-    "lint:project": "run -T eslint . -c ./.eslintrc.js",
-    "lint:back": "run -T eslint ./server -c ./server/.eslintrc.js",
-    "lint:front": "run -T eslint ./admin -c ./admin/.eslintrc.js"
+    "watch": "strapi plugin:watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.12.0",
-    "@strapi/helper-plugin": "4.14.3",
-    "@strapi/icons": "1.12.0",
+    "@strapi/design-system": "1.13.2",
+    "@strapi/helper-plugin": "4.15.5",
+    "@strapi/icons": "1.13.2",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
-    "@strapi/strapi": "4.14.3",
+    "@strapi/strapi": "4.15.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
-    "@types/styled-components": "5.1.26",
+    "@types/styled-components": "5.1.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.4.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.2.1"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "color-picker",
+    "description": "Color picker custom field",
+    "kind": "plugin",
+    "displayName": "Color Picker"
   }
 }

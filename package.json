@@ -30,19 +30,22 @@
   ],
   "scripts": {
     "build": "nx run-many --target=build --nx-ignore-cycles",
+    "build:size": "cd examples/getstarted && yarn build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
+    "commit": "commit",
     "doc:api": "node scripts/open-api/serve.js",
     "format": "yarn format:code && yarn format:other",
     "format:code": "yarn prettier:code --write",
     "format:other": "yarn prettier:other --write",
-    "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:other",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
     "prepare": "husky install",
-    "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
-    "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
+    "prettier:check": "yarn prettier:code --check && yarn prettier:other --check",
+    "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts,jsx,tsx,json}\"",
+    "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "setup": "yarn && yarn clean && yarn build",
     "test:api": "node test/scripts/run-api-tests.js",
     "test:clean": "rimraf ./coverage",
@@ -58,6 +61,7 @@
     "test:front:watch": "cross-env IS_EE=true run test:front --watch",
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
     "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
+    "test:generate-app:no-build": "node test/scripts/generate-test-app.js",
     "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
@@ -68,13 +72,16 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.12.0-typescript.1",
+    "@strapi/design-system": "1.14.0-typescript.2",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/preset-react": "7.18.6",
+    "@commitlint/cli": "17.7.2",
+    "@commitlint/config-conventional": "17.7.0",
+    "@commitlint/prompt-cli": "17.7.2",
     "@playwright/test": "1.38.1",
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.2.0",
@@ -82,6 +89,12 @@
     "@swc/core": "1.3.58",
     "@swc/helpers": "0.5.1",
     "@swc/jest": "0.2.26",
+    "@types/prettier": "2.7.3",
+    "@types/react": "18.2.39",
+    "@types/react-dom": "18.2.17",
+    "@types/react-helmet": "6.1.8",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "5.1.32",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
     "babel-eslint": "10.1.0",
@@ -128,12 +141,14 @@
     "rimraf": "3.0.2",
     "supertest": "6.3.3",
     "ts-jest": "29.1.0",
-    "typescript": "5.2.2",
+    "typescript": "5.3.2",
+    "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "yarn@4.0.1",
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "isStrapiMonorepo": true
 }

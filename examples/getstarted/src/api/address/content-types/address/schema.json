@@ -8,10 +8,7 @@
     "description": "",
     "name": "Address"
   },
-  "options": {
-    "reviewWorkflows": true,
-    "draftAndPublish": false
-  },
+  "options": {},
   "pluginOptions": {},
   "attributes": {
     "postal_code": {
@@ -29,21 +26,14 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "files",
-        "images",
-        "videos",
-        "audios"
-      ],
+      "allowedTypes": ["files", "images", "videos", "audios"],
       "pluginOptions": {}
     },
     "images": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ],
+      "allowedTypes": ["images"],
       "pluginOptions": {}
     },
     "city": {
