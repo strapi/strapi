@@ -40,11 +40,16 @@
   "page.ReleaseDetails.table.header.label.locale": "locale",
   "page.ReleaseDetails.table.header.label.content-type": "content-type",
   "page.ReleaseDetails.table.header.label.action": "action",
+  "content-releases.page.ReleaseDetails.table.header.label.status": "status",
   "page.ReleaseDetails.table.action-published": "This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.",
   "pages.ReleaseDetails.publish-notification-success": "Release was published successfully.",
   "dialog.confirmation-message": "Are you sure you want to delete this release?",
   "page.Details.button.openContentManager": "Open the Content Manager",
   "pages.Releases.notification.error.title": "Your request could not be processed.",
   "pages.Releases.notification.error.message": "Please try again or open another release.",
-  "pages.ReleaseDetails.groupBy.label": "Group by {groupBy}"
+  "pages.ReleaseDetails.groupBy.label": "Group by {groupBy}",
+  "content-releases.pages.ReleaseDetails.entry-validation.already-published": "Already published",
+  "content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish": "Ready to publish",
+  "content-releases.pages.ReleaseDetails.entry-validation.already-unpublished": "Already unpublished",
+  "content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish"
 }

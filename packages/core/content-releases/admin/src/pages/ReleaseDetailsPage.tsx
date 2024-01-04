@@ -15,6 +15,7 @@ import {
   Badge,
   SingleSelect,
   SingleSelectOption,
+  Icon,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
@@ -31,7 +32,7 @@ import {
   ConfirmDialog,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, More, Pencil, Trash } from '@strapi/icons';
+import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
@@ -119,6 +120,60 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
   );
 };
 
+interface EntryValidationTextProps {
+  status: ReleaseAction['entry']['status'];
+  action: ReleaseAction['type'];
+}
+
+const EntryValidationText = ({ status, action }: EntryValidationTextProps) => {
+  const { formatMessage } = useIntl();
+
+  if (action == 'publish') {
+    return (
+      <Flex gap={2}>
+        <Icon color="success600" as={CheckCircle} />
+        {status === 'published' ? (
+          <Typography textColor="success600" fontWeight="bold">
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+              defaultMessage: 'Already published',
+            })}
+          </Typography>
+        ) : (
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
+              defaultMessage: 'Ready to publish',
+            })}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  if (action == 'unpublish') {
+    return (
+      <Flex gap={2}>
+        <Icon color="success600" as={CheckCircle} />
+        {status === 'draft' ? (
+          <Typography textColor="success600" fontWeight="bold">
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
+              defaultMessage: 'Already unpublished',
+            })}
+          </Typography>
+        ) : (
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
+              defaultMessage: 'Ready to unpublish',
+            })}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+};
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
   toggleWarningSubmit: () => void;
@@ -546,6 +601,16 @@ const ReleaseDetailsBody = () => {
                     })}
                     name="action"
                   />
+                  {!release.releasedAt && (
+                    <Table.HeaderCell
+                      fieldSchemaType="string"
+                      label={formatMessage({
+                        id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+                        defaultMessage: 'status',
+                      })}
+                      name="status"
+                    />
+                  )}
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
@@ -589,6 +654,11 @@ const ReleaseDetailsBody = () => {
                           />
                         )}
                       </Td>
+                      {!release.releasedAt && (
+                        <Td>
+                          <EntryValidationText status={entry.status} action={type} />
+                        </Td>
+                      )}
                       <Td>
                         <Flex justifyContent="flex-end">
                           <ReleaseActionMenu releaseId={releaseId} actionId={id} />

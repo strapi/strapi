@@ -5,6 +5,7 @@ import { rest } from 'msw';
 import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
 import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
+import { within } from '@testing-library/react';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -214,5 +215,41 @@ describe('Releases details page', () => {
     const tables = screen.getAllByRole('grid');
 
     expect(tables).toHaveLength(2);
+  });
+
+  it('show the right status based on the action and status', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      )
+    );
+
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    const cat1Row = screen.getByRole('row', { name: /cat1/i });
+    expect(within(cat1Row).getByRole('gridcell', { name: 'Ready to publish' })).toBeInTheDocument();
+
+    const cat2Row = screen.getByRole('row', { name: /cat2/i });
+    expect(
+      within(cat2Row).getByRole('gridcell', { name: 'Ready to unpublish' })
+    ).toBeInTheDocument();
+
+    const add1Row = screen.getByRole('row', { name: /add1/i });
+    expect(
+      within(add1Row).getByRole('gridcell', { name: 'Already published' })
+    ).toBeInTheDocument();
   });
 });
