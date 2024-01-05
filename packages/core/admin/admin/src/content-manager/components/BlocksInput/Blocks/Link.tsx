@@ -59,7 +59,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
 
       try {
         // eslint-disable-next-line no-new
-        new URL(e.target.value);
+        e.target.value?.startsWith('/') || new URL(e.target.value);
       } catch (error) {
         setIsSaveDisabled(true);
       }
