@@ -1,30 +1,31 @@
 import { Flex, IconButton, Typography } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
 import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import { Cross, More } from '@strapi/icons';
+import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { DeleteReleaseAction } from '../../../shared/contracts/release-actions';
+import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 
-const StyledMenuItem = styled(Menu.Item)`
+const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   &:hover {
-    background: ${({ theme }) => theme.colors.danger100};
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
   }
 
   svg {
     path {
-      fill: ${({ theme }) => theme.colors.danger600};
+      fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
     }
   }
 
   &:hover {
     svg {
       path {
-        fill: ${({ theme }) => theme.colors.danger600};
+        fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
       }
     }
   }
@@ -34,16 +35,34 @@ const StyledCross = styled(Cross)`
   padding: ${({ theme }) => theme.spaces[1]};
 `;
 
+const StyledPencil = styled(Pencil)`
+  padding: ${({ theme }) => theme.spaces[1]};
+`;
+
 interface ReleaseActionMenuProps {
   releaseId: DeleteReleaseAction.Request['params']['releaseId'];
   actionId: DeleteReleaseAction.Request['params']['actionId'];
+  contentTypeUid?: ReleaseAction['contentType'];
+  entryId?: ReleaseAction['entry']['id'];
+  locale?: ReleaseAction['locale'];
 }
 
-export const ReleaseActionMenu = ({ releaseId, actionId }: ReleaseActionMenuProps) => {
+export const ReleaseActionMenu = ({
+  releaseId,
+  actionId,
+  contentTypeUid,
+  entryId,
+  locale,
+}: ReleaseActionMenuProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
+  const { push } = useHistory();
+
+  const handleEditEntry = async () => {
+    push(`/content-manager/collectionType/${contentTypeUid}/${entryId}`);
+  };
 
   const handleDeleteAction = async () => {
     const response = await deleteReleaseAction({
@@ -105,11 +124,40 @@ export const ReleaseActionMenu = ({ releaseId, actionId }: ReleaseActionMenuProp
           Refactor this once fixed in the DS
          */}
         <Menu.Content top={1} popoverPlacement="bottom-end">
+          {/*
+            We show edit entry option only if contentTypeUid is provided
+            which means that we are on the Release Details page
+          */}
+          {contentTypeUid && (
+            <CheckPermissions
+              permissions={[
+                {
+                  action: 'plugin::content-manager.explorer.update',
+                  subject: contentTypeUid,
+                  properties: {
+                    locales: locale ? [locale] : [],
+                  },
+                },
+              ]}
+            >
+              <StyledMenuItem onSelect={handleEditEntry}>
+                <Flex gap={2}>
+                  <StyledPencil />
+                  <Typography variant="omega">
+                    {formatMessage({
+                      id: 'content-releases.content-manager-edit-view.edit-entry',
+                      defaultMessage: 'Edit entry',
+                    })}
+                  </Typography>
+                </Flex>
+              </StyledMenuItem>
+            </CheckPermissions>
+          )}
           <CheckPermissions permissions={PERMISSIONS.deleteAction}>
-            <StyledMenuItem color="danger600" onSelect={handleDeleteAction}>
+            <StyledMenuItem color="danger600" variant="danger" onSelect={handleDeleteAction}>
               <Flex gap={2}>
                 <StyledCross />
-                <Typography variant="omega">
+                <Typography color="danger600" variant="omega">
                   {formatMessage({
                     id: 'content-releases.content-manager-edit-view.remove-from-release',
                     defaultMessage: 'Remove from release',

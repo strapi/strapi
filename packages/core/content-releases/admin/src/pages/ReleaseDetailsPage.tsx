@@ -549,7 +549,7 @@ const ReleaseDetailsBody = () => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, type, entry }) => (
+                  {releaseActions[key].map(({ id, type, entry, contentType, locale }) => (
                     <Tr key={id}>
                       <Td width={'25%'}>
                         <Typography ellipsis>{`${
@@ -591,7 +591,13 @@ const ReleaseDetailsBody = () => {
                       </Td>
                       <Td>
                         <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                          <ReleaseActionMenu
+                            releaseId={releaseId}
+                            actionId={id}
+                            contentTypeUid={contentType}
+                            entryId={entry.id}
+                            locale={locale}
+                          />
                         </Flex>
                       </Td>
                     </Tr>

@@ -10,6 +10,7 @@
   "content-manager-edit-view.add-to-release.redirect-button": "Open the list of releases",
   "content-manager-edit-view.list-releases.title": "{isPublish, select, true {Will be published in} other {Will be unpublished in}}",
   "content-manager-edit-view.remove-from-release": "Remove from release",
+  "content-releases.content-manager-edit-view.edit-entry": "Edit entry",
   "content-manager-edit-view.remove-from-release.notification.success": "Entry removed from release",
   "content-manager-edit-view.release-action-menu": "Release action options",
   "content-manager.notification.entry-error": "Failed to get entry data",

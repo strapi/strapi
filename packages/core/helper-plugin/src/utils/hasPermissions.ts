@@ -16,6 +16,20 @@ const findMatchingPermissions = (
     );
 
     if (associatedPermission) {
+      // If there are locales defined on properties, then check user has permissions on that locale
+      if (
+        associatedPermission.properties?.locales &&
+        associatedPermission.properties?.locales.length > 0
+      ) {
+        const hasPermissionOnAtLeastOneLocale = associatedPermission.properties.locales.some(
+          (locale) => curr.properties?.locales?.includes(locale)
+        );
+
+        if (!hasPermissionOnAtLeastOneLocale) {
+          return acc;
+        }
+      }
+
       acc.push(curr);
     }
 
