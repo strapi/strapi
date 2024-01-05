@@ -1,11 +1,11 @@
 import { useRBAC } from '@strapi/helper-plugin';
+import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 
 import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
 import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
-import { within } from '@testing-library/react';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -148,8 +148,7 @@ describe('Releases details page', () => {
     expect(publishButton).not.toBeInTheDocument();
 
     expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
-    const container = screen.getByText(/This entry was/);
-    expect(container.querySelector('span')).toHaveTextContent('published');
+    expect(screen.getByRole('gridcell', { name: /This entry was published/i })).toBeInTheDocument();
   });
 
   it('renders the details page with the delete and edit buttons disabled', async () => {

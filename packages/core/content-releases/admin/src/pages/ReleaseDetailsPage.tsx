@@ -151,28 +151,26 @@ const EntryValidationText = ({ status, action }: EntryValidationTextProps) => {
     );
   }
 
-  if (action == 'unpublish') {
-    return (
-      <Flex gap={2}>
-        <Icon color="success600" as={CheckCircle} />
-        {status === 'draft' ? (
-          <Typography textColor="success600" fontWeight="bold">
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
-              defaultMessage: 'Already unpublished',
-            })}
-          </Typography>
-        ) : (
-          <Typography>
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
-              defaultMessage: 'Ready to unpublish',
-            })}
-          </Typography>
-        )}
-      </Flex>
-    );
-  }
+  return (
+    <Flex gap={2}>
+      <Icon color="success600" as={CheckCircle} />
+      {status === 'draft' ? (
+        <Typography textColor="success600" fontWeight="bold">
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
+            defaultMessage: 'Already unpublished',
+          })}
+        </Typography>
+      ) : (
+        <Typography>
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
+            defaultMessage: 'Ready to unpublish',
+          })}
+        </Typography>
+      )}
+    </Flex>
+  );
 };
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
