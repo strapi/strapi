@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import type { modules } from '../../..';
+import type { modules } from '../../dist';
 
 /**
  * Note: This transform file is only for development purposes and should be deleted before releasing
