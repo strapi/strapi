@@ -7,7 +7,7 @@ import {
   useCMEditViewDataManager,
 } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
-import size from 'lodash/size';
+import { get, size } from 'lodash/fp';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -67,7 +67,7 @@ const FieldComponent = ({
 
   const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
 
-  const componentValue = modifiedData[name] ?? null;
+  const componentValue = get(name, modifiedData) ?? null;
   const compoName = getFieldName(name);
 
   const hasChildrenAllowedFields = React.useMemo(() => {
