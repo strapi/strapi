@@ -26,15 +26,8 @@ export declare namespace Find {
   }
 
   export interface Response {
-    data: {
-      results: PaginatedEntities;
-      pagination: {
-        page: PaginationQuery['page'];
-        pageSize: PaginationQuery['pageSize'];
-        pageCount: number;
-        total: number;
-      };
-    };
+    results: PaginatedEntities['results'];
+    pagination: PaginatedEntities['pagination'];
     error?: errors.ApplicationError;
   }
 }
@@ -89,13 +82,14 @@ export declare namespace AutoClone {
 
   export interface Params {
     model: string;
-    sourceId: number;
+    sourceId: Entity['id'];
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -149,7 +143,7 @@ export declare namespace Delete {
 
   export interface Params {
     model: string;
-    id: number;
+    id: Entity['id'];
   }
 
   export interface Response {
@@ -189,7 +183,7 @@ export declare namespace Unpublish {
 
   export interface Params {
     model: string;
-    id: number;
+    id: Entity['id'];
   }
 
   export interface Response {
@@ -204,7 +198,7 @@ export declare namespace Unpublish {
 export declare namespace BulkDelete {
   export interface Request {
     body: {
-      ids: number[];
+      ids: Entity['id'][];
     };
     query: {};
   }
@@ -227,7 +221,7 @@ export declare namespace BulkDelete {
 export declare namespace BulkPublish {
   export interface Request {
     body: {
-      ids: number[];
+      ids: Entity['id'][];
     };
     query: {};
   }
@@ -237,9 +231,7 @@ export declare namespace BulkPublish {
   }
 
   export interface Response {
-    data: {
-      count: number;
-    };
+    count: number;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -250,7 +242,7 @@ export declare namespace BulkPublish {
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      ids: number[];
+      ids: Entity['id'][];
     };
     query: {};
   }
@@ -281,9 +273,7 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: {
-      data: number;
-    };
+    data: number;
     error?: errors.ApplicationError;
   }
 }
@@ -304,9 +294,7 @@ export declare namespace CountManyEntriesDraftRelations {
   }
 
   export interface Response {
-    data: {
-      data: number;
-    };
+    data: number;
     error?: errors.ApplicationError;
   }
 }

@@ -651,6 +651,8 @@
   "components.Blocks.blocks.image": "Image",
   "components.Blocks.blocks.unorderedList": "Bulleted list",
   "components.Blocks.blocks.orderedList": "Numbered list",
+  "components.Blocks.dnd.instruction": "To reorder blocks, press Command or Control along with Shift and the Up or Down arrow keys",
+  "components.Blocks.dnd.reorder": "{item}, moved. New position in the editor: {position}.",
   "components.Wysiwyg.ToggleMode.markdown-mode": "Markdown mode",
   "components.Wysiwyg.ToggleMode.preview-mode": "Preview mode",
   "components.Wysiwyg.collapse": "Collapse",

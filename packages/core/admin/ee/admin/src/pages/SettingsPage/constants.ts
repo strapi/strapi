@@ -5,10 +5,9 @@ export const ROUTES_EE: Route[] = [
     ? [
         {
           async Component() {
-            // @ts-expect-error – No types, yet.
-            const component = await import('./pages/AuditLogs/ProtectedListPage');
+            const { ProtectedListPage } = await import('./pages/AuditLogs/ListPage');
 
-            return component;
+            return ProtectedListPage;
           },
           to: '/settings/audit-logs',
           exact: true,
@@ -20,10 +19,11 @@ export const ROUTES_EE: Route[] = [
     ? [
         {
           async Component() {
-            // @ts-expect-error – No types, yet.
-            const component = await import('./pages/ReviewWorkflows/pages/ListView');
+            const { ProtectedReviewWorkflowsPage } = await import(
+              './pages/ReviewWorkflows/ListPage'
+            );
 
-            return component;
+            return ProtectedReviewWorkflowsPage;
           },
           to: '/settings/review-workflows',
           exact: true,
@@ -31,10 +31,11 @@ export const ROUTES_EE: Route[] = [
 
         {
           async Component() {
-            // @ts-expect-error – No types, yet.
-            const component = await import('./pages/ReviewWorkflows/pages/CreateView');
+            const { ReviewWorkflowsCreatePage } = await import(
+              './pages/ReviewWorkflows/CreatePage'
+            );
 
-            return component;
+            return ReviewWorkflowsCreatePage;
           },
           to: '/settings/review-workflows/create',
           exact: true,
@@ -42,10 +43,9 @@ export const ROUTES_EE: Route[] = [
 
         {
           async Component() {
-            // @ts-expect-error – No types, yet.
-            const component = await import('./pages/ReviewWorkflows/pages/EditView');
+            const { ReviewWorkflowsEditPage } = await import('./pages/ReviewWorkflows/EditPage');
 
-            return component;
+            return ReviewWorkflowsEditPage;
           },
           to: '/settings/review-workflows/:workflowId',
           exact: true,

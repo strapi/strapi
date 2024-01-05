@@ -1,11 +1,11 @@
 import CLITable from 'cli-table3';
 import chalk from 'chalk';
 
-import strapi from '../../../../Strapi';
+import { strapiFactory } from '@strapi/core';
 
 export default async () => {
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).register();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).register();
 
   const list = app.get('content-types').keys();
 

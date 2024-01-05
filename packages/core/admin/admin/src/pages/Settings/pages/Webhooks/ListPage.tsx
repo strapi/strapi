@@ -31,24 +31,18 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
   useAPIErrorHandler,
-  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
-import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
 import { NavLink, useHistory, useLocation } from 'react-router-dom';
 
-import {
-  DeleteWebhooks,
-  GetWebhooks,
-  UpdateWebhook,
-} from '../../../../../../shared/contracts/webhooks';
-import { selectAdminPermissions } from '../../../../selectors';
+import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
+import { useTypedSelector } from '../../../../core/store/hooks';
+
+import { useWebhooks } from './hooks/useWebhooks';
 
 /* -------------------------------------------------------------------------------------------------
  * ListPage
@@ -56,10 +50,11 @@ import { selectAdminPermissions } from '../../../../selectors';
 
 const ListPage = () => {
   const [showModal, setShowModal] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = React.useState<string[]>([]);
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
   const { formatMessage } = useIntl();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   useFocusWhenNavigate();
   const { push } = useHistory();
@@ -68,25 +63,16 @@ const ListPage = () => {
   const {
     isLoading: isRBACLoading,
     allowedActions: { canCreate, canUpdate, canDelete },
-  } = useRBAC(permissions.settings?.webhooks ?? {});
-  const { get, post, put } = useFetchClient();
+  } = useRBAC(permissions);
   const { notifyStatus } = useNotifyAT();
 
   const {
     isLoading: isWebhooksLoading,
-    data: webhooks = [],
+    webhooks,
     error: webhooksError,
-    refetch: refetchWebhooks,
-  } = useQuery<
-    GetWebhooks.Response['data'],
-    AxiosError<Required<Pick<GetWebhooks.Response, 'error'>>>
-  >('webhooks', async () => {
-    const {
-      data: { data },
-    } = await get<GetWebhooks.Response>('/admin/webhooks');
-
-    return data;
-  });
+    updateWebhook,
+    deleteManyWebhooks,
+  } = useWebhooks();
 
   React.useEffect(() => {
     if (webhooksError) {
@@ -107,51 +93,62 @@ const ListPage = () => {
     }
   }, [webhooks, webhooksError, toggleNotification, formatMessage, notifyStatus, formatAPIError]);
 
-  const deleteMutation = useMutation<
-    AxiosResponse<DeleteWebhooks.Response>,
-    AxiosError<Required<Pick<DeleteWebhooks.Response, 'error'>>>,
-    void
-  >(
-    () =>
-      post('/admin/webhooks/batch-delete', {
-        ids: webhooksToDelete,
-      }),
-    {
-      onError(error) {
+  const enableWebhook = async (body: UpdateWebhook.Request['body'] & UpdateWebhook.Params) => {
+    try {
+      const res = await updateWebhook(body);
+
+      if ('error' in res) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIError(res.error),
         });
-        setShowModal(false);
-      },
-      onSuccess() {
-        setWebhooksToDelete([]);
-        setShowModal(false);
-        refetchWebhooks();
-      },
-    }
-  );
-
-  const enabledMutation = useMutation<
-    AxiosResponse<UpdateWebhook.Response>,
-    AxiosError<Required<Pick<UpdateWebhook.Response, 'error'>>>,
-    UpdateWebhook.Request['body']
-  >(({ id, ...webhook }) => put<UpdateWebhook.Response>(`/admin/webhooks/${id}`, webhook), {
-    onError(error) {
+      }
+    } catch {
       toggleNotification({
         type: 'warning',
-        message: formatAPIError(error),
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
       });
-    },
-    onSuccess() {
-      refetchWebhooks();
-    },
-  });
+    }
+  };
 
-  const confirmDelete = () => deleteMutation.mutate();
+  const confirmDelete = async () => {
+    try {
+      setIsDeleting(true);
+      const res = await deleteManyWebhooks({
+        ids: webhooksToDelete,
+      });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+
+        return;
+      }
+
+      setWebhooksToDelete([]);
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowModal(false);
+    }
+  };
 
   const selectAllCheckbox = (selected: boolean) =>
-    selected ? setWebhooksToDelete(webhooks.map((webhook) => webhook.id)) : setWebhooksToDelete([]);
+    selected
+      ? setWebhooksToDelete(webhooks?.map((webhook) => webhook.id) ?? [])
+      : setWebhooksToDelete([]);
 
   const selectOneCheckbox = (selected: boolean, id: string) =>
     selected
@@ -290,7 +287,7 @@ const ListPage = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {webhooks.map((webhook) => (
+                {webhooks?.map((webhook) => (
                   <Tr
                     key={webhook.id}
                     onClick={canUpdate ? goTo(webhook.id) : undefined}
@@ -333,7 +330,7 @@ const ListPage = () => {
                           selected={webhook.isEnabled}
                           onChange={(e) => {
                             e.stopPropagation();
-                            enabledMutation.mutate({
+                            enableWebhook({
                               ...webhook,
                               isEnabled: !webhook.isEnabled,
                             });
@@ -402,7 +399,7 @@ const ListPage = () => {
         isOpen={showModal}
         onToggleDialog={() => setShowModal((prev) => !prev)}
         onConfirm={confirmDelete}
-        isConfirmButtonLoading={deleteMutation.isLoading}
+        isConfirmButtonLoading={isDeleting}
       />
     </Layout>
   );
@@ -413,10 +410,12 @@ const ListPage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListPage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.webhooks.main
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.webhooks.main}>
+    <CheckPagePermissions permissions={permissions}>
       <ListPage />
     </CheckPagePermissions>
   );

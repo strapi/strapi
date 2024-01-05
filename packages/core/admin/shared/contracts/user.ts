@@ -6,7 +6,7 @@ import type {
   Pagination,
   SanitizedAdminUser,
 } from './shared';
-import type { Entity } from '@strapi/types';
+import type { Entity, EntityService } from '@strapi/types';
 
 /**
  * /create - Create an admin user
@@ -46,7 +46,7 @@ export declare namespace FindAll {
   // TODO make the types for this
   export interface Request {
     body: {};
-    query: {};
+    query: EntityService.Params.Pick<'admin::user', 'filters'>;
   }
 
   export interface Response {

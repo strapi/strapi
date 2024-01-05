@@ -11,13 +11,14 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { auth, pxToRem, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { pxToRem, useNotification } from '@strapi/helper-plugin';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Logo } from '../components/UnauthenticatedLogo';
+import { useAuth } from '../features/Auth';
 import { LayoutContent, UnauthenticatedLayout } from '../layouts/UnauthenticatedLayout';
 
 export const options = [
@@ -75,23 +76,28 @@ export const UseCasePage = () => {
   const { formatMessage } = useIntl();
   const [role, setRole] = React.useState<string | number | null>(null);
   const [otherRole, setOtherRole] = React.useState('');
-  const { post } = useFetchClient();
 
-  const { firstname, email } = auth.get('userInfo') ?? {};
+  const { firstname, email } = useAuth('UseCasePage', (state) => state.user) ?? {};
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 
   const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
     event.preventDefault();
     try {
-      await post('https://analytics.strapi.io/register', {
-        email,
-        username: firstname,
-        firstAdmin: Boolean(!hasAdmin),
-        persona: {
-          role: skipPersona ? undefined : role,
-          otherRole: skipPersona ? undefined : otherRole,
+      await fetch('https://analytics.strapi.io/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email,
+          username: firstname,
+          firstAdmin: Boolean(!hasAdmin),
+          persona: {
+            role: skipPersona ? undefined : role,
+            otherRole: skipPersona ? undefined : otherRole,
+          },
+        }),
       });
 
       toggleNotification({

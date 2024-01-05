@@ -54,12 +54,12 @@ describe('useAdminRoles', () => {
     ]);
   });
 
-  test('extends the default react-query options', async () => {
+  test('extends the default options', async () => {
     const { result } = renderHook(() =>
       useAdminRoles(
         {},
         {
-          enabled: false,
+          skip: true,
         }
       )
     );

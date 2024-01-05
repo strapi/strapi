@@ -17,38 +17,36 @@ import {
   FieldAction,
 } from '@strapi/design-system';
 import {
-  auth,
   Form,
   GenericInput,
   GenericInputProps,
   LoadingIndicatorPage,
   pxToRem,
   translatedErrors,
-  useAppInfo,
-  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
   useTracking,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Check, Eye, EyeStriked } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { Formik, FormikHelpers } from 'formik';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
-import { useLocales } from '../components/LanguageProvider';
-import { useThemeToggle, ThemeName, ThemeToggleContextContextValue } from '../contexts/themeToggle';
+import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { useAuth } from '../features/Auth';
+import { AppState, setAppTheme } from '../reducer';
+import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
+import { isBaseQueryError } from '../utils/baseQuery';
 import { getFullName } from '../utils/getFullName';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
-import type { IsSSOLocked } from '../../../shared/contracts/providers';
-import type { GetMe, UpdateMe } from '../../../shared/contracts/users';
+import type { UpdateMe } from '../../../shared/contracts/users';
 
 const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
   ...COMMON_USER_SCHEMA,
@@ -68,134 +66,62 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
  * -----------------------------------------------------------------------------------------------*/
 
 const ProfilePage = () => {
-  const { changeLocale, localeNames } = useLocales();
-  const { setUserDisplayName } = useAppInfo();
+  const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
-  const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
-  const { get, put } = useFetchClient();
+  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
+  const dispatch = useTypedDispatch();
+  const {
+    _unstableFormatValidationErrors: formatValidationErrors,
+    _unstableFormatAPIError: formatApiError,
+  } = useAPIErrorHandler();
 
   useFocusWhenNavigate();
 
+  const user = useAuth('ProfilePage', (state) => state.user);
+
+  React.useEffect(() => {
+    if (user) {
+      notifyStatus(
+        formatMessage({
+          id: 'Settings.profile.form.notify.data.loaded',
+          defaultMessage: 'Your profile data has been loaded',
+        })
+      );
+    } else {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+    }
+  }, [formatMessage, notifyStatus, toggleNotification, user]);
+
+  const [updateMe, { isLoading: isSubmittingForm }] = useUpdateMeMutation();
+
   const {
-    isLoading: isLoadingUser,
-    data,
-    refetch,
-  } = useQuery(
-    'user',
-    async () => {
-      const { data } = await get<GetMe.Response>('/admin/users/me');
+    isLoading,
+    data: dataSSO,
+    error,
+  } = useIsSSOLockedQuery(undefined, {
+    skip: !(window.strapi.isEE && window.strapi.features.isEnabled('sso')),
+  });
 
-      return data.data;
-    },
-    {
-      onSuccess() {
-        notifyStatus(
-          formatMessage({
-            id: 'Settings.profile.form.notify.data.loaded',
-            defaultMessage: 'Your profile data has been loaded',
-          })
-        );
-      },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'Settings.permissions.users.sso.provider.error' },
+      });
     }
-  );
-
-  const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(
-    ['providers', 'isSSOLocked'],
-    async () => {
-      const {
-        data: { data },
-      } = await get<IsSSOLocked.Response>('/admin/providers/isSSOLocked');
-
-      return data;
-    },
-    {
-      enabled: window.strapi.isEE && window.strapi.features.isEnabled('sso'),
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'Settings.permissions.users.sso.provider.error' },
-        });
-      },
-    }
-  );
-
-  const isLoading = isLoadingUser || isLoadingSSO;
+  }, [error, toggleNotification]);
 
   type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;
-    currentTheme: ThemeName;
+    currentTheme: AppState['theme']['currentTheme'];
   };
-
-  const submitMutation = useMutation<
-    UpdateMe.Response['data'] & { currentTheme: ThemeName },
-    AxiosError<UpdateMe.Response>,
-    UpdateUsersMeBody
-  >(
-    async (body) => {
-      const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
-      let dataToSend = bodyRest;
-
-      const isPasswordRequestBody = (
-        data: UpdateMe.Request['body']
-      ): data is UpdateMe.PasswordRequestBody => {
-        return 'password' in data;
-      };
-
-      // The password fields are optional. If the user didn't touch them, don't send any password
-      // to the API, because an empty string would throw a validation error
-      if (isPasswordRequestBody(dataToSend) && dataToSend.password === '') {
-        const {
-          password: _password,
-          currentPassword: _currentPassword,
-          ...passwordRequestBodyRest
-        } = dataToSend;
-        dataToSend = passwordRequestBodyRest;
-      }
-
-      const { data } = await put<UpdateMe.Response>('/admin/users/me', dataToSend);
-
-      return { ...data.data, currentTheme };
-    },
-    {
-      async onSuccess(data) {
-        await refetch();
-        const { email, firstname, lastname, username, preferedLanguage } = data;
-        auth.setUserInfo({ email, firstname, lastname, username, preferedLanguage });
-        const userDisplayName = data.username || getFullName(data.firstname ?? '', data.lastname);
-        setUserDisplayName(userDisplayName);
-
-        if (data.preferedLanguage) {
-          changeLocale(data.preferedLanguage);
-        }
-
-        // @ts-expect-error – we're going to implement a context assertion to avoid this
-        onChangeTheme(data.currentTheme);
-
-        trackUsage('didChangeMode', { newMode: data.currentTheme });
-
-        toggleNotification({
-          type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
-        });
-      },
-      async onSettled() {
-        // @ts-expect-error – we're going to implement a context assertion to avoid this
-        unlockApp();
-      },
-    }
-  );
-
-  const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleSubmit = async (
     body: UpdateUsersMeBody,
@@ -204,27 +130,57 @@ const ProfilePage = () => {
     // @ts-expect-error – we're going to implement a context assertion to avoid this
     lockApp();
 
-    const username = body.username;
-    submitMutation.mutate(
-      { ...body, username },
-      {
-        onError(error) {
-          const res = error?.response?.data;
+    const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
+    let dataToSend = bodyRest;
 
-          if (res?.data) {
-            return setErrors(res.data);
-          }
+    // The password fields are optional. If the user didn't touch them, don't send any password
+    // to the API, because an empty string would throw a validation error
+    if (dataToSend.password === '') {
+      const {
+        password: _password,
+        currentPassword: _currentPassword,
+        ...passwordRequestBodyRest
+      } = dataToSend;
+      dataToSend = passwordRequestBodyRest;
+    }
 
-          return toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
-          });
-        },
+    const res = await updateMe(dataToSend);
+
+    if ('data' in res) {
+      dispatch(setAppTheme(currentTheme));
+
+      trackUsage('didChangeMode', { newMode: currentTheme });
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+      });
+    }
+
+    if ('error' in res) {
+      if (
+        isBaseQueryError(res.error) &&
+        (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
+      ) {
+        // @ts-expect-error – We get a BadRequest error here instead of a ValidationError if the currentPassword is wrong.
+        setErrors(formatValidationErrors(res.error));
+      } else if (isBaseQueryError(res.error)) {
+        toggleNotification({
+          type: 'warning',
+          message: formatApiError(res.error),
+        });
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
       }
-    );
+    }
+
+    unlockApp?.();
   };
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <Main aria-busy="true">
         <Helmet
@@ -247,7 +203,7 @@ const ProfilePage = () => {
   }
 
   const hasLockedRole = dataSSO?.isSSOLocked ?? false;
-  const { email, firstname, lastname, username, preferedLanguage } = data;
+  const { email, firstname, lastname, username, preferedLanguage } = user ?? {};
   const initialData = {
     email,
     firstname,
@@ -269,7 +225,6 @@ const ProfilePage = () => {
       />
       <Formik
         onSubmit={handleSubmit}
-        // @ts-expect-error – currentTheme could be undefined because we don't have context assertion yet.
         initialValues={initialData}
         validateOnChange={false}
         validationSchema={PROFILE_VALIDTION_SCHEMA}
@@ -293,7 +248,7 @@ const ProfilePage = () => {
           return (
             <Form>
               <HeaderLayout
-                title={data.username || getFullName(data.firstname ?? '', data.lastname)}
+                title={username || getFullName(firstname ?? '', lastname)}
                 primaryAction={
                   <Button
                     startIcon={<Check />}
@@ -326,7 +281,6 @@ const ProfilePage = () => {
                       />
                     )}
                     <PreferencesSection
-                      allApplicationThemes={allApplicationThemes}
                       onChange={handleChange}
                       values={{
                         preferedLanguage,
@@ -543,19 +497,11 @@ interface PreferencesSectionProps extends Pick<GenericInputProps, 'onChange'> {
     currentTheme?: string;
   };
   localeNames: Record<string, string>;
-  allApplicationThemes?: Partial<ThemeToggleContextContextValue['themes']>;
 }
 
-const PreferencesSection = ({
-  onChange,
-  values,
-  localeNames,
-  allApplicationThemes = {},
-}: PreferencesSectionProps) => {
+const PreferencesSection = ({ onChange, values, localeNames }: PreferencesSectionProps) => {
   const { formatMessage } = useIntl();
-  const themesToDisplay = Object.keys(allApplicationThemes).filter(
-    (themeName) => allApplicationThemes[themeName as keyof ThemeToggleContextContextValue['themes']]
-  );
+  const themesToDisplay = useTypedSelector((state) => state.admin_app.theme.availableThemes);
 
   return (
     <Box

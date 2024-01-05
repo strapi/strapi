@@ -15,8 +15,8 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import FieldTypeIcon from '../../../components/FieldTypeIcon';
-import { getTrad } from '../../../utils';
+import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
+import { getTranslation } from '../../../utils/translations';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 import ModalForm from './ModalForm';
@@ -54,7 +54,7 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type, custo
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {
-                  id: getTrad('containers.ListSettingsView.modal-form.edit-label'),
+                  id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
                   defaultMessage: 'Edit {fieldName}',
                 },
                 { fieldName: upperFirst(selectedField) }
