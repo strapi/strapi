@@ -67,6 +67,7 @@ const FieldComponent = ({
 
   const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
 
+  // Use lodash get since the name can be a nested path (e.g. "component.1.component")
   const componentValue = get(name, modifiedData) ?? null;
   const compoName = getFieldName(name);
 
