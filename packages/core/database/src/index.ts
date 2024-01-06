@@ -165,4 +165,4 @@ class Database {
   }
 }
 
-export { Database, errors };
+export { Database, errors, createEntityManager };

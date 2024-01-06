@@ -80,7 +80,8 @@ const getInitialProviders = ({ purest }) => ({
       .qs({ fields: 'name,email' })
       .request()
       .then(({ body }) => ({
-        username: body.name,
+        name: body.name,
+        username: body.email.split('@')[0],
         email: body.email,
       }));
   },
@@ -88,11 +89,13 @@ const getInitialProviders = ({ purest }) => ({
     const google = purest({ provider: 'google' });
 
     return google
-      .query('oauth')
-      .get('tokeninfo')
+      .get('oauth2/v1/userinfo')
       .qs({ accessToken })
       .request()
       .then(({ body }) => ({
+        name: body.name,
+        givenName: body.given_name,
+        familyName: body.family_name,
         username: body.email.split('@')[0],
         email: body.email,
       }));

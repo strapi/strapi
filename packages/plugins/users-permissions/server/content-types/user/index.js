@@ -69,6 +69,9 @@ module.exports = {
       inversedBy: 'users',
       configurable: false,
     },
+    name: {
+      type: 'string',
+    },
   },
 
   config: schemaConfig, // TODO: to move to content-manager options
