@@ -1,5 +1,7 @@
 import type Koa from 'koa';
 
+import { errors } from '@strapi/utils';
+
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
@@ -59,6 +61,13 @@ const releaseActionController = {
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
     const releaseService = getService('release', { strapi });
+
+    const release = await releaseService.findOne(releaseId);
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Cannot update action from a published release');
+    }
+
     const updatedAction = await releaseService.updateAction(
       actionId,
       releaseId,
@@ -74,10 +83,15 @@ const releaseActionController = {
     const actionId: DeleteReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: DeleteReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
 
-    const deletedReleaseAction = await getService('release', { strapi }).deleteAction(
-      actionId,
-      releaseId
-    );
+    const releaseService = getService('release', { strapi });
+
+    const release = await releaseService.findOne(releaseId);
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Cannot delete action from a published release');
+    }
+
+    const deletedReleaseAction = await releaseService.deleteAction(actionId, releaseId);
 
     ctx.body = {
       data: deletedReleaseAction,

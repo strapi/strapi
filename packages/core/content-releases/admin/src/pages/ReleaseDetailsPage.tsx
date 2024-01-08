@@ -589,11 +589,13 @@ const ReleaseDetailsBody = () => {
                           />
                         )}
                       </Td>
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
+                      {!release.releasedAt && (
+                        <Td>
+                          <Flex justifyContent="flex-end">
+                            <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                          </Flex>
+                        </Td>
+                      )}
                     </Tr>
                   ))}
                 </Table.Body>
