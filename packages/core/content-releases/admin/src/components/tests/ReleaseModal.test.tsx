@@ -59,5 +59,9 @@ describe('ReleaseModal', () => {
     // change the input value and enable the submit button
     await user.type(inputElement, 'new content');
     expect(dialogSaveButton).toBeEnabled();
+
+    // change the input to an empty value and disable the submit button
+    await user.clear(inputElement);
+    expect(dialogSaveButton).toBeDisabled();
   });
 });

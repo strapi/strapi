@@ -74,7 +74,9 @@ export const ReleaseModal = ({
                 <Button
                   name="submit"
                   loading={isLoading}
-                  disabled={isOnUpdate ? values.name === initialValues.name : !values.name}
+                  disabled={
+                    isOnUpdate ? !values.name || values.name === initialValues.name : !values.name
+                  }
                   type="submit"
                 >
                   {isOnUpdate
