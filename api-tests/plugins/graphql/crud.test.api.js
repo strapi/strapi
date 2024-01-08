@@ -137,6 +137,48 @@ describe('Test Graphql API End to End', () => {
       data.posts = res.body.data.posts.data.map(({ id, attributes }) => ({ id, ...attributes }));
     });
 
+    test('List posts with GET', async () => {
+      const graphqlQueryGET = (body) => {
+        return rq({
+          url: '/graphql',
+          method: 'GET',
+          qs: body,
+        });
+      };
+
+      const res = await graphqlQueryGET({
+        query: /* GraphQL */ `
+          {
+            posts {
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                  category
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body).toMatchObject({
+        data: {
+          posts: {
+            data: postsPayload.map((entry) => ({
+              id: expect.any(String),
+              attributes: omit('id', entry),
+            })),
+          },
+        },
+      });
+    });
+
     test('List posts with limit', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
