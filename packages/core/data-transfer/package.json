@@ -47,7 +47,7 @@
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
     "ora": "5.4.1",

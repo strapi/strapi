@@ -44,12 +44,14 @@
   },
   "dependencies": {
     "@strapi/utils": "4.15.5",
-    "fs-extra": "10.0.0"
+    "fs-extra": "10.1.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.15.5",
+    "@strapi/plugin-upload": "4.15.5",
     "@types/jest": "29.5.2",
     "eslint-config-custom": "4.15.5",
+    "memfs": "4.6.0",
     "tsconfig": "4.15.5"
   },
   "engines": {
