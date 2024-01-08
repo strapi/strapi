@@ -23,10 +23,13 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
     const oldSqliteDependency = `dependencies.${targetProperty}`;
     if (j.has(oldSqliteDependency)) {
       j.remove(oldSqliteDependency);
-      // TODO check this version when releasing V5
-      j.set('dependencies.better-sqlite3', '9.0.0');
     }
   });
+
+  if (!j.has('dependencies.better-sqlite3')) {
+    // TODO check this version when releasing V5
+    j.set('dependencies.better-sqlite3', '9.0.0');
+  }
 
   return j.root();
 };
