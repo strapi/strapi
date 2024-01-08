@@ -147,7 +147,10 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   <FieldInput
                     ref={linkInputRef}
                     name="url"
-                    placeholder="https://strapi.io"
+                    placeholder={formatMessage({
+                      id: 'components.Blocks.popover.link.placeholder',
+                      defaultMessage: 'Paste link',
+                    })}
                     value={linkUrl}
                     onChange={onLinkChange}
                   />
