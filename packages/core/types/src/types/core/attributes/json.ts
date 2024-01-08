@@ -10,6 +10,6 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.PrivateOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.DefaultOption<Utils.JSONPrimitive>;
+  Attribute.DefaultOption<Utils.JSONPrimitive>; // TODO: should be Utils.JSONValue but it breaks the admin build
 
 export type GetJsonValue<T extends Attribute.Attribute> = T extends JSON ? JsonValue : never;
