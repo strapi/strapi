@@ -39,12 +39,14 @@ export const ReleaseModal = ({
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Typography id="title" fontWeight="bold" textColor="neutral800">
-          {formatMessage({
-            id: isCreatingRelease
-              ? 'content-releases.modal.add-release-title'
-              : 'content-releases.modal.edit-release-title',
-            defaultMessage: isCreatingRelease ? 'New release' : 'Edit release',
-          })}
+          {formatMessage(
+            {
+              id: 'content-releases.modal.title',
+              defaultMessage:
+                '{isCreatingRelease, select, true {New release} other {Edit release}}',
+            },
+            { isCreatingRelease: isCreatingRelease }
+          )}
         </Typography>
       </ModalHeader>
       <Formik
@@ -81,12 +83,13 @@ export const ReleaseModal = ({
                   disabled={!values.name || values.name === initialValues.name}
                   type="submit"
                 >
-                  {formatMessage({
-                    id: isCreatingRelease
-                      ? 'content-releases.modal.form.button.submit'
-                      : 'content-releases.modal.form.button.submit-update',
-                    defaultMessage: isCreatingRelease ? 'Continue' : 'Save',
-                  })}
+                  {formatMessage(
+                    {
+                      id: 'content-releases.modal.form.button.submit',
+                      defaultMessage: '{isCreatingRelease, select, true {Continue} other {Save}}',
+                    },
+                    { isCreatingRelease: isCreatingRelease }
+                  )}
                 </Button>
               }
             />
