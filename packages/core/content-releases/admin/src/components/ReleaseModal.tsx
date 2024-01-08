@@ -33,21 +33,18 @@ export const ReleaseModal = ({
 }: ReleaseModalProps) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
-  const isOnUpdate = pathname !== `/plugins/${pluginId}`;
+  const isCreatingRelease = pathname === `/plugins/${pluginId}`;
 
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Typography id="title" fontWeight="bold" textColor="neutral800">
-          {isOnUpdate
-            ? formatMessage({
-                id: 'content-releases.modal.edit-release-title',
-                defaultMessage: 'Edit release',
-              })
-            : formatMessage({
-                id: 'content-releases.modal.add-release-title',
-                defaultMessage: 'New release',
-              })}
+          {formatMessage({
+            id: isCreatingRelease
+              ? 'content-releases.modal.add-release-title'
+              : 'content-releases.modal.edit-release-title',
+            defaultMessage: isCreatingRelease ? 'New release' : 'Edit release',
+          })}
         </Typography>
       </ModalHeader>
       <Formik
@@ -84,15 +81,12 @@ export const ReleaseModal = ({
                   disabled={!values.name || values.name === initialValues.name}
                   type="submit"
                 >
-                  {isOnUpdate
-                    ? formatMessage({
-                        id: 'content-releases.modal.form.button.submit-update',
-                        defaultMessage: 'Save',
-                      })
-                    : formatMessage({
-                        id: 'content-releases.modal.form.button.submit',
-                        defaultMessage: 'Continue',
-                      })}
+                  {formatMessage({
+                    id: isCreatingRelease
+                      ? 'content-releases.modal.form.button.submit'
+                      : 'content-releases.modal.form.button.submit-update',
+                    defaultMessage: isCreatingRelease ? 'Continue' : 'Save',
+                  })}
                 </Button>
               }
             />
