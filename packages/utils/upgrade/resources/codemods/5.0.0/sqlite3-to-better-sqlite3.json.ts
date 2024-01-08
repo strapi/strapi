@@ -2,6 +2,10 @@ import path from 'node:path';
 
 import type { modules } from '../../../dist';
 
+/**
+ * This codemod runs on the package.json of the Strapi project and updates
+ * the sqlite dependency to better-sqlite3q
+ */
 const transform: modules.runner.json.JSONTransform = (file, params) => {
   const { cwd, json } = params;
 
@@ -19,6 +23,7 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
     const oldSqliteDependency = `dependencies.${targetProperty}`;
     if (j.has(oldSqliteDependency)) {
       j.remove(oldSqliteDependency);
+      // TODO check this version when releasing V5
       j.set('dependencies.better-sqlite3', '9.0.0');
     }
   });

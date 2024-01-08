@@ -1,4 +1,4 @@
-import { cloneDeep, get, has, set, merge } from 'lodash/fp';
+import { cloneDeep, get, has, set, merge, omit } from 'lodash/fp';
 
 import type { Utils } from '@strapi/types';
 
@@ -38,6 +38,11 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
   set(path: string, value: Utils.JSONValue) {
     this.json = set(path, value, this.json);
 
+    return this;
+  }
+
+  remove(path: string) {
+    this.json = omit(path, this.json);
     return this;
   }
 }
