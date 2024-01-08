@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { register } from './register';
+import { bootstrap } from './bootstrap';
 import { contentTypes } from './content-types';
 import { services } from './services';
 import { controllers } from './controllers';
@@ -14,6 +15,7 @@ const getPlugin = () => {
   ) {
     return {
       register,
+      bootstrap,
       contentTypes,
       services,
       controllers,
