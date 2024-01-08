@@ -385,28 +385,24 @@ export const ReleaseDetailsLayout = ({
  * -----------------------------------------------------------------------------------------------*/
 const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
-  switch (value) {
-    case 'contentType':
-      return {
-        id: 'content-releases.pages.ReleaseDetails.groupBy.option.content-type',
-        defaultMessage: 'Content-Types',
-      };
-    case 'locale':
-      return {
-        id: 'content-releases.pages.ReleaseDetails.groupBy.option.locales',
-        defaultMessage: 'Locales',
-      };
-    case 'action':
-      return {
-        id: 'content-releases.pages.ReleaseDetails.groupBy.option.actions',
-        defaultMessage: 'Actions',
-      };
-    default:
-      return {
-        id: 'content-releases.pages.ReleaseDetails.groupBy.option.content-type',
-        defaultMessage: 'Content-Types',
-      };
+  if (value === 'locale') {
+    return {
+      id: 'content-releases.pages.ReleaseDetails.groupBy.option.locales',
+      defaultMessage: 'Locales',
+    };
   }
+
+  if (value === 'action') {
+    return {
+      id: 'content-releases.pages.ReleaseDetails.groupBy.option.actions',
+      defaultMessage: 'Actions',
+    };
+  }
+
+  return {
+    id: 'content-releases.pages.ReleaseDetails.groupBy.option.content-type',
+    defaultMessage: 'Content-Types',
+  };
 };
 
 const ReleaseDetailsBody = () => {
