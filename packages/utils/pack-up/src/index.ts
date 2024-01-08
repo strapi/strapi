@@ -19,4 +19,5 @@ export type {
   TemplateOrTemplateResolver,
   TemplateFeature,
   TemplateOption,
+  TemplateFile,
 } from './node/templates/types';

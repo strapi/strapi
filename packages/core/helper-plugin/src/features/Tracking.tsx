@@ -14,7 +14,7 @@ export interface TelemetryProperties {
 }
 
 export interface TrackingContextValue {
-  uuid: string | boolean;
+  uuid?: string | boolean;
   deviceId?: string;
   telemetryProperties?: TelemetryProperties;
 }
@@ -55,8 +55,12 @@ const TrackingProvider = ({ value = { uuid: false }, children }: TrackingProvide
  */
 interface EventWithoutProperties {
   name:
+    | 'changeComponentsOrder'
     | 'didAccessAuthenticatedAdministration'
+    | 'didAddComponentToDynamicZone'
+    | 'didBulkDeleteEntries'
     | 'didChangeDisplayedFields'
+    | 'didCheckDraftRelations'
     | 'didClickGuidedTourHomepageApiTokens'
     | 'didClickGuidedTourHomepageContentManager'
     | 'didClickGuidedTourHomepageContentTypeBuilder'
@@ -87,6 +91,8 @@ interface EventWithoutProperties {
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
     | 'didPluginLearnMore'
+    | 'didPublishEntry'
+    | 'didUnpublishEntry'
     | 'didSaveComponent'
     | 'didSaveContentType'
     | 'didSearch'
@@ -99,9 +105,12 @@ interface EventWithoutProperties {
     | 'didSelectContentTypeSettings'
     | 'didEditAuthenticationProvider'
     | 'hasClickedCTBAddFieldBanner'
+    | 'removeComponentFromDynamicZone'
     | 'willAddMoreFieldToContentType'
     | 'willBulkDeleteEntries'
     | 'willBulkUnpublishEntries'
+    | 'willChangeNumberOfEntriesPerPage'
+    | 'willCheckDraftRelations'
     | 'willCreateComponent'
     | 'willCreateComponentFromAttributesModal'
     | 'willCreateContentType'
@@ -127,6 +136,8 @@ interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
+    | 'willPublishEntry'
+    | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
@@ -239,29 +250,63 @@ interface TokenEvents {
   };
 }
 
-type WillModifyTokenEvent = {
+interface WillModifyTokenEvent {
   name: 'didCreateToken' | 'didEditToken';
   properties: {
     tokenType: TokenEvents['properties']['tokenType'];
     type: 'custom' | 'full-access' | 'read-only' | Array<'push' | 'pull' | 'push-pull'>;
   };
-};
+}
+
+interface DeleteEntryEvents {
+  name: 'willDeleteEntry' | 'didDeleteEntry' | 'didNotDeleteEntry';
+  properties: {
+    status?: string;
+    error?: unknown;
+  };
+}
+
+interface CreateEntryEvents {
+  name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry';
+  properties: {
+    status?: string;
+    error?: unknown;
+  };
+}
+
+interface UpdateEntryEvents {
+  name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry';
+  properties: {
+    status?: string;
+    error?: unknown;
+  };
+}
+
+interface DidFilterEntriesEvent {
+  name: 'didFilterEntries';
+  properties: {
+    useRelation: boolean;
+  };
+}
 
 type EventsWithProperties =
+  | CreateEntryEvents
   | DidAccessTokenListEvent
   | DidChangeModeEvent
   | DidCropFileEvent
+  | DeleteEntryEvents
   | DidEditMediaLibraryElementsEvent
   | DidFilterMediaLibraryElementsEvent
+  | DidFilterEntriesEvent
   | DidSelectContentTypeFieldTypeEvent
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
   | LogoEvent
   | TokenEvents
+  | UpdateEntryEvents
   | WillModifyTokenEvent
-  | WillNavigateEvent
-  | DidSelectContentTypeFieldTypeEvent;
+  | WillNavigateEvent;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

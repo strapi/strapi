@@ -1,12 +1,11 @@
 import { MultiSelect, MultiSelectOption } from '@strapi/design-system';
-import { useFetchClient } from '@strapi/helper-plugin';
 import { Loader as LoadingIcon } from '@strapi/icons';
 import { FieldInputProps } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
 
-import type { FindRoles } from '../../../../../../../shared/contracts/roles';
+import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
+
 import type { Entity } from '@strapi/types';
 
 interface SelectRolesProps extends Pick<FieldInputProps<Entity.ID[]>, 'onChange' | 'value'> {
@@ -15,21 +14,8 @@ interface SelectRolesProps extends Pick<FieldInputProps<Entity.ID[]>, 'onChange'
 }
 
 const SelectRoles = ({ disabled, error, onChange, value }: SelectRolesProps) => {
-  const { get } = useFetchClient();
+  const { isLoading, roles } = useAdminRoles();
 
-  const { isLoading, data } = useQuery(
-    ['roles'],
-    async () => {
-      const {
-        data: { data },
-      } = await get<FindRoles.Response>('/admin/roles');
-
-      return data;
-    },
-    {
-      staleTime: 50000,
-    }
-  );
   const { formatMessage } = useIntl();
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage({
@@ -62,7 +48,7 @@ const SelectRoles = ({ disabled, error, onChange, value }: SelectRolesProps) => 
       withTags
       required
     >
-      {(data ?? []).map((role) => {
+      {roles.map((role) => {
         return (
           <MultiSelectOption key={role.id} value={role.id.toString()}>
             {formatMessage({

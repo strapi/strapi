@@ -16,40 +16,38 @@ import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import {
   Form,
   GenericInput,
-  useFetchClient,
   useNotification,
   useOverlayBlocker,
   translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
-import { AxiosError, AxiosResponse } from 'axios';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import * as yup from 'yup';
 
-import { Create } from '../../../../../../../shared/contracts/user';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
+import { useCreateUserMutation } from '../../../../../services/users';
 import { FormLayout } from '../../../../../types/form';
+import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
 interface ModalFormProps {
-  onSuccess: () => Promise<void>;
   onToggle: () => void;
 }
 
-const ModalForm = ({ onSuccess, onToggle }: ModalFormProps) => {
+const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const { post } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
   const roleLayout = useEnterprise(
     ROLE_LAYOUT,
     async () =>
@@ -95,54 +93,8 @@ const ModalForm = ({ onSuccess, onToggle }: ModalFormProps) => {
         )
       ).MagicLinkEE
   );
-  const postMutation = useMutation<
-    AxiosResponse<Create.Response>,
-    AxiosError<Required<Create.Response>>,
-    Pick<Create.Request['body'], 'email' | 'firstname' | 'lastname' | 'roles'>
-  >(
-    (body) =>
-      post<Create.Response, AxiosResponse<Create.Response>, Create.Request['body']>(
-        '/admin/users',
-        body
-      ),
-    {
-      onMutate() {
-        if (lockApp) {
-          lockApp();
-        }
 
-        setIsSubmitting(true);
-      },
-      async onSuccess({ data: { data } }) {
-        if (data.registrationToken) {
-          setRegistrationToken(data.registrationToken);
-          await onSuccess();
-
-          goNext();
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
-          });
-        }
-      },
-      onError(err) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(err),
-        });
-
-        throw err;
-      },
-      onSettled() {
-        if (unlockApp) {
-          unlockApp();
-        }
-
-        setIsSubmitting(false);
-      },
-    }
-  );
+  const [createUser] = useCreateUserMutation();
 
   const headerTitle = formatMessage({
     id: 'Settings.permissions.users.create',
@@ -150,19 +102,39 @@ const ModalForm = ({ onSuccess, onToggle }: ModalFormProps) => {
   });
 
   const handleSubmit = async (body: InitialData, { setErrors }: FormikHelpers<InitialData>) => {
-    try {
-      await postMutation.mutateAsync({
-        ...body,
-        roles: body.roles ?? [],
+    // @ts-expect-error – this will be fixed in V5.
+    lockApp();
+
+    const res = await createUser({
+      ...body,
+      roles: body.roles ?? [],
+    });
+
+    if ('data' in res) {
+      if (res.data.registrationToken) {
+        setRegistrationToken(res.data.registrationToken);
+
+        goNext();
+      } else {
+        // This shouldn't happen, but just incase.
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      }
+    } else {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(res.error),
       });
-    } catch (err) {
-      if (
-        err instanceof AxiosError &&
-        err.response?.data?.error.message === 'Email already taken'
-      ) {
-        setErrors({ email: err.response.data.error.message });
+
+      if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+        setErrors(formatValidationErrors(res.error));
       }
     }
+
+    // @ts-expect-error – this will be fixed in V5.
+    unlockApp();
   };
 
   const goNext = () => {
@@ -174,16 +146,6 @@ const ModalForm = ({ onSuccess, onToggle }: ModalFormProps) => {
   };
 
   const { buttonSubmitLabel, isDisabled, next } = STEPPER[currentStep];
-  const endActions =
-    currentStep === 'create' ? (
-      <Button type="submit" loading={isSubmitting}>
-        {formatMessage(buttonSubmitLabel)}
-      </Button>
-    ) : (
-      <Button type="button" loading={isSubmitting} onClick={onToggle}>
-        {formatMessage(buttonSubmitLabel)}
-      </Button>
-    );
 
   // block rendering until the EE component is fully loaded
   if (!MagicLink) {
@@ -207,7 +169,7 @@ const ModalForm = ({ onSuccess, onToggle }: ModalFormProps) => {
         validationSchema={FORM_SCHEMA}
         validateOnChange={false}
       >
-        {({ errors, handleChange, values }) => {
+        {({ errors, handleChange, values, isSubmitting }) => {
           return (
             <Form>
               <ModalBody>
@@ -287,7 +249,17 @@ const ModalForm = ({ onSuccess, onToggle }: ModalFormProps) => {
                     })}
                   </Button>
                 }
-                endActions={endActions}
+                endActions={
+                  currentStep === 'create' ? (
+                    <Button type="submit" loading={isSubmitting}>
+                      {formatMessage(buttonSubmitLabel)}
+                    </Button>
+                  ) : (
+                    <Button type="button" loading={isSubmitting} onClick={onToggle}>
+                      {formatMessage(buttonSubmitLabel)}
+                    </Button>
+                  )
+                }
               />
             </Form>
           );

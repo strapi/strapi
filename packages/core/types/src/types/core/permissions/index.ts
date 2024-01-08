@@ -1,14 +1,8 @@
-import { Subject } from '@casl/ability';
+import type { engine } from '@strapi/permissions';
 
-export interface ParametrizedAction {
-  name: string;
-  params: Record<string, unknown>;
-}
-export interface PermissionRule {
-  action: string | ParametrizedAction;
-  subject?: Subject | null;
-  properties?: {
-    fields?: string[];
-  };
-  condition?: Record<string, unknown>;
-}
+type PermissionRule = Parameters<engine.abilities.CustomAbilityBuilder['can']>[0];
+type ParametrizedAction = Parameters<
+  engine.abilities.CustomAbilityBuilder['buildParametrizedAction']
+>[0];
+
+export type { PermissionRule, ParametrizedAction };

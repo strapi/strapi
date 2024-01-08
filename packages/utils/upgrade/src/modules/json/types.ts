@@ -8,5 +8,4 @@ export interface JSONTransformAPI {
   set(path: string, value: Utils.JSONValue): this;
   merge(other: Utils.JSONObject): this;
   root(): Utils.JSONObject;
-  remove(path: string): this;
 }

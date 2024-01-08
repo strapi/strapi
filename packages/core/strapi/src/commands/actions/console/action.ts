@@ -1,12 +1,12 @@
 import REPL from 'repl';
-import strapi from '../../../Strapi';
+import { strapiFactory } from '@strapi/core';
 
 /**
  * `$ strapi console`
  */
 export default async () => {
-  const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const appContext = await strapiFactory.compile();
+  const app = await strapiFactory(appContext).load();
 
   app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template

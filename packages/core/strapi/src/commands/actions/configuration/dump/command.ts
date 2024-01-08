@@ -1,3 +1,4 @@
+import { createCommand } from 'commander';
 import type { StrapiCommand } from '../../../types';
 import { runAction } from '../../../utils/helpers';
 import action from './action';
@@ -5,9 +6,8 @@ import action from './action';
 /**
  * `$ strapi configuration:dump`
  */
-const command: StrapiCommand = ({ command }) => {
-  command
-    .command('configuration:dump')
+const command: StrapiCommand = () => {
+  return createCommand('configuration:dump')
     .alias('config:dump')
     .description('Dump configurations of your application')
     .option('-f, --file <file>', 'Output file, default output is stdout')

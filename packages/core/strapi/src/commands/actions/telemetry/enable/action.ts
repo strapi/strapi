@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { randomUUID } from 'crypto';
 import fse from 'fs-extra';
 import chalk from 'chalk';
-import machineID from '../../../../utils/machine-id';
+import { machineID } from '@strapi/utils';
 
 type PackageJson = {
   strapi?: {

@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 export const Settings = ({
   contentTypeOptions,
@@ -53,7 +53,7 @@ export const Settings = ({
     <Flex direction="column" alignItems="stretch" gap={4}>
       <Typography variant="delta" as="h2">
         {formatMessage({
-          id: getTrad('containers.SettingPage.settings'),
+          id: getTranslation('containers.SettingPage.settings'),
           defaultMessage: 'Settings',
         })}
       </Typography>
@@ -62,7 +62,7 @@ export const Settings = ({
         <Box width="100%">
           <ToggleInput
             label={formatMessage({
-              id: getTrad('form.Input.search'),
+              id: getTranslation('form.Input.search'),
               defaultMessage: 'Enable search',
             })}
             onChange={(e) => {
@@ -84,7 +84,7 @@ export const Settings = ({
         <Box width="100%">
           <ToggleInput
             label={formatMessage({
-              id: getTrad('form.Input.filters'),
+              id: getTranslation('form.Input.filters'),
               defaultMessage: 'Enable filters',
             })}
             onChange={(e) => {
@@ -106,7 +106,7 @@ export const Settings = ({
         <Box width="100%">
           <ToggleInput
             label={formatMessage({
-              id: getTrad('form.Input.bulkActions'),
+              id: getTranslation('form.Input.bulkActions'),
               defaultMessage: 'Enable bulk actions',
             })}
             onChange={(e) => {
@@ -130,11 +130,11 @@ export const Settings = ({
         <GridItem s={12} col={6}>
           <Select
             label={formatMessage({
-              id: getTrad('form.Input.pageEntries'),
+              id: getTranslation('form.Input.pageEntries'),
               defaultMessage: 'Entries per page',
             })}
             hint={formatMessage({
-              id: getTrad('form.Input.pageEntries.inputDescription'),
+              id: getTranslation('form.Input.pageEntries.inputDescription'),
               defaultMessage:
                 'Note: You can override this value in the Collection Type settings page.',
             })}
@@ -152,7 +152,7 @@ export const Settings = ({
         <GridItem s={12} col={3}>
           <Select
             label={formatMessage({
-              id: getTrad('form.Input.defaultSort'),
+              id: getTranslation('form.Input.defaultSort'),
               defaultMessage: 'Default sort attribute',
             })}
             onChange={(value) => onChange({ target: { name: 'settings.defaultSortBy', value } })}
@@ -169,7 +169,7 @@ export const Settings = ({
         <GridItem s={12} col={3}>
           <Select
             label={formatMessage({
-              id: getTrad('form.Input.sort.order'),
+              id: getTranslation('form.Input.sort.order'),
               defaultMessage: 'Default sort order',
             })}
             onChange={(value) => onChange({ target: { name: 'settings.defaultSortOrder', value } })}

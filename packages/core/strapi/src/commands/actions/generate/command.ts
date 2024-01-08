@@ -1,12 +1,12 @@
+import { createCommand } from 'commander';
 import { assertCwdContainsStrapiProject } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
 
 /**
  * `$ strapi generate`
  */
-const commands: StrapiCommand = ({ command, argv }) => {
-  command
-    .command('generate')
+const commands: StrapiCommand = ({ argv }) => {
+  return createCommand('generate')
     .description('Launch the interactive API generator')
     .action(() => {
       assertCwdContainsStrapiProject('generate');

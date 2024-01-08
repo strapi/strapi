@@ -40,6 +40,7 @@ export {
   useCMEditViewDataManager,
   ContentManagerEditViewDataManagerContext,
   type CMEditViewDataManagerContextValue,
+  type ContentType,
 } from './content-manager/CMEditViewDataManager';
 export * from './content-manager/utils/getAttributeInfos';
 
@@ -107,3 +108,9 @@ export * from './utils/setHexOpacity';
 export * from './utils/stopPropagation';
 export * from './utils/translatedErrors';
 export * from './utils/wrapAxiosInstance';
+
+/* -------------------------------------------------------------------------------------------------
+ * Types
+ * -----------------------------------------------------------------------------------------------*/
+
+export type { TranslationMessage, FilterData } from './types';

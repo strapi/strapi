@@ -1,8 +1,6 @@
 import * as React from 'react';
 
-import { useFetchClient } from '@strapi/helper-plugin';
-import { useQuery } from 'react-query';
-
+import { useGetLicenseLimitsQuery } from '../../../../admin/src/services/admin';
 import { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
 
 interface UseLicenseLimitsArgs {
@@ -10,26 +8,17 @@ interface UseLicenseLimitsArgs {
 }
 
 function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true }) {
-  const { get } = useFetchClient();
-  const { data, isError, isLoading } = useQuery(
-    ['ee', 'license-limit-info'],
-    async () => {
-      const {
-        data: { data },
-      } = await get<GetLicenseLimitInformation.Response>('/admin/license-limit-information');
-
-      return data;
-    },
-    {
-      enabled,
-    }
-  );
+  const { data, isError, isLoading } = useGetLicenseLimitsQuery(undefined, {
+    skip: !enabled,
+  });
 
   type FeatureNames = GetLicenseLimitInformation.Response['data']['features'][number]['name'];
 
-  const getFeature = React.useCallback(
-    (name: FeatureNames) => {
-      const feature = data?.features.find((feature) => feature.name === name);
+  type GetFeatureType = <T>(name: FeatureNames) => Record<string, T> | undefined;
+
+  const getFeature = React.useCallback<GetFeatureType>(
+    (name) => {
+      const feature = data?.data?.features.find((feature) => feature.name === name);
 
       if (feature && 'options' in feature) {
         return feature.options;
@@ -40,7 +29,7 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
     [data]
   );
 
-  return { license: data, getFeature, isError, isLoading };
+  return { license: data?.data, getFeature, isError, isLoading };
 }
 
 export { useLicenseLimits };
