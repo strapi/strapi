@@ -721,6 +721,7 @@ const ReleaseDetailsPage = () => {
           handleSubmit={handleEditRelease}
           isLoading={isLoadingDetails || isSubmittingForm}
           initialValues={{ name: title || '' }}
+          isOnUpdate
         />
       )}
       <ConfirmDialog

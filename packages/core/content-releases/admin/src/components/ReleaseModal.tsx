@@ -21,6 +21,7 @@ interface ReleaseModalProps {
   handleSubmit: (values: FormValues) => void;
   isLoading?: boolean;
   initialValues: FormValues;
+  isOnUpdate?: boolean;
 }
 
 export const ReleaseModal = ({
@@ -28,6 +29,7 @@ export const ReleaseModal = ({
   handleSubmit,
   initialValues,
   isLoading = false,
+  isOnUpdate = false,
 }: ReleaseModalProps) => {
   const { formatMessage } = useIntl();
 
@@ -69,11 +71,21 @@ export const ReleaseModal = ({
                 </Button>
               }
               endActions={
-                <Button name="submit" loading={isLoading} disabled={!values.name} type="submit">
-                  {formatMessage({
-                    id: 'content-releases.modal.form.button.submit',
-                    defaultMessage: 'Continue',
-                  })}
+                <Button
+                  name="submit"
+                  loading={isLoading}
+                  disabled={isOnUpdate ? values.name === initialValues.name : !values.name}
+                  type="submit"
+                >
+                  {isOnUpdate
+                    ? formatMessage({
+                        id: 'content-releases.modal.form.button.submit-update',
+                        defaultMessage: 'Save',
+                      })
+                    : formatMessage({
+                        id: 'content-releases.modal.form.button.submit',
+                        defaultMessage: 'Continue',
+                      })}
                 </Button>
               }
             />

@@ -35,12 +35,13 @@ describe('ReleaseModal', () => {
   });
   it('renders correctly the dialog content on update', async () => {
     const handleCloseMocked = jest.fn();
-    render(
+    const { user } = render(
       <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
         initialValues={{ name: 'title' }}
         isLoading={false}
+        isOnUpdate
       />
     );
     const dialogContainer = screen.getByRole('dialog');
@@ -49,10 +50,14 @@ describe('ReleaseModal', () => {
     const inputElement = within(dialogContainer).getByRole('textbox', { name: /name/i });
     expect(inputElement).toHaveValue('title');
 
-    // enable the submit button when there is content inside the input
-    const dialogContinueButton = within(dialogContainer).getByRole('button', {
-      name: /continue/i,
+    // disable the submit button when there are no changes inside the input
+    const dialogSaveButton = within(dialogContainer).getByRole('button', {
+      name: /save/i,
     });
-    expect(dialogContinueButton).toBeEnabled();
+    expect(dialogSaveButton).toBeDisabled();
+
+    // change the input value and enable the submit button
+    await user.type(inputElement, 'new content');
+    expect(dialogSaveButton).toBeEnabled();
   });
 });
