@@ -99,7 +99,7 @@ const transform: JSONTransform = (file, params) => {
 export default transform;
 ```
 
-For reference, these are the types for the relevant objects, which can be found in `packages/utils/upgrade/src/core/runner/json.ts`:
+For reference, these are the types for the relevant objects, which can be found in `packages/utils/upgrade/src/modules/json/types.ts`:
 
 ```typescript
 export interface JSONTransformParams {
