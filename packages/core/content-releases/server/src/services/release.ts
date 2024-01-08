@@ -416,14 +416,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
       where: {
         id: actionId,
-        release: releaseId,
+        release: {
+          id: releaseId,
+          releasedAt: {
+            $null: true,
+          },
+        },
       },
       data: update,
     });
 
     if (!updatedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in release with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
       );
     }
 
@@ -437,13 +442,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const deletedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
       where: {
         id: actionId,
-        release: releaseId,
+        release: {
+          id: releaseId,
+          releasedAt: {
+            $null: true,
+          },
+        },
       },
     });
 
     if (!deletedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in release with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
       );
     }
 
