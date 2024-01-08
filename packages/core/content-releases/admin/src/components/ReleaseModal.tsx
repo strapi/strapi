@@ -9,8 +9,10 @@ import {
 } from '@strapi/design-system';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
+import { pluginId } from '../pluginId';
 
 export interface FormValues {
   name: string;
@@ -21,7 +23,6 @@ interface ReleaseModalProps {
   handleSubmit: (values: FormValues) => void;
   isLoading?: boolean;
   initialValues: FormValues;
-  isOnUpdate?: boolean;
 }
 
 export const ReleaseModal = ({
@@ -29,18 +30,24 @@ export const ReleaseModal = ({
   handleSubmit,
   initialValues,
   isLoading = false,
-  isOnUpdate = false,
 }: ReleaseModalProps) => {
   const { formatMessage } = useIntl();
+  const { pathname } = useLocation();
+  const isOnUpdate = pathname !== `/plugins/${pluginId}`;
 
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Typography id="title" fontWeight="bold" textColor="neutral800">
-          {formatMessage({
-            id: 'content-releases.modal.add-release-title',
-            defaultMessage: 'New release',
-          })}
+          {isOnUpdate
+            ? formatMessage({
+                id: 'content-releases.modal.edit-release-title',
+                defaultMessage: 'Edit release',
+              })
+            : formatMessage({
+                id: 'content-releases.modal.add-release-title',
+                defaultMessage: 'New release',
+              })}
         </Typography>
       </ModalHeader>
       <Formik
@@ -74,9 +81,7 @@ export const ReleaseModal = ({
                 <Button
                   name="submit"
                   loading={isLoading}
-                  disabled={
-                    isOnUpdate ? !values.name || values.name === initialValues.name : !values.name
-                  }
+                  disabled={!values.name || values.name === initialValues.name}
                   type="submit"
                 >
                   {isOnUpdate

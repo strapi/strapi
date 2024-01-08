@@ -1,18 +1,22 @@
 import { within } from '@testing-library/react';
 import { render, screen } from '@tests/utils';
+import { MemoryRouter } from 'react-router-dom';
 
+import { pluginId } from '../../pluginId';
 import { ReleaseModal } from '../ReleaseModal';
 
 describe('ReleaseModal', () => {
   it('renders correctly the dialog content on create', async () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
-      <ReleaseModal
-        handleClose={handleCloseMocked}
-        handleSubmit={jest.fn()}
-        initialValues={{ name: '' }}
-        isLoading={false}
-      />
+      <MemoryRouter initialEntries={[`/plugins/${pluginId}`]}>
+        <ReleaseModal
+          handleClose={handleCloseMocked}
+          handleSubmit={jest.fn()}
+          initialValues={{ name: '' }}
+          isLoading={false}
+        />
+      </MemoryRouter>
     );
     const dialogContainer = screen.getByRole('dialog');
     const dialogCancelButton = within(dialogContainer).getByRole('button', {
@@ -41,7 +45,6 @@ describe('ReleaseModal', () => {
         handleSubmit={jest.fn()}
         initialValues={{ name: 'title' }}
         isLoading={false}
-        isOnUpdate
       />
     );
     const dialogContainer = screen.getByRole('dialog');

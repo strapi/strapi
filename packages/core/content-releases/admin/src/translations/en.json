@@ -27,6 +27,7 @@
   "modal.release-created-notification-success": "Release created",
   "modal.release-updated-notification-success": "Release updated",
   "modal.add-release-title": "New Release",
+  "modal.edit-release-title": "Edit Release",
   "modal.form.input.label.release-name": "Name",
   "modal.form.button.submit": "Continue",
   "modal.form.button.submit-update": "Save",
