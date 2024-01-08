@@ -17,7 +17,7 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
 
   const j = json(file.json);
 
-  const targetProperties = ['sqlite3', 'vscode/sqlite3', 'sqlite-legacy'];
+  const targetProperties = ['sqlite3', '@vscode/sqlite3'];
 
   targetProperties.forEach((targetProperty) => {
     const oldSqliteDependency = `dependencies.${targetProperty}`;
