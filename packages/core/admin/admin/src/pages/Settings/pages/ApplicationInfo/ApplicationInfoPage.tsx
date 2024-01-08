@@ -24,7 +24,7 @@ import { Check, ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { useConfiguration } from '../../../../contexts/configuration';
+import { useConfiguration } from '../../../../features/Configuration';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -40,7 +40,7 @@ const AdminSeatInfoCE = () => null;
 const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { logos: serverLogos, updateProjectSettings } = useConfiguration();
+  const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 

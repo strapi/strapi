@@ -4,15 +4,6 @@ import { rest } from 'msw';
 
 import { NpsSurvey } from '../NpsSurvey';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  auth: {
-    getUserInfo: jest.fn(() => ({
-      email: 'john@doe.com',
-    })),
-  },
-}));
-
 const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),

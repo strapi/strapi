@@ -240,6 +240,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         scripts: {
           build: 'strapi plugin:build',
           watch: 'strapi plugin:watch',
+          verify: 'strapi plugin:verify',
         },
         dependencies: {},
         devDependencies: {

@@ -1,8 +1,6 @@
 import { Box, Button, Divider, Flex, Loader, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import { NavLink, Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -12,25 +10,16 @@ import {
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
-import { GetProviders } from '../../../../../../shared/contracts/providers';
+import { useGetProvidersQuery } from '../../../../../../admin/src/services/auth';
 
 import { SSOProviders } from './SSOProviders';
 
 const Providers = () => {
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
-  const { isLoading, data: providers = [] } = useQuery(
-    ['ee', 'providers'],
-    async () => {
-      const { data } = await get<GetProviders.Response>('/admin/providers');
-
-      return data;
-    },
-    {
-      enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
-    }
-  );
+  const { isLoading, data: providers = [] } = useGetProvidersQuery(undefined, {
+    skip: !window.strapi.features.isEnabled(window.strapi.features.SSO),
+  });
 
   const handleClick = () => {
     push('/auth/login');

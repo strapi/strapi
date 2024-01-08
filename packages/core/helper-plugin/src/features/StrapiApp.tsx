@@ -29,6 +29,24 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
+type InjectionZoneArea =
+  | 'admin.tutorials.links'
+  | 'contentManager.editView.informations'
+  | 'contentManager.editView.right-links'
+  | 'contentManager.listView.actions'
+  | 'contentManager.listView.unpublishModalAdditionalInfos'
+  | 'contentManager.listView.deleteModalAdditionalInfos'
+  | 'contentManager.listView.publishModalAdditionalInfos'
+  | 'contentManager.listView.deleteModalAdditionalInfos';
+
+type InjectionZoneModule = InjectionZoneArea extends `${infer Word}.${string}` ? Word : never;
+type InjectionZoneContainer = InjectionZoneArea extends `${string}.${infer Word}.${string}`
+  ? Word
+  : never;
+type InjectionZoneBlock = InjectionZoneArea extends `${string}.${string}.${infer Word}`
+  ? Word
+  : never;
+
 // TODO: this should come from `core/admin/src/core/apis/Plugins`
 interface Plugin {
   apis: Record<string, unknown>;
@@ -86,6 +104,11 @@ interface StrapiAppContextValue {
   plugins: Record<string, Plugin>;
   settings: Record<string, StrapiAppSetting>;
   getPlugin: (pluginId: string) => Plugin | undefined;
+  getAdminInjectedComponents: (
+    moduleName: InjectionZoneModule,
+    containerName: InjectionZoneContainer,
+    blockName: InjectionZoneBlock
+  ) => Array<{ Component: React.ComponentType; name: string }>;
   runHookParallel: (hookName: string) => Promise<unknown>;
   runHookWaterfall: RunHookWaterfall;
   runHookSeries: RunHookSeries;
@@ -93,6 +116,7 @@ interface StrapiAppContextValue {
 
 const StrapiAppContext = React.createContext<StrapiAppContextValue>({
   getPlugin: () => undefined,
+  getAdminInjectedComponents: () => [],
   menu: [],
   plugins: {},
   settings: {},
@@ -114,6 +138,7 @@ interface StrapiAppProviderProps extends StrapiAppContextValue {
 const StrapiAppProvider = ({
   children,
   getPlugin,
+  getAdminInjectedComponents,
   menu,
   plugins,
   runHookParallel,
@@ -124,6 +149,7 @@ const StrapiAppProvider = ({
   const contextValue = React.useMemo(
     () => ({
       getPlugin,
+      getAdminInjectedComponents,
       menu,
       plugins,
       runHookParallel,
@@ -131,7 +157,16 @@ const StrapiAppProvider = ({
       runHookWaterfall,
       settings,
     }),
-    [getPlugin, menu, plugins, runHookParallel, runHookSeries, runHookWaterfall, settings]
+    [
+      getPlugin,
+      getAdminInjectedComponents,
+      menu,
+      plugins,
+      runHookParallel,
+      runHookSeries,
+      runHookWaterfall,
+      settings,
+    ]
   );
 
   return <StrapiAppContext.Provider value={contextValue}>{children}</StrapiAppContext.Provider>;

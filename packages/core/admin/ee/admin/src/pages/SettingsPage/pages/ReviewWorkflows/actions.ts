@@ -1,6 +1,7 @@
+import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+
 import { Stage, Workflow } from '../../../../../../../shared/contracts/review-workflows';
 import { Permission, SanitizedAdminRole } from '../../../../../../../shared/contracts/shared';
-import { ContentType } from '../../../../../../../shared/schema';
 
 import {
   ACTION_ADD_STAGE,
@@ -100,8 +101,8 @@ export function resetWorkflow() {
 }
 
 export function setContentTypes(payload: {
-  collectionTypes?: ContentType[];
-  singleTypes?: ContentType[];
+  collectionTypes?: Contracts.ContentTypes.ContentType[];
+  singleTypes?: Contracts.ContentTypes.ContentType[];
 }) {
   return {
     type: ACTION_SET_CONTENT_TYPES,

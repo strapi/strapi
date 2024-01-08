@@ -1,5 +1,5 @@
 import type { errors } from '@strapi/utils';
-import { Permission } from './shared';
+import { Entity, Permission } from './shared';
 
 export interface Action {
   actionId: string;
@@ -53,6 +53,9 @@ export declare namespace GetAll {
   export interface Request {
     query: {};
     body: {};
+    params: {
+      role: Entity['id'];
+    };
   }
 
   export interface Response {
