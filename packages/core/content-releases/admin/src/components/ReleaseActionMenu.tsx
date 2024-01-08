@@ -1,4 +1,4 @@
-import { Flex, IconButton, Typography } from '@strapi/design-system';
+import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
 import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Cross, More, Pencil } from '@strapi/icons';
@@ -29,14 +29,6 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
       }
     }
   }
-`;
-
-const StyledCross = styled(Cross)`
-  padding: ${({ theme }) => theme.spaces[1]};
-`;
-
-const StyledPencil = styled(Pencil)`
-  padding: ${({ theme }) => theme.spaces[1]};
 `;
 
 interface ReleaseActionMenuProps {
@@ -127,6 +119,7 @@ export const ReleaseActionMenu = ({
           {/*
             We show edit entry option only if contentTypeUid is provided
             which means that we are on the Release Details page
+            and not in the EditView Injected component for releases
           */}
           {contentTypeUid && (
             <CheckPermissions
@@ -142,7 +135,7 @@ export const ReleaseActionMenu = ({
             >
               <StyledMenuItem onSelect={handleEditEntry}>
                 <Flex gap={2}>
-                  <StyledPencil />
+                  <Icon as={Pencil} padding={1} />
                   <Typography variant="omega">
                     {formatMessage({
                       id: 'content-releases.content-manager-edit-view.edit-entry',
@@ -156,7 +149,7 @@ export const ReleaseActionMenu = ({
           <CheckPermissions permissions={PERMISSIONS.deleteAction}>
             <StyledMenuItem color="danger600" variant="danger" onSelect={handleDeleteAction}>
               <Flex gap={2}>
-                <StyledCross />
+                <Icon as={Cross} padding={1} />
                 <Typography color="danger600" variant="omega">
                   {formatMessage({
                     id: 'content-releases.content-manager-edit-view.remove-from-release',
