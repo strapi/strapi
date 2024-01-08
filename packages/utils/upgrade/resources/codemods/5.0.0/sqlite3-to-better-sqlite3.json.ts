@@ -4,7 +4,7 @@ import type { modules } from '../../../dist';
 
 /**
  * This codemod runs on the package.json of the Strapi project and updates
- * the sqlite dependency to better-sqlite3q
+ * the sqlite dependency to better-sqlite3
  */
 const transform: modules.runner.json.JSONTransform = (file, params) => {
   const { cwd, json } = params;
