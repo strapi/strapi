@@ -255,7 +255,7 @@ const CollectionTypeFormWrapper = ({
           isCloning
             ? `/content-manager/collection-types/${slug}/clone/${origin}`
             : `/content-manager/collection-types/${slug}`,
-          isCloning ? restBody : body,
+          (isCloning ? restBody : body) as Contracts.CollectionTypes.Clone.Request['body'],
           {
             params: query,
           }
