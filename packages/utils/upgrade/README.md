@@ -99,7 +99,7 @@ const transform: JSONTransform = (file, params) => {
 export default transform;
 ```
 
-For reference, these are the types for the relevant objects, which can be found in `packages/utils/upgrade/src/core/runner/json.ts`:
+For reference, these are the types for the relevant objects, which can be found in `packages/utils/upgrade/src/modules/json/types.ts`:
 
 ```typescript
 export interface JSONTransformParams {
@@ -113,6 +113,7 @@ export interface JSONTransformAPI {
   set(path: string, value: Utils.JSONValue): this;
   merge(other: Utils.JSONObject): this;
   root(): Utils.JSONObject;
+  remove(path: string): this;
 }
 
 export type JSONTransform = (file: JSONSourceFile, params: JSONTransformParams) => Utils.JSONObject;
@@ -125,6 +126,7 @@ The methods available from `json()` are wrappers for the lodash methods of the s
 - **has(path)**: checks if path exists
 - **merge(obj)**: merges two json objects
 - **root()**: returns the whole json object
+- **remove(path)**: removes the attribute given the path (such as 'dependencies.strapi')
 
 ### 'code' codemod transforms
 
