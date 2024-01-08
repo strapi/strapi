@@ -5,12 +5,15 @@ const execa = require('execa');
 const fs = require('node:fs/promises');
 const yargs = require('yargs');
 
+const chalk = require('chalk');
 const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
 const { createConfig } = require('../../playwright.base.config');
-const chalk = require('chalk');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'e2e');
+const testRoot = path.join(cwd, 'e2e');
+const testsDir = path.join(testRoot, 'tests');
+const templateDir = path.join(testRoot, 'app-template');
 
 yargs
   .parserConfiguration({
@@ -23,8 +26,8 @@ yargs
   .command({
     command: '*',
     description: 'run the E2E test suite',
-    builder: async (yarg) => {
-      const domains = await fs.readdir(path.join(cwd, 'e2e', 'tests'));
+    async builder(yarg) {
+      const domains = await fs.readdir(testsDir);
 
       yarg.option('concurrency', {
         alias: 'c',
@@ -49,9 +52,16 @@ yargs
         default: false,
       });
     },
-    handler: async (argv) => {
+    async handler(argv) {
       try {
         const { concurrency, domains, setup } = argv;
+
+        /**
+         * Publishing all packages to the yalc store
+         */
+        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')], {
+          stdio: 'inherit',
+        });
 
         /**
          * We don't need to spawn more apps than we have domains,
@@ -106,7 +116,7 @@ yargs
                   },
                   useNullAsDefault: true,
                 },
-                template: path.join(cwd, 'e2e', 'app-template'),
+                template: templateDir,
                 link: true,
               });
               /**
@@ -143,6 +153,7 @@ yargs
           return acc;
         }, []);
 
+        // eslint-disable-next-line no-plusplus
         for (let i = 0; i < chunkedDomains.length; i++) {
           const domains = chunkedDomains[i];
 
@@ -160,7 +171,7 @@ yargs
               );
 
               const config = createConfig({
-                testDir: path.join(cwd, 'e2e', 'tests', domain),
+                testDir: path.join(testsDir, domain),
                 port,
                 appDir: testAppPath,
               });
@@ -208,7 +219,7 @@ module.exports = config
   .command({
     command: 'clean',
     description: 'clean the test app directory of all test apps',
-    handler: async () => {
+    async handler() {
       try {
         const currentTestApps = await fs.readdir(testAppDirectory);
 

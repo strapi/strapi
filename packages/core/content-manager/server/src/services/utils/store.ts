@@ -20,7 +20,7 @@ const getModelConfiguration = async (key: any) => {
   return _.merge({}, EMPTY_CONFIG, config);
 };
 
-const setModelConfiguration = async (key: any, value: any) => {
+const setModelConfiguration = async (key: string, value: any) => {
   const storedConfig = (await getStore().get({ key: configurationKey(key) })) || {};
   const currentConfig = { ...storedConfig };
 

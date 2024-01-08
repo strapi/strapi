@@ -16,6 +16,7 @@
   "exclude": [
     "./tests",
     "**/__mocks__",
+    "**/tests",
     "**/*.test.*",
     "../ee/admin/**/*.test.*",
     "../ee/admin/**/__mocks__"

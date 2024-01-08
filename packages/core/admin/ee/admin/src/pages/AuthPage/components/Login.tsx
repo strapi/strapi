@@ -1,10 +1,9 @@
 import { Box, Divider, Flex, Typography } from '@strapi/design-system';
-import { useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import styled from 'styled-components';
 
 import { Login, LoginProps } from '../../../../../../admin/src/pages/Auth/components/Login';
+import { useGetProvidersQuery } from '../../../../../../admin/src/services/auth';
 
 import { SSOProviders } from './SSOProviders';
 
@@ -14,18 +13,9 @@ const DividerFull = styled(Divider)`
 
 const LoginEE = (loginProps: LoginProps) => {
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
-  const { isLoading, data: providers = [] } = useQuery(
-    ['ee', 'providers'],
-    async () => {
-      const { data } = await get('/admin/providers');
-
-      return data;
-    },
-    {
-      enabled: window.strapi.features.isEnabled(window.strapi.features.SSO),
-    }
-  );
+  const { isLoading, data: providers = [] } = useGetProvidersQuery(undefined, {
+    skip: !window.strapi.features.isEnabled(window.strapi.features.SSO),
+  });
 
   if (
     !window.strapi.features.isEnabled(window.strapi.features.SSO) ||

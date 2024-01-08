@@ -16,14 +16,14 @@ const mock = {
   admin,
 };
 
-jest.mock('../../../../../Strapi', () => {
-  const impl = jest.fn(() => mock);
+jest.mock('@strapi/core', () => {
+  const strapiFactory = jest.fn(() => mock);
 
-  Object.assign(impl, {
+  Object.assign(strapiFactory, {
     compile: jest.fn(),
   });
 
-  return impl;
+  return { strapiFactory };
 });
 
 describe('admin:reset-password command', () => {

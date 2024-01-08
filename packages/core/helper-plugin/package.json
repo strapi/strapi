@@ -42,7 +42,6 @@
     "build-storybook": "storybook build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --ext .js,.jsx,.tsx,.ts",
-    "prepublishOnly": "yarn run clean && yarn run build",
     "storybook": "storybook dev -p 6006",
     "test:front": "run -T jest --config ./jest.config.front.js",
     "test:front:cov": "run -T jest --config ./jest.config.front.js --coverage",

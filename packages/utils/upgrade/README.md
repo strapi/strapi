@@ -4,9 +4,27 @@
 
 The Strapi Upgrade Tool is the CLI for facilitating upgrades between Strapi versions.
 
-The exact details of what level of upgrade will be run (patch, minor, major) based on the current version and what cli options will be available are still in discussion and this document will be updated once they are finalized.
+It handles updating a project's package.json with the correct version of Strapi, running the package installer, and running suggested code transforms for breaking changes (in major versions).
 
-From now on, all breaking changes, and ideally also deprecations, must have an accompanying code transform written to be accepted.
+Once released, it will be the recommended way to update to any major, minor, and patch versions of Strapi instead of manually modifying package.json files.
+
+The tool offers the following commands:
+
+```
+  major [options]     Upgrade to the next available major version of Strapi
+  minor [options]     Upgrade to the latest minor and patch version of Strapi for the
+                      current major
+  patch [options]     Upgrade to latest patch version of Strapi for the current major
+                      and minor
+  codemods [options]  Run a set of available codemods for the selected target version
+                      without updating the Strapi dependencies
+```
+
+### What's a codemod / code transform?
+
+Codemods are a scripted way to refactor code. Here we are providing and running these scripts for users for any changes necessary in user code between Strapi versions.
+
+For example, if we need to rename a package used by Strapi projects, instead of instructing users to change the import, we provide a script that searches through the user's project and does the replacement for them.
 
 ### Types of Transforms
 
@@ -14,12 +32,6 @@ The upgrade tool provides two types of transforms:
 
 - `json`: for updating a project's .json files, primarily intended for the `package.json`
 - `code`: codemods; for updating a project's .js and .ts files
-
-### What's a codemod?
-
-Codemods are a scripted way to refactor code. Here we are providing and running these scripts for users for any changes necessary in user code between Strapi versions.
-
-For example, if we need to rename a package used by Strapi projects, instead of instructing users to change the import, we provide a script that searches through the user's project and does the replacement for them.
 
 ### Data Migrations
 
@@ -41,9 +53,9 @@ Run the command with the `--help` option to see all the available options.
 
 ## Writing a code transforms
 
-To begin your code transform script, create a file `upgrade/resources/transforms/{X.X.X}/{short-description-of-action}.{code|json}.ts` where `X.X.X` is the target version of Strapi the codemod will be run for.
+To begin your code transform script, create a file `upgrade/resources/codemods/{X.X.X}/{short-description-of-action}.{code|json}.ts` where `X.X.X` is the target version of Strapi the codemod will be run for.
 
-For example, all breaking changes for the initial release of Strapi v5 will go in upgrade/resources/transforms/5.0.0
+For example, all breaking changes for the initial release of Strapi v5 will go in `upgrade/resources/codemods/5.0.0`
 
 Note that "short-description-of-action" will be converted to text displayed to the user with hyphens converted to spaces, for example: "short description of action"
 

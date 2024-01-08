@@ -31,11 +31,6 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
     return this;
   }
 
-  remove(path: string) {
-    this.json = omit(path, this.json);
-    return this;
-  }
-
   root(): Utils.JSONObject {
     return cloneDeep(this.json);
   }
@@ -43,6 +38,11 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
   set(path: string, value: Utils.JSONValue) {
     this.json = set(path, value, this.json);
 
+    return this;
+  }
+
+  remove(path: string) {
+    this.json = omit(path, this.json);
     return this;
   }
 }

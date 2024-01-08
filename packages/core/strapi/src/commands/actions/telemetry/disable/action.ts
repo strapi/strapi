@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import fse from 'fs-extra';
 import chalk from 'chalk';
-import machineID from '../../../../utils/machine-id';
+import { machineID } from '@strapi/utils';
 
 const readPackageJSON = async (path: string) => {
   try {

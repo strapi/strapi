@@ -8,4 +8,8 @@ export interface CLIContext {
   tsconfig?: TsConfig;
 }
 
-export type StrapiCommand = (params: { command: Command; argv: string[]; ctx: CLIContext }) => void;
+export type StrapiCommand = (params: {
+  command: Command;
+  argv: string[];
+  ctx: CLIContext;
+}) => void | Command;

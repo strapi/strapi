@@ -7,16 +7,8 @@ import { useIntl } from 'react-intl';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 import type { FilterData, Filter } from '../types';
-
-export type FilterContent = FilterData<
-  {
-    customValue?: string;
-    label?: string;
-  }[]
->;
-
 export interface FilterListURLQueryProps {
-  filtersSchema: FilterContent[];
+  filtersSchema: FilterData[];
 }
 
 export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryProps) => {
@@ -103,7 +95,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
 };
 
 interface AttributeTagProps {
-  attribute: FilterContent;
+  attribute: FilterData;
   filter: Filter;
   onClick: (filter: Filter) => void;
   operator: string;
@@ -124,28 +116,30 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }: Attribute
 
   let formattedValue = value;
 
-  if (type === 'date') {
-    formattedValue = formatDate(value, { dateStyle: 'full' });
-  }
+  switch (type) {
+    case 'date':
+      formattedValue = formatDate(value, { dateStyle: 'full' });
+      break;
+    case 'datetime':
+      formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
+      break;
+    case 'time':
+      const [hour, minute] = value.split(':');
+      const date = new Date();
+      date.setHours(Number(hour));
+      date.setMinutes(Number(minute));
 
-  if (type === 'datetime') {
-    formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
-  }
-
-  if (type === 'time') {
-    const [hour, minute] = value.split(':');
-    const date = new Date();
-    date.setHours(Number(hour));
-    date.setMinutes(Number(minute));
-
-    formattedValue = formatTime(date, {
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-  }
-
-  if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {
-    formattedValue = formatNumber(Number(value));
+      formattedValue = formatTime(date, {
+        hour: 'numeric',
+        minute: 'numeric',
+      });
+      break;
+    case 'float':
+    case 'integer':
+    case 'biginteger':
+    case 'decimal':
+      formattedValue = formatNumber(Number(value));
+      break;
   }
 
   // Handle custom input

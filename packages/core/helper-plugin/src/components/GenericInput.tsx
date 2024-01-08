@@ -29,7 +29,7 @@ import { FieldSchema, useFieldHint } from '../hooks/useFieldHint';
 import { useFocusInputField } from '../hooks/useFocusInputField';
 import { pxToRem } from '../utils/pxToRem';
 
-import type { InputType, TranslationMessage } from '../types';
+import type { TranslationMessage } from '../types';
 import type { Attribute } from '@strapi/types';
 
 interface InputOption {
@@ -63,7 +63,7 @@ export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.
       target: {
         name: string;
         value: Attribute.GetValue<TAttribute>;
-        type?: InputType;
+        type?: string;
       };
     },
     shouldSetInitialValue?: boolean
@@ -72,7 +72,7 @@ export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.
   placeholder?: TranslationMessage;
   required?: boolean;
   step?: number;
-  type: InputType;
+  type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: Attribute.GetValue<TAttribute>;
   isNullable?: boolean;

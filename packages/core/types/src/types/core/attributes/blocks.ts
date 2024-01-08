@@ -15,7 +15,7 @@ interface BaseNode {
   children: unknown[];
 }
 
-interface LinkInlineNode extends BaseNode {
+export interface LinkInlineNode extends BaseNode {
   type: 'link';
   url: string;
   children: TextInlineNode[];
@@ -52,7 +52,7 @@ interface HeadingBlockNode extends BaseNode {
   children: DefaultInlineNode[];
 }
 
-interface ListBlockNode extends BaseNode {
+export interface ListBlockNode extends BaseNode {
   type: 'list';
   format: 'ordered' | 'unordered';
   children: (ListItemInlineNode | ListBlockNode)[];

@@ -6,7 +6,7 @@ export interface JSONTransformAPI {
 
   has(path: string): boolean;
   set(path: string, value: Utils.JSONValue): this;
+  remove(path: string): this;
   merge(other: Utils.JSONObject): this;
   root(): Utils.JSONObject;
-  remove(path: string): this;
 }

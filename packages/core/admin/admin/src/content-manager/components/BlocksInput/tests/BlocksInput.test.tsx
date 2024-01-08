@@ -3,6 +3,8 @@ import * as React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 
 import { BlocksInput } from '../BlocksInput';
@@ -32,7 +34,7 @@ const setup = (props: Partial<BlocksEditorProps>) =>
       wrapper: ({ children }) => (
         <ThemeProvider theme={lightTheme}>
           <IntlProvider messages={{}} locale="en">
-            {children}
+            <DndProvider backend={HTML5Backend}>{children}</DndProvider>
           </IntlProvider>
         </ThemeProvider>
       ),
@@ -52,7 +54,6 @@ describe('BlocksInput', () => {
 
   it('should render blocks with error', () => {
     setup({ error: 'field is required', value: blocksData });
-
     expect(screen.getByText(/field is required/));
   });
 
