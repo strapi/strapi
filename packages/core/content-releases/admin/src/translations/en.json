@@ -51,5 +51,8 @@
   "content-releases.pages.ReleaseDetails.entry-validation.already-published": "Already published",
   "content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish": "Ready to publish",
   "content-releases.pages.ReleaseDetails.entry-validation.already-unpublished": "Already unpublished",
-  "content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish"
+  "content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish",
+  "pages.ReleaseDetails.groupBy.option.content-type": "Content-Types",
+  "pages.ReleaseDetails.groupBy.option.locales": "Locales",
+  "pages.ReleaseDetails.groupBy.option.actions": "Actions"
 }
