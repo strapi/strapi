@@ -45,5 +45,6 @@
   "dialog.confirmation-message": "Are you sure you want to delete this release?",
   "page.Details.button.openContentManager": "Open the Content Manager",
   "pages.Releases.notification.error.title": "Your request could not be processed.",
-  "pages.Releases.notification.error.message": "Please try again or open another release."
+  "pages.Releases.notification.error.message": "Please try again or open another release.",
+  "pages.ReleaseDetails.groupBy.label": "Group by {groupBy}"
 }

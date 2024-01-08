@@ -1,5 +1,4 @@
 import type Koa from 'koa';
-import { Entity } from '../../../shared/types';
 
 import {
   validateReleaseAction,
@@ -8,21 +7,11 @@ import {
 import type {
   CreateReleaseAction,
   GetReleaseActions,
-  ReleaseAction,
   UpdateReleaseAction,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
-
-interface Locale extends Entity {
-  name: string;
-  code: string;
-}
-
-type LocaleDictionary = {
-  [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
-};
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -38,6 +27,7 @@ const releaseActionController = {
       data: releaseAction,
     };
   },
+
   async findMany(ctx: Koa.Context) {
     const releaseId: GetReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
@@ -47,36 +37,14 @@ const releaseActionController = {
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const releaseService = getService('release', { strapi });
-    const { results, pagination } = await releaseService.findActions(releaseId, query);
-    const allReleaseContentTypesDictionary = await releaseService.getContentTypesDataForActions(
-      releaseId
-    );
-
-    const allLocales: Locale[] = await strapi.plugin('i18n').service('locales').find();
-    const allLocalesDictionary = allLocales.reduce<LocaleDictionary>((acc, locale) => {
-      acc[locale.code] = { name: locale.name, code: locale.code };
-
-      return acc;
-    }, {});
-
-    const data = results.map((action: ReleaseAction) => {
-      const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
-
-      return {
-        ...action,
-        entry: {
-          id: action.entry.id,
-          contentType: {
-            displayName,
-            mainFieldValue: action.entry[mainField],
-          },
-          locale: allLocalesDictionary[action.entry.locale],
-        },
-      };
+    const { results, pagination } = await releaseService.findActions(releaseId, {
+      sort: query.groupBy === 'action' ? 'type' : query.groupBy,
+      ...query,
     });
+    const groupedData = await releaseService.groupActions(results, query.groupBy);
 
     ctx.body = {
-      data,
+      data: groupedData,
       meta: {
         pagination,
       },

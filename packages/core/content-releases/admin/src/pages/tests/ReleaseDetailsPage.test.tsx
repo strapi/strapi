@@ -96,16 +96,20 @@ describe('Releases details page', () => {
     // should show the entries
     expect(
       screen.getByText(
-        mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.contentType.mainFieldValue
+        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.contentType
+          .mainFieldValue
       )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', {
+        name: mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.contentType
+          .displayName,
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.contentType.displayName
+        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.locale.name
       )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.locale.name)
     ).toBeInTheDocument();
 
     // There is one column with actions and the right one is checked
@@ -183,5 +187,32 @@ describe('Releases details page', () => {
 
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
     expect(deleteButton).toBeDisabled();
+  });
+
+  it('renders as many tables as there are in the response', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      )
+    );
+
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    const tables = screen.getAllByRole('grid');
+
+    expect(tables).toHaveLength(2);
   });
 });

@@ -8,7 +8,7 @@ type ReleaseActionEntry = Entity & {
   // Entity attributes
   [key: string]: Attribute.Any;
 } & {
-  locale: string;
+  locale?: string;
 };
 
 type ReleaseActionEntryData = {
@@ -27,6 +27,7 @@ export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: Common.UID.ContentType;
+  locale?: string;
   release: Release;
 }
 
@@ -42,6 +43,7 @@ export declare namespace CreateReleaseAction {
       type: ReleaseAction['type'];
       entry: {
         id: ReleaseActionEntry['id'];
+        locale?: ReleaseActionEntry['locale'];
         contentType: Common.UID.ContentType;
       };
     };
@@ -56,16 +58,22 @@ export declare namespace CreateReleaseAction {
 /**
  * GET /content-releases/:id/actions - Get all release actions
  */
+
+export type ReleaseActionGroupBy = 'contentType' | 'action' | 'locale';
 export declare namespace GetReleaseActions {
   export interface Request {
     params: {
       releaseId: Release['id'];
     };
-    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>>;
+    query?: Partial<Pick<Pagination, 'page' | 'pageSize'>> & {
+      groupBy?: ReleaseActionGroupBy;
+    };
   }
 
   export interface Response {
-    data: Array<ReleaseAction & { entry: ReleaseActionEntryData }>;
+    data: {
+      [key: string]: Array<ReleaseAction & { entry: ReleaseActionEntryData }>;
+    };
     meta: {
       pagination: Pagination;
     };
