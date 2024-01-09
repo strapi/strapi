@@ -27,6 +27,7 @@ describe('release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         entityService: {
+          findOne: jest.fn().mockReturnValue(null),
           update: jest.fn().mockReturnValue(null),
         },
       };
@@ -39,6 +40,26 @@ describe('release service', () => {
 
       expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
         'No release found for id 1'
+      );
+    });
+
+    it('throws an error if the release is already published', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+      };
+
+      expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
+        'Release already published'
       );
     });
   });

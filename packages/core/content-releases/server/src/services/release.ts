@@ -155,22 +155,28 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     releaseData: UpdateRelease.Request['body'],
     { user }: { user: UserInfo }
   ) {
-    const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
+    const releaseWithCreatorFields = await setCreatorFields({ user, isEdition: true })(releaseData);
 
-    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
-      /*
-       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
-       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
-       */
-      // @ts-expect-error see above
-      data: updatedRelease,
-    });
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id);
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${id}`);
     }
 
-    return release;
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
+    const updatedRelease = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
+      /*
+       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
+       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
+       */
+      // @ts-expect-error see above
+      data: releaseWithCreatorFields,
+    });
+
+    return updatedRelease;
   },
 
   async createAction(
