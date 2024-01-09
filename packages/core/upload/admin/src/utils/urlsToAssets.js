@@ -1,5 +1,3 @@
-import { getFetchClient } from '@strapi/helper-plugin';
-
 import { AssetSource } from '../constants';
 
 import { typeFromMime } from './typeFromMime';
@@ -9,20 +7,18 @@ function getFilenameFromURL(url) {
 }
 
 export const urlsToAssets = async (urls) => {
-  const { get } = getFetchClient();
   const assetPromises = urls.map((url) =>
-    get(url, {
-      responseType: 'blob',
-      timeout: 60000,
-    }).then((res) => {
-      const loadedFile = new File([res.data], getFilenameFromURL(res.config.url), {
-        type: res.headers['content-type'],
+    fetch(url).then(async (res) => {
+      const blob = await res.blob();
+
+      const loadedFile = new File([blob], getFilenameFromURL(res.url), {
+        type: res.headers.get('content-type'),
       });
 
       return {
         name: loadedFile.name,
-        url: res.config.url,
-        mime: res.headers['content-type'],
+        url: res.url,
+        mime: res.headers.get('content-type'),
         rawFile: loadedFile,
       };
     })

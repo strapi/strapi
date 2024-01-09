@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
   ContentLayout,
@@ -13,7 +13,6 @@ import {
   Thead,
   Tr,
   Typography,
-  useNotifyAT,
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
@@ -22,6 +21,9 @@ import {
   onRowClick,
   SettingsPageTitle,
   stopPropagation,
+  useAPIErrorHandler,
+  useCollator,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -29,7 +31,6 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -38,90 +39,94 @@ import FormModal from '../../components/FormModal';
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 
-import { fetchData, putProvider } from './utils/api';
-import createProvidersArray from './utils/createProvidersArray';
 import forms from './utils/forms';
 
 export const ProvidersPage = () => {
-  const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
-  const { notifyStatus } = useNotifyAT();
+  const { formatMessage, locale } = useIntl();
   const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
-  const trackUsageRef = useRef(trackUsage);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isSubmiting, setIsSubmiting] = useState(false);
-  const [providerToEditName, setProviderToEditName] = useState(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [providerToEditName, setProviderToEditName] = React.useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { get, put } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  useFocusWhenNavigate();
 
   const {
-    isLoading: isLoadingForPermissions,
+    isLoading: isLoadingPermissions,
     allowedActions: { canUpdate },
   } = useRBAC({ update: PERMISSIONS.updateProviders });
 
-  const {
-    isLoading: isLoadingForData,
-    data: modifiedData,
-    isFetching,
-  } = useQuery('get-providers', () => fetchData(toggleNotification), {
-    onSuccess() {
-      notifyStatus(
-        formatMessage({
-          id: getTrad('Providers.data.loaded'),
-          defaultMessage: 'Providers have been loaded',
-        })
-      );
+  const { isLoading: isLoadingData, data } = useQuery(
+    ['users-permissions', 'get-providers'],
+    async () => {
+      const { data } = await get('/users-permissions/providers');
+
+      return data;
     },
-    initialData: {},
-  });
+    {
+      initialData: {},
+    }
+  );
 
-  const isLoading = isLoadingForData || isFetching;
-
-  const submitMutation = useMutation(putProvider, {
+  const submitMutation = useMutation((body) => put('/users-permissions/providers', body), {
     async onSuccess() {
-      await queryClient.invalidateQueries('get-providers');
+      await queryClient.invalidateQueries(['users-permissions', 'providers']);
+
       toggleNotification({
-        type: 'info',
+        type: 'success',
         message: { id: getTrad('notification.success.submit') },
       });
 
-      trackUsageRef.current('didEditAuthenticationProvider');
-      setIsSubmiting(false);
+      trackUsage('didEditAuthenticationProvider');
+
       handleToggleModal();
       unlockApp();
     },
-    onError() {
+    onError(error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: formatAPIError(error),
       });
+
       unlockApp();
-      setIsSubmiting(false);
     },
     refetchActive: false,
   });
 
-  const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
+  const providers = Object.entries(data)
+    .reduce((acc, [name, provider]) => {
+      const { icon, enabled, subdomain } = provider;
 
-  const rowCount = providers.length;
+      acc.push({
+        name,
+        icon: icon === 'envelope' ? ['fas', 'envelope'] : ['fab', icon],
+        enabled,
+        subdomain,
+      });
 
-  const isProviderWithSubdomain = useMemo(() => {
+      return acc;
+    }, [])
+    .sort((a, b) => formatter.compare(a.name, b.name));
+
+  const isLoading = isLoadingData || isLoadingPermissions;
+
+  const isProviderWithSubdomain = React.useMemo(() => {
     if (!providerToEditName) {
       return false;
     }
 
     const providerToEdit = providers.find((obj) => obj.name === providerToEditName);
 
-    return has(providerToEdit, 'subdomain');
+    return !!providerToEdit?.subdomain;
   }, [providers, providerToEditName]);
 
-  const pageTitle = formatMessage({
-    id: getTrad('HeaderNav.link.providers'),
-    defaultMessage: 'Providers',
-  });
-
-  const layoutToRender = useMemo(() => {
+  const layoutToRender = React.useMemo(() => {
     if (providerToEditName === 'email') {
       return forms.email;
     }
@@ -145,20 +150,21 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async (values) => {
-    setIsSubmiting(true);
-
     lockApp();
 
-    trackUsageRef.current('willEditAuthenticationProvider');
+    trackUsage('willEditAuthenticationProvider');
 
-    const body = { ...modifiedData, [providerToEditName]: values };
-
-    submitMutation.mutate({ providers: body });
+    submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });
   };
 
   return (
     <Layout>
-      <SettingsPageTitle name={pageTitle} />
+      <SettingsPageTitle
+        name={formatMessage({
+          id: getTrad('HeaderNav.link.providers'),
+          defaultMessage: 'Providers',
+        })}
+      />
       <Main>
         <HeaderLayout
           title={formatMessage({
@@ -166,11 +172,11 @@ export const ProvidersPage = () => {
             defaultMessage: 'Providers',
           })}
         />
-        {isLoading || isLoadingForPermissions ? (
+        {isLoading ? (
           <LoadingIndicatorPage />
         ) : (
           <ContentLayout>
-            <Table colCount={3} rowCount={rowCount + 1}>
+            <Table colCount={3} rowCount={providers.length + 1}>
               <Thead>
                 <Tr>
                   <Th>
@@ -243,9 +249,9 @@ export const ProvidersPage = () => {
         )}
       </Main>
       <FormModal
-        initialData={modifiedData[providerToEditName]}
+        initialData={data[providerToEditName]}
         isOpen={isOpen}
-        isSubmiting={isSubmiting}
+        isSubmiting={submitMutation.isLoading}
         layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({

@@ -2,6 +2,13 @@
 
 const settingsService = require('../settings');
 
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  traverse: {
+    traverseQuerySort: jest.fn((a, b, c) => c),
+  },
+}));
+
 describe('Configuration settings service', () => {
   describe('createDefaultSettings', () => {
     test('Consistent defaults', async () => {

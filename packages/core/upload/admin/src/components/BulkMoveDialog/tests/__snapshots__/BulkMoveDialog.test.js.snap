@@ -71,8 +71,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
-  width: 2rem;
-  height: 2rem;
   cursor: pointer;
 }
 
@@ -245,7 +243,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c28[aria-disabled='true'] svg > g,.c28[aria-disabled='true'] svg path {
+.c28[aria-disabled='true'] svg > g,
+.c28[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -258,7 +257,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c28[aria-disabled='true']:active svg > g,.c28[aria-disabled='true']:active svg path {
+.c28[aria-disabled='true']:active svg > g,
+.c28[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -297,7 +297,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
+.c30[aria-disabled='true'] svg > g,
+.c30[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -310,7 +311,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
+.c30[aria-disabled='true']:active svg > g,
+.c30[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
@@ -351,19 +353,22 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c14 svg > g,
+.c14 {
+  border-color: #dcdce4;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c14 svg g,
 .c14 svg path {
   fill: #8e8ea9;
 }
 
-.c14:hover svg > g,
-.c14:hover svg path {
+.c14:hover svg g,
+.c14:focus svg g,
+.c14:hover svg path,
+.c14:focus svg path {
   fill: #666687;
-}
-
-.c14:active svg > g,
-.c14:active svg path {
-  fill: #a5a5ba;
 }
 
 .c14[aria-disabled='true'] svg path {
@@ -550,7 +555,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                           class="css-1f43avz-a11yText-A11yText"
                         />
                         <div
-                          class=" css-1ckpxei-control"
+                          class=" css-1ioi85f-control"
                         >
                           <div
                             class=" css-onz4xi-ValueContainer"
@@ -575,7 +580,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                             />
                           </div>
                           <div
-                            class=" css-1hb7zxy-IndicatorsContainer"
+                            class=" css-1hm8yhz-IndicatorsContainer"
                           >
                             <div
                               aria-hidden="true"

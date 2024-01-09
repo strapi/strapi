@@ -24,7 +24,7 @@ const ACTIONS = {
 
 const sanitizeRole = omit(['users', 'permissions']);
 
-const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action'];
+const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
 const pickComparableFields = pick(COMPARABLE_FIELDS);
 
 const jsonClean = (data) => JSON.parse(JSON.stringify(data));
@@ -110,8 +110,9 @@ const find = (params = {}, populate) => {
  * Find all roles in database
  * @returns {Promise<array>}
  */
-const findAllWithUsersCount = async (populate) => {
-  const roles = await strapi.query('admin::role').findMany({ populate });
+const findAllWithUsersCount = async (params) => {
+  const roles = await strapi.entityService.findMany('admin::role', params);
+
   for (const role of roles) {
     role.usersCount = await getUsersCount(role.id);
   }
@@ -322,6 +323,13 @@ const displayWarningIfNoSuperAdmin = async () => {
 const assignPermissions = async (roleId, permissions = []) => {
   await validatePermissionsExist(permissions);
 
+  // Internal actions are not handled by the role service, so any permission
+  // with an internal action is filtered out
+  const internalActions = getService('permission')
+    .actionProvider.values()
+    .filter((action) => action.section === 'internal')
+    .map((action) => action.actionId);
+
   const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
   const assignRole = set('role', roleId);
@@ -341,13 +349,13 @@ const assignPermissions = async (roleId, permissions = []) => {
     arePermissionsEqual,
     permissionsWithRole,
     existingPermissions
-  );
+  ).filter((permission) => !internalActions.includes(permission.action));
 
   const permissionsToDelete = differenceWith(
     arePermissionsEqual,
     existingPermissions,
     permissionsWithRole
-  );
+  ).filter((permission) => !internalActions.includes(permission.action));
 
   const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
 
@@ -373,7 +381,8 @@ const addPermissions = async (roleId, permissions) => {
 
   const permissionsWithRole = permissions
     .map(set('role', roleId))
-    .map(sanitizeConditions(conditionProvider));
+    .map(sanitizeConditions(conditionProvider))
+    .map(permissionDomain.create);
 
   return createMany(permissionsWithRole);
 };

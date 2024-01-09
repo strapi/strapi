@@ -123,6 +123,7 @@
   "modalForm.editCategory.base.name.description": "ไม่อนุญาตให้มีช่องว่างสำหรับชื่อของหมวดหมู่",
   "modalForm.header-edit": "แก้ไข {name}",
   "modalForm.header.categories": "ประเภท",
+  "modalForm.header.back": "กลับ",
   "modalForm.singleType.header-create": "สร้างชนิดเดี่ยว",
   "modalForm.sub-header.addComponentToDynamicZone": "เพิ่มคอมโพเนนต์ใหม่ให้กับไดนามิกโซน",
   "modalForm.sub-header.attribute.create": "เพิ่มฟิลด์ {type} ใหม่",

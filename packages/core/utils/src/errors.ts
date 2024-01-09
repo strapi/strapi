@@ -5,6 +5,7 @@ import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
 
 /* ApplicationError */
+
 class ApplicationError extends Error {
   details: unknown;
 

@@ -34,7 +34,7 @@ describe('Role CRUD End to End', () => {
     sortedData.conditions = sortedData.conditions.sort();
 
     // eslint-disable-next-line node/no-extraneous-require
-    const { features } = require('@strapi/strapi/lib/utils/ee');
+    const { features } = require('@strapi/strapi/dist/utils/ee');
     const hasSSO = features.isEnabled('sso');
 
     if (hasSSO) {
@@ -374,9 +374,27 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "options",
                 },
                 {
+                  "action": "admin::review-workflows.create",
+                  "category": "review workflows",
+                  "displayName": "Create",
+                  "subCategory": "options",
+                },
+                {
+                  "action": "admin::review-workflows.delete",
+                  "category": "review workflows",
+                  "displayName": "Delete",
+                  "subCategory": "options",
+                },
+                {
                   "action": "admin::review-workflows.read",
                   "category": "review workflows",
                   "displayName": "Read",
+                  "subCategory": "options",
+                },
+                {
+                  "action": "admin::review-workflows.update",
+                  "category": "review workflows",
+                  "displayName": "Update",
                   "subCategory": "options",
                 },
                 {

@@ -1,16 +1,16 @@
 import type { Readable } from 'stream';
 
-import fs from 'fs-extra';
 import zip from 'zlib';
-import tar from 'tar';
 import path from 'path';
+import { pipeline, PassThrough } from 'stream';
+import fs from 'fs-extra';
+import tar from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
-import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
-import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
+import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
 
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
@@ -94,6 +94,11 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
+  async #loadAssetMetadata(path: string) {
+    const backupStream = this.#getBackupStream();
+    return this.#parseJSONFile<IFile>(backupStream, path);
+  }
+
   async getMetadata() {
     if (!this.#metadata) {
       await this.#loadMetadata();
@@ -132,6 +137,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   createAssetsReadStream(): Readable | Promise<Readable> {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
+    const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
 
     pipeline(
       [
@@ -144,12 +150,20 @@ class LocalFileSourceProvider implements ISourceProvider {
             }
             return isFilePathInDirname('assets/uploads', filePath);
           },
-          onentry(entry) {
+          async onentry(entry) {
             const { path: filePath, size = 0 } = entry;
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
-
+            let metadata;
+            try {
+              metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
+            } catch (error) {
+              console.warn(
+                ` Failed to read metadata for ${file}, Strapi will try to fix this issue automatically`
+              );
+            }
             const asset: IAsset = {
+              metadata,
               filename: file,
               filepath: normalizedPath,
               stats: { size },
@@ -272,8 +286,8 @@ class LocalFileSourceProvider implements ISourceProvider {
               const content = await entry.collect();
 
               try {
-                // Parse from buffer to string to JSON
-                const parsedContent = JSON.parse(content.toString());
+                // Parse from buffer array to string to JSON
+                const parsedContent = JSON.parse(Buffer.concat(content).toString());
 
                 // Resolve the Promise with the parsed content
                 resolve(parsedContent);

@@ -89,8 +89,7 @@ const decorator = (service) => ({
     return service.wrapResult.call(this, result, ctx);
   },
 
-
-    /**
+  /**
    * Wraps query options. In particular will add default locale to query params
    * @param {object} params - Query options object (params, data, files, populate)
    * @param {object} ctx - Query context

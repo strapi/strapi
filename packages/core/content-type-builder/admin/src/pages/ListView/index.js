@@ -109,7 +109,9 @@ const ListView = () => {
   return (
     <>
       <Prompt
-        message={formatMessage({ id: getTrad('prompt.unsaved') })}
+        message={(location) =>
+          location.hash === '#back' ? false : formatMessage({ id: getTrad('prompt.unsaved') })
+        }
         when={hasModelBeenModified}
       />
       <HeaderLayout
@@ -126,7 +128,10 @@ const ListView = () => {
                     onOpenModalAddField({ forTarget, targetUid });
                   }}
                 >
-                  {formatMessage({ id: getTrad('button.attributes.add.another') })}
+                  {formatMessage({
+                    id: getTrad('button.attributes.add.another'),
+                    defaultMessage: 'Add another field',
+                  })}
                 </Button>
               )}
               <Button

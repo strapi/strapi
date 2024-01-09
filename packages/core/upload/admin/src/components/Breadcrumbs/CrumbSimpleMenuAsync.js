@@ -51,7 +51,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
               <MenuItem
                 as="button"
                 type="button"
-                onClick={() => onChangeFolder(ascendant.id)}
+                onClick={() => onChangeFolder(ascendant.id, ascendant.path)}
                 key={ascendant.id}
               >
                 {ascendant.label}

@@ -12,7 +12,9 @@ module.exports = {
       pluralName: 'workflow-stages',
       displayName: 'Stages',
     },
-    options: {},
+    options: {
+      version: '1.1.0',
+    },
     pluginOptions: {
       'content-manager': {
         visible: false,
@@ -36,6 +38,12 @@ module.exports = {
         target: 'admin::workflow',
         relation: 'manyToOne',
         inversedBy: 'stages',
+        configurable: false,
+      },
+      permissions: {
+        type: 'relation',
+        target: 'admin::permission',
+        relation: 'manyToMany',
         configurable: false,
       },
     },

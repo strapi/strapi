@@ -1,5 +1,5 @@
-import { ResizeObserver } from '@juggle/resize-observer';
 import { format } from 'util';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 /* -------------------------------------------------------------------------------------------------
  * IntersectionObserver
@@ -27,19 +27,31 @@ window.ResizeObserver = ResizeObserver;
  * If there's a prop type error then we want to throw an
  * error so that the test fails.
  *
- * NOTE: This can be removed once we move to a typescript
- * setup & we throw tests on type errors.
+ * In the CI we fail the entire process if anything is logged to the console.
+ * This is to stop pollution, you shouldn't need to log _anything_ to the console
+ * for tests.
  */
-
-const error = console.error;
 window.console = {
   ...window.console,
+  warn(...args: any[]) {
+    throw new Error(format(...args));
+  },
   error(...args: any[]) {
-    error(...args);
-
     const message = format(...args);
 
     if (/(Invalid prop|Failed prop type)/gi.test(message)) {
+      throw new Error(message);
+
+      // Ignore errors thrown by styled-components. This can be removed once we upgrade
+      // to styled-components@6 and have separate props that are rendered in the DOM by
+      // the ones that aren't using the $ prefix.
+      // https://styled-components.com/docs/faqs#transient-as-and-forwardedas-props-have-been-dropped
+    } else if (
+      /React does not recognize the .* prop on a DOM element/.test(message) ||
+      /Unknown event handler property/.test(message)
+    ) {
+      // do nothing
+    } else {
       throw new Error(message);
     }
   },
@@ -58,6 +70,10 @@ window.strapi = {
   },
   projectType: 'Community',
   telemetryDisabled: true,
+  flags: {
+    nps: true,
+    promoteEE: true,
+  },
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -116,6 +132,7 @@ window.URL.createObjectURL = jest
 
 document.createRange = () => {
   const range = new Range();
+  // @ts-expect-error we don't need to implement all the methods
   range.getClientRects = jest.fn(() => ({
     item: () => null,
     length: 0,

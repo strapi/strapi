@@ -6,10 +6,10 @@ import { pipeAsync } from '../async';
 
 import * as visitors from './visitors';
 import * as sanitizers from './sanitizers';
-import traverseEntity, { Data } from '../traverse-entity';
+import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
-import { Model } from '../types';
+import type { Model, Data } from '../types';
 
 export interface Options {
   auth?: unknown;
@@ -24,6 +24,9 @@ export interface SanitizeFunc {
 
 const createContentAPISanitizers = () => {
   const sanitizeInput: SanitizeFunc = (data: unknown, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizeInput');
+    }
     if (isArray(data)) {
       return Promise.all(data.map((entry) => sanitizeInput(entry, schema, { auth })));
     }
@@ -32,7 +35,7 @@ const createContentAPISanitizers = () => {
 
     const transforms = [
       // Remove non writable attributes
-      traverseEntity(visitors.restrictedFields(nonWritableAttributes), { schema }),
+      traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema }),
     ];
 
     if (auth) {
@@ -49,6 +52,9 @@ const createContentAPISanitizers = () => {
   };
 
   const sanitizeOutput: SanitizeFunc = async (data, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizeOutput');
+    }
     if (isArray(data)) {
       const res = new Array(data.length);
       for (let i = 0; i < data.length; i += 1) {
@@ -76,6 +82,9 @@ const createContentAPISanitizers = () => {
     schema: Model,
     { auth }: Options = {}
   ) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizeQuery');
+    }
     const { filters, sort, fields, populate } = query;
 
     const sanitizedQuery = cloneDeep(query);
@@ -100,6 +109,9 @@ const createContentAPISanitizers = () => {
   };
 
   const sanitizeFilters: SanitizeFunc = (filters, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizeFilters');
+    }
     if (isArray(filters)) {
       return Promise.all(filters.map((filter) => sanitizeFilters(filter, schema, { auth })));
     }
@@ -114,6 +126,9 @@ const createContentAPISanitizers = () => {
   };
 
   const sanitizeSort: SanitizeFunc = (sort, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizeSort');
+    }
     const transforms = [sanitizers.defaultSanitizeSort(schema)];
 
     if (auth) {
@@ -124,12 +139,18 @@ const createContentAPISanitizers = () => {
   };
 
   const sanitizeFields: SanitizeFunc = (fields, schema: Model) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizeFields');
+    }
     const transforms = [sanitizers.defaultSanitizeFields(schema)];
 
     return pipeAsync(...transforms)(fields);
   };
 
   const sanitizePopulate: SanitizeFunc = (populate, schema: Model, { auth } = {}) => {
+    if (!schema) {
+      throw new Error('Missing schema in sanitizePopulate');
+    }
     const transforms = [sanitizers.defaultSanitizePopulate(schema)];
 
     if (auth) {

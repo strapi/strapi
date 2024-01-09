@@ -7,6 +7,7 @@ const WHERE_OPERATORS = [
   '$eq',
   '$eqi',
   '$ne',
+  '$nei',
   '$gt',
   '$gte',
   '$lt',
@@ -22,6 +23,8 @@ const WHERE_OPERATORS = [
   '$notContains',
   '$containsi',
   '$notContainsi',
+  // Experimental, only for internal use
+  '$jsonSupersetOf',
 ];
 
 const CAST_OPERATORS = [

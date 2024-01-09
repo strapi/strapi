@@ -4,8 +4,17 @@ const { omit } = require('lodash/fp');
 const { WORKFLOW_UPDATE_STAGE } = require('../../../constants/webhookEvents');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../../constants/workflows');
 const { decorator } = require('../entity-service-decorator')();
+const utils = require('../../../utils');
 
-jest.mock('../../../utils');
+jest.mock('../../../utils', () => {
+  const workflowsMock = {
+    getAssignedWorkflow: jest.fn(() => ({ id: 1, stages: [{ id: 1, name: 'To Do' }] })),
+  };
+
+  return {
+    getService: jest.fn(() => workflowsMock),
+  };
+});
 
 const rwModel = {
   options: {
@@ -36,11 +45,15 @@ describe('Entity service decorator', () => {
           stages: [{ id: 1 }],
         }),
       }),
+      entityService: {
+        findOne: jest.fn(),
+      },
     };
   });
 
   describe('Create', () => {
     test('Calls original create for non review workflow content types', async () => {
+      utils.getService().getAssignedWorkflow.mockReturnValueOnce(null);
       const entry = {
         id: 1,
       };
@@ -75,7 +88,7 @@ describe('Entity service decorator', () => {
         ...input,
         data: {
           ...input.data,
-          strapi_reviewWorkflows_stage: 1,
+          [ENTITY_STAGE_ATTRIBUTE]: 1,
         },
       });
     });
@@ -127,7 +140,7 @@ describe('Entity service decorator', () => {
         entityService: {
           findOne: jest.fn(() => {
             return {
-              strapi_reviewWorkflows_stage: {
+              [ENTITY_STAGE_ATTRIBUTE]: {
                 id: stageFromId,
                 name: `Stage ${stageFromId}`,
                 workflow: { id: workflowId },
@@ -139,9 +152,6 @@ describe('Entity service decorator', () => {
         getModel: jest.fn(() => ({
           modelName: uid,
           uid,
-          options: {
-            reviewWorkflows: true,
-          },
         })),
         eventHub: {
           emit,
@@ -150,7 +160,7 @@ describe('Entity service decorator', () => {
 
       const service = decorator(defaultService);
 
-      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: stageToId } };
+      const input = { data: { title: 'title ', [ENTITY_STAGE_ATTRIBUTE]: stageToId } };
       await service.update(uid, entityId, input);
 
       expect(defaultService.update).toHaveBeenCalledWith(uid, entityId, input);
@@ -187,13 +197,13 @@ describe('Entity service decorator', () => {
       const service = decorator(defaultService);
 
       const id = 1;
-      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: null } };
+      const input = { data: { title: 'title ', [ENTITY_STAGE_ATTRIBUTE]: null } };
       await service.update(uid, id, input);
 
       expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
         ...input,
         data: {
-          ...omit('strapi_reviewWorkflows_stage', input.data),
+          ...omit(ENTITY_STAGE_ATTRIBUTE, input.data),
         },
       });
     });

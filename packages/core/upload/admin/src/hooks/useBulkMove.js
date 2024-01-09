@@ -2,12 +2,11 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl, getTrad } from '../utils';
+import { getTrad } from '../utils';
 
 export const useBulkMove = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
-  const url = getRequestUrl('actions/bulk-move');
   const { post } = useFetchClient();
 
   const bulkMoveQuery = ({ destinationFolderId, filesAndFolders }) => {
@@ -24,7 +23,7 @@ export const useBulkMove = () => {
       return acc;
     }, {});
 
-    return post(url, { ...payload, destinationFolderId });
+    return post('/upload/actions/bulk-move', { ...payload, destinationFolderId });
   };
 
   const mutation = useMutation(bulkMoveQuery, {

@@ -1,5 +1,5 @@
-import fse from 'fs-extra';
 import { Writable, Readable } from 'stream';
+import fse from 'fs-extra';
 import type { IAsset } from '../../../../../types';
 
 import { getStrapiFactory } from '../../../../__tests__/test-utils';
@@ -24,6 +24,25 @@ const transaction = jest.fn(async (cb) => {
   await cb({ trx, rollback });
 });
 
+const strapiFactory = getStrapiFactory({
+  dirs: {
+    static: {
+      public: 'static/public/assets',
+    },
+  },
+  db: { transaction },
+  config: {
+    get(service) {
+      if (service === 'plugin.upload') {
+        return {
+          provider: 'local',
+        };
+      }
+      return {};
+    },
+  },
+});
+
 describe('Local Strapi Destination Provider - Get Assets Stream', () => {
   test('Throws an error if the Strapi instance is not provided', async () => {
     /* @ts-ignore: disable-next-line */
@@ -35,23 +54,35 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
       'Not able to stream Assets. Strapi instance not found'
     );
   });
-  test('Returns a stream', async () => {
+
+  test('Returns a stream when assets restore is true', async () => {
     const provider = createLocalStrapiDestinationProvider({
-      getStrapi: getStrapiFactory({
-        dirs: {
-          static: {
-            public: 'static/public/assets',
-          },
-        },
-        db: { transaction },
-      }),
+      getStrapi: () => strapiFactory(),
       strategy: 'restore',
+      restore: {
+        assets: true,
+      },
     });
     await provider.bootstrap();
 
     const stream = await provider.createAssetsWriteStream();
 
     expect(stream instanceof Writable).toBeTruthy();
+  });
+
+  test('Throw an error if attempting to create stream while restore assets is false', async () => {
+    const provider = createLocalStrapiDestinationProvider({
+      getStrapi: () => strapiFactory(),
+      strategy: 'restore',
+      restore: {
+        assets: false,
+      },
+    });
+    await provider.bootstrap();
+
+    expect(async () => provider.createAssetsWriteStream()).rejects.toThrow(
+      'Attempting to transfer assets when they are not included'
+    );
   });
 
   test('Writes on the strapi assets path', async () => {
@@ -64,15 +95,18 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
       stream: Readable.from(['test', 'test-2']),
     };
     const provider = createLocalStrapiDestinationProvider({
-      getStrapi: getStrapiFactory({
-        dirs: {
-          static: {
-            public: assetsDirectory,
+      getStrapi: () =>
+        strapiFactory({
+          dirs: {
+            static: {
+              public: assetsDirectory,
+            },
           },
-        },
-        db: { transaction },
-      }),
+        }),
       strategy: 'restore',
+      restore: {
+        assets: true,
+      },
     });
 
     await provider.bootstrap();

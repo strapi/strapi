@@ -1,34 +1,45 @@
 import React from 'react';
 
-import { MenuItem, SimpleMenu } from '@strapi/design-system';
+import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { sortOptions } from '../../constants';
 import { getTrad } from '../../utils';
 
-const SortPicker = ({ onChangeSort }) => {
+const SortPicker = ({ onChangeSort, value }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <SimpleMenu
-      variant="tertiary"
-      label={formatMessage({
+    <SingleSelect
+      size="S"
+      value={value}
+      onChange={(value) => onChangeSort(value)}
+      aria-label={formatMessage({
+        id: getTrad('sort.label'),
+        defaultMessage: 'Sort by',
+      })}
+      placeholder={formatMessage({
         id: getTrad('sort.label'),
         defaultMessage: 'Sort by',
       })}
     >
       {sortOptions.map((filter) => (
-        <MenuItem key={filter.key} onClick={() => onChangeSort(filter.value)}>
+        <SingleSelectOption key={filter.key} value={filter.value}>
           {formatMessage({ id: getTrad(filter.key), defaultMessage: `${filter.value}` })}
-        </MenuItem>
+        </SingleSelectOption>
       ))}
-    </SimpleMenu>
+    </SingleSelect>
   );
+};
+
+SortPicker.defaultProps = {
+  value: undefined,
 };
 
 SortPicker.propTypes = {
   onChangeSort: PropTypes.func.isRequired,
+  value: PropTypes.string,
 };
 
 export default SortPicker;

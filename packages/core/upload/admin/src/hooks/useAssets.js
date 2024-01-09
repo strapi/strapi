@@ -6,14 +6,12 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl } from '../utils';
 
 export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
-  const dataRequestURL = getRequestUrl('files');
   const { folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
   let params;
@@ -40,7 +38,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { data, error, isLoading } = useQuery(
     [pluginId, 'assets', params],
     async () => {
-      const { data } = await get(dataRequestURL, { params });
+      const { data } = await get('/upload/files', { params });
 
       return data;
     },

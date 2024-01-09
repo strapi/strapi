@@ -1,9 +1,12 @@
-import { Writable } from 'stream';
+import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
+import type { Knex } from 'knex';
+import type { LoadedStrapi } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,
+  IFile,
   IMetadata,
   ProviderType,
   Transaction,
@@ -11,17 +14,21 @@ import type {
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
-import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import {
+  ProviderInitializationError,
+  ProviderTransferError,
+  ProviderValidationError,
+} from '../../../errors/providers';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
+  getStrapi(): LoadedStrapi | Promise<LoadedStrapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
-  restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
+  restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
 }
 
@@ -32,9 +39,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   options: ILocalStrapiDestinationProviderOptions;
 
-  strapi?: Strapi.Strapi;
+  strapi?: LoadedStrapi;
 
   transaction?: Transaction;
+
+  uploadsBackupDirectoryName: string;
 
   /**
    * The entities mapper is used to map old entities to their new IDs
@@ -44,14 +53,34 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   constructor(options: ILocalStrapiDestinationProviderOptions) {
     this.options = options;
     this.#entitiesMapper = {};
+    this.uploadsBackupDirectoryName = `uploads_backup_${Date.now()}`;
   }
 
   async bootstrap(): Promise<void> {
     this.#validateOptions();
     this.strapi = await this.options.getStrapi();
+    if (!this.strapi) {
+      throw new ProviderInitializationError('Could not access local strapi');
+    }
 
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
+
+  // TODO: either move this to restore strategy, or restore strategy should given access to these instead of repeating the logic possibly in a different way
+  #areAssetsIncluded = () => {
+    return this.options.restore?.assets;
+  };
+
+  #isContentTypeIncluded = (type: string) => {
+    const notIncluded =
+      this.options.restore?.entities?.include &&
+      !this.options.restore?.entities?.include?.includes(type);
+    const excluded =
+      this.options.restore?.entities?.exclude &&
+      this.options.restore?.entities.exclude.includes(type);
+
+    return !excluded && !notIncluded;
+  };
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
@@ -71,11 +100,48 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         validStrategies: VALID_CONFLICT_STRATEGIES,
       });
     }
+
+    // require restore options when using restore
+    if (this.options.strategy === 'restore' && !this.options.restore) {
+      throw new ProviderValidationError('Missing restore options');
+    }
   }
 
-  async #deleteAll() {
+  async #deleteFromRestoreOptions() {
     assertValidStrapi(this.strapi);
+    if (!this.options.restore) {
+      throw new ProviderValidationError('Missing restore options');
+    }
     return restore.deleteRecords(this.strapi, this.options.restore);
+  }
+
+  async #deleteAllAssets(trx?: Knex.Transaction) {
+    assertValidStrapi(this.strapi);
+
+    // if we're not restoring files, don't touch the files
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
+    const stream: Readable = this.strapi.db
+      // Create a query builder instance (default type is 'select')
+      .queryBuilder('plugin::upload.file')
+      // Fetch all columns
+      .select('*')
+      // Attach the transaction
+      .transacting(trx)
+      // Get a readable stream
+      .stream();
+
+    // TODO use bulk delete when exists in providers
+    for await (const file of stream) {
+      await this.strapi.plugin('upload').provider.delete(file);
+      if (file.formats) {
+        for (const fileFormat of Object.values(file.formats)) {
+          await this.strapi.plugin('upload').provider.delete(fileFormat);
+        }
+      }
+    }
   }
 
   async rollback() {
@@ -87,10 +153,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
-    await this.transaction?.attach(async () => {
+    await this.transaction?.attach(async (trx) => {
       try {
         if (this.options.strategy === 'restore') {
-          await this.#deleteAll();
+          await this.#handleAssetsBackup();
+          await this.#deleteAllAssets(trx);
+          await this.#deleteFromRestoreOptions();
         }
       } catch (error) {
         throw new Error(`restore failed ${error}`);
@@ -99,7 +167,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getMetadata(): IMetadata {
-    const strapiVersion = strapi.config.get('info.strapi');
+    assertValidStrapi(this.strapi, 'Not able to get Schemas');
+    const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {
@@ -147,64 +216,174 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
+  async #handleAssetsBackup() {
+    assertValidStrapi(this.strapi, 'Not able to create the assets backup');
+
+    // if we're not restoring assets, don't back them up because they won't be touched
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
+    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
+      const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+      const backupDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+
+      try {
+        // Check access before attempting to do anything
+        await fse.access(
+          assetsDirectory,
+          // eslint-disable-next-line no-bitwise
+          fse.constants.W_OK | fse.constants.R_OK | fse.constants.F_OK
+        );
+        // eslint-disable-next-line no-bitwise
+        await fse.access(path.join(assetsDirectory, '..'), fse.constants.W_OK | fse.constants.R_OK);
+
+        await fse.move(assetsDirectory, backupDirectory);
+        await fse.mkdir(assetsDirectory);
+        // Create a .gitkeep file to ensure the directory is not empty
+        await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+      } catch (err) {
+        throw new ProviderTransferError(
+          'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory',
+          {
+            code: 'ASSETS_DIRECTORY_ERR',
+          }
+        );
+      }
+      return backupDirectory;
+    }
+  }
+
+  async #removeAssetsBackup() {
+    assertValidStrapi(this.strapi, 'Not able to remove Assets');
+    // if we're not restoring assets, don't back them up because they won't be touched
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
+    // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
+    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
+      assertValidStrapi(this.strapi);
+      const backupDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+      await fse.rm(backupDirectory, { recursive: true, force: true });
+    }
+  }
+
   // TODO: Move this logic to the restore strategy
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
-    const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
-    const backupDirectory = path.join(
-      this.strapi.dirs.static.public,
-      `uploads_backup_${Date.now()}`
-    );
-
-    try {
-      await fse.move(assetsDirectory, backupDirectory);
-      await fse.mkdir(assetsDirectory);
-      // Create a .gitkeep file to ensure the directory is not empty
-      await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
-    } catch (err) {
-      throw new ProviderTransferError(
-        'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
-      );
+    if (!this.#areAssetsIncluded()) {
+      throw new ProviderTransferError('Attempting to transfer assets when they are not included');
     }
+
+    const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
+    const strapi = this.strapi;
+    const transaction = this.transaction;
+    const backupDirectory = this.uploadsBackupDirectoryName;
+
+    const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
 
     return new Writable({
       objectMode: true,
       async final(next) {
-        await fse.rm(backupDirectory, { recursive: true, force: true });
+        // Delete the backup folder
+        await removeAssetsBackup();
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
-        const entryPath = path.join(assetsDirectory, chunk.filename);
-        const writableStream = fse.createWriteStream(entryPath);
+        await transaction?.attach(async () => {
+          // TODO: Remove this logic in V5
+          if (!chunk.metadata) {
+            // If metadata does not exist is because it is an old backup file
+            const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
+            const entryPath = path.join(assetsDirectory, chunk.filename);
+            const writableStream = fse.createWriteStream(entryPath);
+            chunk.stream
+              .pipe(writableStream)
+              .on('close', () => {
+                callback(null);
+              })
+              .on('error', async (error: NodeJS.ErrnoException) => {
+                const errorMessage =
+                  error.code === 'ENOSPC'
+                    ? " Your server doesn't have space to proceed with the import. "
+                    : ' ';
 
-        chunk.stream
-          .pipe(writableStream)
-          .on('close', () => {
-            callback(null);
-          })
-          .on('error', async (error: NodeJS.ErrnoException) => {
-            const errorMessage =
-              error.code === 'ENOSPC'
-                ? " Your server doesn't have space to proceed with the import. "
-                : ' ';
+                try {
+                  await fse.rm(assetsDirectory, { recursive: true, force: true });
+                  this.destroy(
+                    new ProviderTransferError(
+                      `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
+                    )
+                  );
+                } catch (err) {
+                  throw new ProviderTransferError(
+                    `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
+                  );
+                } finally {
+                  callback(error);
+                }
+              });
+            return;
+          }
 
-            try {
-              await fse.rm(assetsDirectory, { recursive: true, force: true });
-              await fse.move(backupDirectory, assetsDirectory);
-              this.destroy(
-                new ProviderTransferError(
-                  `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
-                )
-              );
-            } catch (err) {
-              throw new ProviderTransferError(
-                `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
-              );
-            } finally {
-              callback(error);
+          const uploadData = {
+            ...chunk.metadata,
+            stream: Readable.from(chunk.stream),
+            buffer: chunk?.buffer,
+          };
+
+          const provider = strapi.config.get<{ provider: string }>('plugin.upload').provider;
+
+          try {
+            await strapi.plugin('upload').provider.uploadStream(uploadData);
+
+            // if we're not supposed to transfer the associated entities, stop here
+            if (!restoreMediaEntitiesContent) {
+              return callback();
             }
-          });
+
+            // Files formats are stored within the parent file entity
+            if (uploadData?.type) {
+              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+                where: { hash: uploadData.mainHash },
+              });
+              const specificFormat = entry?.formats?.[uploadData.type];
+              if (specificFormat) {
+                specificFormat.url = uploadData.url;
+              }
+              await strapi.db.query('plugin::upload.file').update({
+                where: { hash: uploadData.mainHash },
+                data: {
+                  formats: entry.formats,
+                  provider,
+                },
+              });
+              return callback();
+            }
+            const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+              where: { hash: uploadData.hash },
+            });
+            entry.url = uploadData.url;
+            await strapi.db.query('plugin::upload.file').update({
+              where: { hash: uploadData.hash },
+              data: {
+                url: entry.url,
+                provider,
+              },
+            });
+            callback();
+          } catch (error) {
+            callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
+          }
+        });
       },
     });
   }

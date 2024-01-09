@@ -32,17 +32,17 @@ If a user has several role, the user will be allowed to perform an action if at 
 
 An action contains the following information:
 
-| key                           | description                                                                                                                                       | type   | required | Default value | example                    |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------------------- |
-| **uid**                       | An id that has to be unique within the plugin.                                                                                                    | string | required | -             | `'audit-logs.read'`        |
-| **pluginName**                | Name of the plugin registrering the action.                                                                                                       | string | -        | `'api'`       | `'admin'`                  |
-| **section**                   | Name of the section among `contentTypes`, `plugins` and `settings`. It will define in which permission tab the action will appear                 | string | required | -             | `'settings'`               |
-| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the plugins and settings section_.                       | string | -        | -             | `'audit logs'`             |
-| **subCategory**               | Name of the subcategory. It will define in which subcategory or the category the action will appear. _Only for the plugins and settings section_. | string | -        | -             | `'options'`                |
-| **displayName**               | Human name of the action.                                                                                                                         | string | required | -             | `'Read'`                   |
-| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                               | array  | -        | -             | `['api::article.article']` |
-| **options**                   | Option object                                                                                                                                     | object | -        | `{}`          | `{}`                       |
-| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                             | -      | -        | `[]`          | `['fields', 'locale']`     |
+| key                           | description                                                                                                                                                                                                                 | type   | required | Default value | example                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------- | -------------------------- |
+| **uid**                       | An id that has to be unique within the plugin.                                                                                                                                                                              | string | required | -             | `'audit-logs.read'`        |
+| **pluginName**                | Name of the plugin registrering the action.                                                                                                                                                                                 | string | -        | `'api'`       | `'admin'`                  |
+| **section**                   | Name of the section among `contentTypes`, `plugins`, `settings` and `internal`. It will define in which permission tab the action will appear. <br/> `internal` is not displayed in any tab but used for internal purposes. | string | required | -             | `'settings'`               |
+| **category**                  | Name of the category. It will define in which category the action will appear. _Only for the plugins and settings section_.                                                                                                 | string | -        | -             | `'audit logs'`             |
+| **subCategory**               | Name of the subcategory. It will define in which subcategory or the category the action will appear. _Only for the plugins and settings section_.                                                                           | string | -        | -             | `'options'`                |
+| **displayName**               | Human name of the action.                                                                                                                                                                                                   | string | required | -             | `'Read'`                   |
+| **subjects**                  | List of subjects the action can be applied to. _Only for the contentTypes section_.                                                                                                                                         | array  | -        | -             | `['api::article.article']` |
+| **options**                   | Option object                                                                                                                                                                                                               | object | -        | `{}`          | `{}`                       |
+| **options.applyToProperties** | List of properties the action can be applied to. _Only for the contentTypes section_.                                                                                                                                       | -      | -        | `[]`          | `['fields', 'locale']`     |
 
 import rbacEditPageImage from '@site/static/img/permissions/rbac-edit-page.png';
 
@@ -85,6 +85,16 @@ module.exports = async () => {
   await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };
 ```
+
+### Parametrize actions
+
+Actions can be parametrized with the `actionParameters` property. This property is an object that can contain any key/value pair.
+
+An example of the feature:
+
+- The action `review-workflows.stage.transition` can be parametrized with the `from` and `to` parameters, which are the ids of the stages a user can transition from and to.
+
+At the moment only Review Workflows use this feature internally.
 
 ## Conditions
 
@@ -138,11 +148,12 @@ More information on how the handler works [here](https://docs.strapi.io/develope
 
 The permissions are modified in the admin panel (on the [edit page](http://localhost:1337/admin/settings/roles/2) of a role) and stored in the database with the following information:
 
-| key            | description                                                                                                                | type   | required | example                                                       |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------------------------- |
-| **action**     | Id of the action that will be permitted.                                                                                   | string | required | `'plugin::content-manager.explorer.update'`                   |
-| **subject**    | Id of the subject on which the action will be permitted.                                                                   | string | -        | `'api::article.article'`                                      |
-| **properties** | List of the properties of the subject on wich the action will be permitted                                                 | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
-| **conditions** | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
+| key                  | description                                                                                                                | type   | required | example                                                       |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------------------------- |
+| **action**           | Id of the action that will be permitted.                                                                                   | string | required | `'plugin::content-manager.explorer.update'`                   |
+| **actionParameters** | Object to parametrize actions.                                                                                             | string | -        | `{}`                                                          |
+| **subject**          | Id of the subject on which the action will be permitted.                                                                   | string | -        | `'api::article.article'`                                      |
+| **properties**       | List of the properties of the subject on which the action will be permitted                                                | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
+| **conditions**       | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.

@@ -431,6 +431,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Duala (Cameroon) (dua-CM)",
   },
   {
+    "code": "dv",
+    "name": "Dhivehi (Maldives)",
+  },
+  {
     "code": "nl",
     "name": "Dutch (nl)",
   },
@@ -717,6 +721,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "en-MP",
     "name": "English (Northern Mariana Islands) (en-MP)",
+  },
+  {
+    "code": "en-NO",
+    "name": "English (Norway) (en-NO)",
   },
   {
     "code": "en-PA",
@@ -2333,6 +2341,18 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "vai-Vaii-LR",
     "name": "Vai (Vai, Liberia) (vai-Vaii-LR)",
+  },
+  {
+    "code": "val",
+    "name": "Valencian (val)",
+  },
+  {
+    "code": "val-ES",
+    "name": "Valencian (Spain) (val-ES)",
+  },
+  {
+    "code": "ca-ES-valencia",
+    "name": "Valencian (Spain Catalan) (ca-ES-valencia)",
   },
   {
     "code": "vi",

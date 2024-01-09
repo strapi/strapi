@@ -13,6 +13,8 @@
   "Settings.list.actions.delete": "Удалить перевод",
   "Settings.list.actions.deleteAdditionalInfos": "Это приведет к удалению активных версий перевода <em>(из плагина интернационализации)</em>",
   "Settings.list.actions.edit": "Редактировать перевод",
+  "Settings.list.actions.publishAdditionalInfos": "При этом будут опубликованы активные языковые версии <em>(из плагина Интернационализация)</em>",
+  "Settings.list.actions.unpublishAdditionalInfos": "При этом будут скрыты (сняты с публикации) активные языковые версии <em>(из плагина Интернационализация)</em>",
   "Settings.list.description": "Настройте параметры для плагина интернационализации",
   "Settings.list.empty.description": "Это необычное поведение, означающее, что всё-таки вы изменили базу данных вручную. Убедитесь, что базе данных сохранён хотя бы один перевод, чтобы иметь возможность правильно использовать Strapi.",
   "Settings.list.empty.title": "Переводов нет.",

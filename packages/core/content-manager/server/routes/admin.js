@@ -188,8 +188,8 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/single-types/:model/actions/numberOfDraftRelations',
-      handler: 'single-types.getNumberOfDraftRelations',
+      path: '/single-types/:model/actions/countDraftRelations',
+      handler: 'single-types.countDraftRelations',
       config: {
         middlewares: [routing],
         policies: [
@@ -387,8 +387,23 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/collection-types/:model/:id/actions/numberOfDraftRelations',
-      handler: 'collection-types.getNumberOfDraftRelations',
+      path: '/collection-types/:model/:id/actions/countDraftRelations',
+      handler: 'collection-types.countDraftRelations',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/collection-types/:model/actions/countManyEntriesDraftRelations',
+      handler: 'collection-types.countManyEntriesDraftRelations',
       config: {
         middlewares: [routing],
         policies: [

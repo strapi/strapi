@@ -4,7 +4,7 @@ const _ = require('lodash');
 const roleService = require('../role');
 const { SUPER_ADMIN_CODE } = require('../constants');
 const { create: createPermission, toPermission } = require('../../domain/permission');
-const createEventHub = require('../../../../strapi/lib/services/event-hub');
+const createEventHub = require('../../../../strapi/dist/services/event-hub');
 
 describe('Role', () => {
   describe('create', () => {
@@ -104,18 +104,31 @@ describe('Role', () => {
           usersCount: 0,
         },
       ];
-      const dbFind = jest.fn(() =>
-        Promise.resolve(roles.map((role) => _.omit(role, ['usersCount'])))
-      );
       const dbCount = jest.fn(() => Promise.resolve(0));
+      const findMany = jest.fn(() => Promise.resolve(roles));
 
       global.strapi = {
-        query: () => ({ findMany: dbFind, count: dbCount }),
+        query: () => ({ count: dbCount }),
+        entityService: {
+          findMany,
+        },
       };
 
-      const foundRoles = await roleService.findAllWithUsersCount();
+      const params = {
+        filters: {
+          $and: [
+            {
+              name: {
+                $contains: 'super_admin',
+              },
+            },
+          ],
+        },
+      };
 
-      expect(dbFind).toHaveBeenCalledWith({});
+      const foundRoles = await roleService.findAllWithUsersCount(params);
+
+      expect(findMany).toHaveBeenCalledWith('admin::role', params);
       expect(foundRoles).toStrictEqual(roles);
     });
   });
@@ -391,6 +404,7 @@ describe('Role', () => {
       const permissions = [
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name'] },
           conditions: [],
@@ -400,36 +414,42 @@ describe('Role', () => {
       const defaultPermissions = [
         {
           action: 'plugin::upload.read',
+          actionParameters: {},
           conditions: ['admin::is-creator'],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.configure-view',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.create',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.update',
+          actionParameters: {},
           conditions: ['admin::is-creator'],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.download',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.copy-link',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
@@ -612,24 +632,28 @@ describe('Role', () => {
       const permissions = [
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name'] },
           conditions: [],
         },
         {
           action: 'action-test2',
+          actionParameters: {},
           subject: 'test-subject1',
           properties: {},
           conditions: [],
         },
         {
           action: 'action-test2',
+          actionParameters: {},
           subject: 'test-subject2',
           properties: {},
           conditions: [],
         },
         {
           action: 'action-test3',
+          actionParameters: {},
           subject: null,
           properties: {},
           conditions: [],
@@ -746,12 +770,149 @@ describe('Role', () => {
 
       expect(createMany).toHaveBeenCalledTimes(1);
       expect(createMany).toHaveBeenCalledWith([
-        { action: 'action-0', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-1', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-2', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-3', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-4', conditions: ['cond'], properties: {}, role: 1, subject: null },
+        {
+          action: 'action-0',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-1',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-2',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-3',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-4',
+          actionParameters: {},
+          conditions: ['cond'],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
       ]);
+    });
+
+    test('Filter internal permissions on create', async () => {
+      const permissions = [
+        { action: `action-0` },
+        { action: `action-1` },
+        { action: 'action-internal' },
+      ];
+
+      const createMany = jest.fn(() => Promise.resolve([]));
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
+      const sendDidUpdateRolePermissions = jest.fn();
+      const findMany = jest.fn(() => Promise.resolve([]));
+      const values = jest.fn(() => [
+        { actionId: 'action-0', section: 'plugins' },
+        { actionId: 'action-1', section: 'plugins' },
+        { actionId: 'action-internal', section: 'internal' },
+      ]);
+      const conditionProviderHas = jest.fn((cond) => cond === 'cond');
+
+      global.strapi = {
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            role: { getSuperAdmin },
+            permission: {
+              findMany,
+              createMany,
+              actionProvider: { values },
+              conditionProvider: {
+                has: conditionProviderHas,
+                values: jest.fn(() => [{ id: 'admin::is-creator' }]),
+              },
+            },
+          },
+        },
+        eventHub: createEventHub(),
+      };
+
+      await roleService.assignPermissions(1, permissions);
+
+      expect(createMany).toHaveBeenCalledTimes(1);
+      expect(createMany).toHaveBeenCalledWith([
+        {
+          action: 'action-0',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-1',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+      ]);
+    });
+
+    test('Filter internal permissions on delete', async () => {
+      const permissions = [{ action: `action-0` }, { action: `action-1` }];
+
+      const createMany = jest.fn(() => Promise.resolve(permissions));
+      const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
+      const sendDidUpdateRolePermissions = jest.fn();
+      const findMany = jest.fn(() =>
+        Promise.resolve([{ action: 'action-internal', id: 1, properties: {} }])
+      );
+      const deleteByIds = jest.fn();
+      const values = jest.fn(() => [
+        { actionId: 'action-0', section: 'plugins' },
+        { actionId: 'action-1', section: 'plugins' },
+        { actionId: 'action-internal', section: 'internal' },
+      ]);
+      const conditionProviderHas = jest.fn((cond) => cond === 'cond');
+
+      global.strapi = {
+        admin: {
+          services: {
+            metrics: { sendDidUpdateRolePermissions },
+            role: { getSuperAdmin },
+            permission: {
+              deleteByIds,
+              findMany,
+              createMany,
+              actionProvider: { values },
+              conditionProvider: {
+                has: conditionProviderHas,
+                values: jest.fn(() => [{ id: 'admin::is-creator' }]),
+              },
+            },
+          },
+        },
+        eventHub: createEventHub(),
+      };
+
+      const returnedPermissions = await roleService.assignPermissions(1, permissions);
+      expect(deleteByIds).toHaveBeenCalledTimes(0);
+      expect(returnedPermissions).toEqual(permissions);
     });
   });
 
@@ -762,6 +923,7 @@ describe('Role', () => {
       const permissions = [
         {
           action: 'someAction',
+          actionParameters: {},
           conditions: [],
           properties: { fields: null },
           subject: null,

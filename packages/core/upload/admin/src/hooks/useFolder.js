@@ -2,46 +2,47 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl, getTrad } from '../utils';
+import { getTrad } from '../utils';
 
-export const useFolder = (id, { enabled = true }) => {
+export const useFolder = (id, { enabled = true } = {}) => {
   const toggleNotification = useNotification();
-  const dataRequestURL = getRequestUrl('folders');
   const { get } = useFetchClient();
 
-  const fetchFolder = async () => {
-    try {
-      const params = {
-        populate: {
-          parent: {
-            populate: {
-              parent: '*',
+  const { data, error, isLoading } = useQuery(
+    [pluginId, 'folder', id],
+    async () => {
+      const {
+        data: { data },
+      } = await get(`/upload/folders/${id}`, {
+        params: {
+          populate: {
+            parent: {
+              populate: {
+                parent: '*',
+              },
             },
           },
         },
-      };
-      const { data } = await get(`${dataRequestURL}/${id}`, { params });
-
-      return data.data;
-    } catch (err) {
-      toggleNotification({
-        type: 'warning',
-        message: {
-          id: getTrad('notification.warning.404'),
-          defaultMessage: 'Not found',
-        },
       });
 
-      throw err;
+      return data;
+    },
+    {
+      retry: false,
+      enabled,
+      staleTime: 0,
+      cacheTime: 0,
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: getTrad('notification.warning.404'),
+            defaultMessage: 'Not found',
+          },
+        });
+      },
     }
-  };
-
-  const { data, error, isLoading } = useQuery([pluginId, 'folder', id], fetchFolder, {
-    retry: false,
-    enabled,
-    staleTime: 0,
-    cacheTime: 0,
-  });
+  );
 
   return { data, error, isLoading };
 };

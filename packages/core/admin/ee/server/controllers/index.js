@@ -8,4 +8,5 @@ module.exports = {
   admin: require('./admin'),
   workflows: require('./workflows'),
   stages: require('./workflows/stages'),
+  assignees: require('./workflows/assignees'),
 };

@@ -1,3 +1,1 @@
-import { InformationBoxCE } from './InformationBoxCE';
-
-export default InformationBoxCE;
+export * from './InformationBoxCE';

@@ -144,7 +144,7 @@ export const BrowseStep = ({
                     />
                   </Flex>
                 )}
-                {isGridView && <SortPicker onChangeSort={onChangeSort} />}
+                {isGridView && <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />}
                 <Filters
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
@@ -273,7 +273,7 @@ export const BrowseStep = ({
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
-                      onClick={() => handleClickFolderCard(folder.id)}
+                      onClick={() => handleClickFolderCard(folder.id, folder.path)}
                       cardActions={
                         onEditFolder && (
                           <IconButton
@@ -288,7 +288,9 @@ export const BrowseStep = ({
                       }
                     >
                       <FolderCardBody>
-                        <FolderCardBodyAction onClick={() => handleClickFolderCard(folder.id)}>
+                        <FolderCardBodyAction
+                          onClick={() => handleClickFolderCard(folder.id, folder.path)}
+                        >
                           <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}

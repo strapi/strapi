@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Strapi Parts
 import {
   Box,
   Button,
@@ -13,32 +12,42 @@ import {
   TextInput,
   ToggleInput,
   Typography,
+  FieldAction,
 } from '@strapi/design-system';
 import {
-  CheckPermissions,
   Form,
   LoadingIndicatorPage,
   useFocusWhenNavigate,
+  translatedErrors,
+  useRBAC,
 } from '@strapi/helper-plugin';
 // Strapi Icons
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import * as yup from 'yup';
 
-import FieldActionWrapper from '../../components/FieldActionWrapper';
 import { PERMISSIONS } from '../../constants';
+import { useDocumentation } from '../../hooks/useDocumentation';
 import { getTrad } from '../../utils';
-import schema from '../utils/schema';
-import useReactQuery from '../utils/useReactQuery';
+
+const schema = yup.object().shape({
+  restrictedAccess: yup.boolean(),
+  password: yup.string().when('restrictedAccess', (value, initSchema) => {
+    return value ? initSchema.required(translatedErrors.required) : initSchema;
+  }),
+});
 
 const SettingsPage = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { submitMutation, data, isLoading } = useReactQuery();
+  const { submit, data, isLoading } = useDocumentation();
   const [passwordShown, setPasswordShown] = useState(false);
+  const { allowedActions } = useRBAC(PERMISSIONS);
 
   const handleUpdateSettingsSubmit = (body) => {
-    submitMutation.mutate({
+    submit.mutate({
       prefix: data?.prefix,
       body,
     });
@@ -78,14 +87,16 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    <CheckPermissions permissions={PERMISSIONS.update}>
-                      <Button type="submit" startIcon={<Check />} disabled={!dirty}>
-                        {formatMessage({
-                          id: getTrad('pages.SettingsPage.Button.save'),
-                          defaultMessage: 'Save',
-                        })}
-                      </Button>
-                    </CheckPermissions>
+                    <Button
+                      type="submit"
+                      startIcon={<Check />}
+                      disabled={!dirty && allowedActions.canUpdate}
+                    >
+                      {formatMessage({
+                        id: getTrad('pages.SettingsPage.Button.save'),
+                        defaultMessage: 'Save',
+                      })}
+                    </Button>
                   }
                 />
                 <ContentLayout>
@@ -186,5 +197,15 @@ const SettingsPage = () => {
     </Main>
   );
 };
+
+const FieldActionWrapper = styled(FieldAction)`
+  svg {
+    height: 1rem;
+    width: 1rem;
+    path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
 
 export default SettingsPage;

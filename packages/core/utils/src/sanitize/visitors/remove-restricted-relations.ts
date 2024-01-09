@@ -58,7 +58,7 @@ export default (auth: unknown): Visitor =>
     }
 
     // Creator relations
-    if (isCreatorRelation && schema.options.populateCreatorFields) {
+    if (isCreatorRelation && schema.options?.populateCreatorFields) {
       // do nothing
       return;
     }

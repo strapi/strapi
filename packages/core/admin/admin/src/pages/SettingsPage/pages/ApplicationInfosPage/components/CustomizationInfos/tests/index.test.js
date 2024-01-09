@@ -25,8 +25,8 @@ const PROJECT_SETTINGS_DATA_FIXTURES = {
   },
 };
 
-jest.mock('../../../../../../../hooks', () => ({
-  useConfigurations: jest.fn(() => ({
+jest.mock('../../../../../../../contexts/configuration', () => ({
+  useConfiguration: jest.fn(() => ({
     logos: {
       menu: { custom: 'customMenuLogo.png', default: 'defaultMenuLogo.png' },
       auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },

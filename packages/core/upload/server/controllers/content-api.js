@@ -6,16 +6,24 @@ const { getService } = require('../utils');
 const { FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/content-api/upload');
 
-const { sanitize } = utils;
+const { sanitize, validate } = utils;
 const { ValidationError } = utils.errors;
 
-const sanitizeOutput = (data, ctx) => {
+const sanitizeOutput = async (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(data, schema, { auth });
 };
-const sanitizeQuery = (data, ctx) => {
+
+const validateQuery = async (data, ctx) => {
+  const schema = strapi.getModel(FILE_MODEL_UID);
+  const { auth } = ctx.state;
+
+  return validate.contentAPI.query(data, schema, { auth });
+};
+
+const sanitizeQuery = async (data, ctx) => {
   const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
@@ -24,9 +32,10 @@ const sanitizeQuery = (data, ctx) => {
 
 module.exports = {
   async find(ctx) {
-    const sanitizedParams = await sanitizeQuery(ctx.query, ctx);
+    await validateQuery(ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-    const files = await getService('upload').findMany(sanitizedParams);
+    const files = await getService('upload').findMany(sanitizedQuery);
 
     ctx.body = await sanitizeOutput(files, ctx);
   },
@@ -36,8 +45,10 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const sanitizedParams = await sanitizeQuery(ctx.query, ctx);
-    const file = await getService('upload').findOne(id, sanitizedParams.populate);
+    await validateQuery(ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+
+    const file = await getService('upload').findOne(id, sanitizedQuery.populate);
 
     if (!file) {
       return ctx.notFound('file.notFound');

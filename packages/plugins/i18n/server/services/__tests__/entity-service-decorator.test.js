@@ -37,7 +37,7 @@ const singleTypeModel = {
       localized: true,
     },
   },
-  attributes: {}
+  attributes: {},
 };
 
 const models = {

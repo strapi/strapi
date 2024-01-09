@@ -7,9 +7,9 @@
   </a>
 </p>
 
-<h3 align="center">API creation made simple, secure and fast.</h3>
-<p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
-<p align="center"><a href="https://strapi.io/cloud">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
+<h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
+<p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
+<p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
 <br />
 
 <p align="center">
@@ -31,18 +31,22 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://raw.githubusercontent.com/strapi/strapi/0bcebf77b37182fe021cb59cc19be8f5db4a18ac/public/assets/administration_panel.png" alt="Administration panel" />
+    <img src="https://raw.githubusercontent.com/strapi/strapi/main/public/assets/admin-demo.gif" alt="Administration panel" />
   </a>
 </p>
 
 <br>
 
-Strapi is a free and open-source headless CMS delivering your content anywhere you need.
+Strapi Community Edition is a free and open-source headless CMS enabling you to manage any content, anywhere.
 
-- **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
-- **Database agnostic**. Strapi works with SQL databases. You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
-- **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
+- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to [Strapi Cloud](https://cloud.strapi.io/signups?source=github1) or deploy to the hosting platform you want\*\*: AWS, Azure, Google Cloud, DigitalOcean.
+- **Modern Admin Pane**: Elegant, entirely customizable and a fully extensible admin panel.
+- **Multi-database support**: You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
+- **Customizable**: You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
+- **Blazing Fast and Robust**: Built on top of Node.js and TypeScript, Strapi delivers reliable and solid performance.
+- **Front-end Agnostic**: Use any front-end framework (React, Next.js, Vue, Angular, etc.), mobile apps or even IoT.
+- **Secure by default**: Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
+- **Powerful CLI**: Scaffold projects and APIs on the fly.
 
 ## Getting Started
 
@@ -88,10 +92,12 @@ Complete installation requirements can be found in the documentation under <a hr
 
 Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
 
-| Strapi Version | Recommended | Minimum |
-| -------------- | ----------- | ------- |
-| 4.3.9 and up   | 18.x        | 14.x    |
-| 4.0.x to 4.3.8 | 16.x        | 14.x    |
+| Strapi Version  | Recommended | Minimum |
+| --------------- | ----------- | ------- |
+| 4.14.5 and up   | 20.x        | 18.x    |
+| 4.11.0 and up   | 18.x        | 16.x    |
+| 4.3.9 to 4.10.x | 18.x        | 14.x    |
+| 4.0.x to 4.3.8  | 16.x        | 14.x    |
 
 **Database:**
 
@@ -106,13 +112,13 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 ## Features
 
-- **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
-- **Secure by default:** Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
-- **Plugins Oriented:** Install the auth system, content management, custom plugins, and more, in seconds.
-- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
-- **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
-- **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL databases:** Works with PostgreSQL, MySQL, MariaDB, and SQLite.
+- **Content Types Builder**: Build the most flexible publishing experience for your content managers, by giving them the freedom to create any page on the go with [fields](https://docs.strapi.io/user-docs/content-manager/writing-content#filling-up-fields), components and [Dynamic Zones](https://docs.strapi.io/user-docs/content-manager/writing-content#dynamic-zones).
+- **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
+- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales"
+- **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
+- **GraphQL or REST**: Consume the API using REST or GraphQL
+
+You can unlock additional features such as SSO, Audit Logs, Review Workflows in [Strapi Cloud](https://cloud.strapi.io/login?source=github1) or [Strapi Enterprise](https://strapi.io/enterprise?source=github1).
 
 **[See more on our website](https://strapi.io/overview)**.
 

@@ -1,8 +1,8 @@
-import { WebSocket } from 'ws';
 import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
+import { WebSocket } from 'ws';
 import { once } from 'lodash/fp';
-import type { Schema, Utils } from '@strapi/strapi';
+import type { Schema, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
@@ -328,7 +328,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
       async write(asset: IAsset, _encoding, callback) {
         const startError = await startAssetsTransferOnce();
-
         if (startError) {
           return callback(startError);
         }
@@ -336,13 +335,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         hasStarted = true;
 
         const assetID = randomUUID();
-        const { filename, filepath, stats, stream } = asset;
+        const { filename, filepath, stats, stream, metadata } = asset;
 
         try {
           await safePush({
             action: 'start',
             assetID,
-            data: { filename, filepath, stats },
+            data: { filename, filepath, stats, metadata },
           });
 
           for await (const chunk of stream) {

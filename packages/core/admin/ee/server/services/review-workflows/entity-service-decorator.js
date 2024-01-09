@@ -1,19 +1,18 @@
 'use strict';
 
-const { isNil, isNull } = require('lodash/fp');
+const { isNil } = require('lodash/fp');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { WORKFLOW_UPDATE_STAGE } = require('../../constants/webhookEvents');
-const { hasReviewWorkflow, getDefaultWorkflow } = require('../../utils/review-workflows');
+const { getService } = require('../../utils');
 
 /**
  * Assigns the entity data to the default workflow stage if no stage is present in the data
  * @param {Object} data
  * @returns
  */
-const getDataWithStage = async (data) => {
+const getDataWithStage = async (workflow, data) => {
   if (!isNil(ENTITY_STAGE_ATTRIBUTE, data)) {
-    const defaultWorkflow = await getDefaultWorkflow({ strapi });
-    return { ...data, [ENTITY_STAGE_ATTRIBUTE]: defaultWorkflow.stages[0].id };
+    return { ...data, [ENTITY_STAGE_ATTRIBUTE]: workflow.stages[0].id };
   }
   return data;
 };
@@ -43,25 +42,21 @@ const getEntityStage = async (uid, id) => {
  */
 const decorator = (service) => ({
   async create(uid, opts = {}) {
-    const hasRW = hasReviewWorkflow({ strapi }, uid);
+    const workflow = await getService('workflows').getAssignedWorkflow(uid, {
+      populate: 'stages',
+    });
 
-    if (!hasRW) {
+    if (!workflow) {
       return service.create.call(this, uid, opts);
     }
 
-    const data = await getDataWithStage(opts.data);
+    const data = await getDataWithStage(workflow, opts.data);
     return service.create.call(this, uid, { ...opts, data });
   },
   async update(uid, entityId, opts = {}) {
-    const hasRW = hasReviewWorkflow({ strapi }, uid);
-
-    if (!hasRW) {
-      return service.update.call(this, uid, entityId, opts);
-    }
-
     // Prevents the stage from being set to null
     const data = { ...opts.data };
-    if (isNull(data[ENTITY_STAGE_ATTRIBUTE])) {
+    if (isNil(data[ENTITY_STAGE_ATTRIBUTE])) {
       delete data[ENTITY_STAGE_ATTRIBUTE];
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
@@ -71,7 +66,8 @@ const decorator = (service) => ({
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
     const updatedStage = updatedEntity[ENTITY_STAGE_ATTRIBUTE];
 
-    if (previousStage?.id && previousStage.id !== updatedStage.id) {
+    // Stage might be null if field is not populated
+    if (updatedStage && previousStage?.id && previousStage.id !== updatedStage.id) {
       const model = strapi.getModel(uid);
 
       strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {

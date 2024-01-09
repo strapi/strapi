@@ -1,13 +1,11 @@
-import toLower from 'lodash/toLower';
-
 const checkIfAttributeIsDisplayable = (attribute) => {
-  const type = attribute.type;
+  const { type } = attribute;
 
   if (type === 'relation') {
-    return !toLower(attribute.relationType).includes('morph');
+    return !(attribute?.relationType ?? '').toLowerCase().includes('morph');
   }
 
-  return !['json', 'dynamiczone', 'richtext', 'password'].includes(type) && !!type;
+  return !['json', 'dynamiczone', 'richtext', 'password', 'blocks'].includes(type) && !!type;
 };
 
 export default checkIfAttributeIsDisplayable;

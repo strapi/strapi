@@ -42,7 +42,7 @@ describe('Relations', () => {
         'content-manager': {
           services: {
             'permission-checker': {
-              create: () => ({
+              create: jest.fn().mockReturnValue({
                 cannot: {
                   read: jest.fn().mockReturnValue(false),
                 },
@@ -224,5 +224,50 @@ describe('Relations', () => {
         })
       );
     });
+  });
+
+  test('Replace mainField by id when mainField is not accessible with RBAC', async () => {
+    global.strapi.plugins['content-manager'].services['permission-checker'].create
+      .mockReturnValueOnce({
+        cannot: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        sanitizedQuery: {
+          read: jest.fn().mockReturnValue({}),
+        },
+      })
+      .mockReturnValueOnce({
+        cannot: {
+          read: jest.fn().mockReturnValue(true),
+        },
+      });
+
+    const ctx = createContext(
+      {
+        params: {
+          model: 'main',
+          targetField: 'relationWithHidden',
+          id: 1,
+        },
+      },
+      {
+        state: {
+          userAbility: {
+            can: jest.fn().mockReturnValue(true),
+          },
+        },
+      }
+    );
+
+    await relations.findExisting(ctx);
+
+    expect(strapi.entityService.load).toHaveBeenCalledWith(
+      'main',
+      { id: 1 },
+      'relationWithHidden',
+      expect.objectContaining({
+        fields: ['id'],
+      })
+    );
   });
 });

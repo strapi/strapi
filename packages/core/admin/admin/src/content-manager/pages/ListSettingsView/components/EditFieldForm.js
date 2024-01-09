@@ -29,7 +29,7 @@ const HeaderContainer = styled(Flex)`
   }
 `;
 
-const EditFieldForm = ({
+export const EditFieldForm = ({
   attributes,
   fieldForm,
   fieldToEdit,
@@ -142,5 +142,3 @@ EditFieldForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
 };
-
-export default EditFieldForm;

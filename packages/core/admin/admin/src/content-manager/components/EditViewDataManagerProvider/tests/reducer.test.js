@@ -1559,6 +1559,75 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           }
         `);
       });
+
+      it('should keep the creator fields relations without replace them with arrays', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            createdBy: { username: 'johnDoe' },
+            updatedBy: { username: 'johnDoe' },
+          },
+          attributes: {
+            okay: {
+              type: 'boolean',
+            },
+            createdBy: {
+              type: 'relation',
+              relation: 'manyToOne',
+              target: 'admin::user',
+              relationType: 'manyToOne',
+            },
+            updatedBy: {
+              type: 'relation',
+              relation: 'manyToOne',
+              target: 'admin::user',
+              relationType: 'manyToOne',
+            },
+          },
+        };
+
+        expect(reducer(state, action)).toMatchInlineSnapshot(`
+          {
+            "componentsDataStructure": {},
+            "contentTypeDataStructure": {},
+            "formErrors": {},
+            "initialData": {
+              "createdBy": {
+                "username": "johnDoe",
+              },
+              "ok": true,
+              "updatedBy": {
+                "username": "johnDoe",
+              },
+            },
+            "modifiedDZName": null,
+            "modifiedData": {
+              "createdBy": {
+                "username": "johnDoe",
+              },
+              "ok": true,
+              "updatedBy": {
+                "username": "johnDoe",
+              },
+            },
+            "publishConfirmation": {
+              "draftCount": 0,
+              "show": false,
+            },
+            "shouldCheckErrors": false,
+          }
+        `);
+      });
     });
 
     describe('repeatable components', () => {

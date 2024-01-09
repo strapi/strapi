@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
+import type { LoadedStrapi } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
@@ -375,7 +376,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   async streamAsset(this: PushHandler, payload) {
     const assetsStream = this.streams?.assets;
 
-    // TODO: close the stream upong receiving an 'end' event instead
+    // TODO: close the stream upon receiving an 'end' event instead
     if (payload === null) {
       this.streams?.assets?.end();
       return;
@@ -398,7 +399,6 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         // We need to transform it back into a Buffer instance
         const rawBuffer = item.data as unknown as { type: 'Buffer'; data: Uint8Array };
         const chunk = Buffer.from(rawBuffer.data);
-
         await writeAsync(this.assets[assetID].stream, chunk);
       }
 
@@ -449,7 +449,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.provider = createLocalStrapiDestinationProvider({
       ...params.options,
       autoDestroy: false,
-      getStrapi: () => strapi,
+      getStrapi: () => strapi as LoadedStrapi,
     });
 
     return { transferID: this.transferID };
@@ -478,7 +478,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   ): Promise<Protocol.Server.Payload<Protocol.Server.EndMessage>> {
     await this.verifyAuth();
 
-    if (this.transferID !== params.transferID) {
+    if (this.transferID !== params?.transferID) {
       throw new ProviderTransferError('Bad transfer ID provided');
     }
 

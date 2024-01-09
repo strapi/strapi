@@ -1,29 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Box, Flex, IconButton, MenuItem, SimpleMenu, Typography } from '@strapi/design-system';
+import { Box, Flex, VisuallyHidden, Typography } from '@strapi/design-system';
+import { Menu } from '@strapi/design-system/v2';
 import { Plus } from '@strapi/icons';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
 
 import DraggableCard from './DraggableCard';
 
-const FlexWrapper = styled(Box)`
-  flex: ${({ size }) => size};
-`;
-
-const ScrollableContainer = styled(FlexWrapper)`
-  overflow-x: scroll;
-  overflow-y: hidden;
-`;
-
-const SelectContainer = styled(FlexWrapper)`
-  max-width: ${32 / 16}rem;
-`;
-
-const SortDisplayedFields = ({
+export const SortDisplayedFields = ({
   displayedFields,
   listRemainingFields,
   metadatas,
@@ -54,25 +41,16 @@ const SortDisplayedFields = ({
   }, [displayedFields, lastAction]);
 
   return (
-    <>
-      <Box paddingBottom={4}>
-        <Typography variant="delta" as="h2">
-          {formatMessage({
-            id: getTrad('containers.SettingPage.view'),
-            defaultMessage: 'View',
-          })}
-        </Typography>
-      </Box>
-      <Flex
-        paddingTop={4}
-        paddingLeft={4}
-        paddingRight={4}
-        borderColor="neutral300"
-        borderStyle="dashed"
-        borderWidth="1px"
-        hasRadius
-      >
-        <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
+    <Flex alignItems="stretch" direction="column" gap={4}>
+      <Typography variant="delta" as="h2">
+        {formatMessage({
+          id: getTrad('containers.SettingPage.view'),
+          defaultMessage: 'View',
+        })}
+      </Typography>
+
+      <Flex padding={4} borderColor="neutral300" borderStyle="dashed" borderWidth="1px" hasRadius>
+        <Box flex="1" overflow="scroll hidden" ref={scrollableContainerRef}>
           <Flex gap={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
@@ -88,27 +66,35 @@ const SortDisplayedFields = ({
               />
             ))}
           </Flex>
-        </ScrollableContainer>
-        <SelectContainer size="auto" paddingBottom={4}>
-          <SimpleMenu
-            label={formatMessage({
-              id: getTrad('components.FieldSelect.label'),
-              defaultMessage: 'Add a field',
-            })}
-            as={IconButton}
-            icon={<Plus />}
+        </Box>
+
+        <Menu.Root>
+          <Menu.Trigger
+            paddingLeft={2}
+            paddingRight={2}
+            justifyContent="center"
+            endIcon={null}
             disabled={listRemainingFields.length <= 0}
-            data-testid="add-field"
+            variant="tertiary"
           >
+            <VisuallyHidden as="span">
+              {formatMessage({
+                id: getTrad('components.FieldSelect.label'),
+                defaultMessage: 'Add a field',
+              })}
+            </VisuallyHidden>
+            <Plus aria-hidden focusable={false} style={{ position: 'relative', top: 2 }} />
+          </Menu.Trigger>
+          <Menu.Content>
             {listRemainingFields.map((field) => (
-              <MenuItem key={field} onClick={() => handleAddField(field)}>
+              <Menu.Item key={field} onSelect={() => handleAddField(field)}>
                 {metadatas[field].list.label || field}
-              </MenuItem>
+              </Menu.Item>
             ))}
-          </SimpleMenu>
-        </SelectContainer>
+          </Menu.Content>
+        </Menu.Root>
       </Flex>
-    </>
+    </Flex>
   );
 };
 
@@ -127,5 +113,3 @@ SortDisplayedFields.propTypes = {
   onMoveField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };
-
-export default SortDisplayedFields;

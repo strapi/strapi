@@ -50,7 +50,6 @@ import FormModalSubHeader from '../FormModalSubHeader';
 import IconPicker from '../IconPicker';
 import PluralName from '../PluralName';
 import Relation from '../Relation';
-import ReviewWorkflowsToggle from '../ReviewWorkflowsToggle';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
@@ -79,7 +78,6 @@ import { createComponentUid, createUid } from './utils/createUid';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
-
 const FormModal = () => {
   const {
     onCloseModal,
@@ -95,6 +93,7 @@ const FormModal = () => {
     forTarget,
     modalType,
     isOpen,
+    showBackLink,
     kind,
     step,
     targetUid,
@@ -193,7 +192,6 @@ const FormModal = () => {
           actionType,
           data: {
             draftAndPublish: true,
-            reviewWorkflows: false,
           },
           pluginOptions: {},
         });
@@ -692,7 +690,7 @@ const FormModal = () => {
           onCloseModal();
         }
 
-        // We don't need to end the loop here we want the reducer to be reinitialised
+        // We don't need to end the loop here we want the reducer to be reinitialized
 
         // Logic for creating a component without clicking on the link in
         // the left menu
@@ -930,7 +928,6 @@ const FormModal = () => {
       'select-number': SelectNumber,
       'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
-      'toggle-review-workflows': ReviewWorkflowsToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
@@ -1007,6 +1004,7 @@ const FormModal = () => {
         targetUid={targetUid}
         attributeType={attributeType}
         customFieldUid={customFieldUid}
+        showBackLink={showBackLink}
       />
       {isPickingAttribute && (
         <AttributeOptions

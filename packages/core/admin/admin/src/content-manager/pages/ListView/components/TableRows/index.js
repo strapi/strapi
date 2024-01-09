@@ -23,7 +23,7 @@ import { useIntl } from 'react-intl';
 import { Link, useHistory } from 'react-router-dom';
 
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
-import { getFullName } from '../../../../../utils';
+import { getFullName } from '../../../../../utils/getFullName';
 import { usePluginsQueryParams } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import CellContent from '../CellContent';
@@ -57,7 +57,7 @@ export const TableRows = ({
     async () =>
       (
         await import(
-          '../../../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+          '../../../../../../../ee/admin/src/content-manager/pages/ListView/ReviewWorkflowsColumn'
         )
       ).ReviewWorkflowsStageEE,
     {
@@ -191,6 +191,10 @@ export const TableRows = ({
                     )}
                   </Td>
                 );
+              }
+
+              if (typeof cellFormatter === 'function') {
+                return <Td key={key}>{cellFormatter(data, { key, name, ...rest })}</Td>;
               }
 
               return (
