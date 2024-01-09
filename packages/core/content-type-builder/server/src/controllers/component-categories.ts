@@ -18,7 +18,7 @@ export default {
 
     const componentCategoryService = getService('component-categories');
 
-    const newName = await componentCategoryService.editCategory(name, body);
+    const newName = await componentCategoryService.editCategory(name, body as any);
 
     setImmediate(() => strapi.reload());
 
