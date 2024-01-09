@@ -28,8 +28,6 @@ export const createLinksWriteStream = (
           await query().insert(link);
         } catch (e) {
           if (e instanceof Error) {
-            // TODO check DB code errors instead
-
             if (e.message.toLowerCase().includes('foreign key constraint')) {
               onWarning(
                 `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
