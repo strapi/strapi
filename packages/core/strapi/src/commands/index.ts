@@ -10,9 +10,7 @@ import listContentTypes from './actions/content-types/list/command';
 import listControllers from './actions/controllers/list/command';
 import generateCommand from './actions/generate/command';
 import listHooks from './actions/hooks/list/command';
-import installCommand from './actions/install/command';
 import listMiddlewares from './actions/middlewares/list/command';
-import newCommand from './actions/new/command';
 import listPolicies from './actions/policies/list/command';
 import reportCommand from './actions/report/command';
 import listRoutes from './actions/routes/list/command';
@@ -22,18 +20,20 @@ import disableTelemetry from './actions/telemetry/disable/command';
 import enableTelemetry from './actions/telemetry/enable/command';
 import generateTemplates from './actions/templates/generate/command';
 import generateTsTypes from './actions/ts/generate-types/command';
-import uninstallCommand from './actions/uninstall/command';
 import versionCommand from './actions/version/command';
-import watchAdminCommand from './actions/watch-admin/command';
+import buildCommand from './actions/build-command/command';
+import developCommand from './actions/develop/command';
 
 import buildPluginCommand from './actions/plugin/build-command/command';
+import initPluginCommand from './actions/plugin/init/command';
 import watchPluginCommand from './actions/plugin/watch/command';
+import verifyPluginCommand from './actions/plugin/verify/command';
 
 import { createLogger } from './utils/logger';
 import { loadTsConfig } from './utils/tsconfig';
 import { CLIContext } from './types';
 
-const strapiCommands = {
+const strapiCommands = [
   createAdminUser,
   resetAdminUserPassword,
   listComponents,
@@ -44,9 +44,7 @@ const strapiCommands = {
   listControllers,
   generateCommand,
   listHooks,
-  installCommand,
   listMiddlewares,
-  newCommand,
   listPolicies,
   reportCommand,
   listRoutes,
@@ -56,25 +54,24 @@ const strapiCommands = {
   enableTelemetry,
   generateTemplates,
   generateTsTypes,
-  uninstallCommand,
   versionCommand,
-  watchAdminCommand,
+  buildCommand,
+  developCommand,
   /**
    * Plugins
    */
   buildPluginCommand,
+  initPluginCommand,
   watchPluginCommand,
-} as const;
+  verifyPluginCommand,
+];
 
 const buildStrapiCommand = async (argv: string[], command = new Command()) => {
   try {
     // NOTE: this is a hack to allow loading dts commands without make dts a dependency of strapi and thus avoiding circular dependencies
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const dtsCommands = require(require.resolve('@strapi/data-transfer')).commands;
-    Object.assign(strapiCommands, dtsCommands);
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
-    const adminCommands = require(require.resolve('@strapi/admin/cli')).commands;
-    Object.assign(strapiCommands, adminCommands);
+    strapiCommands.push(...dtsCommands);
   } catch (e) {
     // noop
   }
@@ -86,7 +83,12 @@ const buildStrapiCommand = async (argv: string[], command = new Command()) => {
   command.helpOption('-h, --help', 'Display help for command');
   command.addHelpCommand('help [command]', 'Display help for command');
 
-  const keys = Object.keys(strapiCommands) as (keyof typeof strapiCommands)[];
+  command.version(
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../package.json').version,
+    '-v, --version',
+    'Output the version number'
+  );
 
   const cwd = process.cwd();
 
@@ -108,12 +110,16 @@ const buildStrapiCommand = async (argv: string[], command = new Command()) => {
   } satisfies CLIContext;
 
   // Load all commands
-  keys.forEach((name) => {
+  strapiCommands.forEach((commandFactory) => {
     try {
       // Add this command to the Commander command object
-      strapiCommands[name]({ command, argv, ctx });
+      const result = commandFactory({ command, argv, ctx });
+
+      if (result) {
+        command.addCommand(result);
+      }
     } catch (e) {
-      console.error(`Failed to load command ${name}`, e);
+      console.error(`Failed to load command`, e);
     }
   });
 

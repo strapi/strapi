@@ -1,4 +1,7 @@
+import type * as Utils from '../../utils';
 import type { Attribute } from '..';
+
+export type JsonValue = Utils.JSONValue;
 
 export type JSON = Attribute.OfType<'json'> &
   // Options
@@ -7,16 +10,6 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.PrivateOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.DefaultOption<JsonValue>;
-
-type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
-
-type JSONArray = Array<JSONValue>;
-
-export interface JSONObject {
-  [key: string]: JSONValue;
-}
-
-export type JsonValue<T extends JSONValue = JSONValue> = T;
+  Attribute.DefaultOption<Utils.JSONPrimitive>; // TODO: should be Utils.JSONValue but it breaks the admin build
 
 export type GetJsonValue<T extends Attribute.Attribute> = T extends JSON ? JsonValue : never;

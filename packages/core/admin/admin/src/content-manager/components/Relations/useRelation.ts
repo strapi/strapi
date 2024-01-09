@@ -165,7 +165,7 @@ const useRelation = (cacheKey: any[] = [], { relation, search }: UseRelationArgs
     setSearchParams({
       ...options,
       _q: term,
-      _filter: '$startsWithi',
+      _filter: '$containsi',
     });
   };
 

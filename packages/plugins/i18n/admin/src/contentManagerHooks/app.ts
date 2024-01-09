@@ -23,17 +23,17 @@ export interface AddLocaleToSTLinksArgs {
   models: Schema.ContentType[];
 }
 
-export type AddLocalToLinksHookArgs<TType extends 'collectionType' | 'singleType'> =
-  TType extends 'collectionType' ? AddLocaleToCTLinksArgs : AddLocaleToSTLinksArgs;
+export type AddLocalToLinksHookArgs<TType extends 'collection-types' | 'single-types'> =
+  TType extends 'collection-types' ? AddLocaleToCTLinksArgs : AddLocaleToSTLinksArgs;
 
 const addLocaleToLinksHook =
-  <TType extends 'collectionType' | 'singleType'>(type: TType) =>
+  <TType extends 'collection-types' | 'single-types'>(type: TType) =>
   (
     args: AddLocalToLinksHookArgs<TType>,
     store: Store
   ): AddLocaleToCTLinksArgs | AddLocaleToSTLinksArgs => {
     const links =
-      type === 'collectionType'
+      type === 'collection-types'
         ? (args as AddLocaleToCTLinksArgs).ctLinks
         : (args as AddLocaleToSTLinksArgs).stLinks;
 
@@ -54,7 +54,7 @@ const addLocaleToLinksHook =
       collectionTypesRelatedPermissions
     );
 
-    return type === 'collectionType'
+    return type === 'collection-types'
       ? { ctLinks: mutatedLinks, models: args.models }
       : { stLinks: mutatedLinks, models: args.models };
   };
@@ -64,7 +64,7 @@ const addLocaleToLinksHook =
  * -----------------------------------------------------------------------------------------------*/
 const addLocaleToLinksSearch = (
   links: Array<StrapiAppSettingLink & { search?: string }>,
-  kind: 'collectionType' | 'singleType',
+  kind: 'collection-types' | 'single-types',
   contentTypeSchemas: Schema.ContentType[],
   locales: Locale[],
   permissions: Record<string, Record<string, Permission[]>>
@@ -84,7 +84,7 @@ const addLocaleToLinksSearch = (
 
     const contentTypePermissions = permissions[contentTypeUID];
     const requiredPermissionsToViewALink =
-      kind === 'collectionType'
+      kind === 'collection-types'
         ? ['plugin::content-manager.explorer.read', 'plugin::content-manager.explorer.create']
         : ['plugin::content-manager.explorer.read'];
 

@@ -2,22 +2,24 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { Form, auth, translatedErrors, useFetchClient, useQuery } from '@strapi/helper-plugin';
+import { Form, translatedErrors, useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
 import { ResetPassword } from '../../../../../shared/contracts/authentication';
 import { Logo } from '../../../components/UnauthenticatedLogo';
+import { useAuth } from '../../../features/Auth';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
+import { useResetPasswordMutation } from '../../../services/auth';
+import { isBaseQueryError } from '../../../utils/baseQuery';
 
 import { FieldActionWrapper } from './FieldActionWrapper';
 
@@ -39,34 +41,29 @@ const ResetPassword = () => {
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { post } = useFetchClient();
   const { push } = useHistory();
   const query = useQuery();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { mutate, isError } = useMutation(
-    async (body: Pick<ResetPassword.Request['body'], 'password'>) => {
-      const {
-        data: { data },
-      } = await post<ResetPassword.Response>('/admin/reset-password', {
-        ...body,
-        resetPasswordToken: query.get('code'),
-      });
+  const setToken = useAuth('ResetPassword', (state) => state.setToken);
 
-      return data;
-    },
-    {
-      onSuccess(data) {
-        if (data) {
-          const { token, user } = data;
-          auth.setToken(token, false);
-          auth.setUserInfo(user, false);
+  const [resetPassword, { error }] = useResetPasswordMutation();
 
-          // Redirect to the homePage
-          push('/');
-        }
-      },
+  const handleSubmit = async (body: ResetPassword.Request['body']) => {
+    const res = await resetPassword(body);
+
+    if ('data' in res) {
+      setToken(res.data.token);
+      push('/');
     }
-  );
+  };
+  /**
+   * If someone doesn't have a reset password token
+   * then they should just be redirected back to the login page.
+   */
+  if (!query.get('code')) {
+    return <Redirect to="/auth/login" />;
+  }
 
   return (
     <UnauthenticatedLayout>
@@ -82,12 +79,14 @@ const ResetPassword = () => {
                 })}
               </Typography>
             </Box>
-            {isError ? (
+            {error ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
-                {formatMessage({
-                  id: 'notification.error',
-                  defaultMessage: 'An error occurred',
-                })}
+                {isBaseQueryError(error)
+                  ? formatAPIError(error)
+                  : formatMessage({
+                      id: 'notification.error',
+                      defaultMessage: 'An error occurred',
+                    })}
               </Typography>
             ) : null}
           </Column>
@@ -98,7 +97,8 @@ const ResetPassword = () => {
               confirmPassword: '',
             }}
             onSubmit={(values) => {
-              mutate({ password: values.password });
+              // We know query.code is defined because we check for it above.
+              handleSubmit({ password: values.password, resetPasswordToken: query.get('code')! });
             }}
             validationSchema={RESET_PASSWORD_SCHEMA}
             validateOnChange={false}

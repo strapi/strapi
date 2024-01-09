@@ -261,7 +261,7 @@ describe('useRelation', () => {
     });
 
     expect(spy).toBeCalledWith('/', {
-      params: { _q: 'something', _filter: '$startsWithi', limit: 10, page: 1 },
+      params: { _q: 'something', _filter: '$containsi', limit: 10, page: 1 },
     });
   });
 
@@ -289,7 +289,7 @@ describe('useRelation', () => {
     expect(spy).toBeCalledWith(expect.any(String), {
       params: {
         _q: 'something',
-        _filter: '$startsWithi',
+        _filter: '$containsi',
         limit: 5,
         page: expect.any(Number),
       },
@@ -321,7 +321,7 @@ describe('useRelation', () => {
     expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
       params: {
         _q: 'something',
-        _filter: '$startsWithi',
+        _filter: '$containsi',
         limit: expect.any(Number),
         page: 1,
       },
@@ -329,7 +329,7 @@ describe('useRelation', () => {
     expect(spy).toHaveBeenNthCalledWith(2, expect.any(String), {
       params: {
         _q: 'something',
-        _filter: '$startsWithi',
+        _filter: '$containsi',
         limit: expect.any(Number),
         page: 2,
       },

@@ -14,7 +14,7 @@ const CodeBlock = styled.pre.attrs({ role: 'code' })`
   max-width: 100%;
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
-  flex-shrink: 0;
+  flex-shrink: 1;
   & > code {
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
       monospace;
@@ -45,6 +45,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
+    dragHandleTopMargin: '10px',
   },
 };
 
