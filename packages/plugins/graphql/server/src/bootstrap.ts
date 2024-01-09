@@ -73,11 +73,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   const defaultServerConfig: ApolloServerOptions<BaseContext> & CustomOptions = {
     // Schema
     schema,
-    // Initialize loaders for this request.
-    // context: ({ ctx }) => ({
-    //   state: ctx.state,
-    //   koaContext: ctx,
-    // }),
 
     // Validation
     validationRules: [depthLimit(config('depthLimit') as number) as any],
@@ -155,6 +150,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   // add the graphql server for koa
   handler.push(
     koaMiddleware(server, {
+      // Initialize loaders for this request.
       context: async ({ ctx }) => ({
         state: ctx.state,
         koaContext: ctx,
