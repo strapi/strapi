@@ -1,11 +1,15 @@
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import type { Common, Schema } from '@strapi/types';
+import type { Next, ParameterizedContext } from 'koa';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
-const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
+const validateLocaleCreation: Common.MiddlewareHandler = async (
+  ctx: ParameterizedContext,
+  next: Next
+) => {
   const { model } = ctx.params;
   const { query, body } = ctx.request;
 
@@ -35,14 +39,14 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
     throw new ApplicationError("This locale doesn't exist");
   }
 
-  body.locale = entityLocale;
+  (body as any).locale = entityLocale;
 
   if (modelDef.kind === 'singleType') {
     const entity = await strapi.entityService.findMany(modelDef.uid, {
       locale: entityLocale,
     } as any);
 
-    ctx.request.query.locale = body.locale;
+    ctx.request.query.locale = (body as any).locale;
 
     // updating
     if (entity) {
@@ -61,7 +65,7 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
 
   fillNonLocalizedAttributes(body, relatedEntity, { model });
   const localizations = await getNewLocalizationsFrom(relatedEntity);
-  body.localizations = localizations;
+  (body as any).localizations = localizations;
 
   return next();
 };
