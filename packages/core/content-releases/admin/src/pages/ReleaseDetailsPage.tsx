@@ -380,24 +380,31 @@ export const ReleaseDetailsLayout = ({
   );
 };
 
-const GROUP_BY_OPTIONS = [
-  {
-    label: 'Content Type',
-    value: 'contentType',
-  },
-  {
-    label: 'Locale',
-    value: 'locale',
-  },
-  {
-    label: 'Action',
-    value: 'action',
-  },
-];
-
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
+const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
+const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
+  if (value === 'locale') {
+    return {
+      id: 'content-releases.pages.ReleaseDetails.groupBy.option.locales',
+      defaultMessage: 'Locales',
+    };
+  }
+
+  if (value === 'action') {
+    return {
+      id: 'content-releases.pages.ReleaseDetails.groupBy.option.actions',
+      defaultMessage: 'Actions',
+    };
+  }
+
+  return {
+    id: 'content-releases.pages.ReleaseDetails.groupBy.option.content-type',
+    defaultMessage: 'Content-Types',
+  };
+};
+
 const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
@@ -410,7 +417,9 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+
   const release = releaseData?.data;
+  const selectedGroupBy = query?.groupBy || 'contentType';
 
   const {
     isLoading,
@@ -527,13 +536,13 @@ const ReleaseDetailsBody = () => {
         <Flex>
           <SingleSelect
             aria-label={formatMessage({
-              id: 'pages.ReleaseDetails.groupBy.label',
+              id: 'content-releases.pages.ReleaseDetails.groupBy.label',
               defaultMessage: 'Group by',
             })}
             customizeContent={(value) =>
               formatMessage(
                 {
-                  id: `pages.ReleaseDetails.groupBy.label}`,
+                  id: `content-releases.pages.ReleaseDetails.groupBy.label`,
                   defaultMessage: `Group by {groupBy}`,
                 },
                 {
@@ -541,12 +550,12 @@ const ReleaseDetailsBody = () => {
                 }
               )
             }
-            value={query?.groupBy || 'contentType'}
+            value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
             {GROUP_BY_OPTIONS.map((option) => (
-              <SingleSelectOption key={option.value} value={option.value}>
-                {option.label}
+              <SingleSelectOption key={option} value={option}>
+                {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
             ))}
           </SingleSelect>
