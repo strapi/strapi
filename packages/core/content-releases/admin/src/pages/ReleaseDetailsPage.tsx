@@ -15,6 +15,7 @@ import {
   Badge,
   SingleSelect,
   SingleSelectOption,
+  Icon,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
@@ -31,7 +32,7 @@ import {
   ConfirmDialog,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, More, Pencil, Trash } from '@strapi/icons';
+import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
@@ -119,6 +120,58 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
   );
 };
 
+interface EntryValidationTextProps {
+  status: ReleaseAction['entry']['status'];
+  action: ReleaseAction['type'];
+}
+
+const EntryValidationText = ({ status, action }: EntryValidationTextProps) => {
+  const { formatMessage } = useIntl();
+
+  if (action == 'publish') {
+    return (
+      <Flex gap={2}>
+        <Icon color="success600" as={CheckCircle} />
+        {status === 'published' ? (
+          <Typography textColor="success600" fontWeight="bold">
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+              defaultMessage: 'Already published',
+            })}
+          </Typography>
+        ) : (
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
+              defaultMessage: 'Ready to publish',
+            })}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex gap={2}>
+      <Icon color="success600" as={CheckCircle} />
+      {status === 'draft' ? (
+        <Typography textColor="success600" fontWeight="bold">
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
+            defaultMessage: 'Already unpublished',
+          })}
+        </Typography>
+      ) : (
+        <Typography>
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
+            defaultMessage: 'Ready to unpublish',
+          })}
+        </Typography>
+      )}
+    </Flex>
+  );
+};
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
   toggleWarningSubmit: () => void;
@@ -216,7 +269,9 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}`;
+  const createdBy = release.createdBy.lastname
+    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
+    : `${release.createdBy.firstname}`;
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -327,24 +382,31 @@ export const ReleaseDetailsLayout = ({
   );
 };
 
-const GROUP_BY_OPTIONS = [
-  {
-    label: 'Content Type',
-    value: 'contentType',
-  },
-  {
-    label: 'Locale',
-    value: 'locale',
-  },
-  {
-    label: 'Action',
-    value: 'action',
-  },
-];
-
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
+const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
+const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
+  if (value === 'locale') {
+    return {
+      id: 'content-releases.pages.ReleaseDetails.groupBy.option.locales',
+      defaultMessage: 'Locales',
+    };
+  }
+
+  if (value === 'action') {
+    return {
+      id: 'content-releases.pages.ReleaseDetails.groupBy.option.actions',
+      defaultMessage: 'Actions',
+    };
+  }
+
+  return {
+    id: 'content-releases.pages.ReleaseDetails.groupBy.option.content-type',
+    defaultMessage: 'Content-Types',
+  };
+};
+
 const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
@@ -357,7 +419,9 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+
   const release = releaseData?.data;
+  const selectedGroupBy = query?.groupBy || 'contentType';
 
   const {
     isLoading,
@@ -474,13 +538,13 @@ const ReleaseDetailsBody = () => {
         <Flex>
           <SingleSelect
             aria-label={formatMessage({
-              id: 'pages.ReleaseDetails.groupBy.label',
+              id: 'content-releases.pages.ReleaseDetails.groupBy.label',
               defaultMessage: 'Group by',
             })}
             customizeContent={(value) =>
               formatMessage(
                 {
-                  id: `pages.ReleaseDetails.groupBy.label}`,
+                  id: `content-releases.pages.ReleaseDetails.groupBy.label`,
                   defaultMessage: `Group by {groupBy}`,
                 },
                 {
@@ -488,12 +552,12 @@ const ReleaseDetailsBody = () => {
                 }
               )
             }
-            value={query?.groupBy || 'contentType'}
+            value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
             {GROUP_BY_OPTIONS.map((option) => (
-              <SingleSelectOption key={option.value} value={option.value}>
-                {option.label}
+              <SingleSelectOption key={option} value={option}>
+                {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
             ))}
           </SingleSelect>
@@ -546,6 +610,16 @@ const ReleaseDetailsBody = () => {
                     })}
                     name="action"
                   />
+                  {!release.releasedAt && (
+                    <Table.HeaderCell
+                      fieldSchemaType="string"
+                      label={formatMessage({
+                        id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+                        defaultMessage: 'status',
+                      })}
+                      name="status"
+                    />
+                  )}
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
@@ -590,11 +664,16 @@ const ReleaseDetailsBody = () => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
-                          <Flex justifyContent="flex-end">
-                            <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                          </Flex>
-                        </Td>
+                        <>
+                          <Td>
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                            </Flex>
+                          </Td>
+                        </>
                       )}
                     </Tr>
                   ))}
