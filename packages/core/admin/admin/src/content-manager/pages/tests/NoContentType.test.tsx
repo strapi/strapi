@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { NoContentType } from '../NoContentType';
+import { NoContentType } from '../NoContentTypePage';
 
 describe('NoContentType', () => {
   it('renders and matches the snapshot', () => {

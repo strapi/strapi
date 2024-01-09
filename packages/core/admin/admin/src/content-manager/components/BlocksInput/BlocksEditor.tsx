@@ -1,13 +1,15 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { InputWrapper, Divider } from '@strapi/design-system';
+import { InputWrapper, Divider, VisuallyHidden } from '@strapi/design-system';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { type Editor, type Descendant, createEditor } from 'slate';
+import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
-import styled from 'styled-components';
+import styled, { type CSSProperties } from 'styled-components';
+
+import { getTranslation } from '../../utils/translations';
 
 import { codeBlocks } from './Blocks/Code';
 import { headingBlocks } from './Blocks/Heading';
@@ -34,6 +36,7 @@ interface BaseBlock {
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   snippets?: string[];
+  dragHandleTopMargin?: CSSProperties['marginTop'];
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -79,6 +82,8 @@ interface BlocksEditorContextValue {
   blocks: BlocksStore;
   modifiers: ModifiersStore;
   disabled: boolean;
+  name: string;
+  setLiveText: (text: string) => void;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -159,10 +164,12 @@ interface BlocksEditorProps {
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
     const { formatMessage } = useIntl();
-
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
+    const [liveText, setLiveText] = React.useState('');
+    const ariaDescriptionId = React.useId();
+
     const formattedPlaceholder =
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
@@ -209,27 +216,43 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     };
 
     return (
-      <Slate
-        editor={editor}
-        initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
-        onChange={handleSlateChange}
-        key={key}
-      >
-        <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={disabled}>
-          <InputWrapper
-            direction="column"
-            alignItems="flex-start"
-            height="512px"
+      <>
+        <VisuallyHidden id={ariaDescriptionId}>
+          {formatMessage({
+            id: getTranslation('components.Blocks.dnd.instruction'),
+            defaultMessage: `To reorder blocks, press Command or Control along with Shift and the Up or Down arrow keys`,
+          })}
+        </VisuallyHidden>
+        <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+        <Slate
+          editor={editor}
+          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          onChange={handleSlateChange}
+          key={key}
+        >
+          <BlocksEditorProvider
+            blocks={blocks}
+            modifiers={modifiers}
             disabled={disabled}
-            hasError={Boolean(error)}
-            style={{ overflow: 'hidden' }}
+            name={name}
+            setLiveText={setLiveText}
           >
-            <BlocksToolbar />
-            <EditorDivider width="100%" />
-            <BlocksContent placeholder={formattedPlaceholder} />
-          </InputWrapper>
-        </BlocksEditorProvider>
-      </Slate>
+            <InputWrapper
+              direction="column"
+              alignItems="flex-start"
+              height="512px"
+              disabled={disabled}
+              hasError={Boolean(error)}
+              style={{ overflow: 'hidden' }}
+              aria-describedby={ariaDescriptionId}
+            >
+              <BlocksToolbar />
+              <EditorDivider width="100%" />
+              <BlocksContent placeholder={formattedPlaceholder} />
+            </InputWrapper>
+          </BlocksEditorProvider>
+        </Slate>
+      </>
     );
   }
 );
