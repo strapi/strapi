@@ -13,7 +13,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/icons": "1.14.0",
+    "@strapi/icons": "1.14.1",
     "@strapi/plugin-color-picker": "4.16.2",
     "@strapi/plugin-documentation": "4.16.2",
     "@strapi/plugin-graphql": "4.16.2",
