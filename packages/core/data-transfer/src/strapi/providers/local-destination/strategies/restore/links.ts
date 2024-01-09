@@ -7,7 +7,8 @@ import { createLinkQuery } from '../../../../queries/link';
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
   strapi: LoadedStrapi,
-  transaction?: Transaction
+  transaction?: Transaction,
+  onWarning?: any
 ) => {
   return new Writable({
     objectMode: true,
@@ -16,14 +17,25 @@ export const createLinksWriteStream = (
         const { left, right } = link;
         const query = createLinkQuery(strapi, trx);
 
+        const originalLeftRef = left.ref;
+        const originalRightRef = right.ref;
+
         // Map IDs if needed
-        left.ref = mapID(left.type, left.ref) ?? left.ref;
-        right.ref = mapID(right.type, right.ref) ?? right.ref;
+        left.ref = mapID(left.type, originalLeftRef) ?? originalLeftRef;
+        right.ref = mapID(right.type, originalRightRef) ?? originalRightRef;
 
         try {
           await query().insert(link);
         } catch (e) {
           if (e instanceof Error) {
+            // TODO check DB code errors instead
+
+            if (e.message.toLowerCase().includes('foreign key constraint')) {
+              onWarning(
+                `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
+              );
+              return callback(null);
+            }
             return callback(e);
           }
 
