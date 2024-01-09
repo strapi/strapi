@@ -261,6 +261,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
             mainFieldValue: action.entry[mainField],
           },
           locale: action.locale ? allLocalesDictionary[action.locale] : null,
+          status: action.entry.publishedAt ? 'published' : 'draft',
         },
       };
     });
