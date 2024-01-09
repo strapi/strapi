@@ -814,10 +814,4 @@ const ReleaseDetailsPage = () => {
   );
 };
 
-const ProtectedReleaseDetailsPage = () => (
-  <CheckPermissions permissions={PERMISSIONS.main}>
-    <ReleaseDetailsPage />
-  </CheckPermissions>
-);
-
-export { ReleaseDetailsPage, ProtectedReleaseDetailsPage };
+export { ReleaseDetailsPage };
