@@ -44,9 +44,9 @@
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "@strapi/design-system": "1.14.0",
+    "@strapi/design-system": "1.14.1",
     "@strapi/helper-plugin": "4.16.2",
-    "@strapi/icons": "1.14.0"
+    "@strapi/icons": "1.14.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.16.2",
