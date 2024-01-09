@@ -6,11 +6,12 @@ import {
 } from '@apollo/server/plugin/landingPage/default';
 import { koaMiddleware } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
-import { graphqlUploadKoa } from 'graphql-upload'; // NOTE: stuck on v15 because v16 is esm only
+// eslint-disable-next-line import/extensions
+import graphqlUploadKoa from 'graphql-upload/graphqlUploadKoa.js';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
-import type { Strapi, Common } from '@strapi/types';
 
+import type { Strapi, Common } from '@strapi/types';
 import type { BaseContext, Context, Next } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
