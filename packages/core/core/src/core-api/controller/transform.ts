@@ -19,6 +19,8 @@ type Entry = {
   [key: string]: Entry | Entry[] | string | number | null | boolean | Date;
 };
 
+type Format = 'v4' | 'v5';
+
 function isEntry(property: unknown): property is Entry | Entry[] {
   return property === null || isPlainObject(property) || Array.isArray(property);
 }
@@ -40,14 +42,19 @@ const parseBody = (ctx: Koa.Context) => {
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Schema.ContentType | Schema.Component } = {}
+  opts: {
+    contentType?: Schema.ContentType | Schema.Component;
+    format?: Format;
+  } = {
+    format: 'v5',
+  }
 ) => {
   if (isNil(resource)) {
     return resource;
   }
 
   return {
-    data: transformEntry(resource, opts?.contentType),
+    data: opts?.format === 'v4' ? transformEntry(resource, opts?.contentType) : resource,
     meta,
   };
 };

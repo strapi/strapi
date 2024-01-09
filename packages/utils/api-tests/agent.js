@@ -26,6 +26,9 @@ const createAgent = (strapi, initialState = {}) => {
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
 
+    // TODO: v5 remove this and update all tests
+    rq.set('x-strapi-response-format', 'v4');
+
     if (queryString) {
       rq.query(qs.stringify(queryString));
     }
