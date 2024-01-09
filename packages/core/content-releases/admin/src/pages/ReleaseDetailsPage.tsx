@@ -628,12 +628,12 @@ const ReleaseDetailsBody = () => {
                           entry.contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td>
+                      <Td width={'15%'}>
                         <Typography>{`${
                           entry?.locale?.name ? entry.locale.name : '-'
                         }`}</Typography>
                       </Td>
-                      <Td>
+                      <Td width={'15%'}>
                         <Typography>{entry.contentType.displayName || ''}</Typography>
                       </Td>
                       <Td>
@@ -662,7 +662,7 @@ const ReleaseDetailsBody = () => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
+                        <Td width={'15%'}>
                           <EntryValidationText status={entry.status} action={type} />
                         </Td>
                       )}
