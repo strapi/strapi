@@ -17,6 +17,9 @@ const initialState = {
         conditions: [],
       },
     ],
+    collectionTypesRelatedPermissions: {
+      'api::category.category': [{ action: 'plugin::content-manager.explorer.update' }],
+    },
   },
 };
 

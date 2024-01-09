@@ -1,19 +1,36 @@
 import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import { Menu, Link } from '@strapi/design-system/v2';
 import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useSelector, TypedUseSelectorHook } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 
+import type { Store } from '@strapi/admin/strapi-admin';
+import type { Permission } from '@strapi/helper-plugin';
+
+type RootState = ReturnType<Store['getState']>;
+const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
+
 const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   &:hover {
     background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+
+    svg {
+      path {
+        fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
+      }
+    }
+
+    a {
+      color: ${({ theme }) => theme.colors.neutral800};
+    }
   }
 
   svg {
@@ -22,12 +39,8 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
     }
   }
 
-  &:hover {
-    svg {
-      path {
-        fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
-      }
-    }
+  a {
+    color: ${({ theme }) => theme.colors.neutral800};
   }
 `;
 
@@ -50,11 +63,19 @@ export const ReleaseActionMenu = ({
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
-  const { push } = useHistory();
+  const collectionTypePermissions = useTypedSelector(
+    (state) => state.rbacProvider.collectionTypesRelatedPermissions
+  );
+  const updatePermissions = contentTypeUid
+    ? collectionTypePermissions[contentTypeUid]?.['plugin::content-manager.explorer.update']
+    : [];
 
-  const handleEditEntry = async () => {
-    push(`/content-manager/collectionType/${contentTypeUid}/${entryId}`);
-  };
+  // We only check the locale permissions if contentType has i18n enabled
+  const canUpdate =
+    !locale ||
+    updatePermissions?.find(({ properties }: { properties: Permission['properties'] }) =>
+      properties.locales?.includes(locale)
+    );
 
   const handleDeleteAction = async () => {
     const response = await deleteReleaseAction({
@@ -127,23 +148,29 @@ export const ReleaseActionMenu = ({
                 {
                   action: 'plugin::content-manager.explorer.update',
                   subject: contentTypeUid,
-                  properties: {
-                    locales: locale ? [locale] : [],
-                  },
                 },
               ]}
             >
-              <StyledMenuItem onSelect={handleEditEntry}>
-                <Flex gap={2}>
-                  <Icon as={Pencil} padding={1} />
-                  <Typography variant="omega">
-                    {formatMessage({
-                      id: 'content-releases.content-manager-edit-view.edit-entry',
-                      defaultMessage: 'Edit entry',
-                    })}
-                  </Typography>
-                </Flex>
-              </StyledMenuItem>
+              {canUpdate && (
+                <StyledMenuItem>
+                  <Link
+                    as={NavLink}
+                    // @ts-expect-error TODO: This component from DS is not using types from NavLink
+                    to={{
+                      pathname: `/content-manager/collectionType/${contentTypeUid}/${entryId}`,
+                      search: locale && `?plugins[i18n][locale]=${locale}`,
+                    }}
+                    startIcon={<Icon as={Pencil} padding={1} />}
+                  >
+                    <Typography variant="omega">
+                      {formatMessage({
+                        id: 'content-releases.content-manager-edit-view.edit-entry',
+                        defaultMessage: 'Edit entry',
+                      })}
+                    </Typography>
+                  </Link>
+                </StyledMenuItem>
+              )}
             </CheckPermissions>
           )}
           <CheckPermissions permissions={PERMISSIONS.deleteAction}>
