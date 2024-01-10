@@ -4,6 +4,7 @@ module.exports = {
   'content-types': {
     'api::category.category': require('./category'),
     'api::article.article': require('./article'),
+    'api::author.author': require('./author'),
   },
   components: {
     'article.comp': require('./comp'),
