@@ -511,7 +511,8 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const entity = await entityManager.findOne(id, model, { populate });
+    const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
+    const entity = await entityManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
       return ctx.notFound();

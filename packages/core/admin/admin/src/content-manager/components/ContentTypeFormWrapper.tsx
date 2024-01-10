@@ -27,6 +27,7 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
+import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
@@ -103,9 +104,8 @@ const ContentTypeFormWrapper = ({
   const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
 
   const requestURL =
-    isCreatingEntry && !origin
-      ? null
-      : `/content-manager/${collectionType}/${slug}/${origin || id}`;
+    isCreatingEntry && !origin ? null : `/content-manager/collection-types/${slug}/${origin || id}`;
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
 
   const cleanReceivedData = React.useCallback(
     (data: EntityData) => {
@@ -172,7 +172,10 @@ const ContentTypeFormWrapper = ({
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, {
+          cancelToken: source.token,
+          params,
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
@@ -383,7 +386,10 @@ const ContentTypeFormWrapper = ({
         } = await fetchClient.get<Contracts.CollectionTypes.CountDraftRelations.Response>(
           isSingleType
             ? `/content-manager/${collectionType}/${slug}/actions/countDraftRelations`
-            : `/content-manager/${collectionType}/${slug}/${id}/actions/countDraftRelations`
+            : `/content-manager/${collectionType}/${slug}/${id}/actions/countDraftRelations`,
+          {
+            params,
+          }
         );
         trackUsage('didCheckDraftRelations');
 
@@ -398,7 +404,17 @@ const ContentTypeFormWrapper = ({
 
         return Promise.reject(err);
       }
-    }, [trackUsage, dispatch, fetchClient, isSingleType, collectionType, slug, id, displayErrors]);
+    }, [
+      trackUsage,
+      dispatch,
+      fetchClient,
+      isSingleType,
+      collectionType,
+      slug,
+      id,
+      displayErrors,
+      params,
+    ]);
 
   const onPublish: RenderChildProps['onPublish'] = React.useCallback(async () => {
     try {
