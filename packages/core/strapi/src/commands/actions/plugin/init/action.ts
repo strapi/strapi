@@ -22,7 +22,6 @@ interface ActionOptions extends Pick<InitOptions, 'silent' | 'debug'> {}
 export default async (
   packagePath: string,
   { silent, debug }: ActionOptions,
-  _cmd: unknown,
   { logger, cwd }: CLIContext
 ) => {
   try {
