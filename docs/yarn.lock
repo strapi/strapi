@@ -5961,12 +5961,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.7":
-  version: 1.15.1
-  resolution: "follow-redirects@npm:1.15.1"
+  version: 1.15.4
+  resolution: "follow-redirects@npm:1.15.4"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: a57f93ce566d4602fe7b2f6cef8f8d3d053891b3d8f2feae7e97eec18aa0003d23aeec8e857801d93887eee27e1617276a16f6a3d5c9d78e45882346612462d5
+  checksum: 2e8f5f259a6b02dfa8dc199e08431848a7c3beed32eb4c19945966164a52c89f07b86c3afcc32ebe4279cf0a960520e45a63013d6350309c5ec90133c5d9351a
   languageName: node
   linkType: hard
 
