@@ -15,10 +15,16 @@ function createFormattedError(
   code: string,
   originalError: unknown
 ) {
-  return new GraphQLError(message, {
+  const options = {
     ...formattedError,
-    extensions: { ...formattedError.extensions, ...formatErrorToExtension(originalError), code },
-  });
+    extensions: {
+      ...formattedError.extensions,
+      ...formatErrorToExtension(originalError),
+      code,
+    },
+  };
+
+  return new GraphQLError(message, options);
 }
 
 /**

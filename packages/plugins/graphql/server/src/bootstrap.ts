@@ -12,7 +12,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Strapi, Common } from '@strapi/types';
-import type { BaseContext, Context, Next } from 'koa';
+import type { BaseContext, Context, ExtendableContext, Next } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
 
@@ -85,7 +85,8 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     cors: false,
     uploads: false,
     bodyParserConfig: true,
-
+    // send 400 http status instead of 200 for input validation errors
+    status400ForVariableCoercionErrors: true,
     plugins: [landingPage],
 
     cache: 'bounded' as const,
@@ -100,7 +101,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   useUploadMiddleware(strapi, path);
 
   try {
-    // Since Apollo-Server v3, server.start() must be called before using server.applyMiddleware()
+    // server.start() must be called before using server.applyMiddleware()
     await server.start();
   } catch (error) {
     if (error instanceof Error) {
