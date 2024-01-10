@@ -79,7 +79,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     validationRules: [depthLimit(config('depthLimit') as number) as any],
 
     // Errors
-    // TODO: format errors properly
     formatError: formatGraphqlError,
 
     // Misc
