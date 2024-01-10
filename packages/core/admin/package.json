@@ -72,7 +72,6 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/data-transfer": "4.17.0",
     "@strapi/design-system": "1.14.1",
     "@strapi/helper-plugin": "4.17.0",
     "@strapi/icons": "1.14.1",
@@ -173,6 +172,7 @@
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "4.17.0",
+    "@strapi/data-transfer": "4.17.0",
     "@strapi/pack-up": "4.17.0",
     "@strapi/plugin-content-manager": "4.17.0",
     "@strapi/strapi": "4.17.0",
@@ -201,7 +201,7 @@
     "vite": "4.4.9"
   },
   "peerDependencies": {
-    "@strapi/data-transfer": "4.16.2",
+    "@strapi/data-transfer": "^4.16.0",
     "@strapi/strapi": "^4.3.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
