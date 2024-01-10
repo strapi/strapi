@@ -1,6 +1,6 @@
 import { propOr } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import type { CoreApi, Schema, Entity } from '@strapi/types';
+import type { CoreApi, Schema } from '@strapi/types';
 
 import {
   getPaginationInfo,
@@ -37,13 +37,13 @@ const createCollectionTypeService = ({
 
       const paginationInfo = getPaginationInfo(fetchParams);
 
-      const results = await strapi.entityService?.findMany(uid, {
+      const results = await strapi.documents.findMany(uid, {
         ...fetchParams,
         ...convertPagedToStartLimit(paginationInfo),
       });
 
       if (shouldCount(fetchParams)) {
-        const count = await strapi.entityService?.count(uid, { ...fetchParams, ...paginationInfo });
+        const count = await strapi.documents.count(uid, { ...fetchParams, ...paginationInfo });
 
         if (typeof count !== 'number') {
           throw new Error('Count should be a number');
@@ -61,8 +61,8 @@ const createCollectionTypeService = ({
       };
     },
 
-    findOne(entityId: Entity.ID, params = {}) {
-      return strapi.entityService?.findOne(uid, entityId, this.getFetchParams(params));
+    findOne(documentId: string, params = {}) {
+      return strapi.documents.findOne(uid, documentId, this.getFetchParams(params));
     },
 
     create(params = { data: {} }) {
@@ -70,17 +70,17 @@ const createCollectionTypeService = ({
 
       setPublishedAt(data);
 
-      return strapi.entityService?.create(uid, { ...params, data });
+      return strapi.documents.create(uid, { ...params, data });
     },
 
-    update(entityId: Entity.ID, params = { data: {} }) {
+    update(documentId: string, params = { data: {} }) {
       const { data } = params;
 
-      return strapi.entityService?.update(uid, entityId, { ...params, data });
+      return strapi.documents.update(uid, documentId, { ...params, data });
     },
 
-    delete(entityId: Entity.ID, params = {}) {
-      return strapi.entityService?.delete(uid, entityId, params);
+    delete(documentId: string, params = {}) {
+      return strapi.documents.delete(uid, documentId, params);
     },
   };
 };

@@ -28,8 +28,7 @@ const createSingleTypeService = ({
      */
     find(params = {}) {
       return (
-        strapi.entityService?.findMany(uid as Common.UID.SingleType, this.getFetchParams(params)) ??
-        null
+        strapi.documents.findMany(uid as Common.UID.SingleType, this.getFetchParams(params)) ?? null
       );
     },
 
@@ -39,9 +38,10 @@ const createSingleTypeService = ({
      * @return {Promise}
      */
     async createOrUpdate({ data, ...params } = { data: {} }) {
-      const entity = await this.find({ ...params, publicationState: 'preview' });
+      const document = await this.find({ ...params, publicationState: 'preview' });
 
-      if (!entity) {
+      // TODO: v5 - manage multiple draft & published versions the count will not work as simple as this
+      if (!document) {
         const count = await strapi.query(uid).count();
         if (count >= 1) {
           throw new errors.ValidationError('singleType.alreadyExists');
@@ -49,10 +49,10 @@ const createSingleTypeService = ({
 
         setPublishedAt(data);
 
-        return strapi.entityService?.create(uid, { ...params, data });
+        return strapi.documents.create(uid, { ...params, data });
       }
 
-      return strapi.entityService?.update(uid, entity.id, { ...params, data });
+      return strapi.documents.update(uid, document.documentId, { ...params, data });
     },
 
     /**
@@ -61,11 +61,11 @@ const createSingleTypeService = ({
      * @return {Promise}
      */
     async delete(params = {}) {
-      const entity = await this.find(params);
+      const document = await this.find(params);
 
-      if (!entity) return;
+      if (!document) return;
 
-      return strapi.entityService?.delete(uid, entity.id);
+      return strapi.documents.delete(uid, document.documentId);
     },
   };
 };
