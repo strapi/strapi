@@ -104,7 +104,9 @@ const ContentTypeFormWrapper = ({
   const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
 
   const requestURL =
-    isCreatingEntry && !origin ? null : `/content-manager/collection-types/${slug}/${origin || id}`;
+    isCreatingEntry && !origin
+      ? null
+      : `/content-manager/${collectionType}/${slug}/${origin || id}`;
   const params = React.useMemo(() => buildValidGetParams(query), [query]);
 
   const cleanReceivedData = React.useCallback(
