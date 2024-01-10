@@ -1,6 +1,5 @@
-import { resolve } from 'path';
-import { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../constants';
-
+const { resolve } = require('path');
+const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('../constants');
 const {
   file: {
     providers: { createLocalFileSourceProvider },
