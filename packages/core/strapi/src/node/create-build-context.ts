@@ -13,6 +13,12 @@ import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 import type { BaseContext } from './types';
 
+interface BaseOptions {
+  stats?: boolean;
+  minify?: boolean;
+  sourcemaps?: boolean;
+}
+
 interface BuildContext<TOptions = unknown> extends BaseContext {
   /**
    * The customisations defined by the user in their app.js file
@@ -25,7 +31,7 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
   /**
    * The build options
    */
-  options: TOptions;
+  options: BaseOptions & TOptions;
   /**
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
@@ -134,7 +140,7 @@ const createBuildContext = async <TOptions>({
     env,
     features,
     logger,
-    options,
+    options: options as BaseOptions & TOptions,
     plugins: pluginsWithFront,
     runtimeDir,
     strapi: strapiInstance,
