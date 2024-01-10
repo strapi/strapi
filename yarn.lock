@@ -9032,17 +9032,12 @@ __metadata:
     "@koa/router": "npm:10.1.1"
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:4.15.5"
-    "@strapi/data-transfer": "npm:4.15.5"
     "@strapi/database": "npm:4.15.5"
     "@strapi/generate-new": "npm:4.15.5"
     "@strapi/generators": "npm:4.15.5"
     "@strapi/logger": "npm:4.15.5"
     "@strapi/pack-up": "workspace:*"
     "@strapi/permissions": "npm:4.15.5"
-    "@strapi/plugin-content-manager": "npm:4.15.5"
-    "@strapi/plugin-content-type-builder": "npm:4.15.5"
-    "@strapi/plugin-email": "npm:4.15.5"
-    "@strapi/plugin-upload": "npm:4.15.5"
     "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/types": "npm:4.15.5"
     "@strapi/typescript-utils": "npm:4.15.5"
@@ -9110,9 +9105,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
+    "@strapi/core": "npm:4.15.5"
     "@strapi/logger": "npm:4.15.5"
     "@strapi/pack-up": "npm:4.15.5"
-    "@strapi/strapi": "npm:4.15.5"
     "@strapi/types": "npm:4.15.5"
     "@strapi/utils": "npm:4.15.5"
     "@types/fs-extra": "npm:9.0.13"
@@ -9144,8 +9139,6 @@ __metadata:
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.3.2"
     ws: "npm:8.13.0"
-  peerDependencies:
-    "@strapi/strapi": ^4.14.4
   languageName: unknown
   linkType: soft
 
@@ -9472,7 +9465,6 @@ __metadata:
     "@strapi/helper-plugin": "npm:4.15.5"
     "@strapi/icons": "npm:1.13.2"
     "@strapi/pack-up": "npm:4.15.5"
-    "@strapi/strapi": "npm:4.15.5"
     "@strapi/types": "npm:4.15.5"
     "@strapi/utils": "npm:4.15.5"
     "@testing-library/react": "npm:14.0.0"
@@ -9497,7 +9489,6 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
@@ -9693,7 +9684,6 @@ __metadata:
     "@strapi/icons": "npm:1.13.2"
     "@strapi/pack-up": "npm:4.15.5"
     "@strapi/provider-upload-local": "npm:4.15.5"
-    "@strapi/strapi": "npm:4.15.5"
     "@strapi/utils": "npm:4.15.5"
     "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
@@ -9725,7 +9715,6 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0

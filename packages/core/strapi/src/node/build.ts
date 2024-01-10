@@ -1,5 +1,5 @@
 import * as tsUtils from '@strapi/typescript-utils';
-import type { CLIContext } from '../commands/types';
+import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './create-build-context';
