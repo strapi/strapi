@@ -1,4 +1,4 @@
-import { EntityService } from '@strapi/types';
+import { Entity, EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import { AdminRole, Permission, SanitizedAdminRole } from './shared';
 
@@ -30,7 +30,7 @@ export declare namespace GetPermissions {
  */
 export declare namespace UpdatePermissions {
   export interface Request {
-    params: { id: string };
+    params: { id: Entity.ID };
     query: {};
     body: {
       permissions: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];

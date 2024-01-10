@@ -61,15 +61,15 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
 
   await generateNew(scope);
   if (link) {
-    await linkPackages(appPath);
+    await linkPackages(scope);
   }
 };
 
-const linkPackages = async (appPath) => {
-  const rootPath = path.resolve(__dirname, '../..');
-  fs.writeFileSync(path.join(appPath, 'yarn.lock'), '');
-  await execa('yarn', ['link', '-A', rootPath], {
-    cwd: appPath,
+const linkPackages = async (scope) => {
+  fs.writeFileSync(path.join(scope.rootPath, 'yarn.lock'), '');
+
+  await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-link.js')], {
+    cwd: scope.rootPath,
     stdio: 'inherit',
   });
 };

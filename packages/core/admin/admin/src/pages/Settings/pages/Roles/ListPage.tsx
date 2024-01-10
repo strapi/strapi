@@ -56,8 +56,8 @@ const ListPage = () => {
   const { roles, refetch: refetchRoles } = useAdminRoles(
     { filters: query?._q ? { name: { $containsi: query._q } } : undefined },
     {
-      cacheTime: 0,
-      enabled: !isLoadingForPermissions && canRead,
+      refetchOnMountOrArgChange: true,
+      skip: isLoadingForPermissions || !canRead,
     }
   );
 

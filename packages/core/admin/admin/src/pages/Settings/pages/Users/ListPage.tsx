@@ -15,7 +15,6 @@ import {
   SearchURLQuery,
   SettingsPageTitle,
   useAPIErrorHandler,
-  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
@@ -25,18 +24,14 @@ import {
   CheckPagePermissions,
   TableHeader,
 } from '@strapi/helper-plugin';
-import { AxiosError, AxiosResponse } from 'axios';
 import * as qs from 'qs';
 import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
-import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
-import { DeleteMany } from '../../../../../../shared/contracts/user';
-import { useAdminUsers } from '../../../../hooks/useAdminUsers';
+import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { selectAdminPermissions } from '../../../../selectors';
+import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { Filters } from '../../components/Filters';
 
 import { CreateActionCE } from './components/CreateActionCE';
@@ -47,31 +42,26 @@ import { TableRows } from './components/TableRows';
  * ListPageCE
  * -----------------------------------------------------------------------------------------------*/
 
-const EE_LICENSE_LIMIT_QUERY_KEY = ['ee', 'license-limit-info'];
-
 const ListPageCE = () => {
-  const { post } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = React.useState(false);
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const {
     allowedActions: { canCreate, canDelete, canRead },
   } = useRBAC(permissions.settings?.users);
-  const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
-  const {
-    users,
-    pagination,
-    isError,
-    isLoading,
-    refetch: refetchAdminUsers,
-  } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }), {
-    cacheTime: 0,
-    enabled: canRead,
-  });
+  const { data, isError, isLoading } = useAdminUsers(
+    qs.parse(search, { ignoreQueryPrefix: true }),
+    {
+      skip: !canRead,
+    }
+  );
+
+  const { pagination, users } = data ?? {};
+
   const CreateAction = useEnterprise(
     CreateActionCE,
     async () =>
@@ -99,31 +89,7 @@ const ListPageCE = () => {
     setIsModalOpen((prev) => !prev);
   };
 
-  const deleteAllMutation = useMutation<
-    AxiosResponse<DeleteMany.Response>,
-    AxiosError<Required<DeleteMany.Response>>,
-    DeleteMany.Request['body']['ids']
-  >(
-    async (ids) =>
-      post<DeleteMany.Response, AxiosResponse<DeleteMany.Response>, DeleteMany.Request['body']>(
-        '/admin/users/batch-delete',
-        { ids }
-      ),
-    {
-      async onSuccess() {
-        await refetchAdminUsers();
-
-        // Toggle enabled/ disabled state on the invite button
-        await queryClient.refetchQueries(EE_LICENSE_LIMIT_QUERY_KEY);
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-    }
-  );
+  const [deleteAll] = useDeleteManyUsersMutation();
 
   // block rendering until the EE component is fully loaded
   if (!CreateAction) {
@@ -168,10 +134,24 @@ const ListPageCE = () => {
               contentType="Users"
               isLoading={isLoading}
               onConfirmDeleteAll={async (ids) => {
-                await deleteAllMutation.mutateAsync(ids);
+                const res = await deleteAll({ ids });
+
+                if ('error' in res) {
+                  toggleNotification({
+                    type: 'warning',
+                    message: formatAPIError(res.error),
+                  });
+                }
               }}
               onConfirmDelete={async (id) => {
-                await deleteAllMutation.mutateAsync([id]);
+                const res = await deleteAll({ ids: [id] });
+
+                if ('error' in res) {
+                  toggleNotification({
+                    type: 'warning',
+                    message: formatAPIError(res.error),
+                  });
+                }
               }}
               headers={headers}
               rows={users}
@@ -192,15 +172,7 @@ const ListPageCE = () => {
           </>
         )}
       </ContentLayout>
-      {isModalOpened && (
-        <ModalForm
-          onSuccess={async () => {
-            await refetchAdminUsers();
-            await queryClient.refetchQueries(EE_LICENSE_LIMIT_QUERY_KEY);
-          }}
-          onToggle={handleToggle}
-        />
-      )}
+      {isModalOpened && <ModalForm onToggle={handleToggle} />}
     </Main>
   );
 };
@@ -378,10 +350,10 @@ const ListPage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListPage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.main);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.users.main}>
+    <CheckPagePermissions permissions={permissions}>
       <ListPage />
     </CheckPagePermissions>
   );

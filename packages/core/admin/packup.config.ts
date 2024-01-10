@@ -13,9 +13,10 @@ const config: Config = defineConfig({
     },
     {
       source: './_internal/index.ts',
-      import: './dist/cli.mjs',
-      require: './dist/cli.js',
-      runtime: 'node',
+      import: './dist/_internal.mjs',
+      require: './dist/_internal.js',
+      types: './dist/_internal/index.d.ts',
+      runtime: 'web',
     },
     {
       source: './server/src/index.ts',

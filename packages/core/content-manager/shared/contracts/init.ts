@@ -13,11 +13,9 @@ export declare namespace GetInitData {
 
   export interface Response {
     data: {
-      data: {
-        fieldSizes: Record<string, { default: number; isResizeable: boolean }>;
-        components: Component[];
-        contentTypes: ContentType[];
-      };
+      fieldSizes: Record<string, { default: number; isResizeable: boolean }>;
+      components: Component[];
+      contentTypes: ContentType[];
     };
     error?: errors.ApplicationError;
   }

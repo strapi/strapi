@@ -1,37 +1,51 @@
 import { intersection, difference } from 'lodash';
+
+import type { Settings, Metadatas, Layouts } from '../../../shared/contracts/content-types';
+
 import { createDefaultConfiguration, syncConfiguration } from './utils/configuration';
 
-export default ({ isComponent, prefix, storeUtils, getModels }: any) => {
-  const uidToStoreKey = (uid: any) => {
+export type ConfigurationUpdate = {
+  settings: Settings;
+  metadatas: Metadatas;
+  layouts: Layouts;
+  options?: Record<string, unknown>;
+};
+
+export default ({
+  isComponent,
+  prefix,
+  storeUtils,
+  getModels,
+}: {
+  isComponent?: boolean;
+  prefix: string;
+  storeUtils: any;
+  getModels: any;
+}) => {
+  const uidToStoreKey = (uid: string) => {
     return `${prefix}::${uid}`;
   };
 
-  const getConfiguration = (uid: any) => {
+  const getConfiguration = (uid: string) => {
     const storeKey = uidToStoreKey(uid);
+
     return storeUtils.getModelConfiguration(storeKey);
   };
 
-  const setConfiguration = (uid: any, input: any) => {
-    const { settings, metadatas, layouts, options } = input;
-
-    const configuration: any = {
+  const setConfiguration = (uid: string, input: ConfigurationUpdate) => {
+    const configuration = {
+      ...input,
       uid,
-      settings,
-      metadatas,
-      layouts,
-      ...(options ? { options } : {}),
+      isComponent: isComponent ?? undefined,
     };
-
-    if (isComponent) {
-      configuration.isComponent = isComponent;
-    }
 
     const storeKey = uidToStoreKey(uid);
     return storeUtils.setModelConfiguration(storeKey, configuration);
   };
 
-  const deleteConfiguration = (uid: any) => {
+  const deleteConfiguration = (uid: string) => {
     const storeKey = uidToStoreKey(uid);
+
     return storeUtils.deleteKey(storeKey);
   };
 
@@ -42,13 +56,13 @@ export default ({ isComponent, prefix, storeUtils, getModels }: any) => {
       `plugin_content_manager_configuration_${prefix}`
     );
 
-    const updateConfiguration = async (uid: any) => {
+    const updateConfiguration = async (uid: string) => {
       const conf = configurations.find((conf: any) => conf.uid === uid);
 
       return setConfiguration(uid, await syncConfiguration(conf, models[uid]));
     };
 
-    const generateNewConfiguration = async (uid: any) => {
+    const generateNewConfiguration = async (uid: string) => {
       return setConfiguration(uid, await createDefaultConfiguration(models[uid]));
     };
 

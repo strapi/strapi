@@ -38,14 +38,13 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
     "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
@@ -55,9 +54,9 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "1.13.1",
+    "@strapi/design-system": "1.13.2",
     "@strapi/helper-plugin": "4.15.5",
-    "@strapi/icons": "1.13.0",
+    "@strapi/icons": "1.13.2",
     "@strapi/utils": "4.15.5",
     "axios": "1.6.0",
     "formik": "2.4.0",

@@ -21,6 +21,8 @@ export declare namespace GetMe {
  */
 export declare namespace UpdateMe {
   export interface BaseRequestBody {
+    password?: string;
+    currentPassword?: string;
     email?: string;
     firstname?: string;
     lastname?: string;
@@ -28,14 +30,9 @@ export declare namespace UpdateMe {
     preferedLanguage?: string;
   }
 
-  export interface PasswordRequestBody extends BaseRequestBody {
-    currentPassword: string;
-    password: string;
-  }
-
   export interface Request {
     query: {};
-    body: BaseRequestBody | PasswordRequestBody;
+    body: BaseRequestBody;
   }
 
   export interface Response {

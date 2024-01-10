@@ -22,22 +22,6 @@ export type ApiError =
   | errors.ValidationError
   | errors.YupValidationError;
 
-export type InputType =
-  | 'json'
-  | 'bool'
-  | 'checkbox'
-  | 'datetime'
-  | 'date'
-  | 'number'
-  | 'email'
-  | 'timestamp'
-  | 'text'
-  | 'string'
-  | 'password'
-  | 'select'
-  | 'textarea'
-  | 'time';
-
 export type AttributeFilter = Record<
   string,
   Record<EntityService.Params.Filters.Operator.Where, string | null>
@@ -52,35 +36,33 @@ export interface Operator {
   intlLabel: MessageDescriptor;
 }
 
-export interface DefaultFilterInputsProps<TOptions extends any[] = string[]> {
+export interface DefaultFilterInputsProps {
   label?: string;
   onChange: (value: string | null) => void;
-  options?: TOptions;
-  type: Attribute.Kind;
+  options?: FilterData['fieldSchema']['options'] | FilterData['metadatas']['options'];
+  type: FilterData['fieldSchema']['type'];
   value?: string | null;
 }
 
-export interface FilterData<TOptions extends any[] = string[]> {
-  fieldSchema:
-    | {
-        options?: string[];
-        type: Exclude<Attribute.Kind, 'relation'>;
-        mainField?: never;
-      }
-    | {
-        type: 'relation';
-        options?: string[];
-        mainField: {
-          name: string;
-          schema: Attribute.Any;
-        };
-      };
-  metadatas: {
-    customOperators?: Operator[];
-    customInput?: React.ComponentType<DefaultFilterInputsProps<TOptions>>;
-    options?: TOptions;
-    label: string;
-  };
+export interface FilterData {
   name: string;
+  metadatas: {
+    label: string;
+    customOperators?: Array<{
+      intlLabel: { id: string; defaultMessage: string };
+      value: string;
+    }>;
+    customInput?: React.ComponentType;
+    options?: Array<{ label?: string; customValue: string }>;
+    uid?: string;
+  };
+  fieldSchema: {
+    type: Attribute.Any['type'];
+    options?: string[];
+    mainField?: {
+      name: string;
+      schema?: Attribute.Any;
+    };
+  };
   trackedEvent?: TrackingEvent;
 }

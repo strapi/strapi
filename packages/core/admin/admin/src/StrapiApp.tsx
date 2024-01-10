@@ -11,7 +11,14 @@ import { DefaultTheme } from 'styled-components';
 
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
-import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
+import {
+  INJECTION_ZONES,
+  InjectionZoneBlock,
+  InjectionZoneComponent,
+  InjectionZoneContainer,
+  InjectionZoneModule,
+  InjectionZones,
+} from './components/InjectionZone';
 import { Providers } from './components/Providers';
 import { HOOKS } from './constants';
 import { Components, Component } from './core/apis/Components';
@@ -20,17 +27,10 @@ import { Field, Fields } from './core/apis/Fields';
 import { Middleware, Middlewares } from './core/apis/Middlewares';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { Reducers } from './core/apis/Reducers';
-import { Store, configureStore } from './core/store/configure';
+import { PreloadState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
-import {
-  INJECTION_ZONES,
-  InjectionZoneBlock,
-  InjectionZoneComponent,
-  InjectionZoneContainer,
-  InjectionZoneModule,
-  InjectionZones,
-} from './shared/components/InjectionZone';
+import { THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY, ThemeName } from './reducer';
 import { languageNativeNames } from './translations/languageNativeNames';
 
 const {
@@ -353,8 +353,12 @@ class StrapiApp {
     });
   };
 
-  createStore = () => {
-    const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
+  createStore = (preloadedState?: PreloadState) => {
+    const store = configureStore(
+      preloadedState,
+      this.middlewares.middlewares,
+      this.reducers.reducers
+    );
 
     return store as Store;
   };
@@ -521,12 +525,7 @@ class StrapiApp {
   runHookSeries = (name: string, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (
-    name: string,
-    initialValue: unknown,
-    asynchronous = false,
-    store?: unknown
-  ) => {
+  runHookWaterfall = <T,>(name: string, initialValue: T, asynchronous = false, store?: Store) => {
     return asynchronous
       ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
       : this.hooksDict[name].runWaterfall(initialValue, store);
@@ -535,8 +534,23 @@ class StrapiApp {
   runHookParallel = (name: string) => this.hooksDict[name].runParallel();
 
   render() {
-    const store = this.createStore();
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
+    const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
+      'en') as keyof typeof localeNames;
+
+    const store = this.createStore({
+      admin_app: {
+        permissions: {},
+        theme: {
+          availableThemes: [],
+          currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
+        },
+        language: {
+          locale: localeNames[locale] ? locale : 'en',
+          localeNames,
+        },
+      },
+    });
 
     const {
       components: { components },
@@ -544,37 +558,38 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Providers
-        components={components}
-        fields={fields}
-        customFields={this.customFields}
-        localeNames={localeNames}
-        getAdminInjectedComponents={this.getAdminInjectedComponents}
-        getPlugin={this.getPlugin}
-        messages={this.configurations.translations}
-        menu={this.menu}
-        plugins={this.plugins}
-        runHookParallel={this.runHookParallel}
-        runHookWaterfall={(name, initialValue, async = false) => {
-          return this.runHookWaterfall(name, initialValue, async, store);
-        }}
-        runHookSeries={this.runHookSeries}
-        themes={this.configurations.themes}
-        settings={this.settings}
-        store={store}
-      >
-        <Helmet
-          htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
-        />
-        <BrowserRouter basename={getBasename()}>
+      <BrowserRouter basename={getBasename()}>
+        <Providers
+          components={components}
+          fields={fields}
+          customFields={this.customFields}
+          localeNames={localeNames}
+          getAdminInjectedComponents={this.getAdminInjectedComponents}
+          getPlugin={this.getPlugin}
+          messages={this.configurations.translations}
+          menu={this.menu}
+          plugins={this.plugins}
+          runHookParallel={this.runHookParallel}
+          runHookWaterfall={(name, initialValue, async = false) => {
+            return this.runHookWaterfall(name, initialValue, async, store);
+          }}
+          // @ts-expect-error – context issue. TODO: fix this.
+          runHookSeries={this.runHookSeries}
+          themes={this.configurations.themes}
+          settings={this.settings}
+          store={store}
+        >
+          <Helmet
+            htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
+          />
           <App
             authLogo={this.configurations.authLogo}
             menuLogo={this.configurations.menuLogo}
             showTutorials={this.configurations.tutorials}
             showReleaseNotification={this.configurations.notifications.releases}
           />
-        </BrowserRouter>
-      </Providers>
+        </Providers>
+      </BrowserRouter>
     );
   }
 }

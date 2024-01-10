@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 import ComponentFieldList from './ComponentFieldList';
 import DynamicZoneList from './DynamicZoneList';
@@ -31,7 +31,7 @@ const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children })
           <CustomIconButton
             label={formatMessage(
               {
-                id: getTrad('containers.ListSettingsView.modal-form.edit-label'),
+                id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
                 defaultMessage: `Edit {fieldName}`,
               },
               { fieldName: children }

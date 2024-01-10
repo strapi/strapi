@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable vars-on-top */
 /* eslint-disable no-var */
+
+// TODO v5: change all 'any' to 'unknown' or a real type
 
 import type { Database } from '@strapi/database';
 import type { Logger } from '@strapi/logger';
@@ -29,6 +32,9 @@ import type { Container } from './container';
 
 export type * from './types';
 
+// TODO add this to ./types/core when the ts-lint (Multiple import/export error with same name) issue is fixed
+export type * as Config from './types/core/config';
+
 export {
   Container,
   Server,
@@ -52,11 +58,9 @@ export {
 };
 
 declare global {
-  // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
   var strapi: LoadedStrapi;
   namespace NodeJS {
     interface Global {
-      // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
       strapi: LoadedStrapi;
     }
   }
