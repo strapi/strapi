@@ -13,12 +13,12 @@ const isErrorWithCode = (error: any): error is ErrorWithCode => {
 };
 
 const isForeignKeyConstraintError = (e: Error) => {
-  const MYSQL_FK_ERROR_CODE = ['1452', '1557', '1216', '1217', '1451'];
+  const MYSQL_FK_ERROR_CODES = ['1452', '1557', '1216', '1217', '1451'];
   const POSTGRES_FK_ERROR_CODE = '23503';
   const SQLITE_FK_ERROR_CODE = 'SQLITE_CONSTRAINT_FOREIGNKEY';
 
   if (isErrorWithCode(e) && e.code) {
-    return [SQLITE_FK_ERROR_CODE, POSTGRES_FK_ERROR_CODE, ...MYSQL_FK_ERROR_CODE].includes(e.code);
+    return [SQLITE_FK_ERROR_CODE, POSTGRES_FK_ERROR_CODE, ...MYSQL_FK_ERROR_CODES].includes(e.code);
   }
 };
 
