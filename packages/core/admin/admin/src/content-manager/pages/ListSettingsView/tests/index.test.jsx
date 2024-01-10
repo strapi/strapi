@@ -10,6 +10,7 @@ const layout = {
   attributes: {
     address: {
       type: 'relation',
+      relation: 'manyToOne',
     },
     averagePrice: {
       type: 'float',
@@ -136,7 +137,7 @@ describe('CM | LV | Configure the view', () => {
   it('should keep plugins query params when arriving on the page and going back', async () => {
     const { getByRole, user } = render({
       initialEntries: [
-        '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr',
+        '/content-manager/collection-types/api::category.category/configurations/list?plugins[i18n][locale]=fr',
       ],
     });
 

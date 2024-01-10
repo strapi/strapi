@@ -1,4 +1,1 @@
-export { commands } from './cli';
-
-export * from './node/build';
-export * from './node/develop';
+export { DefaultDocument } from '../admin/src/components/DefaultDocument';

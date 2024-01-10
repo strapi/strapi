@@ -8,19 +8,24 @@ import styled, { css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
-import { type Block } from '../utils/types';
+import { isListNode, type Block } from '../utils/types';
 
 const listStyle = css`
-  margin-block-start: ${({ theme }) => theme.spaces[4]};
-  margin-block-end: ${({ theme }) => theme.spaces[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[1]};
   margin-inline-start: ${({ theme }) => theme.spaces[0]};
   margin-inline-end: ${({ theme }) => theme.spaces[0]};
-  padding-inline-start: ${({ theme }) => theme.spaces[4]};
+  padding-inline-start: ${({ theme }) => theme.spaces[2]};
 
   ol,
   ul {
     margin-block-start: ${({ theme }) => theme.spaces[0]};
     margin-block-end: ${({ theme }) => theme.spaces[0]};
+  }
+
+  li {
+    margin-inline-start: ${({ theme }) => theme.spaces[3]};
   }
 `;
 
@@ -33,10 +38,6 @@ const Unorderedlist = styled.ul`
   list-style-type: disc;
   ${listStyle}
 `;
-
-const isListNode = (node: unknown): node is Block<'list'> => {
-  return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
-};
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
   if (!isListNode(element)) {
@@ -227,6 +228,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     // No handleConvert, list items are created when converting to the parent list
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,
+    dragHandleTopMargin: '-2px',
   },
 };
 

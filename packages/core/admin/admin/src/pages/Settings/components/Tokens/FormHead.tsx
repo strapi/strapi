@@ -2,36 +2,59 @@ import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { ConfirmDialog } from '@strapi/helper-plugin';
+import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Refresh } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { useRegenerate } from '../../hooks/useRegenerate';
+import { useRegenerateTokenMutation } from '../../../../services/api';
 
 import type { Entity } from '@strapi/types';
 
 interface RegenerateProps {
   onRegenerate?: (newKey: string) => void;
-  idToRegenerate: Entity.ID;
-  backUrl: string;
-  onError?: (err: unknown) => void;
+  url: string;
 }
 
-const Regenerate = ({
-  onRegenerate = () => {},
-  idToRegenerate,
-  backUrl,
-  onError,
-}: RegenerateProps) => {
+const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
-  const { regenerateData, isLoadingConfirmation } = useRegenerate(
-    backUrl,
-    idToRegenerate,
-    onRegenerate,
-    onError
-  );
+
+  const [isLoadingConfirmation, setIsLoadingConfirmation] = React.useState(false);
+  const toggleNotification = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+
+  const [regenerateToken] = useRegenerateTokenMutation();
+
+  const regenerateData = async () => {
+    try {
+      const res = await regenerateToken(url);
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+
+        return;
+      }
+
+      if (onRegenerate) {
+        onRegenerate(res.data.accessKey);
+      }
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'Something went wrong',
+        },
+      });
+    } finally {
+      setIsLoadingConfirmation(false);
+    }
+  };
+
   const handleConfirmRegeneration = async () => {
     regenerateData();
     setShowConfirmDialog(false);
@@ -94,7 +117,6 @@ interface FormHeadProps<TToken extends Token | null> {
   isSubmitting: boolean;
   backUrl: string;
   regenerateUrl: string;
-  onErrorRegenerate?: (err: unknown) => void;
 }
 
 export const FormHead = <TToken extends Token | null>({
@@ -106,7 +128,6 @@ export const FormHead = <TToken extends Token | null>({
   isSubmitting,
   backUrl,
   regenerateUrl,
-  onErrorRegenerate,
 }: FormHeadProps<TToken>) => {
   const { formatMessage } = useIntl();
   const handleRegenerate = (newKey: string) => {
@@ -124,10 +145,8 @@ export const FormHead = <TToken extends Token | null>({
           <Flex gap={2}>
             {canRegenerate && token?.id && (
               <Regenerate
-                backUrl={regenerateUrl}
                 onRegenerate={handleRegenerate}
-                idToRegenerate={token?.id}
-                onError={onErrorRegenerate}
+                url={`${regenerateUrl}${token?.id ?? ''}`}
               />
             )}
             <Button
@@ -148,8 +167,7 @@ export const FormHead = <TToken extends Token | null>({
           token?.id && (
             <Regenerate
               onRegenerate={handleRegenerate}
-              idToRegenerate={token?.id}
-              backUrl={regenerateUrl}
+              url={`${regenerateUrl}${token?.id ?? ''}`}
             />
           )
         )

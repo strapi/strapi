@@ -1,4 +1,4 @@
-import { UserInfo } from '@strapi/helper-plugin';
+import { SanitizedAdminUser } from '../../../shared/contracts/shared';
 
 export const utils = {
   bufferToHex(buffer: ArrayBuffer) {
@@ -12,8 +12,8 @@ export const utils = {
   },
 };
 
-export async function hashAdminUserEmail(payload?: UserInfo) {
-  if (!payload) {
+export async function hashAdminUserEmail(payload?: SanitizedAdminUser) {
+  if (!payload || !payload.email) {
     return null;
   }
 

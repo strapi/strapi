@@ -36,15 +36,7 @@ const dummyMiddleware: Common.MiddlewareHandler = (_, next) => next();
  * Initialize every configured middlewares
  */
 const resolveMiddlewares = (
-  config: Array<
-    | string
-    | {
-        name?: string;
-        resolve?: string;
-        config?: unknown;
-      }
-    | Common.MiddlewareHandler
-  >,
+  config: Array<Common.MiddlewareName | Common.MiddlewareConfig | Common.MiddlewareHandler>,
   strapi: Strapi
 ) => {
   const middlewares: {

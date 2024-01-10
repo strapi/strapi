@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import FieldTypeIcon from '../../../components/FieldTypeIcon';
+import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
 import { getTranslation } from '../../../utils/translations';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 

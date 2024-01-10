@@ -1,22 +1,20 @@
+/* eslint-disable import/first */
+import { fs } from 'memfs';
+
+jest.mock('fs', () => fs);
+
+import fse from 'fs-extra';
+
 import type { File } from '@strapi/plugin-upload';
+
 import localProvider from '../index';
-
-jest.mock('fs', () => {
-  return {
-    writeFile: jest.fn((_path, _buffer, callback) => callback()),
-  };
-});
-
-jest.mock('fs-extra', () => {
-  return {
-    pathExistsSync: jest.fn(() => true),
-  };
-});
 
 describe('Local provider', () => {
   beforeAll(() => {
     globalThis.strapi = {};
     globalThis.strapi.dirs = { static: { public: '' } };
+
+    fse.ensureDirSync('uploads');
   });
 
   afterAll(() => {

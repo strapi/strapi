@@ -21,10 +21,13 @@ import enableTelemetry from './actions/telemetry/enable/command';
 import generateTemplates from './actions/templates/generate/command';
 import generateTsTypes from './actions/ts/generate-types/command';
 import versionCommand from './actions/version/command';
-import watchAdminCommand from './actions/watch-admin/command';
+import buildCommand from './actions/build-command/command';
+import developCommand from './actions/develop/command';
 
 import buildPluginCommand from './actions/plugin/build-command/command';
+import initPluginCommand from './actions/plugin/init/command';
 import watchPluginCommand from './actions/plugin/watch/command';
+import verifyPluginCommand from './actions/plugin/verify/command';
 
 import { createLogger } from './utils/logger';
 import { loadTsConfig } from './utils/tsconfig';
@@ -52,12 +55,15 @@ const strapiCommands = [
   generateTemplates,
   generateTsTypes,
   versionCommand,
-  watchAdminCommand,
+  buildCommand,
+  developCommand,
   /**
    * Plugins
    */
   buildPluginCommand,
+  initPluginCommand,
   watchPluginCommand,
+  verifyPluginCommand,
 ];
 
 const buildStrapiCommand = async (argv: string[], command = new Command()) => {
@@ -66,10 +72,6 @@ const buildStrapiCommand = async (argv: string[], command = new Command()) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const dtsCommands = require(require.resolve('@strapi/data-transfer')).commands;
     strapiCommands.push(...dtsCommands);
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
-    const adminCommands = require(require.resolve('@strapi/admin/cli')).commands;
-    strapiCommands.push(...adminCommands);
   } catch (e) {
     // noop
   }
