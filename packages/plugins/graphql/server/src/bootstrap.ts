@@ -125,7 +125,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   } else if (serverConfig.bodyParserConfig) {
     handler.push(bodyParser());
   } else {
-    handler.push(bodyParser());
     strapi.log.debug('Body parser has been disabled for Apollo server');
   }
 
