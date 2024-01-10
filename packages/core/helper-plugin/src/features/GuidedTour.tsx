@@ -27,6 +27,10 @@ interface GuidedTourContextValue {
       create: boolean;
       success: boolean;
     };
+    transferTokens: {
+      create: boolean;
+      success: boolean;
+    };
   };
   isGuidedTourVisible: boolean;
   isSkipped: boolean;
@@ -49,6 +53,10 @@ const GuidedTourContext = React.createContext<GuidedTourContextValue>({
       success: false,
     },
     apiTokens: {
+      create: false,
+      success: false,
+    },
+    transferTokens: {
       create: false,
       success: false,
     },

@@ -23,6 +23,7 @@ import {
   GenericInputProps,
   LoadingIndicatorPage,
   pxToRem,
+  translatedErrors,
   useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
@@ -40,31 +41,42 @@ import { useMutation, useQuery } from 'react-query';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
-import { useLocales } from '../components/LanguageProvider';
-import { useThemeToggle, ThemeName, ThemeToggleContextContextValue } from '../contexts/themeToggle';
+import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { AppState, setAppTheme, setLocale } from '../reducer';
 import { getFullName } from '../utils/getFullName';
 
-// @ts-expect-error – no types available
-import { profileValidation } from './SettingsPage/pages/Users/utils/validations/users';
+import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
 import type { IsSSOLocked } from '../../../shared/contracts/providers';
 import type { GetMe, UpdateMe } from '../../../shared/contracts/users';
 
-const schema = yup.object().shape(profileValidation);
+const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
+  ...COMMON_USER_SCHEMA,
+  currentPassword: yup
+    .string()
+    // @ts-expect-error – no idea why this is failing.
+    .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
+      return password || confirmPassword
+        ? passSchema.required(translatedErrors.required)
+        : passSchema;
+    }),
+  preferedLanguage: yup.string().nullable(),
+});
 
 /* -------------------------------------------------------------------------------------------------
  * ProfilePage
  * -----------------------------------------------------------------------------------------------*/
 
 const ProfilePage = () => {
-  const { changeLocale, localeNames } = useLocales();
+  const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { setUserDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
-  const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
+  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
+  const dispatch = useTypedDispatch();
   const { get, put } = useFetchClient();
 
   useFocusWhenNavigate();
@@ -122,11 +134,11 @@ const ProfilePage = () => {
 
   type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;
-    currentTheme: ThemeName;
+    currentTheme: AppState['theme']['currentTheme'];
   };
 
   const submitMutation = useMutation<
-    UpdateMe.Response['data'] & { currentTheme: ThemeName },
+    UpdateMe.Response['data'] & { currentTheme: AppState['theme']['currentTheme'] },
     AxiosError<UpdateMe.Response>,
     UpdateUsersMeBody
   >(
@@ -164,11 +176,10 @@ const ProfilePage = () => {
         setUserDisplayName(userDisplayName);
 
         if (data.preferedLanguage) {
-          changeLocale(data.preferedLanguage);
+          dispatch(setLocale(data.preferedLanguage));
         }
 
-        // @ts-expect-error – we're going to implement a context assertion to avoid this
-        onChangeTheme(data.currentTheme);
+        dispatch(setAppTheme(data.currentTheme));
 
         trackUsage('didChangeMode', { newMode: data.currentTheme });
 
@@ -261,7 +272,7 @@ const ProfilePage = () => {
         // @ts-expect-error – currentTheme could be undefined because we don't have context assertion yet.
         initialValues={initialData}
         validateOnChange={false}
-        validationSchema={schema}
+        validationSchema={PROFILE_VALIDTION_SCHEMA}
         enableReinitialize
       >
         {({
@@ -315,7 +326,6 @@ const ProfilePage = () => {
                       />
                     )}
                     <PreferencesSection
-                      allApplicationThemes={allApplicationThemes}
                       onChange={handleChange}
                       values={{
                         preferedLanguage,
@@ -532,19 +542,11 @@ interface PreferencesSectionProps extends Pick<GenericInputProps, 'onChange'> {
     currentTheme?: string;
   };
   localeNames: Record<string, string>;
-  allApplicationThemes?: Partial<ThemeToggleContextContextValue['themes']>;
 }
 
-const PreferencesSection = ({
-  onChange,
-  values,
-  localeNames,
-  allApplicationThemes = {},
-}: PreferencesSectionProps) => {
+const PreferencesSection = ({ onChange, values, localeNames }: PreferencesSectionProps) => {
   const { formatMessage } = useIntl();
-  const themesToDisplay = Object.keys(allApplicationThemes).filter(
-    (themeName) => allApplicationThemes[themeName as keyof ThemeToggleContextContextValue['themes']]
-  );
+  const themesToDisplay = useTypedSelector((state) => state.admin_app.theme.availableThemes);
 
   return (
     <Box
