@@ -41,8 +41,10 @@
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
     "prepare": "husky install",
-    "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
-    "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
+    "prettier:check": "yarn prettier:code --check && yarn prettier:other --check",
+    "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts,jsx,tsx,json}\"",
+    "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "setup": "yarn && yarn clean && yarn build",
     "test:api": "node test/scripts/run-api-tests.js",
     "test:clean": "rimraf ./coverage",
@@ -69,9 +71,8 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.14.0-typescript.1",
-    "@types/koa": "2.13.4",
-    "@types/react": "18.2.7"
+    "@strapi/design-system": "1.15.0-typescript.1",
+    "@types/koa": "2.13.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -84,6 +85,12 @@
     "@swc/core": "1.3.58",
     "@swc/helpers": "0.5.1",
     "@swc/jest": "0.2.26",
+    "@types/prettier": "2.7.3",
+    "@types/react": "18.2.39",
+    "@types/react-dom": "18.2.17",
+    "@types/react-helmet": "6.1.8",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "5.1.32",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
     "babel-eslint": "10.1.0",
@@ -133,7 +140,7 @@
     "typescript": "5.2.2",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.0.0+sha256.6d855253732ba8d231b6cd917961654f6c8439164c962a4e355c9c58360ebe44",
+  "packageManager": "yarn@4.0.1",
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"

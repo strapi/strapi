@@ -34,6 +34,22 @@ jobs:
         with:
           filters: .github/filters.yaml
 
+  pretty:
+    name: 'pretty (node: 20)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: nrwl/nx-set-shas@v3
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run lint
+        run: yarn prettier:check
+
   lint:
     name: 'lint (node: 20)'
     needs: [build]
@@ -93,6 +109,8 @@ jobs:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
+    env:
+      YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
         node: [18, 20]
@@ -117,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18]
+        node: [20]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -131,7 +149,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run test
-        run: yarn nx affected --target=test:front --nx-ignore-cycles
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e:
     timeout-minutes: 60

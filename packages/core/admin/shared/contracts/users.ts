@@ -20,22 +20,27 @@ export declare namespace GetMe {
  * PUT /users/me - Update the current admin user
  */
 export declare namespace UpdateMe {
+  export interface BaseRequestBody {
+    password?: string;
+    currentPassword?: string;
+    email?: string;
+    firstname?: string;
+    lastname?: string;
+    username?: string;
+    preferedLanguage?: string;
+  }
+
   export interface Request {
     query: {};
-    body: {
-      email?: string;
-      firstname?: string;
-      lastname?: string;
-      username?: string;
-      password?: string;
-      currentPassword?: string;
-      preferedLanguage?: string;
-    };
+    body: BaseRequestBody;
   }
 
   export interface Response {
     data: SanitizedAdminUser;
-    error?: errors.ApplicationError | errors.ValidationError | errors.YupValidationError;
+    error?:
+      | errors.ApplicationError
+      | errors.ValidationError<'ValidationError', { currentPassword: ['Invalid credentials'] }>
+      | errors.YupValidationError;
   }
 }
 

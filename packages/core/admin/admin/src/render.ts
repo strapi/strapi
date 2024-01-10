@@ -4,16 +4,22 @@ import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 
+import type { FeaturesService } from '@strapi/types';
+
 interface RenderAdminArgs {
+  customisations: StrapiAppConstructorArgs['adminConfig'];
   plugins: StrapiAppConstructorArgs['appPlugins'];
+  features?: FeaturesService['config'];
 }
 
-const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdminArgs) => {
+const renderAdmin = async (
+  mountNode: HTMLElement | null,
+  { plugins, customisations, features }: RenderAdminArgs
+) => {
   if (!mountNode) {
     throw new Error('[@strapi/admin]: Could not find the root element to mount the admin app');
   }
 
-  // @ts-expect-error – there's pollution from the global scope of Node.
   window.strapi = {
     /**
      * This ENV variable is passed from the strapi instance, by default no url is set
@@ -24,6 +30,12 @@ const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdm
     backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
+    future: {
+      isEnabled: (name: keyof FeaturesService['config']) => {
+        return features?.future?.[name] === true;
+      },
+    },
+    // @ts-expect-error – there's pollution from the global scope of Node.
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
@@ -73,7 +85,7 @@ const renderAdmin = async (mountNode: HTMLElement | null, { plugins }: RenderAdm
   }
 
   const app = new StrapiApp({
-    adminConfig: {},
+    adminConfig: customisations,
     appPlugins: plugins,
   });
 

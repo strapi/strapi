@@ -1,56 +1,40 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { AxiosError } from 'axios';
-import { useQueries } from 'react-query';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
-import { Component, ContentType } from '../../../shared/schema';
+import { useGetComponentsQuery, useGetContentTypesQuery } from '../services/contentManager';
 
-export function useContentTypes() {
-  const { get } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler();
+export function useContentTypes(): {
+  isLoading: boolean;
+  components: Contracts.Components.Component[];
+  collectionTypes: Contracts.ContentTypes.ContentType[];
+  singleTypes: Contracts.ContentTypes.ContentType[];
+} {
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const queries = useQueries([
-    {
-      queryKey: ['content-manager', 'components'],
-      async queryFn() {
-        const {
-          data: { data },
-        } = await get<{ data: Component[] }>(`/content-manager/components`);
 
-        return data;
-      },
-      onError(error: unknown) {
-        if (error instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(error),
-          });
-        }
-      },
-    },
+  const components = useGetComponentsQuery();
+  const contentTypes = useGetContentTypesQuery();
 
-    {
-      queryKey: ['content-manager', 'content-types'],
-      async queryFn() {
-        const {
-          data: { data },
-        } = await get<{ data: ContentType[] }>(`/content-manager/content-types`);
+  React.useEffect(() => {
+    if (contentTypes.error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(contentTypes.error),
+      });
+    }
+  }, [contentTypes.error, formatAPIError, toggleNotification]);
 
-        return data;
-      },
-      onError(error: unknown) {
-        if (error instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(error),
-          });
-        }
-      },
-    },
-  ]);
+  React.useEffect(() => {
+    if (components.error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(components.error),
+      });
+    }
+  }, [components.error, formatAPIError, toggleNotification]);
 
-  const [components, contentTypes] = queries;
   const isLoading = components.isLoading || contentTypes.isLoading;
 
   // the return value needs to be memoized, because intantiating

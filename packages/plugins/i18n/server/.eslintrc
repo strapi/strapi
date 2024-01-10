@@ -1,0 +1,10 @@
+{
+  "root": true,
+  "extends": ["custom/back/typescript"],
+  "parserOptions": {
+    "project": ["./server/tsconfig.eslint.json"]
+  },
+  "rules": {
+    "import/no-cycle": "warn"
+  }
+}

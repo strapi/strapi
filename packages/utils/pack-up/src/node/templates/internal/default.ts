@@ -3,7 +3,6 @@ import gitUrlParse from 'git-url-parse';
 import { outdent } from 'outdent';
 
 import { isError } from '../../core/errors';
-import { parseGlobalGitConfig } from '../../core/git';
 import { PackageJson } from '../../core/pkg';
 import { definePackageFeature, definePackageOption, defineTemplate } from '../create';
 import { TemplateFile } from '../types';
@@ -14,9 +13,7 @@ import { prettierFile, prettierIgnoreFile } from './files/prettier';
 
 const PACKAGE_NAME_REGEXP = /^(?:@(?:[a-z0-9-*~][a-z0-9-*._~]*)\/)?[a-z0-9-~][a-z0-9-._~]*$/i;
 
-const defaultTemplate = defineTemplate(async ({ logger }) => {
-  const gitConfig = await parseGlobalGitConfig();
-
+const defaultTemplate = defineTemplate(async ({ logger, gitConfig }) => {
   let repo: {
     source?: string;
     owner?: string;
