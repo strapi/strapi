@@ -158,7 +158,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     })
   );
 
-  // now that handlers are set up, add the graphql route to our koa server
+  // now that handlers are set up, add the graphql route to our apollo server
   strapi.server.routes([
     {
       method: 'ALL',
