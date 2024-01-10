@@ -98,6 +98,7 @@ const AddActionToReleaseModal = ({
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
+  const { modifiedData } = useCMEditViewDataManager();
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
@@ -110,9 +111,11 @@ const AddActionToReleaseModal = ({
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
   const handleSubmit = async (values: FormValues) => {
+    const locale = modifiedData.locale as string | undefined;
     const releaseActionEntry = {
       contentType: contentTypeUid,
       id: entryId,
+      locale,
     };
     const response = await createReleaseAction({
       body: { type: values.type, entry: releaseActionEntry },

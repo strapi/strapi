@@ -205,4 +205,94 @@ describe('release service', () => {
       expect(() => releaseService.delete(1)).rejects.toThrow('Release already published');
     });
   });
+
+  describe('groupActions', () => {
+    it('should return the data grouped by contentType', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            find: jest.fn().mockReturnValue([
+              { name: 'English (en)', code: 'en' },
+              { name: 'French (fr)', code: 'fr' },
+            ]),
+          }),
+        }),
+      };
+
+      const mockActions = [
+        {
+          id: 1,
+          contentType: 'api::contentTypeA.contentTypeA',
+          locale: 'en',
+          entry: { id: 1, name: 'test 1', publishedAt: '2021-01-01' },
+        },
+        {
+          id: 2,
+          contentType: 'api::contentTypeB.contentTypeB',
+          locale: 'fr',
+          entry: { id: 2, name: 'test 2', publishedAt: null },
+        },
+      ];
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      // Mock getContentTypesDataForActions inside the release service
+      releaseService.getContentTypesDataForActions = jest.fn().mockReturnValue({
+        'api::contentTypeA.contentTypeA': {
+          mainField: 'name',
+          displayName: 'contentTypeA',
+        },
+        'api::contentTypeB.contentTypeB': {
+          mainField: 'name',
+          displayName: 'contentTypeB',
+        },
+      });
+
+      // @ts-expect-error ignore missing properties
+      const groupedData = await releaseService.groupActions(mockActions, 'contentType');
+
+      expect(groupedData).toEqual({
+        contentTypeA: [
+          {
+            id: 1,
+            locale: 'en',
+            contentType: 'api::contentTypeA.contentTypeA',
+            entry: {
+              id: 1,
+              contentType: {
+                displayName: 'contentTypeA',
+                mainFieldValue: 'test 1',
+              },
+              locale: {
+                code: 'en',
+                name: 'English (en)',
+              },
+              status: 'published',
+            },
+          },
+        ],
+        contentTypeB: [
+          {
+            id: 2,
+            locale: 'fr',
+            contentType: 'api::contentTypeB.contentTypeB',
+            entry: {
+              id: 2,
+              contentType: {
+                displayName: 'contentTypeB',
+                mainFieldValue: 'test 2',
+              },
+              locale: {
+                code: 'fr',
+                name: 'French (fr)',
+              },
+              status: 'draft',
+            },
+          },
+        ],
+      });
+    });
+  });
 });

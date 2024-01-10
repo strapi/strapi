@@ -11,6 +11,7 @@ import { axiosBaseQuery } from './axios';
 import type {
   GetReleaseActions,
   UpdateReleaseAction,
+  ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
@@ -36,6 +37,7 @@ export interface GetReleasesQueryParams {
 export interface GetReleaseActionsQueryParams {
   page?: number;
   pageSize?: number;
+  groupBy?: ReleaseActionGroupBy;
 }
 
 type GetReleasesTabResponse = GetReleases.Response & {
@@ -133,25 +135,16 @@ const releaseApi = createApi({
         GetReleaseActions.Response,
         GetReleaseActions.Request['params'] & GetReleaseActions.Request['query']
       >({
-        query({ releaseId, page, pageSize }) {
+        query({ releaseId, ...params }) {
           return {
             url: `/content-releases/${releaseId}/actions`,
             method: 'GET',
             config: {
-              params: {
-                page,
-                pageSize,
-              },
+              params,
             },
           };
         },
-        providesTags: (result, error, arg) =>
-          result
-            ? [
-                ...result.data.map(({ id }) => ({ type: 'ReleaseAction' as const, id })),
-                { type: 'ReleaseAction', id: 'LIST' },
-              ]
-            : [{ type: 'ReleaseAction', id: 'LIST' }],
+        providesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
       createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
         query(data) {
@@ -203,9 +196,7 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: (result, error, arg) => [
-          { type: 'ReleaseAction', id: arg.params.actionId },
-        ],
+        invalidatesTags: () => [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
       deleteReleaseAction: build.mutation<
         DeleteReleaseAction.Response,

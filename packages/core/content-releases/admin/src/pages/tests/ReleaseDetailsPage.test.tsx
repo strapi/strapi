@@ -1,4 +1,5 @@
 import { useRBAC } from '@strapi/helper-plugin';
+import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 
@@ -96,16 +97,20 @@ describe('Releases details page', () => {
     // should show the entries
     expect(
       screen.getByText(
-        mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.contentType.mainFieldValue
+        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.contentType
+          .mainFieldValue
       )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', {
+        name: mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.contentType
+          .displayName,
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.contentType.displayName
+        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.locale.name
       )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(mockReleaseDetailsPageData.withActionsBodyData.data[0].entry.locale.name)
     ).toBeInTheDocument();
 
     // There is one column with actions and the right one is checked
@@ -143,8 +148,7 @@ describe('Releases details page', () => {
     expect(publishButton).not.toBeInTheDocument();
 
     expect(screen.queryByRole('radio', { name: 'publish' })).not.toBeInTheDocument();
-    const container = screen.getByText(/This entry was/);
-    expect(container.querySelector('span')).toHaveTextContent('published');
+    expect(screen.getByRole('gridcell', { name: /This entry was published/i })).toBeInTheDocument();
   });
 
   it('renders the details page with the delete and edit buttons disabled', async () => {
@@ -186,5 +190,68 @@ describe('Releases details page', () => {
 
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
     expect(deleteButton).toBeDisabled();
+  });
+
+  it('renders as many tables as there are in the response', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      )
+    );
+
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    const tables = screen.getAllByRole('grid');
+
+    expect(tables).toHaveLength(2);
+  });
+
+  it('show the right status based on the action and status', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      )
+    );
+
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/1` }],
+    });
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    const cat1Row = screen.getByRole('row', { name: /cat1/i });
+    expect(within(cat1Row).getByRole('gridcell', { name: 'Ready to publish' })).toBeInTheDocument();
+
+    const cat2Row = screen.getByRole('row', { name: /cat2/i });
+    expect(
+      within(cat2Row).getByRole('gridcell', { name: 'Ready to unpublish' })
+    ).toBeInTheDocument();
+
+    const add1Row = screen.getByRole('row', { name: /add1/i });
+    expect(
+      within(add1Row).getByRole('gridcell', { name: 'Already published' })
+    ).toBeInTheDocument();
   });
 });
