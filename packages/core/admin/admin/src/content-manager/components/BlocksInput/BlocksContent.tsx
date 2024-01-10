@@ -531,6 +531,23 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     }
   };
 
+  const handleTab = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!editor.selection) {
+      return;
+    }
+
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    if (!selectedBlock) {
+      return;
+    }
+
+    if (selectedBlock.handleTab) {
+      event.preventDefault();
+      selectedBlock.handleTab(editor);
+    }
+  };
+
   const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
@@ -556,6 +573,13 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     }
     if (event.key === 'Backspace') {
       return handleBackspaceEvent(event);
+    }
+    if (event.key === 'Tab') {
+      return handleTab(event);
+    }
+    if (event.key === 'Escape') {
+      ReactEditor.blur(editor);
+      return;
     }
 
     handleKeyboardShortcuts(event);

@@ -299,57 +299,76 @@ const isListActive = (editor: Editor, matchNode: (node: Node) => boolean) => {
   return Boolean(match);
 };
 
-const toggleList = (editor: Editor, isActive: boolean, format: Block<'list'>['format']) => {
-  // If we have selected a portion of content in the editor,
-  // we want to convert it to a list or if it is already a list,
-  // convert it back to a paragraph
-  if (editor.selection) {
-    Transforms.unwrapNodes(editor, {
-      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-      split: true,
+const toggleList = (editor: Editor, format: Block<'list'>['format']) => {
+  let currentListEntry;
+  if (editor.selection)
+    currentListEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
     });
-
-    Transforms.setNodes(editor, {
-      type: isActive ? 'paragraph' : 'list-item',
+  else {
+    // If no selection, toggle last inserted node
+    const [_, lastNodePath] = Editor.last(editor, []);
+    currentListEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+      at: lastNodePath,
     });
+  }
 
-    if (!isActive) {
-      const block = { type: 'list' as const, format, children: [] };
-      Transforms.wrapNodes(editor, block);
+  // If selection is already a list then toggle format
+  if (currentListEntry) {
+    const [currentList, currentListPath] = currentListEntry;
+
+    if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+      // Format is different, toggle list format
+      if (currentList.format !== format) {
+        Transforms.setNodes(
+          editor,
+          {
+            format,
+          },
+          {
+            at: currentListPath,
+          }
+        );
+      } else {
+        // Format is same, convert selected list-item to paragraph
+        const [, lastNodePath] = Editor.last(editor, []);
+
+        Transforms.unwrapNodes(editor, {
+          match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+          split: true,
+          at: editor.selection ?? lastNodePath,
+        });
+
+        const [, updatedLastNodePath] = Editor.last(editor, []);
+
+        Transforms.setNodes(
+          editor,
+          {
+            type: 'paragraph',
+          },
+          {
+            at: editor.selection ?? [updatedLastNodePath[0]],
+          }
+        );
+      }
     }
   } else {
-    // There is no selection, convert the last inserted node to a list
-    // If it is already a list, convert it back to a paragraph
-    const [, lastNodePath] = Editor.last(editor, []);
+    // If selection is not a list then convert it to list
+    const [_, lastNodePath] = Editor.last(editor, []);
 
-    const [parentNode] = Editor.parent(editor, lastNodePath);
-
-    Transforms.removeNodes(editor, {
-      voids: true,
-      hanging: true,
-      at: {
-        anchor: { path: lastNodePath, offset: 0 },
-        focus: { path: lastNodePath, offset: 0 },
-      },
-    });
-
-    Transforms.insertNodes(
+    Transforms.setNodes(
       editor,
       {
-        type: isActive ? 'paragraph' : 'list-item',
-        children: [...parentNode.children],
-      } as Node,
+        type: 'list-item',
+      },
       {
-        at: [lastNodePath[0]],
-        select: true,
+        at: editor.selection ?? [lastNodePath[0]],
       }
     );
 
-    if (!isActive) {
-      // If the selection is now a list item, wrap it inside a list
-      const block = { type: 'list' as const, format, children: [] };
-      Transforms.wrapNodes(editor, block);
-    }
+    const block = { type: 'list' as const, format, children: [] };
+    Transforms.wrapNodes(editor, block, { at: editor.selection ?? [lastNodePath[0]] });
   }
 };
 
@@ -375,7 +394,7 @@ const ListButton = ({ block, format }: ListButtonProps) => {
       label={label}
       isActive={isActive}
       disabled={disabled}
-      handleClick={() => toggleList(editor, isActive, format)}
+      handleClick={() => toggleList(editor, format)}
     />
   );
 };
