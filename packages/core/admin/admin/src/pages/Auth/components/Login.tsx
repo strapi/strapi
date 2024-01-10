@@ -13,13 +13,14 @@ import styled from 'styled-components';
 import * as yup from 'yup';
 
 import { Login } from '../../../../../shared/contracts/authentication';
-import { useLocales } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/UnauthenticatedLogo';
+import { useTypedDispatch } from '../../../core/store/hooks';
 import {
   UnauthenticatedLayout,
   Column,
   LayoutContent,
 } from '../../../layouts/UnauthenticatedLayout';
+import { setLocale } from '../../../reducer';
 
 import { FieldActionWrapper } from './FieldActionWrapper';
 
@@ -40,7 +41,7 @@ const Login = ({ children }: LoginProps) => {
   const [passwordShown, setPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
-  const { changeLocale } = useLocales();
+  const dispatch = useTypedDispatch();
   const query = useQuery();
   const { push } = useHistory();
 
@@ -58,7 +59,7 @@ const Login = ({ children }: LoginProps) => {
           const { token, user } = data;
 
           if (user.preferedLanguage) {
-            changeLocale(user.preferedLanguage);
+            dispatch(setLocale(user.preferedLanguage));
           }
 
           auth.setToken(token, data.rememberMe);

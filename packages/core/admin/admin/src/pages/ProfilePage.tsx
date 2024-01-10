@@ -23,6 +23,7 @@ import {
   GenericInputProps,
   LoadingIndicatorPage,
   pxToRem,
+  translatedErrors,
   useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
@@ -40,31 +41,42 @@ import { useMutation, useQuery } from 'react-query';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
-import { useLocales } from '../components/LanguageProvider';
-import { useThemeToggle, ThemeName, ThemeToggleContextContextValue } from '../contexts/themeToggle';
+import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { AppState, setAppTheme, setLocale } from '../reducer';
 import { getFullName } from '../utils/getFullName';
 
-// @ts-expect-error – no types available
-import { profileValidation } from './SettingsPage/pages/Users/utils/validations/users';
+import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
 import type { IsSSOLocked } from '../../../shared/contracts/providers';
 import type { GetMe, UpdateMe } from '../../../shared/contracts/users';
 
-const schema = yup.object().shape(profileValidation);
+const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
+  ...COMMON_USER_SCHEMA,
+  currentPassword: yup
+    .string()
+    // @ts-expect-error – no idea why this is failing.
+    .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
+      return password || confirmPassword
+        ? passSchema.required(translatedErrors.required)
+        : passSchema;
+    }),
+  preferedLanguage: yup.string().nullable(),
+});
 
 /* -------------------------------------------------------------------------------------------------
  * ProfilePage
  * -----------------------------------------------------------------------------------------------*/
 
 const ProfilePage = () => {
-  const { changeLocale, localeNames } = useLocales();
+  const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { setUserDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
-  const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
+  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
+  const dispatch = useTypedDispatch();
   const { get, put } = useFetchClient();
 
   useFocusWhenNavigate();
@@ -120,18 +132,37 @@ const ProfilePage = () => {
 
   const isLoading = isLoadingUser || isLoadingSSO;
 
-  type UpdateUsersMeBody = Omit<UpdateMe.Request['body'], 'currentPassword'> & {
+  type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;
-    currentTheme: ThemeName;
+    currentTheme: AppState['theme']['currentTheme'];
   };
 
   const submitMutation = useMutation<
-    UpdateMe.Response['data'] & { currentTheme: ThemeName },
+    UpdateMe.Response['data'] & { currentTheme: AppState['theme']['currentTheme'] },
     AxiosError<UpdateMe.Response>,
     UpdateUsersMeBody
   >(
     async (body) => {
-      const { confirmPassword: _confirmPassword, currentTheme, ...dataToSend } = body;
+      const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
+      let dataToSend = bodyRest;
+
+      const isPasswordRequestBody = (
+        data: UpdateMe.Request['body']
+      ): data is UpdateMe.PasswordRequestBody => {
+        return 'password' in data;
+      };
+
+      // The password fields are optional. If the user didn't touch them, don't send any password
+      // to the API, because an empty string would throw a validation error
+      if (isPasswordRequestBody(dataToSend) && dataToSend.password === '') {
+        const {
+          password: _password,
+          currentPassword: _currentPassword,
+          ...passwordRequestBodyRest
+        } = dataToSend;
+        dataToSend = passwordRequestBodyRest;
+      }
+
       const { data } = await put<UpdateMe.Response>('/admin/users/me', dataToSend);
 
       return { ...data.data, currentTheme };
@@ -145,11 +176,10 @@ const ProfilePage = () => {
         setUserDisplayName(userDisplayName);
 
         if (data.preferedLanguage) {
-          changeLocale(data.preferedLanguage);
+          dispatch(setLocale(data.preferedLanguage));
         }
 
-        // @ts-expect-error – we're going to implement a context assertion to avoid this
-        onChangeTheme(data.currentTheme);
+        dispatch(setAppTheme(data.currentTheme));
 
         trackUsage('didChangeMode', { newMode: data.currentTheme });
 
@@ -242,7 +272,7 @@ const ProfilePage = () => {
         // @ts-expect-error – currentTheme could be undefined because we don't have context assertion yet.
         initialValues={initialData}
         validateOnChange={false}
-        validationSchema={schema}
+        validationSchema={PROFILE_VALIDTION_SCHEMA}
         enableReinitialize
       >
         {({
@@ -254,8 +284,7 @@ const ProfilePage = () => {
             username,
             preferedLanguage,
             currentTheme,
-            password,
-            confirmPassword,
+            ...passwordValues
           },
           handleChange,
           isSubmitting,
@@ -293,11 +322,10 @@ const ProfilePage = () => {
                       <PasswordSection
                         errors={errors}
                         onChange={handleChange}
-                        values={{ password, confirmPassword }}
+                        values={passwordValues}
                       />
                     )}
                     <PreferencesSection
-                      allApplicationThemes={allApplicationThemes}
                       onChange={handleChange}
                       values={{
                         preferedLanguage,
@@ -321,9 +349,10 @@ const ProfilePage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface PasswordSectionProps {
-  errors: { password?: string; confirmPassword?: string };
+  errors: { currentPassword?: string; password?: string; confirmPassword?: string };
   onChange: React.ChangeEventHandler<HTMLInputElement>;
   values: {
+    currentPassword?: string;
     password?: string;
     confirmPassword?: string;
   };
@@ -331,6 +360,7 @@ interface PasswordSectionProps {
 
 const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => {
   const { formatMessage } = useIntl();
+  const [currentPasswordShown, setCurrentPasswordShown] = React.useState(false);
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [passwordConfirmShown, setPasswordConfirmShown] = React.useState(false);
 
@@ -351,6 +381,49 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
             defaultMessage: 'Change password',
           })}
         </Typography>
+        <Grid gap={5}>
+          <GridItem s={12} col={6}>
+            <TextInput
+              error={
+                errors.currentPassword
+                  ? formatMessage({
+                      id: errors.currentPassword,
+                      defaultMessage: errors.currentPassword,
+                    })
+                  : ''
+              }
+              onChange={onChange}
+              value={values.currentPassword}
+              label={formatMessage({
+                id: 'Auth.form.currentPassword.label',
+                defaultMessage: 'Current Password',
+              })}
+              name="currentPassword"
+              type={currentPasswordShown ? 'text' : 'password'}
+              endAction={
+                <FieldActionWrapper
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentPasswordShown((prev) => !prev);
+                  }}
+                  label={formatMessage(
+                    currentPasswordShown
+                      ? {
+                          id: 'Auth.form.password.show-password',
+                          defaultMessage: 'Show password',
+                        }
+                      : {
+                          id: 'Auth.form.password.hide-password',
+                          defaultMessage: 'Hide password',
+                        }
+                  )}
+                >
+                  {currentPasswordShown ? <Eye /> : <EyeStriked />}
+                </FieldActionWrapper>
+              }
+            />
+          </GridItem>
+        </Grid>
         <Grid gap={5}>
           <GridItem s={12} col={6}>
             <PasswordInput
@@ -408,7 +481,7 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               value={values.confirmPassword}
               label={formatMessage({
                 id: 'Auth.form.confirmPassword.label',
-                defaultMessage: 'Password confirmation',
+                defaultMessage: 'Confirm Password',
               })}
               name="confirmPassword"
               type={passwordConfirmShown ? 'text' : 'password'}
@@ -469,19 +542,11 @@ interface PreferencesSectionProps extends Pick<GenericInputProps, 'onChange'> {
     currentTheme?: string;
   };
   localeNames: Record<string, string>;
-  allApplicationThemes?: Partial<ThemeToggleContextContextValue['themes']>;
 }
 
-const PreferencesSection = ({
-  onChange,
-  values,
-  localeNames,
-  allApplicationThemes = {},
-}: PreferencesSectionProps) => {
+const PreferencesSection = ({ onChange, values, localeNames }: PreferencesSectionProps) => {
   const { formatMessage } = useIntl();
-  const themesToDisplay = Object.keys(allApplicationThemes).filter(
-    (themeName) => allApplicationThemes[themeName as keyof ThemeToggleContextContextValue['themes']]
-  );
+  const themesToDisplay = useTypedSelector((state) => state.admin_app.theme.availableThemes);
 
   return (
     <Box

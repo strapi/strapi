@@ -1,6 +1,6 @@
 {
   "name": "@strapi/pack-up",
-  "version": "4.15.2",
+  "version": "4.17.0",
   "description": "Simple tools for creating interoperable CJS & ESM packages.",
   "keywords": [
     "strapi",
@@ -54,7 +54,6 @@
     "check": "node -r esbuild-register scripts/check",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test": "test:ts && test:unit",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
@@ -84,11 +83,11 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.2",
+    "@strapi/pack-up": "4.17.0",
     "@types/git-url-parse": "9.0.1",
     "@types/ini": "1.3.31",
     "@types/prompts": "2.4.4",
-    "eslint-config-custom": "4.15.2",
+    "eslint-config-custom": "4.17.0",
     "rimraf": "3.0.2"
   },
   "engines": {

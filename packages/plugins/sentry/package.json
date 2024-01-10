@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "4.15.2",
+  "version": "4.17.0",
   "description": "Send Strapi error events to Sentry",
   "repository": {
     "type": "git",
@@ -40,18 +40,17 @@
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "prepublishOnly": "yarn clean && yarn build",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "@strapi/design-system": "1.13.1",
-    "@strapi/helper-plugin": "4.15.2",
-    "@strapi/icons": "1.13.0"
+    "@strapi/design-system": "1.14.1",
+    "@strapi/helper-plugin": "4.17.0",
+    "@strapi/icons": "1.14.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.2",
-    "@strapi/strapi": "4.15.2",
+    "@strapi/pack-up": "4.17.0",
+    "@strapi/strapi": "4.17.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",

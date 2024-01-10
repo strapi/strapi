@@ -137,6 +137,10 @@ const initialState = {
       create: false,
       success: false,
     },
+    transferTokens: {
+      create: false,
+      success: false,
+    },
   },
   isGuidedTourVisible: false,
   isSkipped: false,

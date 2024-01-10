@@ -32,6 +32,9 @@ const components: Record<string, Schema.Component> = {
     category: 'default',
     modelName: 'sub-compo',
     globalId: 'SubCompo',
+    info: {
+      displayName: 'sub-compo',
+    },
     attributes: {
       id: { type: 'integer' },
       name: { type: 'string' },
@@ -44,6 +47,9 @@ const components: Record<string, Schema.Component> = {
     category: 'default',
     modelName: 'test-compo',
     globalId: 'TestCompo',
+    info: {
+      displayName: 'test-compo',
+    },
     attributes: {
       id: { type: 'integer' },
       name: { type: 'string' },

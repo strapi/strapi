@@ -4,7 +4,8 @@ import { Box, Flex, SingleSelect, SingleSelectOption } from '@strapi/design-syst
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useLocales } from '../components/LanguageProvider';
+import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { setLocale } from '../reducer';
 
 const Wrapper = styled(Box)`
   margin: 0 auto;
@@ -16,7 +17,8 @@ export const Column = styled(Flex)`
 `;
 
 const LocaleToggle = () => {
-  const { changeLocale, localeNames } = useLocales();
+  const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
+  const dispatch = useTypedDispatch();
   const { formatMessage, locale } = useIntl();
 
   return (
@@ -27,7 +29,7 @@ const LocaleToggle = () => {
       })}
       value={locale}
       onChange={(language) => {
-        changeLocale(language as string);
+        dispatch(setLocale(language as string));
       }}
     >
       {Object.entries(localeNames).map(([language, name]) => (

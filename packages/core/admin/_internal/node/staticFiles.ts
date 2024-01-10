@@ -4,21 +4,18 @@ import outdent from 'outdent';
 import { format } from 'prettier';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import camelCase from 'lodash/camelCase';
 import { DefaultDocument as Document } from '../../admin/src/components/DefaultDocument';
 
 import type { BuildContext } from './createBuildContext';
 
-interface EntryModuleArgs {
-  plugins: BuildContext['plugins'];
-}
-
-const getEntryModule = ({ plugins }: EntryModuleArgs): string => {
-  const pluginsObject = plugins
+const getEntryModule = (ctx: BuildContext): string => {
+  const pluginsObject = ctx.plugins
     .map(({ name, importName }) => `'${name}': ${importName}`)
     .join(',\n');
 
-  const pluginsImport = plugins
-    .map(({ importName, path }) => `import ${importName} from '${path}';`)
+  const pluginsImport = ctx.plugins
+    .map(({ importName, modulePath }) => `import ${importName} from '${modulePath}';`)
     .join('\n');
 
   return outdent`
@@ -28,10 +25,18 @@ const getEntryModule = ({ plugins }: EntryModuleArgs): string => {
          */
         ${pluginsImport}
         import { renderAdmin } from "@strapi/strapi/admin"
-        
+
+        ${
+          ctx.customisations?.modulePath
+            ? `import customisations from '${ctx.customisations.modulePath}'`
+            : ''
+        }
+
         renderAdmin(
           document.getElementById("strapi"),
           {
+            ${ctx.customisations?.modulePath ? 'customisations,' : ''}
+            ${ctx.features ? `features: ${JSON.stringify(ctx.features)},` : ''}
             plugins: {
         ${pluginsObject}
             }
@@ -88,7 +93,7 @@ const writeStaticClientFiles = async (ctx: BuildContext) => {
   ctx.logger.debug('Wrote the index.html file');
   await fs.writeFile(
     path.join(ctx.runtimeDir, 'app.js'),
-    format(getEntryModule({ plugins: ctx.plugins }), {
+    format(getEntryModule(ctx), {
       parser: 'babel',
     })
   );
