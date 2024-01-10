@@ -13,7 +13,7 @@ const {
 /**
  * Reset the DB and import data from a DTS dataset
  */
-export const resetDatabaseAndImportDataFromPath = async (filePath) => {
+const resetDatabaseAndImportDataFromPath = async (filePath) => {
   const source = createSourceProvider(filePath);
   const destination = createDestinationProvider();
 
@@ -47,3 +47,5 @@ const createDestinationProvider = () => {
     strategy: 'restore',
   });
 };
+
+module.exports = { resetDatabaseAndImportDataFromPath };
