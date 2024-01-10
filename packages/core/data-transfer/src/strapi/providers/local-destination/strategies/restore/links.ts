@@ -4,11 +4,29 @@ import { ProviderTransferError } from '../../../../../errors/providers';
 import { ILink, Transaction } from '../../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
 
+interface ErrorWithCode extends Error {
+  code?: string;
+}
+
+const isErrorWithCode = (error: any): error is ErrorWithCode => {
+  return error && typeof error.code === 'string';
+};
+
+const isForeignKeyConstraintError = (e: Error) => {
+  const MYSQL_FK_ERROR_CODE = ['1452', '1557', '1216', '1217', '1451'];
+  const POSTGRES_FK_ERROR_CODE = '23503';
+  const SQLITE_FK_ERROR_CODE = 'SQLITE_CONSTRAINT_FOREIGNKEY';
+
+  if (isErrorWithCode(e) && e.code) {
+    return [SQLITE_FK_ERROR_CODE, POSTGRES_FK_ERROR_CODE, ...MYSQL_FK_ERROR_CODE].includes(e.code);
+  }
+};
+
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
   strapi: LoadedStrapi,
   transaction?: Transaction,
-  onWarning?: any
+  onWarning?: (message: string) => void
 ) => {
   return new Writable({
     objectMode: true,
@@ -28,8 +46,11 @@ export const createLinksWriteStream = (
           await query().insert(link);
         } catch (e) {
           if (e instanceof Error) {
-            if (e.message.toLowerCase().includes('foreign key constraint')) {
-              onWarning(
+            if (
+              // e.message.toLowerCase().includes('foreign key constraint') ||
+              isForeignKeyConstraintError(e)
+            ) {
+              onWarning?.(
                 `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
               );
               return callback(null);
