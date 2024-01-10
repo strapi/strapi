@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { strapiFactory } from '@strapi/core';
 import { getConfigUrls } from '@strapi/utils';
-import { Strapi } from '@strapi/types';
+import { Strapi, FeaturesService } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -18,6 +18,10 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
    * The customisations defined by the user in their app.js file
    */
   customisations?: AppFile;
+  /**
+   * Features object with future flags
+   */
+  features?: FeaturesService['config'];
   /**
    * The build options
    */
@@ -117,6 +121,8 @@ const createBuildContext = async <TOptions>({
 
   const customisations = await loadUserAppFile({ appDir, runtimeDir });
 
+  const features = strapiInstance.config.get('features', undefined);
+
   const buildContext = {
     appDir,
     basePath: `${adminPath}/`,
@@ -126,6 +132,7 @@ const createBuildContext = async <TOptions>({
     distPath,
     entry,
     env,
+    features,
     logger,
     options,
     plugins: pluginsWithFront,
