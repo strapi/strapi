@@ -1,16 +1,17 @@
-import React from 'react';
-
 import { fireEvent } from '@testing-library/react';
-import { render as renderRTL, waitFor } from '@tests/utils';
+import { render as renderRTL } from '@tests/utils';
+import { Location } from 'history';
 import { Route } from 'react-router-dom';
 
-import { ListSettingsView } from '../index';
+import { ListSettingsView } from '../ListSettingsView';
+
+import type { SettingsViewContentTypeLayout } from '../../../utils/layouts';
 
 const layout = {
   attributes: {
     address: {
       type: 'relation',
-      relation: 'manyToOne',
+      relation: 'manyToMany',
     },
     averagePrice: {
       type: 'float',
@@ -73,43 +74,38 @@ const layout = {
     searchable: true,
   },
   uid: 'api::restaurant.restaurant',
-};
+} as unknown as SettingsViewContentTypeLayout;
 
-let testLocation;
+let testLocation: Location;
 
-const render = ({ initialEntries } = {}) => ({
-  ...renderRTL(
-    <ListSettingsView layout={layout} slug="api::restaurant.restaurant" updateLayout={jest.fn()} />,
-    {
-      initialEntries,
-      renderOptions: {
-        wrapper({ children }) {
-          return (
-            <>
-              {children}
-              <Route
-                path="*"
-                render={({ location }) => {
-                  testLocation = location;
+const render = ({ initialEntries }: { initialEntries?: string[] } = {}) => ({
+  ...renderRTL(<ListSettingsView layout={layout} slug="api::restaurant.restaurant" />, {
+    initialEntries,
+    renderOptions: {
+      wrapper({ children }) {
+        return (
+          <>
+            {children}
+            <Route
+              path="*"
+              render={({ location }) => {
+                testLocation = location;
 
-                  return null;
-                }}
-              />
-            </>
-          );
-        },
+                return null;
+              }}
+            />
+          </>
+        );
       },
-    }
-  ),
+    },
+  }),
 });
 
 describe('CM | LV | Configure the view', () => {
   it('renders and matches the snapshot', async () => {
-    const { getByRole } = render();
+    const { getByRole, findByRole } = render();
 
-    await waitFor(() =>
-      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-    );
+    await findByRole('heading', { name: 'Configure the view - Michka' });
 
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
@@ -135,15 +131,13 @@ describe('CM | LV | Configure the view', () => {
   });
 
   it('should keep plugins query params when arriving on the page and going back', async () => {
-    const { getByRole, user } = render({
+    const { getByRole, user, findByRole } = render({
       initialEntries: [
         '/content-manager/collection-types/api::category.category/configurations/list?plugins[i18n][locale]=fr',
       ],
     });
 
-    await waitFor(() =>
-      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-    );
+    await findByRole('heading', { name: 'Configure the view - Michka' });
 
     expect(testLocation.search).toEqual('?plugins[i18n][locale]=fr');
 
@@ -153,11 +147,9 @@ describe('CM | LV | Configure the view', () => {
   });
 
   it('should add field', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, user, findByRole } = render();
 
-    await waitFor(() =>
-      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-    );
+    await findByRole('heading', { name: 'Configure the view - Michka' });
 
     await user.click(getByRole('button', { name: 'Add a field' }));
     await user.click(getByRole('menuitem', { name: 'Cover' }));
@@ -168,11 +160,9 @@ describe('CM | LV | Configure the view', () => {
 
   describe('Edit modal', () => {
     it('should open edit modal & close upon editing and pressing finish', async () => {
-      const { getByRole, queryByRole, user } = render();
+      const { getByRole, queryByRole, user, findByRole } = render();
 
-      await waitFor(() =>
-        expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-      );
+      await findByRole('heading', { name: 'Configure the view - Michka' });
 
       await user.click(getByRole('button', { name: 'Edit id' }));
 
@@ -192,11 +182,9 @@ describe('CM | LV | Configure the view', () => {
     });
 
     it('should close edit modal when pressing cancel', async () => {
-      const { getByRole, queryByRole, user } = render();
+      const { getByRole, queryByRole, user, findByRole } = render();
 
-      await waitFor(() =>
-        expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-      );
+      await findByRole('heading', { name: 'Configure the view - Michka' });
 
       await user.click(getByRole('button', { name: 'Edit id' }));
 
@@ -208,11 +196,9 @@ describe('CM | LV | Configure the view', () => {
     });
 
     it('should not show sortable toggle input if field not sortable', async () => {
-      const { getByRole, queryByRole, user } = render();
+      const { getByRole, queryByRole, user, findByRole } = render();
 
-      await waitFor(() =>
-        expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
-      );
+      await findByRole('heading', { name: 'Configure the view - Michka' });
 
       await user.click(getByRole('button', { name: 'Edit address' }));
 

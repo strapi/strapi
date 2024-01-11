@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Button,
@@ -14,12 +14,13 @@ import {
   Typography,
 } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
 import { getTranslation } from '../../../utils/translations';
+
+import type { Attribute } from '@strapi/types';
 
 const HeaderContainer = styled(Flex)`
   svg {
@@ -29,6 +30,24 @@ const HeaderContainer = styled(Flex)`
   }
 `;
 
+interface EditFieldFormProps {
+  attributes: Record<string, Attribute.Any>;
+  fieldForm: {
+    label?: string;
+    sortable?: boolean;
+  };
+  fieldToEdit: string;
+  onChangeEditLabel: (e: {
+    target: {
+      name: string;
+      value: string | boolean;
+    };
+  }) => void;
+  onCloseModal: () => void;
+  onSubmit: React.FormEventHandler<HTMLFormElement>;
+  type: React.ComponentProps<typeof FieldTypeIcon>['type'];
+}
+
 export const EditFieldForm = ({
   attributes,
   fieldForm,
@@ -37,14 +56,14 @@ export const EditFieldForm = ({
   onChangeEditLabel,
   onSubmit,
   type,
-}) => {
+}: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
 
-  const relationType = attributes[fieldToEdit].relationType;
+  const attribute = attributes[fieldToEdit];
 
   let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
 
-  if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
+  if ('relation' in attribute && ['oneWay', 'oneToOne', 'manyToOne'].includes(attribute.relation)) {
     shouldDisplaySortToggle = true;
   }
 
@@ -124,21 +143,4 @@ export const EditFieldForm = ({
       </form>
     </ModalLayout>
   );
-};
-
-EditFieldForm.propTypes = {
-  attributes: PropTypes.objectOf(
-    PropTypes.shape({
-      relationType: PropTypes.string,
-    })
-  ).isRequired,
-  fieldForm: PropTypes.shape({
-    label: PropTypes.string,
-    sortable: PropTypes.bool,
-  }).isRequired,
-  fieldToEdit: PropTypes.string.isRequired,
-  onChangeEditLabel: PropTypes.func.isRequired,
-  onCloseModal: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  type: PropTypes.string.isRequired,
 };
