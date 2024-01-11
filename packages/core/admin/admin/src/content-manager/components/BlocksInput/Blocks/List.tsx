@@ -152,10 +152,40 @@ const handleEnterKeyOnList = (editor: Editor) => {
   if (isListEmpty) {
     replaceListWithEmptyBlock(editor, currentListPath);
   } else if (isListItemEmpty) {
-    // Delete the empty list item
-    Transforms.removeNodes(editor, { at: currentListItemPath });
+    // Check if there is a list above the current list and shift list-item under it
+    if (
+      !Editor.isEditor(currentList) &&
+      isListNode(currentList) &&
+      currentList?.listIndentLevel &&
+      currentList.listIndentLevel > 0
+    ) {
+      const previousIndentLevel = currentList.listIndentLevel - 1;
 
-    // Create a new paragraph below the parent list
+      const parentListNodeEntry = Editor.above(editor, {
+        match: (node) =>
+          !Editor.isEditor(node) &&
+          node.type === 'list' &&
+          (node.listIndentLevel || 0) === previousIndentLevel,
+      });
+
+      if (parentListNodeEntry) {
+        const modifiedPath = currentListItemPath.slice(0, -1);
+
+        if (modifiedPath.length > 0) {
+          modifiedPath[modifiedPath.length - 1] += 1; // Add 1 to the previous path
+        }
+
+        // Shift list-item under parent list
+        Transforms.moveNodes(editor, {
+          at: currentListItemPath,
+          to: modifiedPath,
+        });
+        return;
+      }
+    }
+
+    // Otherwise delete the empty list item and create a new paragraph below the parent list
+    Transforms.removeNodes(editor, { at: currentListItemPath });
     const listNodeEntry = Editor.above(editor, {
       match: (node) => !Editor.isEditor(node) && node.type === 'list',
     });
