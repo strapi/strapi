@@ -367,7 +367,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return mappedEntity;
   },
 
-  async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string = 'en') {
+  async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
