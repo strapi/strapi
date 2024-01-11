@@ -210,7 +210,7 @@ const BlocksDropdown = () => {
 
   const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
 
-  const selectOption = (optionKey: unknown) => {
+  const handleOnSelect = (optionKey: unknown) => {
     if (!isSelectorBlockKey(optionKey)) {
       return;
     }
@@ -271,15 +271,26 @@ const BlocksDropdown = () => {
   // Listen to the selection change and update the selected block in the dropdown
   React.useEffect(() => {
     if (editor.selection) {
-      // Get the parent node of the anchor
-      // with a depth of two to retrieve also the list item parents
-      const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
-        edge: 'start',
-        depth: 2,
+      let selectedNode: Ancestor;
+
+      // If selection anchor is a list-item, get its parent
+      const currentListEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'list',
+        at: editor.selection.anchor,
       });
+
+      if (currentListEntry) {
+        const [currentList] = currentListEntry;
+        selectedNode = currentList;
+      } else {
+        // Get the parent node of the anchor other than list-item
+        const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+        selectedNode = anchorNode;
+      }
+
       // Find the block key that matches the anchor node
       const anchorBlockKey = getKeys(blocks).find(
-        (blockKey) => !Editor.isEditor(anchorNode) && blocks[blockKey].matchNode(anchorNode)
+        (blockKey) => !Editor.isEditor(selectedNode) && blocks[blockKey].matchNode(selectedNode)
       );
 
       // Change the value selected in the dropdown if it doesn't match the anchor block key
@@ -294,7 +305,7 @@ const BlocksDropdown = () => {
       <SelectWrapper>
         <SingleSelect
           startIcon={<Icon as={blocks[blockSelected].icon} />}
-          onChange={selectOption}
+          onChange={handleOnSelect}
           placeholder={formatMessage(blocks[blockSelected].label)}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
@@ -346,21 +357,6 @@ const isListNode = (node: unknown): node is Block<'list'> => {
   return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
 };
 
-const isListActive = (editor: Editor, matchNode: (node: Node) => boolean) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const [match] = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: matchNode,
-    })
-  );
-
-  return Boolean(match);
-};
-
 const toggleList = (editor: Editor, format: Block<'list'>['format']) => {
   let currentListEntry;
   if (editor.selection)
@@ -406,19 +402,30 @@ interface ListButtonProps {
 const ListButton = ({ block, format }: ListButtonProps) => {
   const { editor, disabled } = useBlocksEditorContext('ListButton');
 
-  const { icon, matchNode, label } = block;
+  const isListActive = () => {
+    if (!editor.selection) return false;
 
-  const isActive = isListActive(
-    editor,
-    (node) => !Editor.isEditor(node) && node.type !== 'text' && matchNode(node)
-  );
+    // Get the parent list at selection anchor node
+    const currentListEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+      at: editor.selection.anchor,
+    });
+
+    if (currentListEntry) {
+      const [currentList] = currentListEntry;
+
+      if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
+        return true;
+    }
+    return false;
+  };
 
   return (
     <ToolbarButton
-      icon={icon}
+      icon={block.icon}
       name={format}
-      label={label}
-      isActive={isActive}
+      label={block.label}
+      isActive={isListActive()}
       disabled={disabled}
       handleClick={() => toggleList(editor, format)}
     />
