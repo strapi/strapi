@@ -34,12 +34,22 @@ const StyledCross = styled(Cross)`
   padding: ${({ theme }) => theme.spaces[1]};
 `;
 
+const StyledIconButton = styled(IconButton)`
+  /* Setting this style inline with borderColor will not apply the style */
+  border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
+`;
+
 interface ReleaseActionMenuProps {
   releaseId: DeleteReleaseAction.Request['params']['releaseId'];
   actionId: DeleteReleaseAction.Request['params']['actionId'];
+  hasTriggerBorder?: boolean;
 }
 
-export const ReleaseActionMenu = ({ releaseId, actionId }: ReleaseActionMenuProps) => {
+export const ReleaseActionMenu = ({
+  releaseId,
+  actionId,
+  hasTriggerBorder = false,
+}: ReleaseActionMenuProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -90,7 +100,7 @@ export const ReleaseActionMenu = ({ releaseId, actionId }: ReleaseActionMenuProp
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
          */}
         <Menu.Trigger
-          as={IconButton}
+          as={hasTriggerBorder ? StyledIconButton : IconButton}
           paddingLeft={2}
           paddingRight={2}
           aria-label={formatMessage({
@@ -106,10 +116,10 @@ export const ReleaseActionMenu = ({ releaseId, actionId }: ReleaseActionMenuProp
          */}
         <Menu.Content top={1} popoverPlacement="bottom-end">
           <CheckPermissions permissions={PERMISSIONS.deleteAction}>
-            <StyledMenuItem color="danger600" onSelect={handleDeleteAction}>
+            <StyledMenuItem onSelect={handleDeleteAction}>
               <Flex gap={2}>
                 <StyledCross />
-                <Typography variant="omega">
+                <Typography textColor="danger600" variant="omega">
                   {formatMessage({
                     id: 'content-releases.content-manager-edit-view.remove-from-release',
                     defaultMessage: 'Remove from release',
