@@ -67,7 +67,7 @@ export const security: Common.MiddlewareFactory<Config> =
     }
 
     if (ctx.method === 'GET') {
-      // iIf this path matches one of our special paths, merge in its config
+      // if this path matches one of our special paths, merge in its config
       // Note that it only finds the first matching path
       const matchedPathKey = Object.keys(specialPaths).find((key) => ctx.path.startsWith(key));
 
