@@ -31,7 +31,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
         'react',
         `react/jsx-runtime`,
-        `react/jsx-dev-runtime`,
         'react-dom/client',
         'styled-components',
         'react-router-dom',

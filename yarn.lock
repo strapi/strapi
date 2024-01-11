@@ -28217,15 +28217,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin":
+"strapi-plugin-workspace-plugin@workspace:*, strapi-plugin-workspace-plugin@workspace:examples/plugins/workspace-plugin":
   version: 0.0.0-use.local
-  resolution: "strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin"
-  languageName: unknown
-  linkType: soft
-
-"strapi-plugin-workspace-plugin@workspace:*, strapi-plugin-workspace-plugin@workspace:examples/getstarted/src/plugins/workspace-plugin":
-  version: 0.0.0-use.local
-  resolution: "strapi-plugin-workspace-plugin@workspace:examples/getstarted/src/plugins/workspace-plugin"
+  resolution: "strapi-plugin-workspace-plugin@workspace:examples/plugins/workspace-plugin"
   languageName: unknown
   linkType: soft
 
