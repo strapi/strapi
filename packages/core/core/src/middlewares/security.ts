@@ -38,16 +38,15 @@ export const security: Common.MiddlewareFactory<Config> =
     const specialPaths = ['/documentation'];
 
     const directives: {
-      // TODO: figure out why some must be snake-case and some must be camelCase and standardize them
       'script-src': string[];
       'img-src': string[];
-      manifestSrc: string[];
-      frameSrc: string[];
+      'manifest-src': string[];
+      'frame-src': string[];
     } = {
       'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
       'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
-      manifestSrc: [],
-      frameSrc: [],
+      'manifest-src': [],
+      'frame-src': [],
     };
 
     if (strapi.plugin('graphql')) {
@@ -58,10 +57,10 @@ export const security: Common.MiddlewareFactory<Config> =
       if (strapi.plugin('graphql').isPlaygroundEnabled()) {
         directives['script-src'].push(`https: 'unsafe-inline'`);
         directives['img-src'].push(`'apollo-server-landing-page.cdn.apollographql.com'`);
-        directives.manifestSrc.push(`'self'`);
-        directives.manifestSrc.push('apollo-server-landing-page.cdn.apollographql.com');
-        directives.frameSrc.push(`'self'`);
-        directives.frameSrc.push('sandbox.embed.apollographql.com');
+        directives['manifest-src'].push(`'self'`);
+        directives['manifest-src'].push('apollo-server-landing-page.cdn.apollographql.com');
+        directives['frame-src'].push(`'self'`);
+        directives['frame-src'].push('sandbox.embed.apollographql.com');
       }
     }
 
