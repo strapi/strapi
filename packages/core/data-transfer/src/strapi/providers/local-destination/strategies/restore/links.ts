@@ -47,7 +47,7 @@ export const createLinksWriteStream = (
         } catch (e) {
           if (e instanceof Error) {
             if (
-              // e.message.toLowerCase().includes('foreign key constraint') ||
+              e.message.toLowerCase().includes('foreign key constraint') ||
               isForeignKeyConstraintError(e)
             ) {
               onWarning?.(
