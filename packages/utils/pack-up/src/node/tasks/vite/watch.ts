@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import os from 'os';
 import path from 'path';
 import { Observable } from 'rxjs';
-import { build } from 'vite';
 
 import { isError } from '../../core/errors';
 
@@ -47,37 +46,38 @@ const viteWatchTask: TaskHandler<ViteWatchTask, RollupWatcherEvent> = {
     ctx.logger.success(msg.join(os.EOL));
   },
   run$(ctx, task) {
-    const config = resolveViteConfig(ctx, task);
-
-    ctx.logger.debug(`Vite config:${os.EOL}`, config);
-
     /**
      * We need to return an observable here, but vite build
      * is an async function which the observable does not want,
      * so we do some classic let definition with if to workaround.
      */
     return new Observable((subscriber) => {
-      let watcher: Awaited<ReturnType<typeof build>> | null = null;
+      let watcher: object | null = null;
 
-      build({
-        ...config,
-        mode: 'development',
-        build: {
-          ...config.build,
-          watch: {},
-        },
-      }).then((rollupWatcher) => {
-        watcher = rollupWatcher;
+      resolveViteConfig(ctx, task).then((config) => {
+        ctx.logger.debug(`Vite config:${os.EOL}`, config);
+        import('vite').then(({ build }) => {
+          build({
+            ...config,
+            mode: 'development',
+            build: {
+              ...config.build,
+              watch: {},
+            },
+          }).then((rollupWatcher) => {
+            watcher = rollupWatcher;
 
-        if ('on' in watcher) {
-          watcher.on('event', (ev) => {
-            subscriber.next(ev);
+            if ('on' in watcher && typeof watcher.on === 'function') {
+              watcher.on('event', (ev: any) => {
+                subscriber.next(ev);
+              });
+            }
           });
-        }
+        });
       });
 
       return () => {
-        if (watcher !== null && 'close' in watcher) {
+        if (watcher !== null && 'close' in watcher && typeof watcher.close === 'function') {
           watcher.close();
         }
       };
