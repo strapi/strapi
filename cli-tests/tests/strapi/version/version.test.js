@@ -1,14 +1,34 @@
+'use strict';
+
+const coffee = require('coffee');
+
+const utils = require('../../../utils');
+
 describe('--version', () => {
-  const instances = [];
+  let appPath;
+  let currentVersion;
 
   beforeAll(async () => {
-    // TODO: get the test instances from helpers
-  });
-  beforeEach(async () => {
-    // TODO: reset the test instances
+    const testApps = utils.instances.getTestApps();
+
+    appPath = testApps.at(0);
+    currentVersion = require(`${appPath}/package.json`).dependencies['@strapi/strapi'];
   });
 
-  // TODO: run the cli command `strapi --version` and check exit code and output
-  // Should we use coffee (https://github.com/node-modules/coffee) or CLET (https://github.com/node-modules/clet) ?
-  it.todo('should output version');
+  it('should output version', async () => {
+    await coffee
+      .spawn('yarn', ['strapi', 'version'], { cwd: appPath })
+      .expect('stderr', '')
+      .expect('stdout', `${currentVersion}\n`)
+      .expect('code', 0)
+      .end();
+  });
+
+  it('should output version with --version', async () => {
+    await coffee
+      .spawn('yarn', ['strapi', '--version'], { cwd: appPath })
+      .expect('stdout', `${currentVersion}\n`)
+      .expect('code', 0)
+      .end();
+  });
 });

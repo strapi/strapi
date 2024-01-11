@@ -59,9 +59,7 @@ yargs
          * Publishing all packages to the yalc store
          */
         console.log('Running yalc...');
-        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')], {
-          stdio: 'inherit',
-        });
+        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')]);
         console.log('Complete');
 
         const loadDomainConfigs = async (domain) => {
@@ -108,7 +106,9 @@ yargs
         let currentTestApps = [];
 
         try {
-          currentTestApps = await fs.readdir(testAppDirectory);
+          currentTestApps = await fs
+            .readdir(testAppDirectory)
+            .then((paths) => paths.map((appPath) => path.join(testAppDirectory, appPath)));
         } catch (err) {
           // no test apps exist, okay to fail silently
         }
@@ -124,12 +124,13 @@ yargs
            * as opposed to cleaning the ones we aim to spawn.
            */
           await Promise.all(
-            currentTestApps.map(async (testAppName) => {
-              const appPath = path.join(testAppDirectory, testAppName);
+            currentTestApps.map(async (appPath) => {
               console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
               await cleanTestApp(appPath);
             })
           );
+
+          currentTestApps = [];
 
           /**
            * Generate the test apps and modify the configuration as needed
@@ -160,6 +161,8 @@ yargs
               const envFile = (await fs.readFile(pathToEnv)).toString();
               const envWithoutPort = envFile.replace('PORT=1337', '');
               await fs.writeFile(pathToEnv, envWithoutPort);
+
+              currentTestApps.push(appPath);
             })
           );
 
@@ -194,7 +197,7 @@ yargs
 
               if (availableTestApps.length < config.testApps) {
                 console.error('Not enough test apps available; aborting');
-                process.exit();
+                process.exit(1);
               }
 
               // claim testApps for this domain to use
@@ -210,20 +213,13 @@ yargs
                   TEST_APPS: testApps.join(','),
                 };
                 const domainDir = path.join(testsDir, domain);
-                console.log('Running jest for domain', domain, 'with env', env, 'in', domainDir);
+                console.log('Running jest for domain', domain, 'in', domainDir);
                 // run the command 'jest --rootDir <domainDir>'
-                const { stdout, stderr } = await execa('jest', ['--rootDir', domainDir], {
+                await execa('jest', ['--rootDir', domainDir, '--color'], {
+                  stdio: 'inherit',
                   cwd: domainDir, // run from the domain directory
                   env, // pass it our custom env values
                 });
-
-                // TODO: determine the best way to log this for the CI (stream it rather than wait for completion)
-                if (stdout) {
-                  console.log(stdout);
-                }
-                if (stderr) {
-                  console.log(stderr);
-                }
               } catch (err) {
                 // If any tests fail
                 console.error('Test suite failed for', domain);
