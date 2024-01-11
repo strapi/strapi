@@ -192,6 +192,16 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       validateUniqueEntry(releaseId, action),
     ]);
 
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+
+    if (!release) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
     const { entry, type } = action;
 
     return strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
