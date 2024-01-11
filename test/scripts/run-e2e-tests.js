@@ -11,6 +11,9 @@ const { createConfig } = require('../../playwright.base.config');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'e2e');
+const testRoot = path.join(cwd, 'e2e');
+const testsDir = path.join(testRoot, 'tests');
+const templateDir = path.join(testRoot, 'app-template');
 
 yargs
   .parserConfiguration({
@@ -24,7 +27,7 @@ yargs
     command: '*',
     description: 'run the E2E test suite',
     async builder(yarg) {
-      const domains = await fs.readdir(path.join(cwd, 'e2e', 'tests'));
+      const domains = await fs.readdir(testsDir);
 
       yarg.option('concurrency', {
         alias: 'c',
@@ -54,7 +57,7 @@ yargs
         const { concurrency, domains, setup } = argv;
 
         /**
-         * Publshing all pacakges to the yalc store
+         * Publishing all packages to the yalc store
          */
         await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')], {
           stdio: 'inherit',
@@ -113,7 +116,7 @@ yargs
                   },
                   useNullAsDefault: true,
                 },
-                template: path.join(cwd, 'e2e', 'app-template'),
+                template: templateDir,
                 link: true,
               });
               /**
@@ -150,6 +153,7 @@ yargs
           return acc;
         }, []);
 
+        // eslint-disable-next-line no-plusplus
         for (let i = 0; i < chunkedDomains.length; i++) {
           const domains = chunkedDomains[i];
 
@@ -167,7 +171,7 @@ yargs
               );
 
               const config = createConfig({
-                testDir: path.join(cwd, 'e2e', 'tests', domain),
+                testDir: path.join(testsDir, domain),
                 port,
                 appDir: testAppPath,
               });

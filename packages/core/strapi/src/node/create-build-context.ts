@@ -4,14 +4,20 @@ import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { strapiFactory } from '@strapi/core';
 import { getConfigUrls } from '@strapi/utils';
-import { Strapi } from '@strapi/types';
+import { Strapi, FeaturesService } from '@strapi/types';
 
-import type { CLIContext } from '../commands/types';
+import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 import type { BaseContext } from './types';
+
+interface BaseOptions {
+  stats?: boolean;
+  minify?: boolean;
+  sourcemaps?: boolean;
+}
 
 interface BuildContext<TOptions = unknown> extends BaseContext {
   /**
@@ -19,9 +25,13 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
    */
   customisations?: AppFile;
   /**
+   * Features object with future flags
+   */
+  features?: FeaturesService['config'];
+  /**
    * The build options
    */
-  options: TOptions;
+  options: BaseOptions & TOptions;
   /**
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
@@ -117,6 +127,8 @@ const createBuildContext = async <TOptions>({
 
   const customisations = await loadUserAppFile({ appDir, runtimeDir });
 
+  const features = strapiInstance.config.get('features', undefined);
+
   const buildContext = {
     appDir,
     basePath: `${adminPath}/`,
@@ -126,8 +138,9 @@ const createBuildContext = async <TOptions>({
     distPath,
     entry,
     env,
+    features,
     logger,
-    options,
+    options: options as BaseOptions & TOptions,
     plugins: pluginsWithFront,
     runtimeDir,
     strapi: strapiInstance,

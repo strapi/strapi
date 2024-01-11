@@ -224,7 +224,9 @@ const generateLinks = (
         search,
         kind: link.kind,
         title: link.info.displayName,
-        to: `/content-manager/${link.kind}/${link.uid}`,
+        to: `/content-manager/${
+          link.kind === 'collectionType' ? 'collection-types' : 'single-types'
+        }/${link.uid}`,
         uid: link.uid,
         // Used for the list item key in the helper plugin
         name: link.uid,

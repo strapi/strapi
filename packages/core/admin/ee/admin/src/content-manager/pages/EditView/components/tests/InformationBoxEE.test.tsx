@@ -14,6 +14,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     jest.mocked(useCMEditViewDataManager).mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
+      // @ts-expect-error – we only need partial data for this test
       layout: {
         options: {
           reviewWorkflows: false,
@@ -25,7 +26,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       createActionAllowedFields: [],
       formErrors: {},
-      hasDraftAndPublish: false,
       isSingleType: false,
       modifiedData: {},
       readActionAllowedFields: [],
@@ -41,6 +41,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
   it('renders neither stage nor assignee select inputs, if no nothing is returned for an entity', async () => {
     jest.mocked(useCMEditViewDataManager).mockReturnValue({
       initialData: {},
+      // @ts-expect-error – we only need partial data for this test
       layout: {
         options: {
           reviewWorkflows: false,
@@ -52,7 +53,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       createActionAllowedFields: [],
       formErrors: {},
-      hasDraftAndPublish: false,
       isCreatingEntry: false,
       isSingleType: false,
       modifiedData: {},
@@ -81,6 +81,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         },
       },
       layout: {
+        // @ts-expect-error – we only need partial data for this test
         uid: 'api::articles:articles',
         options: {
           reviewWorkflows: true,
@@ -92,7 +93,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       createActionAllowedFields: [],
       formErrors: {},
-      hasDraftAndPublish: false,
       isCreatingEntry: false,
       isSingleType: false,
       modifiedData: {},

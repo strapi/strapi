@@ -21,14 +21,14 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
         field: 'slug',
         data: {},
-      });
+      } as any);
 
       expect(uid).toBe('my-test-model');
     });
@@ -56,9 +56,14 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
-      uidService.findUniqueUID = jest.fn((v) => v);
+      uidService.findUniqueUID = jest.fn(
+        (v) =>
+          new Promise((resolve) => {
+            resolve(v as any);
+          })
+      );
 
       await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -66,13 +71,13 @@ describe('Test uid service', () => {
         data: {
           title: 'Test title',
         },
-      });
+      } as any);
 
       await uidService.generateUIDField({
         contentTypeUID: 'my-model',
         field: 'slug',
         data: {},
-      });
+      } as any);
 
       expect(uidService.findUniqueUID).toHaveBeenCalledTimes(2);
     });
@@ -104,7 +109,7 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
@@ -113,7 +118,7 @@ describe('Test uid service', () => {
         data: {
           title: 'Test title',
         },
-      });
+      } as any);
 
       expect(uid).toBe('test-title-1');
 
@@ -126,7 +131,7 @@ describe('Test uid service', () => {
         data: {
           title: '',
         },
-      });
+      } as any);
 
       expect(uidWithEmptyTarget).toBe('my-test-model');
     });
@@ -155,7 +160,7 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
@@ -164,7 +169,7 @@ describe('Test uid service', () => {
         data: {
           title: 'Test title',
         },
-      });
+      } as any);
 
       expect(uid).toBe('Test-title');
     });
@@ -193,7 +198,7 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
@@ -202,7 +207,7 @@ describe('Test uid service', () => {
         data: {
           title: 'Test UID',
         },
-      });
+      } as any);
 
       expect(uid).toBe('test-uid');
     });
@@ -231,7 +236,7 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
@@ -240,7 +245,7 @@ describe('Test uid service', () => {
         data: {
           title: 'Test with a 999 very long title',
         },
-      });
+      } as any);
 
       expect(uid).toBe('test-with-a-999-very-long-title');
     });
@@ -265,14 +270,14 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
         field: 'slug',
         data: {},
-      });
+      } as any);
 
       expect(uid).toBe('slug-default');
     });
@@ -307,14 +312,14 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.findUniqueUID({
         contentTypeUID: 'my-model',
         field: 'slug',
         value: 'my-test-model',
-      });
+      } as any);
 
       expect(uid).toBe('my-test-model-2');
     });
@@ -342,14 +347,14 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       await uidService.findUniqueUID({
         contentTypeUID: 'my-model',
         field: 'slug',
         value: 'my-test-model',
-      });
+      } as any);
 
       expect(findMany).toHaveBeenCalledWith({
         where: { slug: { $contains: 'my-test-model' } },
@@ -369,14 +374,14 @@ describe('Test uid service', () => {
             };
           },
         },
-      };
+      } as any;
       const uidService = uidServiceLoader({ strapi });
 
       const isAvailable = await uidService.checkUIDAvailability({
         contentTypeUID: 'my-model',
         field: 'slug',
         value: 'my-test-model',
-      });
+      } as any);
 
       expect(count).toHaveBeenCalledWith({ where: { slug: 'my-test-model' } });
       expect(isAvailable).toBe(true);

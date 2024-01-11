@@ -100,7 +100,14 @@ const Wrapper = ({
     <ThemeProvider theme={lightTheme}>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider blocks={blocks} modifiers={modifiers} disabled={false}>
+          <BlocksEditorProvider
+            blocks={blocks}
+            modifiers={modifiers}
+            disabled={false}
+            name="blocks"
+            setLiveText={jest.fn()}
+            isExpandedMode={false}
+          >
             {children}
           </BlocksEditorProvider>
         </Slate>

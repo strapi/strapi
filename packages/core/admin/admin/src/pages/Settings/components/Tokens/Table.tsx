@@ -18,6 +18,9 @@ import { useIntl } from 'react-intl';
 import { NavLink, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ApiToken } from '../../../../../../shared/contracts/api-token';
+import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
+
 import type { Entity } from '@strapi/types';
 
 interface TokenTableRowData {
@@ -42,13 +45,7 @@ interface TableProps
     canDelete: boolean;
     canUpdate: boolean;
   };
-  tokens: Array<{
-    id: string | number;
-    name: string;
-    description: string;
-    createdAt: string;
-    lastUsedAt: string | null;
-  }>;
+  tokens: SanitizedTransferToken[] | ApiToken[];
   tokenType: 'api-token' | 'transfer-token';
 }
 
@@ -117,7 +114,7 @@ const TableRows = ({
   } = useHistory();
   const { trackUsage } = useTracking();
 
-  const sortedTokens = rows.sort((a, b) => {
+  const sortedTokens = [...rows].sort((a, b) => {
     const comparison = a.name.localeCompare(b.name);
 
     return sortOrder === 'DESC' ? -comparison : comparison;
@@ -317,7 +314,7 @@ const ReadButton = ({ tokenName, tokenId }: ButtonProps) => {
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {
   return (
     <DefaultButton tokenName={tokenName} tokenId={tokenId}>
-      <Pencil />
+      <Pencil width={12} />
     </DefaultButton>
   );
 };

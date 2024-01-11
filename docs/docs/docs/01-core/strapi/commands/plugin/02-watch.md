@@ -1,6 +1,6 @@
 ---
-title: plugin:build
-description: An in depth look at the plugin:build command of the Strapi CLI
+title: plugin:watch
+description: An in depth look at the plugin:watch command of the Strapi CLI
 tags:
   - CLI
   - commands
