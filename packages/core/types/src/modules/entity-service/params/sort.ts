@@ -75,15 +75,25 @@ export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID
  * type F = 'title'; // ❌
  */
 export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
-  // First level sort
-  [key in SingleAttribute<TSchemaUID>]?: OrderKind.Any;
-} & {
-  // Deep sort, only add populatable keys that have a
-  // target (remove dynamic zones and other polymorphic links)
-  [key in Attribute.GetKeysWithTarget<TSchemaUID>]?: ObjectNotation<
-    Attribute.GetTarget<TSchemaUID, key>
-  >;
+  [TKey in ObjectNotationKeys<TSchemaUID>]?: TKey extends SingleAttribute<TSchemaUID>
+    ? // First level sort (scalar attributes, id, ...)
+      OrderKind.Any
+    : TKey extends Attribute.GetKeysWithTarget<TSchemaUID>
+    ? // Deep sort (relations with a target, components, media, ...)
+      ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>
+    : never;
 };
+
+/**
+ * Represents the keys of an object notation for a sort
+ * - SingleAttribute<TSchemaUID> represents a union of every non-populatable attribute based on the passed schema UID
+ * - Attribute.GetKeysWithTarget<TSchemaUID> provides keys with a target from the passed schema UID.
+ *
+ * This means that every member of ObjectNotationKeys can represent either a single non-populatable attribute or an attribute with a target.
+ */
+type ObjectNotationKeys<TSchemaUID extends Common.UID.Schema> =
+  | SingleAttribute<TSchemaUID>
+  | Attribute.GetKeysWithTarget<TSchemaUID>;
 
 /**
  * Represents any notation for a sort (string, array, object)

@@ -89,7 +89,7 @@
     },
     "dynamiczone": {
       "type": "dynamiczone",
-      "components": ["basic.simple", "blog.test-como"]
+      "components": ["basic.simple", "blog.test-como", "default.closingperiod"]
     },
     "one_way_tag": {
       "type": "relation",
