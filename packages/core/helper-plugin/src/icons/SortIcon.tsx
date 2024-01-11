@@ -4,7 +4,7 @@ import { CarretDown } from '@strapi/icons';
 import styled from 'styled-components';
 
 export interface SortIconProps extends React.SVGProps<SVGSVGElement> {
-  isUp: boolean;
+  isUp?: boolean;
 }
 
 const transientProps: Partial<Record<keyof SortIconProps, boolean>> = {

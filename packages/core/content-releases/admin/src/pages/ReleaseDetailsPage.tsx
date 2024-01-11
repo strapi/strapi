@@ -60,6 +60,7 @@ import type {
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
+// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -269,7 +270,9 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}`;
+  const createdBy = release.createdBy.lastname
+    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
+    : `${release.createdBy.firstname}`;
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -814,10 +817,4 @@ const ReleaseDetailsPage = () => {
   );
 };
 
-const ProtectedReleaseDetailsPage = () => (
-  <CheckPermissions permissions={PERMISSIONS.main}>
-    <ReleaseDetailsPage />
-  </CheckPermissions>
-);
-
-export { ReleaseDetailsPage, ProtectedReleaseDetailsPage };
+export { ReleaseDetailsPage };

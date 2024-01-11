@@ -8,13 +8,10 @@ import * as React from 'react';
 
 import { SkipToContent } from '@strapi/design-system';
 import {
-  auth,
   LoadingIndicatorPage,
   MenuItem,
-  prefixFileUrlWithBackendUrl,
   TrackingProvider,
   useAppInfo,
-  useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import merge from 'lodash/merge';
@@ -23,12 +20,16 @@ import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from './components/PrivateRoute';
-import { ADMIN_PERMISSIONS_CE, ACTION_SET_ADMIN_PERMISSIONS } from './constants';
-import { useConfiguration } from './contexts/configuration';
+import { ADMIN_PERMISSIONS_CE } from './constants';
+import { useAuth } from './features/Auth';
+import { ConfigurationProvider, ConfigurationProviderProps } from './features/Configuration';
 import { useEnterprise } from './hooks/useEnterprise';
 import { AuthPage } from './pages/Auth/AuthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UseCasePage } from './pages/UseCasePage';
+import { setAdminPermissions } from './reducer';
+import { useInitQuery, useTelemetryPropertiesQuery } from './services/admin';
+import { PermissionMap } from './types/permissions';
 import { createRoute } from './utils/createRoute';
 
 type StrapiRoute = Pick<MenuItem, 'exact' | 'to'> & Required<Pick<MenuItem, 'Component'>>;
@@ -39,8 +40,14 @@ const AuthenticatedApp = React.lazy(() =>
   import('./components/AuthenticatedApp').then((mod) => ({ default: mod.AuthenticatedApp }))
 );
 
-export const App = () => {
-  const adminPermissions = useEnterprise(
+interface AppProps extends Omit<ConfigurationProviderProps, 'children' | 'authLogo' | 'menuLogo'> {
+  authLogo: string;
+  menuLogo: string;
+}
+
+export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials }: AppProps) => {
+  // @ts-expect-error – we need to type the useEnterprise hook better, in this circumstance we know it'll either be the CE data or a merge of the two.
+  const adminPermissions: Partial<PermissionMap> = useEnterprise(
     ADMIN_PERMISSIONS_CE,
     async () => (await import('../../ee/admin/src/constants')).ADMIN_PERMISSIONS_EE,
     {
@@ -60,17 +67,10 @@ export const App = () => {
     }
   );
   const toggleNotification = useNotification();
-  const { updateProjectSettings } = useConfiguration();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = React.useState({
-    isLoading: true,
-    deviceId: undefined,
-    hasAdmin: false,
-    uuid: false,
-  });
   const dispatch = useDispatch();
   const appInfo = useAppInfo();
-  const { get, post } = useFetchClient();
+  const token = useAuth('App', (state) => state.token);
 
   const authRoutes = React.useMemo(() => {
     if (!routes) {
@@ -80,106 +80,64 @@ export const App = () => {
     return routes.map(({ to, Component, exact }) => createRoute(Component, to, exact));
   }, [routes]);
 
-  const [telemetryProperties, setTelemetryProperties] = React.useState(undefined);
-
   React.useEffect(() => {
-    dispatch({ type: ACTION_SET_ADMIN_PERMISSIONS, payload: adminPermissions });
+    dispatch(setAdminPermissions(adminPermissions));
   }, [adminPermissions, dispatch]);
 
+  const initQuery = useInitQuery();
+  const {
+    hasAdmin,
+    uuid,
+    authLogo: customAuthLogo,
+    menuLogo: customMenuLogo,
+  } = initQuery.data ?? {};
+
+  const telemetryPropertiesQuery = useTelemetryPropertiesQuery(undefined, {
+    skip: !uuid || !token,
+  });
+
   React.useEffect(() => {
-    const currentToken = auth.getToken();
-
-    const renewToken = async () => {
-      try {
-        const {
-          data: {
-            data: { token },
-          },
-        } = await post('/admin/renew-token', { token: currentToken });
-        auth.updateToken(token);
-      } catch (err) {
-        // Refresh app
-        auth.clearAppStorage();
-        window.location.reload();
-      }
-    };
-
-    if (currentToken) {
-      renewToken();
+    if (initQuery.error) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'app.containers.App.notification.error.init' },
+      });
     }
-  }, [post]);
+  }, [initQuery.error, toggleNotification]);
 
   React.useEffect(() => {
-    const getData = async () => {
-      try {
-        const {
-          data: {
-            data: { hasAdmin, uuid, menuLogo, authLogo },
-          },
-        } = await get(`/admin/init`);
-
-        updateProjectSettings({
-          menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
-          authLogo: prefixFileUrlWithBackendUrl(authLogo),
-        });
-
-        if (uuid) {
-          const {
-            data: { data: properties },
-          } = await get(`/admin/telemetry-properties`, {
-            // NOTE: needed because the interceptors of the fetchClient redirect to /login when receive a 401 and it would end up in an infinite loop when the user doesn't have a session.
-            validateStatus: (status) => status < 500,
-          });
-
-          setTelemetryProperties(properties);
-
-          try {
-            const event = 'didInitializeAdministration';
-            await post(
-              'https://analytics.strapi.io/api/v2/track',
-              {
-                // This event is anonymous
-                event,
-                userId: '',
-                deviceId,
-                eventPropeties: {},
-                userProperties: { environment: appInfo.currentEnvironment },
-                groupProperties: { ...properties, projectId: uuid },
-              },
-              {
-                headers: {
-                  'X-Strapi-Event': event,
-                },
-              }
-            );
-          } catch (e) {
-            // Silent.
-          }
-        }
-
-        setState({ isLoading: false, hasAdmin, uuid, deviceId });
-      } catch (err) {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'app.containers.App.notification.error.init' },
-        });
-      }
-    };
-
-    getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toggleNotification, updateProjectSettings]);
+    if (uuid && appInfo.currentEnvironment && telemetryPropertiesQuery.data) {
+      const event = 'didInitializeAdministration';
+      /**
+       * fetch doesn't throw so it doesn't need to be in a try/catch.
+       */
+      fetch('https://analytics.strapi.io/api/v2/track', {
+        method: 'POST',
+        body: JSON.stringify({
+          // This event is anonymous
+          event,
+          userId: '',
+          eventPropeties: {},
+          userProperties: { environment: appInfo.currentEnvironment },
+          groupProperties: { ...telemetryPropertiesQuery.data, projectId: uuid },
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Strapi-Event': event,
+        },
+      });
+    }
+  }, [appInfo.currentEnvironment, telemetryPropertiesQuery.data, uuid]);
 
   const trackingInfo = React.useMemo(
     () => ({
       uuid,
-      telemetryProperties,
-      deviceId,
+      telemetryProperties: telemetryPropertiesQuery.data,
     }),
-    [uuid, telemetryProperties, deviceId]
+    [uuid, telemetryPropertiesQuery.data]
   );
 
-  if (isLoading) {
+  if (initQuery.isLoading) {
     return <LoadingIndicatorPage />;
   }
 
@@ -188,19 +146,40 @@ export const App = () => {
       <SkipToContent>
         {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
       </SkipToContent>
-      <TrackingProvider value={trackingInfo}>
-        <Switch>
-          {authRoutes}
-          <Route
-            path="/auth/:authType"
-            render={(routerProps) => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
-            exact
-          />
-          <PrivateRoute path="/usecase" component={UseCasePage} />
-          <PrivateRoute path="/" component={AuthenticatedApp} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
-      </TrackingProvider>
+      <ConfigurationProvider
+        authLogo={{
+          default: authLogo,
+          custom: {
+            url: customAuthLogo ?? '',
+          },
+        }}
+        menuLogo={{
+          default: menuLogo,
+          custom: {
+            url: customMenuLogo ?? '',
+          },
+        }}
+        showReleaseNotification={showReleaseNotification}
+        showTutorials={showTutorials}
+      >
+        <TrackingProvider value={trackingInfo}>
+          <Switch>
+            {authRoutes}
+            <Route
+              path="/auth/:authType"
+              render={(routerProps) => <AuthPage {...routerProps} hasAdmin={Boolean(hasAdmin)} />}
+              exact
+            />
+            <PrivateRoute path="/usecase">
+              <UseCasePage />
+            </PrivateRoute>
+            <PrivateRoute path="/">
+              <AuthenticatedApp />
+            </PrivateRoute>
+            <Route path="" component={NotFoundPage} />
+          </Switch>
+        </TrackingProvider>
+      </ConfigurationProvider>
     </React.Suspense>
   );
 };

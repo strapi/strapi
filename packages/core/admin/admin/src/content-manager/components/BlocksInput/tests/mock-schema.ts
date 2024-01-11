@@ -2,12 +2,33 @@
 
 import { type Attribute } from '@strapi/types';
 
-export const blocksData: Attribute.BlocksValue = [
+const mockImage = {
+  url: 'https://via.placeholder.com/300/09f/fff.png',
+  name: 'Screenshot 2023-08-22 at 10.33.50.png',
+  alternativeText: 'My image alt text',
+  caption: null,
+  width: 300,
+  height: 300,
+  formats: {},
+  hash: 'Screenshot_2023_08_22_at_10_33_50_ac7d5fd5b1',
+  ext: '.png',
+  mime: 'image/png',
+  size: 17.95,
+  previewUrl: null,
+  provider: 'local',
+  provider_metadata: null,
+  createdAt: '2023-08-24T09:43:30.065Z',
+  updatedAt: '2023-08-24T09:43:30.065Z',
+};
+
+const blocksData: Attribute.BlocksValue = [
   {
     type: 'paragraph',
     children: [
       { type: 'text', text: 'This is editable ' },
       { type: 'text', text: 'This is bold text', bold: true },
+      { type: 'text', text: 'This is italic text', italic: true },
+      { type: 'text', text: 'This is underlined text', underline: true },
       { type: 'text', text: 'This is deleted text', strikethrough: true },
       { type: 'text', text: '<textarea>\n', code: true },
       { type: 'text', text: 'It is me', italic: true },
@@ -192,23 +213,8 @@ export const blocksData: Attribute.BlocksValue = [
   {
     type: 'image',
     children: [{ type: 'text', text: '' }], // for void elements this needs to be defined
-    image: {
-      url: 'https://via.placeholder.com/300/09f/fff.png',
-      name: 'Screenshot 2023-08-22 at 10.33.50.png',
-      alternativeText: null,
-      caption: null,
-      width: 300,
-      height: 300,
-      formats: {},
-      hash: 'Screenshot_2023_08_22_at_10_33_50_ac7d5fd5b1',
-      ext: '.png',
-      mime: 'image/png',
-      size: 17.95,
-      previewUrl: null,
-      provider: 'local',
-      provider_metadata: null,
-      createdAt: '2023-08-24T09:43:30.065Z',
-      updatedAt: '2023-08-24T09:43:30.065Z',
-    },
+    image: mockImage,
   },
 ];
+
+export { blocksData, mockImage };

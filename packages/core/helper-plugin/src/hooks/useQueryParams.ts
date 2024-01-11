@@ -10,7 +10,7 @@ const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
   const query = useMemo(() => {
     const searchQuery = search.substring(1);
 
-    if (!search) {
+    if (!search && initialParams) {
       return initialParams;
     }
 

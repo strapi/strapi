@@ -94,7 +94,7 @@ const createBuildContext = async ({
   tsconfig,
   strapi,
   options = {},
-}: CreateBuildContextArgs) => {
+}: CreateBuildContextArgs): Promise<BuildContext> => {
   /**
    * If you make a new strapi instance when one already exists,
    * you will overwrite the global and the app will _most likely_
