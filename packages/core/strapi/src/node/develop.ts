@@ -10,8 +10,8 @@ import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './create-build-context';
-import { build as buildWebpack } from './webpack/build';
-import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
+import type { WebpackWatcher } from './webpack/watch';
+import type { ViteWatcher } from './vite/watch';
 
 import { writeStaticClientFiles } from './staticFiles';
 
@@ -20,6 +20,12 @@ interface DevelopOptions extends CLIContext {
    * @default false
    */
   ignorePrompts?: boolean;
+  /**
+   * Which bundler to use for building.
+   *
+   * @default webpack
+   */
+  bundler?: 'webpack' | 'vite';
   polling?: boolean;
   open?: boolean;
   watchAdmin?: boolean;
@@ -120,7 +126,14 @@ const develop = async ({
       const adminSpinner = logger.spinner(`Creating admin`).start();
 
       await writeStaticClientFiles(ctx);
-      await buildWebpack(ctx);
+
+      if (ctx.bundler === 'webpack') {
+        const { build: buildWebpack } = await import('./webpack/build');
+        await buildWebpack(ctx);
+      } else if (ctx.bundler === 'vite') {
+        const { build: buildVite } = await import('./vite/build');
+        await buildVite(ctx);
+      }
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
@@ -166,12 +179,13 @@ const develop = async ({
       autoReload: true,
       serveAdminPanel: !watchAdmin,
     });
-    let webpackWatcher: WebpackWatcher | undefined;
 
     /**
      * If we're watching the admin panel then we're going to attach the watcher
      * as a strapi middleware.
      */
+    let bundleWatcher: WebpackWatcher | ViteWatcher | undefined;
+
     if (watchAdmin) {
       timer.start('createBuildContext');
       const contextSpinner = logger.spinner(`Building build context`).start();
@@ -192,7 +206,14 @@ const develop = async ({
       const adminSpinner = logger.spinner(`Creating admin`).start();
 
       await writeStaticClientFiles(ctx);
-      webpackWatcher = await watchWebpack(ctx);
+
+      if (ctx.bundler === 'webpack') {
+        const { watch: watchWebpack } = await import('./webpack/watch');
+        bundleWatcher = await watchWebpack(ctx);
+      } else if (ctx.bundler === 'vite') {
+        const { watch: watchVite } = await import('./vite/watch');
+        bundleWatcher = await watchVite(ctx);
+      }
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
@@ -291,8 +312,8 @@ const develop = async ({
 
           await strapiInstance.destroy();
 
-          if (webpackWatcher) {
-            webpackWatcher.close();
+          if (bundleWatcher) {
+            bundleWatcher.close();
           }
           process.send?.('killed');
           break;

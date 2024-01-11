@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { type StrapiTheme } from '@strapi/design-system';
 import { type Attribute, type FeaturesService } from '@strapi/types';
 import { type BaseEditor } from 'slate';
