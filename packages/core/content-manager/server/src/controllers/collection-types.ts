@@ -522,7 +522,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.countDraftRelations(id, model);
+    const number = await entityManager.countDraftRelations(id, model, locale);
 
     return {
       data: number,
