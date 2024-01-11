@@ -15,7 +15,12 @@ let uploadFolder;
 describe('Uploads folder (GraphQL)', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createAuthRequest({
+      strapi,
+      // header required for multipart requests
+      state: { headers: { 'x-apollo-operation-name': 'graphql-upload' } },
+    });
+
     rqAdmin = await createAuthRequest({ strapi });
   });
 
