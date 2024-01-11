@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import os from 'os';
 import path from 'path';
 import { Observable } from 'rxjs';
-import { build } from 'vite';
 
 import { isError } from '../../core/errors';
 
@@ -40,15 +39,18 @@ const viteBuildTask: TaskHandler<ViteBuildTask> = {
   },
   run$(ctx, task) {
     return new Observable((subscriber) => {
-      const config = resolveViteConfig(ctx, task);
-      ctx.logger.debug('Vite config:', os.EOL, config);
-      build(config)
-        .then(() => {
-          subscriber.complete();
-        })
-        .catch((err) => {
-          subscriber.error(err);
+      resolveViteConfig(ctx, task).then((config) => {
+        ctx.logger.debug('Vite config:', os.EOL, config);
+        import('vite').then(({ build }) => {
+          build(config)
+            .then(() => {
+              subscriber.complete();
+            })
+            .catch((err) => {
+              subscriber.error(err);
+            });
         });
+      });
     });
   },
   async success(ctx, task) {
