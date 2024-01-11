@@ -51,7 +51,7 @@ export default async (_opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIC
         Then run one of the commands below based on the package manager used in that project:
 
         ## yarn
-        ${chalk.greenBright(`yalc add --link ${pkgJson.name} && yarn install`)}
+        ${chalk.greenBright(`yarn dlx yalc add --link ${pkgJson.name} && yarn install`)}
 
         ## npm
         ${chalk.greenBright(
