@@ -1,6 +1,6 @@
 import { Strapi } from '@strapi/types';
 
-import type { CLIContext } from '../commands/types';
+import type { CLIContext } from '../cli/types';
 
 interface BaseContext {
   /**

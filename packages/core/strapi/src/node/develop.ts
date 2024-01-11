@@ -6,7 +6,7 @@ import path from 'node:path';
 import cluster from 'node:cluster';
 import { strapiFactory } from '@strapi/core';
 
-import type { CLIContext } from '../commands/types';
+import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './create-build-context';
