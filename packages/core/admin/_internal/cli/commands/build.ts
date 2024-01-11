@@ -48,6 +48,12 @@ const build = async (options: BuildCLIOptions) => {
      */
     process.env.NODE_ENV = process.env.NODE_ENV ?? 'production';
 
+    if (process.env.NODE_ENV !== 'production') {
+      options.logger.warn(
+        '[@strapi/strapi]: The NODE_ENV is not set to production. This may result in unexpected behavior.'
+      );
+    }
+
     await nodeBuild({
       ...options,
       minify: options.optimization ?? options.minify,

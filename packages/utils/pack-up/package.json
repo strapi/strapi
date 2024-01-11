@@ -60,7 +60,7 @@
     "watch": "node -r esbuild-register scripts/watch"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "4.2.1",
+    "@vitejs/plugin-react-swc": "3.5.0",
     "boxen": "5.1.2",
     "browserslist-to-esbuild": "1.2.0",
     "chalk": "4.1.2",

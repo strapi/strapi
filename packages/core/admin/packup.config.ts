@@ -1,5 +1,4 @@
 import { Config, defineConfig } from '@strapi/pack-up';
-import { transformWithEsbuild } from 'vite';
 
 const config: Config = defineConfig({
   bundles: [

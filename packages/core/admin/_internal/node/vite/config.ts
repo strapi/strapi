@@ -1,4 +1,4 @@
-import { InlineConfig, UserConfig } from 'vite';
+import type { InlineConfig, UserConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 

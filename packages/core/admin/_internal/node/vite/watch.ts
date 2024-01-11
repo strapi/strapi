@@ -1,4 +1,3 @@
-import { createServer } from 'vite';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { Common } from '@strapi/types';
@@ -16,6 +15,8 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
   const finalConfig = await mergeConfigWithUserConfig(config, ctx);
 
   ctx.logger.debug('Vite config', finalConfig);
+
+  const { createServer } = await import('vite');
 
   const vite = await createServer(config);
 
