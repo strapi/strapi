@@ -226,7 +226,7 @@ const findOne = async (id: Entity.ID, populate = ['roles']) => {
  */
 const findOneByEmail = async (email: string, populate = []) => {
   return strapi.query('admin::user').findOne({
-    where: { email },
+    where: { email: { $eqi: email } },
     populate,
   });
 };

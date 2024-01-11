@@ -67,7 +67,7 @@ Creates a new package at the given path, by default uses the inbuilt template se
 
 ### `build`
 
-Builds your current package based on the configuration in your `package.json` and `package.config.ts` (if applicable).
+Builds your current package based on the configuration in your `package.json` and `packup.config.ts` (if applicable).
 
 - `--minify` – minifies the output (default `false`).
 - `--sourcemap` – generates sourcemaps for the output (default `true`).
@@ -82,10 +82,10 @@ Watches your current package for changes and rebuilds when necessary.
 
 ## Configuration
 
-`@strapi/pack-up` by default reads its configuration from your `package.json`. But sometimes you need more flexibility, to do this you can create a `package.config.ts` file in the root of your package.
+`@strapi/pack-up` by default reads its configuration from your `package.json`. But sometimes you need more flexibility, to do this you can create a `packup.config.ts` file in the root of your package.
 
 ```ts
-// package.config.ts
+// packup.config.ts
 import { defineConfig } from '@strapi/pack-up';
 
 export default defineConfig({
