@@ -35,43 +35,45 @@ export const security: Common.MiddlewareFactory<Config> =
   (ctx: Context, next: Next) => {
     let helmetConfig: Config = defaultsDeep(defaults, config);
 
-    const specialPaths = ['/documentation'];
-
-    const directives: {
-      'script-src': string[];
-      'img-src': string[];
-      'manifest-src': string[];
-      'frame-src': string[];
-    } = {
-      'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
-      'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
-      'manifest-src': [],
-      'frame-src': [],
+    const specialPaths: Record<string, Config> = {
+      '/documentation': {
+        contentSecurityPolicy: {
+          directives: {
+            'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
+            'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
+          },
+        },
+      },
     };
 
     if (strapi.plugin('graphql')) {
       const { config: gqlConfig } = strapi.plugin('graphql');
-      specialPaths.push(gqlConfig('endpoint'));
-
-      // if playground is enabled, add exceptions for apollo
-      if (strapi.plugin('graphql').isPlaygroundEnabled()) {
-        directives['script-src'].push(`https: 'unsafe-inline'`);
-        directives['img-src'].push(`'apollo-server-landing-page.cdn.apollographql.com'`);
-        directives['manifest-src'].push(`'self'`);
-        directives['manifest-src'].push('apollo-server-landing-page.cdn.apollographql.com');
-        directives['frame-src'].push(`'self'`);
-        directives['frame-src'].push('sandbox.embed.apollographql.com');
-      }
-    }
-
-    // TODO: we shouldn't combine playground exceptions with documentation for all routes, we should first check the path and then return exceptions specific to that
-    if (ctx.method === 'GET' && specialPaths.some((str) => ctx.path.startsWith(str))) {
-      helmetConfig = merge(helmetConfig, {
+      specialPaths[gqlConfig('endpoint') as string] = {
         crossOriginEmbedderPolicy: false, // TODO: only use this for graphql playground
         contentSecurityPolicy: {
-          directives,
+          directives: {
+            'script-src': ["'self'", "'unsafe-inline'", `https: 'unsafe-inline'`],
+            'img-src': [
+              "'self'",
+              'data:',
+              `'apollo-server-landing-page.cdn.apollographql.com'`,
+              'strapi.io',
+            ],
+            'manifest-src': [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
+            'frame-src': [`'self'`, 'sandbox.embed.apollographql.com'],
+          },
         },
-      });
+      };
+    }
+
+    if (ctx.method === 'GET') {
+      // iIf this path matches one of our special paths, merge in its config
+      // Note that it only finds the first matching path
+      const matchedPathKey = Object.keys(specialPaths).find((key) => ctx.path.startsWith(key));
+
+      if (matchedPathKey) {
+        helmetConfig = merge(helmetConfig, specialPaths[matchedPathKey]);
+      }
     }
 
     return helmet(helmetConfig)(ctx, next);
