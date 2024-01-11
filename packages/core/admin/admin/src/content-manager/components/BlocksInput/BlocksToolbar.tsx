@@ -5,7 +5,14 @@ import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@str
 import { pxToRem } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement, Node } from 'slate';
+import {
+  Editor,
+  Transforms,
+  Element as SlateElement,
+  Node,
+  type NodeEntry,
+  type Ancestor,
+} from 'slate';
 import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -144,6 +151,50 @@ const ToolbarButton = ({
   );
 };
 
+const handleToggleList = (
+  editor: Editor,
+  currentListEntry: NodeEntry<Ancestor>,
+  format: Block<'list'>['format']
+) => {
+  const [currentList, currentListPath] = currentListEntry;
+
+  if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+    // Format is different, toggle list format
+    if (currentList.format !== format) {
+      Transforms.setNodes(
+        editor,
+        {
+          format,
+        },
+        {
+          at: currentListPath,
+        }
+      );
+    } else {
+      // Format is same, convert selected list-item to paragraph
+      const [, lastNodePath] = Editor.last(editor, []);
+
+      Transforms.unwrapNodes(editor, {
+        match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+        split: true,
+        at: editor.selection ?? lastNodePath,
+      });
+
+      const [, updatedLastNodePath] = Editor.last(editor, []);
+
+      Transforms.setNodes(
+        editor,
+        {
+          type: 'paragraph',
+        },
+        {
+          at: editor.selection ?? [updatedLastNodePath[0]],
+        }
+      );
+    }
+  }
+};
+
 const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
@@ -187,7 +238,18 @@ const BlocksDropdown = () => {
       Transforms.select(editor, Editor.start(editor, [0, 0]));
     }
 
-    // Let the block handle the Slate conversion logic
+    // If selection is a list-item, toggle format
+    const currentListEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+    });
+
+    if (currentListEntry && ['list-ordered', 'list-unordered'].includes(optionKey)) {
+      const format = optionKey.split('-')[1] as Block<'list'>['format'];
+      handleToggleList(editor, currentListEntry, format);
+      return;
+    }
+
+    // Let the block handle the Slate conversion logic except list
     const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
     handleConversionResult(maybeRenderModal);
 
@@ -316,43 +378,7 @@ const toggleList = (editor: Editor, format: Block<'list'>['format']) => {
 
   // If selection is already a list then toggle format
   if (currentListEntry) {
-    const [currentList, currentListPath] = currentListEntry;
-
-    if (!Editor.isEditor(currentList) && isListNode(currentList)) {
-      // Format is different, toggle list format
-      if (currentList.format !== format) {
-        Transforms.setNodes(
-          editor,
-          {
-            format,
-          },
-          {
-            at: currentListPath,
-          }
-        );
-      } else {
-        // Format is same, convert selected list-item to paragraph
-        const [, lastNodePath] = Editor.last(editor, []);
-
-        Transforms.unwrapNodes(editor, {
-          match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-          split: true,
-          at: editor.selection ?? lastNodePath,
-        });
-
-        const [, updatedLastNodePath] = Editor.last(editor, []);
-
-        Transforms.setNodes(
-          editor,
-          {
-            type: 'paragraph',
-          },
-          {
-            at: editor.selection ?? [updatedLastNodePath[0]],
-          }
-        );
-      }
-    }
+    handleToggleList(editor, currentListEntry, format);
   } else {
     // If selection is not a list then convert it to list
     const [_, lastNodePath] = Editor.last(editor, []);

@@ -200,11 +200,7 @@ const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) =>
 
   if (!convertedPath) return;
 
-  Transforms.wrapNodes(
-    editor,
-    { type: 'list', format, children: [], listIndentLevel: 0 },
-    { at: convertedPath }
-  );
+  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: convertedPath });
 };
 
 /**
