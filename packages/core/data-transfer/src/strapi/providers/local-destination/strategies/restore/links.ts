@@ -18,7 +18,10 @@ const isForeignKeyConstraintError = (e: Error) => {
   const SQLITE_FK_ERROR_CODE = 'SQLITE_CONSTRAINT_FOREIGNKEY';
 
   if (isErrorWithCode(e) && e.code) {
-    return [SQLITE_FK_ERROR_CODE, POSTGRES_FK_ERROR_CODE, ...MYSQL_FK_ERROR_CODES].includes(e.code);
+    return (
+      [SQLITE_FK_ERROR_CODE, POSTGRES_FK_ERROR_CODE, ...MYSQL_FK_ERROR_CODES].includes(e.code) ||
+      e.message.toLowerCase().includes('foreign key constraint')
+    );
   }
 };
 
@@ -46,10 +49,7 @@ export const createLinksWriteStream = (
           await query().insert(link);
         } catch (e) {
           if (e instanceof Error) {
-            if (
-              e.message.toLowerCase().includes('foreign key constraint') ||
-              isForeignKeyConstraintError(e)
-            ) {
+            if (isForeignKeyConstraintError(e)) {
               onWarning?.(
                 `Skipping link ${left.type}:${originalLeftRef} -> ${right.type}:${originalRightRef} due to a foreign key constraint.`
               );
