@@ -290,6 +290,8 @@ const develop = async ({
           '**/exports/**',
           '**/dist/**',
           '**/*.d.ts',
+          '**/.yalc/**',
+          '**/yalc.lock',
           ...strapiInstance.config.get('admin.watchIgnoreFiles', []),
         ],
       })
