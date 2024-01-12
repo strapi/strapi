@@ -293,32 +293,48 @@ export class Upgrader implements UpgraderInterface {
   }
 }
 
+/**
+ * Resolves the NPM target version based on the given project, target, and NPM package.
+ * If target is a SemVer, it directly finds it. If it's a release type (major, minor, patch),
+ * it calculates the range of versions for this release type and returns the latest version within this range.
+ */
+const resolveNPMTarget = (
+  project: Project,
+  target: Version.ReleaseType | Version.SemVer,
+  npmPackage: NPM.Package
+): NPM.NPMPackageVersion | undefined => {
+  // Semver
+  if (isSemverInstance(target)) {
+    return npmPackage.findVersion(target);
+  }
+
+  // Release Types
+  else if (isSemVerReleaseType(target)) {
+    const range = rangeFromVersions(project.strapiVersion, target);
+    const npmVersionsMatches = npmPackage.findVersionsInRange(range);
+
+    // The targeted version is the latest one that matches the given range
+    return npmVersionsMatches.at(-1);
+  }
+
+  return undefined;
+};
+
 export const upgraderFactory = (
   project: Project,
   target: Version.ReleaseType | Version.SemVer,
   npmPackage: NPM.Package
 ) => {
-  const range = rangeFromVersions(project.strapiVersion, target);
-  const npmVersionsMatches = npmPackage.findVersionsInRange(range);
-  // The targeted version is the latest one that matches the given range
-  const targetedNPMVersion = npmVersionsMatches.at(-1);
-
-  assert(targetedNPMVersion, `Could not find any version in the range ${f.versionRange(range)}`);
-
-  // Make sure the latest version matched in the range is the same as the targeted one (only if target is a semver)
-  if (isSemVer(target) && target.raw !== targetedNPMVersion.version) {
-    throw new Error(
-      `${f.version(target)} doesn't exist on the registry. Closest version found is ${
-        targetedNPMVersion.version
-      }`
-    );
-  }
-
-  if (!isLiteralSemVer(targetedNPMVersion.version)) {
-    throw new Error('Something wrong happened with the target version (not a literal semver)');
+  const targetedNPMVersion = resolveNPMTarget(project, target, npmPackage);
+  if (!targetedNPMVersion) {
+    throw new Error(`Couldn't find a matching version in the NPM registry for "${target}"`);
   }
 
   const semverTarget = semVerFactory(targetedNPMVersion.version);
+
+  if (semver.eq(semverTarget, project.strapiVersion)) {
+    throw new Error(`The project is already on ${f.version(semverTarget)}`);
+  }
 
   return new Upgrader(project, semverTarget, npmPackage);
 };
