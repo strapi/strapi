@@ -1,8 +1,7 @@
 import { defaultsDeep, merge } from 'lodash/fp';
 import helmet, { KoaHelmet } from 'koa-helmet';
 
-import type { Common, Strapi } from '@strapi/types';
-import type { Context, Next } from 'koa';
+import type { Common } from '@strapi/types';
 
 export type Config = NonNullable<Parameters<KoaHelmet>[0]>;
 
