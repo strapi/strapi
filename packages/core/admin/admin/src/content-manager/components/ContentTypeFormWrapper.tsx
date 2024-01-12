@@ -27,6 +27,7 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
+import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
@@ -172,7 +173,10 @@ const ContentTypeFormWrapper = ({
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, {
+          cancelToken: source.token,
+          params: buildValidGetParams(query),
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
@@ -231,6 +235,7 @@ const ContentTypeFormWrapper = ({
     redirectionLink,
     toggleNotification,
     isSingleType,
+    query,
   ]);
 
   const displayErrors = React.useCallback(
