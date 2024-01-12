@@ -102,7 +102,6 @@ const readFile = async (archive, file, options = {}) => {
             console.log(filePath);
             return entry.type === 'File' && file === filePath;
           },
-          // Set outStream to
           async onentry(entry) {
             content = await collector(entry);
           },
