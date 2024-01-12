@@ -31,7 +31,7 @@ const defaults: Config = {
 };
 
 export const security: Common.MiddlewareFactory<Config> =
-  (config: any, { strapi }: { strapi: Strapi }) =>
+  (config, { strapi }) =>
   (ctx: Context, next: Next) => {
     let helmetConfig: Config = defaultsDeep(defaults, config);
 
