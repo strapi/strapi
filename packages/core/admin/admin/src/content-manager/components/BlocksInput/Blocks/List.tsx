@@ -103,20 +103,40 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
     editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
   if (isListEmpty) {
-    event.preventDefault();
-    replaceListWithEmptyBlock(editor, currentListPath);
-  } else if (isNodeStart) {
-    Transforms.liftNodes(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
+    const parentListEntry = Editor.above(editor, {
+      at: currentListPath,
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
     });
-    // Transforms the list item into a paragraph
-    Transforms.setNodes(
-      editor,
-      { type: 'paragraph' },
-      {
-        hanging: true,
+    if (!parentListEntry) {
+      event.preventDefault();
+      replaceListWithEmptyBlock(editor, currentListPath);
+    }
+  } else if (isNodeStart) {
+    const previousEntry = Editor.previous(editor, {
+      at: currentListItemPath,
+    });
+
+    const nextEntry = Editor.next(editor, {
+      at: currentListItemPath,
+    });
+
+    // If previous node and next node are lists with same format and indent Levels, then merge the nodes
+    if (previousEntry && nextEntry) {
+      if (
+        previousEntry[0].format === nextEntry[0].format &&
+        previousEntry[0].listIndentLevel === nextEntry[0].listIndentLevel
+      ) {
+        event.preventDefault();
+        Transforms.removeNodes(editor, {
+          at: currentListItemPath,
+        });
+
+        if (previousEntry[0].type === 'list' && nextEntry[0].type === 'list')
+          Transforms.mergeNodes(editor, {
+            at: currentListItemPath,
+          });
       }
-    );
+    }
   } else if (isFocusAtTheBeginningOfAChild) {
     Transforms.liftNodes(editor, {
       match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
@@ -186,15 +206,8 @@ const handleEnterKeyOnList = (editor: Editor) => {
 
     // Otherwise delete the empty list item and create a new paragraph below the parent list
     Transforms.removeNodes(editor, { at: currentListItemPath });
-    const listNodeEntry = Editor.above(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-    });
 
-    if (!listNodeEntry) {
-      return;
-    }
-
-    const createdParagraphPath = Path.next(listNodeEntry[1]);
+    const createdParagraphPath = Path.next(currentListPath);
     Transforms.insertNodes(
       editor,
       {
