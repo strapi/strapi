@@ -1,5 +1,6 @@
 import { errors } from '@strapi/utils';
 import { LoadedStrapi } from '@strapi/types';
+import EE from '@strapi/strapi/dist/utils/ee';
 import type { Release } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
@@ -47,6 +48,26 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
       throw new errors.ValidationError(
         `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
       );
+    }
+  },
+  async validatePendingReleaseLimit() {
+    // @ts-expect-error - options is not typed into features
+    const eeLicenseOptions = EE.features.get('cms-content-releases')?.options;
+    const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
+      filters: {
+        releasedAt: {
+          $null: true,
+        },
+      },
+    });
+
+    if (!eeLicenseOptions || !eeLicenseOptions.maximumReleases) {
+      throw new errors.ValidationError('The license does not contain a configuration for releases');
+    }
+
+    // Unlimited is a number that will never be reached like 9999
+    if (pendingReleasesCount >= eeLicenseOptions.maximumReleases) {
+      throw new errors.ValidationError('You have reached the maximum number of pending releases');
     }
   },
 });
