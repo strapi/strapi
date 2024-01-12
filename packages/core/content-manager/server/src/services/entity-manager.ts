@@ -186,8 +186,9 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     };
 
     // @ts-expect-error - change entity to document
-    const clonedEntity = await strapi.documents(uid).clone(document.id, params);
+    const result = await strapi.documents(uid).clone(document.id, params);
 
+    const clonedEntity = result?.versions.at(0);
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (clonedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(clonedEntity, uid);
