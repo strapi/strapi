@@ -12,7 +12,14 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Strapi, Common } from '@strapi/types';
-import type { BaseContext, Context, Next } from 'koa';
+import type {
+  BaseContext,
+  Context,
+  DefaultContextExtends,
+  DefaultState,
+  DefaultStateExtends,
+  Next,
+} from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
 
@@ -30,7 +37,7 @@ const merge = mergeWith((a, b) => {
 const useUploadMiddleware = (strapi: Strapi, path: string): void => {
   const uploadMiddleware = graphqlUploadKoa();
 
-  strapi.server.app.use((ctx: Context, next: Next) => {
+  strapi.server.app.use((ctx, next) => {
     if (ctx.path === path) {
       return uploadMiddleware(ctx, next);
     }
@@ -92,7 +99,10 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     cache: 'bounded' as const,
   };
 
-  const serverConfig = merge(defaultServerConfig, config('apolloServer')) as any;
+  const serverConfig = merge(
+    defaultServerConfig,
+    config('apolloServer')
+  ) as ApolloServerOptions<BaseContext> & CustomOptions;
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
@@ -149,7 +159,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
 
   // add the graphql server for koa
   handler.push(
-    koaMiddleware(server, {
+    koaMiddleware<DefaultStateExtends, DefaultContextExtends>(server, {
       // Initialize loaders for this request.
       context: async ({ ctx }) => ({
         state: ctx.state,
