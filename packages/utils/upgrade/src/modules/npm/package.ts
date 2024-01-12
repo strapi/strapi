@@ -4,7 +4,7 @@ import semver from 'semver';
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
-import type { Package as PackageInterface, NPMPackage } from './types';
+import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
 import type { Version } from '../version';
 
 export class Package implements PackageInterface {
@@ -54,6 +54,12 @@ export class Package implements PackageInterface {
     );
   }
 
+  findVersion(version: Version.SemVer): NPMPackageVersion | undefined {
+    const versions = this.getVersionsAsList();
+
+    return versions.find((npmVersion) => semver.eq(npmVersion.version, version));
+  }
+
   async refresh() {
     const response = await fetch(this.packageURL);
 
@@ -66,10 +72,7 @@ export class Package implements PackageInterface {
   }
 
   versionExists(version: Version.SemVer) {
-    const versions = this.getVersionsAsList();
-    const searchResult = versions.find((npmVersion) => semver.eq(npmVersion.version, version));
-
-    return searchResult !== undefined;
+    return this.findVersion(version) !== undefined;
   }
 }
 

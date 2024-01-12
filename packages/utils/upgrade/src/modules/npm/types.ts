@@ -15,6 +15,7 @@ export interface Package {
   getVersionsDict(): Record<NPMVersion, NPMPackageVersion>;
   getVersionsAsList(): NPMPackageVersion[];
 
+  findVersion(version: Version.SemVer): NPMPackageVersion | undefined;
   findVersionsInRange(range: Version.Range): NPMPackageVersion[];
 }
 

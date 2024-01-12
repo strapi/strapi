@@ -122,4 +122,15 @@ describe('Package class', () => {
 
     expect(packageInstance.versionExists(version)).toBeFalsy();
   });
+
+  it('should return the version if it exists', async () => {
+    const version = new semver.SemVer('1.0.0');
+    expect(packageInstance.findVersion(version)).not.toBeUndefined();
+  });
+
+  it('should return undefined if the version does not exist', async () => {
+    const version = new semver.SemVer('1.1.1');
+
+    expect(packageInstance.findVersion(version)).toBeUndefined();
+  });
 });
