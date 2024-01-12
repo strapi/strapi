@@ -32,7 +32,7 @@ const defaults: Config = {
 
 export const security: Common.MiddlewareFactory<Config> =
   (config, { strapi }) =>
-  (ctx: Context, next: Next) => {
+  (ctx, next) => {
     let helmetConfig: Config = defaultsDeep(defaults, config);
 
     const specialPaths = ['/documentation'];
