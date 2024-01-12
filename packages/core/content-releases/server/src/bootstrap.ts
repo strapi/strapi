@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { LoadedStrapi } from '@strapi/types';
-import type { Entity as StrapiEntity } from '@strapi/types';
+import type { LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID } from './constants';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
