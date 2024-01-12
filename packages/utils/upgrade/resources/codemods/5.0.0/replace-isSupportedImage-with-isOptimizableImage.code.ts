@@ -10,18 +10,33 @@ const transform: Transform = (file, api) => {
   // Parse the file content
   const root = j(file.source);
 
+  // Find and update the destructuring assignment
   root
-    // Find isSupportedImage calls expressions
-    .find(j.CallExpression, {
-      callee: {
-        name: 'isSupportedImage',
+    .find(j.VariableDeclarator, {
+      init: {
+        callee: {
+          object: { callee: { property: { name: 'getUploadService' } } },
+          arguments: [{ value: 'image-manipulation' }],
+        },
       },
     })
-    // For each call expression
     .forEach((path) => {
-      // Update the callee's name to isOptimizableImage
-      path.node.callee.name = 'isOptimizableImage';
+      if (path.node.id.type === 'ObjectPattern') {
+        path.node.id.properties.forEach((property) => {
+          if (property.key.type === 'Identifier' && property.key.name === 'isSupportedImage') {
+            property.key.name = 'isOptimizableImage';
+            if (property.value && property.value.type === 'Identifier') {
+              property.value.name = 'isOptimizableImage';
+            }
+          }
+        });
+      }
     });
+
+  // Update calls to isSupportedImage
+  root.find(j.Identifier, { name: 'isSupportedImage' }).forEach((path) => {
+    path.node.name = 'isOptimizableImage';
+  });
 
   // Return the updated file content
   return root.toSource();
