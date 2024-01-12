@@ -1,7 +1,7 @@
 import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticleDb } from './utils';
+import { ARTICLE_UID, findArticleDb, AUTHOR_UID, findAuthorDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
@@ -53,6 +53,17 @@ describe('Document Service', () => {
       });
 
       expect(article).toMatchObject(articleDb);
+    });
+
+    it('ignores locale parameter on non-localized content type', async () => {
+      const authorDb = await findAuthorDb({ name: 'Author1-Draft' });
+
+      // Locale should be ignored on non-localized content types
+      const author = await strapi.documents(AUTHOR_UID).findOne(authorDb.documentId, {
+        locale: 'en',
+      });
+
+      expect(author).toMatchObject(authorDb);
     });
 
     it.todo('ignores pagination parameters');

@@ -18,7 +18,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
 // Types reused from entity service
-type Entity = EntityService.Result<Common.UID.ContentType>;
+export type Entity = EntityService.Result<Common.UID.ContentType>;
 type Body = EntityService.Params.Data.Input<Common.UID.ContentType>;
 
 const emitEvent = async (uid: Common.UID.ContentType, event: string, entity: Entity) => {
@@ -44,10 +44,7 @@ const buildDeepPopulate = (uid: Common.UID.ContentType) => {
   );
 };
 
-/**
- * @type {import('./entity-manager').default}
- */
-export default ({ strapi }: { strapi: Strapi }) => ({
+const entityManager = ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Extend this function from other plugins to add custom mapping of entity
    * responses
@@ -192,7 +189,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const clonedEntity = await strapi.documents(uid).clone(document.id, params);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
+    if (clonedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(clonedEntity, uid);
     }
 
@@ -223,9 +220,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     // @ts-expect-error - change entity to document
     await strapi.documents(uid).delete(document.id, { ...opts, populate });
+    // const deletedDocument = await strapi.documents(uid).delete(document.id, { ...opts, populate });
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    // if (isWebhooksPopulateRelationsEnabled()) {
+    // if (deletedDocument && isWebhooksPopulateRelationsEnabled()) {
     //   return getDeepRelationsCount(deletedEntity, uid);
     // }
 
@@ -259,7 +257,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const mappedEntity = await this.mapEntity(publishedDocument, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
+    if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
@@ -357,7 +355,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const mappedEntity = await this.mapEntity(unpublishedDocument, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
+    if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
@@ -399,3 +397,5 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return totalNumberDraftRelations;
   },
 });
+
+export default entityManager;

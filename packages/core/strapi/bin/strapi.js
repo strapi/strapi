@@ -1,2 +1,4 @@
 #!/usr/bin/env node
-require('../dist/cli');
+const { runCLI } = require('../dist/cli');
+
+runCLI(process.argv);

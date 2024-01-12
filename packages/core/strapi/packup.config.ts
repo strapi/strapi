@@ -12,8 +12,8 @@ export default defineConfig({
       runtime: 'node',
     },
     {
-      source: './src/cli.ts',
-      require: './dist/cli.js',
+      source: './src/cli/index.ts',
+      require: './dist/cli/index.js',
       runtime: 'node',
     },
     {

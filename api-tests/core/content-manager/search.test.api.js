@@ -181,7 +181,10 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body.results)).toBe(true);
       expect(res.body.results.length).toBe(data.beds.length);
-      expect(res.body.results.map(omit(CREATOR_FIELDS))).toEqual(expect.arrayContaining(data.beds));
+      // TODO V5: Filter out i18n fields if content type is not localized
+      expect(res.body.results.map(omit([...CREATOR_FIELDS, 'localizations']))).toEqual(
+        expect.arrayContaining(data.beds)
+      );
     });
 
     test('search with special characters', async () => {
