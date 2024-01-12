@@ -107,6 +107,10 @@ const renderAdmin = async (
   ) {
     module.hot.accept();
   }
+
+  if (typeof import.meta.hot?.accept === 'function') {
+    import.meta.hot.accept();
+  }
 };
 
 export { renderAdmin };

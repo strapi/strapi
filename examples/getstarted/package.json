@@ -33,6 +33,7 @@
     "react-dom": "^18.2.0",
     "react-intl": "6.4.1",
     "react-router-dom": "5.3.4",
+    "strapi-plugin-workspace-plugin": "workspace:*",
     "styled-components": "5.3.3"
   },
   "engines": {

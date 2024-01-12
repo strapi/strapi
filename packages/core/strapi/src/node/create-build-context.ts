@@ -121,7 +121,7 @@ const createBuildContext = async <TOptions>({
 
   const pluginsWithFront = getMapOfPluginsWithAdmin(plugins);
 
-  logger.debug('Enabled plugins with FE', os.EOL, plugins);
+  logger.debug('Enabled plugins with FE', os.EOL, pluginsWithFront);
 
   const target = browserslist.loadConfig({ path: cwd }) ?? DEFAULT_BROWSERSLIST;
 
@@ -129,9 +129,12 @@ const createBuildContext = async <TOptions>({
 
   const features = strapiInstance.config.get('features', undefined);
 
+  const { bundler = 'webpack', ...restOptions } = options;
+
   const buildContext = {
     appDir,
     basePath: `${adminPath}/`,
+    bundler,
     customisations,
     cwd,
     distDir,
@@ -140,7 +143,7 @@ const createBuildContext = async <TOptions>({
     env,
     features,
     logger,
-    options: options as BaseOptions & TOptions,
+    options: restOptions as BaseOptions & TOptions,
     plugins: pluginsWithFront,
     runtimeDir,
     strapi: strapiInstance,
