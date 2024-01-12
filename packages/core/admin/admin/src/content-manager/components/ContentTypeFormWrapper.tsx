@@ -100,7 +100,7 @@ const ContentTypeFormWrapper = ({
   const { put, post, del } = fetchClient;
 
   const isSingleType = collectionType === 'single-types';
-  const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
+  const isCreatingEntry = !isSingleType && !id;
 
   const requestURL =
     isCreatingEntry && !origin
@@ -187,7 +187,6 @@ const ContentTypeFormWrapper = ({
           return;
         } else if (resStatus === 404 && isSingleType) {
           // Creating a single type
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         }
 
@@ -258,7 +257,6 @@ const ContentTypeFormWrapper = ({
         trackUsage('didDeleteEntry', trackerProperty);
 
         if (isSingleType) {
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         } else {
           replace(redirectionLink);
@@ -327,7 +325,6 @@ const ContentTypeFormWrapper = ({
 
         // TODO: need to find a better place, or a better abstraction
         queryClient.invalidateQueries(['relation']);
-        setIsCreatingEntry(false);
 
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
