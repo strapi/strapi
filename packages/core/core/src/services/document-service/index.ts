@@ -131,7 +131,10 @@ const createDocumentService = ({
 
     const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
 
-    const validData = await entityValidator.validateEntityCreation(model, data, { isDraft: true });
+    const validData = await entityValidator.validateEntityCreation(model, data, {
+      isDraft: true,
+      locale: params?.locale,
+    });
 
     const componentData = await createComponents(uid, validData);
     const entryData = createPipeline(
@@ -170,7 +173,10 @@ const createDocumentService = ({
     const validData = await entityValidator.validateEntityUpdate(
       model,
       data,
-      { isDraft: true }, // Always update the draft version
+      {
+        isDraft: true, // Always update the draft version
+        locale: params?.locale,
+      },
       entryToUpdate
     );
 

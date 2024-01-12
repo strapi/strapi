@@ -36,7 +36,7 @@ test.describe('Uniqueness', () => {
    * We are testing that uniqueness is enforced for these fields across all entries of a content type in the same locale.
    */
   FIELDS_TO_TEST.forEach((field) => {
-    test(`A user should not be able to duplicate the ${field.name} value in the same content type and locale. Validation should not happen across locales`, async ({
+    test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and locale. Validation should not happen across locales`, async ({
       page,
     }) => {
       await page.locator('text=Create new entry').first().click();

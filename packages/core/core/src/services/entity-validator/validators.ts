@@ -15,6 +15,7 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
 
 interface ValidatorOptions {
   isDraft: boolean;
+  locale: string;
 }
 
 /* Validator utils */
@@ -35,7 +36,7 @@ const addMinLengthValidator = (
       | Attribute.Email
       | Attribute.UID;
   },
-  { isDraft }: { isDraft: boolean }
+  { isDraft }: ValidatorOptions
 ) => {
   return attr.minLength && _.isInteger(attr.minLength) && !isDraft
     ? validator.min(attr.minLength)
@@ -139,13 +140,8 @@ const addStringRegexValidator = (
  */
 const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   validator: T,
-  {
-    attr,
-    model,
-    updatedAttribute,
-    entity,
-    locale,
-  }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>
+  { attr, model, updatedAttribute, entity }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>,
+  options: ValidatorOptions
 ): T => {
   if (attr.type !== 'uid' && !attr.unique) {
     return validator;
@@ -174,11 +170,16 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
      * At this point we know that we are creating a new entry or that the unique field value has changed
      * We check if there is an entry of this content type in the same locale with the same unique field value
      */
-    const filters = locale
-      ? { [updatedAttribute.name]: value, locale }
+    const filters = options.locale
+      ? {
+          [updatedAttribute.name]: value,
+          locale: options.locale,
+        }
       : { [updatedAttribute.name]: value };
+
     const record = await strapi.documents.findFirst(model.uid, {
       filters,
+      status: options.isDraft ? 'draft' : 'published',
     });
 
     return !record;
@@ -203,7 +204,7 @@ const stringValidator = (
   schema = addMinLengthValidator(schema, metas, options);
   schema = addMaxLengthValidator(schema, metas);
   schema = addStringRegexValidator(schema, metas);
-  schema = addUniqueValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas, options);
 
   return schema;
 };
@@ -225,35 +226,45 @@ const enumerationValidator = ({ attr }: { attr: Attribute.Enumeration }) => {
     .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null as any));
 };
 
-const integerValidator = (metas: ValidatorMetas<Attribute.Integer | Attribute.BigInteger>) => {
+const integerValidator = (
+  metas: ValidatorMetas<Attribute.Integer | Attribute.BigInteger>,
+  options: ValidatorOptions
+) => {
   let schema = yup.number().integer();
 
   schema = addMinIntegerValidator(schema, metas);
   schema = addMaxIntegerValidator(schema, metas);
-  schema = addUniqueValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas, options);
 
   return schema;
 };
 
-const floatValidator = (metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>) => {
+const floatValidator = (
+  metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>,
+  options: ValidatorOptions
+) => {
   let schema = yup.number();
   schema = addMinFloatValidator(schema, metas);
   schema = addMaxFloatValidator(schema, metas);
-  schema = addUniqueValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas, options);
 
   return schema;
 };
 
-const bigintegerValidator = (metas: ValidatorMetas<Attribute.BigInteger>) => {
+const bigintegerValidator = (
+  metas: ValidatorMetas<Attribute.BigInteger>,
+  options: ValidatorOptions
+) => {
   const schema = yup.mixed();
-  return addUniqueValidator(schema, metas);
+  return addUniqueValidator(schema, metas, options);
 };
 
 const datesValidator = (
-  metas: ValidatorMetas<Attribute.Date | Attribute.DateTime | Attribute.Time | Attribute.Timestamp>
+  metas: ValidatorMetas<Attribute.Date | Attribute.DateTime | Attribute.Time | Attribute.Timestamp>,
+  options: ValidatorOptions
 ) => {
   const schema = yup.mixed();
-  return addUniqueValidator(schema, metas);
+  return addUniqueValidator(schema, metas, options);
 };
 
 export default {

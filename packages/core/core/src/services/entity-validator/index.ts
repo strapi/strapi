@@ -30,7 +30,8 @@ interface ValidatorMeta<TAttribute = Attribute.Any> {
 }
 
 interface ValidatorContext {
-  isDraft: boolean;
+  isDraft?: boolean;
+  locale?: string;
 }
 
 interface AttributeValidatorMetas {
@@ -38,12 +39,11 @@ interface AttributeValidatorMetas {
   updatedAttribute: { name: string; value: unknown };
   model: Schema.ContentType | Schema.Component;
   entity?: Entity;
-  locale?: string;
 }
 
 interface ModelValidatorMetas {
   model: Schema.ContentType | Schema.Component;
-  data: Record<string, unknown> & { locale?: string };
+  data: Record<string, unknown>;
   entity?: Entity;
 }
 
@@ -286,10 +286,7 @@ const createModelValidator =
         entity,
       };
 
-      const validator = createAttributeValidator(createOrUpdate)(
-        data?.locale ? { ...metas, locale: data.locale } : metas,
-        options
-      );
+      const validator = createAttributeValidator(createOrUpdate)(metas, options);
 
       validators[attributeName] = validator;
 
@@ -306,7 +303,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   >(
     model: Shared.ContentTypes[TUID],
     data: TData | Partial<TData> | undefined,
-    options?: { isDraft?: boolean },
+    options?: ValidatorContext,
     entity?: Entity
   ): Promise<TData> => {
     if (!isObject(data)) {
@@ -319,7 +316,11 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
 
     const validator = createModelValidator(createOrUpdate)(
       { model, data, entity },
-      { isDraft: options?.isDraft ?? false }
+      {
+        isDraft: options?.isDraft ?? false,
+        // TODO should we pass the default locale here?
+        locale: options?.locale ?? 'en',
+      }
     )
       .test('relations-test', 'check that all relations exist', async function (data) {
         try {

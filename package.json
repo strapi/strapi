@@ -31,7 +31,6 @@
   "scripts": {
     "build": "nx run-many --target=build --nx-ignore-cycles",
     "build:size": "cd examples/getstarted && yarn build",
-    "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "commit": "commit",
     "doc:api": "node scripts/open-api/serve.js",
@@ -60,7 +59,7 @@
     "test:front:update:ce": "yarn test:front:ce -u",
     "test:front:watch": "cross-env IS_EE=true run test:front --watch",
     "test:front:watch:ce": "cross-env IS_EE=false run test:front --watch",
-    "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
+    "test:generate-app": "node test/scripts/generate-test-app.js",
     "test:generate-app:no-build": "node test/scripts/generate-test-app.js",
     "test:ts": "yarn test:ts:packages && yarn test:ts:front && yarn test:ts:back",
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
