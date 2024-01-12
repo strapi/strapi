@@ -463,6 +463,7 @@ describe('Upload plugin end to end tests', () => {
     expect(res.body.errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
+          message: expect.stringContaining('x-apollo-operation-name'),
           extensions: expect.objectContaining({
             code: 'BAD_REQUEST',
           }),
