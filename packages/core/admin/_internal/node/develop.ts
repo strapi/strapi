@@ -230,12 +230,9 @@ const develop = async ({
     loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
     loadStrapiSpinner.succeed();
 
-    // if this is a JS project (no tsconfig) AND they have disabled type autogeneration, skip type generation
-    if (!tsconfig?.config && strapi.config.get('typescript.autogenerate') === false) {
-      logger.log('Skipping typescript autogeneration');
-    }
     // For TS projects, type generation is a requirement for the develop command so that the server can restart
-    else {
+    // For JS projects, we respect the experimental autogenerate setting
+    if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
       timer.start('generatingTS');
       const generatingTsSpinner = logger.spinner(`Generating types`).start();
 
