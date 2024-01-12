@@ -48,8 +48,7 @@
     "watch": "strapi plugin:watch"
   },
   "dependencies": {
-    "@apollo/server": "^4.10.0",
-    "@apollo/server-plugin-landing-page-graphql-playground": "4.0.1",
+    "@apollo/server": "4.10.0",
     "@as-integrations/koa": "1.1.1",
     "@graphql-tools/schema": "8.5.1",
     "@graphql-tools/utils": "^8.13.1",
