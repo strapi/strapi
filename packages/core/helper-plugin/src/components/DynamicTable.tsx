@@ -16,6 +16,7 @@ import {
   TableProps as DSTableProps,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
+import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useTracking } from '../features/Tracking';
@@ -25,8 +26,10 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
 
-interface TableProps<TRows extends { id: string }>
-  extends Pick<EmptyBodyTableProps, 'action'>,
+interface TableProps<
+  TRows extends { id: Entity.ID } = { id: Entity.ID },
+  THeader extends TableHeader = TableHeader
+> extends Pick<EmptyBodyTableProps, 'action'>,
     Pick<DSTableProps, 'footer'> {
   children?: React.ReactNode;
   contentType: string;
@@ -34,10 +37,10 @@ interface TableProps<TRows extends { id: string }>
     ConfirmDialogDeleteAll?: React.ElementType;
     ConfirmDialogDelete?: React.ElementType;
   };
-  headers?: TableHeadProps['headers'];
+  headers?: TableHeadProps<THeader>['headers'];
   isLoading?: boolean;
-  onConfirmDeleteAll?: (ids: Array<string | number>) => Promise<void>;
-  onConfirmDelete?: (id: string | number) => Promise<void>;
+  onConfirmDeleteAll?: (ids: Array<TRows['id']>) => Promise<void>;
+  onConfirmDelete?: (id: TRows['id']) => Promise<void>;
   rows?: Array<TRows>;
   withBulkActions?: boolean;
   withMainAction?: boolean;
@@ -45,6 +48,18 @@ interface TableProps<TRows extends { id: string }>
     selectedEntries: Array<string | number>;
     clearSelectedEntries: () => void;
   }) => React.ReactNode;
+}
+
+interface TableRowProps<
+  TRows extends { id: Entity.ID } = { id: Entity.ID },
+  THeader extends TableHeader = TableHeader
+> extends Pick<
+      TableProps<TRows, THeader>,
+      'withBulkActions' | 'withMainAction' | 'rows' | 'headers'
+    >,
+    Pick<TableHeadProps<THeader>, 'entriesToDelete'> {
+  onClickDelete: (id: TRows['id']) => void;
+  onSelectRow: (row: { name: TRows['id']; value: boolean }) => void;
 }
 
 /**
@@ -67,7 +82,7 @@ const Table = ({
   withMainAction = false,
   renderBulkActionsBar,
   ...rest
-}: TableProps<{ id: string }>) => {
+}: TableProps) => {
   const [selectedEntries, setSelectedEntries] = React.useState<Array<number | string>>([]);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = React.useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = React.useState(false);
@@ -137,13 +152,13 @@ const Table = ({
     setShowConfirmDelete((prev) => !prev);
   };
 
-  const handleClickDelete = (id: number) => {
+  const handleClickDelete: TableRowProps['onClickDelete'] = (id) => {
     setSelectedEntries([id]);
 
     handleToggleConfirmDelete();
   };
 
-  const handleSelectRow = ({ name, value }: { name: string; value: unknown }) => {
+  const handleSelectRow: TableRowProps['onSelectRow'] = ({ name, value }) => {
     setSelectedEntries((prev) => {
       if (value) {
         return prev.concat(name);
@@ -239,7 +254,7 @@ const Table = ({
   );
 };
 
-interface Header {
+interface TableHeader {
   fieldSchema?: {
     type: string;
   };
@@ -253,10 +268,10 @@ interface Header {
   };
 }
 
-export interface TableHeadProps {
+interface TableHeadProps<THeader extends TableHeader = TableHeader> {
   areAllEntriesSelected?: boolean;
   entriesToDelete?: Array<string | number>;
-  headers?: Array<Header>;
+  headers?: Array<THeader>;
   onSelectAll: BaseCheckboxProps['onChange'];
   withMainAction?: boolean;
   withBulkActions?: boolean;
@@ -369,3 +384,4 @@ const TableHead = ({
 };
 
 export { Table as DynamicTable };
+export type { TableProps, TableRowProps, TableHeader, TableHeadProps };

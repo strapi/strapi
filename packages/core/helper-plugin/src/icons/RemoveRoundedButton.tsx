@@ -21,8 +21,13 @@ const StyledIconButton = styled(IconButton)(
 `
 );
 
-const RemoveRoundedButton = (props: IconButtonProps) => (
+interface RemoveRoundedButtonProps
+  extends Omit<IconButtonProps, 'icon'>,
+    Partial<Pick<IconButtonProps, 'icon'>> {}
+
+const RemoveRoundedButton = (props: RemoveRoundedButtonProps) => (
   <StyledIconButton icon={<Minus />} {...props} />
 );
 
 export { RemoveRoundedButton };
+export type { RemoveRoundedButtonProps };

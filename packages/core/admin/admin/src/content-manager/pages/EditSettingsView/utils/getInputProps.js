@@ -1,4 +1,4 @@
-import { getTrad } from '../../../utils';
+import { getTranslation } from '../../../utils/translations';
 
 const getInputProps = (fieldName) => {
   let type;
@@ -21,8 +21,8 @@ const getInputProps = (fieldName) => {
 
   const labelId =
     fieldName === 'mainField'
-      ? getTrad('containers.SettingPage.editSettings.entry.title')
-      : getTrad(`form.Input.${fieldName}`);
+      ? getTranslation('containers.SettingPage.editSettings.entry.title')
+      : getTranslation(`form.Input.${fieldName}`);
 
   return { type, label: { id: labelId } };
 };

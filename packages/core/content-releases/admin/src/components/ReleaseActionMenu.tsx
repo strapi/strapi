@@ -44,12 +44,22 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   }
 `;
 
+const StyledCross = styled(Cross)`
+  padding: ${({ theme }) => theme.spaces[1]};
+`;
+
+const StyledIconButton = styled(IconButton)`
+  /* Setting this style inline with borderColor will not apply the style */
+  border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
+`;
+
 interface ReleaseActionMenuProps {
   releaseId: DeleteReleaseAction.Request['params']['releaseId'];
   actionId: DeleteReleaseAction.Request['params']['actionId'];
   contentTypeUid?: ReleaseAction['contentType'];
   entryId?: ReleaseAction['entry']['id'];
   locale?: ReleaseAction['locale'];
+  hasTriggerBorder?: boolean;
 }
 
 export const ReleaseActionMenu = ({
@@ -58,6 +68,7 @@ export const ReleaseActionMenu = ({
   contentTypeUid,
   entryId,
   locale,
+  hasTriggerBorder = false,
 }: ReleaseActionMenuProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -73,8 +84,8 @@ export const ReleaseActionMenu = ({
   // We only check the locale permissions if contentType has i18n enabled
   const canUpdate =
     !locale ||
-    updatePermissions?.find(({ properties }: { properties: Permission['properties'] }) =>
-      properties.locales?.includes(locale)
+    updatePermissions?.find((permission: Permission) =>
+      permission.properties?.locales?.includes(locale)
     );
 
   const handleDeleteAction = async () => {
@@ -122,7 +133,7 @@ export const ReleaseActionMenu = ({
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
          */}
         <Menu.Trigger
-          as={IconButton}
+          as={hasTriggerBorder ? StyledIconButton : IconButton}
           paddingLeft={2}
           paddingRight={2}
           aria-label={formatMessage({

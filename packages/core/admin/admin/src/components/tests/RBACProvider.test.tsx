@@ -111,7 +111,6 @@ describe('RBACReducer', () => {
       };
 
       expect(
-        // @ts-expect-error – admin-test-utils permission types are incorrect
         RBACReducer(state, setPermissionsAction(fixtures.permissions.contentManager))
           .collectionTypesRelatedPermissions
       ).toEqual(expected);

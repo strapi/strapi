@@ -28,7 +28,6 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { ContentType } from '../../../shared/schema';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
@@ -60,14 +59,12 @@ const HomePageCE = () => {
   };
 
   const hasAlreadyCreatedContentTypes = React.useMemo(() => {
-    const filterContentTypes = (contentTypes: ContentType[]) =>
-      contentTypes.filter((c) => c.isDisplayed);
-
     /**
      * TODO: this can be done with a `some` call.
      */
     return (
-      filterContentTypes(collectionTypes).length > 1 || filterContentTypes(singleTypes).length > 0
+      collectionTypes.filter((c) => c.isDisplayed).length > 1 ||
+      singleTypes.filter((c) => c.isDisplayed).length > 0
     );
   }, [collectionTypes, singleTypes]);
 

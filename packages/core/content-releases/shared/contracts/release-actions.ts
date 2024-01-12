@@ -9,6 +9,7 @@ type ReleaseActionEntry = Entity & {
   [key: string]: Attribute.Any;
 } & {
   locale?: string;
+  status: 'published' | 'draft';
 };
 
 type ReleaseActionEntryData = {
@@ -21,6 +22,7 @@ type ReleaseActionEntryData = {
     mainFieldValue?: string;
     displayName: string;
   };
+  status: 'published' | 'draft';
 };
 
 export interface ReleaseAction extends Entity {

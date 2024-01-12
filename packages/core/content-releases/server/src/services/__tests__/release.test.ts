@@ -225,13 +225,13 @@ describe('release service', () => {
           id: 1,
           contentType: 'api::contentTypeA.contentTypeA',
           locale: 'en',
-          entry: { id: 1, name: 'test 1' },
+          entry: { id: 1, name: 'test 1', publishedAt: '2021-01-01' },
         },
         {
           id: 2,
           contentType: 'api::contentTypeB.contentTypeB',
           locale: 'fr',
-          entry: { id: 2, name: 'test 2' },
+          entry: { id: 2, name: 'test 2', publishedAt: null },
         },
       ];
 
@@ -269,6 +269,7 @@ describe('release service', () => {
                 code: 'en',
                 name: 'English (en)',
               },
+              status: 'published',
             },
           },
         ],
@@ -287,6 +288,7 @@ describe('release service', () => {
                 code: 'fr',
                 name: 'French (fr)',
               },
+              status: 'draft',
             },
           },
         ],

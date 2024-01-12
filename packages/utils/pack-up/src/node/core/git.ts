@@ -58,3 +58,4 @@ const parseGlobalGitConfig = async (): Promise<GitConfig | null> => {
 };
 
 export { parseGlobalGitConfig };
+export type { GitConfig };
