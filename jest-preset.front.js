@@ -17,6 +17,9 @@ const moduleNameMapper = {
   '^styled-components$': path.join(__dirname, 'node_modules/styled-components'),
 };
 
+/**
+ * @type {import('jest').Config}
+ */
 module.exports = {
   rootDir: __dirname,
   moduleNameMapper,
@@ -76,7 +79,7 @@ module.exports = {
       path.join(__dirname, 'fileTransformer.js'),
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@strapi/design-system|@strapi/icons|fractional-indexing)/)',
+    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing)/)',
   ],
   testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
