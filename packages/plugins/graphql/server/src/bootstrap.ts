@@ -12,14 +12,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Strapi, Common } from '@strapi/types';
-import type {
-  BaseContext,
-  Context,
-  DefaultContextExtends,
-  DefaultState,
-  DefaultStateExtends,
-  Next,
-} from 'koa';
+import type { BaseContext, Context, DefaultContextExtends, DefaultStateExtends, Next } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
 
