@@ -38,7 +38,7 @@ export function formatGraphqlError(formattedError: GraphQLFormattedError, origin
     return formattedError;
   }
 
-  const { message = null, name = null } = originalError as any;
+  const { message = '', name = 'UNKNOWN' } = originalError as Error;
 
   if (originalError instanceof ForbiddenError || originalError instanceof UnauthorizedError) {
     return createFormattedError(formattedError, message, 'FORBIDDEN', originalError);
