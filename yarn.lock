@@ -9970,7 +9970,6 @@ __metadata:
     "@strapi/utils": "npm:4.17.0"
     "@types/graphql-depth-limit": "npm:1.1.5"
     "@types/graphql-upload": "npm:15.0.2"
-    "@types/koa-cors": "npm:0.0.6"
     "@types/koa__cors": "npm:5.0.0"
     cross-env: "npm:^7.0.3"
     eslint-config-custom: "npm:4.17.0"
@@ -11587,15 +11586,6 @@ __metadata:
     "@types/koa": "npm:*"
     "@types/node": "npm:*"
   checksum: 6f09e4ad8160204fbee9d0a452b83ba62fec503a2eec60cf41fc67a032971027b6858e0b90c6e05bf1ad3b006f7c7a2d02922db4d159d223ab8d33eeeb108757
-  languageName: node
-  linkType: hard
-
-"@types/koa-cors@npm:0.0.6":
-  version: 0.0.6
-  resolution: "@types/koa-cors@npm:0.0.6"
-  dependencies:
-    "@types/koa": "npm:*"
-  checksum: f77df33346be025b667d8113238d7b50c993d670b9dedf0ea3551ddb004f6dfcd387246b06cd9cab414818955b77b97ebeda7c88c9c72f65b69098bb1b69c027
   languageName: node
   linkType: hard
 
