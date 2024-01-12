@@ -276,10 +276,8 @@ export const CMReleasesContainer = () => {
 
   /**
    * - Impossible to add entry to release before it exists
-   * - Content types without draft and publish cannot add entries to release
-   * TODO v5: All contentTypes will have draft and publish enabled
    */
-  if (isCreatingEntry || !contentType?.options?.draftAndPublish) {
+  if (isCreatingEntry) {
     return null;
   }
 
@@ -356,7 +354,11 @@ export const CMReleasesContainer = () => {
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
-                  <ReleaseActionMenu releaseId={release.id} actionId={release.action.id} />
+                  <ReleaseActionMenu
+                    releaseId={release.id}
+                    actionId={release.action.id}
+                    hasTriggerBorder
+                  />
                 </Flex>
               </Flex>
             );

@@ -1,23 +1,24 @@
 /* eslint-disable no-nested-ternary */
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import { builtinModules } from 'node:module';
 import path from 'path';
-import { InlineConfig, createLogger } from 'vite';
 
 import { resolveConfigProperty } from '../../core/config';
 
 import type { ViteBaseTask } from './types';
 import type { BuildContext } from '../../createBuildContext';
+import type { InlineConfig } from 'vite';
 
 /**
  * @internal
  */
-const resolveViteConfig = (ctx: BuildContext, task: ViteBaseTask) => {
+const resolveViteConfig = async (ctx: BuildContext, task: ViteBaseTask) => {
   const { cwd, distPath, targets, external, extMap, pkg, exports: exportMap } = ctx;
   const { entries, format, output, runtime } = task;
   const outputExt = extMap[pkg.type || 'commonjs'][format];
   const outDir = path.relative(cwd, distPath);
 
+  const { createLogger } = await import('vite');
   const customLogger = createLogger();
   customLogger.warn = (msg) => ctx.logger.warn(msg);
   customLogger.warnOnce = (msg) => ctx.logger.warn(msg);

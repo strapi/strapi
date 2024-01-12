@@ -9,7 +9,7 @@ import enableContentType from './migrations/content-type/enable';
 import disableContentType from './migrations/content-type/disable';
 
 export default ({ strapi }: { strapi: Strapi }) => {
-  extendLocalizedContentTypes(strapi);
+  extendContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
   addContentTypeSyncHooks(strapi);
 };
@@ -46,37 +46,35 @@ const addContentTypeSyncHooks = (strapi: Strapi) => {
 };
 
 /**
- * Adds locale and localization fields to localized content types
+ * Adds locale and localization fields to all content types
+ * Even if content type is not localized, it will have these fields
  * @param {Strapi} strapi
  */
-const extendLocalizedContentTypes = (strapi: Strapi) => {
-  const contentTypeService = getService('content-types');
+const extendContentTypes = (strapi: Strapi) => {
   const coreApiService = getService('core-api');
 
   Object.values(strapi.contentTypes).forEach((contentType) => {
-    if (contentTypeService.isLocalizedContentType(contentType)) {
-      const { attributes } = contentType;
+    const { attributes } = contentType;
 
-      _.set(attributes, 'localizations', {
-        writable: true,
-        private: false,
-        configurable: false,
-        visible: false,
-        type: 'relation',
-        relation: 'oneToMany',
-        target: contentType.uid,
-      });
+    _.set(attributes, 'localizations', {
+      writable: true,
+      private: false,
+      configurable: false,
+      visible: false,
+      type: 'relation',
+      relation: 'oneToMany',
+      target: contentType.uid,
+    });
 
-      _.set(attributes, 'locale', {
-        writable: true,
-        private: false,
-        configurable: false,
-        visible: false,
-        type: 'string',
-      });
+    _.set(attributes, 'locale', {
+      writable: true,
+      private: false,
+      configurable: false,
+      visible: false,
+      type: 'string',
+    });
 
-      coreApiService.addCreateLocalizationAction(contentType);
-    }
+    coreApiService.addCreateLocalizationAction(contentType);
   });
 
   if (strapi.plugin('graphql')) {
