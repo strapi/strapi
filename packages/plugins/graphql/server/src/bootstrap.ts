@@ -173,9 +173,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     },
   ]);
 
-  // add a method to check if playground was actually enabled to avoid re-implementing env and config checks
-  strapi.plugin('graphql').isPlaygroundEnabled = () => playgroundEnabled;
-
   // Register destroy behavior
   // We're doing it here instead of exposing a destroy method to the strapi-server.js
   // file since we need to have access to the ApolloServer instance

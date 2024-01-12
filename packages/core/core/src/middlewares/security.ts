@@ -48,19 +48,17 @@ export const security: Common.MiddlewareFactory<Config> =
       'frame-src': [],
     };
 
-    if (strapi.plugin('graphql')) {
+    // if apollo graphql playground is enabled, add exceptions for it
+    if (strapi.plugin('graphql')?.service('utils').playground.isEnabled()) {
       const { config: gqlConfig } = strapi.plugin('graphql');
       specialPaths.push(gqlConfig('endpoint'));
 
-      // if playground is enabled, add exceptions for apollo
-      if (strapi.plugin('graphql').isPlaygroundEnabled()) {
-        directives['script-src'].push(`https: 'unsafe-inline'`);
-        directives['img-src'].push(`'apollo-server-landing-page.cdn.apollographql.com'`);
-        directives['manifest-src'].push(`'self'`);
-        directives['manifest-src'].push('apollo-server-landing-page.cdn.apollographql.com');
-        directives['frame-src'].push(`'self'`);
-        directives['frame-src'].push('sandbox.embed.apollographql.com');
-      }
+      directives['script-src'].push(`https: 'unsafe-inline'`);
+      directives['img-src'].push(`'apollo-server-landing-page.cdn.apollographql.com'`);
+      directives['manifest-src'].push(`'self'`);
+      directives['manifest-src'].push('apollo-server-landing-page.cdn.apollographql.com');
+      directives['frame-src'].push(`'self'`);
+      directives['frame-src'].push('sandbox.embed.apollographql.com');
     }
 
     // TODO: we shouldn't combine playground exceptions with documentation for all routes, we should first check the path and then return exceptions specific to that
