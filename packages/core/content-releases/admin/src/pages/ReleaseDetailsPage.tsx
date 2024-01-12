@@ -665,15 +665,17 @@ const ReleaseDetailsBody = () => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
-                          <EntryValidationText status={entry.status} action={type} />
-                        </Td>
+                        <>
+                          <Td>
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                            </Flex>
+                          </Td>
+                        </>
                       )}
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
                     </Tr>
                   ))}
                 </Table.Body>
