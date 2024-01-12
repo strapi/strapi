@@ -1,10 +1,16 @@
-import assert from 'node:assert';
 import chalk from 'chalk';
+import semver from 'semver';
 import { packageManager } from '@strapi/utils';
 
 import { createJSONTransformAPI, saveJSON } from '../json';
 import { constants as projectConstants } from '../project';
-import { isLiteralSemVer, isSemVer, rangeFromVersions, semVerFactory } from '../version';
+import {
+  isSemverInstance,
+  isSemVerReleaseType,
+  isValidSemVer,
+  rangeFromVersions,
+  semVerFactory,
+} from '../version';
 import { unknownToError } from '../error';
 import * as f from '../format';
 import { codemodRunnerFactory } from '../codemod-runner';
@@ -17,7 +23,7 @@ import type { NPM } from '../npm';
 import type { Project } from '../project';
 import type { ConfirmationCallback } from '../common/types';
 
-type DependenciesEntries = Array<[name: string, version: Version.LiteralSemVer]>;
+type DependenciesEntries = Array<[name: string, version: Version.SemVer]>;
 
 export class Upgrader implements UpgraderInterface {
   private readonly project: Project;
@@ -25,6 +31,8 @@ export class Upgrader implements UpgraderInterface {
   private readonly npmPackage: NPM.Package;
 
   private target: Version.SemVer;
+
+  private codemodsTarget!: Version.SemVer;
 
   private isDry: boolean;
 
@@ -36,8 +44,10 @@ export class Upgrader implements UpgraderInterface {
 
   constructor(project: Project, target: Version.SemVer, npmPackage: NPM.Package) {
     this.project = project;
-    this.target = target;
     this.npmPackage = npmPackage;
+
+    this.target = target;
+    this.syncCodemodsTarget();
 
     this.isDry = false;
 
@@ -54,6 +64,37 @@ export class Upgrader implements UpgraderInterface {
 
   setTarget(target: Version.SemVer) {
     this.target = target;
+    return this;
+  }
+
+  syncCodemodsTarget() {
+    // Extract the <major>.<minor>.<patch> version from the target and assign it to the codemods target
+    //
+    // This is useful when dealing with alphas, betas or release candidates:
+    // e.g. "5.0.0-beta.1" becomes "5.0.0"
+    //
+    // For experimental versions (e.g. "0.0.0-experimental.hex"), it is necessary to
+    // override the codemods target manually in order to run the appropriate ones.
+    this.codemodsTarget = semVerFactory(
+      `${this.target.major}.${this.target.minor}.${this.target.patch}`
+    );
+
+    this.logger?.debug(
+      `The codemods target has been synced with the upgrade target. The codemod runner will now look for ${f.version(
+        this.codemodsTarget
+      )}`
+    );
+
+    return this;
+  }
+
+  overrideCodemodsTarget(target: Version.SemVer) {
+    this.codemodsTarget = target;
+
+    this.logger?.debug(
+      `Overriding the codemods target. The codemod runner will now look for ${f.version(target)}`
+    );
+
     return this;
   }
 
@@ -74,20 +115,29 @@ export class Upgrader implements UpgraderInterface {
 
   addRequirement(requirement: Requirement.Requirement) {
     this.requirements.push(requirement);
+
+    const fRequired = requirement.isRequired ? '(required)' : '(optional)';
+    this.logger?.debug(
+      `Added a new requirement to the upgrade: ${f.highlight(requirement.name)} ${fRequired}`
+    );
+
     return this;
   }
 
   async upgrade(): Promise<UpgradeReport> {
+    this.logger?.info(
+      `Upgrading from ${f.version(this.project.strapiVersion)} to ${f.version(this.target)}`
+    );
+
     if (this.isDry) {
       this.logger?.warn(
         'Running the upgrade in dry mode. No files will be modified during the process.'
       );
     }
-    this.logger?.debug(
-      `Upgrading from ${f.version(this.project.strapiVersion)} to ${f.version(this.target)}`
-    );
 
     const range = rangeFromVersions(this.project.strapiVersion, this.target);
+    const codemodsRange = rangeFromVersions(this.project.strapiVersion, this.codemodsTarget);
+
     const npmVersionsMatches = this.npmPackage?.findVersionsInRange(range) ?? [];
 
     this.logger?.debug(
@@ -102,14 +152,14 @@ export class Upgrader implements UpgraderInterface {
         target: this.target,
       });
 
-      this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [2, 4]));
+      this.logger?.info(f.upgradeStep('Applying the latest code modifications', [2, 4]));
+      await this.runCodemods(codemodsRange);
+
+      this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [3, 4]));
       await this.updateDependencies();
 
-      this.logger?.info(f.upgradeStep('Installing dependencies', [3, 4]));
+      this.logger?.info(f.upgradeStep('Installing dependencies', [4, 4]));
       await this.installDependencies();
-
-      this.logger?.info(f.upgradeStep('Applying the latest code modifications', [4, 4]));
-      await this.runCodemods(range);
     } catch (e) {
       return erroredReport(unknownToError(e));
     }
@@ -190,7 +240,7 @@ export class Upgrader implements UpgraderInterface {
     const updatedPackageJSON = json.root();
 
     if (this.isDry) {
-      this.logger?.debug(`Skipping dependencies update (${chalk.italic('dry mode')}`);
+      this.logger?.debug(`Skipping dependencies update (${chalk.italic('dry mode')})`);
       return;
     }
 
@@ -205,10 +255,10 @@ export class Upgrader implements UpgraderInterface {
     // Find all @strapi/* packages matching the current Strapi version
     for (const [name, version] of Object.entries(dependencies)) {
       const isScopedStrapiPackage = name.startsWith(projectConstants.SCOPED_STRAPI_PACKAGE_PREFIX);
-      const isOnCurrentStrapiVersion = isLiteralSemVer(version) && version === strapiVersion.raw;
+      const isOnCurrentStrapiVersion = isValidSemVer(version) && version === strapiVersion.raw;
 
       if (isScopedStrapiPackage && isOnCurrentStrapiVersion) {
-        strapiDependencies.push([name, version]);
+        strapiDependencies.push([name, semVerFactory(version)]);
       }
     }
 
