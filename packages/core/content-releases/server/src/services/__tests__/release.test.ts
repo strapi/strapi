@@ -327,7 +327,7 @@ describe('release service', () => {
       expect(release).toEqual({ id: 1, name: 'test' });
     });
 
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist or was already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
         entityService: {
@@ -503,7 +503,7 @@ describe('release service', () => {
       expect(release).toEqual({ id: 1, type: 'publish' });
     });
 
-    it('throws an error if the release does not exist', () => {
+    it('throws an error if the release does not exist or was already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
