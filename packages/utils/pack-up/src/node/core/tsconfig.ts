@@ -1,4 +1,5 @@
 import os from 'os';
+import nodePath from 'path';
 import ts from 'typescript';
 
 import { Logger } from './logger';
@@ -23,7 +24,11 @@ const loadTsConfig = ({
       path: string;
     }
   | undefined => {
-  const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, path);
+  const providedPath = path.split(nodePath.sep);
+  const [configFileName] = providedPath.slice(-1);
+  const pathToConfig = nodePath.join(cwd, providedPath.slice(0, -1).join(nodePath.sep));
+
+  const configPath = ts.findConfigFile(pathToConfig, ts.sys.fileExists, configFileName);
 
   if (!configPath) {
     return undefined;
@@ -31,7 +36,7 @@ const loadTsConfig = ({
 
   const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
 
-  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd);
+  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, pathToConfig);
 
   logger.debug(`Loaded user TS config:`, os.EOL, parsedConfig);
 

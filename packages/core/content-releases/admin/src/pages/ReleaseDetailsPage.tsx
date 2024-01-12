@@ -31,6 +31,7 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -60,6 +61,7 @@ import type {
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
+// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -269,7 +271,9 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = `${release.createdBy.firstname} ${release.createdBy.lastname}`;
+  const createdBy = release.createdBy.lastname
+    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
+    : `${release.createdBy.firstname}`;
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -476,7 +480,7 @@ const ReleaseDetailsBody = () => {
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
 
-  if (isError || isReleaseError || !release || !releaseActions) {
+  if (isReleaseError || !release) {
     const errorsArray = [];
     if (releaseError) {
       errorsArray.push({
@@ -497,6 +501,14 @@ const ReleaseDetailsBody = () => {
           },
         }}
       />
+    );
+  }
+
+  if (isError || !releaseActions) {
+    return (
+      <ContentLayout>
+        <AnErrorOccurred />
+      </ContentLayout>
     );
   }
 
@@ -623,18 +635,18 @@ const ReleaseDetailsBody = () => {
                 <Table.Body>
                   {releaseActions[key].map(({ id, type, entry }) => (
                     <Tr key={id}>
-                      <Td width="25%">
+                      <Td width="25%" maxWidth="200px">
                         <Typography ellipsis>{`${
                           entry.contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td width="15%">
+                      <Td width="10%">
                         <Typography>{`${
                           entry?.locale?.name ? entry.locale.name : '-'
                         }`}</Typography>
                       </Td>
-                      <Td width="15%">
-                        <Typography>{entry.contentType.displayName || ''}</Typography>
+                      <Td width="10%">
+                        <Typography ellipsis>{entry.contentType.displayName || ''}</Typography>
                       </Td>
                       <Td width="20%">
                         {release.releasedAt ? (
@@ -662,15 +674,17 @@ const ReleaseDetailsBody = () => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td width="15%">
-                          <EntryValidationText status={entry.status} action={type} />
-                        </Td>
+                        <>
+                          <Td width="20%">
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                            </Flex>
+                          </Td>
+                        </>
                       )}
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
                     </Tr>
                   ))}
                 </Table.Body>
@@ -814,10 +828,4 @@ const ReleaseDetailsPage = () => {
   );
 };
 
-const ProtectedReleaseDetailsPage = () => (
-  <CheckPermissions permissions={PERMISSIONS.main}>
-    <ReleaseDetailsPage />
-  </CheckPermissions>
-);
-
-export { ReleaseDetailsPage, ProtectedReleaseDetailsPage };
+export { ReleaseDetailsPage };

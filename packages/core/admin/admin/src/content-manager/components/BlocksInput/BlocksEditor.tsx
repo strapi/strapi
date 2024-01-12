@@ -1,16 +1,30 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { InputWrapper, Divider } from '@strapi/design-system';
+import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Expand } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { type Editor, type Descendant, createEditor } from 'slate';
+import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
-import { Slate, withReact, ReactEditor, useSlate } from 'slate-react';
-import styled from 'styled-components';
+import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
+import styled, { type CSSProperties } from 'styled-components';
 
+import { getTranslation } from '../../utils/translations';
+
+import { codeBlocks } from './Blocks/Code';
+import { headingBlocks } from './Blocks/Heading';
+import { imageBlocks } from './Blocks/Image';
+import { linkBlocks } from './Blocks/Link';
+import { listBlocks } from './Blocks/List';
+import { paragraphBlocks } from './Blocks/Paragraph';
+import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { EditorLayout } from './EditorLayout';
+import { type ModifiersStore, modifiers } from './Modifiers';
+import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
@@ -18,8 +32,62 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface BaseBlock {
+  renderElement: (props: RenderElementProps) => React.JSX.Element;
+  matchNode: (node: Attribute.BlocksNode) => boolean;
+  handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
+  handleEnterKey?: (editor: Editor) => void;
+  handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+  snippets?: string[];
+  dragHandleTopMargin?: CSSProperties['marginTop'];
+}
+
+interface NonSelectorBlock extends BaseBlock {
+  isInBlocksSelector: false;
+}
+
+interface SelectorBlock extends BaseBlock {
+  isInBlocksSelector: true;
+  icon: React.ComponentType;
+  label: MessageDescriptor;
+}
+
+type NonSelectorBlockKey = 'list-item' | 'link';
+
+const selectorBlockKeys = [
+  'paragraph',
+  'heading-one',
+  'heading-two',
+  'heading-three',
+  'heading-four',
+  'heading-five',
+  'heading-six',
+  'list-ordered',
+  'list-unordered',
+  'image',
+  'quote',
+  'code',
+] as const;
+
+type SelectorBlockKey = (typeof selectorBlockKeys)[number];
+
+const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
+  return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
+};
+
+type BlocksStore = {
+  [K in SelectorBlockKey]: SelectorBlock;
+} & {
+  [K in NonSelectorBlockKey]: NonSelectorBlock;
+};
+
 interface BlocksEditorContextValue {
+  blocks: BlocksStore;
+  modifiers: ModifiersStore;
   disabled: boolean;
+  name: string;
+  setLiveText: (text: string) => void;
+  isExpandedMode: boolean;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -43,6 +111,12 @@ function useBlocksEditorContext(
 
 const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
+`;
+
+const ExpandIconButton = styled(IconButton)`
+  position: absolute;
+  bottom: ${pxToRem(12)};
+  right: ${pxToRem(12)};
 `;
 
 /**
@@ -81,22 +155,6 @@ function useResetKey(value?: Attribute.BlocksValue): {
   return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
 }
 
-/**
- * Images are void elements. They handle the rendering of their children instead of Slate.
- * See the Slate documentation for more information:
- * - https://docs.slatejs.org/api/nodes/element#void-vs-not-void
- * - https://docs.slatejs.org/api/nodes/element#rendering-void-elements
- */
-const withImages = (editor: Editor) => {
-  const { isVoid } = editor;
-
-  editor.isVoid = (element) => {
-    return element.type === 'image' ? true : isVoid(element);
-  };
-
-  return editor;
-};
-
 const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
   (value: Editor) =>
@@ -116,13 +174,20 @@ interface BlocksEditorProps {
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
     const { formatMessage } = useIntl();
-
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
+    const [liveText, setLiveText] = React.useState('');
+    const ariaDescriptionId = React.useId();
+    const [isExpandedMode, setIsExpandedMode] = React.useState(false);
+
     const formattedPlaceholder =
       placeholder &&
       formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
+
+    const handleToggleExpand = () => {
+      setIsExpandedMode((prev) => !prev);
+    };
 
     /**
      * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
@@ -155,30 +220,72 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     };
 
+    const blocks: BlocksStore = {
+      ...paragraphBlocks,
+      ...headingBlocks,
+      ...listBlocks,
+      ...linkBlocks,
+      ...imageBlocks,
+      ...quoteBlocks,
+      ...codeBlocks,
+    };
+
     return (
-      <Slate
-        editor={editor}
-        initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
-        onChange={handleSlateChange}
-        key={key}
-      >
-        <BlocksEditorProvider disabled={disabled}>
-          <InputWrapper
-            direction="column"
-            alignItems="flex-start"
-            height="512px"
+      <>
+        <VisuallyHidden id={ariaDescriptionId}>
+          {formatMessage({
+            id: getTranslation('components.Blocks.dnd.instruction'),
+            defaultMessage: `To reorder blocks, press Command or Control along with Shift and the Up or Down arrow keys`,
+          })}
+        </VisuallyHidden>
+        <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+        <Slate
+          editor={editor}
+          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          onChange={handleSlateChange}
+          key={key}
+        >
+          <BlocksEditorProvider
+            blocks={blocks}
+            modifiers={modifiers}
             disabled={disabled}
-            hasError={Boolean(error)}
-            style={{ overflow: 'hidden' }}
+            name={name}
+            setLiveText={setLiveText}
+            isExpandedMode={isExpandedMode}
           >
-            <BlocksToolbar />
-            <EditorDivider width="100%" />
-            <BlocksContent placeholder={formattedPlaceholder} />
-          </InputWrapper>
-        </BlocksEditorProvider>
-      </Slate>
+            <EditorLayout
+              error={error}
+              disabled={disabled}
+              onCollapse={handleToggleExpand}
+              ariaDescriptionId={ariaDescriptionId}
+            >
+              <BlocksToolbar />
+              <EditorDivider width="100%" />
+              <BlocksContent placeholder={formattedPlaceholder} />
+              {!isExpandedMode && (
+                <ExpandIconButton
+                  aria-label={formatMessage({
+                    id: getTranslation('components.Blocks.expand'),
+                    defaultMessage: 'Expand',
+                  })}
+                  onClick={handleToggleExpand}
+                >
+                  <Expand />
+                </ExpandIconButton>
+              )}
+            </EditorLayout>
+          </BlocksEditorProvider>
+        </Slate>
+      </>
     );
   }
 );
 
-export { BlocksEditor, BlocksEditorProvider, useBlocksEditorContext };
+export {
+  type BlocksStore,
+  type SelectorBlockKey,
+  BlocksEditor,
+  BlocksEditorProvider,
+  useBlocksEditorContext,
+  isSelectorBlockKey,
+};

@@ -19,4 +19,4 @@ interface WatchAdminArgs {
 
 declare const watchAdmin: (args: WatchAdminArgs) => Promise<void>;
 
-export { build, BuildArgs, clean, CleanArg, watchAdmin, WatchAdminArgs };
+export { build, BuildArgs, clean, CleanArgs, watchAdmin, WatchAdminArgs };

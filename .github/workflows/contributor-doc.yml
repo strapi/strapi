@@ -3,7 +3,7 @@ name: Deploy contributor doc
 on:
   push:
     branches:
-      - 'main'
+      - 'develop'
     paths:
       - 'docs/**'
 
