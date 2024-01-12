@@ -276,10 +276,8 @@ export const CMReleasesContainer = () => {
 
   /**
    * - Impossible to add entry to release before it exists
-   * - Content types without draft and publish cannot add entries to release
-   * TODO v5: All contentTypes will have draft and publish enabled
    */
-  if (isCreatingEntry || !contentType?.options?.draftAndPublish) {
+  if (isCreatingEntry) {
     return null;
   }
 
