@@ -46,7 +46,7 @@ export const security: Common.MiddlewareFactory<Config> =
       },
     };
 
-    if (strapi.plugin('graphql') && strapi.plugin('graphql').isPlaygroundEnabled()) {
+    if (strapi.plugin('graphql')?.isPlaygroundEnabled()) {
       const { config: gqlConfig } = strapi.plugin('graphql');
       specialPaths[gqlConfig('endpoint') as string] = {
         crossOriginEmbedderPolicy: false,
