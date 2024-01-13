@@ -26,7 +26,7 @@ const exportData = async () => {
 
   const strapi = await createStrapiInstance();
 
-  const source = createSourceProvider(strapi);
+  const source = await createSourceProvider(strapi);
   const destination = createDestinationProvider(args[0]);
 
   const engine = createTransferEngine(source, destination, {
