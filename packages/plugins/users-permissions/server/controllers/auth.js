@@ -282,7 +282,7 @@ module.exports = {
     }
 
     const { register } = strapi.config.get('plugin.users-permissions');
-    const alwaysAllowedKeys = ['username', 'password', 'email'];
+    const alwaysAllowedKeys = ['username', 'password', 'email', 'phoneNotificationsEnabled', 'emailNotificationsEnabled'];
     const userModel = strapi.contentTypes['plugin::users-permissions.user'];
     const { attributes } = userModel;
 
