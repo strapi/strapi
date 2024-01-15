@@ -13,8 +13,10 @@ This is an experimental API that is subject to change at any moment, hence why i
 
 ## Available Commands
 
-- [plugin:build](build) - Build a plugin for publishing
-- [plugin:watch](watch) - Watch & compile a plugin in local development
+- [plugin:init](./03-init.md) - Create a new plugin
+- [plugin:build](./01-build.md) - Build a plugin for publishing
+- [plugin:watch](./02-watch.md) - Watch & compile a plugin in local development
+- [plugin:verify](./04-check.md) - Verify the build output of the plugin before publication
 
 ## Setting up your package
 

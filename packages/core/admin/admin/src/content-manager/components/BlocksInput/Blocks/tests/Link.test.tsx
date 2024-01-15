@@ -66,13 +66,13 @@ describe('Link', () => {
 
     const link = screen.getByRole('link', { name: 'Some link' });
 
-    expect(screen.queryByRole('button', { name: /Delete/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Edit/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Save/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Cancel/i })).not.toBeInTheDocument();
 
     await user.click(link);
 
-    expect(screen.getByRole('button', { name: /Delete/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Edit/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();
   });
 
   it('only enables save button in popover when content has changed', async () => {
@@ -99,15 +99,17 @@ describe('Link', () => {
 
     const link = screen.getByRole('link', { name: 'Some link' });
     await user.click(link);
-    const editButton = screen.getByLabelText(/Edit/i, { selector: 'button' });
-    await user.click(editButton);
 
     const linkTextInput = screen.getByPlaceholderText('Enter link text');
-    const saveButtons = screen.getAllByRole('button');
-    expect(saveButtons[1]).toBeEnabled();
+    const saveButton = screen.queryByRole('button', { name: /save/i });
+    expect(saveButton).toBeDisabled();
+
+    // change link text and check if save button is enabled
+    await userEvent.type(linkTextInput, 'new link');
+    expect(saveButton).toBeEnabled();
 
     // Remove link text and check if save button is disabled
     await userEvent.clear(linkTextInput);
-    expect(saveButtons[1]).toBeDisabled();
+    expect(saveButton).toBeDisabled();
   });
 });

@@ -115,6 +115,8 @@ const userSchemaAdditions = () => {
     'publishedAt',
     'strapi_stage',
     'strapi_assignee',
+    'locale',
+    'localizations',
   ];
 
   return currentSchema.filter((key) => !(ignoreDiffs.includes(key) || defaultSchema.includes(key)));

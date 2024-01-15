@@ -7,7 +7,6 @@ tags:
 
 The CLI is largely contained to the `@strapi/strapi` package, however some packages are able to inject their own commands:
 
-- [`@strapi/admin`](/docs/core/admin/intro)
 - [`@strapi/data-transfer`](/docs/core/data-transfer/intro)
 
 ## Structure of command
@@ -15,16 +14,15 @@ The CLI is largely contained to the `@strapi/strapi` package, however some packa
 The CLI is built with `commander` and as such every command we create can be described as:
 
 ```ts
-import type { Command } from 'commander';
+import { createCommand, Command } from 'commander';
 
-type StrapiCommand = (params: { command: Command; argv: string[]; ctx: CLIContext }) => void;
+type StrapiCommand = (params: { command: Command; argv: string[]; ctx: CLIContext }) => Command;
 
 // usage
 
-const myCommand: StrapiCommand = ({ command, argv, ctx }) => {
+const myCommand: StrapiCommand = ({ argv, ctx }) => {
   // do something
-  command
-    .command('develop')
+  return createCommand('develop')
     .alias('dev')
     .option(
       '--no-build',

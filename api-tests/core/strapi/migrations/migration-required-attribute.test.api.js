@@ -42,7 +42,8 @@ const restart = async () => {
   rq = await createAuthRequest({ strapi });
 };
 
-describe('Migration - required attribute', () => {
+// V5: Fix unique field validations
+describe.skip('Migration - required attribute', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 

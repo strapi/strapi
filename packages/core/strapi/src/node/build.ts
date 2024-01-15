@@ -1,16 +1,21 @@
 import * as tsUtils from '@strapi/typescript-utils';
-import type { CLIContext } from '../commands/types';
+import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './create-build-context';
 import { writeStaticClientFiles } from './staticFiles';
-import { build as buildWebpack } from './webpack/build';
 
 interface BuildOptions extends CLIContext {
   /**
    * @default false
    */
   ignorePrompts?: boolean;
+  /**
+   * Which bundler to use for building.
+   *
+   * @default webpack
+   */
+  bundler?: 'webpack' | 'vite';
   /**
    * Minify the output
    *
@@ -78,7 +83,14 @@ const build = async ({ logger, cwd, tsconfig, ignorePrompts, ...options }: Build
 
   try {
     await writeStaticClientFiles(ctx);
-    await buildWebpack(ctx);
+
+    if (ctx.bundler === 'webpack') {
+      const { build: buildWebpack } = await import('./webpack/build');
+      await buildWebpack(ctx);
+    } else if (ctx.bundler === 'vite') {
+      const { build: buildVite } = await import('./vite/build');
+      await buildVite(ctx);
+    }
 
     const buildDuration = timer.end('buildAdmin');
     buildingSpinner.text = `Building admin panel (${prettyTime(buildDuration)})`;

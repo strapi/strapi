@@ -188,7 +188,7 @@ const reducer = (state: ListViewLayoutManagerState = initialState, action: Actio
             fieldSchema: attributes[name],
             metadatas: metas,
             key: `__${name}_key__`,
-          };
+          } satisfies ListLayoutRow;
 
           const attribute = attributes[name];
 

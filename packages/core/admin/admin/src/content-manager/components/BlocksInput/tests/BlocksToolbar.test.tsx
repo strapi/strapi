@@ -106,6 +106,7 @@ const Wrapper = ({
             disabled={false}
             name="blocks"
             setLiveText={jest.fn()}
+            isExpandedMode={false}
           >
             {children}
           </BlocksEditorProvider>

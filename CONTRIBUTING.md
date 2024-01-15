@@ -51,7 +51,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
-- Fork the repository and create your new branch from `main`.
+- Fork the repository and create your new branch from `develop`.
 - Run `yarn install` in the root of the repository.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
@@ -212,7 +212,7 @@ Examples:
 
 We chose to use a monorepo design using [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows us to maintain the whole ecosystem keep it up-to-date and consistent.
 
-We do our best to keep the master branch as clean as possible, with tests passing at all times. However, the master branch can move faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/@strapi/strapi) so that you are always up-to-date with the latest stable version.
+We do our best to keep the develop branch as clean as possible, with tests passing at all times. However, the develop branch can move faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/@strapi/strapi) so that you are always up-to-date with the latest stable version.
 
 ### Reporting an issue
 
