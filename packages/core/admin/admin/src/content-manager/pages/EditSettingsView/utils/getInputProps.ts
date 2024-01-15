@@ -1,6 +1,6 @@
 import { getTranslation } from '../../../utils/translations';
 
-const getInputProps = (fieldName: string) => {
+const getInputProps = (fieldName: string | null) => {
   let type;
 
   switch (fieldName) {

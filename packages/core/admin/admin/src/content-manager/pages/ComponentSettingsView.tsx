@@ -53,7 +53,7 @@ const ComponentSettingsView = () => {
 
   return (
     <CheckPagePermissions permissions={permissions.contentManager?.componentsConfigurations}>
-      <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
+      <EditSettingsView />
     </CheckPagePermissions>
   );
 };

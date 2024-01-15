@@ -4,9 +4,10 @@ import { useIntl } from 'react-intl';
 interface GenericInputProps extends Record<string, unknown> {
   type: string;
   options?: string[];
-  onChange: (e: { target: { name: string; value: string | boolean } }) => void;
-  value: string | boolean;
+  onChange: (e: { target: { name: string; value: string | boolean | number } }) => void;
+  value: string | boolean | string[];
   name: string;
+  label: string;
 }
 
 const GenericInput = ({
@@ -21,7 +22,7 @@ const GenericInput = ({
 
   switch (type) {
     case 'text': {
-      return <TextInput onChange={onChange} value={value} name={name} {...inputProps} />;
+      return <TextInput onChange={onChange} value={value as string} name={name} {...inputProps} />;
     }
     case 'bool': {
       return (
@@ -29,7 +30,7 @@ const GenericInput = ({
           onChange={(e) => {
             onChange({ target: { name, value: e.target.checked } });
           }}
-          checked={value}
+          checked={value as boolean}
           name={name}
           onLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.on-label',
@@ -46,12 +47,12 @@ const GenericInput = ({
     case 'select': {
       return (
         <Select
-          value={value}
+          value={value as string}
           name={name}
           onChange={(value) => onChange({ target: { name, value } })}
           {...inputProps}
         >
-          {options.map((option) => (
+          {options?.map((option) => (
             <Option key={option} value={option}>
               {option}
             </Option>

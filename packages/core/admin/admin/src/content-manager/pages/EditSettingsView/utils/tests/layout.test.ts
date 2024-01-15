@@ -136,7 +136,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
           },
         ],
       },
-    ];
+    ] as any;
 
     const expected = [
       {
@@ -172,7 +172,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
           },
         ],
       },
-    ];
+    ] as any;
 
     const expected = [
       {

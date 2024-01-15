@@ -1,4 +1,18 @@
-import reducer from '../reducer';
+import {
+  reducer,
+  Action,
+  MoveRowAction,
+  OnAddFieldAction,
+  OnChangeAction,
+  OnChangeMetaAction,
+  OnChangeSizeAction,
+  RemoveFieldAction,
+  ReorderDiffRowAction,
+  ReorderRowAction,
+  SetFieldToEditAction,
+  SubmitMetaFormAction,
+  SubmitSucceededAction,
+} from '../reducer';
 
 const fieldSizes = {
   richtext: { default: 12, isResizable: false },
@@ -7,7 +21,7 @@ const fieldSizes = {
 };
 
 describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
-  let state;
+  let state: any;
 
   beforeEach(() => {
     state = {
@@ -23,7 +37,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
   it('should handle the default action correctly', () => {
     const expected = state;
 
-    expect(reducer(state, {})).toEqual(expected);
+    expect(reducer(state, {} as Action)).toEqual(expected);
   });
 
   describe('MOVE_ROW', () => {
@@ -49,7 +63,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'MOVE_ROW', fromIndex: 2, toIndex: 0 };
+      const action: MoveRowAction = { type: 'MOVE_ROW', fromIndex: 2, toIndex: 0 };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -88,7 +102,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = {
+      const action: OnAddFieldAction = {
         type: 'ON_ADD_FIELD',
         name: 'description',
         fieldSizes,
@@ -131,7 +145,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'title', fieldSizes };
+      const action: OnAddFieldAction = { type: 'ON_ADD_FIELD', name: 'title', fieldSizes };
       expect(reducer(state, action)).toEqual(expected);
     });
 
@@ -173,7 +187,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'isActive', fieldSizes };
+      const action: OnAddFieldAction = { type: 'ON_ADD_FIELD', name: 'isActive', fieldSizes };
       expect(reducer(state, action)).toEqual(expected);
     });
 
@@ -224,7 +238,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'title', fieldSizes };
+      const action: OnAddFieldAction = { type: 'ON_ADD_FIELD', name: 'title', fieldSizes };
       expect(reducer(state, action)).toEqual(expected);
     });
   });
@@ -242,7 +256,11 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_CHANGE', keys: ['settings', 'mainField'], value: 'postal_code' };
+      const action: OnChangeAction = {
+        type: 'ON_CHANGE',
+        keys: ['settings', 'mainField'],
+        value: 'postal_code',
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -261,7 +279,11 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_CHANGE_META', keys: ['label'], value: 'postal_code' };
+      const action: OnChangeMetaAction = {
+        type: 'ON_CHANGE_META',
+        keys: ['label'],
+        value: 'postal_code',
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -278,22 +300,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           size: 6,
         },
       };
-      const action = { type: 'ON_CHANGE_SIZE', name: 'postal_code', value: 6 };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_RESET', () => {
-    it('should set the data to change in the modifiedData object', () => {
-      state.modifiedData = {
-        test: 'Postal_coder',
-      };
-      const expected = {
-        ...state,
-        modifiedData: {},
-      };
-      const action = { type: 'ON_RESET' };
+      const action: OnChangeSizeAction = { type: 'ON_CHANGE_SIZE', value: 6 };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -317,7 +324,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'REMOVE_FIELD', rowIndex: 0, fieldIndex: 0 };
+      const action: RemoveFieldAction = { type: 'REMOVE_FIELD', rowIndex: 0, fieldIndex: 0 };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -351,7 +358,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'REMOVE_FIELD', rowIndex: 0, fieldIndex: 1 };
+      const action: RemoveFieldAction = { type: 'REMOVE_FIELD', rowIndex: 0, fieldIndex: 1 };
       //
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -404,7 +411,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = {
+      const action: ReorderDiffRowAction = {
         type: 'REORDER_DIFF_ROW',
         dragIndex: 0,
         hoverIndex: 1,
@@ -461,7 +468,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = {
+      const action: ReorderDiffRowAction = {
         type: 'REORDER_DIFF_ROW',
         dragIndex: 0,
         hoverIndex: 2,
@@ -518,7 +525,12 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'REORDER_ROW', dragRowIndex: 1, dragIndex: 1, hoverIndex: 0 };
+      const action: ReorderRowAction = {
+        type: 'REORDER_ROW',
+        dragRowIndex: 1,
+        dragIndex: 1,
+        hoverIndex: 0,
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -552,7 +564,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SET_FIELD_TO_EDIT', name: 'city' };
+      const action: SetFieldToEditAction = { type: 'SET_FIELD_TO_EDIT', name: 'city' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -591,7 +603,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SUBMIT_META_FORM' };
+      const action: SubmitMetaFormAction = { type: 'SUBMIT_META_FORM' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -630,24 +642,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SUBMIT_SUCCEEDED' };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('UNSET_FIELD_TO_EDIT', () => {
-    it('should unset the metadatas to edit and the form data', () => {
-      state.metaToEdit = 'city';
-      state.metaForm.metadata = {
-        label: 'New city label',
-      };
-      const expected = {
-        ...state,
-        metaToEdit: '',
-        metaForm: {},
-      };
-      const action = { type: 'UNSET_FIELD_TO_EDIT' };
+      const action: SubmitSucceededAction = { type: 'SUBMIT_SUCCEEDED' };
 
       expect(reducer(state, action)).toEqual(expected);
     });

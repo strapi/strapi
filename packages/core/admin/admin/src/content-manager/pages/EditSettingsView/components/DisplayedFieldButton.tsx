@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import { Box, Flex, GridItem } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
@@ -13,7 +13,13 @@ import { FieldButtonContent } from './FieldButtonContent';
 
 import type { Attribute } from '@strapi/types';
 
-const Wrapper = styled(Flex)`
+const Wrapper = styled(Flex)<{
+  showLeftCarret: boolean;
+  showRightCarret: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  hasHorizontalPadding: boolean;
+}>`
   position: relative;
   ${({ isFirst, isLast, hasHorizontalPadding }) => {
     if (isFirst) {
@@ -76,7 +82,13 @@ const CustomDragIcon = styled(Drag)`
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
-const CustomFlex = styled(Flex)`
+
+const CustomFlex = styled(Flex)<{
+  isDragging: boolean;
+  dragStart: boolean;
+  isFullSize: boolean;
+  isHidden: boolean;
+}>`
   display: ${({ dragStart }) => (dragStart ? 'none' : 'flex')};
   opacity: ${({ isDragging, isFullSize, isHidden }) => {
     if (isDragging && !isFullSize) {
@@ -90,10 +102,20 @@ const CustomFlex = styled(Flex)`
     return 1;
   }};
 `;
+
 const DragButton = styled(Flex)`
   cursor: all-scroll;
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
+
+interface Item {
+  index: number;
+  labelField: string;
+  rowIndex: number;
+  name: string;
+  size: number;
+  itemIndex?: number;
+}
 
 interface DisplayedFieldButtonProps {
   attribute?: Attribute.Any;
@@ -122,16 +144,17 @@ const DisplayedFieldButton = ({
   rowIndex,
   size,
 }: DisplayedFieldButtonProps) => {
-  const [dragStart, setDragStart] = useState(false);
+  const [dragStart, setDragStart] = React.useState(false);
   const isHidden = name === '_TEMP_';
   const { setIsDraggingSibling } = useLayoutDnd();
   const isFullSize = size === 12;
 
-  const dragRef = useRef(null);
-  const dropRef = useRef(null);
+  const dragRef = React.useRef<HTMLElement>(null);
+  const dropRef = React.useRef<HTMLElement>(null);
+
   const [{ clientOffset, isOver }, drop] = useDrop({
     accept: ItemTypes.EDIT_FIELD,
-    hover(item, monitor) {
+    hover(item: Item, monitor) {
       if (!dropRef.current) {
         return;
       }
@@ -159,6 +182,10 @@ const DisplayedFieldButton = ({
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
 
+      if (!clientOffset) {
+        return;
+      }
+
       // Get pixels to the top
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
@@ -181,7 +208,7 @@ const DisplayedFieldButton = ({
       item.rowIndex = targetRow;
       item.itemIndex = hoverIndex;
     },
-    drop(item, monitor) {
+    drop(item: Item, monitor) {
       if (!dropRef.current) {
         return;
       }
@@ -207,8 +234,13 @@ const DisplayedFieldButton = ({
       // Scroll window if mouse near vertical edge(100px)
 
       // Horizontal Check --
+      const monitorClientOffset = monitor.getClientOffset();
+      if (!monitorClientOffset) {
+        return;
+      }
+
       if (
-        Math.abs(monitor.getClientOffset().x - hoverBoundingRect.left) >
+        Math.abs(monitorClientOffset.x - hoverBoundingRect.left) >
         hoverBoundingRect.width / 1.8
       ) {
         moveItem(dragIndex, hoverIndex + 1, dragRow, targetRow);
@@ -239,9 +271,10 @@ const DisplayedFieldButton = ({
       itemType: monitor.getItemType(),
     }),
   });
+
   const [{ isDragging, getItem }, drag, dragPreview] = useDrag({
     type: ItemTypes.EDIT_FIELD,
-    item() {
+    item(): Item {
       setIsDraggingSibling(true);
 
       return {
@@ -271,7 +304,7 @@ const DisplayedFieldButton = ({
 
   // Remove the default preview when the item is being dragged
   // The preview is handled by the DragLayer
-  useEffect(() => {
+  React.useEffect(() => {
     dragPreview(getEmptyImage(), { captureDraggingState: true });
   }, [dragPreview]);
 
@@ -279,8 +312,8 @@ const DisplayedFieldButton = ({
   // We need 1 for the drop target
   // 1 for the drag target
   const refs = {
-    dragRef: drag(dragRef),
-    dropRef: drop(dropRef),
+    dragRef: drag(dragRef) as unknown as React.RefObject<HTMLDivElement>,
+    dropRef: drop(dropRef) as unknown as React.RefObject<HTMLDivElement>,
   };
 
   let showLeftCarret = false;
@@ -358,7 +391,6 @@ const DisplayedFieldButton = ({
         >
           <DragButton
             as="span"
-            type="button"
             ref={refs.dragRef}
             onClick={(e) => e.stopPropagation()}
             alignItems="center"

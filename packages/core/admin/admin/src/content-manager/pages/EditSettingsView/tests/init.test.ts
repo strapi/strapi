@@ -1,9 +1,9 @@
-import init from '../init';
+import { init } from '../init';
 
 describe('CONTENT MANAGER | containers | EditSettingsView | init', () => {
   it('should return the correct initialState', () => {
     const initialState = { test: true };
-    const mainLayout = { metadata: {}, layouts: { edit: [], list: ['test'] } };
+    const mainLayout = { metadata: {}, layouts: { edit: [], list: ['test'] } } as any;
     const expected = {
       test: true,
       initialData: { metadata: {}, layouts: { edit: [], list: ['test'] } },

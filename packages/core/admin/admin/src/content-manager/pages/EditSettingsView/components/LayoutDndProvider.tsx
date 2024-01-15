@@ -1,89 +1,35 @@
 import * as React from 'react';
 
-interface LayoutDndProviderProps {
-  attributes: any;
-  buttonData: any[];
-  goTo: () => void;
-  layout: any[];
-  metadatas: any;
-  moveItem: () => void;
-  moveRow: () => void;
-  onAddData: () => void;
-  relationsLayout: any[];
-  removeField: () => void;
-  selectedField?: string;
-  setEditFieldToSelect: () => void;
+import type { EditSettingsViewState } from '../reducer';
+import type { Schema } from '@strapi/types';
+
+export interface LayoutDndProviderProps {
+  isContentTypeView: boolean;
+  attributes: Schema.Attributes;
+  modifiedData: EditSettingsViewState['modifiedData'];
+  slug: string;
+  componentLayouts: EditSettingsViewState['componentLayouts'];
+  selectedField: string;
+  fieldForm: any;
+  moveRow: (fromIndex: number, toIndex: number) => void;
+  moveItem: (
+    dragIndex: number,
+    hoverIndex: number,
+    dragRowIndex: number,
+    hoverRowIndex: number
+  ) => void;
+  setEditFieldToSelect: (name: string) => void;
+  isDraggingSibling: boolean;
+  setIsDraggingSibling: (isDragging: boolean) => void;
   children?: React.ReactNode;
 }
 
-const LayoutDndContext = React.createContext<LayoutDndProviderProps>({
-  attributes: {},
-  buttonData: [],
-  goTo: () => {},
-  layout: [],
-  metadatas: {},
-  moveItem: () => {},
-  moveRow: () => {},
-  onAddData: () => {},
-  relationsLayout: [],
-  removeField: () => {},
-  setEditFieldToSelect: () => {},
-});
+const LayoutDndContext = React.createContext<LayoutDndProviderProps>(
+  null as unknown as LayoutDndProviderProps
+);
 
-/*
-isContentTypeView
-attributes
-modifiedData
-slug
-componentLayouts
-selectedField
-fieldForm
-onMoveRelation
-onMoveField
-moveRow
-moveItem
-setEditFieldToSelect
-isDraggingSibling
-setIsDraggingSibling
-*/
-
-const LayoutDndProvider = ({
-  attributes = {},
-  buttonData = [],
-  goTo = () => {},
-  layout = [],
-  metadatas = {},
-  moveItem = () => {},
-  moveRow = () => {},
-  onAddData = () => {},
-  relationsLayout = [],
-  removeField = () => {},
-  selectedField,
-  setEditFieldToSelect = () => {},
-  children,
-  ...rest
-}: LayoutDndProviderProps) => {
-  return (
-    <LayoutDndContext.Provider
-      value={{
-        attributes,
-        buttonData,
-        goTo,
-        layout,
-        metadatas,
-        moveItem,
-        moveRow,
-        onAddData,
-        relationsLayout,
-        removeField,
-        selectedField,
-        setEditFieldToSelect,
-        ...rest,
-      }}
-    >
-      {children}
-    </LayoutDndContext.Provider>
-  );
+const LayoutDndProvider = ({ children, ...props }: LayoutDndProviderProps) => {
+  return <LayoutDndContext.Provider value={{ ...props }}>{children}</LayoutDndContext.Provider>;
 };
 
 export { LayoutDndContext, LayoutDndProvider };

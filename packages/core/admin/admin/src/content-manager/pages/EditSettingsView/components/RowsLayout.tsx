@@ -5,7 +5,7 @@ import { RowItemsLayout } from './RowItemsLayout';
 interface RowsLayoutProps {
   onRemoveField: (rowIndex: number, index: number) => void;
   row: {
-    rowId: string;
+    rowId: number;
     rowContent: {
       name: string;
       size: number;

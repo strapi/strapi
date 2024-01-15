@@ -3,8 +3,14 @@ import set from 'lodash/set';
 
 import { createLayout, formatLayout } from './utils/layout';
 
-const init = (initialState, mainLayout, components) => {
-  let initialData = cloneDeep(mainLayout);
+import type { SettingsViewLayout, SettingsViewComponentLayout } from '../../utils/layouts';
+
+const init = (
+  initialState: any,
+  mainLayout: SettingsViewLayout,
+  components: Record<string, SettingsViewComponentLayout>
+) => {
+  const initialData = cloneDeep(mainLayout);
 
   set(initialData, ['layouts', 'edit'], formatLayout(createLayout(mainLayout.layouts.edit)));
 
@@ -16,4 +22,4 @@ const init = (initialState, mainLayout, components) => {
   };
 };
 
-export default init;
+export { init };

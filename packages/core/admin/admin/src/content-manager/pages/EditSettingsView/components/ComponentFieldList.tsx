@@ -14,8 +14,8 @@ interface ComponentFieldListProps {
 const ComponentFieldList = ({ componentUid }: ComponentFieldListProps) => {
   const { componentLayouts } = useLayoutDnd();
   const { formatMessage } = useIntl();
-  const componentData = get(componentLayouts, [componentUid], {});
-  const componentLayout = get(componentData, ['layouts', 'edit'], []);
+  const componentData = get(componentLayouts, [componentUid]);
+  const componentLayout = get(componentData, ['layouts', 'edit']);
 
   return (
     <Box padding={3}>

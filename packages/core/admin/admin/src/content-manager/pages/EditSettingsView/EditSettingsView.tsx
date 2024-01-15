@@ -33,15 +33,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useContentTypeLayout } from '../../hooks/useLayouts';
-import { formatLayoutForSettingsView } from '../../utils/layouts';
+import { type SettingsViewComponentLayout, formatLayoutForSettingsView } from '../../utils/layouts';
 import { getTranslation } from '../../utils/translations';
 
 import { DisplayedFields } from './components/DisplayedFields';
 import { FormModal } from './components/FormModal';
 import { LayoutDndProvider } from './components/LayoutDndProvider';
-import init from './init';
+import { init } from './init';
 import { reducer, initialState } from './reducer';
 import { unformatLayout } from './utils/layout';
+
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { AxiosError, AxiosResponse } from 'axios';
 
 const EditSettingsView = () => {
   const { slug } = useParams();
@@ -57,7 +60,9 @@ const EditSettingsView = () => {
       }
 
       if (layout?.components) {
-        rawComponentsLayouts = Object.keys(layout.components).reduce((acc, current) => {
+        rawComponentsLayouts = Object.keys(layout.components).reduce<
+          Record<string, SettingsViewComponentLayout>
+        >((acc, current) => {
           acc[current] = formatLayoutForSettingsView(layout.components[current]);
 
           return acc;
@@ -73,7 +78,7 @@ const EditSettingsView = () => {
     if (mainLayout) {
       dispatch({
         type: 'SET_DATA',
-        data: init(initialState, mainLayout, components),
+        data: init(initialState, mainLayout, components ?? {}),
       });
     }
   }, [mainLayout, components]);
@@ -117,7 +122,11 @@ const EditSettingsView = () => {
     .filter((attr) => displayedFields.findIndex((el) => el.name === attr) === -1)
     .sort();
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleChange = ({
+    target: { name, value },
+  }: {
+    target: { name: string; value: string | boolean | null | number };
+  }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
@@ -133,7 +142,11 @@ const EditSettingsView = () => {
     setIsConfirmDialogOpen((prev) => !prev);
   };
 
-  const handleMetaChange = ({ target: { name, value } }) => {
+  const handleMetaChange = ({
+    target: { name, value },
+  }: {
+    target: { name: string; value: string | boolean | number };
+  }) => {
     dispatch({
       type: 'ON_CHANGE_META',
       keys: name.split('.'),
@@ -141,15 +154,14 @@ const EditSettingsView = () => {
     });
   };
 
-  const handleSizeChange = ({ name, value }) => {
+  const handleSizeChange = ({ value }: { value: number }) => {
     dispatch({
       type: 'ON_CHANGE_SIZE',
-      name,
       value,
     });
   };
 
-  const handleMetaSubmit = (e) => {
+  const handleMetaSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     dispatch({
       type: 'SUBMIT_META_FORM',
@@ -157,19 +169,23 @@ const EditSettingsView = () => {
     handleToggleModal();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     toggleConfirmDialog();
   };
 
-  const submitMutation = useMutation(
+  const submitMutation = useMutation<
+    AxiosResponse<Contracts.ContentTypes.UpdateContentTypeConfiguration.Response>,
+    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkPublish.Response, 'error'>>>,
+    Contracts.ContentTypes.UpdateContentTypeConfiguration.Request['body']
+  >(
     (body) => {
       return put(`/content-manager/content-types/${slug}/configuration`, body);
     },
     {
-      onSuccess({ data }) {
+      onSuccess() {
         if (updateLayout) {
-          updateLayout(data.data);
+          updateLayout();
         }
         dispatch({
           type: 'SUBMIT_SUCCEEDED',
@@ -185,7 +201,12 @@ const EditSettingsView = () => {
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleConfirm = () => {
+    if (!modifiedData) {
+      return;
+    }
+
     const { layouts, metadatas, settings } = cloneDeep(modifiedData);
+
     submitMutation.mutate({
       layouts: {
         ...layouts,
@@ -196,23 +217,12 @@ const EditSettingsView = () => {
     });
   };
 
-  const handleMoveRelation = (fromIndex, toIndex) => {
-    dispatch({
-      type: 'MOVE_RELATION',
-      fromIndex,
-      toIndex,
-    });
-  };
-
-  const handleMoveField = (fromIndex, toIndex) => {
-    dispatch({
-      type: 'MOVE_FIELD',
-      fromIndex,
-      toIndex,
-    });
-  };
-
-  const moveItem = (dragIndex, hoverIndex, dragRowIndex, hoverRowIndex) => {
+  const moveItem = (
+    dragIndex: number,
+    hoverIndex: number,
+    dragRowIndex: number,
+    hoverRowIndex: number
+  ) => {
     // Same row = just reorder
     if (dragRowIndex === hoverRowIndex) {
       dispatch({
@@ -232,7 +242,7 @@ const EditSettingsView = () => {
     }
   };
 
-  const moveRow = (fromIndex, toIndex) => {
+  const moveRow = (fromIndex: number, toIndex: number) => {
     dispatch({
       type: 'MOVE_ROW',
       fromIndex,
@@ -249,15 +259,13 @@ const EditSettingsView = () => {
       isContentTypeView
       attributes={attributes}
       modifiedData={modifiedData}
-      slug={slug}
+      slug={slug ?? ''}
       componentLayouts={componentLayouts}
       selectedField={metaToEdit}
       fieldForm={metaForm}
-      onMoveRelation={handleMoveRelation}
-      onMoveField={handleMoveField}
       moveRow={moveRow}
       moveItem={moveItem}
-      setEditFieldToSelect={(name) => {
+      setEditFieldToSelect={(name: string) => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',
           name,
@@ -368,7 +376,6 @@ const EditSettingsView = () => {
                 </Typography>
 
                 <DisplayedFields
-                  attributes={attributes}
                   editLayout={editLayout}
                   fields={editLayoutFields}
                   onAddField={(field) => {
@@ -409,7 +416,8 @@ const EditSettingsView = () => {
             onMetaChange={handleMetaChange}
             onSizeChange={handleSizeChange}
             type={attributes?.[metaToEdit]?.type ?? ''}
-            customFieldUid={attributes?.[metaToEdit]?.customField ?? ''}
+            // @ts-expect-error - customField is not in the type
+            customFieldUid={attributes?.[metaToEdit].customField ?? ''}
           />
         )}
       </Main>

@@ -32,7 +32,7 @@ const HeaderContainer = styled(Flex)`
 
 interface FormModalProps {
   onToggle: () => void;
-  onMetaChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
+  onMetaChange: (e: { target: { name: string; value: string | boolean | number } }) => void;
   onSizeChange: (e: { name: string; value: number }) => void;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
   type: Attribute.Kind;

@@ -7,18 +7,127 @@ import { arrayMoveItem } from '../../utils/arrayMoveItem';
 
 import { formatLayout, getFieldSize, setFieldSize } from './utils/layout';
 
+import type { SettingsViewComponentLayout, SettingsViewLayout } from '../../utils/layouts';
+
 const DEFAULT_FIELD_SIZE = 6;
 
 const initialState = {
   fieldForm: {},
   componentLayouts: {},
   metaToEdit: '',
-  initialData: {},
-  metaForm: {},
-  modifiedData: {},
-};
+  metaForm: null,
+  initialData: null,
+  modifiedData: null,
+} satisfies EditSettingsViewState;
 
-const reducer = (state = initialState, action) =>
+interface SettingsViewLayoutModified extends Omit<SettingsViewLayout, 'layouts'> {
+  layouts: {
+    edit: Array<{
+      rowId: number;
+      rowContent: Array<{
+        name: string;
+        size: number;
+      }>;
+    }>;
+    list: SettingsViewLayout['layouts']['list'];
+  };
+}
+
+export interface EditSettingsViewState {
+  fieldForm: Record<string, unknown>;
+  componentLayouts: Record<string, SettingsViewComponentLayout>;
+  metaToEdit: string;
+  metaForm: {
+    metadata: Record<string, unknown>;
+    size: number;
+  } | null;
+  initialData: SettingsViewLayoutModified | null;
+  modifiedData: SettingsViewLayoutModified | null;
+}
+
+export interface MoveRowAction {
+  fromIndex: number;
+  toIndex: number;
+  type: 'MOVE_ROW';
+}
+
+export interface OnAddFieldAction {
+  fieldSizes: Record<string, { default: number }>;
+  name: string;
+  type: 'ON_ADD_FIELD';
+}
+
+export interface OnChangeAction {
+  keys: string[];
+  type: 'ON_CHANGE';
+  value: string | number | boolean | null;
+}
+
+export interface OnChangeMetaAction {
+  keys: string[];
+  type: 'ON_CHANGE_META';
+  value: string | number | boolean;
+}
+
+export interface OnChangeSizeAction {
+  type: 'ON_CHANGE_SIZE';
+  value: number;
+}
+
+export interface RemoveFieldAction {
+  fieldIndex: number;
+  rowIndex: number;
+  type: 'REMOVE_FIELD';
+}
+
+export interface ReorderDiffRowAction {
+  dragIndex: number;
+  dragRowIndex: number;
+  hoverIndex: number;
+  hoverRowIndex: number;
+  type: 'REORDER_DIFF_ROW';
+}
+
+export interface ReorderRowAction {
+  dragIndex: number;
+  dragRowIndex: number;
+  hoverIndex: number;
+  type: 'REORDER_ROW';
+}
+
+export interface SetFieldToEditAction {
+  name: string;
+  type: 'SET_FIELD_TO_EDIT';
+}
+
+export interface SubmitMetaFormAction {
+  type: 'SUBMIT_META_FORM';
+}
+
+export interface SubmitSucceededAction {
+  type: 'SUBMIT_SUCCEEDED';
+}
+
+export interface SetDataAction {
+  data: EditSettingsViewState;
+  type: 'SET_DATA';
+}
+
+export type Action =
+  | MoveRowAction
+  | OnAddFieldAction
+  | OnChangeAction
+  | OnChangeMetaAction
+  | OnChangeSizeAction
+  | RemoveFieldAction
+  | ReorderDiffRowAction
+  | ReorderRowAction
+  | SetFieldToEditAction
+  | SubmitMetaFormAction
+  | SubmitSucceededAction
+  | SetDataAction;
+
+const reducer = (state: EditSettingsViewState, action: Action) =>
   // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
@@ -32,7 +141,7 @@ const reducer = (state = initialState, action) =>
       }
       case 'ON_ADD_FIELD': {
         const newState = cloneDeep(state);
-        const attribute = get(newState, ['modifiedData', 'attributes', action.name], {});
+        const attribute = get(newState, ['modifiedData', 'attributes', action.name]);
 
         // Get the default size, checking custom fields first, then the type and generic defaults
         const size =
@@ -43,7 +152,7 @@ const reducer = (state = initialState, action) =>
         const listSize = get(newState, layoutPathEdit, []).length;
         const actualRowContentPath = [...layoutPathEdit, listSize - 1, 'rowContent'];
         const rowContentToSet = get(newState, actualRowContentPath, []);
-        let newList = get(newState, layoutPathEdit, []);
+        const newList = get(newState, layoutPathEdit, []);
 
         if (Array.isArray(rowContentToSet)) {
           set(
@@ -75,16 +184,22 @@ const reducer = (state = initialState, action) =>
         set(draftState, ['metaForm', 'size'], action.value);
         break;
       }
-      case 'ON_RESET': {
-        draftState.modifiedData = state.initialData;
-        break;
-      }
       case 'REMOVE_FIELD': {
-        const row = get(state, [...layoutPathEdit, action.rowIndex, 'rowContent'], []);
-        let newState = cloneDeep(state);
+        const row: SettingsViewLayoutModified['layouts']['edit'][0]['rowContent'] = get(
+          state,
+          [...layoutPathEdit, action.rowIndex, 'rowContent'],
+          []
+        );
+
+        const newState = cloneDeep(state);
 
         if (row.length === 1 || (row.length === 2 && get(row, [1, 'name'], '') === '_TEMP_')) {
-          const currentRowFieldList = get(state, layoutPathEdit, []);
+          const currentRowFieldList: SettingsViewLayoutModified['layouts']['edit'] = get(
+            state,
+            layoutPathEdit,
+            []
+          );
+
           set(
             newState,
             layoutPathEdit,
@@ -102,11 +217,9 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case 'REORDER_DIFF_ROW': {
-        const actualRowContent = get(
-          state,
-          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
-          []
-        );
+        const actualRowContent: SettingsViewLayoutModified['layouts']['edit'][0]['rowContent'] =
+          get(state, [...layoutPathEdit, action.dragRowIndex, 'rowContent'], []);
+
         const targetRowContent = get(
           state,
           [...layoutPathEdit, action.hoverRowIndex, 'rowContent'],
@@ -118,7 +231,7 @@ const reducer = (state = initialState, action) =>
           {}
         );
         const rowContent = [...targetRowContent, itemToInsert];
-        let newState = cloneDeep(state);
+        const newState = cloneDeep(state);
 
         set(
           newState,
@@ -137,17 +250,12 @@ const reducer = (state = initialState, action) =>
       }
       case 'REORDER_ROW': {
         const newState = cloneDeep(state);
-        const rowContent = get(
-          newState,
-          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
-          []
-        );
+        const rowPath = [...layoutPathEdit, action.dragRowIndex, 'rowContent'];
+        const rowContent = get(newState, rowPath, []);
 
-        set(
-          newState,
-          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
-          arrayMoveItem(rowContent, action.dragIndex, action.hoverIndex)
-        );
+        const reorderedRow = arrayMoveItem(rowContent, action.dragIndex, action.hoverIndex);
+
+        set(newState, rowPath, reorderedRow);
 
         const updatedList = formatLayout(get(newState, layoutPathEdit, []));
         set(draftState, layoutPathEdit, updatedList);
@@ -166,11 +274,13 @@ const reducer = (state = initialState, action) =>
         set(
           draftState,
           ['modifiedData', 'metadatas', state.metaToEdit, 'edit'],
-          state.metaForm.metadata
+          // TODO: review this to remove the non-null assertion.
+          state.metaForm!.metadata
         );
 
         const layoutsCopy = cloneDeep(get(state, layoutPathEdit, []));
-        const nextLayoutValue = setFieldSize(state.metaToEdit, state.metaForm.size, layoutsCopy);
+        // TODO: review this to remove the non-null assertion.
+        const nextLayoutValue = setFieldSize(state.metaToEdit, state.metaForm!.size, layoutsCopy);
 
         if (nextLayoutValue.length > 0) {
           set(draftState, layoutPathEdit, formatLayout(nextLayoutValue));
@@ -180,11 +290,6 @@ const reducer = (state = initialState, action) =>
       }
       case 'SUBMIT_SUCCEEDED': {
         draftState.initialData = state.modifiedData;
-        break;
-      }
-      case 'UNSET_FIELD_TO_EDIT': {
-        draftState.metaToEdit = '';
-        draftState.metaForm = {};
         break;
       }
       case 'SET_DATA': {

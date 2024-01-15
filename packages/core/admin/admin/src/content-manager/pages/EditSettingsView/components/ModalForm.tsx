@@ -21,7 +21,7 @@ const FIELD_SIZES = [
 ];
 
 interface ModalFormProps {
-  onMetaChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
+  onMetaChange: (e: { target: { name: string; value: string | boolean | number } }) => void;
   onSizeChange: (e: { name: string; value: number }) => void;
 }
 
@@ -46,7 +46,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }: ModalFormProps) => {
   }, [schemas]);
 
   const getSelectedItemSelectOptions = React.useCallback(
-    (formType) => {
+    (formType: string) => {
       if (formType !== 'relation' && formType !== 'component') {
         return [];
       }
@@ -108,8 +108,14 @@ const ModalForm = ({ onMetaChange, onSizeChange }: ModalFormProps) => {
   });
 
   // Check for a custom input provided by a custom field, or use the default one for that type
-  const { type, customField } = attributes[selectedField];
-  const { isResizable } = fieldSizes[customField] ?? fieldSizes[type];
+  const attribute = attributes[selectedField];
+  let isResizable: boolean;
+
+  if ('customField' in attribute && typeof attribute.customField === 'string') {
+    isResizable = fieldSizes[attribute.customField].isResizable;
+  } else {
+    isResizable = fieldSizes[attribute.type].isResizable;
+  }
 
   return (
     <>
@@ -120,7 +126,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }: ModalFormProps) => {
             value={fieldForm?.size}
             name="size"
             onChange={(value) => {
-              onSizeChange({ name: selectedField, value });
+              onSizeChange({ name: selectedField, value: value as number });
             }}
             label={formatMessage({
               id: getTranslation('containers.SettingPage.editSettings.size.label'),

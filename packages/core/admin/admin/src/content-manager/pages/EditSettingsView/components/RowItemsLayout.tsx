@@ -1,6 +1,7 @@
 import get from 'lodash/get';
 
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
+
 import { DisplayedFieldButton } from './DisplayedFieldButton';
 
 interface RowItemsLayoutProps {
@@ -24,7 +25,7 @@ const RowItemsLayout = ({
   lastIndex,
 }: RowItemsLayoutProps) => {
   const { setEditFieldToSelect, attributes, modifiedData, moveRow, moveItem } = useLayoutDnd();
-  const attribute = get(attributes, [rowItem.name], {});
+  const attribute = get(attributes, [rowItem.name]);
   const attributeLabel = get(modifiedData, ['metadatas', rowItem.name, 'edit', 'label'], '');
 
   return (

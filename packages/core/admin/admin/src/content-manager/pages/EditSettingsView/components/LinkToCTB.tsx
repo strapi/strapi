@@ -33,6 +33,7 @@ const LinkToCTB = () => {
   return (
     <CheckPermissions permissions={permissions}>
       <LinkButton
+        // @ts-expect-error – Remove deprecated component
         to={`${baseUrl}/${suffixUrl}`}
         onClick={handleClick}
         size="S"
