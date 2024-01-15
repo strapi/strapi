@@ -67,7 +67,7 @@ const ViewSettingsMenu = ({ slug }: ViewSettingsMenuProps) => {
                 variant="secondary"
                 as={NavLink}
                 // @ts-expect-error – inference from the as prop does not work in the DS.
-                to={`${slug}/configurations/list${
+                to={`configurations/list${
                   query.plugins
                     ? `?${stringify({ plugins: query.plugins }, { encode: false })}`
                     : ''

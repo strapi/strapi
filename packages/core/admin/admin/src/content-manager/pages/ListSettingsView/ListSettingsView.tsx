@@ -9,7 +9,6 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
@@ -17,6 +16,7 @@ import {
   useNotification,
   useQueryParams,
   useTracking,
+  Link,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
@@ -76,7 +76,6 @@ const ListSettingsView = () => {
   React.useEffect(() => {
     dispatch({
       type: 'SET_DATA',
-      data: layout,
     });
   }, [layout]);
 
@@ -85,27 +84,6 @@ const ListSettingsView = () => {
   const { attributes = {}, options } = layout ?? {};
   const { list: displayedFields = [] } = modifiedData?.layouts ?? {
     list: [],
-  };
-
-  const goBackUrl = () => {
-    const {
-      settings: { pageSize, defaultSortBy, defaultSortOrder },
-      kind,
-      uid,
-    } = initialData ?? { settings: {}, kind: '', uid: '' };
-
-    const sort = `${defaultSortBy}:${defaultSortOrder}`;
-    const goBackSearch = `${stringify(
-      {
-        page: 1,
-        pageSize,
-        sort,
-        plugins: query?.plugins,
-      },
-      { encode: false }
-    )}`;
-
-    return `/content-manager/${kind}/${uid}?${goBackSearch}`;
   };
 
   const handleChange = ({
@@ -245,6 +223,12 @@ const ListSettingsView = () => {
     return <LoadingIndicatorPage />;
   }
 
+  const {
+    settings: { pageSize, defaultSortBy, defaultSortOrder },
+    kind,
+    uid,
+  } = initialData ?? { settings: {} };
+
   return (
     <Layout>
       <Main aria-busy={isSubmittingForm}>
@@ -254,7 +238,20 @@ const ListSettingsView = () => {
               <Link
                 startIcon={<ArrowLeft />}
                 // @ts-expect-error invalid typings
-                to={goBackUrl}
+                to={{
+                  to: `/content-manager/${kind}/${uid}`,
+                  search: stringify(
+                    {
+                      page: 1,
+                      pageSize,
+                      sort: `${defaultSortBy}:${defaultSortOrder}`,
+                      plugins: query.plugins,
+                    },
+                    {
+                      encode: false,
+                    }
+                  ),
+                }}
                 id="go-back"
                 as={NavLink}
               >

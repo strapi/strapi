@@ -58,7 +58,6 @@ export interface SubmitFieldFormAction {
 }
 
 export interface SetDataAction {
-  data: SettingsViewContentTypeLayout | null;
   type: 'SET_DATA';
 }
 
@@ -151,8 +150,7 @@ const reducer = (state: ListSettingsViewState, action: Action) =>
        * TODO: refactor this so we don't need to do it, do we actually need a reducer?
        */
       case 'SET_DATA': {
-        draftState.initialData = action.data;
-        draftState.modifiedData = action.data;
+        set(draftState, ['initialData'], state.modifiedData);
         break;
       }
       default:
