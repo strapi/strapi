@@ -1,7 +1,17 @@
-import reducer from '../reducer';
+import {
+  reducer,
+  AddFieldAction,
+  MoveFieldAction,
+  OnChangeAction,
+  OnChangeFieldMetasAction,
+  RemoveFieldAction,
+  SetFieldToEditAction,
+  UnsetFieldToEditAction,
+  SubmitFieldFormAction,
+} from '../reducer';
 
 describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
-  let state;
+  let state: any;
 
   beforeEach(() => {
     state = {
@@ -16,7 +26,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
   it('should handle the default action correctly', () => {
     const expected = state;
 
-    expect(reducer(state, {})).toEqual(expected);
+    expect(reducer(state, {} as any)).toEqual(expected);
   });
 
   describe('ADD_FIELD', () => {
@@ -29,7 +39,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ADD_FIELD', item: 'title' };
+      const action: AddFieldAction = { type: 'ADD_FIELD', item: 'title' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -50,7 +60,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'MOVE_FIELD', atIndex: 1, originalIndex: 2 };
+      const action: MoveFieldAction = { type: 'MOVE_FIELD', atIndex: 1, originalIndex: 2 };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -66,7 +76,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_CHANGE', keys: 'settings.pageSize', value: 50 };
+      const action: OnChangeAction = { type: 'ON_CHANGE', keys: 'settings.pageSize', value: 50 };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -80,7 +90,11 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           label: 'Cover',
         },
       };
-      const action = { type: 'ON_CHANGE_FIELD_METAS', name: 'label', value: 'Cover' };
+      const action: OnChangeFieldMetasAction = {
+        type: 'ON_CHANGE_FIELD_METAS',
+        name: 'label',
+        value: 'Cover',
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -107,7 +121,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'REMOVE_FIELD', index: 1 };
+      const action: RemoveFieldAction = { type: 'REMOVE_FIELD', index: 1 };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -143,7 +157,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
+      const action: SetFieldToEditAction = { type: 'SET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -184,7 +198,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'UNSET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
+      const action: UnsetFieldToEditAction = { type: 'UNSET_FIELD_TO_EDIT' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -228,7 +242,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SUBMIT_FIELD_FORM', fieldToEdit: 'cover' };
+      const action: SubmitFieldFormAction = { type: 'SUBMIT_FIELD_FORM' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
