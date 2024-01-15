@@ -171,9 +171,6 @@ const useContentManagerInitData = () => {
     });
   };
 
-  const isLoading =
-    initialDataQuery.isLoading || contentTypeSettingsQuery.isLoading || state.isLoading;
-
   useEffect(() => {
     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
       formatData(
@@ -185,7 +182,7 @@ const useContentManagerInitData = () => {
     }
   }, [initialDataQuery.data, contentTypeSettingsQuery.data]);
 
-  return { ...state, isLoading };
+  return { ...state };
 };
 
 const generateLinks = (

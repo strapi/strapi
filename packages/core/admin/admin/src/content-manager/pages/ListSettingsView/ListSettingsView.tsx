@@ -9,9 +9,9 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
-  Link,
   LoadingIndicatorPage,
   useFetchClient,
   useNotification,
@@ -24,7 +24,7 @@ import upperFirst from 'lodash/upperFirst';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
 import { queryKeyPrefix as initDataQueryKey } from '../../hooks/useContentManagerInitData';
@@ -87,6 +87,27 @@ const ListSettingsView = () => {
     list: [],
   };
 
+  const goBackUrl = () => {
+    const {
+      settings: { pageSize, defaultSortBy, defaultSortOrder },
+      kind,
+      uid,
+    } = initialData ?? { settings: {}, kind: '', uid: '' };
+
+    const sort = `${defaultSortBy}:${defaultSortOrder}`;
+    const goBackSearch = `${stringify(
+      {
+        page: 1,
+        pageSize,
+        sort,
+        plugins: query?.plugins,
+      },
+      { encode: false }
+    )}`;
+
+    return `/content-manager/${kind}/${uid}?${goBackSearch}`;
+  };
+
   const handleChange = ({
     target: { name, value },
   }: {
@@ -106,6 +127,10 @@ const ListSettingsView = () => {
     Contracts.ContentTypes.UpdateContentTypeConfiguration.Request['body']
   >((body) => put(`/content-manager/content-types/${slug}/configuration`, body), {
     onSuccess() {
+      toggleNotification({
+        type: 'success',
+        message: { id: getTranslation('success.record.save') },
+      });
       trackUsage('didEditListSettings');
       queryClient.invalidateQueries(initDataQueryKey);
     },
@@ -220,12 +245,6 @@ const ListSettingsView = () => {
     return <LoadingIndicatorPage />;
   }
 
-  const {
-    settings: { pageSize, defaultSortBy, defaultSortOrder },
-    kind,
-    uid,
-  } = initialData ?? { settings: {} };
-
   return (
     <Layout>
       <Main aria-busy={isSubmittingForm}>
@@ -235,21 +254,9 @@ const ListSettingsView = () => {
               <Link
                 startIcon={<ArrowLeft />}
                 // @ts-expect-error invalid typings
-                to={{
-                  to: `/content-manager/${kind}/${uid}`,
-                  search: stringify(
-                    {
-                      page: 1,
-                      pageSize,
-                      sort: `${defaultSortBy}:${defaultSortOrder}`,
-                      plugins: query.plugins,
-                    },
-                    {
-                      encode: false,
-                    }
-                  ),
-                }}
+                to={goBackUrl}
                 id="go-back"
+                as={NavLink}
               >
                 {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
               </Link>
@@ -260,6 +267,7 @@ const ListSettingsView = () => {
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
+                loading={isSubmittingForm}
               >
                 {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
