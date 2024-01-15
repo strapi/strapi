@@ -35,11 +35,7 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": [
-        "first comp value",
-        "second comp value",
-        "third comp value"
-      ]
+      "enum": ["first comp value", "second comp value", "third comp value"]
     },
     "markdown": {
       "type": "richtext"

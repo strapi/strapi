@@ -2,6 +2,8 @@
  * single-type-unpublished controller
  */
 
-import { factories } from '@strapi/strapi'
+import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::single-type-unpublished.single-type-unpublished');
+export default factories.createCoreController(
+  'api::single-type-unpublished.single-type-unpublished'
+);
