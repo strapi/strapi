@@ -31,6 +31,7 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -479,7 +480,7 @@ const ReleaseDetailsBody = () => {
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
 
-  if (isError || isReleaseError || !release || !releaseActions) {
+  if (isReleaseError || !release) {
     const errorsArray = [];
     if (releaseError) {
       errorsArray.push({
@@ -500,6 +501,14 @@ const ReleaseDetailsBody = () => {
           },
         }}
       />
+    );
+  }
+
+  if (isError || !releaseActions) {
+    return (
+      <ContentLayout>
+        <AnErrorOccurred />
+      </ContentLayout>
     );
   }
 
@@ -665,15 +674,17 @@ const ReleaseDetailsBody = () => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
-                          <EntryValidationText status={entry.status} action={type} />
-                        </Td>
+                        <>
+                          <Td>
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu releaseId={releaseId} actionId={id} />
+                            </Flex>
+                          </Td>
+                        </>
                       )}
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
                     </Tr>
                   ))}
                 </Table.Body>
