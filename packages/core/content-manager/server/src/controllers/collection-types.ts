@@ -509,7 +509,8 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const entity = await entityManager.findOne(id, model, { populate });
+    const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
+    const entity = await entityManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
       return ctx.notFound();
@@ -519,7 +520,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.countDraftRelations(id, model);
+    const number = await entityManager.countDraftRelations(id, model, locale);
 
     return {
       data: number,

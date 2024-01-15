@@ -1,6 +1,7 @@
 import { omit } from 'lodash/fp';
 import { mapAsync, contentTypes, sanitize } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, EntityService, Documents } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   getDeepPopulate,
@@ -10,6 +11,8 @@ import {
 import { getDeepRelationsCount } from './utils/count';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
+
+const { ApplicationError } = errors;
 
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 
@@ -361,13 +364,18 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     return mappedEntity;
   },
 
-  async countDraftRelations(id: string, uid: Common.UID.ContentType) {
+  async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
       return 0;
     }
-    const document = await strapi.documents(uid).findOne(id, { populate });
+    const document = await strapi.documents(uid).findOne(id, { populate, locale });
+    if (!document) {
+      throw new ApplicationError(
+        `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
+      );
+    }
     return sumDraftCounts(document, uid);
   },
 
