@@ -57,6 +57,8 @@ import type {
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 
+import { useDocument } from '@strapi/admin/strapi-admin';
+
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
@@ -124,10 +126,22 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 interface EntryValidationTextProps {
   status: ReleaseAction['entry']['status'];
   action: ReleaseAction['type'];
+  schema: any;
+  components: any;
+  entry: any;
 }
 
-const EntryValidationText = ({ status, action }: EntryValidationTextProps) => {
+const EntryValidationText = ({
+  status,
+  action,
+  schema,
+  components,
+  entry,
+}: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
+  const { validationErrors } = useDocument(schema, entry, { components });
+
+  console.log(validationErrors);
 
   if (action == 'publish') {
     return (
@@ -424,6 +438,9 @@ const ReleaseDetailsBody = () => {
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
 
+  const collectionTypes = release?.actions.meta.contentTypes;
+  const components = release?.actions.meta.components;
+
   const {
     isLoading,
     isFetching,
@@ -624,20 +641,18 @@ const ReleaseDetailsBody = () => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, type, entry }) => (
+                  {releaseActions[key].map(({ id, contentType, locale, type, entry }) => (
                     <Tr key={id}>
                       <Td width={'25%'}>
                         <Typography ellipsis>{`${
-                          entry.contentType.mainFieldValue || entry.id
+                          contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
                       <Td>
-                        <Typography>{`${
-                          entry?.locale?.name ? entry.locale.name : '-'
-                        }`}</Typography>
+                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
                       </Td>
                       <Td>
-                        <Typography>{entry.contentType.displayName || ''}</Typography>
+                        <Typography>{contentType.displayName || ''}</Typography>
                       </Td>
                       <Td>
                         {release.releasedAt ? (
@@ -666,7 +681,13 @@ const ReleaseDetailsBody = () => {
                       </Td>
                       {!release.releasedAt && (
                         <Td>
-                          <EntryValidationText status={entry.status} action={type} />
+                          <EntryValidationText
+                            status={entry.publishedAt ? 'published' : 'draft'}
+                            action={type}
+                            schema={collectionTypes[contentType.uid]}
+                            components={components}
+                            entry={entry}
+                          />
                         </Td>
                       )}
                       <Td>

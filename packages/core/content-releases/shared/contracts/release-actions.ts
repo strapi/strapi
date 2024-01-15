@@ -28,8 +28,15 @@ type ReleaseActionEntryData = {
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
-  contentType: Common.UID.ContentType;
-  locale?: string;
+  contentType: {
+    mainFieldValue?: string;
+    displayName: string;
+    uid: Common.UID.ContentType;
+  };
+  locale?: {
+    name: string;
+    code: string;
+  };
   release: Release;
 }
 

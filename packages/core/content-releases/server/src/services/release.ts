@@ -37,13 +37,13 @@ type LocaleDictionary = {
 const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   switch (queryValue) {
     case 'contentType':
-      return 'entry.contentType.displayName';
+      return 'contentType.displayName';
     case 'action':
       return 'type';
     case 'locale':
-      return _.getOr('No locale', 'entry.locale.name');
+      return _.getOr('No locale', 'locale.name');
     default:
-      return 'entry.contentType.displayName';
+      return 'contentType.displayName';
   }
 };
 
@@ -254,14 +254,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
       return {
         ...action,
-        entry: {
-          id: action.entry.id,
-          contentType: {
-            displayName,
-            mainFieldValue: action.entry[mainField],
-          },
-          locale: action.locale ? allLocalesDictionary[action.locale] : null,
-          status: action.entry.publishedAt ? 'published' : 'draft',
+        locale: action.entry.locale ? allLocalesDictionary[action.entry.locale] : null,
+        status: action.entry.publishedAt ? 'published' : 'draft',
+        contentType: {
+          displayName,
+          mainFieldValue: action.entry[mainField],
+          uid: action.contentType,
         },
       };
     });

@@ -88,12 +88,28 @@ const releaseController = {
       throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
 
+    const contentManagerContentTypeService = strapi
+      .plugin('content-manager')
+      .service('content-types');
+    const contentManagerComponentsService = strapi.plugin('content-manager').service('components');
+
+    const contentTypeSchemas = await contentManagerContentTypeService.findAllContentTypes();
+    const components = await contentManagerComponentsService.findAllComponents();
+
+    const mappedContentTypeSchemas = contentTypeSchemas.reduce((acc, schema) => {
+      acc[schema.uid] = schema;
+
+      return acc;
+    });
+
     // Format the data object
     const data = {
       ...sanitizedRelease,
       actions: {
         meta: {
           count,
+          contentTypes: mappedContentTypeSchemas,
+          components,
         },
       },
     };
