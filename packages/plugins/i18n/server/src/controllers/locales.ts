@@ -27,14 +27,13 @@ const controller: Common.Controller = {
   async createLocale(ctx) {
     const { user } = ctx.state;
     const body = ctx.request.body as any;
-    const { isDefault, ...localeToCreate } = body as any;
-    const { code } = localeToCreate;
+    const { isDefault, ...localeToCreate } = body;
 
     await validateCreateLocaleInput(body);
 
     const localesService = getService('locales');
 
-    const existingLocale = await localesService.findByCode(code);
+    const existingLocale = await localesService.findByCode(body.code);
     if (existingLocale) {
       throw new ApplicationError('This locale already exists');
     }

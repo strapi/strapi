@@ -12,7 +12,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Strapi, Common } from '@strapi/types';
-import type { BaseContext, Context, DefaultContextExtends, DefaultStateExtends, Next } from 'koa';
+import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
 
@@ -132,7 +132,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   }
 
   // add the Strapi auth middleware
-  handler.push((ctx: Context, next: Next) => {
+  handler.push((ctx, next) => {
     ctx.state.route = {
       info: {
         // Indicate it's a content API route
