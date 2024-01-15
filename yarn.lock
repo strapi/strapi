@@ -158,18 +158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/server-plugin-landing-page-graphql-playground@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@apollo/server-plugin-landing-page-graphql-playground@npm:4.0.1"
-  dependencies:
-    "@apollographql/graphql-playground-html": "npm:1.6.29"
-  peerDependencies:
-    "@apollo/server": ^4.0.0
-  checksum: 68005fca18bd41c25360f2f82c740e1f45b15a491acffb2ffb015647abae9ce953186898336d984331a2f7d94848bbf56e2050891838a0ece10625018555fe99
-  languageName: node
-  linkType: hard
-
-"@apollo/server@npm:^4.10.0":
+"@apollo/server@npm:4.10.0":
   version: 4.10.0
   resolution: "@apollo/server@npm:4.10.0"
   dependencies:
@@ -321,15 +310,6 @@ __metadata:
   version: 2.0.1
   resolution: "@apollo/utils.withrequired@npm:2.0.1"
   checksum: ddd3a72d0f13e6283128d1aae787b65f8ef0bf2f2cf351e143c479f0838679e72d82f42f653b6baadd33a092854fc9cb9dd8af4a45938ee25b718274cef408ee
-  languageName: node
-  linkType: hard
-
-"@apollographql/graphql-playground-html@npm:1.6.29":
-  version: 1.6.29
-  resolution: "@apollographql/graphql-playground-html@npm:1.6.29"
-  dependencies:
-    xss: "npm:^1.0.8"
-  checksum: 5e45cdc122dbc18c71f89fd9be8c19d1e35417ea27d3915206438d351f7775894957cd5b8bb378921bb96a8f6e6a9d182ce3d674abaddefd36a3a7e9cf6f1e68
   languageName: node
   linkType: hard
 
@@ -9956,8 +9936,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
-    "@apollo/server": "npm:^4.10.0"
-    "@apollo/server-plugin-landing-page-graphql-playground": "npm:4.0.1"
+    "@apollo/server": "npm:4.10.0"
     "@as-integrations/koa": "npm:1.1.1"
     "@graphql-tools/schema": "npm:8.5.1"
     "@graphql-tools/utils": "npm:^8.13.1"
@@ -33856,18 +33835,6 @@ __metadata:
   bin:
     xss: bin/xss
   checksum: 1e66a38c54baa685474e66e12fabde098298dbc3e2839a03f867fbcbefb13dcf0cee97af9996b1850dc24b075302e82c495ecf80cdcf0de4372b1151ac3689cd
-  languageName: node
-  linkType: hard
-
-"xss@npm:^1.0.8":
-  version: 1.0.14
-  resolution: "xss@npm:1.0.14"
-  dependencies:
-    commander: "npm:^2.20.3"
-    cssfilter: "npm:0.0.10"
-  bin:
-    xss: bin/xss
-  checksum: dc97acaee35e5ed453fe5628841daf7b4aba5ed26b31ff4eadf831f42cded1ddebc218ff0db1d6a73e301bfada8a5236fec0c234233d66a20ecc319da542b357
   languageName: node
   linkType: hard
 
