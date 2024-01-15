@@ -80,6 +80,7 @@
     "@strapi/types": "4.17.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/koa-bodyparser": "4.3.12",
     "@types/pluralize": "0.0.30",
     "koa": "2.13.4",
     "react": "^18.2.0",

@@ -1,11 +1,6 @@
 import { toUpper, snakeCase, pick, isEmpty } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import {
-  ApolloError,
-  UserInputError as ApolloUserInputError,
-  ForbiddenError as ApolloForbiddenError,
-} from 'apollo-server-koa';
-import { GraphQLError } from 'graphql';
+import { GraphQLError, type GraphQLFormattedError } from 'graphql';
 
 const { HttpError, ForbiddenError, UnauthorizedError, ApplicationError, ValidationError } = errors;
 
@@ -14,31 +9,64 @@ const formatErrorToExtension = (error: any) => ({
   error: pick(['name', 'message', 'details'])(error),
 });
 
-export function formatGraphqlError(error: GraphQLError) {
-  const { originalError } = error;
+function createFormattedError(
+  formattedError: GraphQLFormattedError,
+  message: string,
+  code: string,
+  originalError: unknown
+) {
+  const options = {
+    ...formattedError,
+    extensions: {
+      ...formattedError.extensions,
+      ...formatErrorToExtension(originalError),
+      code,
+    },
+  };
 
+  return new GraphQLError(message, options);
+}
+
+/**
+ * The handler for Apollo Server v4's formatError config option
+ *
+ * Intercepts specific Strapi error types to send custom error response codes in the GraphQL response
+ */
+export function formatGraphqlError(formattedError: GraphQLFormattedError, originalError: unknown) {
+  // If this error doesn't have an associated originalError, it
   if (isEmpty(originalError)) {
-    return error;
+    return formattedError;
   }
 
+  const { message = '', name = 'UNKNOWN' } = originalError as Error;
+
   if (originalError instanceof ForbiddenError || originalError instanceof UnauthorizedError) {
-    return new ApolloForbiddenError(originalError.message, formatErrorToExtension(originalError));
+    return createFormattedError(formattedError, message, 'FORBIDDEN', originalError);
   }
 
   if (originalError instanceof ValidationError) {
-    return new ApolloUserInputError(originalError.message, formatErrorToExtension(originalError));
+    return createFormattedError(formattedError, message, 'BAD_USER_INPUT', originalError);
   }
 
   if (originalError instanceof ApplicationError || originalError instanceof HttpError) {
-    const name = formatToCode(originalError.name);
-    return new ApolloError(originalError.message, name, formatErrorToExtension(originalError));
+    const errorName = formatToCode(name);
+    return createFormattedError(formattedError, message, errorName, originalError);
   }
 
-  if (originalError instanceof ApolloError || originalError instanceof GraphQLError) {
-    return error;
+  if (originalError instanceof GraphQLError) {
+    return formattedError;
   }
 
-  // Internal server error
+  // else if originalError doesn't appear to be from Strapi or GraphQL..
+
+  // Log the error
   strapi.log.error(originalError);
-  return new ApolloError('Internal Server Error', 'INTERNAL_SERVER_ERROR');
+
+  // Create a generic 500 to send so we don't risk leaking any data
+  return createFormattedError(
+    new GraphQLError('Internal Server Error'),
+    'Internal Server Error',
+    'INTERNAL_SERVER_ERROR',
+    originalError
+  );
 }
