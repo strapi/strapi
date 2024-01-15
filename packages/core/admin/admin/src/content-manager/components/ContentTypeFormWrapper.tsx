@@ -458,7 +458,9 @@ const ContentTypeFormWrapper = ({
           Contracts.CollectionTypes.Update.Response,
           AxiosResponse<Contracts.CollectionTypes.Update.Response>,
           Contracts.CollectionTypes.Update.Request['body']
-        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
+        >(`/content-manager/${collectionType}/${slug}/${id}`, body, {
+          params: query,
+        });
 
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
