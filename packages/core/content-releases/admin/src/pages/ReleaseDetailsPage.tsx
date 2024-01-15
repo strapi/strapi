@@ -34,11 +34,13 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
+  getYupInnerErrors,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
+import { ValidationError } from 'yup';
 
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -135,7 +137,19 @@ interface EntryValidationTextProps {
 
 const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validationErrors } = unstable_useDocument(schema, entry, { components });
+  const { validate } = unstable_useDocument();
+
+  const getValidationErrors = () => {
+    try {
+      validate(entry, { contentType: schema, components });
+
+      return {};
+    } catch (error) {
+      return getYupInnerErrors(error as ValidationError);
+    }
+  };
+
+  const validationErrors = getValidationErrors();
 
   if (Object.keys(validationErrors).length > 0) {
     const validationErrorsMessages = Object.entries(validationErrors)
