@@ -125,9 +125,9 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
 
   const subtitle = `${formatMessage({
     id: getTranslation('api.id'),
-    defaultMessage: 'API ID ',
+    defaultMessage: 'API ID',
     // @ts-expect-error – issue comes from the context not having the correct layout from the admin.
-  })} : ${layout?.apiID}`;
+  })}: ${layout?.apiID}`;
 
   return (
     <>

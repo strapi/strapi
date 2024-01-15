@@ -23,6 +23,7 @@ import {
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
+import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
 import { FieldSchema, useFieldHint } from '../hooks/useFieldHint';
@@ -559,4 +560,11 @@ const GenericInput = ({
   }
 };
 
-export { GenericInput };
+/**
+ * we've memoized this component because we use a context to store all the data in our form in the content-manager.
+ * This then causes _every_ component to re-render because there are no selects incurring performance issues
+ * in content-types as the content-type gets more complicated.
+ */
+const MemoizedGenericInput = React.memo(GenericInput, isEqual);
+
+export { MemoizedGenericInput as GenericInput };

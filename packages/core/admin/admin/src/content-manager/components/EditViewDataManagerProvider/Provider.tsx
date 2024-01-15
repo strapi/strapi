@@ -27,7 +27,7 @@ import { usePrev } from '../../hooks/usePrev';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crud/actions';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
-import { RenderChildProps } from '../SingleTypeFormWrapper';
+import { RenderChildProps } from '../ContentTypeFormWrapper';
 
 import { reducer, initialState, RelationData } from './reducer';
 import { cleanData } from './utils/cleanData';

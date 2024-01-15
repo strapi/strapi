@@ -3,6 +3,7 @@ import execa from 'execa';
 import logger from './logger';
 import type { Options } from '../types';
 
+// TODO: Refactor run install, use the methods available in @strapi/utils instead
 export function runInstall(path: string, { useYarn }: Options = {}) {
   return execa(useYarn ? 'yarn' : 'npm', ['install'], {
     cwd: path,

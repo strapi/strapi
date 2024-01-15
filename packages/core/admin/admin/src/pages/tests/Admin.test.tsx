@@ -6,12 +6,6 @@ import { render, screen } from '@tests/utils';
 import { useMenu } from '../../hooks/useMenu';
 import { Admin } from '../Admin';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useDispatch: jest.fn(() => jest.fn()),
-  useSelector: jest.fn(() => 'init'),
-}));
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useStrapiApp: jest.fn(() => ({ menu: [] })),
@@ -37,6 +31,7 @@ jest.mock('../../components/LeftMenu', () => ({
     return <div>menu</div>;
   },
 }));
+
 jest.mock('../HomePage', () => ({
   HomePage() {
     return <div>HomePage</div>;

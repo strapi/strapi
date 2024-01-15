@@ -3,7 +3,7 @@ import _ from 'lodash';
 import fse from 'fs-extra';
 
 import { importDefault } from '@strapi/utils';
-import glob from './glob';
+import { glob } from 'glob';
 import filePathToPath from './filepath-to-prop-path';
 
 /**

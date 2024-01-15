@@ -6,7 +6,6 @@ import { ProfilePage } from '../ProfilePage';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useFocusWhenNavigate: jest.fn(),
-  useAppInfo: jest.fn(() => ({ setUserDisplayName: jest.fn() })),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
 }));
 
@@ -17,6 +16,8 @@ describe('Profile page', () => {
   beforeAll(() => {
     window.strapi.isEE = true;
     window.strapi.features.isEnabled = () => true;
+
+    window.localStorage.setItem('jwtToken', JSON.stringify('token'));
   });
 
   afterAll(() => {

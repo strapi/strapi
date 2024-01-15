@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger } from '@strapi/logger';
-import strapiFactory from '@strapi/strapi';
+import { strapiFactory } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
 import type { LoadedStrapi, Strapi } from '@strapi/types';

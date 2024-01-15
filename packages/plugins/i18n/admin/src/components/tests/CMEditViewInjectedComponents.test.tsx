@@ -64,7 +64,6 @@ const render = (
             },
             createActionAllowedFields: [],
             formErrors: {},
-            hasDraftAndPublish: true,
             initialData: {},
             isCreatingEntry: true,
             isSingleType: false,

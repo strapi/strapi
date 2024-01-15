@@ -51,11 +51,11 @@ export default {
     // Hooks that mutate the collection types links in order to add the locale filter
     app.registerHook(
       'Admin/CM/pages/App/mutate-collection-types-links',
-      addLocaleToLinksHook('collectionType')
+      addLocaleToLinksHook('collection-types')
     );
     app.registerHook(
       'Admin/CM/pages/App/mutate-single-types-links',
-      addLocaleToLinksHook('singleType')
+      addLocaleToLinksHook('single-types')
     );
     // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);

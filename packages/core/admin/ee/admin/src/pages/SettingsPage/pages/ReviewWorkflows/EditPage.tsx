@@ -1,29 +1,21 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { ConfirmDialog, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
-import set from 'lodash/set';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ValidationError } from 'yup';
 
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
-import { Stage, Update, Workflow } from '../../../../../../../shared/contracts/review-workflows';
+import { isBaseQueryError } from '../../../../../../../admin/src/utils/baseQuery';
+import { Stage } from '../../../../../../../shared/contracts/review-workflows';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
+import { useUpdateWorkflowMutation } from '../../../../services/reviewWorkflows';
 
 import {
   resetWorkflow,
@@ -59,10 +51,12 @@ export const ReviewWorkflowsEditPage = () => {
   const permissions = useSelector(selectAdminPermissions);
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { put } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { isLoading: isLoadingWorkflow, meta, workflows, refetch } = useReviewWorkflows();
+  const { isLoading: isLoadingWorkflow, meta, workflows } = useReviewWorkflows();
   const { collectionTypes, singleTypes, isLoading: isLoadingContentTypes } = useContentTypes();
   const serverState = useSelector(selectServerState);
   const currentWorkflowIsDirty = useSelector(selectIsWorkflowDirty);
@@ -78,11 +72,10 @@ export const ReviewWorkflowsEditPage = () => {
     hasReassignedContentTypes?: boolean;
   }>({});
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
-  const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles(undefined, {
-    retry: false,
-  });
+  const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles(undefined);
   const [showLimitModal, setShowLimitModal] = React.useState<'workflow' | 'stage' | null>(null);
   const [initialErrors, setInitialErrors] = React.useState<FormikErrors<CurrentWorkflow>>();
+  const [saving, setSaving] = React.useState(false);
 
   const workflow = workflows?.find((workflow) => workflow.id === parseInt(workflowId, 10));
   const contentTypesFromOtherWorkflows = workflows
@@ -93,102 +86,73 @@ export const ReviewWorkflowsEditPage = () => {
   const numberOfWorkflows = limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME];
   const stagesPerWorkflow = limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME];
 
-  const { mutateAsync, isLoading: isLoadingMutation } = useMutation<
-    Update.Response['data'],
-    AxiosError<Update.Response>,
-    { workflow: Update.Request['body'] }
-  >(
-    async ({ workflow }) => {
-      const {
-        data: { data },
-      } = await put(`/admin/review-workflows/workflows/${workflow.id}`, {
-        data: workflow,
-      });
-
-      return data;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
-        });
-      },
-    }
-  );
-
-  const updateWorkflow = async (workflow: Partial<Workflow>) => {
-    // reset the error messages
-    setInitialErrors(undefined);
-
-    try {
-      const res = await mutateAsync({
-        workflow: {
-          ...workflow,
-
-          // compare permissions of stages and only submit them if at least one has
-          // changed; this enables partial updates e.g. for users who don't have
-          // permissions to see roles
-          stages: workflow.stages?.map((stage) => {
-            let hasUpdatedPermissions = true;
-            const serverStage = serverState.workflow?.stages?.find(
-              (serverStage) => serverStage.id === stage?.id
-            );
-
-            if (serverStage) {
-              hasUpdatedPermissions =
-                serverStage.permissions?.length !== stage.permissions?.length ||
-                !serverStage.permissions?.every(
-                  (serverPermission) =>
-                    !!stage.permissions?.find(
-                      (permission) => permission.role === serverPermission.role
-                    )
-                );
-            }
-
-            return {
-              ...stage,
-              permissions: hasUpdatedPermissions ? stage.permissions : undefined,
-            } satisfies Stage;
-          }),
-        },
-      });
-
-      return res;
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        // TODO: this would benefit from a utility to get a formik error
-        // representation from an API error
-        if (
-          error.response &&
-          error.response.data?.error?.name === 'ValidationError' &&
-          error.response.data?.error?.details?.errors?.length > 0
-        ) {
-          setInitialErrors(
-            (error.response.data?.error?.details?.errors as ValidationError[]).reduce(
-              (acc, error) => {
-                if (error.path) set(acc, error.path, error.message);
-
-                return acc;
-              },
-              {}
-            )
-          );
-        }
-
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-
-        return null;
-      }
-    }
-  };
+  const [updateWorkflow] = useUpdateWorkflowMutation();
 
   const submitForm = async () => {
-    await updateWorkflow(currentWorkflow);
-    await refetch();
+    // reset the error messages
+    setInitialErrors(undefined);
+    setSaving(true);
+
+    try {
+      // @ts-expect-error – issue with the redux-store set up
+      const res = await updateWorkflow({
+        ...currentWorkflow,
+
+        // compare permissions of stages and only submit them if at least one has
+        // changed; this enables partial updates e.g. for users who don't have
+        // permissions to see roles
+        stages: currentWorkflow.stages?.map((stage) => {
+          let hasUpdatedPermissions = true;
+          const serverStage = serverState.workflow?.stages?.find(
+            (serverStage) => serverStage.id === stage?.id
+          );
+
+          if (serverStage) {
+            hasUpdatedPermissions =
+              serverStage.permissions?.length !== stage.permissions?.length ||
+              !serverStage.permissions?.every(
+                (serverPermission) =>
+                  !!stage.permissions?.find(
+                    (permission) => permission.role === serverPermission.role
+                  )
+              );
+          }
+
+          return {
+            ...stage,
+            permissions: hasUpdatedPermissions ? stage.permissions : undefined,
+          } satisfies Stage;
+        }),
+      });
+
+      if ('error' in res) {
+        if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          setInitialErrors(formatValidationErrors(res.error));
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(res.error),
+          });
+        }
+
+        return;
+      }
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+      });
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    } finally {
+      setSaving(false);
+    }
 
     setSavePrompts({});
   };
@@ -348,7 +312,7 @@ export const ReviewWorkflowsEditPage = () => {
                   disabled={!currentWorkflowIsDirty}
                   // if the confirm dialog is open the loading state is on
                   // the confirm button already
-                  loading={!Boolean(Object.keys(savePrompts).length > 0) && isLoadingMutation}
+                  loading={!Boolean(Object.keys(savePrompts).length > 0) && saving}
                 >
                   {formatMessage({
                     id: 'global.save',

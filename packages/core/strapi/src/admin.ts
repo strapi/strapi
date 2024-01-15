@@ -1,9 +1,10 @@
 import { RenderAdminArgs, renderAdmin, Store } from '@strapi/admin/strapi-admin';
-// @ts-expect-error – No types, yet.
 import contentTypeBuilder from '@strapi/plugin-content-type-builder/strapi-admin';
 import email from '@strapi/plugin-email/strapi-admin';
 // @ts-expect-error – No types, yet.
 import upload from '@strapi/plugin-upload/strapi-admin';
+// @ts-expect-error – No types, yet.
+import contentReleases from '@strapi/content-releases/strapi-admin';
 
 const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderAdminArgs) => {
   return renderAdmin(mountNode, {
@@ -13,6 +14,7 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
       // @ts-expect-error – TODO: fix this
       email,
       upload,
+      contentReleases,
       ...plugins,
     },
   });

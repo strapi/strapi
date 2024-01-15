@@ -4,4 +4,5 @@ export const ItemTypes = {
   FIELD: 'field',
   DYNAMIC_ZONE: 'dynamicZone',
   RELATION: 'relation',
+  BLOCKS: 'blocks',
 } as const;

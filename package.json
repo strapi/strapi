@@ -25,6 +25,7 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
+    "examples/plugins/*",
     ".github/actions/*",
     "scripts/*"
   ],
@@ -48,6 +49,9 @@
     "setup": "yarn && yarn clean && yarn build",
     "test:api": "node test/scripts/run-api-tests.js",
     "test:clean": "rimraf ./coverage",
+    "test:cli": "node test/scripts/run-cli-tests.js",
+    "test:cli:clean": "node test/scripts/run-cli-tests.js clean",
+    "test:cli:debug": "node test/scripts/run-cli-tests.js --debug",
     "test:e2e": "node test/scripts/run-e2e-tests.js",
     "test:e2e:clean": "node test/scripts/run-e2e-tests.js clean",
     "test:e2e:debug": "node test/scripts/run-e2e-tests.js --debug",
@@ -71,7 +75,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.14.0-typescript.2",
+    "@strapi/design-system": "1.15.0-typescript.1",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -120,9 +124,9 @@
     "eslint-plugin-testing-library": "6.0.2",
     "execa": "5.1.1",
     "find-up": "5.0.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "get-port": "5.1.1",
-    "glob": "7.2.3",
+    "glob": "10.3.10",
     "husky": "8.0.2",
     "inquirer": "8.2.5",
     "jest": "29.6.0",
@@ -138,7 +142,10 @@
     "prettier": "2.8.4",
     "qs": "6.11.1",
     "rimraf": "3.0.2",
+    "stream-chain": "2.2.5",
+    "stream-json": "1.8.0",
     "supertest": "6.3.3",
+    "tar": "6.1.13",
     "ts-jest": "29.1.0",
     "typescript": "5.3.2",
     "yalc": "1.0.0-pre.53",

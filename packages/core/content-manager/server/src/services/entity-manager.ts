@@ -1,6 +1,7 @@
 import { omit } from 'lodash/fp';
 import { mapAsync, contentTypes, sanitize } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, EntityService, Documents } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   getDeepPopulate,
@@ -11,6 +12,8 @@ import { getDeepRelationsCount } from './utils/count';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
+const { ApplicationError } = errors;
+
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
@@ -18,7 +21,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
 // Types reused from entity service
-type Entity = EntityService.Result<Common.UID.ContentType>;
+export type Entity = EntityService.Result<Common.UID.ContentType>;
 type Body = EntityService.Params.Data.Input<Common.UID.ContentType>;
 
 const emitEvent = async (uid: Common.UID.ContentType, event: string, entity: Entity) => {
@@ -44,10 +47,7 @@ const buildDeepPopulate = (uid: Common.UID.ContentType) => {
   );
 };
 
-/**
- * @type {import('./entity-manager').default}
- */
-export default ({ strapi }: { strapi: Strapi }) => ({
+const entityManager = ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Extend this function from other plugins to add custom mapping of entity
    * responses
@@ -59,7 +59,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     // Map documentId to id
     // TODO: remove this when we change documentId to id in database
     if (entity?.documentId) {
-      entity.entryId = entity.id;
       entity.id = entity.documentId;
       delete entity.documentId;
     }
@@ -100,7 +99,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const page = Number(opts?.page) || 1;
     const pageSize = Number(opts?.pageSize) || 10;
 
-    // const entities = await strapi.entityService.findPage(uid, opts);
     const [documents, total = 0] = await Promise.all([
       strapi.documents(uid).findMany(opts),
       strapi.documents(uid).count(opts),
@@ -189,10 +187,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     };
 
     // @ts-expect-error - change entity to document
-    const clonedEntity = await strapi.documents(uid).clone(document.id, params);
+    const result = await strapi.documents(uid).clone(document.id, params);
 
+    const clonedEntity = result?.versions.at(0);
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
+    if (clonedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(clonedEntity, uid);
     }
 
@@ -223,9 +222,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     // @ts-expect-error - change entity to document
     await strapi.documents(uid).delete(document.id, { ...opts, populate });
+    // const deletedDocument = await strapi.documents(uid).delete(document.id, { ...opts, populate });
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    // if (isWebhooksPopulateRelationsEnabled()) {
+    // if (deletedDocument && isWebhooksPopulateRelationsEnabled()) {
     //   return getDeepRelationsCount(deletedEntity, uid);
     // }
 
@@ -259,7 +259,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const mappedEntity = await this.mapEntity(publishedDocument, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
+    if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
@@ -357,20 +357,25 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const mappedEntity = await this.mapEntity(unpublishedDocument, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isWebhooksPopulateRelationsEnabled()) {
+    if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
     return mappedEntity;
   },
 
-  async countDraftRelations(id: string, uid: Common.UID.ContentType) {
+  async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
       return 0;
     }
-    const document = await strapi.documents(uid).findOne(id, { populate });
+    const document = await strapi.documents(uid).findOne(id, { populate, locale });
+    if (!document) {
+      throw new ApplicationError(
+        `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
+      );
+    }
     return sumDraftCounts(document, uid);
   },
 
@@ -399,3 +404,5 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return totalNumberDraftRelations;
   },
 });
+
+export default entityManager;

@@ -30,7 +30,6 @@ export default {
     const { query } = ctx.request;
 
     const entityManager = getService('entity-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -55,7 +54,6 @@ export default {
 
     const sanitizedResults = await mapAsync(results, async (result: any) => {
       const sanitizedResult = await permissionChecker.sanitizeOutput(result);
-      sanitizedResult.status = await documentMetadata.getStatus(model, result);
       return sanitizedResult;
     });
 
@@ -511,7 +509,8 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const entity = await entityManager.findOne(id, model, { populate });
+    const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
+    const entity = await entityManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
       return ctx.notFound();
@@ -521,7 +520,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.countDraftRelations(id, model);
+    const number = await entityManager.countDraftRelations(id, model, locale);
 
     return {
       data: number,

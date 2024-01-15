@@ -1,28 +1,22 @@
 import * as React from 'react';
 
-import { auth } from '@strapi/helper-plugin';
-import { Redirect, Route, useLocation } from 'react-router-dom';
+import { Redirect, Route, RouteProps } from 'react-router-dom';
 
-type PropsOf<T> = T extends React.ComponentType<infer P> ? P : object;
+import { useAuth } from '../features/Auth';
 
-type PrivateRouteProps<TComponent extends React.ElementType> = {
-  component: TComponent;
-  path: string;
-} & PropsOf<TComponent>;
+interface PrivateRouteProps extends Omit<RouteProps, 'render' | 'component'> {
+  children: React.ReactNode;
+}
 
-const PrivateRoute = <TComponent extends React.ElementType>({
-  component: Component,
-  path,
-  ...rest
-}: PrivateRouteProps<TComponent>) => {
-  const { pathname, search } = useLocation();
+const PrivateRoute = ({ children, ...rest }: PrivateRouteProps) => {
+  const token = useAuth('PrivateRoute', (state) => state.token);
 
   return (
     <Route
-      path={path}
-      render={(props) =>
-        auth.getToken() !== null ? (
-          <Component {...rest} {...props} />
+      {...rest}
+      render={({ location: { pathname, search } }) =>
+        token !== null ? (
+          children
         ) : (
           <Redirect
             to={{

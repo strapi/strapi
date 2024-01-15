@@ -14,6 +14,8 @@ export type IsFalse<TValue> = [TValue] extends [False] ? True : False;
 
 export type StrictEqual<TValue, TMatch> = And<Extends<TValue, TMatch>, Extends<TMatch, TValue>>;
 
+export type NotStrictEqual<TValue, TMatch> = Not<StrictEqual<TValue, TMatch>>;
+
 export type Extends<TLeft, TRight> = [TLeft] extends [TRight] ? True : False;
 
 export type DoesNotExtends<TLeft, TRight> = Not<Extends<TLeft, TRight>>;

@@ -1,9 +1,5 @@
-import StrapiFactory from './Strapi';
+import strapiFactory from './Strapi';
 
-// export type * from '@strapi/types';
+export * as factories from './factories';
 
-// export type { StrapiCommand, CLIContext } from './commands/types';
-
-// export * as factories from './factories';
-
-export { StrapiFactory };
+export { strapiFactory };

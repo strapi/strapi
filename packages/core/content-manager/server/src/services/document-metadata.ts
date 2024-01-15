@@ -1,5 +1,5 @@
 import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
-import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+import type { DocumentMetadata } from '../../../shared/contracts/collection-types-v5';
 
 export interface DocumentVersionSelector {
   id: string;

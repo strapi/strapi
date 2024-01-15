@@ -1,9 +1,6 @@
 import * as React from 'react';
 
-import { useFetchClient } from '@strapi/helper-plugin';
-import { AxiosError } from 'axios';
-import { useQuery } from 'react-query';
-
+import { useGetLicenseLimitsQuery } from '../../../../admin/src/services/admin';
 import { GetLicenseLimitInformation } from '../../../../shared/contracts/admin';
 
 interface UseLicenseLimitsArgs {
@@ -11,23 +8,9 @@ interface UseLicenseLimitsArgs {
 }
 
 function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true }) {
-  const { get } = useFetchClient();
-  const { data, isError, isLoading } = useQuery<
-    GetLicenseLimitInformation.Response,
-    AxiosError<GetLicenseLimitInformation.Response['error']>
-  >(
-    ['ee', 'license-limit-info'],
-    async () => {
-      const { data } = await get<GetLicenseLimitInformation.Response>(
-        '/admin/license-limit-information'
-      );
-
-      return data;
-    },
-    {
-      enabled,
-    }
-  );
+  const { data, isError, isLoading } = useGetLicenseLimitsQuery(undefined, {
+    skip: !enabled,
+  });
 
   type FeatureNames = GetLicenseLimitInformation.Response['data']['features'][number]['name'];
 
