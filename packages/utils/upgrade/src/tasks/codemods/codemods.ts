@@ -4,7 +4,7 @@ import { timerFactory } from '../../modules/timer';
 import { projectFactory } from '../../modules/project';
 import type { RunCodemodsOptions } from './types';
 import { codemodRunnerFactory } from '../../modules/codemod-runner';
-import { Version, isSemVer, rangeFactory } from '../../modules/version';
+import { Version, isSemverInstance, rangeFactory } from '../../modules/version';
 
 export const codemods = async (options: RunCodemodsOptions) => {
   const timer = timerFactory();
@@ -35,10 +35,12 @@ const getRangeFromTarget = (
   currentVersion: Version.SemVer,
   target: Version.ReleaseType | Version.LiteralSemVer
 ) => {
-  if (isSemVer(target)) {
+  if (isSemverInstance(target)) {
     return rangeFactory(target);
   }
+
   const { major, minor, patch } = currentVersion;
+
   switch (target) {
     case Version.ReleaseType.Major:
       return rangeFactory(`${major}`);
