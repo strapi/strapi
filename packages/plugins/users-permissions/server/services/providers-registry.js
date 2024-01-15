@@ -90,7 +90,7 @@ const getInitialProviders = ({ purest }) => ({
 
     return google
       .get('oauth2/v1/userinfo')
-      .qs({ accessToken })
+      .qs({ access_token: accessToken })
       .request()
       .then(({ body }) => ({
         name: body.name,
