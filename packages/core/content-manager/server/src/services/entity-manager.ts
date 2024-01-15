@@ -56,7 +56,6 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     // Map documentId to id
     // TODO: remove this when we change documentId to id in database
     if (entity?.documentId) {
-      entity.entryId = entity.id;
       entity.id = entity.documentId;
       delete entity.documentId;
     }
@@ -97,7 +96,6 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     const page = Number(opts?.page) || 1;
     const pageSize = Number(opts?.pageSize) || 10;
 
-    // const entities = await strapi.entityService.findPage(uid, opts);
     const [documents, total = 0] = await Promise.all([
       strapi.documents(uid).findMany(opts),
       strapi.documents(uid).count(opts),
