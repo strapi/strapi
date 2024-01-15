@@ -5,7 +5,7 @@ import { ILink, Transaction } from '../../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
 
 interface ErrorWithCode extends Error {
-  code?: string;
+  code: string;
 }
 
 const isErrorWithCode = (error: any): error is ErrorWithCode => {
