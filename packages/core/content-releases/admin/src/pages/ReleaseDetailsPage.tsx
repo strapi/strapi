@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { unstable_useDocument } from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
@@ -16,6 +17,7 @@ import {
   SingleSelect,
   SingleSelectOption,
   Icon,
+  Tooltip,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
@@ -33,7 +35,7 @@ import {
   useRBAC,
   AnErrorOccurred,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
+import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
@@ -56,9 +58,9 @@ import {
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
+  ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-
-import { useDocument } from '@strapi/admin/strapi-admin';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -125,30 +127,43 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 };
 
 interface EntryValidationTextProps {
-  status: ReleaseAction['entry']['status'];
   action: ReleaseAction['type'];
-  schema: any;
-  components: any;
-  entry: any;
+  schema: Schema.ContentType;
+  components: { [key: Schema.Component['uid']]: Schema.Component };
+  entry: ReleaseActionEntry;
 }
 
-const EntryValidationText = ({
-  status,
-  action,
-  schema,
-  components,
-  entry,
-}: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validationErrors } = useDocument(schema, entry, { components });
+  const { validationErrors } = unstable_useDocument(schema, entry, { components });
 
-  console.log(validationErrors);
+  if (Object.keys(validationErrors).length > 0) {
+    const validationErrorsMessages = Object.entries(validationErrors)
+      .map(([key, value]) =>
+        formatMessage(
+          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+          { field: key }
+        )
+      )
+      .join(' ');
+
+    return (
+      <Flex gap={2}>
+        <Icon color="danger600" as={CrossCircle} />
+        <Tooltip description={validationErrorsMessages}>
+          <Typography textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+            {validationErrorsMessages}
+          </Typography>
+        </Tooltip>
+      </Flex>
+    );
+  }
 
   if (action == 'publish') {
     return (
       <Flex gap={2}>
         <Icon color="success600" as={CheckCircle} />
-        {status === 'published' ? (
+        {entry.publishedAt ? (
           <Typography textColor="success600" fontWeight="bold">
             {formatMessage({
               id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
@@ -170,7 +185,7 @@ const EntryValidationText = ({
   return (
     <Flex gap={2}>
       <Icon color="success600" as={CheckCircle} />
-      {status === 'draft' ? (
+      {!entry.publishedAt ? (
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
@@ -692,7 +707,6 @@ const ReleaseDetailsBody = () => {
                         <>
                           <Td>
                             <EntryValidationText
-                              status={entry.publishedAt ? 'published' : 'draft'}
                               action={type}
                               schema={collectionTypes[contentType.uid]}
                               components={components}

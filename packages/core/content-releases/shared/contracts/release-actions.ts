@@ -4,7 +4,7 @@ import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
-type ReleaseActionEntry = Entity & {
+export type ReleaseActionEntry = Entity & {
   // Entity attributes
   [key: string]: Attribute.Any;
 } & {
@@ -12,26 +12,21 @@ type ReleaseActionEntry = Entity & {
   status: 'published' | 'draft';
 };
 
-type ReleaseActionEntryData = {
-  id: ReleaseActionEntry['id'];
-  locale?: {
-    name: string;
-    code: string;
-  };
-  contentType: {
-    mainFieldValue?: string;
-    displayName: string;
-  };
-  status: 'published' | 'draft';
-};
-
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
+  contentType: Common.UID.ContentType;
+  locale?: string;
+  release: Release;
+}
+
+export interface FormattedReleaseAction extends Entity {
+  type: 'publish' | 'unpublish';
+  entry: ReleaseActionEntry;
   contentType: {
+    uid: Common.UID.ContentType;
     mainFieldValue?: string;
     displayName: string;
-    uid: Common.UID.ContentType;
   };
   locale?: {
     name: string;
@@ -81,7 +76,7 @@ export declare namespace GetReleaseActions {
 
   export interface Response {
     data: {
-      [key: string]: Array<ReleaseAction & { entry: ReleaseActionEntryData }>;
+      [key: string]: Array<FormattedReleaseAction>;
     };
     meta: {
       pagination: Pagination;

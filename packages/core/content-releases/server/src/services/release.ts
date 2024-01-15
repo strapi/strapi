@@ -270,8 +270,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
       return {
         ...action,
-        locale: action.entry.locale ? allLocalesDictionary[action.entry.locale] : null,
-        status: action.entry.publishedAt ? 'published' : 'draft',
+        locale: action.locale ? allLocalesDictionary[action.locale] : null,
         contentType: {
           displayName,
           mainFieldValue: action.entry[mainField],

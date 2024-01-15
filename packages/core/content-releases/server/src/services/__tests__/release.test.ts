@@ -407,38 +407,38 @@ describe('release service', () => {
         contentTypeA: [
           {
             id: 1,
-            locale: 'en',
-            contentType: 'api::contentTypeA.contentTypeA',
+            contentType: {
+              displayName: 'contentTypeA',
+              mainFieldValue: 'test 1',
+              uid: 'api::contentTypeA.contentTypeA',
+            },
+            locale: {
+              code: 'en',
+              name: 'English (en)',
+            },
             entry: {
               id: 1,
-              contentType: {
-                displayName: 'contentTypeA',
-                mainFieldValue: 'test 1',
-              },
-              locale: {
-                code: 'en',
-                name: 'English (en)',
-              },
-              status: 'published',
+              name: 'test 1',
+              publishedAt: '2021-01-01',
             },
           },
         ],
         contentTypeB: [
           {
             id: 2,
-            locale: 'fr',
-            contentType: 'api::contentTypeB.contentTypeB',
+            contentType: {
+              displayName: 'contentTypeB',
+              mainFieldValue: 'test 2',
+              uid: 'api::contentTypeB.contentTypeB',
+            },
+            locale: {
+              code: 'fr',
+              name: 'French (fr)',
+            },
             entry: {
               id: 2,
-              contentType: {
-                displayName: 'contentTypeB',
-                mainFieldValue: 'test 2',
-              },
-              locale: {
-                code: 'fr',
-                name: 'French (fr)',
-              },
-              status: 'draft',
+              name: 'test 2',
+              publishedAt: null,
             },
           },
         ],

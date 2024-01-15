@@ -165,6 +165,24 @@ describe('Release controller', () => {
             },
           },
         },
+        plugins: {
+          // @ts-expect-error Ignore missing properties
+          'content-manager': {
+            services: {
+              'content-types': {
+                findAllContentTypes: jest
+                  .fn()
+                  .mockReturnValue([
+                    { uid: 'api::contentTypeA.contentTypeA' },
+                    { uid: 'api::contentTypeB.contentTypeB' },
+                  ]),
+              },
+              components: {
+                findAllComponents: jest.fn().mockReturnValue([{ uid: 'component.component' }]),
+              },
+            },
+          },
+        },
       };
     });
 
@@ -226,6 +244,19 @@ describe('Release controller', () => {
       await releaseController.findOne(ctx);
       expect(ctx.body.data.actions.meta).toEqual({
         count: 2,
+        contentTypes: {
+          'api::contentTypeA.contentTypeA': {
+            uid: 'api::contentTypeA.contentTypeA',
+          },
+          'api::contentTypeB.contentTypeB': {
+            uid: 'api::contentTypeB.contentTypeB',
+          },
+        },
+        components: {
+          'component.component': {
+            uid: 'component.component',
+          },
+        },
       });
     });
   });

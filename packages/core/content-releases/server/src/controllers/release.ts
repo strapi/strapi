@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
+import { Schema } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
 import type {
@@ -96,11 +97,25 @@ const releaseController = {
     const contentTypeSchemas = await contentManagerContentTypeService.findAllContentTypes();
     const components = await contentManagerComponentsService.findAllComponents();
 
-    const mappedContentTypeSchemas = contentTypeSchemas.reduce((acc, schema) => {
-      acc[schema.uid] = schema;
+    const mappedContentTypeSchemas = contentTypeSchemas.reduce(
+      (
+        acc: { [key: Schema.ContentType['uid']]: Schema.ContentType },
+        schema: Schema.ContentType
+      ) => {
+        acc[schema.uid] = schema;
 
-      return acc;
-    });
+        return acc;
+      },
+      {}
+    );
+    const mappedComponents = components.reduce(
+      (acc: { [key: Schema.Component['uid']]: Schema.Component }, component: Schema.Component) => {
+        acc[component.uid] = component;
+
+        return acc;
+      },
+      {}
+    );
 
     // Format the data object
     const data = {
@@ -109,7 +124,7 @@ const releaseController = {
         meta: {
           count,
           contentTypes: mappedContentTypeSchemas,
-          components,
+          components: mappedComponents,
         },
       },
     };
