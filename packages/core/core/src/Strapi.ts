@@ -65,7 +65,7 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import convertCustomFieldType from './utils/convert-custom-field-type';
 import { transformContentTypesToModels } from './utils/transform-content-types-to-models';
 import { FeaturesService, createFeaturesService } from './services/features';
-import { createDocumentEngine } from './services/document-service/document-engine';
+import { createDocumentService } from './services/document-service/document-service';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -152,7 +152,7 @@ class Strapi extends Container implements StrapiI {
 
   entityService?: EntityService.EntityService;
 
-  documents?: Documents.Repository;
+  documents?: Documents.Service;
 
   telemetry: TelemetryService;
 
@@ -512,7 +512,7 @@ class Strapi extends Container implements StrapiI {
       entityValidator: this.entityValidator,
     });
 
-    this.documents = createDocumentEngine(this);
+    this.documents = createDocumentService(this);
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});
