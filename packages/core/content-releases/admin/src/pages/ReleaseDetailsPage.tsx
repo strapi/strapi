@@ -671,13 +671,17 @@ const ReleaseDetailsBody = () => {
                       )}
                       <Td>
                         <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu
-                            releaseId={releaseId}
-                            actionId={id}
-                            contentTypeUid={contentType}
-                            entryId={entry.id}
-                            locale={locale}
-                          />
+                          <ReleaseActionMenu.Root>
+                            <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                              contentTypeUid={contentType}
+                              entryId={entry.id}
+                              locale={locale}
+                            />
+                            <ReleaseActionMenu.DeleteReleaseActionItem
+                              releaseId={release.id}
+                              actionId={id}
+                            />
+                          </ReleaseActionMenu.Root>
                         </Flex>
                       </Td>
                     </Tr>

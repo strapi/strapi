@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
 import { Menu, Link } from '@strapi/design-system/v2';
 import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
@@ -42,51 +44,30 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   a {
     color: ${({ theme }) => theme.colors.neutral800};
   }
+
+  span,
+  a {
+    width: 100%;
+  }
 `;
 
-const StyledCross = styled(Cross)`
-  padding: ${({ theme }) => theme.spaces[1]};
-`;
-
+/* -------------------------------------------------------------------------------------------------
+ * DeleteReleaseActionItemProps
+ * -----------------------------------------------------------------------------------------------*/
 const StyledIconButton = styled(IconButton)`
   /* Setting this style inline with borderColor will not apply the style */
   border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
 `;
-
-interface ReleaseActionMenuProps {
+interface DeleteReleaseActionItemProps {
   releaseId: DeleteReleaseAction.Request['params']['releaseId'];
   actionId: DeleteReleaseAction.Request['params']['actionId'];
-  contentTypeUid?: ReleaseAction['contentType'];
-  entryId?: ReleaseAction['entry']['id'];
-  locale?: ReleaseAction['locale'];
-  hasTriggerBorder?: boolean;
 }
 
-export const ReleaseActionMenu = ({
-  releaseId,
-  actionId,
-  contentTypeUid,
-  entryId,
-  locale,
-  hasTriggerBorder = false,
-}: ReleaseActionMenuProps) => {
+const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionItemProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
-  const collectionTypePermissions = useTypedSelector(
-    (state) => state.rbacProvider.collectionTypesRelatedPermissions
-  );
-  const updatePermissions = contentTypeUid
-    ? collectionTypePermissions[contentTypeUid]?.['plugin::content-manager.explorer.update']
-    : [];
-
-  // We only check the locale permissions if contentType has i18n enabled
-  const canUpdate =
-    !locale ||
-    updatePermissions?.find((permission: Permission) =>
-      permission.properties?.locales?.includes(locale)
-    );
 
   const handleDeleteAction = async () => {
     const response = await deleteReleaseAction({
@@ -124,6 +105,97 @@ export const ReleaseActionMenu = ({
   };
 
   return (
+    <CheckPermissions permissions={PERMISSIONS.deleteAction}>
+      <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
+        <Flex gap={2}>
+          <Icon as={Cross} padding={1} />
+          <Typography textColor="danger600" variant="omega">
+            {formatMessage({
+              id: 'content-releases.content-manager-edit-view.remove-from-release',
+              defaultMessage: 'Remove from release',
+            })}
+          </Typography>
+        </Flex>
+      </StyledMenuItem>
+    </CheckPermissions>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleaseActionEntryLinkItem
+ * -----------------------------------------------------------------------------------------------*/
+interface ReleaseActionEntryLinkItemProps {
+  contentTypeUid: ReleaseAction['contentType'];
+  entryId: ReleaseAction['entry']['id'];
+  locale: ReleaseAction['locale'];
+}
+
+const ReleaseActionEntryLinkItem = ({
+  contentTypeUid,
+  entryId,
+  locale,
+}: ReleaseActionEntryLinkItemProps) => {
+  const { formatMessage } = useIntl();
+  // Confirm user has permissions to access the entry with for the given locale
+  const collectionTypePermissions = useTypedSelector(
+    (state) => state.rbacProvider.collectionTypesRelatedPermissions
+  );
+  const updatePermissions = contentTypeUid
+    ? collectionTypePermissions[contentTypeUid]?.['plugin::content-manager.explorer.update']
+    : [];
+  const canUpdateEntryForLocale = Boolean(
+    !locale ||
+      updatePermissions?.find((permission: Permission) =>
+        permission.properties?.locales?.includes(locale)
+      )
+  );
+
+  return (
+    <CheckPermissions
+      permissions={[
+        {
+          action: 'plugin::content-manager.explorer.update',
+          subject: contentTypeUid,
+        },
+      ]}
+    >
+      {canUpdateEntryForLocale && (
+        <StyledMenuItem>
+          <Link
+            as={NavLink}
+            // @ts-expect-error TODO: This component from DS is not using types from NavLink
+            to={{
+              pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
+              search: locale && `?plugins[i18n][locale]=${locale}`,
+            }}
+            startIcon={<Icon as={Pencil} padding={1} />}
+          >
+            <Typography variant="omega">
+              {formatMessage({
+                id: 'content-releases.content-manager-edit-view.edit-entry',
+                defaultMessage: 'Edit entry',
+              })}
+            </Typography>
+          </Link>
+        </StyledMenuItem>
+      )}
+    </CheckPermissions>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Root
+ * -----------------------------------------------------------------------------------------------*/
+
+interface RootProps {
+  children: React.ReactNode;
+  hasTriggerBorder?: boolean;
+}
+
+const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     <CheckPermissions permissions={[...PERMISSIONS.deleteAction, ...PERMISSIONS.update]}>
       <Menu.Root>
@@ -148,57 +220,15 @@ export const ReleaseActionMenu = ({
           Refactor this once fixed in the DS
          */}
         <Menu.Content top={1} popoverPlacement="bottom-end">
-          {/*
-            We show edit entry option only if contentTypeUid is provided
-            which means that we are on the Release Details page
-            and not in the EditView Injected component for releases
-          */}
-          {contentTypeUid && (
-            <CheckPermissions
-              permissions={[
-                {
-                  action: 'plugin::content-manager.explorer.update',
-                  subject: contentTypeUid,
-                },
-              ]}
-            >
-              {canUpdate && (
-                <StyledMenuItem>
-                  <Link
-                    as={NavLink}
-                    // @ts-expect-error TODO: This component from DS is not using types from NavLink
-                    to={{
-                      pathname: `/content-manager/collectionType/${contentTypeUid}/${entryId}`,
-                      search: locale && `?plugins[i18n][locale]=${locale}`,
-                    }}
-                    startIcon={<Icon as={Pencil} padding={1} />}
-                  >
-                    <Typography variant="omega">
-                      {formatMessage({
-                        id: 'content-releases.content-manager-edit-view.edit-entry',
-                        defaultMessage: 'Edit entry',
-                      })}
-                    </Typography>
-                  </Link>
-                </StyledMenuItem>
-              )}
-            </CheckPermissions>
-          )}
-          <CheckPermissions permissions={PERMISSIONS.deleteAction}>
-            <StyledMenuItem color="danger600" variant="danger" onSelect={handleDeleteAction}>
-              <Flex gap={2}>
-                <Icon as={Cross} padding={1} />
-                <Typography color="danger600" variant="omega">
-                  {formatMessage({
-                    id: 'content-releases.content-manager-edit-view.remove-from-release',
-                    defaultMessage: 'Remove from release',
-                  })}
-                </Typography>
-              </Flex>
-            </StyledMenuItem>
-          </CheckPermissions>
+          {children}
         </Menu.Content>
       </Menu.Root>
     </CheckPermissions>
   );
+};
+
+export const ReleaseActionMenu = {
+  Root,
+  DeleteReleaseActionItem,
+  ReleaseActionEntryLinkItem,
 };
