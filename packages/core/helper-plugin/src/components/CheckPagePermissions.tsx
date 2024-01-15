@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useQuery } from 'react-query';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
 import { useRBACProvider } from '../features/RBAC';
@@ -39,7 +39,7 @@ const CheckPagePermissions = ({
   }
 
   if (canAccess === false) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   return <>{children}</>;

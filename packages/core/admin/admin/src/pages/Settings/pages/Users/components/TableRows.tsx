@@ -11,7 +11,7 @@ import {
 import { TableRowProps, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../../shared/contracts/shared';
 import { getFullName } from '../../../../../utils/getFullName';
@@ -32,10 +32,7 @@ const TableRows = ({
   withBulkActions,
   rows = [],
 }: TableRowsProps) => {
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
+  const navigate = useNavigate();
   const { formatMessage } = useIntl();
 
   return (
@@ -47,7 +44,7 @@ const TableRows = ({
           <Tr
             key={data.id}
             {...onRowClick({
-              fn: () => push(`${pathname}/${data.id}`),
+              fn: () => navigate(data.id.toString()),
               condition: withBulkActions,
             })}
           >
@@ -87,7 +84,9 @@ const TableRows = ({
               <Td>
                 <Flex justifyContent="end">
                   <IconButton
-                    onClick={() => push(`${pathname}/${data.id}`)}
+                    forwardedAs={NavLink}
+                    // @ts-expect-error – This is an issue in the DS with the as prop not adding the inferred props to the component.
+                    to={data.id.toString()}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                       { target: getFullName(data.firstname ?? '', data.lastname) }

@@ -28,7 +28,7 @@ import set from 'lodash/set';
 import toLower from 'lodash/toLower';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
@@ -113,7 +113,7 @@ export const FormModal = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const reducerState = useSelector((state) => formModalSelector(state), shallowEqual);
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
@@ -520,7 +520,7 @@ export const FormModal = () => {
         if (isCreating) {
           createSchema({ ...modifiedData, kind }, modalType, uid);
           // Redirect the user to the created content type
-          push({ pathname: `/plugins/${pluginId}/content-types/${uid}` });
+          navigate({ pathname: `/plugins/${pluginId}/content-types/${uid}` });
 
           // Navigate to the choose attribute modal
           onNavigateToChooseAttributeModal({
@@ -552,7 +552,7 @@ export const FormModal = () => {
           createSchema(rest, 'component', componentUid, category);
 
           // Redirect the user to the created component
-          push({
+          navigate({
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
 

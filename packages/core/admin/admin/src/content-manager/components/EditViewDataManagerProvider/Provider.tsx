@@ -19,7 +19,7 @@ import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
 import { flushSync } from 'react-dom';
 import { useIntl } from 'react-intl';
-import { Prompt, Redirect } from 'react-router-dom';
+import { unstable_usePrompt as usePrompt, Navigate } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
 import { useTypedDispatch, useTypedSelector } from '../../../core/store/hooks';
@@ -676,9 +676,17 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  usePrompt({
+    message: formatMessage({ id: 'global.prompt.unsaved' }),
+    when: ({ currentLocation, nextLocation }) =>
+      !isEqual(modifiedData, initialData) &&
+      !isSaving &&
+      currentLocation.pathname !== nextLocation.pathname,
+  });
+
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
-    return <Redirect to={from} />;
+    return <Navigate to={from} />;
   }
 
   if (!modifiedData) {
@@ -735,18 +743,13 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
+      {/* with SingleTypes, we'll never be creating the entry and there won't ever be an id because thats not how single types work. */}
+      {isLoadingForData || (!isCreatingEntry && !initialData.id && !isSingleType) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>
       ) : (
         <>
-          {!isSaving ? (
-            <Prompt
-              when={!isEqual(modifiedData, initialData)}
-              message={formatMessage({ id: 'global.prompt.unsaved' })}
-            />
-          ) : null}
           <form noValidate onSubmit={handleSubmit}>
             {children}
           </form>

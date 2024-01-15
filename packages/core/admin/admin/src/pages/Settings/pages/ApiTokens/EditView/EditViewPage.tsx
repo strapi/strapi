@@ -15,7 +15,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useLocation, useHistory, useRouteMatch } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import {
@@ -50,7 +50,7 @@ export const EditView = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const { state: locationState } = useLocation<{ apiToken: ApiToken }>();
+  const { state: locationState } = useLocation();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [apiToken, setApiToken] = React.useState<ApiToken | null>(
     locationState?.apiToken?.accessKey
@@ -65,7 +65,7 @@ export const EditView = () => {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions.settings?.['api-tokens']);
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const match = useRouteMatch<{ id: string }>('/settings/api-tokens/:id');
+  const match = useMatch('/settings/api-tokens/:id');
   const id = match?.params?.id;
   const isCreating = id === 'create';
   const {
@@ -73,7 +73,7 @@ export const EditView = () => {
     _unstableFormatValidationErrors: formatValidtionErrors,
   } = useAPIErrorHandler();
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const contentAPIPermissionsQuery = useGetPermissionsQuery();
   const contentAPIRoutesQuery = useGetRoutesQuery();
@@ -232,7 +232,10 @@ export const EditView = () => {
           tokenType: API_TOKEN_TYPE,
         });
 
-        history.replace(`/settings/api-tokens/${res.data.id}`, { apiToken: res.data });
+        navigate(res.data.id.toString(), {
+          state: { apiToken: res.data },
+          replace: true,
+        });
         setCurrentStep('apiTokens.success');
       } else {
         const res = await updateToken({

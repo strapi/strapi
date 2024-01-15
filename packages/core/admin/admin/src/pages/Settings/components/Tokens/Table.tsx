@@ -15,7 +15,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Eye, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
@@ -108,10 +108,7 @@ const TableRows = ({
   const [{ query }] = useQueryParams<{ sort?: string }>();
   const { formatMessage } = useIntl();
   const [, sortOrder] = query && query.sort ? query.sort.split(':') : [undefined, 'ASC'];
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
 
   const sortedTokens = [...rows].sort((a, b) => {
@@ -131,7 +128,7 @@ const TableRows = ({
                 trackUsage('willEditTokenFromList', {
                   tokenType,
                 });
-                push(`${pathname}/${token.id}`);
+                navigate(token.id.toString());
               },
               condition: canUpdate,
             })}
@@ -224,14 +221,11 @@ const DefaultButton = ({
   children,
 }: DefaultButtonProps) => {
   const { formatMessage } = useIntl();
-  const {
-    location: { pathname },
-  } = useHistory();
 
   return (
     <LinkStyled
       forwardedAs={NavLink}
-      to={`${pathname}/${tokenId}`}
+      to={tokenId.toString()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >
       {children}

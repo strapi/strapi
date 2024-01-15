@@ -96,7 +96,7 @@ test.describe('Sign Up', () => {
   }) => {
     await page.getByRole('button', { name: "Let's start" }).click();
 
-    await page.waitForURL('**/admin/');
+    await page.waitForURL('**/admin');
     await expect(page).toHaveTitle('Homepage');
   });
 });

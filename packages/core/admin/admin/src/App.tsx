@@ -9,7 +9,6 @@ import * as React from 'react';
 import { SkipToContent } from '@strapi/design-system';
 import {
   LoadingIndicatorPage,
-  MenuItem,
   TrackingProvider,
   useAppInfo,
   useNotification,
@@ -17,28 +16,15 @@ import {
 import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
-import { PrivateRoute } from './components/PrivateRoute';
 import { ADMIN_PERMISSIONS_CE } from './constants';
 import { useAuth } from './features/Auth';
 import { ConfigurationProvider, ConfigurationProviderProps } from './features/Configuration';
 import { useEnterprise } from './hooks/useEnterprise';
-import { AuthPage } from './pages/Auth/AuthPage';
-import { NotFoundPage } from './pages/NotFoundPage';
-import { UseCasePage } from './pages/UseCasePage';
 import { setAdminPermissions } from './reducer';
 import { useInitQuery, useTelemetryPropertiesQuery } from './services/admin';
 import { PermissionMap } from './types/permissions';
-import { createRoute } from './utils/createRoute';
-
-type StrapiRoute = Pick<MenuItem, 'exact' | 'to'> & Required<Pick<MenuItem, 'Component'>>;
-
-const ROUTES_CE: StrapiRoute[] | null = null;
-
-const AuthenticatedApp = React.lazy(() =>
-  import('./components/AuthenticatedApp').then((mod) => ({ default: mod.AuthenticatedApp }))
-);
 
 interface AppProps extends Omit<ConfigurationProviderProps, 'children' | 'authLogo' | 'menuLogo'> {
   authLogo: string;
@@ -59,38 +45,19 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
       defaultValue: ADMIN_PERMISSIONS_CE,
     }
   );
-  const routes = useEnterprise(
-    ROUTES_CE,
-    async () => (await import('../../ee/admin/src/constants')).ROUTES_EE,
-    {
-      defaultValue: [],
-    }
-  );
+
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const appInfo = useAppInfo();
   const token = useAuth('App', (state) => state.token);
 
-  const authRoutes = React.useMemo(() => {
-    if (!routes) {
-      return null;
-    }
-
-    return routes.map(({ to, Component, exact }) => createRoute(Component, to, exact));
-  }, [routes]);
-
   React.useEffect(() => {
     dispatch(setAdminPermissions(adminPermissions));
   }, [adminPermissions, dispatch]);
 
   const initQuery = useInitQuery();
-  const {
-    hasAdmin,
-    uuid,
-    authLogo: customAuthLogo,
-    menuLogo: customMenuLogo,
-  } = initQuery.data ?? {};
+  const { uuid, authLogo: customAuthLogo, menuLogo: customMenuLogo } = initQuery.data ?? {};
 
   const telemetryPropertiesQuery = useTelemetryPropertiesQuery(undefined, {
     skip: !uuid || !token,
@@ -163,21 +130,7 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
         showTutorials={showTutorials}
       >
         <TrackingProvider value={trackingInfo}>
-          <Switch>
-            {authRoutes}
-            <Route
-              path="/auth/:authType"
-              render={(routerProps) => <AuthPage {...routerProps} hasAdmin={Boolean(hasAdmin)} />}
-              exact
-            />
-            <PrivateRoute path="/usecase">
-              <UseCasePage />
-            </PrivateRoute>
-            <PrivateRoute path="/">
-              <AuthenticatedApp />
-            </PrivateRoute>
-            <Route path="" component={NotFoundPage} />
-          </Switch>
+          <Outlet />
         </TrackingProvider>
       </ConfigurationProvider>
     </React.Suspense>

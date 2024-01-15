@@ -11,7 +11,7 @@ import { mergeMetasWithSchema } from '../utils/schemas';
 
 import { selectSchemas } from './App';
 // @ts-expect-error – This will be done in CONTENT-1952
-import EditSettingsView from './EditSettingsView';
+import { EditSettingsView } from './EditSettingsView';
 
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = React.useReducer(reducer, initialState);
@@ -59,4 +59,16 @@ const ComponentSettingsView = () => {
   );
 };
 
-export { ComponentSettingsView };
+const ProtectedComponentSettingsView = () => {
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.contentManager?.componentsConfigurations
+  );
+
+  return (
+    <CheckPagePermissions permissions={permissions}>
+      <ComponentSettingsView />
+    </CheckPagePermissions>
+  );
+};
+
+export { ComponentSettingsView, ProtectedComponentSettingsView };

@@ -3,7 +3,7 @@ import { Link } from '@strapi/design-system/v2';
 import { Form, translatedErrors, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Logo } from '../../../components/UnauthenticatedLogo';
@@ -18,7 +18,7 @@ import { isBaseQueryError } from '../../../utils/baseQuery';
 import type { ForgotPassword } from '../../../../../shared/contracts/authentication';
 
 const ForgotPassword = () => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -58,7 +58,7 @@ const ForgotPassword = () => {
               const res = await forgotPassword(body);
 
               if (!('error' in res)) {
-                push('/auth/forgot-password-success');
+                navigate('/auth/forgot-password-success');
               }
             }}
             validationSchema={yup.object().shape({

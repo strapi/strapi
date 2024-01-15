@@ -7,7 +7,7 @@ import {
 } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { I18nBaseQuery } from '../types';
@@ -45,7 +45,7 @@ const CMEditViewLocalePicker = ({
     plugins: { i18n: { locale: currentLocale } },
   });
 
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const handleChange: SingleSelectProps['onChange'] = (v) => {
     /**
@@ -83,12 +83,12 @@ const CMEditViewLocalePicker = ({
     }
 
     if (status === 'did-not-create-locale') {
-      push({
+      navigate({
         pathname: `/content-manager/collection-types/${slug}/create`,
         search: stringify(defaultParams, { encode: false }),
       });
     } else {
-      push({
+      navigate({
         pathname: `/content-manager/collection-types/${slug}/${id}`,
         search: stringify(defaultParams, { encode: false }),
       });

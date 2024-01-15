@@ -6,7 +6,7 @@ import { Form, translatedErrors, useAPIErrorHandler, useQuery } from '@strapi/he
 import { Eye, EyeStriked } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { NavLink, Redirect, useHistory } from 'react-router-dom';
+import { NavLink, Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
@@ -41,7 +41,7 @@ const ResetPassword = () => {
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const query = useQuery();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -54,7 +54,7 @@ const ResetPassword = () => {
 
     if ('data' in res) {
       setToken(res.data.token);
-      push('/');
+      navigate('/');
     }
   };
   /**
@@ -62,7 +62,7 @@ const ResetPassword = () => {
    * then they should just be redirected back to the login page.
    */
   if (!query.get('code')) {
-    return <Redirect to="/auth/login" />;
+    return <Navigate to="/auth/login" />;
   }
 
   return (

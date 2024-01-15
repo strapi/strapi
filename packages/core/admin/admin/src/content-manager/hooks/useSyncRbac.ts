@@ -13,8 +13,8 @@ import type { RBACState } from '../../components/RBACProvider';
 
 const useSyncRbac = (
   query: { plugins?: object },
-  collectionTypeUID: string,
-  containerName = 'listView'
+  collectionTypeUID: string = '',
+  containerName: string = 'listView'
 ): {
   isValid: boolean;
   permissions: Permission[] | null;

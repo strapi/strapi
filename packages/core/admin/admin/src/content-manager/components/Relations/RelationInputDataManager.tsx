@@ -4,7 +4,7 @@ import { NotAllowedInput, useCMEditViewDataManager } from '@strapi/helper-plugin
 import get from 'lodash/get';
 import pick from 'lodash/pick';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { getInitialDataPathUsingTempKeys } from '../../utils/paths';
 import { getTranslation } from '../../utils/translations';
@@ -85,12 +85,7 @@ const RelationInputDataManager = ({
    * We need the origin ID to pre-load the relations into the modifiedData of the new
    * to-be-cloned entity.
    */
-  const { params } =
-    useRouteMatch<{ origin?: string }>(
-      '/content-manager/collection-types/:collectionType/create/clone/:origin'
-    ) ?? {};
-
-  const { origin } = params ?? {};
+  const { origin } = useParams();
   const isCloningEntry = Boolean(origin);
   const isComponentRelation = Boolean(componentUid);
 

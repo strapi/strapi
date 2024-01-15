@@ -1,15 +1,15 @@
 import { useCallback, useMemo } from 'react';
 
 import { parse, stringify } from 'qs';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
   const { search } = useLocation();
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const query = useMemo(() => {
-    const searchQuery = search.substring(1);
-
+    // TODO: investigate why sometimes we're getting the search with a leading `?` and sometimes not.
+    const searchQuery = search.startsWith('?') ? search.slice(1) : search;
     if (!search && initialParams) {
       return initialParams;
     }
@@ -32,9 +32,9 @@ const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
         nextQuery = { ...query, ...nextParams };
       }
 
-      push({ search: stringify(nextQuery, { encode: false }) });
+      navigate({ pathname: '', search: stringify(nextQuery, { encode: false }) });
     },
-    [push, query]
+    [navigate, query]
   );
 
   return [{ query, rawQuery: search }, setQuery] as const;
