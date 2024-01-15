@@ -76,6 +76,7 @@ const ListSettingsView = () => {
   React.useEffect(() => {
     dispatch({
       type: 'SET_DATA',
+      data: layout,
     });
   }, [layout]);
 
@@ -109,8 +110,11 @@ const ListSettingsView = () => {
         type: 'success',
         message: { id: getTranslation('success.record.save') },
       });
+
       trackUsage('didEditListSettings');
+
       queryClient.invalidateQueries(initDataQueryKey);
+      queryClient.invalidateQueries(['content-manager', 'content-types', slug, 'configuration']);
     },
     onError() {
       toggleNotification({
