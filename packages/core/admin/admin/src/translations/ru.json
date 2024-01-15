@@ -587,7 +587,7 @@
   "components.Blocks.popover.link": "Ссылка",
   "components.Blocks.popover.save": "Сохранить",
   "components.Blocks.popover.text": "Текст",
-  "components.Blocks.popover.text.placeholder": "Введите текст ссылки",
+  "components.Blocks.popover.text.placeholder": "Текст ссылки",
   "components.ErrorBoundary.title": "Что-то пошло не так...",
   "components.FilterOptions.FILTER_TYPES.$contains": "содержит",
   "components.FilterOptions.FILTER_TYPES.$containsi": "содержит (без учета регистра)",
