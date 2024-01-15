@@ -676,6 +676,9 @@ const ReleaseDetailsBody = () => {
                       {!release.releasedAt && (
                         <>
                           <Td>
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
                             <Flex justifyContent="flex-end">
                               <ReleaseActionMenu.Root>
                                 <ReleaseActionMenu.ReleaseActionEntryLinkItem
