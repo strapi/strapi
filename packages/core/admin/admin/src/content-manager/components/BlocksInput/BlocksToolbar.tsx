@@ -284,7 +284,10 @@ const BlocksDropdown = () => {
         selectedNode = currentList;
       } else {
         // Get the parent node of the anchor other than list-item
-        const [anchorNode] = Editor.parent(editor, editor.selection.anchor);
+        const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
+          edge: 'start',
+          depth: 2,
+        });
         selectedNode = anchorNode;
       }
 
