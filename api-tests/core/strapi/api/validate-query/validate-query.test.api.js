@@ -745,6 +745,7 @@ describe('Core API - Validate', () => {
     const allDocumentFields = [
       // TODO: Document id should not be in attributes
       'documentId',
+      'locale',
       'name',
       'name_non_searchable',
       'misc',

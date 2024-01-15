@@ -12,6 +12,7 @@ const {
 
 /**
  * Reset the DB and import data from a DTS dataset
+ * This is meant to be used directly from a CLI test
  */
 const resetDatabaseAndImportDataFromPath = async (filePath) => {
   const source = createSourceProvider(filePath);
@@ -41,6 +42,8 @@ const createSourceProvider = (filePath) =>
   });
 
 const createDestinationProvider = () => {
+  // TODO: When possible, use the local strapi destination provider instead
+  //       For this we need to wait to have access to a Strapi instance
   return createRemoteStrapiDestinationProvider({
     url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },

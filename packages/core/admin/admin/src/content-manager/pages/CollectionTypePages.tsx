@@ -20,8 +20,7 @@ import {
 // @ts-expect-error – This will be done in CONTENT-1952
 import EditSettingsView from './EditSettingsView';
 import { EditViewLayoutManager } from './EditViewLayoutManager';
-// @ts-expect-error – This will be done in CONTENT-1953
-import { ListSettingsView } from './ListSettingsView';
+import { ListSettingsView } from './ListSettingsView/ListSettingsView';
 import { ListViewLayoutManager } from './ListViewLayoutManager';
 
 interface CollectionTypePagesProps
@@ -108,11 +107,9 @@ const CollectionTypePages = (props: CollectionTypePagesProps) => {
             <CheckPagePermissions
               permissions={permissions.contentManager?.collectionTypesConfigurations}
             >
-              <ListSettingsView
-                layout={rawContentTypeLayout}
-                slug={slug}
-                updateLayout={updateLayout}
-              />
+              {rawContentTypeLayout && (
+                <ListSettingsView layout={rawContentTypeLayout} slug={slug} />
+              )}
             </CheckPagePermissions>
           </Route>
           <Route

@@ -428,6 +428,7 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
   };
 
   const addLink = () => {
+    editor.shouldSaveLinkPath = true;
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
     insertLink(editor, { url: '' });
   };

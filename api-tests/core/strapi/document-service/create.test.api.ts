@@ -2,7 +2,7 @@ import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticlesDb } from './utils';
+import { ARTICLE_UID, findArticlesDb, AUTHOR_UID } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
@@ -115,6 +115,23 @@ describe('Document Service', () => {
         expect(article).toMatchObject({
           title: 'Article',
           publishedAt: null, // should be a draft
+        });
+      })
+    );
+
+    it(
+      'ignores locale parameter on non-localized content type',
+      testInTransaction(async () => {
+        const author = await strapi.documents(AUTHOR_UID).create({
+          // Should be ignored on non-localized content types
+          locale: 'fr',
+          data: { name: 'Author' },
+        });
+
+        // verify that the returned document was updated
+        expect(author).toMatchObject({
+          name: 'Author',
+          locale: null, // should be null, as it is not a localized content type
         });
       })
     );
