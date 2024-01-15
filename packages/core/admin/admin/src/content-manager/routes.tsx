@@ -1,5 +1,15 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { Navigate, RouteObject } from 'react-router-dom';
+import { Navigate, RouteObject, useParams } from 'react-router-dom';
+
+const RedirectToCollectionTypes = ({
+  type = 'collection-types',
+}: {
+  type: 'collection-types' | 'single-types';
+}) => {
+  const { slug } = useParams();
+
+  return <Navigate to={`/content-manager/${type}/${slug}`} />;
+};
 
 const routes: RouteObject[] = [
   {
@@ -19,11 +29,11 @@ const routes: RouteObject[] = [
        */
       {
         path: 'collectionType/:slug',
-        element: <Navigate to="/collection-types/:slug" />,
+        element: <RedirectToCollectionTypes type={`collection-types`} />,
       },
       {
         path: 'singleType/:slug',
-        element: <Navigate to="/single-types/:slug" />,
+        element: <RedirectToCollectionTypes type={`single-types`} />,
       },
       {
         path: ':collectionType/:slug',

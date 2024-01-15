@@ -9,6 +9,7 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
@@ -16,7 +17,6 @@ import {
   useNotification,
   useQueryParams,
   useTracking,
-  Link,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
@@ -227,11 +227,27 @@ const ListSettingsView = () => {
     return <LoadingIndicatorPage />;
   }
 
-  const {
-    settings: { pageSize, defaultSortBy, defaultSortOrder },
-    kind,
-    uid,
-  } = initialData ?? { settings: {} };
+  const getBackUrl = () => {
+    const {
+      settings: { pageSize, defaultSortBy, defaultSortOrder },
+      kind,
+      uid,
+    } = initialData ?? { settings: {} };
+
+    const queryParams = stringify(
+      {
+        page: 1,
+        pageSize,
+        sort: `${defaultSortBy}:${defaultSortOrder}`,
+        plugins: query.plugins,
+      },
+      {
+        encode: false,
+      }
+    );
+
+    return `/content-manager/${kind}/${uid}?${queryParams}`;
+  };
 
   return (
     <Layout>
@@ -242,20 +258,7 @@ const ListSettingsView = () => {
               <Link
                 startIcon={<ArrowLeft />}
                 // @ts-expect-error invalid typings
-                to={{
-                  to: `/content-manager/${kind}/${uid}`,
-                  search: stringify(
-                    {
-                      page: 1,
-                      pageSize,
-                      sort: `${defaultSortBy}:${defaultSortOrder}`,
-                      plugins: query.plugins,
-                    },
-                    {
-                      encode: false,
-                    }
-                  ),
-                }}
+                to={getBackUrl()}
                 id="go-back"
                 as={NavLink}
               >
