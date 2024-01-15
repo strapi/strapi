@@ -51,8 +51,11 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     }
   },
   async validatePendingReleaseLimit() {
-    // @ts-expect-error - options is not typed into features
-    const eeLicenseOptions = EE.features.get('cms-content-releases')?.options;
+    // Use the maximum releases option if it exists, otherwise default to 3
+    const maximumPendingReleases =
+      // @ts-expect-error - options is not typed into features
+      EE.features.get('cms-content-releases')?.options?.maximumReleases || 3;
+
     const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
       filters: {
         releasedAt: {
@@ -61,12 +64,8 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
       },
     });
 
-    if (!eeLicenseOptions || !eeLicenseOptions.maximumReleases) {
-      throw new errors.ValidationError('The license does not contain a configuration for releases');
-    }
-
     // Unlimited is a number that will never be reached like 9999
-    if (pendingReleasesCount >= eeLicenseOptions.maximumReleases) {
+    if (pendingReleasesCount >= maximumPendingReleases) {
       throw new errors.ValidationError('You have reached the maximum number of pending releases');
     }
   },

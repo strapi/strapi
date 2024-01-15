@@ -115,35 +115,56 @@ describe('Release Validation service', () => {
     });
   });
   describe('validatePendingReleaseLimit', () => {
-    it('should throw an error if the license does not have options for releases', () => {
+    it('should throw an error if the default pending release limit has been reached', () => {
+      // @ts-expect-error - get is a mock
+      EE.features.get.mockReturnValue({});
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           query: jest.fn().mockReturnValue({
-            findWithCount: jest.fn().mockReturnValue([[], 3]),
+            findWithCount: jest.fn().mockReturnValue([[], 4]),
           }),
         },
       };
+
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
       expect(() => releaseValidationService.validatePendingReleaseLimit()).rejects.toThrow(
-        'The license does not contain a configuration for releases'
+        'You have reached the maximum number of pending releases'
       );
     });
 
-    it('should throw an error if the pending release limit has been reached', () => {
+    it('should pass if the default pending release limit has NOT been reached', async () => {
+      // @ts-expect-error - get is a mock
+      EE.features.get.mockReturnValue({});
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            findWithCount: jest.fn().mockReturnValue([[], 2]),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(releaseValidationService.validatePendingReleaseLimit()).resolves.not.toThrow();
+    });
+
+    it('should throw an error if the license pending release limit has been reached', () => {
       // @ts-expect-error - get is a mock
       EE.features.get.mockReturnValue({
         options: {
-          maximumReleases: 3,
+          maximumReleases: 5,
         },
       });
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           query: jest.fn().mockReturnValue({
-            findWithCount: jest.fn().mockReturnValue([[], 3]),
+            findWithCount: jest.fn().mockReturnValue([[], 5]),
           }),
         },
       };
@@ -155,18 +176,18 @@ describe('Release Validation service', () => {
       );
     });
 
-    it('should not throw an error if the pending release limit has not been reached', async () => {
+    it('should pass if the license pending release limit has NOT been reached', async () => {
       // @ts-expect-error - get is a mock
       EE.features.get.mockReturnValue({
         options: {
-          maximumReleases: 3,
+          maximumReleases: 5,
         },
       });
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           query: jest.fn().mockReturnValue({
-            findWithCount: jest.fn().mockReturnValue([[], 2]),
+            findWithCount: jest.fn().mockReturnValue([[], 4]),
           }),
         },
       };
