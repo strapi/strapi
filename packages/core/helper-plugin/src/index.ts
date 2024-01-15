@@ -113,4 +113,4 @@ export * from './utils/wrapAxiosInstance';
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export type { TranslationMessage } from './types';
+export type { TranslationMessage, FilterData } from './types';

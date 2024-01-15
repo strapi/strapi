@@ -6,6 +6,8 @@ export * as Function from './function';
 export * as Tuple from './tuple';
 export * as Expression from './expression';
 
+export * from './json';
+
 /**
  * Get the type of a specific key `TKey` in `TValue`
  *

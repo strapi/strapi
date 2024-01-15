@@ -73,10 +73,9 @@ const formatLayouts = (initialData: LayoutData, models: Models): FormattedLayout
   };
 };
 
-interface MainField {
+type MainField = Attribute.Any & {
   name: string;
-  schema?: Attribute.Any;
-}
+};
 
 interface Metadata {
   edit: Contracts.ContentTypes.Metadatas[string]['edit'] & {
@@ -121,7 +120,7 @@ const createMetasSchema = (initialData: LayoutData, models: Models): SchemasWith
 
         const mainField = {
           name: mainFieldName,
-          schema: relationModel.attributes[mainFieldName],
+          ...relationModel.attributes[mainFieldName],
         };
 
         metadatas = {
@@ -209,7 +208,7 @@ const formatLayoutWithMetas = (
 interface ListLayoutRow {
   key: string;
   name: string;
-  fieldSchema: Attribute.Any;
+  fieldSchema: Attribute.Any | { type: 'custom' };
   metadatas: Metadata['list'];
 }
 
@@ -357,8 +356,10 @@ export type {
   FormattedLayouts,
   FormattedContentTypeLayout,
   FormattedComponentLayout,
+  ListLayoutRow,
   EditLayoutRow,
   Metadata,
   SettingsViewContentTypeLayout,
   SettingsViewComponentLayout,
+  MainField,
 };

@@ -1,5 +1,7 @@
+/// <reference types="vite/client" />
+
 import { type StrapiTheme } from '@strapi/design-system';
-import { type Attribute } from '@strapi/types';
+import { type Attribute, type FeaturesService } from '@strapi/types';
 import { type BaseEditor } from 'slate';
 import { type HistoryEditor } from 'slate-history';
 import { type ReactEditor } from 'slate-react';
@@ -22,23 +24,28 @@ declare module 'slate' {
   }
 }
 
+interface BrowserStrapi {
+  backendURL: string;
+  isEE: boolean;
+  future: {
+    isEnabled: (name: keyof FeaturesService['config']) => boolean;
+  };
+  features: {
+    SSO: 'sso';
+    AUDIT_LOGS: 'audit-logs';
+    REVIEW_WORKFLOWS: 'review-workflows';
+    isEnabled: (featureName?: string) => boolean;
+  };
+  flags: {
+    promoteEE?: boolean;
+    nps?: boolean;
+  };
+  projectType: 'Community' | 'Enterprise';
+  telemetryDisabled: boolean;
+}
+
 declare global {
   interface Window {
-    strapi: {
-      backendURL: string;
-      isEE: boolean;
-      features: {
-        SSO: 'sso';
-        AUDIT_LOGS: 'audit-logs';
-        REVIEW_WORKFLOWS: 'review-workflows';
-        isEnabled: (featureName?: string) => boolean;
-      };
-      flags: {
-        promoteEE?: boolean;
-        nps?: boolean;
-      };
-      projectType: 'Community' | 'Enterprise';
-      telemetryDisabled: boolean;
-    };
+    strapi: BrowserStrapi;
   }
 }

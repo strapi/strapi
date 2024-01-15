@@ -87,7 +87,7 @@ const RelationInputDataManager = ({
    */
   const { params } =
     useRouteMatch<{ origin?: string }>(
-      '/content-manager/collectionType/:collectionType/create/clone/:origin'
+      '/content-manager/collection-types/:collectionType/create/clone/:origin'
     ) ?? {};
 
   const { origin } = params ?? {};

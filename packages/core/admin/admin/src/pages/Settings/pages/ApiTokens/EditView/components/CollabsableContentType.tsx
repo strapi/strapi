@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import styled, { css } from 'styled-components';
 
 import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
-import { useApiTokenPermissions } from '../../../../../../contexts/apiTokenPermissions';
+import { useApiTokenPermissions } from '../apiTokenPermissions';
 
 const activeCheckboxWrapperStyles = css`
   background: ${(props) => props.theme.colors.primary100};
