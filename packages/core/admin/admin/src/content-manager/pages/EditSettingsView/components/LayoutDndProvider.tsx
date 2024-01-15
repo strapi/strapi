@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import type { EditSettingsViewState } from '../reducer';
+import type { EditSettingsViewState } from './SettingsForm/reducer';
 import type { Schema } from '@strapi/types';
 
 export interface LayoutDndProviderProps {

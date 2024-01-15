@@ -3,11 +3,10 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
-import { arrayMoveItem } from '../../utils/arrayMoveItem';
+import { arrayMoveItem } from '../../../../utils/arrayMoveItem';
+import { formatLayout, getFieldSize, setFieldSize } from '../../utils/layout';
 
-import { formatLayout, getFieldSize, setFieldSize } from './utils/layout';
-
-import type { SettingsViewComponentLayout, SettingsViewLayout } from '../../utils/layouts';
+import type { SettingsViewComponentLayout, SettingsViewLayout } from '../../../../utils/layouts';
 
 const DEFAULT_FIELD_SIZE = 6;
 

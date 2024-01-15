@@ -82,14 +82,6 @@ const formatLayout = (arr: Layout) => {
     });
 };
 
-const unformatLayout = (arr: Layout): EditLayout => {
-  return arr.reduce((acc, current) => {
-    const currentRow = current.rowContent.filter((content) => content.name !== '_TEMP_');
-
-    return acc.concat([currentRow]);
-  }, [] as EditLayout);
-};
-
 const getFieldSize = (name: string, layouts: Layout = []): number | null => {
   return layouts.reduce((acc: number | null, { rowContent }) => {
     const size = rowContent.find((row) => row.name === name)?.size ?? null;
@@ -119,4 +111,6 @@ const setFieldSize = (name: string, size: number, layouts: Layout = []) => {
   });
 };
 
-export { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize, unformatLayout };
+export { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize };
+
+export type { Layout, EditLayout };

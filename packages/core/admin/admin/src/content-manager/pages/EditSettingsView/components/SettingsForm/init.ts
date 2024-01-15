@@ -1,9 +1,9 @@
 import cloneDeep from 'lodash/cloneDeep';
 import set from 'lodash/set';
 
-import { createLayout, formatLayout } from './utils/layout';
+import { createLayout, formatLayout } from '../../utils/layout';
 
-import type { SettingsViewLayout, SettingsViewComponentLayout } from '../../utils/layouts';
+import type { SettingsViewLayout, SettingsViewComponentLayout } from '../../../../utils/layouts';
 
 const init = (
   initialState: any,
