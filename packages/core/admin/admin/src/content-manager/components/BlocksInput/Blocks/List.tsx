@@ -120,21 +120,39 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
       at: currentListItemPath,
     });
 
-    // If previous node and next node are lists with same format and indent Levels, then merge the nodes
     if (previousEntry && nextEntry) {
-      if (
-        previousEntry[0].format === nextEntry[0].format &&
-        previousEntry[0].listIndentLevel === nextEntry[0].listIndentLevel
-      ) {
-        event.preventDefault();
-        Transforms.removeNodes(editor, {
-          at: currentListItemPath,
-        });
+      const [previousNode] = previousEntry;
+      const [nextNode] = nextEntry;
+      event.preventDefault();
+      Transforms.removeNodes(editor, {
+        at: currentListItemPath,
+      });
 
-        if (previousEntry[0].type === 'list' && nextEntry[0].type === 'list')
+      if (
+        !Editor.isEditor(previousNode) &&
+        !isText(previousNode) &&
+        isListNode(previousNode) &&
+        !Editor.isEditor(nextNode) &&
+        !isText(nextNode) &&
+        isListNode(nextNode)
+      ) {
+        const {
+          type: previousType,
+          format: previousFormat,
+          listIndentLevel: previousIndent,
+        } = previousNode;
+        const { type: nextType, format: nextFormat, listIndentLevel: nextIndent } = nextNode;
+        if (
+          previousType === 'list' &&
+          nextType === 'list' &&
+          previousFormat === nextFormat &&
+          previousIndent === nextIndent
+        ) {
+          // If previous node and next node are lists with same format and indent Levels, then merge the nodes
           Transforms.mergeNodes(editor, {
             at: currentListItemPath,
           });
+        }
       }
     }
   } else if (isFocusAtTheBeginningOfAChild) {
