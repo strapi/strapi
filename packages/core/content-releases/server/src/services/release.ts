@@ -155,22 +155,28 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     releaseData: UpdateRelease.Request['body'],
     { user }: { user: UserInfo }
   ) {
-    const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
+    const releaseWithCreatorFields = await setCreatorFields({ user, isEdition: true })(releaseData);
 
-    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
-      /*
-       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
-       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
-       */
-      // @ts-expect-error see above
-      data: updatedRelease,
-    });
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id);
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${id}`);
     }
 
-    return release;
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
+    const updatedRelease = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
+      /*
+       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
+       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
+       */
+      // @ts-expect-error see above
+      data: releaseWithCreatorFields,
+    });
+
+    return updatedRelease;
   },
 
   async createAction(
@@ -185,6 +191,16 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       validateEntryContentType(action.entry.contentType),
       validateUniqueEntry(releaseId, action),
     ]);
+
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+
+    if (!release) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
 
     const { entry, type } = action;
 
@@ -417,14 +433,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
       where: {
         id: actionId,
-        release: releaseId,
+        release: {
+          id: releaseId,
+          releasedAt: {
+            $null: true,
+          },
+        },
       },
       data: update,
     });
 
     if (!updatedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in release with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
       );
     }
 
@@ -438,13 +459,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const deletedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
       where: {
         id: actionId,
-        release: releaseId,
+        release: {
+          id: releaseId,
+          releasedAt: {
+            $null: true,
+          },
+        },
       },
     });
 
     if (!deletedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in release with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
       );
     }
 
