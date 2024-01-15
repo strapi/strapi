@@ -4,7 +4,7 @@ import validateComponentCategory from './validation/component-category';
 
 export default {
   async editCategory(ctx: Context) {
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     try {
       await validateComponentCategory(body);
@@ -18,7 +18,7 @@ export default {
 
     const componentCategoryService = getService('component-categories');
 
-    const newName = await componentCategoryService.editCategory(name, body as any);
+    const newName = await componentCategoryService.editCategory(name, body);
 
     setImmediate(() => strapi.reload());
 
