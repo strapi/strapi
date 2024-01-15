@@ -30,7 +30,6 @@ export default {
     const { query } = ctx.request;
 
     const entityManager = getService('entity-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -55,7 +54,6 @@ export default {
 
     const sanitizedResults = await mapAsync(results, async (result: any) => {
       const sanitizedResult = await permissionChecker.sanitizeOutput(result);
-      sanitizedResult.status = await documentMetadata.getStatus(model, result);
       return sanitizedResult;
     });
 
