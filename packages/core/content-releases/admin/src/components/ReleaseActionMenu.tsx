@@ -136,7 +136,7 @@ const ReleaseActionEntryLinkItem = ({
   locale,
 }: ReleaseActionEntryLinkItemProps) => {
   const { formatMessage } = useIntl();
-  // Confirm user has permissions to access the entry with for the given locale
+  // Confirm user has permissions to access the entry for the given locale
   const collectionTypePermissions = useTypedSelector(
     (state) => state.rbacProvider.collectionTypesRelatedPermissions
   );
