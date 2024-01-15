@@ -22,4 +22,4 @@ const createPossibleMainFieldsForModelsAndComponents = (array) => {
   }, {});
 };
 
-export default createPossibleMainFieldsForModelsAndComponents;
+export { createPossibleMainFieldsForModelsAndComponents };

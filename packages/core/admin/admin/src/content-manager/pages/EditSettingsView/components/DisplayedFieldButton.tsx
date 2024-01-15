@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { Box, Flex, GridItem } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
@@ -10,7 +9,9 @@ import styled from 'styled-components';
 import { ItemTypes } from '../../../utils/dragAndDrop';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
-import FieldButtonContent from './FieldButtonContent';
+import { FieldButtonContent } from './FieldButtonContent';
+
+import type { Attribute } from '@strapi/types';
 
 const Wrapper = styled(Flex)`
   position: relative;
@@ -94,6 +95,20 @@ const DragButton = styled(Flex)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
+interface DisplayedFieldButtonProps {
+  attribute?: Attribute.Any;
+  index: number;
+  lastIndex: number;
+  moveItem: (dragIndex: number, hoverIndex: number, dragRow: number, targetRow: number) => void;
+  moveRow: (dragRow: number, targetRow: number) => void;
+  name: string;
+  onDeleteField: () => void;
+  onEditField: () => void;
+  rowIndex: number;
+  size: number;
+  children: string;
+}
+
 const DisplayedFieldButton = ({
   attribute,
   children,
@@ -106,7 +121,7 @@ const DisplayedFieldButton = ({
   onEditField,
   rowIndex,
   size,
-}) => {
+}: DisplayedFieldButtonProps) => {
   const [dragStart, setDragStart] = useState(false);
   const isHidden = name === '_TEMP_';
   const { setIsDraggingSibling } = useLayoutDnd();
@@ -369,26 +384,4 @@ const DisplayedFieldButton = ({
   );
 };
 
-DisplayedFieldButton.defaultProps = {
-  attribute: undefined,
-};
-
-DisplayedFieldButton.propTypes = {
-  attribute: PropTypes.shape({
-    components: PropTypes.array,
-    component: PropTypes.string,
-    type: PropTypes.string,
-  }),
-  children: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired,
-  moveItem: PropTypes.func.isRequired,
-  moveRow: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
-  onDeleteField: PropTypes.func.isRequired,
-  onEditField: PropTypes.func.isRequired,
-  rowIndex: PropTypes.number.isRequired,
-  lastIndex: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-};
-
-export default DisplayedFieldButton;
+export { DisplayedFieldButton };

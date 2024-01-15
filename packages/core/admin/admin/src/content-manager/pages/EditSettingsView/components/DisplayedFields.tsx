@@ -1,17 +1,26 @@
-import React from 'react';
-
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
 import { Plus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTranslation } from '../../../utils/translations';
 
-import LinkToCTB from './LinkToCTB';
-import RowsLayout from './RowsLayout';
+import { LinkToCTB } from './LinkToCTB';
+import { RowsLayout } from './RowsLayout';
 
-const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
+interface DisplayedFieldsProps {
+  editLayout: any[];
+  fields: string[];
+  onAddField: (field: string) => void;
+  onRemoveField: (rowIndex: number, fieldIndex: number) => void;
+}
+
+const DisplayedFields = ({
+  editLayout,
+  fields,
+  onRemoveField,
+  onAddField,
+}: DisplayedFieldsProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -69,11 +78,4 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
   );
 };
 
-DisplayedFields.propTypes = {
-  editLayout: PropTypes.array.isRequired,
-  fields: PropTypes.array.isRequired,
-  onAddField: PropTypes.func.isRequired,
-  onRemoveField: PropTypes.func.isRequired,
-};
-
-export default DisplayedFields;
+export { DisplayedFields };

@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -36,11 +36,11 @@ import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { formatLayoutForSettingsView } from '../../utils/layouts';
 import { getTranslation } from '../../utils/translations';
 
-import DisplayedFields from './components/DisplayedFields';
-import ModalForm from './components/FormModal';
+import { DisplayedFields } from './components/DisplayedFields';
+import { FormModal } from './components/FormModal';
 import { LayoutDndProvider } from './components/LayoutDndProvider';
 import init from './init';
-import reducer, { initialState } from './reducer';
+import { reducer, initialState } from './reducer';
 import { unformatLayout } from './utils/layout';
 
 const EditSettingsView = () => {
@@ -67,7 +67,7 @@ const EditSettingsView = () => {
       return { rawContentTypeLayout, rawComponentsLayouts };
     }, [layout]);
 
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
+  const [reducerState, dispatch] = React.useReducer(reducer, initialState);
 
   React.useEffect(() => {
     if (mainLayout) {
@@ -78,12 +78,12 @@ const EditSettingsView = () => {
     }
   }, [mainLayout, components]);
 
-  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  const [isDraggingSibling, setIsDraggingSibling] = React.useState(false);
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const navigate = useNavigate();
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isModalFormOpen, setIsModalFormOpen] = React.useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
   const modelName = mainLayout?.info?.displayName;
@@ -403,7 +403,7 @@ const EditSettingsView = () => {
           />
         </form>
         {isModalFormOpen && (
-          <ModalForm
+          <FormModal
             onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
             onMetaChange={handleMetaChange}

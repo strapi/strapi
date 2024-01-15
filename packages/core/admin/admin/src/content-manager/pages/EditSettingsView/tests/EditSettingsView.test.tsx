@@ -4,7 +4,7 @@ import { fireEvent } from '@testing-library/react';
 import { render } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { EditSettingsView } from '../index';
+import { EditSettingsView } from '../EditSettingsView';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

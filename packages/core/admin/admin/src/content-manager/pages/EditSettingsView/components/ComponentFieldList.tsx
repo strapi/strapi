@@ -1,16 +1,17 @@
-import React from 'react';
-
 import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/helper-plugin';
 import { Cog } from '@strapi/icons';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTranslation } from '../../../utils/translations';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
-const ComponentFieldList = ({ componentUid }) => {
+interface ComponentFieldListProps {
+  componentUid: string;
+}
+
+const ComponentFieldList = ({ componentUid }: ComponentFieldListProps) => {
   const { componentLayouts } = useLayoutDnd();
   const { formatMessage } = useIntl();
   const componentData = get(componentLayouts, [componentUid], {});
@@ -55,8 +56,4 @@ const ComponentFieldList = ({ componentUid }) => {
   );
 };
 
-ComponentFieldList.propTypes = {
-  componentUid: PropTypes.string.isRequired,
-};
-
-export default ComponentFieldList;
+export { ComponentFieldList };

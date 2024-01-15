@@ -1,15 +1,14 @@
-import React from 'react';
-
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { getTranslation } from '../../../utils/translations';
 
-import ComponentFieldList from './ComponentFieldList';
-import DynamicZoneList from './DynamicZoneList';
+import { ComponentFieldList } from './ComponentFieldList';
+import { DynamicZoneList } from './DynamicZoneList';
+
+import type { Attribute } from '@strapi/types';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -18,7 +17,19 @@ const CustomIconButton = styled(IconButton)`
   }
 `;
 
-const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children }) => {
+interface FieldButtonContentProps {
+  attribute?: Attribute.Any;
+  onEditField: () => void;
+  onDeleteField: () => void;
+  children: string;
+}
+
+const FieldButtonContent = ({
+  attribute,
+  onEditField,
+  onDeleteField,
+  children,
+}: FieldButtonContentProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -63,19 +74,4 @@ const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children })
   );
 };
 
-FieldButtonContent.defaultProps = {
-  attribute: undefined,
-};
-
-FieldButtonContent.propTypes = {
-  attribute: PropTypes.shape({
-    components: PropTypes.array,
-    component: PropTypes.string,
-    type: PropTypes.string,
-  }),
-  onEditField: PropTypes.func.isRequired,
-  onDeleteField: PropTypes.func.isRequired,
-  children: PropTypes.string.isRequired,
-};
-
-export default FieldButtonContent;
+export { FieldButtonContent };

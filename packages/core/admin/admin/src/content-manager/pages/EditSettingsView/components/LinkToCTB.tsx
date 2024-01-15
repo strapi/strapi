@@ -1,11 +1,3 @@
-/**
- *
- * EditViewButton
- *
- */
-
-import React from 'react';
-
 import { CheckPermissions, LinkButton, useTracking } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import get from 'lodash/get';
@@ -56,4 +48,4 @@ const LinkToCTB = () => {
   );
 };
 
-export default LinkToCTB;
+export { LinkToCTB };

@@ -1,10 +1,22 @@
-import React from 'react';
-
 import { Option, Select, TextInput, ToggleInput } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) => {
+interface GenericInputProps extends Record<string, unknown> {
+  type: string;
+  options?: string[];
+  onChange: (e: { target: { name: string; value: string | boolean } }) => void;
+  value: string | boolean;
+  name: string;
+}
+
+const GenericInput = ({
+  type,
+  options,
+  onChange,
+  value,
+  name,
+  ...inputProps
+}: GenericInputProps) => {
   const { formatMessage } = useIntl();
 
   switch (type) {
@@ -52,16 +64,4 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
   }
 };
 
-GenericInput.defaultProps = {
-  options: undefined,
-};
-
-GenericInput.propTypes = {
-  type: PropTypes.string.isRequired,
-  options: PropTypes.arrayOf(PropTypes.string),
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
-  name: PropTypes.string.isRequired,
-};
-
-export default GenericInput;
+export { GenericInput };

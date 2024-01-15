@@ -1,13 +1,28 @@
-import React from 'react';
-
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
+import { DisplayedFieldButton } from './DisplayedFieldButton';
 
-import DisplayedFieldButton from './DisplayedFieldButton';
+interface RowItemsLayoutProps {
+  index: number;
+  lastIndex: number;
+  onRemoveField: (rowIndex: number, index: number) => void;
+  rowId: number;
+  rowIndex: number;
+  rowItem: {
+    name: string;
+    size: number;
+  };
+}
 
-const RowItemsLayout = ({ rowItem, onRemoveField, rowId, rowIndex, index, lastIndex }) => {
+const RowItemsLayout = ({
+  rowItem,
+  onRemoveField,
+  rowId,
+  rowIndex,
+  index,
+  lastIndex,
+}: RowItemsLayoutProps) => {
   const { setEditFieldToSelect, attributes, modifiedData, moveRow, moveItem } = useLayoutDnd();
   const attribute = get(attributes, [rowItem.name], {});
   const attributeLabel = get(modifiedData, ['metadatas', rowItem.name, 'edit', 'label'], '');
@@ -30,13 +45,4 @@ const RowItemsLayout = ({ rowItem, onRemoveField, rowId, rowIndex, index, lastIn
   );
 };
 
-RowItemsLayout.propTypes = {
-  index: PropTypes.number.isRequired,
-  lastIndex: PropTypes.number.isRequired,
-  onRemoveField: PropTypes.func.isRequired,
-  rowId: PropTypes.number.isRequired,
-  rowIndex: PropTypes.number.isRequired,
-  rowItem: PropTypes.object.isRequired,
-};
-
-export default RowItemsLayout;
+export { RowItemsLayout };

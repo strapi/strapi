@@ -1,8 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
+import * as React from 'react';
 
 import { GridItem, Option, Select } from '@strapi/design-system';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -12,7 +11,7 @@ import { selectSchemas } from '../../App';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 
-import GenericInput from './GenericInput';
+import { GenericInput } from './GenericInput';
 
 const FIELD_SIZES = [
   [4, '33%'],
@@ -21,13 +20,18 @@ const FIELD_SIZES = [
   [12, '100%'],
 ];
 
-const ModalForm = ({ onMetaChange, onSizeChange }) => {
+interface ModalFormProps {
+  onMetaChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
+  onSizeChange: (e: { name: string; value: number }) => void;
+}
+
+const ModalForm = ({ onMetaChange, onSizeChange }: ModalFormProps) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
   const schemas = useSelector(selectSchemas);
   const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
 
-  const formToDisplay = useMemo(() => {
+  const formToDisplay = React.useMemo(() => {
     if (!selectedField) {
       return [];
     }
@@ -37,11 +41,11 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     return Object.keys(associatedMetas).filter((meta) => meta !== 'visible');
   }, [selectedField, modifiedData]);
 
-  const componentsAndModelsPossibleMainFields = useMemo(() => {
+  const componentsAndModelsPossibleMainFields = React.useMemo(() => {
     return createPossibleMainFieldsForModelsAndComponents(schemas);
   }, [schemas]);
 
-  const getSelectedItemSelectOptions = useCallback(
+  const getSelectedItemSelectOptions = React.useCallback(
     (formType) => {
       if (formType !== 'relation' && formType !== 'component') {
         return [];
@@ -135,9 +139,4 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   );
 };
 
-ModalForm.propTypes = {
-  onMetaChange: PropTypes.func.isRequired,
-  onSizeChange: PropTypes.func.isRequired,
-};
-
-export default ModalForm;
+export { ModalForm };
