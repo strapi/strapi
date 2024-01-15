@@ -309,7 +309,7 @@ const resolveNPMTarget = (
   }
 
   // Release Types
-  else if (isSemVerReleaseType(target)) {
+  if (isSemVerReleaseType(target)) {
     const range = rangeFromVersions(project.strapiVersion, target);
     const npmVersionsMatches = npmPackage.findVersionsInRange(range);
 
