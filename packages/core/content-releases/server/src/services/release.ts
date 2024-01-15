@@ -52,7 +52,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
     const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
 
-    await getService('release-validation', { strapi }).validatePendingReleaseLimit();
+    await getService('release-validation', { strapi }).validatePendingReleasesLimit();
 
     return strapi.entityService.create(RELEASE_MODEL_UID, {
       data: releaseWithCreatorFields,

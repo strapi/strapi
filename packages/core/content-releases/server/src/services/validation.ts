@@ -50,7 +50,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
       );
     }
   },
-  async validatePendingReleaseLimit() {
+  async validatePendingReleasesLimit() {
     // Use the maximum releases option if it exists, otherwise default to 3
     const maximumPendingReleases =
       // @ts-expect-error - options is not typed into features

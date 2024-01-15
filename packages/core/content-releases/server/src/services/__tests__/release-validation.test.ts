@@ -114,7 +114,7 @@ describe('Release Validation service', () => {
       );
     });
   });
-  describe('validatePendingReleaseLimit', () => {
+  describe('validatePendingReleasesLimit', () => {
     it('should throw an error if the default pending release limit has been reached', () => {
       // @ts-expect-error - get is a mock
       EE.features.get.mockReturnValue({});
@@ -130,7 +130,7 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      expect(() => releaseValidationService.validatePendingReleaseLimit()).rejects.toThrow(
+      expect(() => releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
         'You have reached the maximum number of pending releases'
       );
     });
@@ -150,7 +150,7 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      await expect(releaseValidationService.validatePendingReleaseLimit()).resolves.not.toThrow();
+      await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
     });
 
     it('should throw an error if the license pending release limit has been reached', () => {
@@ -171,7 +171,7 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      expect(() => releaseValidationService.validatePendingReleaseLimit()).rejects.toThrow(
+      expect(() => releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
         'You have reached the maximum number of pending releases'
       );
     });
@@ -195,7 +195,7 @@ describe('Release Validation service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
-      await expect(releaseValidationService.validatePendingReleaseLimit()).resolves.not.toThrow();
+      await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
     });
   });
 });
