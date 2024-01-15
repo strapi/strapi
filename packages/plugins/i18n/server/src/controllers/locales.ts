@@ -1,7 +1,6 @@
 import * as utils from '@strapi/utils';
 import { pick } from 'lodash/fp';
 import type { Common } from '@strapi/types';
-import type { Context } from 'koa';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
@@ -16,7 +15,7 @@ const sanitizeLocale = (locale: any) => {
 };
 
 const controller: Common.Controller = {
-  async listLocales(ctx: Context) {
+  async listLocales(ctx) {
     const localesService = getService('locales');
 
     const locales = await localesService.find();
@@ -27,7 +26,7 @@ const controller: Common.Controller = {
 
   async createLocale(ctx) {
     const { user } = ctx.state;
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
     const { isDefault, ...localeToCreate } = body as any; // TODO: add correct typings
     const { code } = localeToCreate;
 
