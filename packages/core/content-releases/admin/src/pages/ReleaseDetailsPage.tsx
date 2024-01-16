@@ -31,6 +31,7 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -485,7 +486,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
 
-  if (isError || isReleaseError || !release || !releaseActions) {
+  if (isReleaseError || !release) {
     const errorsArray = [];
     if (releaseError) {
       errorsArray.push({
@@ -504,6 +505,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           errors: errorsArray,
         }}
       />
+    );
+  }
+
+  if (isError || !releaseActions) {
+    return (
+      <ContentLayout>
+        <AnErrorOccurred />
+      </ContentLayout>
     );
   }
 
@@ -628,22 +637,22 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, type, entry }) => (
+                  {releaseActions[key].map(({ id, type, entry, contentType, locale }) => (
                     <Tr key={id}>
-                      <Td width={'25%'}>
+                      <Td width="25%" maxWidth="200px">
                         <Typography ellipsis>{`${
                           entry.contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="10%">
                         <Typography>{`${
                           entry?.locale?.name ? entry.locale.name : '-'
                         }`}</Typography>
                       </Td>
-                      <Td>
-                        <Typography>{entry.contentType.displayName || ''}</Typography>
+                      <Td width="10%">
+                        <Typography ellipsis>{entry.contentType.displayName || ''}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="20%">
                         {release.releasedAt ? (
                           <Typography>
                             {formatMessage(
@@ -669,15 +678,27 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
-                          <EntryValidationText status={entry.status} action={type} />
-                        </Td>
+                        <>
+                          <Td width="20%" minWidth="200px">
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu.Root>
+                                <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                  contentTypeUid={contentType}
+                                  entryId={entry.id}
+                                  locale={locale}
+                                />
+                                <ReleaseActionMenu.DeleteReleaseActionItem
+                                  releaseId={release.id}
+                                  actionId={id}
+                                />
+                              </ReleaseActionMenu.Root>
+                            </Flex>
+                          </Td>
+                        </>
                       )}
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
                     </Tr>
                   ))}
                 </Table.Body>

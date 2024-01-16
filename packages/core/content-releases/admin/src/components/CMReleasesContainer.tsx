@@ -354,11 +354,12 @@ export const CMReleasesContainer = () => {
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
-                  <ReleaseActionMenu
-                    releaseId={release.id}
-                    actionId={release.action.id}
-                    hasTriggerBorder
-                  />
+                  <ReleaseActionMenu.Root hasTriggerBorder>
+                    <ReleaseActionMenu.DeleteReleaseActionItem
+                      releaseId={release.id}
+                      actionId={release.action.id}
+                    />
+                  </ReleaseActionMenu.Root>
                 </Flex>
               </Flex>
             );
