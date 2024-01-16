@@ -258,12 +258,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const allReleaseContentTypesDictionary = await this.getContentTypesDataForActions(
       contentTypeUids
     );
-    const allLocales: Locale[] = await strapi.plugin('i18n').service('locales').find();
-    const allLocalesDictionary = allLocales.reduce<LocaleDictionary>((acc, locale) => {
-      acc[locale.code] = { name: locale.name, code: locale.code };
-
-      return acc;
-    }, {});
+    const allLocalesDictionary = await this.getLocalesDataForActions();
 
     const formattedData = actions.map((action: ReleaseAction) => {
       const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
@@ -284,6 +279,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     const groupName = getGroupName(groupBy);
     return _.groupBy(groupName)(formattedData);
+  },
+
+  async getLocalesDataForActions() {
+    if (!strapi.plugin('i18n')) {
+      return {};
+    }
+
+    const allLocales: Locale[] = (await strapi.plugin('i18n').service('locales').find()) || [];
+    return allLocales.reduce<LocaleDictionary>((acc, locale) => {
+      acc[locale.code] = { name: locale.name, code: locale.code };
+
+      return acc;
+    }, {});
   },
 
   async getContentTypesDataForActions(contentTypesUids: ReleaseAction['contentType'][]) {
