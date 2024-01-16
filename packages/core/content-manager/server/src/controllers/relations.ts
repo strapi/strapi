@@ -1,4 +1,4 @@
-import { prop, isEmpty, uniq, flow } from 'lodash/fp';
+import { prop, isEmpty, uniq, flow, concat, uniqBy } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -133,14 +133,20 @@ export default {
       filters: {}, // cannot filter for RBAC reasons
     };
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model: targetedModel.uid,
+    });
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
+
     if (!isEmpty(idsToOmit)) {
-      addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
+      addFiltersClause(permissionQuery, { id: { $notIn: idsToOmit } });
     }
 
     // searching should be allowed only on mainField for permission reasons
     if (_q) {
       const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+      addFiltersClause(permissionQuery, { [mainField]: { [_filter]: _q } });
     }
 
     if (entityId) {
@@ -163,10 +169,10 @@ export default {
         .select(`${alias}.id`)
         .getKnexQuery();
 
-      addFiltersClause(queryParams, { id: { $notIn: knexSubQuery } });
+      addFiltersClause(permissionQuery, { id: { $notIn: knexSubQuery } });
     }
 
-    ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
+    ctx.body = await strapi.entityService.findPage(targetedModel.uid, permissionQuery);
   },
 
   async findExisting(ctx: any) {
@@ -242,13 +248,32 @@ export default {
       fields: fieldsToSelect,
     };
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model: targetedModel.uid,
+    });
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
+
     if (isAnyToMany(attribute)) {
+      const resWithIds = await strapi.entityService.loadPages(
+        model,
+        { id },
+        targetField,
+        {
+          fields: ['id'],
+        } as any,
+        {
+          page: ctx.request.query.page,
+          pageSize: ctx.request.query.pageSize,
+        }
+      );
+
       const res = await strapi.entityService.loadPages(
         model,
         { id },
         targetField,
         {
-          ...queryParams,
+          ...permissionQuery,
           ordering: 'desc',
         } as any,
         {
@@ -257,6 +282,7 @@ export default {
         }
       );
 
+      res.results = uniqBy('id', concat(res.results, resWithIds.results));
       ctx.body = res;
     } else {
       const result = await strapi.entityService.load(model, { id }, targetField, queryParams);
