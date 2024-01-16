@@ -17,7 +17,81 @@ const initialState = {
     },
   },
   'content-manager_app': {
+    collectionTypeLinks: [],
+    components: [
+      {
+        uid: 'blog.test-como',
+        isDisplayed: true,
+        apiID: 'test-como',
+        category: 'blog',
+        info: {
+          displayName: 'test comp',
+          icon: 'air-freshener',
+          description: '',
+        },
+        options: {},
+        attributes: {
+          id: {
+            type: 'integer',
+          },
+          name: {
+            type: 'string',
+            default: 'toto',
+          },
+        },
+      },
+    ],
     fieldSizes: {},
+    models: [
+      {
+        uid: 'api::address.address',
+        isDisplayed: true,
+        apiID: 'address',
+        kind: 'collectionType',
+        info: {
+          displayName: 'Address',
+          singularName: 'address',
+          pluralName: 'addresses',
+          description: '',
+          name: 'Address',
+        },
+        options: {},
+        pluginOptions: {},
+        attributes: {
+          id: {
+            type: 'integer',
+          },
+          postal_code: {
+            type: 'string',
+            pluginOptions: {},
+            maxLength: 2,
+          },
+          json: {
+            type: 'json',
+            pluginOptions: {},
+          },
+          slug: {
+            type: 'uid',
+          },
+          repeat_req_min: {
+            type: 'component',
+            repeatable: true,
+            pluginOptions: {},
+            component: 'blog.test-como',
+            required: false,
+            min: 2,
+          },
+          createdAt: {
+            type: 'datetime',
+          },
+          updatedAt: {
+            type: 'datetime',
+          },
+        },
+      },
+    ],
+    singleTypeLinks: [],
+    isLoading: true,
   },
   rbacProvider: {
     allPermissions: fixtures.permissions.allPermissions,

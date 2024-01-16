@@ -1,9 +1,10 @@
 import React from 'react';
 
 import { fireEvent } from '@testing-library/react';
-import { render as renderRTL } from '@tests/utils';
+import { render } from '@tests/utils';
+import { Routes, Route } from 'react-router-dom';
 
-import EditSettingsView from '../index';
+import { EditSettingsView } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -11,59 +12,35 @@ jest.mock('@strapi/helper-plugin', () => ({
   CheckPermissions: ({ children }) => <div>{children}</div>,
 }));
 
-const mainLayout = {
-  attributes: {
-    id: { type: 'integer' },
-    categories: { type: 'integer' },
-    postal_code: { type: 'integer' },
-  },
-  kind: 'collectionType',
-  layouts: {
-    edit: [
-      [
-        { name: 'postal_code', size: 6 },
-        { name: 'city', size: 6 },
-      ],
-    ],
-    list: [],
-  },
-  metadatas: {
-    postal_code: { edit: { visible: true }, list: { label: 'postal_code' } },
-    city: { edit: { visible: true }, list: { label: 'city' } },
-    categories: { edit: { visible: true }, list: { label: 'categories' } },
-  },
-  settings: { mainField: 'postal_code' },
-  options: {},
-  info: {
-    description: 'the address',
-    displayName: 'address',
-    label: 'address',
-    name: 'address',
-  },
-};
-
-const components = {
-  compo1: { uid: 'compo1' },
-};
-
-const render = ({ layout } = {}) =>
-  renderRTL(
-    <EditSettingsView
-      mainLayout={layout || mainLayout}
-      components={components}
-      isContentTypeView
-      slug="api::address.address"
-    />
-  );
+const EDIT_ATTRIBUTES = [
+  [
+    { name: 'slug', size: 6 },
+    { name: 'repeat_req_min', size: 12 },
+    { name: 'json', size: 12 },
+  ],
+];
 
 /**
  * TODO: we should use MSW for network calls
  */
 describe('EditSettingsView', () => {
   it('renders correctly', async () => {
-    const { getByRole } = render();
+    const { getByRole, findByRole } = render(
+      <Routes>
+        <Route
+          path="/content-manager/:contentType/:slug/configuration/edit"
+          element={<EditSettingsView />}
+        />
+      </Routes>,
+      {
+        initialEntries: [
+          '/content-manager/collection-types/api::address.address/configuration/edit',
+        ],
+      }
+    );
 
-    expect(getByRole('heading', { name: 'Configure the view - Address' })).toBeInTheDocument();
+    await findByRole('heading', { name: 'Configure the view - Address' });
+
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
     expect(getByRole('link', { name: 'Back' })).toBeInTheDocument();
 
@@ -73,7 +50,7 @@ describe('EditSettingsView', () => {
     expect(getByRole('heading', { name: 'View' })).toBeInTheDocument();
     expect(getByRole('link', { name: 'Edit the content type' })).toBeInTheDocument();
 
-    mainLayout.layouts.edit.forEach((attributeRow) =>
+    EDIT_ATTRIBUTES.forEach((attributeRow) =>
       attributeRow.forEach((attribute) => {
         expect(getByRole('button', { name: `Edit ${attribute.name}` })).toBeInTheDocument();
         expect(getByRole('button', { name: `Delete ${attribute.name}` })).toBeInTheDocument();
@@ -84,16 +61,28 @@ describe('EditSettingsView', () => {
   });
 
   it('should add field and set it to disabled once all fields are showing', async () => {
-    const { user, getByRole } = render();
+    const { user, findByRole, getByRole } = render(
+      <Routes>
+        <Route
+          path="/content-manager/:contentType/:slug/configuration/edit"
+          element={<EditSettingsView />}
+        />
+      </Routes>,
+      {
+        initialEntries: [
+          '/content-manager/collection-types/api::address.address/configuration/edit',
+        ],
+      }
+    );
 
-    expect(getByRole('heading', { name: 'Configure the view - Address' })).toBeInTheDocument();
+    await findByRole('heading', { name: 'Configure the view - Address' });
 
     await user.click(getByRole('button', { name: 'Insert another field' }));
 
-    await user.click(getByRole('menuitem', { name: 'categories' }));
+    await user.click(getByRole('menuitem', { name: 'postal_code' }));
 
-    mainLayout.layouts.edit.forEach((attributeRow) =>
-      [...attributeRow, { name: 'categories' }].forEach((attribute) => {
+    EDIT_ATTRIBUTES.forEach((attributeRow) =>
+      [...attributeRow, { name: 'postal_code' }].forEach((attribute) => {
         expect(getByRole('button', { name: `Edit ${attribute.name}` })).toBeInTheDocument();
         expect(getByRole('button', { name: `Delete ${attribute.name}` })).toBeInTheDocument();
       })
@@ -109,16 +98,28 @@ describe('EditSettingsView', () => {
   });
 
   it('should delete field', async () => {
-    const { queryByRole, getByRole, user } = render();
+    const { queryByRole, findByRole, getByRole, user } = render(
+      <Routes>
+        <Route
+          path="/content-manager/:contentType/:slug/configuration/edit"
+          element={<EditSettingsView />}
+        />
+      </Routes>,
+      {
+        initialEntries: [
+          '/content-manager/collection-types/api::address.address/configuration/edit',
+        ],
+      }
+    );
 
-    expect(getByRole('heading', { name: 'Configure the view - Address' })).toBeInTheDocument();
+    await findByRole('heading', { name: 'Configure the view - Address' });
 
-    expect(queryByRole('button', { name: 'Delete postal_code' })).toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Delete json' })).toBeInTheDocument();
 
-    await user.click(getByRole('button', { name: 'Delete postal_code' }));
+    await user.click(getByRole('button', { name: 'Delete json' }));
 
-    expect(queryByRole('button', { name: 'Delete postal_code' })).not.toBeInTheDocument();
-    expect(queryByRole('button', { name: 'Edit postal_code' })).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Delete json' })).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Edit json' })).not.toBeInTheDocument();
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 

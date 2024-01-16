@@ -3,25 +3,26 @@ import * as React from 'react';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import Cookies from 'js-cookie';
 import { useIntl } from 'react-intl';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 
 import { useAuth } from '../../../../admin/src/features/Auth';
 
 const AuthResponse = () => {
-  const match = useRouteMatch<{ authResponse: string }>('/auth/login/:authResponse');
+  const match = useMatch('/auth/login/:authResponse');
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const redirectToOops = React.useCallback(() => {
-    push(
-      `/auth/oops?info=${encodeURIComponent(
+    navigate({
+      pathname: '/auth/oops',
+      search: `?info=${encodeURIComponent(
         formatMessage({
           id: 'Auth.form.button.login.providers.error',
           defaultMessage: 'We cannot connect you through the selected provider.',
         })
-      )}`
-    );
-  }, [push, formatMessage]);
+      )}`,
+    });
+  }, [navigate, formatMessage]);
 
   const setToken = useAuth('AuthResponse', (state) => state.setToken);
 
@@ -38,12 +39,12 @@ const AuthResponse = () => {
 
         Cookies.remove('jwtToken');
 
-        push('/auth/login');
+        navigate('/auth/login');
       } else {
         redirectToOops();
       }
     }
-  }, [match, redirectToOops, setToken, push]);
+  }, [match, redirectToOops, setToken, navigate]);
 
   return <LoadingIndicatorPage />;
 };

@@ -32,7 +32,7 @@ import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import produce from 'immer';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
@@ -61,7 +61,7 @@ const ListPage = () => {
     }
   );
 
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [{ showModalConfirmButtonLoading, roleToDelete }, dispatch] = React.useReducer(
     reducer,
     initialState
@@ -95,7 +95,7 @@ const ListPage = () => {
     handleToggleModal();
   };
 
-  const handleNewRoleClick = () => push('/settings/roles/new');
+  const handleNewRoleClick = () => navigate('new');
 
   const handleToggleModal = () => setIsWarningDeleteAllOpenend((prev) => !prev);
 
@@ -122,7 +122,7 @@ const ListPage = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    push(`/settings/roles/duplicate/${role.id}`);
+    navigate(`duplicate/${role.id}`);
   };
 
   const rowCount = roles.length + 1;
@@ -250,7 +250,7 @@ const ListPage = () => {
                         } satisfies RoleRowProps['icons'][number]),
                       canUpdate &&
                         ({
-                          onClick: () => push(`/settings/roles/${role.id}`),
+                          onClick: () => navigate(role.id.toString()),
                           label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
                           icon: <Pencil />,
                         } satisfies RoleRowProps['icons'][number]),

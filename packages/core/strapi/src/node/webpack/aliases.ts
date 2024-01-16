@@ -11,7 +11,6 @@ const adminPackageAliases = [
   '@strapi/icons',
   'date-fns',
   'formik',
-  'history',
   'immer',
   'qs',
   'lodash',

@@ -187,6 +187,16 @@ const reducer = (state = initialState, action) =>
         draftState.metaForm = {};
         break;
       }
+      case 'SET_DATA': {
+        draftState.componentLayouts = action.data.componentLayouts;
+        draftState.initialData = action.data.initialData;
+        draftState.modifiedData = action.data.modifiedData;
+        draftState.fieldForm = action.data.fieldForm;
+        draftState.metaForm = action.data.metaForm;
+        draftState.metaToEdit = action.data.metaToEdit;
+
+        break;
+      }
       default:
         return draftState;
     }

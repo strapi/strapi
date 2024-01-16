@@ -29,7 +29,7 @@ import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory, useRouteMatch } from 'react-router-dom';
+import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
@@ -66,11 +66,11 @@ interface CreateRoleFormValues {
  * manage the state of the child is nonsensical.
  */
 const CreatePage = () => {
-  const match = useRouteMatch<{ id: string }>('/settings/roles/duplicate/:id');
+  const match = useMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
-  const { replace } = useHistory();
+  const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
   const { trackUsage } = useTracking();
   const {
@@ -162,7 +162,7 @@ const CreatePage = () => {
         message: { id: 'Settings.roles.created', defaultMessage: 'created' },
       });
 
-      replace(`/settings/roles/${res.data.id}`);
+      navigate(res.data.id.toString(), { replace: true });
     } catch (err) {
       toggleNotification({
         type: 'warning',

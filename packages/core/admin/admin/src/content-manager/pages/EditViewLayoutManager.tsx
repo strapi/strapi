@@ -2,12 +2,14 @@ import * as React from 'react';
 
 import { LoadingIndicatorPage, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import produce from 'immer';
+import { useParams } from 'react-router-dom';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useContentTypeLayout } from '../hooks/useLayouts';
 import { useSyncRbac } from '../hooks/useSyncRbac';
 
-import { ProtectedEditViewPage, ProtectedEditViewPageProps } from './EditView/EditViewPage';
+import { ProtectedEditViewPage } from './EditView/EditViewPage';
 
 import type { FormattedLayouts } from '../utils/layouts';
 
@@ -16,39 +18,36 @@ const { MUTATE_EDIT_VIEW_LAYOUT } = HOOKS;
 /* -------------------------------------------------------------------------------------------------
  * EditViewLayoutManager
  * -----------------------------------------------------------------------------------------------*/
-interface EditViewLayoutManagerProps extends ProtectedEditViewPageProps {
-  layout: FormattedLayouts;
-}
 
-const EditViewLayoutManager = ({ layout, ...rest }: EditViewLayoutManagerProps) => {
+const EditViewLayoutManager = () => {
   const currentLayout = useTypedSelector(
     (state) => state['content-manager_editViewLayoutManager'].currentLayout
   );
   const dispatch = useTypedDispatch();
   const [{ query }] = useQueryParams();
   const { runHookWaterfall } = useStrapiApp();
-  const { permissions, isValid: isValidPermissions } = useSyncRbac(
-    query,
-    rest.match.params.slug,
-    'editView'
-  );
+  const { slug } = useParams<{ slug: string }>();
+  const { isLoading, layout } = useContentTypeLayout(slug);
+  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, slug, 'editView');
 
   React.useEffect(() => {
-    // Allow the plugins to extend the edit view layout
-    const mutatedLayout = runHookWaterfall(MUTATE_EDIT_VIEW_LAYOUT, { layout, query });
+    if (layout) {
+      // Allow the plugins to extend the edit view layout
+      const mutatedLayout = runHookWaterfall(MUTATE_EDIT_VIEW_LAYOUT, { layout, query });
 
-    dispatch(setLayout(mutatedLayout.layout, query));
+      dispatch(setLayout(mutatedLayout.layout, query));
+    }
 
     return () => {
       dispatch(resetProps());
     };
   }, [layout, dispatch, query, runHookWaterfall]);
 
-  if (!currentLayout.contentType || !isValidPermissions) {
+  if (isLoading || !currentLayout.contentType || !isValidPermissions) {
     return <LoadingIndicatorPage />;
   }
 
-  return <ProtectedEditViewPage {...rest} userPermissions={permissions ?? []} />;
+  return <ProtectedEditViewPage userPermissions={permissions ?? []} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -67,7 +66,7 @@ const SET_LAYOUT = 'ContentManager/EditViewLayoutManager/SET_LAYOUT';
 
 interface SetLayoutAction {
   type: typeof SET_LAYOUT;
-  layout: EditViewLayoutManagerProps['layout'];
+  layout: FormattedLayouts;
   query: object;
 }
 
@@ -80,8 +79,8 @@ const setLayout = (layout: SetLayoutAction['layout'], query: SetLayoutAction['qu
 
 interface EditViewLayoutManagerState {
   currentLayout: {
-    components: EditViewLayoutManagerProps['layout']['components'];
-    contentType: EditViewLayoutManagerProps['layout']['contentType'] | null;
+    components: FormattedLayouts['components'];
+    contentType: FormattedLayouts['contentType'] | null;
   };
 }
 
@@ -111,4 +110,4 @@ const reducer = (state: EditViewLayoutManagerState = initialState, action: Actio
   });
 
 export { EditViewLayoutManager, reducer };
-export type { EditViewLayoutManagerProps, EditViewLayoutManagerState };
+export type { EditViewLayoutManagerState };

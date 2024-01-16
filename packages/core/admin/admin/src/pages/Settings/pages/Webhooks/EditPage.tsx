@@ -10,7 +10,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Webhook } from '@strapi/types';
 import { FormikHelpers } from 'formik';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 
 import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -39,11 +39,11 @@ const cleanData = (
 });
 
 const EditPage = () => {
-  const match = useRouteMatch<{ id: string }>('/settings/webhooks/:id');
+  const match = useMatch('/settings/webhooks/:id');
   const id = match?.params.id;
   const isCreating = id === 'create';
 
-  const { replace } = useHistory();
+  const navigate = useNavigate();
   const toggleNotification = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -124,7 +124,7 @@ const EditPage = () => {
           message: { id: 'Settings.webhooks.created' },
         });
 
-        replace(`/settings/webhooks/${res.data.id}`);
+        navigate(res.data.id, { replace: true });
       } else {
         const res = await updateWebhook({ id: id!, ...cleanData(data) });
 

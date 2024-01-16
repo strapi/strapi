@@ -2,9 +2,8 @@ import { ReactNode } from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import { FormModalNavigationProvider } from '../../../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
@@ -32,7 +31,6 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const makeApp = () => {
-  const history = createMemoryHistory();
   type PluginEnKey = keyof typeof pluginEn;
   const messages: Record<string, any> = {
     en: Object.keys(pluginEn).reduce((acc: Record<string, string>, current) => {
@@ -42,14 +40,21 @@ const makeApp = () => {
     }, {}),
   };
 
+  const router = createMemoryRouter([
+    {
+      path: '/',
+      element: (
+        <FormModalNavigationProvider>
+          <ListView />
+        </FormModalNavigationProvider>
+      ),
+    },
+  ]);
+
   return (
     <IntlProvider messages={messages} defaultLocale="en" textComponent="span" locale="en">
       <ThemeProvider theme={lightTheme}>
-        <Router history={history}>
-          <FormModalNavigationProvider>
-            <ListView />
-          </FormModalNavigationProvider>
-        </Router>
+        <RouterProvider router={router} />
       </ThemeProvider>
     </IntlProvider>
   );

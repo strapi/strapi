@@ -9,14 +9,15 @@ describe('ReleaseModal', () => {
   it('renders correctly the dialog content on create', async () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
-      <MemoryRouter initialEntries={[`/plugins/${pluginId}`]}>
-        <ReleaseModal
-          handleClose={handleCloseMocked}
-          handleSubmit={jest.fn()}
-          initialValues={{ name: '' }}
-          isLoading={false}
-        />
-      </MemoryRouter>
+      <ReleaseModal
+        handleClose={handleCloseMocked}
+        handleSubmit={jest.fn()}
+        initialValues={{ name: '' }}
+        isLoading={false}
+      />,
+      {
+        initialEntries: [{ pathname: `/plugins/${pluginId}` }],
+      }
     );
     const dialogContainer = screen.getByRole('dialog');
     const dialogCancelButton = within(dialogContainer).getByRole('button', {

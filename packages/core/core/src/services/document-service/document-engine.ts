@@ -44,13 +44,13 @@ const updatePipeline = (data: Record<string, unknown>, context: Context) => {
   return applyTransforms(data, context);
 };
 
-const createDocumentService = ({
+const createDocumentEngine = ({
   strapi,
   db,
 }: {
   strapi: Strapi;
   db: Database;
-}): Documents.Service => ({
+}): Documents.Engine => ({
   uploadFiles,
 
   async findMany(uid, params) {
@@ -145,7 +145,7 @@ const createDocumentService = ({
     );
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params) as any);
 
     return db.query(uid).create({ ...query, data: entryData });
   },
@@ -158,7 +158,7 @@ const createDocumentService = ({
     const { data } = params || {};
     const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(params || {}));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params || {}) as any);
 
     // Find all locales of the document
     const entryToUpdate = await db
@@ -202,7 +202,7 @@ const createDocumentService = ({
     const { data = {} as any } = params!;
 
     const model = strapi.getModel(uid);
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params) as any);
 
     // Find all locales of the document
     const entries = await db.query(uid).findMany({
@@ -298,8 +298,8 @@ const createDocumentService = ({
   },
 });
 
-export default (ctx: { strapi: Strapi; db: Database }): Documents.Service => {
-  const implementation = createDocumentService(ctx);
+export default (ctx: { strapi: Strapi; db: Database }): Documents.Engine => {
+  const implementation = createDocumentEngine(ctx);
 
   // TODO: Wrap with database error handling
   return implementation;

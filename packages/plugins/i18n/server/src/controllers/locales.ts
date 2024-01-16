@@ -26,7 +26,7 @@ const controller: Common.Controller = {
 
   async createLocale(ctx) {
     const { user } = ctx.state;
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
     const { isDefault, ...localeToCreate } = body;
 
     await validateCreateLocaleInput(body);
@@ -54,7 +54,7 @@ const controller: Common.Controller = {
   async updateLocale(ctx) {
     const { user } = ctx.state;
     const { id } = ctx.params;
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
     const { isDefault, ...updates } = body;
 
     await validateUpdateLocaleInput(body);

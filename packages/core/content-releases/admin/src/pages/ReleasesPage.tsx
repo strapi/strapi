@@ -31,7 +31,7 @@ import {
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases } from '../../../shared/contracts/releases';
@@ -173,20 +173,17 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 /* -------------------------------------------------------------------------------------------------
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
-interface CustomLocationState {
-  errors?: Record<'code', string>[];
-}
 
 const INITIAL_FORM_VALUES = {
   name: '',
 } satisfies FormValues;
 
 const ReleasesPage = () => {
-  const location = useLocation<CustomLocationState>();
+  const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const { push, replace } = useHistory();
+  const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
@@ -208,9 +205,9 @@ const ReleasesPage = () => {
           defaultMessage: 'Please try again or open another release.',
         }),
       });
-      replace({ state: null });
+      navigate('', { replace: true, state: null });
     }
-  }, [formatMessage, location?.state?.errors, replace, toggleNotification]);
+  }, [formatMessage, location?.state?.errors, navigate, toggleNotification]);
 
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
@@ -257,7 +254,7 @@ const ReleasesPage = () => {
         }),
       });
 
-      push(`/plugins/content-releases/${response.data.data.id}`);
+      navigate(response.data.data.id.toString());
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({

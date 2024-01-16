@@ -50,6 +50,7 @@ describe('ADMIN | new StrapiApp', () => {
           "collectionTypeLinks": [],
           "components": [],
           "fieldSizes": {},
+          "isLoading": true,
           "models": [],
           "singleTypeLinks": [],
         },
@@ -195,7 +196,7 @@ describe('ADMIN | new StrapiApp', () => {
       const links = [
         {
           Component: jest.fn(),
-          to: '/bar',
+          to: 'bar',
           id: 'bar',
           intlLabel: { id: 'bar', defaultMessage: 'bar' },
           permissions: [],
@@ -204,14 +205,34 @@ describe('ADMIN | new StrapiApp', () => {
       app.createSettingSection(section, links);
 
       expect(app.settings.foo).toBeDefined();
-      expect(app.settings.foo.links).toEqual(links);
+      expect(app.settings.foo.links).toMatchInlineSnapshot(`
+        [
+          {
+            "Component": {
+              "$$typeof": Symbol(react.lazy),
+              "_init": [Function],
+              "_payload": {
+                "_result": [Function],
+                "_status": -1,
+              },
+            },
+            "id": "bar",
+            "intlLabel": {
+              "defaultMessage": "bar",
+              "id": "bar",
+            },
+            "permissions": [],
+            "to": "bar",
+          },
+        ]
+      `);
     });
 
     it('should add a link correctly to the global section', () => {
       const app = new StrapiApp();
       const link = {
         Component: jest.fn(),
-        to: '/bar',
+        to: 'bar',
         id: 'bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
@@ -220,11 +241,72 @@ describe('ADMIN | new StrapiApp', () => {
       app.addSettingsLink('global', link);
 
       expect(app.settings.global.links).toHaveLength(1);
-      expect(app.settings.global.links[0]).toEqual(link);
+      expect(app.settings.global.links[0]).toMatchInlineSnapshot(`
+        {
+          "Component": {
+            "$$typeof": Symbol(react.lazy),
+            "_init": [Function],
+            "_payload": {
+              "_result": [Function],
+              "_status": -1,
+            },
+          },
+          "id": "bar",
+          "intlLabel": {
+            "defaultMessage": "bar",
+            "id": "bar",
+          },
+          "permissions": [],
+          "to": "bar",
+        }
+      `);
     });
 
     it('should add an array of links correctly to the global section', () => {
       const app = new StrapiApp();
+      const links = [
+        {
+          Component: jest.fn(),
+          to: 'bar',
+          id: 'bar',
+          intlLabel: { id: 'bar', defaultMessage: 'bar' },
+          permissions: [],
+        },
+      ];
+
+      app.addSettingsLinks('global', links);
+
+      expect(app.settings.global.links).toHaveLength(1);
+      expect(app.settings.global.links).toMatchInlineSnapshot(`
+        [
+          {
+            "Component": {
+              "$$typeof": Symbol(react.lazy),
+              "_init": [Function],
+              "_payload": {
+                "_result": [Function],
+                "_status": -1,
+              },
+            },
+            "id": "bar",
+            "intlLabel": {
+              "defaultMessage": "bar",
+              "id": "bar",
+            },
+            "permissions": [],
+            "to": "bar",
+          },
+        ]
+      `);
+    });
+
+    it('should warn if a user supplies an absolute link', () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
+      const app = new StrapiApp();
+
       const links = [
         {
           Component: jest.fn(),
@@ -237,8 +319,44 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addSettingsLinks('global', links);
 
-      expect(app.settings.global.links).toHaveLength(1);
-      expect(app.settings.global.links).toEqual(links);
+      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "[bar]: the \`to\` property of your settings link is an absolute path. It should be relative to \`/settings\`. This has been corrected for you but will be removed in a future version of Strapi.",
+        ]
+      `);
+
+      console.warn = originalWarn;
+    });
+
+    it('should warn if a user supplies an async component', () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
+      const app = new StrapiApp();
+
+      const links = [
+        {
+          Component: async () => ({ default: jest.fn() }),
+          to: 'bar',
+          id: 'bar',
+          intlLabel: { id: 'bar', defaultMessage: 'bar' },
+          permissions: [],
+        },
+      ];
+
+      app.addSettingsLinks('global', links);
+
+      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "
+              [bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed
+                in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+              ",
+        ]
+      `);
+
+      console.warn = originalWarn;
     });
   });
 
@@ -464,7 +582,7 @@ describe('ADMIN | new StrapiApp', () => {
       const app = new StrapiApp();
       const link = {
         Component: jest.fn(),
-        to: '/plugins/bar',
+        to: 'plugins/bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
         icon: () => <>{'book'}</>,
@@ -473,25 +591,82 @@ describe('ADMIN | new StrapiApp', () => {
       app.addMenuLink(link);
 
       expect(app.menu[0]).toBeDefined();
-      expect(app.menu[0]).toEqual(link);
+      expect(app.menu[0]).toMatchInlineSnapshot(`
+        {
+          "Component": {
+            "$$typeof": Symbol(react.lazy),
+            "_init": [Function],
+            "_payload": {
+              "_result": [Function],
+              "_status": -1,
+            },
+          },
+          "icon": [Function],
+          "intlLabel": {
+            "defaultMessage": "bar",
+            "id": "bar",
+          },
+          "permissions": [],
+          "to": "plugins/bar",
+        }
+      `);
     });
 
-    it('addCorePluginMenuLink should add a link to the menu', () => {
+    it('should warn if a user supplies an absolute link', () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
       const app = new StrapiApp();
+
       const link = {
-        to: '/plugins/content-type-builder',
-        icon: () => <>{'book'}</>,
+        Component: jest.fn(),
+        to: '/bar',
+        id: 'bar',
+        intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
-        intlLabel: {
-          id: 'content-type-builder.plugin.name',
-          defaultMessage: 'Content Type builder',
-        },
+        icon: jest.fn(),
       };
 
-      app.addCorePluginMenuLink(link);
+      app.addMenuLink(link);
 
-      expect(app.menu).toHaveLength(1);
-      expect(app.menu[0]).toEqual(link);
+      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "[bar]: the \`to\` property of your menu link is an absolute path, it should be relative to the root of the application. This has been corrected for you but will be removed in a future version of Strapi.",
+        ]
+      `);
+
+      console.warn = originalWarn;
+    });
+
+    it('should warn if a user supplies an async component', () => {
+      const originalWarn = console.warn;
+      const consoleSpy = jest.fn();
+      console.warn = consoleSpy;
+
+      const app = new StrapiApp();
+
+      const link = {
+        Component: async () => ({ default: jest.fn() }),
+        to: 'bar',
+        id: 'bar',
+        intlLabel: { id: 'bar', defaultMessage: 'bar' },
+        permissions: [],
+        icon: jest.fn(),
+      };
+
+      app.addMenuLink(link);
+
+      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "
+              [bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed
+                in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+              ",
+        ]
+      `);
+
+      console.warn = originalWarn;
     });
   });
 

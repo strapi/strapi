@@ -1,6 +1,6 @@
 import { Common, Utils } from '../../..';
 import { Result } from '.';
-import * as Params from '../params/document-service';
+import * as Params from '../params/document-engine';
 
 export type CountResult = { count: number };
 

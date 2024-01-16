@@ -1,5 +1,5 @@
 import { render } from '@tests/utils';
-import { Route, RouteProps } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { SearchURLQuery } from '../SearchURLQuery';
 
@@ -9,6 +9,16 @@ jest.mock('../../features/Tracking', () => ({
     trackUsage,
   }),
 }));
+
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return (
+    <ul>
+      <li>{location.search}</li>
+    </ul>
+  );
+};
 
 describe('<SearchURLQuery />', () => {
   it('should render an icon button by default', () => {
@@ -26,22 +36,13 @@ describe('<SearchURLQuery />', () => {
   });
 
   it('should push value to query params', async () => {
-    let testLocation: RouteProps['location'] | null = null;
-
     const { user, getByRole } = render(<SearchURLQuery label="Search label" />, {
       renderOptions: {
         wrapper({ children }) {
           return (
             <>
               {children}
-              <Route
-                path="*"
-                render={({ location }) => {
-                  testLocation = location;
-
-                  return null;
-                }}
-              />
+              <LocationDisplay />
             </>
           );
         },
@@ -54,29 +55,21 @@ describe('<SearchURLQuery />', () => {
 
     await user.keyboard('[Enter]');
 
-    const searchParams = new URLSearchParams(testLocation?.['search']);
+    const searchString = getByRole('listitem').textContent ?? '';
+    const searchParams = new URLSearchParams(searchString);
 
     expect(searchParams.has('_q')).toBe(true);
     expect(searchParams.get('_q')).toBe('michka');
   });
 
   it('should clear value and update query params', async () => {
-    let testLocation: RouteProps['location'] | null = null;
-
     const { user, getByRole } = render(<SearchURLQuery label="Search label" />, {
       renderOptions: {
         wrapper({ children }) {
           return (
             <>
               {children}
-              <Route
-                path="*"
-                render={({ location }) => {
-                  testLocation = location;
-
-                  return null;
-                }}
-              />
+              <LocationDisplay />
             </>
           );
         },
@@ -89,13 +82,13 @@ describe('<SearchURLQuery />', () => {
 
     await user.keyboard('[Enter]');
 
-    expect(new URLSearchParams(testLocation?.['search']).has('_q')).toBe(true);
+    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(true);
 
     await user.click(getByRole('button', { name: 'Clear' }));
 
     expect(getByRole('textbox', { name: 'Search label' })).toHaveValue('');
 
-    expect(new URLSearchParams(testLocation?.['search']).has('_q')).toBe(false);
+    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
   });
 
   it('should call trackUsage with trackedEvent props when submit', async () => {
