@@ -23,7 +23,7 @@ test.describe('Edit View', () => {
     /**
      * Now we're in the edit view.
      */
-    await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create?**');
+    await page.waitForURL('**/content-manager/collection-types/ api::testing.testing/create?');
 
     await page.getByRole('textbox', { name: 'title' }).fill('my content');
 
