@@ -689,18 +689,18 @@ const ReleaseDetailsBody = () => {
                 <Table.Body>
                   {releaseActions[key].map(({ id, contentType, locale, type, entry }) => (
                     <Tr key={id}>
-                      <Td width={'25%'}>
+                      <Td width="25%" maxWidth="200px">
                         <Typography ellipsis>{`${
                           contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="10%">
                         <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="10%">
                         <Typography>{contentType.displayName || ''}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="20%">
                         {release.releasedAt ? (
                           <Typography>
                             {formatMessage(
@@ -727,7 +727,7 @@ const ReleaseDetailsBody = () => {
                       </Td>
                       {!release.releasedAt && (
                         <>
-                          <Td>
+                          <Td width="20%" minWidth="200px">
                             <EntryValidationText
                               action={type}
                               schema={contentTypes?.[contentType.uid]}
