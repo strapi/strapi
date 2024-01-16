@@ -313,8 +313,8 @@ const ContentTypeFormWrapper = ({
         >(
           isCloning
             ? `/content-manager/collection-types/${slug}/clone/${origin}`
-            : `/content-manager/collection-types/${slug}`,
-          (isCloning ? restBody : body) as Contracts.CollectionTypes.Clone.Request['body'],
+            : `/content-manager/${collectionType}/${slug}`,
+          isCloning ? restBody : body,
           {
             params: query,
           }
