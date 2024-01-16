@@ -3,6 +3,7 @@ import { setCreatorFields, errors } from '@strapi/utils';
 import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
 
 import _ from 'lodash/fp';
+
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
@@ -50,6 +51,8 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
 const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
     const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
+
+    await getService('release-validation', { strapi }).validatePendingReleasesLimit();
 
     return strapi.entityService.create(RELEASE_MODEL_UID, {
       data: releaseWithCreatorFields,

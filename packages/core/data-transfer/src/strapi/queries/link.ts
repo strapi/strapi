@@ -264,12 +264,12 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
         }
 
         assignOrderColumns();
-
         const qb = connection.insert(payload).into(addSchema(joinTable.name));
         if (trx) {
-          qb.transacting(trx);
+          await trx.transaction(async (nestedTrx) => {
+            await qb.transacting(nestedTrx);
+          });
         }
-        await qb;
       }
     };
 
