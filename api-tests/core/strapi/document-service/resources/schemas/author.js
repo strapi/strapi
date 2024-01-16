@@ -10,15 +10,16 @@ module.exports = {
   draftAndPublish: true,
   pluginOptions: {
     i18n: {
-      localized: false,
+      localized: true,
     },
   },
   attributes: {
     name: {
       type: 'string',
+      unique: true,
       pluginOptions: {
         i18n: {
-          localized: false,
+          localized: true,
         },
       },
     },
