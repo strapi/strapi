@@ -158,27 +158,30 @@ const readDir = async (archive, dir) => {
    * @type {string[]}
    */
   const files = [];
+  const isGzipped = archive.endsWith('.tar.gz');
 
   await new Promise((resolve, reject) => {
-    pipeline(
-      [
-        // Source: Archive stream
-        fs.createReadStream(archive),
-        // Transform: tar parser
-        new tar.Parse({
-          // Match tar entry with the given filename
-          filter: (filePath, entry) => entry.type === 'File' && dir === path.dirname(filePath),
-          // Set outStream to
-          async onentry(entry) {
-            files.push(path.basename(entry.path));
+    const streams = [fs.createReadStream(archive)];
+    if (isGzipped) {
+      streams.push(zlib.createGunzip());
+    }
 
-            // Consume the entry anyway to avoid blocking the tar parser
-            await rawCollector(entry);
-          },
-        }),
-      ],
-      (err) => (err ? reject(err) : resolve())
+    // Add the tar parser
+    streams.push(
+      new tar.Parse({
+        // Match tar entry with the given filename
+        filter: (filePath, entry) => entry.type === 'File' && dir === path.dirname(filePath),
+        // Set outStream to
+        async onentry(entry) {
+          files.push(path.basename(entry.path));
+
+          // Consume the entry anyway to avoid blocking the tar parser
+          await rawCollector(entry);
+        },
+      })
     );
+
+    pipeline(streams, (err) => (err ? reject(err) : resolve()));
   });
 
   return files;
