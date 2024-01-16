@@ -744,7 +744,8 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
+      {/* with SingleTypes, we'll never be creating the entry and there won't ever be an id because thats not how single types work. */}
+      {isLoadingForData || (!isCreatingEntry && !initialData.id && !isSingleType) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>
