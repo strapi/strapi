@@ -51,7 +51,7 @@ export default {
   },
 
   async createContentType(ctx: Context) {
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     try {
       await validateContentTypeInput(body);
@@ -95,7 +95,7 @@ export default {
 
   async updateContentType(ctx: Context) {
     const { uid } = ctx.params;
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     if (!_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);

@@ -16,7 +16,8 @@ const getFirstLevelPath = map((path: string) => path.split('.')[0]);
 const controller = {
   async getNonLocalizedAttributes(ctx) {
     const { user } = ctx.state;
-    const { model, id, locale } = ctx.request.body;
+    const body = ctx.request.body as any;
+    const { model, id, locale } = body;
 
     await validateGetNonLocalizedAttributesInput({ model, id, locale });
 

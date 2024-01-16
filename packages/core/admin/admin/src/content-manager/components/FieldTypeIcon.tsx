@@ -1,6 +1,9 @@
+import * as React from 'react';
+
 import { Box } from '@strapi/design-system';
 import { useCustomFields } from '@strapi/helper-plugin';
 import {
+  Blocks,
   Boolean,
   Component,
   Date,
@@ -10,26 +13,26 @@ import {
   Json,
   Media,
   Number,
+  Password,
   Relation,
   Text,
   Uid,
 } from '@strapi/icons';
 
-const iconByTypes = {
+import type { Attribute } from '@strapi/types';
+
+const iconByTypes: Record<Attribute.Kind, React.ReactElement> = {
   biginteger: <Number />,
   boolean: <Boolean />,
   date: <Date />,
   datetime: <Date />,
   decimal: <Number />,
   email: <Email />,
-  enum: <Enumeration />,
   enumeration: <Enumeration />,
-  file: <Media />,
-  files: <Media />,
   float: <Number />,
   integer: <Number />,
   media: <Media />,
-  number: <Number />,
+  password: <Password />,
   relation: <Relation />,
   string: <Text />,
   text: <Text />,
@@ -40,6 +43,7 @@ const iconByTypes = {
   uid: <Uid />,
   component: <Component />,
   dynamiczone: <DynamicZone />,
+  blocks: <Blocks />,
 };
 
 interface FieldTypeIconProps {

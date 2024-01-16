@@ -1,8 +1,7 @@
 /* eslint-disable testing-library/no-node-access */
 import { screen, within } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
-import { Location } from 'history';
-import { Route } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { MarketplacePage } from '../MarketplacePage';
 
@@ -28,7 +27,11 @@ const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 };
 
-let testLocation: Location = null!;
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span>{location.search}</span>;
+};
 
 const render = () =>
   renderRTL(<MarketplacePage />, {
@@ -37,14 +40,7 @@ const render = () =>
         return (
           <>
             {children}
-            <Route
-              path="*"
-              render={({ location }) => {
-                testLocation = location;
-
-                return null;
-              }}
-            />
+            <LocationDisplay />
           </>
         );
       },
@@ -331,12 +327,12 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(testLocation.search).toBe('?collections[0]=Made by Strapi&page=1');
+    expect(screen.getByText('?collections[0]=Made by Strapi&page=1')).toBeInTheDocument();
     await user.click(getByRole('button', { name: 'Made by Strapi' }));
 
     await waitForReload();
 
-    expect(testLocation.search).toBe('?page=1');
+    expect(screen.getByText('?page=1')).toBeInTheDocument();
   });
 
   it('only filters in the plugins tab', async () => {
@@ -384,7 +380,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(getByRole('option', { name: 'Newest' }));
 
     await waitForReload();
-    expect(testLocation.search).toEqual('?sort=submissionDate:desc&page=1');
+    expect(screen.getByText('?sort=submissionDate:desc&page=1')).toBeInTheDocument();
   });
 
   it('shows github stars and weekly downloads count for each plugin', async () => {
@@ -423,16 +419,16 @@ describe('Marketplace page - plugins tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
-    expect(testLocation.search).toBe('?page=2');
+    expect(screen.getByText('?page=2')).toBeInTheDocument();
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
-    expect(testLocation.search).toBe('?page=1');
+    expect(screen.getByText('?page=1')).toBeInTheDocument();
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
-    expect(testLocation.search).toBe('?page=3');
+    expect(screen.getByText('?page=3')).toBeInTheDocument();
   });
 });

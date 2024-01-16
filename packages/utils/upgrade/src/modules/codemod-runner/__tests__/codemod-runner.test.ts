@@ -1,6 +1,6 @@
 import { vol, fs } from 'memfs';
 
-import { projectFactory } from '../../project/project';
+import { projectFactory } from '../../project';
 import { rangeFactory } from '../../version';
 import { codemodRunnerFactory } from '../codemod-runner';
 import { loggerFactory } from '../../logger';
@@ -80,7 +80,7 @@ describe('CodemodRunner', () => {
       loggerFactory({ debug: true })
     );
     const res = await codemodRunner.run(`${validCwd}/src`);
-    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s)`);
+    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
     expect(res.success).toBe(true);
   });
 
@@ -104,7 +104,7 @@ describe('CodemodRunner', () => {
       .onSelectCodemods(selectCodemodsCallback);
     const res = await codemodRunner.run(`${validCwd}/src`);
     expect(selectCodemodsCallback).toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s)`);
+    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
     expect(res.success).toBe(true);
   });
 
@@ -114,7 +114,7 @@ describe('CodemodRunner', () => {
       .setLogger(logger)
       .dry();
     const res = await codemodRunner.run(`${validCwd}/src`);
-    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s)`);
+    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
     expect(res.success).toBe(true);
   });
 });

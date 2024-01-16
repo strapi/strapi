@@ -10,7 +10,9 @@ import {
   Main,
 } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
   Link,
+  LoadingIndicatorPage,
   useFetchClient,
   useNotification,
   useQueryParams,
@@ -19,28 +21,48 @@ import {
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
-import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+import { Navigate, useParams } from 'react-router-dom';
 
+import { useTypedSelector } from '../../../core/store/hooks';
 import { queryKeyPrefix as initDataQueryKey } from '../../hooks/useContentManagerInitData';
+import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
+import { formatLayoutForSettingsView } from '../../utils/layouts';
 import { getTranslation } from '../../utils/translations';
 
 import { EditFieldForm } from './components/EditFieldForm';
 import { Settings } from './components/Settings';
 import { SortDisplayedFields } from './components/SortDisplayedFields';
 import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
-import reducer, { initialState } from './reducer';
+import { reducer, initialState } from './reducer';
 
-export const ListSettingsView = ({ layout, slug }) => {
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { AxiosError, AxiosResponse } from 'axios';
+
+const ListSettingsView = () => {
   const queryClient = useQueryClient();
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [{ query }] = useQueryParams();
+  const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
+  const { collectionType, slug } = useParams<{ collectionType: string; slug: string }>();
   const toggleNotification = useNotification();
+
+  const { isLoading: isLoadingLayout, layout: fetchedLayout } = useContentTypeLayout(slug);
+
+  const { rawContentTypeLayout: layout } = React.useMemo(() => {
+    let rawContentTypeLayout = null;
+
+    if (fetchedLayout?.contentType) {
+      rawContentTypeLayout = formatLayoutForSettingsView(fetchedLayout.contentType);
+    }
+
+    return { rawContentTypeLayout };
+  }, [fetchedLayout]);
+
   const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
     reducer,
     initialState,
@@ -51,43 +73,58 @@ export const ListSettingsView = ({ layout, slug }) => {
     })
   );
 
+  React.useEffect(() => {
+    dispatch({
+      type: 'SET_DATA',
+      data: layout,
+    });
+  }, [layout]);
+
   const isModalFormOpen = Object.keys(fieldForm).length !== 0;
 
-  const { attributes, options } = layout;
-  const displayedFields = modifiedData.layouts.list;
+  const { attributes = {}, options } = layout ?? {};
+  const { list: displayedFields = [] } = modifiedData?.layouts ?? {
+    list: [],
+  };
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleChange = ({
+    target: { name, value },
+  }: {
+    target: { name: string; value: string | number | boolean };
+  }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name,
-      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
+      value:
+        name === 'settings.pageSize' && typeof value === 'string' ? parseInt(value, 10) : value,
     });
   };
 
-  const { isLoading: isSubmittingForm, mutate } = useMutation(
-    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
-    {
-      onSuccess() {
-        trackUsage('didEditListSettings');
-        queryClient.invalidateQueries(initDataQueryKey);
-      },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      },
-    }
-  );
+  const { isLoading: isSubmittingForm, mutate } = useMutation<
+    AxiosResponse<Contracts.ContentTypes.UpdateContentTypeConfiguration.Response>,
+    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkPublish.Response, 'error'>>>,
+    Contracts.ContentTypes.UpdateContentTypeConfiguration.Request['body']
+  >((body) => put(`/content-manager/content-types/${slug}/configuration`, body), {
+    onSuccess() {
+      trackUsage('didEditListSettings');
+      queryClient.invalidateQueries(initDataQueryKey);
+    },
+    onError() {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    },
+  });
 
-  const handleAddField = (item) => {
+  const handleAddField = (item: string) => {
     dispatch({
       type: 'ADD_FIELD',
       item,
     });
   };
 
-  const handleRemoveField = (e, index) => {
+  const handleRemoveField = (e: React.MouseEvent<HTMLButtonElement>, index: number) => {
     e.stopPropagation();
 
     if (displayedFields.length === 1) {
@@ -103,8 +140,10 @@ export const ListSettingsView = ({ layout, slug }) => {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!modifiedData) return;
 
     const { layouts, settings, metadatas } = modifiedData;
 
@@ -117,7 +156,7 @@ export const ListSettingsView = ({ layout, slug }) => {
     trackUsage('willSaveContentTypeLayout');
   };
 
-  const handleClickEditField = (fieldToEdit) => {
+  const handleClickEditField = (fieldToEdit: string) => {
     dispatch({
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
@@ -130,7 +169,7 @@ export const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
-  const handleSubmitFieldEdit = (e) => {
+  const handleSubmitFieldEdit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
@@ -138,7 +177,11 @@ export const ListSettingsView = ({ layout, slug }) => {
     handleCloseModal();
   };
 
-  const handleChangeEditLabel = ({ target: { name, value } }) => {
+  const handleChangeEditLabel = ({
+    target: { name, value },
+  }: {
+    target: { name: string; value: string | boolean };
+  }) => {
     dispatch({
       type: 'ON_CHANGE_FIELD_METAS',
       name,
@@ -158,10 +201,10 @@ export const ListSettingsView = ({ layout, slug }) => {
     .filter(([, attribute]) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(attribute.type))
     .map(([name]) => ({
       value: name,
-      label: layout.metadatas[name].list.label,
+      label: layout?.metadatas[name].list.label ?? '',
     }));
 
-  const move = (originalIndex, atIndex) => {
+  const move = (originalIndex: number, atIndex: number) => {
     dispatch({
       type: 'MOVE_FIELD',
       originalIndex,
@@ -169,11 +212,19 @@ export const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
+  if (collectionType === 'single-types') {
+    return <Navigate to={`/single-types/${slug}`} />;
+  }
+
+  if (isLoadingLayout) {
+    return <LoadingIndicatorPage />;
+  }
+
   const {
     settings: { pageSize, defaultSortBy, defaultSortOrder },
     kind,
     uid,
-  } = initialData;
+  } = initialData ?? { settings: {} };
 
   return (
     <Layout>
@@ -183,6 +234,7 @@ export const ListSettingsView = ({ layout, slug }) => {
             navigationAction={
               <Link
                 startIcon={<ArrowLeft />}
+                // @ts-expect-error invalid typings
                 to={{
                   to: `/content-manager/${kind}/${uid}`,
                   search: stringify(
@@ -223,7 +275,7 @@ export const ListSettingsView = ({ layout, slug }) => {
                 id: getTranslation('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
-              { name: upperFirst(modifiedData.info.displayName) }
+              { name: upperFirst(modifiedData?.info.displayName) }
             )}
           />
           <ContentLayout>
@@ -255,7 +307,7 @@ export const ListSettingsView = ({ layout, slug }) => {
                 onClickEditField={handleClickEditField}
                 onMoveField={move}
                 onRemoveField={handleRemoveField}
-                metadatas={modifiedData.metadatas}
+                metadatas={modifiedData?.metadatas ?? {}}
               />
             </Flex>
           </ContentLayout>
@@ -277,24 +329,16 @@ export const ListSettingsView = ({ layout, slug }) => {
   );
 };
 
-ListSettingsView.propTypes = {
-  layout: PropTypes.shape({
-    uid: PropTypes.string.isRequired,
-    settings: PropTypes.shape({
-      bulkable: PropTypes.bool,
-      defaultSortBy: PropTypes.string,
-      defaultSortOrder: PropTypes.string,
-      filterable: PropTypes.bool,
-      pageSize: PropTypes.number,
-      searchable: PropTypes.bool,
-    }).isRequired,
-    metadatas: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired,
-    attributes: PropTypes.objectOf(
-      PropTypes.shape({
-        type: PropTypes.string,
-      })
-    ).isRequired,
-  }).isRequired,
-  slug: PropTypes.string.isRequired,
+const ProtectedListSettingsView = () => {
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.contentManager?.collectionTypesConfigurations
+  );
+
+  return (
+    <CheckPagePermissions permissions={permissions}>
+      <ListSettingsView />
+    </CheckPagePermissions>
+  );
 };
+
+export { ProtectedListSettingsView, ListSettingsView };

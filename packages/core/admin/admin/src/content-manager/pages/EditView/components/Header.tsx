@@ -16,7 +16,7 @@ import { ArrowLeft, Check, ExclamationMarkCircle } from '@strapi/icons';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { getTranslation } from '../../../utils/translations';
 
@@ -37,7 +37,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
     publishConfirmation: { show: showPublishConfirmation, draftCount } = {},
     onPublishPromptDismissal,
   } = useCMEditViewDataManager();
-  const { goBack } = useHistory();
+  const navigate = useNavigate();
   const [showWarningUnpublish, setWarningUnpublish] = React.useState(false);
   const { formatMessage } = useIntl();
 
@@ -143,11 +143,11 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
             // event
             onClick={(e) => {
               e.preventDefault();
-              goBack();
+              navigate(-1);
             }}
             as={NavLink}
             // @ts-expect-error – DS issue with inferring props from the `as` prop.
-            to="/"
+            to=""
           >
             {formatMessage({
               id: 'global.back',

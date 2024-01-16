@@ -8,12 +8,10 @@ import {
 import produce from 'immer';
 import set from 'lodash/set';
 
-import { Admin } from '../pages/Admin';
-
 /**
  * TODO: this isn't great, and we really should focus on fixing this.
  */
-const PluginsInitializer = () => {
+const PluginsInitializer = ({ children }: { children: React.ReactNode }) => {
   const { plugins: appPlugins } = useStrapiApp();
   const [{ plugins }, dispatch] = React.useReducer<React.Reducer<State, Action>, State>(
     reducer,
@@ -72,7 +70,7 @@ const PluginsInitializer = () => {
     );
   }
 
-  return <Admin />;
+  return children;
 };
 
 /* -------------------------------------------------------------------------------------------------

@@ -171,10 +171,11 @@ const useContentManagerInitData = () => {
     });
   };
 
-  const isLoading = initialDataQuery.isLoading || contentTypeSettingsQuery.isLoading;
+  const isLoading =
+    initialDataQuery.isLoading || contentTypeSettingsQuery.isLoading || state.isLoading;
 
   useEffect(() => {
-    if (!isLoading && initialDataQuery.data && contentTypeSettingsQuery.data) {
+    if (initialDataQuery.data && contentTypeSettingsQuery.data) {
       formatData(
         initialDataQuery.data.components,
         initialDataQuery.data.contentTypes,
@@ -182,7 +183,7 @@ const useContentManagerInitData = () => {
         contentTypeSettingsQuery.data
       );
     }
-  }, [isLoading, initialDataQuery.data, contentTypeSettingsQuery.data]);
+  }, [initialDataQuery.data, contentTypeSettingsQuery.data]);
 
   return { ...state, isLoading };
 };

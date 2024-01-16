@@ -20,8 +20,8 @@ import { HomePage } from './HomePage';
 const App = () => {
   return (
     <Switch>
-        <Route path={\`/plugins/\${PLUGIN_ID}\`} component={HomePage} exact />
-        <Route component={AnErrorOccurred} />
+      <Route index element={<HomePage />} />
+      <Route path="*" element={<AnErrorOccurred />} />
     </Switch>
   );
 };
@@ -60,7 +60,7 @@ const TYPESCRIPT: TemplateFile[] = [
         export default {
           register(app: any) {
             app.addMenuLink({
-              to: \`/plugins/\${PluginIcon}\`,
+              to: \`plugins/\${PluginIcon}\`,
               icon: PluginIcon,
               intlLabel: {
                 id: \`\${PLUGIN_ID}.plugin.name\`,
@@ -183,7 +183,7 @@ const JAVASCRIPT: TemplateFile[] = [
             export default {
               register(app) {
                 app.addMenuLink({
-                  to: \`/plugins/\${PluginIcon}\`,
+                  to: \`plugins/\${PluginIcon}\`,
                   icon: PluginIcon,
                   intlLabel: {
                     id: \`\${PLUGIN_ID}.plugin.name\`,

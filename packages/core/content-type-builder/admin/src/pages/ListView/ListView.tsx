@@ -6,7 +6,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useRouteMatch } from 'react-router-dom';
+import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
 
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
@@ -25,9 +25,7 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const match = useRouteMatch<{ kind: string; currentUID: string }>(
-    '/plugins/content-type-builder/:kind/:currentUID'
-  );
+  const match = useMatch('/plugins/content-type-builder/:kind/:currentUID');
 
   const {
     onOpenModalAddComponentsToDZ,
@@ -112,14 +110,13 @@ const ListView = () => {
     });
   };
 
+  usePrompt({
+    when: hasModelBeenModified,
+    message: formatMessage({ id: getTrad('prompt.unsaved'), defaultMessage: 'Are you sure?' }),
+  });
+
   return (
     <>
-      <Prompt
-        message={(location) =>
-          location.hash === '#back' ? false : formatMessage({ id: getTrad('prompt.unsaved') })
-        }
-        when={hasModelBeenModified}
-      />
       <HeaderLayout
         id="title"
         primaryAction={

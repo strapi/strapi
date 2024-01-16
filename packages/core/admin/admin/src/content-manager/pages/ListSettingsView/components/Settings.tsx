@@ -11,30 +11,53 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useCollator } from '@strapi/helper-plugin';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { getTranslation } from '../../../utils/translations';
 
+import type { SettingsViewContentTypeLayout } from '../../../utils/layouts';
+
+interface SortOption {
+  value: string;
+  label: string;
+}
+
+interface SettingsProps {
+  contentTypeOptions: SettingsViewContentTypeLayout['options'];
+  modifiedData: {
+    settings: {
+      searchable: boolean;
+      filterable: boolean;
+      bulkable: boolean;
+      pageSize: number;
+      defaultSortBy: string;
+      defaultSortOrder: string;
+    };
+  } | null;
+  onChange: (e: { target: { name: string; value: string | number | boolean } }) => void;
+  sortOptions: SortOption[];
+}
+
 export const Settings = ({
   contentTypeOptions,
   modifiedData,
   onChange,
-  sortOptions: sortOptionsCE,
-}) => {
+  sortOptions: sortOptionsCE = [],
+}: SettingsProps) => {
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
   const sortOptions = useEnterprise(
     sortOptionsCE,
-    async () =>
-      (
+    async () => {
+      return (
         await import(
           '../../../../../../ee/admin/src/content-manager/pages/ListSettingsView/constants'
         )
-      ).REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME,
+      ).REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME;
+    },
     {
       combine(ceOptions, eeOption) {
         return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];
@@ -44,10 +67,10 @@ export const Settings = ({
 
       enabled: !!contentTypeOptions?.reviewWorkflows,
     }
-  );
+  ) as SortOption[];
 
   const sortOptionsSorted = sortOptions.sort((a, b) => formatter.compare(a.label, b.label));
-  const { settings } = modifiedData;
+  const { settings } = modifiedData ?? {};
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -77,7 +100,7 @@ export const Settings = ({
               defaultMessage: 'off',
             })}
             name="settings.searchable"
-            checked={settings.searchable}
+            checked={settings?.searchable}
           />
         </Box>
 
@@ -99,7 +122,7 @@ export const Settings = ({
               defaultMessage: 'off',
             })}
             name="settings.filterable"
-            checked={settings.filterable}
+            checked={settings?.filterable}
           />
         </Box>
 
@@ -121,7 +144,7 @@ export const Settings = ({
               defaultMessage: 'off',
             })}
             name="settings.bulkable"
-            checked={settings.bulkable}
+            checked={settings?.bulkable}
           />
         </Box>
       </Flex>
@@ -140,7 +163,7 @@ export const Settings = ({
             })}
             onChange={(value) => onChange({ target: { name: 'settings.pageSize', value } })}
             name="settings.pageSize"
-            value={modifiedData.settings.pageSize || ''}
+            value={settings?.pageSize || ''}
           >
             {[10, 20, 50, 100].map((pageSize) => (
               <Option key={pageSize} value={pageSize}>
@@ -157,7 +180,7 @@ export const Settings = ({
             })}
             onChange={(value) => onChange({ target: { name: 'settings.defaultSortBy', value } })}
             name="settings.defaultSortBy"
-            value={modifiedData.settings.defaultSortBy || ''}
+            value={settings?.defaultSortBy || ''}
           >
             {sortOptionsSorted.map(({ value, label }) => (
               <Option key={value} value={value}>
@@ -174,7 +197,7 @@ export const Settings = ({
             })}
             onChange={(value) => onChange({ target: { name: 'settings.defaultSortOrder', value } })}
             name="settings.defaultSortOrder"
-            value={modifiedData.settings.defaultSortOrder || ''}
+            value={settings?.defaultSortOrder || ''}
           >
             {['ASC', 'DESC'].map((order) => (
               <Option key={order} value={order}>
@@ -186,21 +209,4 @@ export const Settings = ({
       </Grid>
     </Flex>
   );
-};
-
-Settings.defaultProps = {
-  modifiedData: {},
-  sortOptions: [],
-};
-
-Settings.propTypes = {
-  contentTypeOptions: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object,
-  onChange: PropTypes.func.isRequired,
-  sortOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      value: PropTypes.string,
-      label: PropTypes.string,
-    }).isRequired
-  ),
 };

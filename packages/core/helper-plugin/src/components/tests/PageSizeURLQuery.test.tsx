@@ -7,16 +7,27 @@
 import * as React from 'react';
 
 import { render } from '@tests/utils';
-import { Route, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { PageSizeURLQuery } from '../PageSizeURLQuery';
 
 const trackUsage = jest.fn();
+
 jest.mock('../../features/Tracking', () => ({
   useTracking: () => ({
     trackUsage,
   }),
 }));
+
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return (
+    <ul>
+      <li>{location.search}</li>
+    </ul>
+  );
+};
 
 describe('PageSizeURLQuery', () => {
   it('renders', async () => {
@@ -60,22 +71,13 @@ describe('PageSizeURLQuery', () => {
 
   describe('interaction', () => {
     it('should change the value when the user selects a new value', async () => {
-      let testLocation: ReturnType<typeof useLocation> = null!;
-
       const { getByRole, user } = render(<PageSizeURLQuery />, {
         renderOptions: {
           wrapper({ children }) {
             return (
               <>
                 {children}
-                <Route
-                  path="*"
-                  render={({ location }) => {
-                    testLocation = location;
-
-                    return null;
-                  }}
-                />
+                <LocationDisplay />
               </>
             );
           },
@@ -88,7 +90,7 @@ describe('PageSizeURLQuery', () => {
 
       expect(getByRole('combobox')).toHaveTextContent('20');
 
-      const searchParams = new URLSearchParams(testLocation?.search);
+      const searchParams = new URLSearchParams(getByRole('listitem').textContent ?? '');
 
       expect(searchParams.has('pageSize')).toBe(true);
       expect(searchParams.get('pageSize')).toBe('20');

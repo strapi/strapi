@@ -7,7 +7,7 @@ import { Layout } from '@strapi/design-system';
 import { CheckPagePermissions, LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
@@ -42,17 +42,10 @@ const App = () => {
         <DataManagerProvider>
           <Layout sideNav={<ContentTypeBuilderNav />}>
             <Suspense fallback={<LoadingIndicatorPage />}>
-              <Switch>
-                <Route
-                  path={`/plugins/${pluginId}/content-types/create-content-type`}
-                  component={ListView}
-                />
-                <Route path={`/plugins/${pluginId}/content-types/:uid`} component={ListView} />
-                <Route
-                  path={`/plugins/${pluginId}/component-categories/:categoryUid`}
-                  component={RecursivePath}
-                />
-              </Switch>
+              <Routes>
+                <Route path="content-types/:uid" element={<ListView />} />
+                <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
+              </Routes>
             </Suspense>
           </Layout>
         </DataManagerProvider>

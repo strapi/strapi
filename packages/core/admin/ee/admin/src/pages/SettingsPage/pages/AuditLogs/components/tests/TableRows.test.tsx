@@ -1,12 +1,9 @@
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import { TableHeader, TableRows } from '../TableRows';
-
-const history = createMemoryHistory();
 
 const headers: TableHeader[] = [
   {
@@ -87,11 +84,11 @@ const onModalOpen = jest.fn();
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-      <Router history={history}>
+      <MemoryRouter>
         <table>
           <TableRows headers={headers} rows={rows} onOpenModal={onModalOpen} />
         </table>
-      </Router>
+      </MemoryRouter>
     </IntlProvider>
   </ThemeProvider>
 );
