@@ -68,6 +68,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/admin": "4.17.0",
     "@strapi/admin-test-utils": "4.17.0",
     "@strapi/pack-up": "workspace:*",
     "@strapi/strapi": "4.17.0",

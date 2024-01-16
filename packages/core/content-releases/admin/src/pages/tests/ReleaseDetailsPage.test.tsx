@@ -21,7 +21,9 @@ jest.mock('@strapi/helper-plugin', () => ({
  * Mocking the useDocument hook to avoid validation errors for testing
  */
 jest.mock('@strapi/admin/strapi-admin', () => ({
-  useDocument: jest.fn().mockReturnValue({ validationErrors: {} }),
+  unstable_useDocument: jest
+    .fn()
+    .mockReturnValue({ validate: jest.fn().mockReturnValue({ status: 'ok' }) }),
 }));
 
 describe('Releases details page', () => {

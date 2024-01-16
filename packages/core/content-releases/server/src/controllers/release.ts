@@ -1,6 +1,5 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
-import { Schema } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
 import type {

@@ -28,22 +28,26 @@ export function useDocument() {
    * But at the moment the store is populated only inside the content-manager by useContentManagerInitData
    * So, we need to receive the content type schema and the components to use the function
    */
-  const getValidationErrors = (
+  const validate = (
     entry: Entity & { [key: string]: Attribute.Any },
     { contentType, components, isCreatingEntry = false }: ValidateOptions
   ) => {
-    console.log('validating errors');
     // @ts-expect-error - @TODO: createYupSchema types need to be revisited
     const schema = createYupSchema(contentType, { components }, { isCreatingEntry });
 
     try {
       schema.validateSync(entry, { abortEarly: false });
 
-      return {};
+      return {
+        status: 'ok',
+      };
     } catch (error) {
-      return getYupInnerErrors(error as ValidationError);
+      return {
+        status: 'error',
+        errors: getYupInnerErrors(error as ValidationError),
+      };
     }
   };
 
-  return { getValidationErrors };
+  return { validate };
 }

@@ -34,13 +34,11 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
-  getYupInnerErrors,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
-import { ValidationError } from 'yup';
 
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -57,6 +55,7 @@ import {
   useDeleteReleaseMutation,
   releaseApi,
 } from '../services/release';
+import { useTypedDispatch } from '../store/hooks';
 
 import type {
   ReleaseAction,
@@ -135,19 +134,23 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema?: Schema.ContentType;
-  components?: { [key: Schema.Component['uid']]: Schema.Component };
+  schema: Schema.ContentType;
+  components: { [key: Schema.Component['uid']]: Schema.Component };
   entry: ReleaseActionEntry;
 }
 
 const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { getValidationErrors } = unstable_useDocument();
+  const { validate } = unstable_useDocument();
 
-  const validationErrors = getValidationErrors(entry, { contentType: schema, components });
+  const { status, errors } = validate(entry, {
+    contentType: schema,
+    components,
+    isCreatingEntry: false,
+  });
 
-  if (Object.keys(validationErrors).length > 0) {
-    const validationErrorsMessages = Object.entries(validationErrors)
+  if (status === 'error' && errors && Object.keys(errors).length > 0) {
+    const validationErrorsMessages = Object.entries(errors)
       .map(([key, value]) =>
         formatMessage(
           { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
@@ -232,7 +235,6 @@ export const ReleaseDetailsLayout = ({
     isLoading: isLoadingDetails,
     isError,
     error,
-    refetch,
   } = useGetReleaseQuery({ id: releaseId });
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
@@ -240,6 +242,7 @@ export const ReleaseDetailsLayout = ({
   const {
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
+  const dispatch = useTypedDispatch();
 
   const release = data?.data;
 
@@ -285,7 +288,7 @@ export const ReleaseDetailsLayout = ({
   };
 
   const handleRefresh = () => {
-    refetch();
+    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
   };
 
   if (isLoadingDetails) {
@@ -528,8 +531,8 @@ const ReleaseDetailsBody = () => {
 
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
-  const contentTypes = releaseMeta?.contentTypes;
-  const components = releaseMeta?.components;
+  const contentTypes = releaseMeta?.contentTypes || {};
+  const components = releaseMeta?.components || {};
 
   if (isReleaseError || !release) {
     const errorsArray = [];
@@ -736,9 +739,9 @@ const ReleaseDetailsBody = () => {
                             <Flex justifyContent="flex-end">
                               <ReleaseActionMenu.Root>
                                 <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                  contentTypeUid={contentType}
+                                  contentTypeUid={contentType.uid}
                                   entryId={entry.id}
-                                  locale={locale}
+                                  locale={locale?.code}
                                 />
                                 <ReleaseActionMenu.DeleteReleaseActionItem
                                   releaseId={release.id}

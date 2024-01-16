@@ -244,19 +244,6 @@ describe('Release controller', () => {
       await releaseController.findOne(ctx);
       expect(ctx.body.data.actions.meta).toEqual({
         count: 2,
-        contentTypes: {
-          'api::contentTypeA.contentTypeA': {
-            uid: 'api::contentTypeA.contentTypeA',
-          },
-          'api::contentTypeB.contentTypeB': {
-            uid: 'api::contentTypeB.contentTypeB',
-          },
-        },
-        components: {
-          'component.component': {
-            uid: 'component.component',
-          },
-        },
       });
     });
   });
