@@ -6,6 +6,9 @@ export type Author = Attribute.GetAll<typeof AUTHOR_UID> & { documentId: string;
 export const ARTICLE_UID = 'api::article.article';
 export type Article = Attribute.GetAll<typeof ARTICLE_UID> & { documentId: string; id: number };
 
+export const CATEGORY_UID = 'api::category.category';
+export type Category = Attribute.GetAll<typeof CATEGORY_UID> & { documentId: string; id: number };
+
 export const findArticleDb = async (where: any) => {
   return (await strapi.query(ARTICLE_UID).findOne({ where })) as Article | undefined;
 };

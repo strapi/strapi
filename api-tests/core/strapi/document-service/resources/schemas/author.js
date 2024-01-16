@@ -16,7 +16,6 @@ module.exports = {
   attributes: {
     name: {
       type: 'string',
-      unique: true,
       pluginOptions: {
         i18n: {
           localized: true,

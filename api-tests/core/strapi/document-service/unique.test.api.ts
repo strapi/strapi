@@ -1,15 +1,18 @@
 import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
-import { AUTHOR_UID } from './utils';
+import { CATEGORY_UID } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
   let strapi: LoadedStrapi;
 
+  let testName;
+  let createdCategory;
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
     strapi = testUtils.strapi;
+    testName = testUtils.data.category[0].name;
   });
 
   afterAll(async () => {
@@ -17,43 +20,54 @@ describe('Document Service', () => {
   });
 
   describe('Unique fields', () => {
-    it('tests document unique field values across the same publication state', async () => {
-      const valueToTest = 'Author';
-      const author = await strapi.documents(AUTHOR_UID).create({
-        data: { name: valueToTest },
-      });
-
-      expect(author).toMatchObject({
-        name: valueToTest,
-        publishedAt: null,
-      });
-
-      // At this point we should not be able to repeat the unique field value as there is a draft author using the same value
+    it('cannot create a document with a duplicated unique field value in the same publication state', async () => {
       expect(async () => {
-        await strapi.documents(AUTHOR_UID).create({
-          data: { name: valueToTest },
+        await strapi.documents(CATEGORY_UID).create({
+          data: { name: testName },
         });
       }).rejects.toThrow();
+    });
 
-      // Publish the original author
-      const publishRes = strapi.documents(AUTHOR_UID).publish(author.documentId);
+    it('cannot update a document to have a duplicated unique field value in the same publication state', async () => {
+      const uniqueName = `${testName}-1`;
+
+      const category = await strapi.documents(CATEGORY_UID).create({
+        data: { name: uniqueName },
+      });
+      createdCategory = category;
+
+      expect(async () => {
+        await strapi.documents(CATEGORY_UID).update(category.documentId, {
+          data: { name: testName },
+        });
+      }).rejects.toThrow();
+    });
+
+    it('cannot publish a document to have a duplicated unique field value in the same publication state', async () => {
+      const updatedName = `${createdCategory.name}-1`;
+      // Update the previously created category to have a new name
+      const category = await strapi.documents(CATEGORY_UID).update(createdCategory.documentId, {
+        data: { name: updatedName },
+      });
+
+      // Publish that category
+      const publishRes = strapi.documents(CATEGORY_UID).publish(category.documentId);
       await expect(publishRes).resolves.not.toThrowError();
 
-      // Now we have both a draft and a published author with the same unique field value
-      // We should be able to create a new author with a new unique field value and publish it
-      const newValueToTest = `${valueToTest}-1`;
-
-      const author2 = await strapi.documents(AUTHOR_UID).create({
-        data: { name: newValueToTest },
+      // Reset the name of the draft category
+      await strapi.documents(CATEGORY_UID).update(createdCategory.documentId, {
+        data: { name: createdCategory.name },
       });
 
-      expect(author2).toMatchObject({
-        name: newValueToTest,
-        publishedAt: null,
+      // Now we can create a new category with the same name as the published category
+      // When we try to publish it, it should throw an error
+      const newCategory = await strapi.documents(CATEGORY_UID).create({
+        data: { name: updatedName },
       });
 
-      const publishRes2 = strapi.documents(AUTHOR_UID).publish(author2.documentId);
-      await expect(publishRes2).resolves.not.toThrowError();
+      expect(async () => {
+        await strapi.documents(CATEGORY_UID).publish(newCategory.documentId);
+      }).rejects.toThrow();
     });
   });
 });
