@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -15,10 +15,8 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   ConfirmDialog,
   Link,
-  LoadingIndicatorPage,
   useFetchClient,
   useNotification,
   useTracking,
@@ -29,64 +27,47 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 
-import { useTypedSelector } from '../../../core/store/hooks';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
-import { formatLayoutForSettingsView } from '../../utils/layouts';
-import { getTranslation } from '../../utils/translations';
+import { useTypedSelector } from '../../../../../core/store/hooks';
+import { getTranslation } from '../../../../utils/translations';
+import { DisplayedFields } from '../DisplayedFields';
+import { FormModal } from '../FormModal';
+import { LayoutDndProvider } from '../LayoutDndProvider';
 
-import DisplayedFields from './components/DisplayedFields';
-import ModalForm from './components/FormModal';
-import { LayoutDndProvider } from './components/LayoutDndProvider';
-import init from './init';
-import reducer, { initialState } from './reducer';
-import { unformatLayout } from './utils/layout';
+import { init } from './init';
+import { reducer, initialState } from './reducer';
 
-const EditSettingsView = () => {
-  const { slug } = useParams();
-  const { isLoading, layout, updateLayout } = useContentTypeLayout(slug);
+import type {
+  SettingsViewComponentLayout,
+  SettingsViewContentTypeLayout,
+} from '../../../../utils/layouts';
+import type { EditLayout, Layout } from '../../utils/layout';
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { AxiosError, AxiosResponse } from 'axios';
 
-  const { rawContentTypeLayout: mainLayout, rawComponentsLayouts: components } =
-    React.useMemo(() => {
-      let rawContentTypeLayout = null;
-      let rawComponentsLayouts = null;
+interface SettingsFormProps {
+  layout: SettingsViewContentTypeLayout;
+  components: Record<string, SettingsViewComponentLayout>;
+  updateLayout?: () => void;
+}
 
-      if (layout?.contentType) {
-        rawContentTypeLayout = formatLayoutForSettingsView(layout.contentType);
-      }
+const SettingsForm = ({ layout, components, updateLayout }: SettingsFormProps) => {
+  const match = useMatch('/content-manager/:modelType/:model/configurations/edit');
+  const { modelType, model: slug = '' } = match?.params ?? {};
+  const [reducerState, dispatch] = React.useReducer(reducer, initialState, () =>
+    init(initialState, layout, components)
+  );
 
-      if (layout?.components) {
-        rawComponentsLayouts = Object.keys(layout.components).reduce((acc, current) => {
-          acc[current] = formatLayoutForSettingsView(layout.components[current]);
-
-          return acc;
-        }, {});
-      }
-
-      return { rawContentTypeLayout, rawComponentsLayouts };
-    }, [layout]);
-
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
-
-  React.useEffect(() => {
-    if (mainLayout) {
-      dispatch({
-        type: 'SET_DATA',
-        data: init(initialState, mainLayout, components),
-      });
-    }
-  }, [mainLayout, components]);
-
-  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  const [isDraggingSibling, setIsDraggingSibling] = React.useState(false);
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const navigate = useNavigate();
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isModalFormOpen, setIsModalFormOpen] = React.useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
-  const modelName = mainLayout?.info?.displayName;
+  const modelName = layout?.info?.displayName;
   const attributes = modifiedData?.attributes ?? {};
   const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
   const { put } = useFetchClient();
@@ -117,7 +98,11 @@ const EditSettingsView = () => {
     .filter((attr) => displayedFields.findIndex((el) => el.name === attr) === -1)
     .sort();
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleChange = ({
+    target: { name, value },
+  }: {
+    target: { name: string; value: string | boolean | null | number };
+  }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
@@ -133,7 +118,11 @@ const EditSettingsView = () => {
     setIsConfirmDialogOpen((prev) => !prev);
   };
 
-  const handleMetaChange = ({ target: { name, value } }) => {
+  const handleMetaChange = ({
+    target: { name, value },
+  }: {
+    target: { name: string; value: string | boolean | number };
+  }) => {
     dispatch({
       type: 'ON_CHANGE_META',
       keys: name.split('.'),
@@ -141,15 +130,14 @@ const EditSettingsView = () => {
     });
   };
 
-  const handleSizeChange = ({ name, value }) => {
+  const handleSizeChange = ({ value }: { value: number }) => {
     dispatch({
       type: 'ON_CHANGE_SIZE',
-      name,
       value,
     });
   };
 
-  const handleMetaSubmit = (e) => {
+  const handleMetaSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     dispatch({
       type: 'SUBMIT_META_FORM',
@@ -157,19 +145,28 @@ const EditSettingsView = () => {
     handleToggleModal();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     toggleConfirmDialog();
   };
 
-  const submitMutation = useMutation(
+  const submitMutation = useMutation<
+    AxiosResponse<Contracts.ContentTypes.UpdateContentTypeConfiguration.Response>,
+    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkPublish.Response, 'error'>>>,
+    Contracts.ContentTypes.UpdateContentTypeConfiguration.Request['body']
+  >(
     (body) => {
-      return put(`/content-manager/content-types/${slug}/configuration`, body);
+      return put(
+        `/content-manager/${
+          modelType !== 'components' ? 'content-types' : modelType
+        }/${slug}/configuration`,
+        body
+      );
     },
     {
-      onSuccess({ data }) {
+      onSuccess() {
         if (updateLayout) {
-          updateLayout(data.data);
+          updateLayout();
         }
         dispatch({
           type: 'SUBMIT_SUCCEEDED',
@@ -185,7 +182,12 @@ const EditSettingsView = () => {
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleConfirm = () => {
+    if (!modifiedData) {
+      return;
+    }
+
     const { layouts, metadatas, settings } = cloneDeep(modifiedData);
+
     submitMutation.mutate({
       layouts: {
         ...layouts,
@@ -196,23 +198,12 @@ const EditSettingsView = () => {
     });
   };
 
-  const handleMoveRelation = (fromIndex, toIndex) => {
-    dispatch({
-      type: 'MOVE_RELATION',
-      fromIndex,
-      toIndex,
-    });
-  };
-
-  const handleMoveField = (fromIndex, toIndex) => {
-    dispatch({
-      type: 'MOVE_FIELD',
-      fromIndex,
-      toIndex,
-    });
-  };
-
-  const moveItem = (dragIndex, hoverIndex, dragRowIndex, hoverRowIndex) => {
+  const moveItem = (
+    dragIndex: number,
+    hoverIndex: number,
+    dragRowIndex: number,
+    hoverRowIndex: number
+  ) => {
     // Same row = just reorder
     if (dragRowIndex === hoverRowIndex) {
       dispatch({
@@ -232,7 +223,7 @@ const EditSettingsView = () => {
     }
   };
 
-  const moveRow = (fromIndex, toIndex) => {
+  const moveRow = (fromIndex: number, toIndex: number) => {
     dispatch({
       type: 'MOVE_ROW',
       fromIndex,
@@ -240,24 +231,18 @@ const EditSettingsView = () => {
     });
   };
 
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
   return (
     <LayoutDndProvider
-      isContentTypeView
+      isContentTypeView={modelType === 'collection-types'}
       attributes={attributes}
       modifiedData={modifiedData}
-      slug={slug}
+      slug={slug ?? ''}
       componentLayouts={componentLayouts}
       selectedField={metaToEdit}
       fieldForm={metaForm}
-      onMoveRelation={handleMoveRelation}
-      onMoveField={handleMoveField}
       moveRow={moveRow}
       moveItem={moveItem}
-      setEditFieldToSelect={(name) => {
+      setEditFieldToSelect={(name: string) => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',
           name,
@@ -368,7 +353,6 @@ const EditSettingsView = () => {
                 </Typography>
 
                 <DisplayedFields
-                  attributes={attributes}
                   editLayout={editLayout}
                   fields={editLayoutFields}
                   onAddField={(field) => {
@@ -403,13 +387,14 @@ const EditSettingsView = () => {
           />
         </form>
         {isModalFormOpen && (
-          <ModalForm
+          <FormModal
             onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
             onMetaChange={handleMetaChange}
             onSizeChange={handleSizeChange}
             type={attributes?.[metaToEdit]?.type ?? ''}
-            customFieldUid={attributes?.[metaToEdit]?.customField ?? ''}
+            // @ts-expect-error - customField is not in the type
+            customFieldUid={attributes?.[metaToEdit].customField ?? ''}
           />
         )}
       </Main>
@@ -417,16 +402,12 @@ const EditSettingsView = () => {
   );
 };
 
-const ProtectedEditSettingsView = () => {
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.contentManager?.collectionTypesConfigurations
-  );
+const unformatLayout = (arr: Layout): EditLayout => {
+  return arr.reduce<EditLayout>((acc, current) => {
+    const currentRow = current.rowContent.filter((content) => content.name !== '_TEMP_');
 
-  return (
-    <CheckPagePermissions permissions={permissions}>
-      <EditSettingsView />
-    </CheckPagePermissions>
-  );
+    return acc.concat([currentRow]);
+  }, []);
 };
 
-export { ProtectedEditSettingsView, EditSettingsView };
+export { SettingsForm };

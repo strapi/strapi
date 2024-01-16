@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Button,
@@ -11,7 +11,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -19,7 +18,9 @@ import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
 import { getTranslation } from '../../../utils/translations';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
-import ModalForm from './ModalForm';
+import { ModalForm } from './ModalForm';
+
+import type { Attribute } from '@strapi/types';
 
 const HeaderContainer = styled(Flex)`
   svg {
@@ -29,28 +30,32 @@ const HeaderContainer = styled(Flex)`
   }
 `;
 
-const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type, customFieldUid }) => {
+interface FormModalProps {
+  onToggle: () => void;
+  onMetaChange: (e: { target: { name: string; value: string | boolean | number } }) => void;
+  onSizeChange: (e: { name: string; value: number }) => void;
+  onSubmit: React.FormEventHandler<HTMLFormElement>;
+  type: Attribute.Kind;
+  customFieldUid?: string;
+}
+
+const FormModal = ({
+  onToggle,
+  onMetaChange,
+  onSizeChange,
+  onSubmit,
+  type,
+  customFieldUid,
+}: FormModalProps) => {
   const { selectedField } = useLayoutDnd();
   const { formatMessage } = useIntl();
-
-  const getAttrType = () => {
-    if (type === 'timestamp') {
-      return 'date';
-    }
-
-    if (['decimal', 'float', 'integer', 'biginter'].includes(type)) {
-      return 'number';
-    }
-
-    return type;
-  };
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
       <form onSubmit={onSubmit}>
         <ModalHeader>
           <HeaderContainer>
-            <FieldTypeIcon type={getAttrType()} customFieldUid={customFieldUid} />
+            <FieldTypeIcon type={type} customFieldUid={customFieldUid} />
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {
@@ -83,18 +88,4 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type, custo
     </ModalLayout>
   );
 };
-
-FormModal.defaultProps = {
-  customFieldUid: null,
-};
-
-FormModal.propTypes = {
-  customFieldUid: PropTypes.string,
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  onMetaChange: PropTypes.func.isRequired,
-  onSizeChange: PropTypes.func.isRequired,
-  type: PropTypes.string.isRequired,
-};
-
-export default FormModal;
+export { FormModal };

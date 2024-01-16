@@ -1,18 +1,39 @@
-const getRowSize = (arr) => arr.reduce((sum, value) => sum + value.size, 0);
+import type { SettingsViewLayout } from '../../../utils/layouts';
 
-const createLayout = (arr) => {
-  return arr.reduce((acc, current, index) => {
+type EditLayout = SettingsViewLayout['layouts']['edit'];
+type EditLayoutRow = EditLayout[0];
+
+type LayoutRow = {
+  rowId: number;
+  rowContent: EditLayoutRow;
+};
+
+type Layout = Array<LayoutRow>;
+
+const getRowSize = (arr: EditLayoutRow) =>
+  arr.reduce(
+    (
+      sum: number,
+      value: {
+        size: number;
+      }
+    ) => sum + value.size,
+    0
+  );
+
+const createLayout = (arr: EditLayout): Layout => {
+  return arr.reduce((acc, current, index: number) => {
     const row = { rowId: index, rowContent: current };
 
     return acc.concat(row);
-  }, []);
+  }, [] as Layout);
 };
 
-const formatLayout = (arr) => {
+const formatLayout = (arr: Layout) => {
   return arr
     .reduce((acc, current) => {
-      let toPush = [];
-      const currentRow = current.rowContent.reduce((acc2, curr) => {
+      let toPush: EditLayoutRow = [];
+      const currentRow = current.rowContent.reduce((acc2: EditLayoutRow, curr) => {
         const acc2Size = getRowSize(acc2);
 
         if (curr.name === '_TEMP_') {
@@ -27,13 +48,8 @@ const formatLayout = (arr) => {
 
         return acc2;
       }, []);
-      const rowId =
-        acc.length === 0
-          ? 0
-          : Math.max.apply(
-              Math,
-              acc.map((o) => o.rowId)
-            ) + 1;
+
+      const rowId = acc.length === 0 ? 0 : Math.max(...acc.map((o) => o.rowId)) + 1;
 
       const currentRowSize = getRowSize(currentRow);
 
@@ -55,7 +71,7 @@ const formatLayout = (arr) => {
       }
 
       return acc;
-    }, [])
+    }, [] as Layout)
     .filter((row) => row.rowContent.length > 0)
     .filter((row) => {
       if (row.rowContent.length === 1) {
@@ -66,16 +82,8 @@ const formatLayout = (arr) => {
     });
 };
 
-const unformatLayout = (arr) => {
-  return arr.reduce((acc, current) => {
-    const currentRow = current.rowContent.filter((content) => content.name !== '_TEMP_');
-
-    return acc.concat([currentRow]);
-  }, []);
-};
-
-const getFieldSize = (name, layouts = []) => {
-  return layouts.reduce((acc, { rowContent }) => {
+const getFieldSize = (name: string, layouts: Layout = []): number | null => {
+  return layouts.reduce((acc: number | null, { rowContent }) => {
     const size = rowContent.find((row) => row.name === name)?.size ?? null;
 
     if (size) {
@@ -86,7 +94,7 @@ const getFieldSize = (name, layouts = []) => {
   }, null);
 };
 
-const setFieldSize = (name, size, layouts = []) => {
+const setFieldSize = (name: string, size: number, layouts: Layout = []) => {
   return layouts.map((row) => {
     row.rowContent = row.rowContent.map((column) => {
       if (column.name === name) {
@@ -103,4 +111,6 @@ const setFieldSize = (name, size, layouts = []) => {
   });
 };
 
-export { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize, unformatLayout };
+export { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize };
+
+export type { Layout, EditLayout };

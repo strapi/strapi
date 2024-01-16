@@ -1,15 +1,15 @@
-import React from 'react';
+import * as React from 'react';
 
 import { fireEvent } from '@testing-library/react';
 import { render } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { EditSettingsView } from '../index';
+import { EditSettingsView } from '../EditSettingsView';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
-  CheckPermissions: ({ children }) => <div>{children}</div>,
+  CheckPermissions: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const EDIT_ATTRIBUTES = [
@@ -114,7 +114,7 @@ describe('EditSettingsView', () => {
 
     await findByRole('heading', { name: 'Configure the view - Address' });
 
-    expect(queryByRole('button', { name: 'Delete json' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Delete json' })).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Delete json' }));
 

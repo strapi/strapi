@@ -36,7 +36,11 @@ const CustomLink = styled(Flex)`
   }
 `;
 
-const DynamicZoneList = ({ components }) => {
+interface DynamicZoneListProps {
+  components: string[];
+}
+
+const DynamicZoneList = ({ components }: DynamicZoneListProps) => {
   const { componentLayouts } = useLayoutDnd();
 
   return (
@@ -69,8 +73,4 @@ const DynamicZoneList = ({ components }) => {
   );
 };
 
-DynamicZoneList.propTypes = {
-  components: PropTypes.arrayOf(PropTypes.string).isRequired,
-};
-
-export default DynamicZoneList;
+export { DynamicZoneList };

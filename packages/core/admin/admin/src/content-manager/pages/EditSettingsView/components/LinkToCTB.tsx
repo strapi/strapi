@@ -1,11 +1,3 @@
-/**
- *
- * EditViewButton
- *
- */
-
-import React from 'react';
-
 import { CheckPermissions, LinkButton, useTracking } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import get from 'lodash/get';
@@ -41,6 +33,7 @@ const LinkToCTB = () => {
   return (
     <CheckPermissions permissions={permissions}>
       <LinkButton
+        // @ts-expect-error – Remove deprecated component
         to={`${baseUrl}/${suffixUrl}`}
         onClick={handleClick}
         size="S"
@@ -56,4 +49,4 @@ const LinkToCTB = () => {
   );
 };
 
-export default LinkToCTB;
+export { LinkToCTB };

@@ -1,4 +1,4 @@
-import createPossibleMainFieldsForModelsAndComponents from '../createPossibleMainFieldsForModelsAndComponents';
+import { createPossibleMainFieldsForModelsAndComponents } from '../createPossibleMainFieldsForModelsAndComponents';
 
 describe('CONTENT MANAGER | containers | Main | utils', () => {
   describe('createPossibleMainFieldsForModelsAndComponents', () => {
@@ -51,7 +51,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
             updatedAt: { type: 'timestamp' },
           },
         },
-      ];
+      ] as any;
 
       const expected = {
         'api::address.address': [

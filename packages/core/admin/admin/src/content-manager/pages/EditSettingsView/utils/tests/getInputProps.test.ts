@@ -1,4 +1,4 @@
-import getInputProps from '../getInputProps';
+import { getInputProps } from '../getInputProps';
 
 describe('CONTENT MANAGER | containers | EditSettingsView | utils | getInputProps', () => {
   it('should return the correct label and type for the description meta', () => {

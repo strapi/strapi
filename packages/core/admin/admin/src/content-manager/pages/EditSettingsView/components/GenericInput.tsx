@@ -1,15 +1,29 @@
-import React from 'react';
-
 import { Option, Select, TextInput, ToggleInput } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) => {
+interface GenericInputProps extends Record<string, unknown> {
+  type: string;
+  options?: string[];
+  onChange: (e: { target: { name: string; value: string | boolean | number } }) => void;
+  value: string | boolean | string[];
+  name: string;
+  label: string;
+}
+
+// TODO: refactor this to be actually typesafe instead of casting
+const GenericInput = ({
+  type,
+  options,
+  onChange,
+  value,
+  name,
+  ...inputProps
+}: GenericInputProps) => {
   const { formatMessage } = useIntl();
 
   switch (type) {
     case 'text': {
-      return <TextInput onChange={onChange} value={value} name={name} {...inputProps} />;
+      return <TextInput onChange={onChange} value={value as string} name={name} {...inputProps} />;
     }
     case 'bool': {
       return (
@@ -17,7 +31,7 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
           onChange={(e) => {
             onChange({ target: { name, value: e.target.checked } });
           }}
-          checked={value}
+          checked={value as boolean}
           name={name}
           onLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.on-label',
@@ -34,12 +48,12 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
     case 'select': {
       return (
         <Select
-          value={value}
+          value={value as string}
           name={name}
           onChange={(value) => onChange({ target: { name, value } })}
           {...inputProps}
         >
-          {options.map((option) => (
+          {options?.map((option) => (
             <Option key={option} value={option}>
               {option}
             </Option>
@@ -52,16 +66,4 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
   }
 };
 
-GenericInput.defaultProps = {
-  options: undefined,
-};
-
-GenericInput.propTypes = {
-  type: PropTypes.string.isRequired,
-  options: PropTypes.arrayOf(PropTypes.string),
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
-  name: PropTypes.string.isRequired,
-};
-
-export default GenericInput;
+export { GenericInput };

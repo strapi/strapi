@@ -1,11 +1,4 @@
-import {
-  createLayout,
-  formatLayout,
-  getFieldSize,
-  getRowSize,
-  setFieldSize,
-  unformatLayout,
-} from '../layout';
+import { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize } from '../layout';
 
 describe('Content Manager | containers | EditSettingsView | utils | layout', () => {
   describe('createLayout', () => {
@@ -136,7 +129,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
           },
         ],
       },
-    ];
+    ] as any;
 
     const expected = [
       {
@@ -172,7 +165,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
           },
         ],
       },
-    ];
+    ] as any;
 
     const expected = [
       {
@@ -201,53 +194,6 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
       ];
 
       expect(getRowSize(row)).toBe(15);
-    });
-  });
-
-  describe('unformatLayout', () => {
-    it('Should return an array containing the displayed fields', () => {
-      const data = [
-        {
-          rowId: 0,
-          rowContent: [
-            {
-              name: 'name',
-              size: 6,
-            },
-            {
-              name: 'test',
-              size: 4,
-            },
-            {
-              name: '_TEMP_',
-              size: 2,
-            },
-          ],
-        },
-
-        {
-          rowId: 1,
-          rowContent: [
-            {
-              name: 'name1',
-              size: 4,
-            },
-            {
-              name: '_TEMP_',
-              size: 8,
-            },
-          ],
-        },
-      ];
-      const expected = [
-        [
-          { name: 'name', size: 6 },
-          { name: 'test', size: 4 },
-        ],
-        [{ name: 'name1', size: 4 }],
-      ];
-
-      expect(unformatLayout(data)).toEqual(expected);
     });
   });
 });

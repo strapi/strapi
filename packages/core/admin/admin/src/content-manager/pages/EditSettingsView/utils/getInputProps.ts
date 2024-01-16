@@ -1,6 +1,6 @@
 import { getTranslation } from '../../../utils/translations';
 
-const getInputProps = (fieldName) => {
+const getInputProps = (fieldName: string | null) => {
   let type;
 
   switch (fieldName) {
@@ -27,4 +27,4 @@ const getInputProps = (fieldName) => {
   return { type, label: { id: labelId } };
 };
 
-export default getInputProps;
+export { getInputProps };

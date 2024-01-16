@@ -1,8 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
+import * as React from 'react';
 
 import { GridItem, Option, Select } from '@strapi/design-system';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -12,7 +11,7 @@ import { selectSchemas } from '../../App';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 
-import GenericInput from './GenericInput';
+import { GenericInput } from './GenericInput';
 
 const FIELD_SIZES = [
   [4, '33%'],
@@ -21,13 +20,18 @@ const FIELD_SIZES = [
   [12, '100%'],
 ];
 
-const ModalForm = ({ onMetaChange, onSizeChange }) => {
+interface ModalFormProps {
+  onMetaChange: (e: { target: { name: string; value: string | boolean | number } }) => void;
+  onSizeChange: (e: { name: string; value: number }) => void;
+}
+
+const ModalForm = ({ onMetaChange, onSizeChange }: ModalFormProps) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
   const schemas = useSelector(selectSchemas);
   const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
 
-  const formToDisplay = useMemo(() => {
+  const formToDisplay = React.useMemo(() => {
     if (!selectedField) {
       return [];
     }
@@ -37,12 +41,12 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     return Object.keys(associatedMetas).filter((meta) => meta !== 'visible');
   }, [selectedField, modifiedData]);
 
-  const componentsAndModelsPossibleMainFields = useMemo(() => {
+  const componentsAndModelsPossibleMainFields = React.useMemo(() => {
     return createPossibleMainFieldsForModelsAndComponents(schemas);
   }, [schemas]);
 
-  const getSelectedItemSelectOptions = useCallback(
-    (formType) => {
+  const getSelectedItemSelectOptions = React.useCallback(
+    (formType: string) => {
       if (formType !== 'relation' && formType !== 'component') {
         return [];
       }
@@ -104,8 +108,14 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   });
 
   // Check for a custom input provided by a custom field, or use the default one for that type
-  const { type, customField } = attributes[selectedField];
-  const { isResizable } = fieldSizes[customField] ?? fieldSizes[type];
+  const attribute = attributes[selectedField];
+  let isResizable: boolean;
+
+  if ('customField' in attribute && typeof attribute.customField === 'string') {
+    isResizable = fieldSizes[attribute.customField].isResizable;
+  } else {
+    isResizable = fieldSizes[attribute.type].isResizable;
+  }
 
   return (
     <>
@@ -116,7 +126,8 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
             value={fieldForm?.size}
             name="size"
             onChange={(value) => {
-              onSizeChange({ name: selectedField, value });
+              // TODO: refactor this to be actually typesafe instead of casting
+              onSizeChange({ name: selectedField, value: value as number });
             }}
             label={formatMessage({
               id: getTranslation('containers.SettingPage.editSettings.size.label'),
@@ -135,9 +146,4 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   );
 };
 
-ModalForm.propTypes = {
-  onMetaChange: PropTypes.func.isRequired,
-  onSizeChange: PropTypes.func.isRequired,
-};
-
-export default ModalForm;
+export { ModalForm };

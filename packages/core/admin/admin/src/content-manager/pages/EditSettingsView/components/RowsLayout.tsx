@@ -1,11 +1,20 @@
-import React from 'react';
-
 import { Grid } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
-import RowItemsLayout from './RowItemsLayout';
+import { RowItemsLayout } from './RowItemsLayout';
 
-const RowsLayout = ({ row, onRemoveField, rowIndex }) => {
+interface RowsLayoutProps {
+  onRemoveField: (rowIndex: number, index: number) => void;
+  row: {
+    rowId: number;
+    rowContent: {
+      name: string;
+      size: number;
+    }[];
+  };
+  rowIndex: number;
+}
+
+const RowsLayout = ({ row, onRemoveField, rowIndex }: RowsLayoutProps) => {
   return (
     <Grid>
       {row.rowContent.map((rowItem, index) => {
@@ -25,10 +34,4 @@ const RowsLayout = ({ row, onRemoveField, rowIndex }) => {
   );
 };
 
-RowsLayout.propTypes = {
-  onRemoveField: PropTypes.func.isRequired,
-  row: PropTypes.object.isRequired,
-  rowIndex: PropTypes.number.isRequired,
-};
-
-export default RowsLayout;
+export { RowsLayout };
