@@ -338,7 +338,6 @@ module.exports = {
       }
     }
 
-    console.log('params', params);
     const newUser = {
       ...params,
       role: role.id,
@@ -351,7 +350,6 @@ module.exports = {
 
     const sanitizedUser = await sanitizeUser(user, ctx);
 
-    console.log('sanitizedUser', sanitizedUser);
     if (settings.email_confirmation) {
       try {
         await getService('user').sendConfirmationEmail(sanitizedUser);

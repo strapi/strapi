@@ -15,7 +15,7 @@ const mockStrapi = {
     get: jest.fn(() => {
       return {
         register: {
-          allowedFields: [],
+          // only set allowedFields on a per-test basis
         },
       };
     }),
@@ -74,7 +74,7 @@ describe('user-permissions auth', () => {
   });
 
   describe('register', () => {
-    test('accepts valid body', async () => {
+    test('accepts valid registration', async () => {
       const ctx = {
         state: {
           auth: {},
@@ -89,7 +89,8 @@ describe('user-permissions auth', () => {
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
 
-    test("throws ValidationError when given fields that aren't allowed", async () => {
+    test('throws ValidationError when passed fields not in allowedFields', async () => {
+      // without allowedFields
       const ctx = {
         state: {
           auth: {},
@@ -104,6 +105,22 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
+      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
+
+      // with allowedFields []
+      global.strapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn(() => {
+            return {
+              register: {
+                allowedFields: [],
+              },
+            };
+          }),
+        },
+      };
+
       await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
 
       expect(ctx.send).toHaveBeenCalledTimes(0);
@@ -122,6 +139,7 @@ describe('user-permissions auth', () => {
           }),
         },
       };
+
       const ctx = {
         state: {
           auth: {},
