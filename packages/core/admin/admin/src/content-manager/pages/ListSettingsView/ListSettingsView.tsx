@@ -227,27 +227,11 @@ const ListSettingsView = () => {
     return <LoadingIndicatorPage />;
   }
 
-  const getBackUrl = () => {
-    const {
-      settings: { pageSize, defaultSortBy, defaultSortOrder },
-      kind,
-      uid,
-    } = initialData ?? { settings: {} };
-
-    const queryParams = stringify(
-      {
-        page: 1,
-        pageSize,
-        sort: `${defaultSortBy}:${defaultSortOrder}`,
-        plugins: query.plugins,
-      },
-      {
-        encode: false,
-      }
-    );
-
-    return `/content-manager/${kind}/${uid}?${queryParams}`;
-  };
+  const {
+    settings: { pageSize, defaultSortBy, defaultSortOrder },
+    kind,
+    uid,
+  } = initialData ?? { settings: {} };
 
   return (
     <Layout>
@@ -258,7 +242,20 @@ const ListSettingsView = () => {
               <Link
                 startIcon={<ArrowLeft />}
                 // @ts-expect-error invalid typings
-                to={getBackUrl()}
+                to={{
+                  pathname: `/content-manager/${kind}/${uid}`,
+                  search: stringify(
+                    {
+                      page: 1,
+                      pageSize,
+                      sort: `${defaultSortBy}:${defaultSortOrder}`,
+                      plugins: query.plugins,
+                    },
+                    {
+                      encode: false,
+                    }
+                  ),
+                }}
                 id="go-back"
                 as={NavLink}
               >

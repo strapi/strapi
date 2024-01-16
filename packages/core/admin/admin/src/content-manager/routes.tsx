@@ -1,14 +1,17 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { Navigate, RouteObject, useParams } from 'react-router-dom';
+import { UID } from '@strapi/types';
+import { Navigate as ReactRouterNavigate, RouteObject, useLoaderData } from 'react-router-dom';
 
-const RedirectToCollectionTypes = ({
-  type = 'collection-types',
-}: {
-  type: 'collection-types' | 'single-types';
-}) => {
-  const { slug } = useParams();
+const Navigate = () => {
+  const pathname = useLoaderData() as string;
 
-  return <Navigate to={`/content-manager/${type}/${slug}`} />;
+  return (
+    <ReactRouterNavigate
+      to={{
+        pathname,
+      }}
+    />
+  );
 };
 
 const routes: RouteObject[] = [
@@ -29,11 +32,21 @@ const routes: RouteObject[] = [
        */
       {
         path: 'collectionType/:slug',
-        element: <RedirectToCollectionTypes type={`collection-types`} />,
+        loader: ({ params }) => {
+          const slug = params.slug as UID.ContentType;
+
+          return `/content-manager/collection-types/${slug}`;
+        },
+        element: <Navigate />,
       },
       {
         path: 'singleType/:slug',
-        element: <RedirectToCollectionTypes type={`single-types`} />,
+        loader: ({ params }) => {
+          const slug = params.slug as UID.ContentType;
+
+          return `/content-manager/single-types/${slug}`;
+        },
+        element: <Navigate />,
       },
       {
         path: ':collectionType/:slug',
