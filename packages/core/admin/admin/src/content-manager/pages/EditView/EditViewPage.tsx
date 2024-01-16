@@ -15,7 +15,7 @@ import {
 import { Layer, Pencil } from '@strapi/icons';
 import { Attribute } from '@strapi/types';
 import { useIntl } from 'react-intl';
-import { RouteComponentProps, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { useTypedSelector } from '../../../core/store/hooks';
@@ -55,23 +55,18 @@ interface EditViewPageParams {
   origin?: string;
 }
 
-interface EditViewPageProps extends RouteComponentProps<EditViewPageParams> {
+interface EditViewPageProps {
   allowedActions: AllowedActions;
   userPermissions?: Permission[];
 }
 
-const EditViewPage = ({
-  allowedActions,
-  history: { goBack },
-  match: {
-    params: { slug, collectionType, id, origin },
-  },
-  userPermissions = [],
-}: EditViewPageProps) => {
+const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { slug, collectionType, id, origin } = useParams();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const location = useLocation<{ error?: string }>();
   const toggleNotification = useNotification();
   const Information = useEnterprise(
     InformationBoxCE,
@@ -103,9 +98,6 @@ const EditViewPage = ({
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
-  const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
-    getFieldsActionMatchingPermissions(userPermissions, slug);
-
   const configurationPermissions =
     (collectionType === 'single-types'
       ? permissions.contentManager?.singleTypesConfigurations
@@ -132,6 +124,13 @@ const EditViewPage = ({
   if (!Information) {
     return null;
   }
+
+  if (!collectionType || !slug) {
+    return <Navigate to="/content-manager" />;
+  }
+
+  const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
+    getFieldsActionMatchingPermissions(userPermissions, slug);
 
   return (
     <ContentTypeFormWrapper collectionType={collectionType} slug={slug} id={id} origin={origin}>
@@ -167,7 +166,7 @@ const EditViewPage = ({
             onPut={onPut}
             onUnpublish={onUnpublish}
             readActionAllowedFields={readActionAllowedFields}
-            redirectToPreviousPage={goBack}
+            redirectToPreviousPage={() => navigate(-1)}
             slug={slug}
             status={status}
             updateActionAllowedFields={updateActionAllowedFields}
@@ -428,14 +427,9 @@ const selectCustomFieldUids = createSelector(
 
 interface ProtectedEditViewPageProps extends Omit<EditViewPageProps, 'allowedActions'> {}
 
-const ProtectedEditViewPage = ({
-  userPermissions = [],
-  ...restProps
-}: ProtectedEditViewPageProps) => {
-  const viewPermissions = React.useMemo(
-    () => generatePermissionsObject(restProps.match.params.slug),
-    [restProps.match.params.slug]
-  );
+const ProtectedEditViewPage = ({ userPermissions = [] }: ProtectedEditViewPageProps) => {
+  const { slug } = useParams();
+  const viewPermissions = React.useMemo(() => generatePermissionsObject(slug), [slug]);
   const { isLoading, allowedActions } = useRBAC(
     viewPermissions,
     // TODO: just make usePermissions undefined by default in the reducer?
@@ -446,13 +440,7 @@ const ProtectedEditViewPage = ({
     return <LoadingIndicatorPage />;
   }
 
-  return (
-    <EditViewPage
-      {...restProps}
-      allowedActions={allowedActions}
-      userPermissions={userPermissions}
-    />
-  );
+  return <EditViewPage allowedActions={allowedActions} userPermissions={userPermissions} />;
 };
 
 export { EditViewPage, ProtectedEditViewPage };

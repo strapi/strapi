@@ -1,5 +1,5 @@
 import { Strapi, Common, Documents } from '@strapi/types';
-import createDocumentService from '.';
+import createDocumentRepository from './document-engine';
 import createMiddlewareManager from './middlewares';
 import { loadDefaultMiddlewares } from './middlewares/defaults';
 
@@ -12,25 +12,25 @@ import { loadDefaultMiddlewares } from './middlewares/defaults';
  * @param strapi
  * @param options.defaults - Default parameters to apply to all actions
  * @param options.parent - Parent repository, used when creating a new repository with .with()
- * @returns DocumentRepository
+ * @returns DocumentService
  *
  * @example Access documents
  * const article = strapi.documents('api::article.article').create(params)
  * const allArticles = strapi.documents('api::article.article').findMany(params)
  *
  */
-export const createDocumentRepository = (
+export const createDocumentService = (
   strapi: Strapi,
   { defaults = {} }: { defaults?: any } = {}
-): Documents.Repository => {
-  const documents = createDocumentService({ strapi, db: strapi.db! });
+): Documents.Service => {
+  const documents = createDocumentRepository({ strapi, db: strapi.db! });
 
   const middlewareManager = createMiddlewareManager();
   loadDefaultMiddlewares(middlewareManager);
 
   function create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID
-  ): Documents.RepositoryInstance<TContentTypeUID> {
+  ): Documents.ServiceInstance<TContentTypeUID> {
     return {
       async findMany(params = {} as any) {
         return strapi.db?.transaction?.(async () =>
@@ -132,7 +132,7 @@ export const createDocumentRepository = (
 
       // @ts-expect-error - TODO: Fix this
       with(params: object) {
-        return createDocumentRepository(strapi, {
+        return createDocumentService(strapi, {
           defaults: { ...defaults, ...params },
         })(uid);
       },

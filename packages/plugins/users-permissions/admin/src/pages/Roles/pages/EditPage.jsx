@@ -27,7 +27,7 @@ import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
 import { PERMISSIONS } from '../../../constants';
@@ -41,7 +41,7 @@ export const EditPage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     params: { id },
-  } = useRouteMatch(`/settings/users-permissions/roles/:id`);
+  } = useMatch(`/settings/users-permissions/roles/:id`);
   const { get } = useFetchClient();
   const { isLoading: isLoadingPlugins, routes } = usePlugins();
   const {

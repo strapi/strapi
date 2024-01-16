@@ -9,10 +9,9 @@ import {
 } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { Entity } from '@strapi/types';
-import { Location } from 'history';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { DialogConfirmDelete } from './DialogConfirmDelete';
 
@@ -72,6 +71,7 @@ const EntityActionsDataCell = ({
   setIsConfirmDeleteRowOpen,
   handleCloneClick,
 }: EntityActionsDataCellProps) => {
+  const location = useLocation();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { setSelectedEntries } = useTableContext();
@@ -93,11 +93,11 @@ const EntityActionsDataCell = ({
           trackUsage('willEditEntryFromButton');
         }}
         // @ts-expect-error – DS does not correctly infer props from the as prop.
-        to={(location: Location) => ({
-          pathname: `${location.pathname}/${rowId}`,
+        to={{
+          pathname: rowId.toString(),
           state: { from: location.pathname },
           search: query.plugins ? stringify({ plugins: query.plugins }) : '',
-        })}
+        }}
         label={formatMessage(
           { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
           { target: itemLineText }

@@ -25,7 +25,7 @@ import {
 } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
@@ -51,11 +51,11 @@ const HomePageCE = () => {
     ) &&
     isGuidedTourVisible &&
     !isSkipped;
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
 
-    push('/plugins/content-type-builder/content-types/create-content-type');
+    navigate('/plugins/content-type-builder/content-types/create-content-type');
   };
 
   const hasAlreadyCreatedContentTypes = React.useMemo(() => {

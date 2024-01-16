@@ -37,7 +37,7 @@ import {
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -57,8 +57,7 @@ const ListPage = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   useFocusWhenNavigate();
-  const { push } = useHistory();
-  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const {
     isLoading: isRBACLoading,
@@ -155,8 +154,6 @@ const ListPage = () => {
       ? setWebhooksToDelete((prev) => [...prev, id])
       : setWebhooksToDelete((prev) => prev.filter((webhookId) => webhookId !== id));
 
-  const goTo = (to: string) => () => push(`${pathname}/${to}`);
-
   const isLoading = isRBACLoading || isWebhooksLoading;
   const numberOfWebhooks = webhooks?.length ?? 0;
   const webhooksToDeleteLength = webhooksToDelete.length;
@@ -179,7 +176,7 @@ const ListPage = () => {
                 startIcon={<Plus />}
                 variant="default"
                 // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                to={`${pathname}/create`}
+                to="create"
                 size="S"
               >
                 {formatMessage({
@@ -229,7 +226,14 @@ const ListPage = () => {
               colCount={5}
               rowCount={numberOfWebhooks + 1}
               footer={
-                <TFooter onClick={canCreate ? goTo('create') : undefined} icon={<Plus />}>
+                <TFooter
+                  onClick={() => {
+                    if (canCreate) {
+                      navigate('create');
+                    }
+                  }}
+                  icon={<Plus />}
+                >
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',
                     defaultMessage: 'Create new webhook',
@@ -290,7 +294,11 @@ const ListPage = () => {
                 {webhooks?.map((webhook) => (
                   <Tr
                     key={webhook.id}
-                    onClick={canUpdate ? goTo(webhook.id) : undefined}
+                    onClick={() => {
+                      if (canUpdate) {
+                        navigate(webhook.id);
+                      }
+                    }}
                     style={{ cursor: canUpdate ? 'pointer' : 'default' }}
                   >
                     <Td onClick={(e) => e.stopPropagation()}>
@@ -380,16 +388,15 @@ const ListPage = () => {
                 defaultMessage: 'No webhooks found',
               })}
               action={
-                <Button
-                  variant="secondary"
-                  startIcon={<Plus />}
-                  onClick={() => (canCreate ? goTo('create') : {})}
-                >
-                  {formatMessage({
-                    id: 'Settings.webhooks.list.button.add',
-                    defaultMessage: 'Create new webhook',
-                  })}
-                </Button>
+                canCreate ? (
+                  // @ts-expect-error – this is an issue with the DS where as props are not inferred
+                  <LinkButton variant="secondary" startIcon={<Plus />} as={NavLink} to="create">
+                    {formatMessage({
+                      id: 'Settings.webhooks.list.button.add',
+                      defaultMessage: 'Create new webhook',
+                    })}
+                  </LinkButton>
+                ) : null
               }
             />
           )}

@@ -1,11 +1,11 @@
 import os from 'os';
 import chalk from 'chalk';
-import { Option, program } from 'commander';
+import { InvalidArgumentError, Option, program } from 'commander';
 
 import { version as packageJSONVersion } from '../../package.json';
-import { Version } from '../modules/version';
+import { isLiteralSemVer, isValidSemVer, semVerFactory, Version } from '../modules/version';
 
-import type { CLIOptions } from './types';
+import type { CLICodemodsOptions, CLIUpgradeOptions, CLIUpgradeToOptions } from './types';
 
 const projectPathOption = new Option(
   '-p, --project-path <project-path>',
@@ -35,7 +35,7 @@ const addReleaseUpgradeCommand = (releaseType: Version.ReleaseType, description:
     .addOption(debugOption)
     .addOption(silentOption)
     .addOption(automaticConfirmationOption)
-    .action(async (options: CLIOptions) => {
+    .action(async (options: CLIUpgradeOptions) => {
       const { upgrade } = await import('./commands/upgrade.js');
 
       return upgrade({ ...options, target: releaseType });
@@ -66,9 +66,45 @@ program
   .addOption(dryOption)
   .addOption(debugOption)
   .addOption(silentOption)
-  .action(async (options) => {
+  .action(async (options: CLICodemodsOptions) => {
     const { codemods } = await import('./commands/codemods.js');
-    return codemods({ ...options, target: Version.ReleaseType.Major });
+    return codemods(options);
+  });
+
+// Defines the 'to' command to upgrade to a specific Strapi version,
+// with various options including custom codemod target.
+// This command is meant for internal use for now (and is thus hidden)
+program
+  .command('to <target>', { hidden: true })
+  .description('Upgrade to the specified version of Strapi')
+  .addOption(projectPathOption)
+  .addOption(dryOption)
+  .addOption(debugOption)
+  .addOption(silentOption)
+  .addOption(automaticConfirmationOption)
+  .addOption(
+    new Option(
+      '-c, --codemods-target <codemodsTarget>',
+      'Use a custom target for the codemods execution. Useful when targeting pre-releases'
+    ).argParser((codemodsTarget) => {
+      if (!isLiteralSemVer(codemodsTarget)) {
+        throw new InvalidArgumentError(
+          `Expected a version with the following format: "<number>.<number>.<number>"`
+        );
+      }
+
+      return semVerFactory(codemodsTarget);
+    })
+  )
+  .action(async (target: string, options: CLIUpgradeToOptions) => {
+    if (!isValidSemVer(target)) {
+      console.error(`Invalid target supplied, expected a valid semver but got "${target}"`);
+      process.exit(1);
+    }
+
+    const { upgrade } = await import('./commands/upgrade.js');
+
+    return upgrade({ ...options, target: semVerFactory(target) });
   });
 
 program

@@ -1,7 +1,7 @@
 // Utility type to reuse Param definition in MiddlewareContext
 import { Common } from '../..';
-import { DocumentService } from './document-service';
-import type * as Params from './params/document-service';
+import { DocumentEngine } from './document-engine';
+import type * as Params from './params/document-engine';
 
 export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType> = {
   findOne: Params.FindOne<TContentTypeUID>;
@@ -20,7 +20,7 @@ export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UI
 
 export interface Context<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
-  TAction extends keyof DocumentService = keyof DocumentService
+  TAction extends keyof DocumentEngine = keyof DocumentEngine
 > {
   uid: TContentTypeUID;
   action: TAction;
@@ -40,11 +40,11 @@ export interface Options {
 
 export type Middleware<
   TContentTypeUID extends Common.UID.ContentType,
-  TAction extends keyof DocumentService
+  TAction extends keyof DocumentEngine
 > = (
   ctx: Context<TContentTypeUID, TAction>,
-  next: (ctx: Context<TContentTypeUID, TAction>) => ReturnType<DocumentService[TAction]>
-) => ReturnType<DocumentService[TAction]>;
+  next: (ctx: Context<TContentTypeUID, TAction>) => ReturnType<DocumentEngine[TAction]>
+) => ReturnType<DocumentEngine[TAction]>;
 
 /**
  * Handles middlewares for document service

@@ -28,7 +28,7 @@ import {
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink, useHistory, useLocation } from 'react-router-dom';
+import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { AssetGridList } from '../../../components/AssetGridList';
@@ -76,7 +76,7 @@ const ActionContainer = styled(Box)`
 `;
 
 export const MediaLibrary = () => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const {
     canRead,
     canCreate,
@@ -122,7 +122,7 @@ export const MediaLibrary = () => {
 
   // Folder was not found: redirect to the media library root
   if (currentFolderError?.response?.status === 404) {
-    push(pathname);
+    navigate(pathname);
   }
 
   const folders =
@@ -333,7 +333,7 @@ export const MediaLibrary = () => {
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
               onChangeFolder={(folderID, folderPath) =>
-                push(getFolderURL(pathname, query, { folder: folderID, folderPath }))
+                navigate(getFolderURL(pathname, query, { folder: folderID, folderPath }))
               }
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -72,6 +71,23 @@ const FieldWrapper = styled(Box)`
   }
 `;
 
+interface DraggableCardProps {
+  index: number;
+  isDraggingSibling: boolean;
+  labelField: string;
+  onClickEditField: (name: string) => void;
+  onMoveField: (dragIndex: number, hoverIndex: number) => void;
+  onRemoveField: React.MouseEventHandler<HTMLButtonElement>;
+  name: string;
+  setIsDraggingSibling: (isDragging: boolean) => void;
+}
+
+interface Item {
+  index: number;
+  labelField: string;
+  name: string;
+}
+
 const DraggableCard = ({
   index,
   isDraggingSibling,
@@ -81,12 +97,12 @@ const DraggableCard = ({
   onRemoveField,
   name,
   setIsDraggingSibling,
-}) => {
+}: DraggableCardProps) => {
   const { formatMessage } = useIntl();
-  const dragRef = useRef(null);
-  const dropRef = useRef(null);
+  const dragRef = useRef<HTMLElement>(null);
+  const dropRef = useRef<HTMLElement>(null);
   const [, forceRerenderAfterDnd] = useState(false);
-  const editButtonRef = useRef();
+  const editButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleClickEditRow = () => {
     if (editButtonRef.current) {
@@ -97,7 +113,7 @@ const DraggableCard = ({
   // TODO: this can be simplified a lot by using the useDragAndDrop() hook
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
-    hover(item, monitor) {
+    hover(item: Item, monitor) {
       if (!dropRef.current) {
         return;
       }
@@ -114,7 +130,7 @@ const DraggableCard = ({
       // Get vertical middle
       const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
       // Determine mouse position
-      const clientOffset = monitor.getClientOffset();
+      const clientOffset = monitor.getClientOffset()!;
       // Get pixels to the top
       const hoverClientX = clientOffset.x - hoverBoundingRect.left;
 
@@ -138,7 +154,7 @@ const DraggableCard = ({
 
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.FIELD,
-    item() {
+    item(): Item {
       return { index, labelField, name };
     },
     collect: (monitor) => ({
@@ -172,8 +188,8 @@ const DraggableCard = ({
   // We need 1 for the drop target
   // 1 for the drag target
   const refs = {
-    dragRef: drag(dragRef),
-    dropRef: drop(dropRef),
+    dragRef: drag(dragRef) as unknown as React.RefObject<HTMLDivElement>,
+    dropRef: drop(dropRef) as unknown as React.RefObject<HTMLDivElement>,
   };
 
   return (
@@ -188,7 +204,6 @@ const DraggableCard = ({
           hasRadius
           justifyContent="space-between"
           onClick={handleClickEditRow}
-          isDragging={isDragging}
         >
           <Flex gap={3}>
             <DragButton
@@ -202,7 +217,7 @@ const DraggableCard = ({
               )}
               onClick={(e) => e.stopPropagation()}
               ref={refs.dragRef}
-              type="button"
+              // type="button"
             >
               <Drag />
             </DragButton>
@@ -247,15 +262,4 @@ const DraggableCard = ({
   );
 };
 
-DraggableCard.propTypes = {
-  index: PropTypes.number.isRequired,
-  isDraggingSibling: PropTypes.bool.isRequired,
-  labelField: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  onClickEditField: PropTypes.func.isRequired,
-  onMoveField: PropTypes.func.isRequired,
-  onRemoveField: PropTypes.func.isRequired,
-  setIsDraggingSibling: PropTypes.func.isRequired,
-};
-
-export default DraggableCard;
+export { DraggableCard };

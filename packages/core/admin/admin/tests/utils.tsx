@@ -20,7 +20,13 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
-import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
+import {
+  MemoryRouter,
+  MemoryRouterProps,
+  Outlet,
+  RouterProvider,
+  createMemoryRouter,
+} from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { RBACReducer } from '../src/components/RBACProvider';
@@ -75,58 +81,68 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), adminApi.middleware],
   });
 
-  // en is the default locale of the admin app.
-  return (
-    <MemoryRouter initialEntries={initialEntries}>
-      <Provider store={store}>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <DndProvider backend={HTML5Backend}>
-              <LanguageProvider messages={{}}>
-                <Theme
-                  themes={{
-                    dark: darkTheme,
-                    light: lightTheme,
-                  }}
-                >
-                  <NotificationsProvider>
-                    <RBACContext.Provider
-                      value={{
-                        refetchPermissions: jest.fn(),
-                        allPermissions: [
-                          ...fixtures.permissions.allPermissions,
-                          {
-                            id: 314,
-                            action: 'admin::users.read',
-                            subject: null,
-                            properties: {},
-                            conditions: [],
-                            actionParameters: {},
-                          },
-                        ] as Permission[],
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/*',
+        element: (
+          <Provider store={store}>
+            <AuthProvider>
+              <QueryClientProvider client={queryClient}>
+                <DndProvider backend={HTML5Backend}>
+                  <LanguageProvider messages={{}}>
+                    <Theme
+                      themes={{
+                        dark: darkTheme,
+                        light: lightTheme,
                       }}
                     >
-                      <ConfigurationContextProvider
-                        showReleaseNotification={false}
-                        showTutorials={false}
-                        logos={{
-                          auth: { default: '' },
-                          menu: { default: '' },
-                        }}
-                        updateProjectSettings={jest.fn()}
-                      >
-                        {children}
-                      </ConfigurationContextProvider>
-                    </RBACContext.Provider>
-                  </NotificationsProvider>
-                </Theme>
-              </LanguageProvider>
-            </DndProvider>
-          </QueryClientProvider>
-        </AuthProvider>
-      </Provider>
-    </MemoryRouter>
+                      <NotificationsProvider>
+                        <RBACContext.Provider
+                          value={{
+                            refetchPermissions: jest.fn(),
+                            allPermissions: [
+                              ...fixtures.permissions.allPermissions,
+                              {
+                                id: 314,
+                                action: 'admin::users.read',
+                                subject: null,
+                                properties: {},
+                                conditions: [],
+                                actionParameters: {},
+                              },
+                            ] as Permission[],
+                          }}
+                        >
+                          <ConfigurationContextProvider
+                            showReleaseNotification={false}
+                            showTutorials={false}
+                            logos={{
+                              auth: { default: '' },
+                              menu: { default: '' },
+                            }}
+                            updateProjectSettings={jest.fn()}
+                          >
+                            {children}
+                          </ConfigurationContextProvider>
+                        </RBACContext.Provider>
+                      </NotificationsProvider>
+                    </Theme>
+                  </LanguageProvider>
+                </DndProvider>
+              </QueryClientProvider>
+            </AuthProvider>
+          </Provider>
+        ),
+      },
+    ],
+    {
+      initialEntries,
+    }
   );
+
+  // en is the default locale of the admin app.
+  return <RouterProvider router={router} />;
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment

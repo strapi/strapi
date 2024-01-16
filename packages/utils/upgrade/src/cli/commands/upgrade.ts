@@ -4,9 +4,9 @@ import { loggerFactory } from '../../modules/logger';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 
-import type { Command } from '../types';
+import type { UpgradeCommand } from '../types';
 
-export const upgrade: Command = async (options) => {
+export const upgrade: UpgradeCommand = async (options) => {
   try {
     const { silent, debug, yes } = options;
     const logger = loggerFactory({ silent, debug });
@@ -36,8 +36,9 @@ export const upgrade: Command = async (options) => {
       dry: options.dry,
       cwd: options.projectPath,
       target: options.target,
+      codemodsTarget: options.codemodsTarget,
     });
   } catch (err) {
-    handleError(err);
+    handleError(err, options.silent);
   }
 };

@@ -1,14 +1,22 @@
 /* eslint-disable check-file/filename-naming-convention */
 
-import { renderHook, act } from '@tests/utils';
-import { Route, useLocation } from 'react-router-dom';
+import { renderHook, act, screen } from '@tests/utils';
+import { useLocation } from 'react-router-dom';
 
 import { useQueryParams } from '../useQueryParams';
 
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return (
+    <ul>
+      <li>{location.search}</li>
+    </ul>
+  );
+};
+
 describe('useQueryParams', () => {
   it('should set and remove the query params using setQuery method', () => {
-    let testLocation: ReturnType<typeof useLocation> = null!;
-
     const { result } = renderHook(
       ({ initialParams }) =>
         useQueryParams<{ type?: string; filters?: object; page?: number }>(initialParams),
@@ -16,14 +24,7 @@ describe('useQueryParams', () => {
         wrapper: ({ children }) => (
           <>
             {children}
-            <Route
-              path="*"
-              render={({ location }) => {
-                testLocation = location;
-
-                return null;
-              }}
-            />
+            <LocationDisplay />
           </>
         ),
         initialProps: { initialParams: { page: 1, type: 'plugins' } },
@@ -37,14 +38,14 @@ describe('useQueryParams', () => {
       setQuery({ type: 'plugins' }, 'remove');
     });
 
-    const searchParams = new URLSearchParams(testLocation.search);
+    const searchParams = new URLSearchParams(screen.getByRole('listitem').textContent ?? '');
     expect(searchParams.has('type')).toBe(false);
     expect(searchParams.has('page')).toBe(true);
 
     act(() => {
       setQuery({ filters: { type: 'audio' }, page: 1 });
     });
-    const updatedSearchParams = new URLSearchParams(testLocation.search);
+    const updatedSearchParams = new URLSearchParams(screen.getByRole('listitem').textContent ?? '');
     expect(updatedSearchParams.get('page')).toEqual('1');
     expect(updatedSearchParams.get('filters[type]')).toEqual('audio');
   });

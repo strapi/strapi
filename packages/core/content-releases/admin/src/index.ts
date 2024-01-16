@@ -17,16 +17,13 @@ const admin: Plugin.Config.AdminInput = {
       window.strapi.future.isEnabled('contentReleases')
     ) {
       app.addMenuLink({
-        to: `/plugins/${pluginId}`,
+        to: `plugins/${pluginId}`,
         icon: PaperPlane,
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
-        async Component() {
-          const { App } = await import('./pages/App');
-          return App;
-        },
+        Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
       });
 

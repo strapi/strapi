@@ -10,6 +10,7 @@ import {
   RenderOptions as RTLRenderOptions,
   RenderResult,
   act,
+  screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -100,4 +101,4 @@ const renderHook: typeof renderHookRTL = (hook, options) => {
   });
 };
 
-export { render, renderHook, waitFor, server, act };
+export { render, renderHook, waitFor, server, act, screen };

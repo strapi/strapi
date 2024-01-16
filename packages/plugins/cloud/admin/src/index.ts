@@ -15,7 +15,7 @@ export default {
     // Only add the plugin menu link and registering it if the project is on development (localhost).
     if (backendURL?.includes('localhost')) {
       app.addMenuLink({
-        to: `/plugins/${pluginId}`,
+        to: `plugins/${pluginId}`,
         icon: PluginIcon,
         intlLabel: {
           id: `${pluginId}.plugin.name`,

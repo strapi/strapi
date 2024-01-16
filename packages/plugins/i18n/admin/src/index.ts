@@ -68,13 +68,9 @@ export default {
         defaultMessage: 'Internationalization',
       },
       id: 'internationalization',
-      to: '/settings/internationalization',
-
-      async Component() {
-        const { ProtectedSettingsPage } = await import('./pages/SettingsPage');
-
-        return ProtectedSettingsPage;
-      },
+      to: 'internationalization',
+      Component: () =>
+        import('./pages/SettingsPage').then((mod) => ({ default: mod.ProtectedSettingsPage })),
       permissions: PERMISSIONS.accessMain,
     });
 

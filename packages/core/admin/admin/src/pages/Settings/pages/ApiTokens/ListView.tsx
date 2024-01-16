@@ -15,9 +15,9 @@ import {
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
-import qs from 'qs';
+import * as qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useOnce } from '../../../../hooks/useOnce';
@@ -82,7 +82,7 @@ export const ListView = () => {
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(permissions);
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { startSection } = useGuidedTour();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -92,8 +92,8 @@ export const ListView = () => {
   }, [startSection]);
 
   React.useEffect(() => {
-    push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
-  }, [push]);
+    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
+  }, [navigate]);
 
   const headers = TABLE_HEADERS.map((header) => ({
     ...header,

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Flex,
@@ -28,7 +28,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
@@ -69,7 +69,7 @@ const ActionLink = styled(Link)`
 
 export const ReviewWorkflowsListView = () => {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const [workflowToDelete, setWorkflowToDelete] = React.useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = React.useState<boolean>(false);
@@ -246,7 +246,7 @@ export const ReviewWorkflowsListView = () => {
                     ) {
                       setShowLimitModal(true);
                     } else {
-                      push('/settings/review-workflows/create');
+                      navigate('/settings/review-workflows/create');
                       trackUsage('willCreateWorkflow');
                     }
                   }}
@@ -308,7 +308,7 @@ export const ReviewWorkflowsListView = () => {
                         return;
                       }
 
-                      push(`/settings/review-workflows/${workflow.id}`);
+                      navigate(`/settings/review-workflows/${workflow.id}`);
                     },
                   })}
                   key={`workflow-${workflow.id}`}

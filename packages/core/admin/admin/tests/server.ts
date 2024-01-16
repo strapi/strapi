@@ -452,13 +452,20 @@ export const server = setupServer(
         })
       )
     ),
-    // /**
-    //  *
-    //  * CONTENT_MANAGER
-    //  *
-    //  */
+    /**
+     *
+     * CONTENT_MANAGER
+     *
+     */
     rest.put('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
       return res(ctx.status(200));
+    }),
+    rest.get('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: mockData.contentManager.layout,
+        })
+      );
     }),
     rest.post('/content-manager/uid/generate', async (req, res, ctx) => {
       const body = await req.json();
