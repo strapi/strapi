@@ -43,10 +43,15 @@ const releaseActionController = {
     });
     const groupedData = await releaseService.groupActions(results, query.groupBy);
 
+    const contentTypes = releaseService.getContentTypeModelsFromActions(results);
+    const components = await releaseService.getAllComponents();
+
     ctx.body = {
       data: groupedData,
       meta: {
         pagination,
+        contentTypes,
+        components,
       },
     };
   },

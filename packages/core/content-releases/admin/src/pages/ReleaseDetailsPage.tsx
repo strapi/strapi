@@ -55,6 +55,7 @@ import {
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
   useDeleteReleaseMutation,
+  releaseApi,
 } from '../services/release';
 
 import type {
@@ -103,6 +104,10 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 300px;
+`;
+
 interface PopoverButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   disabled?: boolean;
@@ -130,26 +135,16 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema: Schema.ContentType;
-  components: { [key: Schema.Component['uid']]: Schema.Component };
+  schema?: Schema.ContentType;
+  components?: { [key: Schema.Component['uid']]: Schema.Component };
   entry: ReleaseActionEntry;
 }
 
 const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument();
+  const { getValidationErrors } = unstable_useDocument();
 
-  const getValidationErrors = () => {
-    try {
-      validate(entry, { contentType: schema, components });
-
-      return {};
-    } catch (error) {
-      return getYupInnerErrors(error as ValidationError);
-    }
-  };
-
-  const validationErrors = getValidationErrors();
+  const validationErrors = getValidationErrors(entry, { contentType: schema, components });
 
   if (Object.keys(validationErrors).length > 0) {
     const validationErrorsMessages = Object.entries(validationErrors)
@@ -165,9 +160,9 @@ const EntryValidationText = ({ action, schema, components, entry }: EntryValidat
       <Flex gap={2}>
         <Icon color="danger600" as={CrossCircle} />
         <Tooltip description={validationErrorsMessages}>
-          <Typography textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
             {validationErrorsMessages}
-          </Typography>
+          </TypographyMaxWidth>
         </Tooltip>
       </Flex>
     );
@@ -237,6 +232,7 @@ export const ReleaseDetailsLayout = ({
     isLoading: isLoadingDetails,
     isError,
     error,
+    refetch,
   } = useGetReleaseQuery({ id: releaseId });
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
@@ -286,6 +282,10 @@ export const ReleaseDetailsLayout = ({
   const openWarningConfirmDialog = () => {
     toggleWarningSubmit();
     handleTogglePopover();
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   if (isLoadingDetails) {
@@ -404,6 +404,12 @@ export const ReleaseDetailsLayout = ({
                   </ReleaseInfoWrapper>
                 </Popover>
               )}
+              <Button size="S" variant="tertiary" onClick={handleRefresh}>
+                {formatMessage({
+                  id: 'content-releases.header.actions.refresh',
+                  defaultMessage: 'Refresh',
+                })}
+              </Button>
               <CheckPermissions permissions={PERMISSIONS.publish}>
                 <Button
                   size="S"
@@ -468,9 +474,6 @@ const ReleaseDetailsBody = () => {
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
 
-  const collectionTypes = release?.actions.meta.contentTypes;
-  const components = release?.actions.meta.components;
-
   const {
     isLoading,
     isFetching,
@@ -525,6 +528,8 @@ const ReleaseDetailsBody = () => {
 
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
+  const contentTypes = releaseMeta?.contentTypes;
+  const components = releaseMeta?.components;
 
   if (isReleaseError || !release) {
     const errorsArray = [];
@@ -722,7 +727,7 @@ const ReleaseDetailsBody = () => {
                           <Td>
                             <EntryValidationText
                               action={type}
-                              schema={collectionTypes[contentType.uid]}
+                              schema={contentTypes?.[contentType.uid]}
                               components={components}
                               entry={entry}
                             />

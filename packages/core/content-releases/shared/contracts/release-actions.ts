@@ -1,4 +1,4 @@
-import { Attribute, Common } from '@strapi/types';
+import { Attribute, Common, Schema } from '@strapi/types';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
@@ -9,7 +9,6 @@ export type ReleaseActionEntry = Entity & {
   [key: string]: Attribute.Any;
 } & {
   locale?: string;
-  status: 'published' | 'draft';
 };
 
 export interface ReleaseAction extends Entity {
@@ -80,6 +79,8 @@ export declare namespace GetReleaseActions {
     };
     meta: {
       pagination: Pagination;
+      contentTypes: Record<Schema.ContentType['uid'], Schema.ContentType>;
+      components: Record<Schema.Component['uid'], Schema.Component>;
     };
   }
 }

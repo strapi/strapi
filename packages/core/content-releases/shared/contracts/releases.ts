@@ -18,7 +18,7 @@ export type Pagination = {
 };
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
-  actions: { meta: { count: number; contentTypes: any; components: any } };
+  actions: { meta: { count: number } };
   createdBy: Pick<SanitizedAdminUser, 'id' | 'firstname' | 'lastname' | 'username'>;
 }
 

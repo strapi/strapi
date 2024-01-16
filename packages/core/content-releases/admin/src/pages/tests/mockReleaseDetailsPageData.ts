@@ -19,8 +19,6 @@ const RELEASE_NO_ACTIONS_HEADER_MOCK_DATA = {
       meta: {
         count: 0,
       },
-      contentTypes: {},
-      components: {},
     },
   },
 };
@@ -61,8 +59,6 @@ const RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
     actions: {
       meta: {
         count: 1,
-        contentTypes: {},
-        components: {},
       },
     },
   },
@@ -88,8 +84,6 @@ const PUBLISHED_RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
     actions: {
       meta: {
         count: 1,
-        contentTypes: {},
-        components: {},
       },
     },
   },
@@ -128,6 +122,8 @@ const RELEASE_WITH_ACTIONS_BODY_MOCK_DATA = {
       total: 1,
       pageCount: 1,
     },
+    contentTypes: {},
+    components: {},
   },
 };
 
@@ -205,6 +201,8 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
       total: 1,
       pageCount: 1,
     },
+    contentTypes: {},
+    components: {},
   },
 };
 

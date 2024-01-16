@@ -1,6 +1,6 @@
 import { setCreatorFields, errors } from '@strapi/utils';
 
-import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
+import type { LoadedStrapi, EntityService, UID, Schema } from '@strapi/types';
 
 import _ from 'lodash/fp';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
@@ -302,6 +302,47 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     }
 
     return contentTypesData;
+  },
+
+  getContentTypeModelsFromActions(actions: ReleaseAction[]) {
+    const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
+      if (!acc.includes(action.contentType)) {
+        acc.push(action.contentType);
+      }
+
+      return acc;
+    }, []);
+
+    const contentTypeModelsMap = contentTypeUids.reduce(
+      (
+        acc: { [key: ReleaseAction['contentType']]: Schema.ContentType },
+        contentTypeUid: ReleaseAction['contentType']
+      ) => {
+        acc[contentTypeUid] = strapi.getModel(contentTypeUid);
+
+        return acc;
+      },
+      {}
+    );
+
+    return contentTypeModelsMap;
+  },
+
+  async getAllComponents() {
+    const contentManagerComponentsService = strapi.plugin('content-manager').service('components');
+
+    const components = await contentManagerComponentsService.findAllComponents();
+
+    const componentsMap = components.reduce(
+      (acc: { [key: Schema.Component['uid']]: Schema.Component }, component: Schema.Component) => {
+        acc[component.uid] = component;
+
+        return acc;
+      },
+      {}
+    );
+
+    return componentsMap;
   },
 
   async delete(releaseId: DeleteRelease.Request['params']['id']) {

@@ -1,6 +1,9 @@
+import { getYupInnerErrors } from '@strapi/helper-plugin';
 import { Schema, Entity as StrapiEntity, Attribute } from '@strapi/types';
 
 import { createYupSchema } from '../content-manager/utils/validation';
+
+import type { ValidationError } from 'yup';
 
 export interface Entity {
   id: StrapiEntity.ID;
@@ -13,10 +16,11 @@ interface ValidateOptions {
   components: {
     [key: Schema.Component['uid']]: Schema.Component;
   };
+  isCreatingEntry?: boolean;
 }
 
 /**
- * @alpha - This hook is not recommended to use it because is likely to be completely change, use it at your own risk
+ * @alpha - This hook is not stable and likely to change. Use at your own risk.
  */
 export function useDocument() {
   /**
@@ -24,15 +28,22 @@ export function useDocument() {
    * But at the moment the store is populated only inside the content-manager by useContentManagerInitData
    * So, we need to receive the content type schema and the components to use the function
    */
-  const validate = (
+  const getValidationErrors = (
     entry: Entity & { [key: string]: Attribute.Any },
-    { contentType, components }: ValidateOptions
+    { contentType, components, isCreatingEntry = false }: ValidateOptions
   ) => {
+    console.log('validating errors');
     // @ts-expect-error - @TODO: createYupSchema types need to be revisited
-    const schema = createYupSchema(contentType, { components }, { isCreatingEntry: false });
+    const schema = createYupSchema(contentType, { components }, { isCreatingEntry });
 
-    return schema.validateSync(entry, { abortEarly: false });
+    try {
+      schema.validateSync(entry, { abortEarly: false });
+
+      return {};
+    } catch (error) {
+      return getYupInnerErrors(error as ValidationError);
+    }
   };
 
-  return { validate };
+  return { getValidationErrors };
 }
