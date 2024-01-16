@@ -3,6 +3,7 @@
 const path = require('node:path');
 const { pipeline } = require('node:stream');
 const fs = require('node:fs');
+const zlib = require('node:zlib');
 const { parser: jsonlParser } = require('stream-json/jsonl/Parser');
 const { chain } = require('stream-chain');
 const tar = require('tar');
@@ -84,31 +85,34 @@ const jsonCollector = async (entry) => {
  */
 const readFile = async (archive, file, options = {}) => {
   const { collector = stringCollector } = options;
-  /**
-   * @type {string | undefined}
-   */
+
+  // Check if the file is a .tar.gz
+  const isGzipped = archive.endsWith('.tar.gz');
   let content = undefined;
 
   await new Promise((resolve, reject) => {
-    pipeline(
-      [
-        // Source: Archive stream
-        fs.createReadStream(archive),
+    const streams = [fs.createReadStream(archive)];
 
-        // Transform: tar parser
-        new tar.Parse({
-          // Match tar entry with the given filename
-          filter: (filePath, entry) => {
-            console.log(filePath);
-            return entry.type === 'File' && file === filePath;
-          },
-          async onentry(entry) {
-            content = await collector(entry);
-          },
-        }),
-      ],
-      (err) => (err ? reject(err) : resolve())
+    // If the file is gzipped, add a decompression step
+    if (isGzipped) {
+      streams.push(zlib.createGunzip());
+    }
+
+    streams.push(
+      // Transform: tar parser
+      new tar.Parse({
+        // Match tar entry with the given filename
+        filter: (filePath, entry) => {
+          console.log(filePath);
+          return entry.type === 'File' && file === filePath;
+        },
+        async onentry(entry) {
+          content = await collector(entry);
+        },
+      })
     );
+
+    pipeline(streams, (err) => (err ? reject(err) : resolve()));
   });
 
   if (content === undefined) {
