@@ -675,7 +675,7 @@ const ReleaseDetailsBody = () => {
                       </Td>
                       {!release.releasedAt && (
                         <>
-                          <Td width="20%">
+                          <Td width="20%" minWidth="200px">
                             <EntryValidationText status={entry.status} action={type} />
                           </Td>
                           <Td>
