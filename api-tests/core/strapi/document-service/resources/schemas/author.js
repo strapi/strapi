@@ -10,7 +10,7 @@ module.exports = {
   draftAndPublish: true,
   pluginOptions: {
     i18n: {
-      localized: true,
+      localized: false,
     },
   },
   attributes: {
@@ -18,7 +18,7 @@ module.exports = {
       type: 'string',
       pluginOptions: {
         i18n: {
-          localized: true,
+          localized: false,
         },
       },
     },
