@@ -126,6 +126,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }: ModalFormProps) => {
             value={fieldForm?.size}
             name="size"
             onChange={(value) => {
+              // TODO: refactor this to be actually typesafe instead of casting
               onSizeChange({ name: selectedField, value: value as number });
             }}
             label={formatMessage({

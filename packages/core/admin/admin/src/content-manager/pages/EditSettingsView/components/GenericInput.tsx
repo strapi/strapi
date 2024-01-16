@@ -10,6 +10,7 @@ interface GenericInputProps extends Record<string, unknown> {
   label: string;
 }
 
+// TODO: refactor this to be actually typesafe instead of casting
 const GenericInput = ({
   type,
   options,

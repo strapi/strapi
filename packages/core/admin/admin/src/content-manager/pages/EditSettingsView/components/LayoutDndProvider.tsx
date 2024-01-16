@@ -24,7 +24,8 @@ export interface LayoutDndProviderProps {
   children?: React.ReactNode;
 }
 
-const LayoutDndContext = React.createContext<LayoutDndProviderProps>(
+// TODO: refactor this to be actually typesafe instead of casting
+const LayoutDndContext = React.createContext<Omit<LayoutDndProviderProps, 'children'>>(
   null as unknown as LayoutDndProviderProps
 );
 
