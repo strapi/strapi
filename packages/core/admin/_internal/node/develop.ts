@@ -230,20 +230,24 @@ const develop = async ({
     loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
     loadStrapiSpinner.succeed();
 
-    timer.start('generatingTS');
-    const generatingTsSpinner = logger.spinner(`Generating types`).start();
+    // For TS projects, type generation is a requirement for the develop command so that the server can restart
+    // For JS projects, we respect the experimental autogenerate setting
+    if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
+      timer.start('generatingTS');
+      const generatingTsSpinner = logger.spinner(`Generating types`).start();
 
-    await tsUtils.generators.generate({
-      strapi: strapiInstance,
-      pwd: cwd,
-      rootDir: undefined,
-      logger: { silent: true, debug: false },
-      artifacts: { contentTypes: true, components: true },
-    });
+      await tsUtils.generators.generate({
+        strapi: strapiInstance,
+        pwd: cwd,
+        rootDir: undefined,
+        logger: { silent: true, debug: false },
+        artifacts: { contentTypes: true, components: true },
+      });
 
-    const generatingDuration = timer.end('generatingTS');
-    generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
-    generatingTsSpinner.succeed();
+      const generatingDuration = timer.end('generatingTS');
+      generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
+      generatingTsSpinner.succeed();
+    }
 
     if (tsconfig?.config) {
       timer.start('compilingTS');
