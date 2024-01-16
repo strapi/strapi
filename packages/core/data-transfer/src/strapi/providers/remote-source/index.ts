@@ -86,7 +86,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       }
 
       // if we get a single items instead of a batch
-      // TODO V5: in v5 only allow array
       for (const item of castArray(data)) {
         stream.push(item);
       }
