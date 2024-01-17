@@ -43,15 +43,22 @@ type FieldsParams = string | string[];
 type FiltersParams = unknown;
 
 export interface PopulateAttributesParams {
-  [key: string]: PopulateObjectParams;
+  [key: string]: boolean | PopulateObjectParams;
 }
 export interface PopulateObjectParams {
   sort?: SortParams;
   fields?: FieldsParams;
   filters?: FiltersParams;
-  populate?: PopulateParams;
+  populate?: string | string[] | PopulateAttributesParams;
   publicationState?: 'live' | 'preview';
-  on: PopulateAttributesParams;
+  on?: PopulateAttributesParams;
+  count?: boolean;
+  ordering?: unknown;
+  _q?: string;
+  limit?: number | string;
+  start?: number | string;
+  page?: number | string;
+  pageSize?: number | string;
 }
 
 type PopulateParams = string | string[] | PopulateAttributesParams;
@@ -314,6 +321,12 @@ const convertPopulateQueryParams = (
   throw new InvalidPopulateError();
 };
 
+const hasFragmentPopulateDefined = (
+  populate: PopulateObjectParams
+): populate is PopulateObjectParams & Required<Pick<PopulateObjectParams, 'on'>> => {
+  return typeof populate === 'object' && 'on' in populate && !isNil(populate.on);
+};
+
 const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Model) => {
   if (!schema) {
     return {};
@@ -322,6 +335,10 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Mode
   const { attributes } = schema;
 
   return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
+    if (_.isBoolean(subPopulate)) {
+      return { ...acc, [key]: subPopulate };
+    }
+
     const attribute = attributes[key];
 
     if (!attribute) {
@@ -332,10 +349,10 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Mode
     const isAllowedAttributeForFragmentPopulate =
       isDynamicZoneAttribute(attribute) || isMorphToRelationalAttribute(attribute);
 
-    const hasFragmentPopulateDefined =
-      typeof subPopulate === 'object' && 'on' in subPopulate && !isNil(subPopulate.on);
+    // const hasFragmentPopulateDefined =
+    //   typeof subPopulate === 'object' && 'on' in subPopulate && !isNil(subPopulate.on);
 
-    if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined) {
+    if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined(subPopulate)) {
       return {
         ...acc,
         [key]: {
@@ -408,7 +425,7 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Mode
   }, {});
 };
 
-const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema?: Model) => {
+const convertNestedPopulate = (subPopulate: boolean | PopulateObjectParams, schema?: Model) => {
   if (_.isString(subPopulate)) {
     return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
@@ -422,7 +439,7 @@ const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema?: Model
   }
 
   const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
-    subPopulate;
+    subPopulate as PopulateObjectParams;
 
   const query: Query = {};
 

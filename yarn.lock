@@ -9605,6 +9605,7 @@ __metadata:
     "@strapi/icons": "npm:1.14.1"
     "@strapi/pack-up": "npm:4.17.1"
     "@strapi/types": "npm:4.17.1"
+    "@strapi/utils": "npm:4.17.1"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
     axios: "npm:1.6.0"
@@ -10243,10 +10244,13 @@ __metadata:
     "@strapi/types": "npm:4.17.1"
     "@strapi/typescript-utils": "npm:4.17.1"
     "@strapi/utils": "npm:4.17.1"
+    "@types/find-root": "npm:1.1.4"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:18.18.4"
     "@types/nodemon": "npm:1.19.6"
+    "@types/webpack-bundle-analyzer": "npm:4.6.3"
+    "@types/webpack-hot-middleware": "npm:2.25.9"
     "@vitejs/plugin-react-swc": "npm:3.5.0"
     boxen: "npm:5.1.2"
     browserslist: "npm:^4.22.2"
@@ -10422,7 +10426,6 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/pack-up": "npm:4.17.1"
-    "@strapi/types": "npm:4.17.1"
     "@types/koa": "npm:2.13.4"
     "@types/node": "npm:18.18.4"
     date-fns: "npm:2.30.0"
@@ -11204,6 +11207,13 @@ __metadata:
   version: 3.2.1
   resolution: "@types/find-cache-dir@npm:3.2.1"
   checksum: bf5c4e96da40247cd9e6327f54dfccda961a0fb2d70e3c71bd05def94de4c2e6fb310fe8ecb0f04ecf5dbc52214e184b55a2337b0f87250d4ae1e2e7d58321e4
+  languageName: node
+  linkType: hard
+
+"@types/find-root@npm:1.1.4":
+  version: 1.1.4
+  resolution: "@types/find-root@npm:1.1.4"
+  checksum: e438c62b3ef3b706d058764797ec5227479ed4be98e9fec5456fb3b9a2096ccd3e35a84c94e2018278e22c651f12ae6ff4d6d7006b09fa5132da3612e2118076
   languageName: node
   linkType: hard
 
@@ -12194,6 +12204,28 @@ __metadata:
   version: 0.0.3
   resolution: "@types/use-sync-external-store@npm:0.0.3"
   checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
+  languageName: node
+  linkType: hard
+
+"@types/webpack-bundle-analyzer@npm:4.6.3":
+  version: 4.6.3
+  resolution: "@types/webpack-bundle-analyzer@npm:4.6.3"
+  dependencies:
+    "@types/node": "npm:*"
+    tapable: "npm:^2.2.0"
+    webpack: "npm:^5"
+  checksum: 646b78aa5e06094b9558d49826fcecff6d7c67ab5e02120b9567a4cec904aaebb820ffac5f57963aada98a0603ae56c8aebfd9b54e8bb0597540e6687da063ac
+  languageName: node
+  linkType: hard
+
+"@types/webpack-hot-middleware@npm:2.25.9":
+  version: 2.25.9
+  resolution: "@types/webpack-hot-middleware@npm:2.25.9"
+  dependencies:
+    "@types/connect": "npm:*"
+    tapable: "npm:^2.2.0"
+    webpack: "npm:^5"
+  checksum: bfa30ed24fcad7f4e4bce956ee7f2ddcc332428be38c2fa3613e8c53bd077d19806dc801de9c36cb77b966b38c9c9e27ef0367da25b684237f793955e406b657
   languageName: node
   linkType: hard
 
@@ -33331,7 +33363,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.89.0":
+"webpack@npm:^5, webpack@npm:^5.89.0":
   version: 5.89.0
   resolution: "webpack@npm:5.89.0"
   dependencies:
