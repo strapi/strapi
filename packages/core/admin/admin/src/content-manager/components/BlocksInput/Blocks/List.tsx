@@ -98,9 +98,12 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
     currentList.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
-  const isNodeStart = Editor.isStart(editor, editor.selection.anchor, currentListItemPath);
+  const isListItemEmpty =
+    currentListItem.children.length === 1 &&
+    isText(currentListItem.children[0]) &&
+    currentListItem.children[0].text === '';
   const isFocusAtTheBeginningOfAChild =
-    editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
+    editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-2) === 0;
 
   if (isListEmpty) {
     const parentListEntry = Editor.above(editor, {
@@ -111,7 +114,14 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
       event.preventDefault();
       replaceListWithEmptyBlock(editor, currentListPath);
     }
-  } else if (isNodeStart) {
+  } else if (isFocusAtTheBeginningOfAChild) {
+    // If first child then convert it into paragraph node
+    Transforms.liftNodes(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
+    });
+    // If the focus is at the beginning of a child node we need to replace it with a paragraph
+    Transforms.setNodes(editor, { type: 'paragraph' });
+  } else if (isListItemEmpty) {
     const previousEntry = Editor.previous(editor, {
       at: currentListItemPath,
     });
@@ -155,12 +165,6 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
         }
       }
     }
-  } else if (isFocusAtTheBeginningOfAChild) {
-    Transforms.liftNodes(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
-    });
-    // If the focus is at the beginning of a child node we need to replace it with a paragraph
-    Transforms.setNodes(editor, { type: 'paragraph' });
   }
 };
 
