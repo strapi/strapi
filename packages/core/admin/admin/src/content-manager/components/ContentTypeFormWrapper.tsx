@@ -101,7 +101,7 @@ const ContentTypeFormWrapper = ({
   const { put, post, del } = fetchClient;
 
   const isSingleType = collectionType === 'single-types';
-  const isCreatingEntry = !isSingleType && !id;
+  const isCreatingEntry = !isSingleType && id === 'create';
 
   const requestURL =
     isCreatingEntry && !origin
