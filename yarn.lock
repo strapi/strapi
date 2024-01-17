@@ -7906,6 +7906,7 @@ __metadata:
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin": "npm:4.17.1"
     "@strapi/admin-test-utils": "npm:4.17.1"
     "@strapi/design-system": "npm:1.14.1"
     "@strapi/helper-plugin": "npm:4.17.1"
@@ -7932,6 +7933,7 @@ __metadata:
     typescript: "npm:5.2.2"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/admin": ^4.19.0
     "@strapi/strapi": ^4.15.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
