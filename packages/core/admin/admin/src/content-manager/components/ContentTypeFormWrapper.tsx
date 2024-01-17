@@ -251,7 +251,8 @@ const ContentTypeFormWrapper = ({
         trackUsage('willDeleteEntry', trackerProperty);
 
         const { data } = await del<Contracts.CollectionTypes.Delete.Response>(
-          `/content-manager/${collectionType}/${slug}/${id}`
+          `/content-manager/${collectionType}/${slug}/${id}`,
+          { params }
         );
 
         toggleNotification({
@@ -316,7 +317,7 @@ const ContentTypeFormWrapper = ({
             : `/content-manager/${collectionType}/${slug}`,
           isCloning ? restBody : body,
           {
-            params: query,
+            params,
           }
         );
 

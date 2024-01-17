@@ -41,7 +41,7 @@ test.describe('Uniqueness', () => {
     }) => {
       await page.locator('text=Create new entry').first().click();
 
-      await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create?**');
+      await page.waitForURL('**/content-manager/collection-types/api::testing.testing/create?**');
 
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
@@ -60,7 +60,7 @@ test.describe('Uniqueness', () => {
 
       await page.locator('text=Create new entry').first().click();
 
-      await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create?**');
+      await page.waitForURL('**/content-manager/collection-types/api::testing.testing/create?**');
 
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
@@ -99,7 +99,7 @@ test.describe('Uniqueness', () => {
 
       await page.locator('text=Create new entry').first().click();
 
-      await page.waitForURL('**/content-manager/collectionType/api::testing.testing/create?**');
+      await page.waitForURL('**/content-manager/collection-types/api::testing.testing/create?**');
 
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
