@@ -1,42 +1,19 @@
-import { EntityService, Attribute, Schema } from '@strapi/types';
+import { EntityService, Attribute, Schema, LoadedStrapi } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
-
-// TODO: Shorthand id should only be a string on documents.
-// It's also a number here to make it works with existing V4 types.
-type ID = string | number;
-type ShortHand = ID;
-type LongHand = { id: ID };
-
-const isShortHand = (relation: any): relation is string | number => {
-  return typeof relation === 'string' || typeof relation === 'number';
-};
-
-const isLongHand = (relation: any): relation is { id: ID } => {
-  return isObject(relation) && 'id' in relation;
-};
-
-/**
- * Get relation ids from shorthand id (id)
- */
-const handleShortHand = (relation: ShortHand): ID[] => [relation];
-
-/**
- * Get relation ids from arrayed ids (id[], {id}[])
- */
-const handleArray = (array: ShortHand[] | LongHand[]) =>
-  array.map((item) => (isShortHand(item) ? item : item.id));
+import { ShortHand, LongHand, ID } from '../utils/types';
+import { isShortHand, isLongHand } from '../utils/data';
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
 const handlePrimitive = (
-  relation: ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined
+  relation: ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined | any
 ) => {
   if (!relation) return []; // null
-  if (isShortHand(relation)) return handleShortHand(relation); // id
-  if (isLongHand(relation)) return handleShortHand(relation.id); // { id }
-  if (Array.isArray(relation)) return handleArray(relation); // id[]
+  if (isShortHand(relation)) return [relation]; // id
+  if (isLongHand(relation)) return [relation.id]; // { id }
+  if (Array.isArray(relation)) return relation.map((item) => (isShortHand(item) ? item : item.id)); // id[]
 
   return [];
 };
@@ -47,12 +24,8 @@ const handlePrimitive = (
 const extractRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>
 ): ID[] => {
-  if (!relation) return []; // null
-  if (isShortHand(relation)) return handleShortHand(relation); // id
-  if (isLongHand(relation)) return handleShortHand(relation.id); // { id }
-  if (Array.isArray(relation)) return relation.map((item) => (isShortHand(item) ? item : item.id)); // id[]
-
-  const ids = [];
+  const ids = handlePrimitive(relation);
+  if (!isObject(relation)) return ids;
 
   if ('set' in relation) ids.push(...handlePrimitive(relation.set)); // set: id[]
   if ('disconnect' in relation) ids.push(...handlePrimitive(relation.disconnect)); // disconnect: id[]
