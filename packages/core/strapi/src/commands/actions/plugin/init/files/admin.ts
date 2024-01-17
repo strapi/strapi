@@ -60,7 +60,7 @@ const TYPESCRIPT: TemplateFile[] = [
         export default {
           register(app: any) {
             app.addMenuLink({
-              to: \`/plugins/\${PluginIcon}\`,
+              to: \`/plugins/\${PLUGIN_ID}\`,
               icon: PluginIcon,
               intlLabel: {
                 id: \`\${PLUGIN_ID}.plugin.name\`,

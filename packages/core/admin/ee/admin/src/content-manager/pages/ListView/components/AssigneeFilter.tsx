@@ -2,13 +2,14 @@ import { Combobox, ComboboxOption, ComboboxProps } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
-import { useAdminUsers } from '../../../../../../../admin/src/hooks/useAdminUsers';
+import { useAdminUsers } from '../../../../../../../admin/src/services/users';
 
 interface AssigneeFilterProps extends Pick<ComboboxProps, 'value' | 'onChange'> {}
 
 const AssigneeFilter = ({ value, onChange }: AssigneeFilterProps) => {
   const { formatMessage } = useIntl();
-  const { users, isLoading } = useAdminUsers();
+  const { data, isLoading } = useAdminUsers();
+  const users = data?.users || [];
 
   return (
     <Combobox

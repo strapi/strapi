@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import type { Entity } from '@strapi/types';
-import type { QueryObserverBaseResult } from 'react-query';
 
 /**
  * This is duplicated from the `@strapi/admin` package.
@@ -25,7 +24,7 @@ interface Permission {
 
 export type RBACContextValue = {
   allPermissions: Permission[]; // The permissions of the current user.
-  refetchPermissions: QueryObserverBaseResult<Permission[]>['refetch'];
+  refetchPermissions: () => void;
 };
 
 const RBACContext = React.createContext<RBACContextValue>({

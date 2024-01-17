@@ -61,7 +61,7 @@ export declare namespace Revoke {
   }
 
   export interface Params {
-    id: number;
+    id: Entity.ID;
   }
 
   export interface Response {
@@ -80,7 +80,7 @@ export declare namespace Get {
   }
 
   export interface Params {
-    id: number;
+    id: Entity.ID;
   }
 
   export interface Response {
@@ -99,7 +99,7 @@ export declare namespace Update {
   }
 
   export interface Params {
-    id: number;
+    id: Entity.ID;
   }
 
   export interface Response {

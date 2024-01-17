@@ -23,13 +23,17 @@ namespace GetAll {
     query: {};
   }
 
-  export interface Response {
-    data: {
-      pagination: Pagination;
-      results: AuditLog[];
-    };
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | {
+        pagination: Pagination;
+        results: AuditLog[];
+        error?: never;
+      }
+    | {
+        pagination?: never;
+        results?: never;
+        error?: errors.ApplicationError;
+      };
 }
 
 namespace Get {

@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   Box,
   Flex,
@@ -10,53 +12,34 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { QueryStatus, useQuery } from 'react-query';
 
-import { AuditLog, Get } from '../../../../../../../../shared/contracts/audit-logs';
+import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
+import { useGetAuditLogQuery } from '../../../../../services/auditLogs';
 import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';
 import { actionTypes, getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
-type ActionBodyProps = {
-  status: QueryStatus;
-  data: AuditLog;
-  formattedDate: string;
-};
-
-type ModalProps = {
+interface ModalProps {
   handleClose: () => void;
   logId: string;
-};
-
-type ActionItemProps = {
-  actionLabel: string;
-  actionName: string;
-};
+}
 
 export const Modal = ({ handleClose, logId }: ModalProps) => {
-  const { get } = useFetchClient();
   const toggleNotification = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const fetchAuditLog = async (id: string) => {
-    const { data } = await get<Get.Response>(`/admin/audit-logs/${id}`);
+  const { data, error, isLoading } = useGetAuditLogQuery(logId);
 
-    if (!data) {
-      throw new Error('Audit log not found');
-    }
-
-    return data;
-  };
-
-  const { data, status } = useQuery(['audit-log', logId], () => fetchAuditLog(logId), {
-    onError() {
+  React.useEffect(() => {
+    if (error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: formatAPIError(error),
       });
       handleClose();
-    },
-  });
+    }
+  }, [error, formatAPIError, handleClose, toggleNotification]);
 
   const formatTimeStamp = useFormatTimeStamp();
   const formattedDate = data && 'date' in data ? formatTimeStamp(data.date) : '';
@@ -72,16 +55,22 @@ export const Modal = ({ handleClose, logId }: ModalProps) => {
         </Breadcrumbs>
       </ModalHeader>
       <ModalBody>
-        <ActionBody status={status} data={data as AuditLog} formattedDate={formattedDate} />
+        <ActionBody isLoading={isLoading} data={data as AuditLog} formattedDate={formattedDate} />
       </ModalBody>
     </ModalLayout>
   );
 };
 
-const ActionBody = ({ status, data, formattedDate }: ActionBodyProps) => {
+interface ActionBodyProps {
+  isLoading?: boolean;
+  data: AuditLog;
+  formattedDate: string;
+}
+
+const ActionBody = ({ isLoading, data, formattedDate }: ActionBodyProps) => {
   const { formatMessage } = useIntl();
 
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       <Flex padding={7} justifyContent="center" alignItems="center">
         {/**
@@ -162,6 +151,11 @@ const ActionBody = ({ status, data, formattedDate }: ActionBodyProps) => {
     </>
   );
 };
+
+interface ActionItemProps {
+  actionLabel: string;
+  actionName: string;
+}
 
 const ActionItem = ({ actionLabel, actionName }: ActionItemProps) => {
   return (
