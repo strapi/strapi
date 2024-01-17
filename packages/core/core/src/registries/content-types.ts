@@ -1,7 +1,7 @@
 import { pickBy, has } from 'lodash/fp';
 import type { Common, Schema } from '@strapi/types';
 import { createContentType, ContentTypeDefinition } from '../domain/content-type';
-import { addNamespace, hasNamespace } from '../utils';
+import { addNamespace, hasNamespace } from './namespace';
 
 type ContentTypesInput = Record<string, ContentTypeDefinition>;
 type ContentTypeExtendFn = (contentType: Schema.ContentType) => Schema.ContentType;

@@ -3,8 +3,8 @@ import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import { env } from '@strapi/utils';
 import type { Strapi, Plugin } from '@strapi/types';
-import { loadFile } from '../../app-configuration/load-config-file';
-import loadFiles from '../../../load/load-files';
+import { loadConfigFile } from '../../utils/load-config-file';
+import { loadFiles } from '../../utils/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
@@ -107,7 +107,7 @@ export default async function loadPlugins(strapi: Strapi) {
       continue;
     }
 
-    const pluginServer = loadFile(serverEntrypointPath);
+    const pluginServer = loadConfigFile(serverEntrypointPath);
     plugins[pluginName] = {
       ...defaultPlugin,
       ...pluginServer,

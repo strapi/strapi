@@ -11,7 +11,7 @@ dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
+const { version: strapiVersion } = require(path.join(__dirname, '../../package.json'));
 
 const defaultConfig = {
   server: {
