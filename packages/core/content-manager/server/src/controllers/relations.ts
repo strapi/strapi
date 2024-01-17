@@ -126,27 +126,26 @@ export default {
       fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
     }
 
-    const queryParams = {
-      sort: mainField,
-      ...query,
-      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      filters: {}, // cannot filter for RBAC reasons
-    };
-
     const permissionChecker = getService('permission-checker').create({
       userAbility,
       model: targetedModel.uid,
     });
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+
+    const queryParams = {
+      sort: mainField,
+      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
+      ...permissionQuery,
+    };
 
     if (!isEmpty(idsToOmit)) {
-      addFiltersClause(permissionQuery, { id: { $notIn: idsToOmit } });
+      addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
     }
 
     // searching should be allowed only on mainField for permission reasons
     if (_q) {
       const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(permissionQuery, { [mainField]: { [_filter]: _q } });
+      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
     }
 
     if (entityId) {
@@ -169,10 +168,10 @@ export default {
         .select(`${alias}.id`)
         .getKnexQuery();
 
-      addFiltersClause(permissionQuery, { id: { $notIn: knexSubQuery } });
+      addFiltersClause(queryParams, { id: { $notIn: knexSubQuery } });
     }
 
-    ctx.body = await strapi.entityService.findPage(targetedModel.uid, permissionQuery);
+    ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
   },
 
   async findExisting(ctx: any) {
