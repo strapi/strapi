@@ -143,13 +143,13 @@ const EntryValidationText = ({ action, schema, components, entry }: EntryValidat
   const { formatMessage } = useIntl();
   const { validate } = unstable_useDocument();
 
-  const { status, errors } = validate(entry, {
+  const { errors } = validate(entry, {
     contentType: schema,
     components,
     isCreatingEntry: false,
   });
 
-  if (status === 'error' && errors && Object.keys(errors).length > 0) {
+  if (Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)
       .map(([key, value]) =>
         formatMessage(

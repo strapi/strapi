@@ -1,9 +1,8 @@
 import { getYupInnerErrors } from '@strapi/helper-plugin';
 import { Schema, Entity as StrapiEntity, Attribute } from '@strapi/types';
+import { ValidationError } from 'yup';
 
 import { createYupSchema } from '../content-manager/utils/validation';
-
-import type { ValidationError } from 'yup';
 
 export interface Entity {
   id: StrapiEntity.ID;
@@ -32,20 +31,27 @@ export function useDocument() {
     entry: Entity & { [key: string]: Attribute.Any },
     { contentType, components, isCreatingEntry = false }: ValidateOptions
   ) => {
-    // @ts-expect-error - @TODO: createYupSchema types need to be revisited
-    const schema = createYupSchema(contentType, { components }, { isCreatingEntry });
+    const schema = createYupSchema(
+      // @ts-expect-error - @TODO: createYupSchema types need to be revisited
+      contentType,
+      { components },
+      { isCreatingEntry, isDraft: false, isJSONTestDisabled: true }
+    );
 
     try {
       schema.validateSync(entry, { abortEarly: false });
 
       return {
-        status: 'ok',
+        errors: {},
       };
     } catch (error) {
-      return {
-        status: 'error',
-        errors: getYupInnerErrors(error as ValidationError),
-      };
+      if (error instanceof ValidationError) {
+        return {
+          errors: getYupInnerErrors(error as ValidationError),
+        };
+      }
+
+      throw error;
     }
   };
 

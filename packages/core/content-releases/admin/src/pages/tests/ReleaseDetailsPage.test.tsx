@@ -23,7 +23,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 jest.mock('@strapi/admin/strapi-admin', () => ({
   unstable_useDocument: jest
     .fn()
-    .mockReturnValue({ validate: jest.fn().mockReturnValue({ status: 'ok' }) }),
+    .mockReturnValue({ validate: jest.fn().mockReturnValue({ errors: {} }) }),
 }));
 
 describe('Releases details page', () => {

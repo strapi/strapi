@@ -238,7 +238,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
       ...query,
       populate: {
-        entry: true,
+        entry: {
+          populate: '*',
+        },
       },
       filters: {
         release: releaseId,
