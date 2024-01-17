@@ -88,30 +88,47 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       hasEntryAttached: false,
     }
   ) {
-    const whereActions = hasEntryAttached
-      ? {
-          // Find all Releases where the content type entry is present
+    const getWhereObject = async (hasEntryAttached: boolean = false) => {
+      if (hasEntryAttached) {
+        // Find all Releases where the content type entry is present
+        return {
           actions: {
             target_type: contentTypeUid,
             target_id: entryId,
           },
-        }
-      : {
-          // Find all Releases where the content type entry is not present
-          $or: [
-            {
-              $not: {
-                actions: {
-                  target_type: contentTypeUid,
-                  target_id: entryId,
-                },
-              },
-            },
-            {
-              actions: null,
-            },
-          ],
         };
+      }
+
+      // We get the list of releases where the entry is present
+      const releasesRelated = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+        where: {
+          releasedAt: {
+            $null: true,
+          },
+          actions: {
+            target_type: contentTypeUid,
+            target_id: entryId,
+          },
+        },
+      });
+
+      // Find all Releases where the content type entry is not present
+      return {
+        $or: [
+          {
+            id: {
+              $notIn: releasesRelated.map((release) => release.id),
+            },
+          },
+          {
+            actions: null,
+          },
+        ],
+      };
+    };
+
+    const whereActions = await getWhereObject(hasEntryAttached);
+
     const populateAttachedAction = hasEntryAttached
       ? {
           // Filter the action to get only the content type entry
