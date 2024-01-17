@@ -10,10 +10,7 @@ import { getService } from './utils';
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 const getPlugin = () => {
-  if (
-    features.isEnabled('cms-content-releases') &&
-    strapi.features.future.isEnabled('contentReleases')
-  ) {
+  if (features.isEnabled('cms-content-releases')) {
     return {
       register,
       bootstrap,
@@ -22,10 +19,7 @@ const getPlugin = () => {
       controllers,
       routes,
       destroy() {
-        if (
-          features.isEnabled('cms-content-releases') &&
-          strapi.features.future.isEnabled('contentReleases')
-        ) {
+        if (features.isEnabled('cms-content-releases')) {
           getService('event-manager').destroyAllListeners();
         }
       },

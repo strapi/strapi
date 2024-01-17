@@ -5,17 +5,14 @@ import { RELEASE_ACTION_MODEL_UID } from './constants';
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
-  if (
-    features.isEnabled('cms-content-releases') &&
-    strapi.features.future.isEnabled('contentReleases')
-  ) {
+  if (features.isEnabled('cms-content-releases')) {
     strapi.db.lifecycles.subscribe({
       afterDelete(event) {
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         const { model, result } = event;
 
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options.draftAndPublish) {
+        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
           const { id } = result;
 
           strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
@@ -35,7 +32,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         const { model, params } = event;
 
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options.draftAndPublish) {
+        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
           const { where } = params;
 
           const entriesToDelete = await strapi.db

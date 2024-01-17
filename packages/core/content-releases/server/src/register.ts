@@ -7,10 +7,7 @@ import { getService } from './utils';
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
-  if (
-    features.isEnabled('cms-content-releases') &&
-    strapi.features.future.isEnabled('contentReleases')
-  ) {
+  if (features.isEnabled('cms-content-releases')) {
     await strapi.admin.services.permission.actionProvider.registerMany(ACTIONS);
 
     const releaseActionService = getService('release-action', { strapi });
@@ -19,7 +16,7 @@ export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
     const destroyContentTypeUpdateListener = strapi.eventHub.on(
       'content-type.update',
       async ({ contentType }) => {
-        if (contentType.schema.options.draftAndPublish === false) {
+        if (contentType.schema?.options?.draftAndPublish === false) {
           await releaseActionService.deleteManyForContentType(contentType.uid);
         }
       }
