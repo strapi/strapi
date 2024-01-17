@@ -148,7 +148,6 @@ yargs
                   useNullAsDefault: true,
                 },
                 template: templateDir,
-                link: true,
               });
 
               /**
