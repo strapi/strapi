@@ -88,7 +88,7 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = Utils.Express
       : never;
   },
   {
-    [x: string]: OrderKind.Any | ObjectNotation<TSchemaUID>;
+    [key: string]: OrderKind.Any | ObjectNotation<TSchemaUID>;
   }
 >;
 

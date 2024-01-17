@@ -349,9 +349,6 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Mode
     const isAllowedAttributeForFragmentPopulate =
       isDynamicZoneAttribute(attribute) || isMorphToRelationalAttribute(attribute);
 
-    // const hasFragmentPopulateDefined =
-    //   typeof subPopulate === 'object' && 'on' in subPopulate && !isNil(subPopulate.on);
-
     if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined(subPopulate)) {
       return {
         ...acc,
