@@ -28,6 +28,7 @@ import watchAdminCommand from './actions/watch-admin/command';
 
 import buildPluginCommand from './actions/plugin/build-command/command';
 import initPluginCommand from './actions/plugin/init/command';
+import linkWatchPluginCommand from './actions/plugin/link-watch/command';
 import watchPluginCommand from './actions/plugin/watch/command';
 import verifyPluginCommand from './actions/plugin/verify/command';
 
@@ -66,6 +67,7 @@ const strapiCommands = {
    */
   buildPluginCommand,
   initPluginCommand,
+  linkWatchPluginCommand,
   watchPluginCommand,
   verifyPluginCommand,
 } as const;

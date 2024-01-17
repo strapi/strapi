@@ -16,12 +16,7 @@ import sub from 'markdown-it-sub';
 // @ts-expect-error - library does not export types
 import sup from 'markdown-it-sup';
 
-const loadCss = async () => {
-  // @ts-expect-error – idm
-  await import('highlight.js/styles/solarized-dark.css');
-};
-
-loadCss();
+import 'highlight.js/styles/solarized-dark.css';
 
 const md: Markdown = new Markdown({
   html: true, // Enable HTML tags in source

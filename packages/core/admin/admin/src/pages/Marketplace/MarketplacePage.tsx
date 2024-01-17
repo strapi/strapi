@@ -59,6 +59,7 @@ interface TabQuery {
 }
 
 const MarketplacePage = () => {
+  const tabRef = React.useRef<any>(null);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
@@ -102,6 +103,16 @@ const MarketplacePage = () => {
     possibleCategories,
     pagination,
   } = useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery });
+
+  const indexOfNpmPackageType = ['plugin', 'provider'].indexOf(npmPackageType);
+
+  // TODO: Replace this solution with v2 of the Design System
+  // Check if the active tab index changes and call the handler of the ref to update the tab group component
+  React.useEffect(() => {
+    if (tabRef.current) {
+      tabRef.current._handlers.setSelectedTabIndex(indexOfNpmPackageType);
+    }
+  }, [indexOfNpmPackageType]);
 
   if (!isOnline) {
     return <OfflineLayout />;
@@ -173,8 +184,9 @@ const MarketplacePage = () => {
             })}
             id="tabs"
             variant="simple"
-            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
+            initialSelectedTabIndex={indexOfNpmPackageType}
             onTabChange={handleTabChange}
+            ref={tabRef}
           >
             <Flex justifyContent="space-between" paddingBottom={4}>
               <Tabs>

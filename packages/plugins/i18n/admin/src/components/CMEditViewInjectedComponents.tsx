@@ -35,7 +35,11 @@ const CMEditViewInjectedComponents = () => {
     return null;
   }
 
-  const localizations = getLocalizationsFromData(modifiedData);
+  const localizations = [
+    ...getLocalizationsFromData(modifiedData),
+    // current locale
+    { id: currentEntityId, locale: currentLocale, publishedAt: modifiedData.publishedAt },
+  ];
 
   return (
     <Box paddingTop={6}>
