@@ -51,7 +51,7 @@ const DropPlaceholder = styled(Box)<{
   `}
 `;
 
-const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
+const DragItem = styled(Flex)<{ dragVisibility?: CSSProperties['visibility'] }>`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -60,7 +60,7 @@ const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
 
   // Set the visibility of drag button
   [role='button'] {
-    visibility: ${(props) => props.dragVisibility};
+    visibility: ${(props) => props.dragVisibility ?? 'hidden'};
     opacity: inherit;
   }
   &[aria-disabled='true'] {
@@ -109,6 +109,7 @@ type DragAndDropElementProps = Direction & {
   children: RenderElementProps['children'];
   index: Array<number>;
   dragHandleTopMargin?: CSSProperties['marginTop'];
+  dragButtonHidden: boolean;
 };
 
 const DragAndDropElement = ({
@@ -117,6 +118,7 @@ const DragAndDropElement = ({
   setDragDirection,
   dragDirection,
   dragHandleTopMargin,
+  dragButtonHidden,
 }: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
@@ -286,7 +288,7 @@ const DragAndDropElement = ({
           onSelect={() => setDragVisibility('visible')}
           onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
-          dragVisibility={dragVisibility}
+          dragVisibility={!dragButtonHidden && dragVisibility}
         >
           <DragIconButton
             forwardedAs="div"
@@ -370,10 +372,24 @@ const baseRenderElement = ({
   const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, props.element);
+  let hideDragButton = false;
 
   // Link is inline block so it cannot be dragged
   // List is skipped from dragged items
   if (isLinkNode(props.element) || isListNode(props.element)) return block.renderElement(props);
+
+  const isListItem = props.element.type === 'list-item';
+
+  const listNodeEntry =
+    isListItem &&
+    Editor.above(editor, {
+      at: nodePath,
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+    });
+
+  // Hide drag button for nested lists i.e. lists with indentlevel higher than 0
+  if (listNodeEntry && !Editor.isEditor(listNodeEntry[0]) && listNodeEntry[0].listIndentLevel > 0)
+    hideDragButton = true;
 
   return (
     <DragAndDropElement
@@ -381,6 +397,7 @@ const baseRenderElement = ({
       setDragDirection={setDragDirection}
       dragDirection={dragDirection}
       dragHandleTopMargin={block.dragHandleTopMargin}
+      dragButtonHidden={hideDragButton}
     >
       {block.renderElement(props)}
     </DragAndDropElement>
