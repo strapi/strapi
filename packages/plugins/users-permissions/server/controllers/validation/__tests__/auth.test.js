@@ -89,8 +89,20 @@ describe('user-permissions auth', () => {
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
 
-    test('throws ValidationError when passed fields not in allowedFields', async () => {
-      // without allowedFields
+    test('throws ValidationError when passed extra fields when allowedField is undefined', async () => {
+      global.strapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn(() => {
+            return {
+              register: {
+                // empty
+              },
+            };
+          }),
+        },
+      };
+
       const ctx = {
         state: {
           auth: {},
@@ -105,9 +117,12 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
 
-      // with allowedFields []
+      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
+      expect(ctx.send).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws ValidationError when passed extra fields when allowedField is []', async () => {
       global.strapi = {
         ...mockStrapi,
         config: {
@@ -121,8 +136,22 @@ describe('user-permissions auth', () => {
         },
       };
 
-      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
+      const ctx = {
+        state: {
+          auth: {},
+        },
+        request: {
+          body: {
+            confirmed: true,
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'Testpassword1!',
+          },
+        },
+        send: jest.fn(),
+      };
 
+      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
