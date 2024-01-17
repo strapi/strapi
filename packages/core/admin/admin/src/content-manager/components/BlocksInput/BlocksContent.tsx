@@ -54,7 +54,7 @@ const DropPlaceholder = styled(Box)<{
   `}
 `;
 
-const DragItem = styled(Flex)<{ dragVisibility?: CSSProperties['visibility'] }>`
+const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -63,7 +63,7 @@ const DragItem = styled(Flex)<{ dragVisibility?: CSSProperties['visibility'] }>`
 
   // Set the visibility of drag button
   [role='button'] {
-    visibility: ${(props) => props.dragVisibility ?? 'hidden'};
+    visibility: ${(props) => props.dragVisibility};
     opacity: inherit;
   }
   &[aria-disabled='true'] {

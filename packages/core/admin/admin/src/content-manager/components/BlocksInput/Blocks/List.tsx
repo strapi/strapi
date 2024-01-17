@@ -29,13 +29,13 @@ const listStyle = css`
   }
 `;
 
-const Orderedlist = styled.ol<{ listStyle?: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyle || 'decimal'};
+const Orderedlist = styled.ol<{ listStyle: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.listStyle};
   ${listStyle}
 `;
 
-const Unorderedlist = styled.ul<{ listStyle?: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyle || 'disc'};
+const Unorderedlist = styled.ul<{ listStyle: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.listStyle};
   ${listStyle}
 `;
 
@@ -44,7 +44,7 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
     return null;
   }
 
-  // Determine the next style based on the current style
+  // Determine next style based on the current style
   const listStyles = listBlocks[`list-${element.format}`].styles;
   const nextIndex = (element.listIndentLevel || 0) % listStyles!.length;
   const listStyle = listStyles![nextIndex];
@@ -115,11 +115,10 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
       replaceListWithEmptyBlock(editor, currentListPath);
     }
   } else if (isFocusAtTheBeginningOfAChild) {
-    // If first child then convert it into paragraph node
+    // If the focus is at the beginning of a child node we need to replace it with a paragraph
     Transforms.liftNodes(editor, {
       match: (node) => !Editor.isEditor(node) && node.type === 'list-item',
     });
-    // If the focus is at the beginning of a child node we need to replace it with a paragraph
     Transforms.setNodes(editor, { type: 'paragraph' });
   } else if (isListItemEmpty) {
     const previousEntry = Editor.previous(editor, {

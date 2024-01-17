@@ -161,15 +161,7 @@ const handleToggleList = (
   if (!Editor.isEditor(currentList) && isListNode(currentList)) {
     // Format is different, toggle list format
     if (currentList.format !== format) {
-      Transforms.setNodes(
-        editor,
-        {
-          format,
-        },
-        {
-          at: currentListPath,
-        }
-      );
+      Transforms.setNodes(editor, { format }, { at: currentListPath });
     } else {
       // Format is same, convert selected list-item to paragraph
       const [, lastNodePath] = Editor.last(editor, []);
@@ -184,12 +176,8 @@ const handleToggleList = (
 
       Transforms.setNodes(
         editor,
-        {
-          type: 'paragraph',
-        },
-        {
-          at: editor.selection ?? [updatedLastNodePath[0]],
-        }
+        { type: 'paragraph' },
+        { at: editor.selection ?? [updatedLastNodePath[0]] }
       );
     }
   }
@@ -210,7 +198,7 @@ const BlocksDropdown = () => {
 
   const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
 
-  const handleOnSelect = (optionKey: unknown) => {
+  const handleSelect = (optionKey: unknown) => {
     if (!isSelectorBlockKey(optionKey)) {
       return;
     }
@@ -318,7 +306,7 @@ const BlocksDropdown = () => {
       <SelectWrapper>
         <SingleSelect
           startIcon={<Icon as={blocks[blockSelected].icon} />}
-          onChange={handleOnSelect}
+          onChange={handleSelect}
           placeholder={formatMessage(blocks[blockSelected].label)}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
@@ -394,12 +382,8 @@ const toggleList = (editor: Editor, format: Block<'list'>['format']) => {
 
     Transforms.setNodes(
       editor,
-      {
-        type: 'list-item',
-      },
-      {
-        at: editor.selection ?? [lastNodePath[0]],
-      }
+      { type: 'list-item' },
+      { at: editor.selection ?? [lastNodePath[0]] }
     );
 
     const block = { type: 'list' as const, format, children: [] };
@@ -426,7 +410,6 @@ const ListButton = ({ block, format }: ListButtonProps) => {
 
     if (currentListEntry) {
       const [currentList] = currentListEntry;
-
       if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
         return true;
     }
