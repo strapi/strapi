@@ -85,9 +85,17 @@ const createUpdateNotifier = (strapi: Strapi) => {
 
   return {
     notify({ checkInterval = CHECK_INTERVAL, notifInterval = NOTIF_INTERVAL } = {}) {
+      // TODO v6: Remove this warning
       if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false) || !config) {
+        strapi.log.warn(
+          'STRAPI_DISABLE_UPDATE_NOTIFICATION is no longer supported. Instead, set { logger: { updates: { enabled: false } } } in your server configuration.'
+        );
+      }
+
+      if (strapi.config.get<boolean>('server.logger.updates.enabled') === false) {
         return;
       }
+
       display(notifInterval);
       checkUpdate(checkInterval); // doesn't need to await
     },

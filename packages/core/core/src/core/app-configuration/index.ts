@@ -21,6 +21,19 @@ const defaultConfig = {
     cron: { enabled: false },
     admin: { autoOpen: false },
     dirs: { public: './public' },
+    transfer: {
+      remote: {
+        enabled: true,
+      },
+    },
+    logger: {
+      updates: {
+        enabled: true,
+      },
+      startup: {
+        enabled: true,
+      },
+    },
   },
   admin: {},
   api: {

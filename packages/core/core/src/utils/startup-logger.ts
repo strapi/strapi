@@ -71,12 +71,7 @@ export default (app: Strapi) => {
     },
 
     logStartupMessage({ isInitialized }: { isInitialized: boolean }) {
-      // Should the startup message be displayed?
-      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
-        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
-        : false;
-
-      if (hideStartupMessage === false) {
+      if (strapi.config.get('server.logger.startup.enabled', true) === true) {
         if (!isInitialized) {
           this.logFirstStartupMessage();
         } else {
