@@ -3,36 +3,80 @@ import strapiUtils from '@strapi/utils';
 
 const { isVisibleAttribute } = strapiUtils.contentTypes;
 
-function isProhibitedRelation(model: any, attributeName: any) {
+type ProhibitedCloningFields = Record<string, 'unique' | 'relation'>;
+
+function isProhibitedRelation(
+  model: any,
+  attributeName: any,
+  path: string
+): ProhibitedCloningFields {
   // we don't care about createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
-    return false;
+    return {};
   }
 
-  return true;
+  /**
+   * Only one-to-many and one-to-one (when it's reversed, not one-way) are dangerous,
+   * because the other relations don't "steal" the relation from the entry we're cloning
+   */
+  const { relation, inversedBy } = model.attributes[attributeName];
+  const isOneToOne = relation === 'oneToOne' && inversedBy != null;
+
+  if (relation === 'oneToMany' || isOneToOne) {
+    return { [`${path}${attributeName}`]: 'relation' };
+  }
+
+  return {};
 }
 
-const hasProhibitedCloningFields = (uid: any): boolean => {
+const getProhibitedCloningFields = (uid: any, pathPrefix = ''): ProhibitedCloningFields => {
   const model = strapi.getModel(uid);
 
-  return Object.keys(model.attributes).some((attributeName: any) => {
-    const attribute: any = model.attributes[attributeName];
+  const prohibitedFields = Object.keys(model.attributes).reduce<ProhibitedCloningFields>(
+    (acc, attributeName) => {
+      const attribute: any = model.attributes[attributeName];
+      const baseAttributePath = `${pathPrefix}${attributeName}`;
 
-    switch (attribute.type) {
-      case 'relation':
-        return isProhibitedRelation(model, attributeName);
-      case 'component':
-        return hasProhibitedCloningFields(attribute.component);
-      case 'dynamiczone':
-        return (attribute.components || []).some((componentUID: any) =>
-          hasProhibitedCloningFields(componentUID)
-        );
-      case 'uid':
-        return true;
-      default:
-        return attribute?.unique ?? false;
-    }
-  });
+      switch (attribute.type) {
+        case 'relation':
+          return {
+            ...acc,
+            ...isProhibitedRelation(model, attributeName, pathPrefix),
+          };
+        case 'component':
+          return {
+            ...acc,
+            ...getProhibitedCloningFields(attribute.component, `${baseAttributePath}.`),
+          };
+        case 'dynamiczone':
+          return {
+            ...acc,
+            ...Object.assign(
+              {},
+              ...(attribute.components || []).map((componentUID: any, index: number) =>
+                getProhibitedCloningFields(componentUID, `${baseAttributePath}[${index}].`)
+              )
+            ),
+          };
+        case 'uid':
+          return {
+            ...acc,
+            [baseAttributePath]: 'unique',
+          };
+        default:
+          if (attribute?.unique) {
+            return {
+              ...acc,
+              [baseAttributePath]: 'unique',
+            };
+          }
+          return acc;
+      }
+    },
+    {}
+  );
+
+  return prohibitedFields;
 };
 
 /**
@@ -79,4 +123,4 @@ const excludeNotCreatableFields =
     }, body);
   };
 
-export { hasProhibitedCloningFields, excludeNotCreatableFields };
+export { getProhibitedCloningFields, excludeNotCreatableFields };

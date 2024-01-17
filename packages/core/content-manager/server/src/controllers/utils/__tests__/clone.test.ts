@@ -1,4 +1,4 @@
-import { hasProhibitedCloningFields } from '../clone';
+import { getProhibitedCloningFields } from '../clone';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -55,12 +55,51 @@ describe('Populate', () => {
         },
       },
     },
-    relation: {
+    relations: {
       modelName: 'Fake relation oneToMany model',
       attributes: {
-        relationAttrName: {
+        one_way: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'simple',
+        },
+        one_to_one: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'simple',
+          private: true,
+          inversedBy: 'one_to_one_kitchensink',
+        },
+        one_to_many: {
           type: 'relation',
           relation: 'oneToMany',
+          target: 'simple',
+          mappedBy: 'many_to_one_kitchensink',
+        },
+        many_to_one: {
+          type: 'relation',
+          relation: 'manyToOne',
+          target: 'simple',
+          inversedBy: 'one_to_many_kitchensinks',
+        },
+        many_to_manys: {
+          type: 'relation',
+          relation: 'manyToMany',
+          target: 'simple',
+          inversedBy: 'many_to_many_kitchensinks',
+        },
+        many_way: {
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'simple',
+        },
+        morph_to_one: {
+          type: 'relation',
+          relation: 'morphToOne',
+        },
+        morph_to_many: {
+          type: 'relation',
+          relation: 'morphToMany',
         },
       },
     },
@@ -86,48 +125,47 @@ describe('Populate', () => {
     });
 
     test('model without unique fields', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('simple');
-      expect(hasProhibitedFields).toEqual(false);
+      const prohibitedFields = getProhibitedCloningFields('simple');
+      expect(prohibitedFields).toEqual({});
     });
 
     test('model with unique fields', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('simpleUnique');
-      expect(hasProhibitedFields).toEqual(true);
+      const prohibitedFields = getProhibitedCloningFields('simpleUnique');
+      expect(prohibitedFields).toEqual({ text: 'unique' });
     });
 
     test('model with component', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('component');
-      expect(hasProhibitedFields).toEqual(false);
+      const prohibitedFields = getProhibitedCloningFields('component');
+      expect(prohibitedFields).toEqual({});
     });
 
     test('model with component & unique fields', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('componentUnique');
-      expect(hasProhibitedFields).toEqual(true);
-    });
-
-    test('model with component & unique fields', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('componentUnique');
-      expect(hasProhibitedFields).toEqual(true);
+      const prohibitedFields = getProhibitedCloningFields('componentUnique');
+      expect(prohibitedFields).toEqual({ 'componentAttrName.text': 'unique' });
     });
 
     test('model with dynamic zone', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('dynZone');
-      expect(hasProhibitedFields).toEqual(false);
+      const prohibitedFields = getProhibitedCloningFields('dynZone');
+      expect(prohibitedFields).toEqual({});
     });
 
-    test('model with dynamic zone', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('dynZoneUnique');
-      expect(hasProhibitedFields).toEqual(true);
+    test('model with unique component in dynamic zone', () => {
+      const prohibitedFields = getProhibitedCloningFields('dynZoneUnique');
+      expect(prohibitedFields).toEqual({ 'dynZoneAttrName[1].componentAttrName.text': 'unique' });
     });
 
-    test('model with relation', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('relation');
-      expect(hasProhibitedFields).toEqual(true);
+    test('model with relations', () => {
+      const prohibitedFields = getProhibitedCloningFields('relations');
+      expect(prohibitedFields).toEqual({
+        one_to_one: 'relation',
+        one_to_many: 'relation',
+        many_way: 'relation',
+      });
     });
 
     test('model with media', () => {
-      const hasProhibitedFields = hasProhibitedCloningFields('media');
-      expect(hasProhibitedFields).toEqual(false);
+      const prohibitedFields = getProhibitedCloningFields('media');
+      expect(prohibitedFields).toEqual({});
     });
   });
 });

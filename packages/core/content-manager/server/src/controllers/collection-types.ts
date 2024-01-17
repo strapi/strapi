@@ -1,7 +1,7 @@
 import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
-import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
+import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 
 const { ApplicationError } = errors;
 
@@ -193,10 +193,15 @@ export default {
     const { model } = ctx.params;
 
     // Trying to automatically clone the entity and model has unique or relational fields
-    if (hasProhibitedCloningFields(model)) {
-      throw new ApplicationError(
+    const prohibitedFields = getProhibitedCloningFields(model);
+    console.log(prohibitedFields);
+    if (Object.keys(prohibitedFields).length > 0) {
+      return ctx.badRequest(
         'Entity could not be cloned as it has unique and/or relational fields. ' +
-          'Please edit those fields manually and save to complete the cloning.'
+          'Please edit those fields manually and save to complete the cloning.',
+        {
+          prohibitedFields,
+        }
       );
     }
 
