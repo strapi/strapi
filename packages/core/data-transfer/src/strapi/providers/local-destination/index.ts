@@ -45,6 +45,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   uploadsBackupDirectoryName: string;
 
+  onWarning?: ((message: string) => void) | undefined;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -415,7 +417,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
 
     if (strategy === 'restore') {
-      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction);
+      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, this.onWarning);
     }
 
     throw new ProviderValidationError(`Invalid strategy ${strategy}`, {
