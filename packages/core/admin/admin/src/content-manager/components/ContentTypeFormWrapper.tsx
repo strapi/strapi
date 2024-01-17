@@ -27,6 +27,7 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
+import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
@@ -100,7 +101,7 @@ const ContentTypeFormWrapper = ({
   const { put, post, del } = fetchClient;
 
   const isSingleType = collectionType === 'single-types';
-  const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
+  const isCreatingEntry = !isSingleType && !id;
 
   const requestURL =
     isCreatingEntry && !origin
@@ -172,7 +173,10 @@ const ContentTypeFormWrapper = ({
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, {
+          cancelToken: source.token,
+          params: buildValidGetParams(query),
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
@@ -187,7 +191,6 @@ const ContentTypeFormWrapper = ({
           return;
         } else if (resStatus === 404 && isSingleType) {
           // Creating a single type
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         }
 
@@ -232,6 +235,7 @@ const ContentTypeFormWrapper = ({
     redirectionLink,
     toggleNotification,
     isSingleType,
+    query,
   ]);
 
   const displayErrors = React.useCallback(
@@ -258,7 +262,6 @@ const ContentTypeFormWrapper = ({
         trackUsage('didDeleteEntry', trackerProperty);
 
         if (isSingleType) {
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         } else {
           replace(redirectionLink);
@@ -327,7 +330,6 @@ const ContentTypeFormWrapper = ({
 
         // TODO: need to find a better place, or a better abstraction
         queryClient.invalidateQueries(['relation']);
-        setIsCreatingEntry(false);
 
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
@@ -456,7 +458,9 @@ const ContentTypeFormWrapper = ({
           Contracts.CollectionTypes.Update.Response,
           AxiosResponse<Contracts.CollectionTypes.Update.Response>,
           Contracts.CollectionTypes.Update.Request['body']
-        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
+        >(`/content-manager/${collectionType}/${slug}/${id}`, body, {
+          params: query,
+        });
 
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
