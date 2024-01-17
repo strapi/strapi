@@ -288,7 +288,17 @@ const BlocksDropdown = () => {
           edge: 'start',
           depth: 2,
         });
-        selectedNode = anchorNode;
+
+        // @ts-expect-error slate's delete behaviour creates an exceptional type
+        if (anchorNode.type === 'list-item') {
+          // When the last node in the selection is a list item,
+          // slate's default delete operation leaves an empty list-item instead of converting it into a paragraph.
+          // Issue: https://github.com/ianstormtaylor/slate/issues/2500
+
+          Transforms.setNodes(editor, { type: 'paragraph' });
+          // @ts-expect-error convert explicitly type to paragraph
+          selectedNode = { ...anchorNode, type: 'paragraph' };
+        } else selectedNode = anchorNode;
       }
 
       // Find the block key that matches the anchor node

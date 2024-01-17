@@ -528,16 +528,6 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
     if (selectedBlock.handleBackspaceKey) {
       selectedBlock.handleBackspaceKey(editor, event);
-    } else {
-      // When the last block in a selection is a list item,
-      // slate's default delete operation leaves an empty list-item instead of converting it into a paragraph.
-      // Issue: https://github.com/ianstormtaylor/slate/issues/2500
-      Transforms.delete(editor);
-
-      // @ts-expect-error slate's delete behaviour creates an exceptional type
-      if (editor.children?.[0].type === 'list-item') {
-        Transforms.setNodes(editor, { type: 'paragraph' });
-      }
     }
   };
 
