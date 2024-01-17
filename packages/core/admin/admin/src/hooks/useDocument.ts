@@ -47,7 +47,7 @@ export function useDocument() {
     } catch (error) {
       if (error instanceof ValidationError) {
         return {
-          errors: getYupInnerErrors(error as ValidationError),
+          errors: getYupInnerErrors(error),
         };
       }
 

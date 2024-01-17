@@ -85,7 +85,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/admin": "^4.15.1",
+    "@strapi/admin": "^4.19.0",
     "@strapi/strapi": "^4.15.1",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
