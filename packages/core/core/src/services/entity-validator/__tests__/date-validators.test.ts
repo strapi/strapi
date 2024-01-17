@@ -1,6 +1,7 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import validators from '../validators';
+import { mockOptions } from './utils';
 
 describe('Date validator', () => {
   const fakeModel: Schema.ContentType = {
@@ -24,9 +25,9 @@ describe('Date validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: {
+      documents: () => ({
         findFirst: fakeFindFirst,
-      },
+      }),
     } as any;
 
     afterEach(() => {
@@ -38,12 +39,15 @@ describe('Date validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date({
-          attr: { type: 'date' },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-          entity: null,
-        })
+        validators.date(
+          {
+            attr: { type: 'date' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       await validator('2021-11-29');
@@ -56,12 +60,15 @@ describe('Date validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .date({
-            attr: { type: 'date', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrDateUnique', value: null },
-            entity: null,
-          })
+          .date(
+            {
+              attr: { type: 'date', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrDateUnique', value: null },
+              entity: null,
+            },
+            mockOptions
+          )
           .nullable()
       );
 
@@ -73,12 +80,15 @@ describe('Date validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date({
-          attr: { type: 'date', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-          entity: null,
-        })
+        validators.date(
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       expect(await validator('2021-11-29')).toBe('2021-11-29');
@@ -89,12 +99,15 @@ describe('Date validator', () => {
       fakeFindFirst.mockResolvedValueOnce({ attrDateUnique: '2021-11-29' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date({
-          attr: { type: 'date', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-          entity: null,
-        })
+        validators.date(
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       try {
@@ -108,12 +121,15 @@ describe('Date validator', () => {
       fakeFindFirst.mockResolvedValueOnce({ attrDateUnique: '2021-11-29' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date({
-          attr: { type: 'date', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-          entity: { id: 1, attrDateUnique: '2021-11-29' },
-        })
+        validators.date(
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: { id: 1, attrDateUnique: '2021-11-29' },
+          },
+          mockOptions
+        )
       );
 
       expect(await validator('2021-11-29')).toBe('2021-11-29');
@@ -123,19 +139,23 @@ describe('Date validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date({
-          attr: { type: 'date', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-          entity: null,
-          locale: 'en',
-        })
+        validators.date(
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       await validator('2021-11-29');
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
-        filters: { attrDateUnique: '2021-11-29', locale: 'en' },
+      expect(fakeFindFirst).toHaveBeenCalledWith({
+        filters: { attrDateUnique: '2021-11-29' },
+        locale: 'en',
+        status: 'draft',
       });
     });
 
@@ -143,19 +163,23 @@ describe('Date validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.date({
-          attr: { type: 'date', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-          entity: { id: 1, attrDateUnique: '2021-12-15' },
-          locale: 'en',
-        })
+        validators.date(
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: { id: 1, attrDateUnique: '2021-12-15' },
+          },
+          mockOptions
+        )
       );
 
       await validator('2021-11-29');
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
-        filters: { attrDateUnique: '2021-11-29', locale: 'en' },
+      expect(fakeFindFirst).toHaveBeenCalledWith({
+        filters: { attrDateUnique: '2021-11-29' },
+        locale: 'en',
+        status: 'draft',
       });
     });
   });

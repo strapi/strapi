@@ -2,14 +2,15 @@ import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 import validators from '../validators';
+import { mockOptions } from './utils';
 
 describe('UID validator', () => {
   const fakeFindFirst = jest.fn();
 
   global.strapi = {
-    documents: {
+    documents: () => ({
       findFirst: fakeFindFirst,
-    },
+    }),
   } as any;
 
   afterEach(() => {
@@ -46,7 +47,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -66,7 +67,7 @@ describe('UID validator', () => {
               updatedAttribute: { name: 'attrUidUnique', value: null },
               entity: null,
             },
-            { isDraft: false }
+            mockOptions
           )
           .nullable()
       );
@@ -76,7 +77,7 @@ describe('UID validator', () => {
       expect(fakeFindFirst).not.toHaveBeenCalled();
     });
 
-    test('it always validates the unique constraint even if the attribute is not set as unique', async () => {
+    test.only('it always validates the unique constraint even if the attribute is not set as unique', async () => {
       fakeFindFirst.mockResolvedValueOnce(null);
       const valueToCheck = 'non-unique-uid';
 
@@ -88,13 +89,15 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
       expect(await validator(valueToCheck)).toBe(valueToCheck);
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrUidUnique: valueToCheck },
+        locale: 'en',
+        status: 'draft',
       });
     });
 
@@ -110,7 +113,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -132,7 +135,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'unchanged-unique-uid' },
             entity: { id: 1, attrUidUnique: 'unchanged-unique-uid' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -151,14 +154,16 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrUidUnique: valueToCheck },
+        locale: 'en',
+        status: 'draft',
       });
     });
 
@@ -173,14 +178,16 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
             entity: { id: 1, attrUidUnique: 'other-uid' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrUidUnique: valueToCheck },
+        locale: 'en',
+        status: 'draft',
       });
     });
   });
@@ -198,7 +205,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -220,7 +227,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 

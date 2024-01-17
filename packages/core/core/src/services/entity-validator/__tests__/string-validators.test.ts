@@ -1,6 +1,7 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import validators from '../validators';
+import { mockOptions } from './utils';
 
 describe('String validator', () => {
   const fakeModel: Schema.ContentType = {
@@ -24,9 +25,9 @@ describe('String validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: {
+      documents: () => ({
         findFirst: fakeFindFirst,
-      },
+      }),
     } as any;
 
     afterEach(() => {
@@ -48,7 +49,7 @@ describe('String validator', () => {
             },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -72,7 +73,7 @@ describe('String validator', () => {
               },
               entity: null,
             },
-            { isDraft: false }
+            mockOptions
           )
           .nullable()
       );
@@ -96,7 +97,7 @@ describe('String validator', () => {
             },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -118,7 +119,7 @@ describe('String validator', () => {
             },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -143,7 +144,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'non-updated-unique-test-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -165,14 +166,16 @@ describe('String validator', () => {
             },
             entity: null,
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrStringUnique: valueToCheck },
+        locale: 'en',
+        status: 'draft',
       });
     });
 
@@ -191,14 +194,16 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrStringUnique: valueToCheck },
+        locale: 'en',
+        status: 'draft',
       });
     });
   });
@@ -216,7 +221,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: true }
+          mockOptions
         )
       );
 
@@ -224,8 +229,6 @@ describe('String validator', () => {
     });
 
     test('it fails the validation if the string is shorter than the define minLength', async () => {
-      expect.assertions(1);
-
       const validator = strapiUtils.validateYupSchema(
         validators.string(
           {
@@ -237,7 +240,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -260,7 +263,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -283,7 +286,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -304,7 +307,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -327,7 +330,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -350,7 +353,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -373,7 +376,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -392,7 +395,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 
@@ -411,7 +414,7 @@ describe('String validator', () => {
             },
             entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { isDraft: false }
+          mockOptions
         )
       );
 

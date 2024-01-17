@@ -1,15 +1,16 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import validators from '../validators';
+import { mockOptions } from './utils';
 
 describe('Time validator', () => {
   describe('unique', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: {
+      documents: () => ({
         findFirst: fakeFindFirst,
-      },
+      }),
     } as any;
 
     afterEach(() => {
@@ -38,12 +39,15 @@ describe('Time validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time({
-          attr: { type: 'time' },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          entity: null,
-        })
+        validators.time(
+          {
+            attr: { type: 'time' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       await validator('00:00:00.000Z');
@@ -56,12 +60,15 @@ describe('Time validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .time({
-            attr: { type: 'time', unique: true },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrTimeUnique', value: null },
-            entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
-          })
+          .time(
+            {
+              attr: { type: 'time', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrTimeUnique', value: null },
+              entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+            },
+            mockOptions
+          )
           .nullable()
       );
 
@@ -73,12 +80,15 @@ describe('Time validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time({
-          attr: { type: 'time', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          entity: null,
-        })
+        validators.time(
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       expect(await validator('00:00:00.000Z')).toBe('00:00:00.000Z');
@@ -89,12 +99,15 @@ describe('Time validator', () => {
       fakeFindFirst.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time({
-          attr: { type: 'time', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          entity: null,
-        })
+        validators.time(
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       try {
@@ -108,12 +121,15 @@ describe('Time validator', () => {
       fakeFindFirst.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time({
-          attr: { type: 'time', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
-        })
+        validators.time(
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+          },
+          mockOptions
+        )
       );
 
       expect(await validator('00:00:00.000Z')).toBe('00:00:00.000Z');
@@ -125,18 +141,23 @@ describe('Time validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time({
-          attr: { type: 'time', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrTimeUnique', value: valueToCheck },
-          entity: null,
-        })
+        validators.time(
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: valueToCheck },
+            entity: null,
+          },
+          mockOptions
+        )
       );
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrTimeUnique: '00:00:00.000Z' },
+        locale: 'en',
+        status: 'draft',
       });
     });
 
@@ -144,18 +165,23 @@ describe('Time validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.time({
-          attr: { type: 'time', unique: true },
-          model: fakeModel,
-          updatedAttribute: { name: 'attrTimeUnique', value: valueToCheck },
-          entity: { id: 1, attrTimeUnique: '01:00:00.000Z' },
-        })
+        validators.time(
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: valueToCheck },
+            entity: { id: 1, attrTimeUnique: '01:00:00.000Z' },
+          },
+          mockOptions
+        )
       );
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
+      expect(fakeFindFirst).toHaveBeenCalledWith({
         filters: { attrTimeUnique: valueToCheck },
+        locale: 'en',
+        status: 'draft',
       });
     });
   });

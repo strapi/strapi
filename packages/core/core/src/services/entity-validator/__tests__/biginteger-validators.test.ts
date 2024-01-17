@@ -1,6 +1,7 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import validators from '../validators';
+import { mockOptions } from './utils';
 
 describe('BigInteger validator', () => {
   const fakeModel: Schema.ContentType = {
@@ -24,9 +25,9 @@ describe('BigInteger validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: {
+      documents: () => ({
         findFirst: fakeFindFirst,
-      },
+      }),
     } as any;
 
     afterEach(() => {
@@ -38,15 +39,18 @@ describe('BigInteger validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger({
-          attr: { type: 'biginteger' },
-          model: fakeModel,
-          updatedAttribute: {
-            name: 'attrBigIntegerUnique',
-            value: 1,
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 1,
+            },
+            entity: null,
           },
-          entity: null,
-        })
+          mockOptions
+        )
       );
 
       await validator(1);
@@ -59,15 +63,18 @@ describe('BigInteger validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         validators
-          .biginteger({
-            attr: { type: 'biginteger', unique: true },
-            model: fakeModel,
-            updatedAttribute: {
-              name: 'attrBigIntegerUnique',
-              value: null,
+          .biginteger(
+            {
+              attr: { type: 'biginteger', unique: true },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'attrBigIntegerUnique',
+                value: null,
+              },
+              entity: null,
             },
-            entity: null,
-          })
+            mockOptions
+          )
           .nullable()
       );
 
@@ -80,15 +87,18 @@ describe('BigInteger validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger({
-          attr: { type: 'biginteger', unique: true },
-          model: fakeModel,
-          updatedAttribute: {
-            name: 'attrBigIntegerUnique',
-            value: 1,
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 1,
+            },
+            entity: null,
           },
-          entity: null,
-        })
+          mockOptions
+        )
       );
 
       expect(await validator(1)).toBe(1);
@@ -99,15 +109,18 @@ describe('BigInteger validator', () => {
       fakeFindFirst.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger({
-          attr: { type: 'biginteger', unique: true },
-          model: fakeModel,
-          updatedAttribute: {
-            name: 'attrBigIntegerUnique',
-            value: 2,
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 2,
+            },
+            entity: null,
           },
-          entity: null,
-        })
+          mockOptions
+        )
       );
 
       try {
@@ -121,15 +134,18 @@ describe('BigInteger validator', () => {
       fakeFindFirst.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger({
-          attr: { type: 'biginteger', unique: true },
-          model: fakeModel,
-          updatedAttribute: {
-            name: 'attrBigIntegerUnique',
-            value: 3,
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 3,
+            },
+            entity: { id: 1, attrBigIntegerUnique: 3 },
           },
-          entity: { id: 1, attrBigIntegerUnique: 3 },
-        })
+          mockOptions
+        )
       );
 
       expect(await validator(3)).toBe(3);
@@ -139,22 +155,26 @@ describe('BigInteger validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger({
-          attr: { type: 'biginteger', unique: true },
-          model: fakeModel,
-          updatedAttribute: {
-            name: 'attrBigIntegerUnique',
-            value: 4,
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 4,
+            },
+            entity: null,
           },
-          entity: null,
-          locale: 'en',
-        })
+          mockOptions
+        )
       );
 
       await validator(4);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
-        filters: { attrBigIntegerUnique: 4, locale: 'en' },
+      expect(fakeFindFirst).toHaveBeenCalledWith({
+        filters: { attrBigIntegerUnique: 4 },
+        locale: 'en',
+        status: 'draft',
       });
     });
 
@@ -162,22 +182,26 @@ describe('BigInteger validator', () => {
       fakeFindFirst.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger({
-          attr: { type: 'biginteger', unique: true },
-          model: fakeModel,
-          updatedAttribute: {
-            name: 'attrBigIntegerUnique',
-            value: 5,
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 5,
+            },
+            entity: { id: 1, attrBigIntegerUnique: 42 },
           },
-          entity: { id: 1, attrBigIntegerUnique: 42 },
-          locale: 'en',
-        })
+          mockOptions
+        )
       );
 
       await validator(5);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith(fakeModel.uid, {
-        filters: { attrBigIntegerUnique: 5, locale: 'en' },
+      expect(fakeFindFirst).toHaveBeenCalledWith({
+        filters: { attrBigIntegerUnique: 5 },
+        locale: 'en',
+        status: 'draft',
       });
     });
   });
