@@ -14,8 +14,7 @@ import { AttributeIcon, IconByType } from '../AttributeIcon';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
 
-// TODO: remove blocks from array on 4.16 release (after blocks stable)
-const newAttributes = ['blocks'];
+const newAttributes = [];
 
 const NewBadge = () => (
   <Flex grow={1} justifyContent="flex-end">
