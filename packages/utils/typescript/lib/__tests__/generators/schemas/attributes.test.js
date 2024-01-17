@@ -668,7 +668,7 @@ describe('Attributes', () => {
           expect(min.type.kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(min.type.text).toBe('1');
 
-          // Check for number keyword on the second typeArgument
+          // Check for string keyword on the second typeArgument
           expect(typeofMinMax.kind).toBe(ts.SyntaxKind.StringKeyword);
         });
       });
