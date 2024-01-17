@@ -59,6 +59,7 @@ const releaseActionController = {
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
     const releaseService = getService('release', { strapi });
+
     const updatedAction = await releaseService.updateAction(
       actionId,
       releaseId,
@@ -74,10 +75,9 @@ const releaseActionController = {
     const actionId: DeleteReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: DeleteReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
 
-    const deletedReleaseAction = await getService('release', { strapi }).deleteAction(
-      actionId,
-      releaseId
-    );
+    const releaseService = getService('release', { strapi });
+
+    const deletedReleaseAction = await releaseService.deleteAction(actionId, releaseId);
 
     ctx.body = {
       data: deletedReleaseAction,

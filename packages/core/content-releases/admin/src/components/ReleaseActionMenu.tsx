@@ -1,55 +1,69 @@
-import { Flex, IconButton, Typography } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import * as React from 'react';
+
+import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
+import { Menu, Link } from '@strapi/design-system/v2';
 import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import { Cross, More } from '@strapi/icons';
+import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
+import { useSelector, TypedUseSelectorHook } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { DeleteReleaseAction } from '../../../shared/contracts/release-actions';
+import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 
-const StyledMenuItem = styled(Menu.Item)`
+import type { Store } from '@strapi/admin/strapi-admin';
+import type { Permission } from '@strapi/helper-plugin';
+
+type RootState = ReturnType<Store['getState']>;
+const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   &:hover {
-    background: ${({ theme }) => theme.colors.danger100};
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+
+    svg {
+      path {
+        fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
+      }
+    }
+
+    a {
+      color: ${({ theme }) => theme.colors.neutral800};
+    }
   }
 
   svg {
     path {
-      fill: ${({ theme }) => theme.colors.danger600};
+      fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
     }
   }
 
-  &:hover {
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.danger600};
-      }
-    }
+  a {
+    color: ${({ theme }) => theme.colors.neutral800};
+  }
+
+  span,
+  a {
+    width: 100%;
   }
 `;
 
-const StyledCross = styled(Cross)`
-  padding: ${({ theme }) => theme.spaces[1]};
-`;
-
+/* -------------------------------------------------------------------------------------------------
+ * DeleteReleaseActionItemProps
+ * -----------------------------------------------------------------------------------------------*/
 const StyledIconButton = styled(IconButton)`
   /* Setting this style inline with borderColor will not apply the style */
   border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
 `;
-
-interface ReleaseActionMenuProps {
+interface DeleteReleaseActionItemProps {
   releaseId: DeleteReleaseAction.Request['params']['releaseId'];
   actionId: DeleteReleaseAction.Request['params']['actionId'];
-  hasTriggerBorder?: boolean;
 }
 
-export const ReleaseActionMenu = ({
-  releaseId,
-  actionId,
-  hasTriggerBorder = false,
-}: ReleaseActionMenuProps) => {
+const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionItemProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -91,6 +105,97 @@ export const ReleaseActionMenu = ({
   };
 
   return (
+    <CheckPermissions permissions={PERMISSIONS.deleteAction}>
+      <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
+        <Flex gap={2}>
+          <Icon as={Cross} padding={1} />
+          <Typography textColor="danger600" variant="omega">
+            {formatMessage({
+              id: 'content-releases.content-manager-edit-view.remove-from-release',
+              defaultMessage: 'Remove from release',
+            })}
+          </Typography>
+        </Flex>
+      </StyledMenuItem>
+    </CheckPermissions>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ReleaseActionEntryLinkItem
+ * -----------------------------------------------------------------------------------------------*/
+interface ReleaseActionEntryLinkItemProps {
+  contentTypeUid: ReleaseAction['contentType'];
+  entryId: ReleaseAction['entry']['id'];
+  locale: ReleaseAction['locale'];
+}
+
+const ReleaseActionEntryLinkItem = ({
+  contentTypeUid,
+  entryId,
+  locale,
+}: ReleaseActionEntryLinkItemProps) => {
+  const { formatMessage } = useIntl();
+  // Confirm user has permissions to access the entry for the given locale
+  const collectionTypePermissions = useTypedSelector(
+    (state) => state.rbacProvider.collectionTypesRelatedPermissions
+  );
+  const updatePermissions = contentTypeUid
+    ? collectionTypePermissions[contentTypeUid]?.['plugin::content-manager.explorer.update']
+    : [];
+  const canUpdateEntryForLocale = Boolean(
+    !locale ||
+      updatePermissions?.find((permission: Permission) =>
+        permission.properties?.locales?.includes(locale)
+      )
+  );
+
+  return (
+    <CheckPermissions
+      permissions={[
+        {
+          action: 'plugin::content-manager.explorer.update',
+          subject: contentTypeUid,
+        },
+      ]}
+    >
+      {canUpdateEntryForLocale && (
+        <StyledMenuItem>
+          <Link
+            as={NavLink}
+            // @ts-expect-error TODO: This component from DS is not using types from NavLink
+            to={{
+              pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
+              search: locale && `?plugins[i18n][locale]=${locale}`,
+            }}
+            startIcon={<Icon as={Pencil} padding={1} />}
+          >
+            <Typography variant="omega">
+              {formatMessage({
+                id: 'content-releases.content-manager-edit-view.edit-entry',
+                defaultMessage: 'Edit entry',
+              })}
+            </Typography>
+          </Link>
+        </StyledMenuItem>
+      )}
+    </CheckPermissions>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Root
+ * -----------------------------------------------------------------------------------------------*/
+
+interface RootProps {
+  children: React.ReactNode;
+  hasTriggerBorder?: boolean;
+}
+
+const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     <CheckPermissions permissions={[...PERMISSIONS.deleteAction, ...PERMISSIONS.update]}>
       <Menu.Root>
@@ -115,21 +220,15 @@ export const ReleaseActionMenu = ({
           Refactor this once fixed in the DS
          */}
         <Menu.Content top={1} popoverPlacement="bottom-end">
-          <CheckPermissions permissions={PERMISSIONS.deleteAction}>
-            <StyledMenuItem onSelect={handleDeleteAction}>
-              <Flex gap={2}>
-                <StyledCross />
-                <Typography textColor="danger600" variant="omega">
-                  {formatMessage({
-                    id: 'content-releases.content-manager-edit-view.remove-from-release',
-                    defaultMessage: 'Remove from release',
-                  })}
-                </Typography>
-              </Flex>
-            </StyledMenuItem>
-          </CheckPermissions>
+          {children}
         </Menu.Content>
       </Menu.Root>
     </CheckPermissions>
   );
+};
+
+export const ReleaseActionMenu = {
+  Root,
+  DeleteReleaseActionItem,
+  ReleaseActionEntryLinkItem,
 };

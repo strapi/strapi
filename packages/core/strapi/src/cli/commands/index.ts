@@ -24,6 +24,7 @@ import { command as versionCommand } from './version';
 
 import { command as buildPluginCommand } from './plugin/build';
 import { command as initPluginCommand } from './plugin/init';
+import { command as linkWatchPluginCommand } from './plugin/link-watch';
 import { command as watchPluginCommand } from './plugin/watch';
 import { command as verifyPluginCommand } from './plugin/verify';
 import { StrapiCommand } from '../types';
@@ -57,6 +58,7 @@ export const commands: StrapiCommand[] = [
    */
   buildPluginCommand,
   initPluginCommand,
+  linkWatchPluginCommand,
   watchPluginCommand,
   verifyPluginCommand,
 ];

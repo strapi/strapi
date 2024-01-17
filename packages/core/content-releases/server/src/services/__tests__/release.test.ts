@@ -23,10 +23,31 @@ const mockUser = {
 
 describe('release service', () => {
   describe('update', () => {
+    it('updates the release', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          update: jest.fn().mockReturnValue({ id: 1, name: 'Release name' }),
+        },
+      };
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+      };
+
+      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'Release name' });
+    });
+
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
         entityService: {
+          findOne: jest.fn().mockReturnValue(null),
           update: jest.fn().mockReturnValue(null),
         },
       };
@@ -39,6 +60,26 @@ describe('release service', () => {
 
       expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
         'No release found for id 1'
+      );
+    });
+
+    it('throws an error if the release is already published', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+      };
+
+      expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
+        'Release already published'
       );
     });
   });
@@ -58,6 +99,95 @@ describe('release service', () => {
       expect(() =>
         releaseService.findActions(1, ['api::contentType.contentType'], {})
       ).rejects.toThrow('No release found for id 1');
+    });
+  });
+
+  describe('createAction', () => {
+    it('creates an action', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          create: jest.fn().mockReturnValue({
+            type: 'publish',
+            entry: { id: 1, contentType: 'api::contentType.contentType' },
+          }),
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            validateEntryContentType: jest.fn(),
+            validateUniqueEntry: jest.fn(),
+          }),
+        }),
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entry: { id: 1, contentType: 'api::contentType.contentType' as const },
+      };
+
+      const action = await releaseService.createAction(1, mockActionArgs);
+
+      expect(action).toEqual({
+        type: 'publish',
+        entry: { id: 1, contentType: 'api::contentType.contentType' },
+      });
+    });
+
+    it('throws an error if the release does not exist', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue(null),
+        },
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            validateEntryContentType: jest.fn(),
+            validateUniqueEntry: jest.fn(),
+          }),
+        }),
+      };
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entry: { id: 1, contentType: 'api::contentType.contentType' as const },
+      };
+
+      expect(() => releaseService.createAction(1, mockActionArgs)).rejects.toThrow(
+        'No release found for id 1'
+      );
+    });
+
+    it('throws an error if the release is already published', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+        },
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            validateEntryContentType: jest.fn(),
+            validateUniqueEntry: jest.fn(),
+          }),
+        }),
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockActionArgs = {
+        type: 'publish' as const,
+        entry: { id: 1, contentType: 'api::contentType.contentType' as const },
+      };
+
+      expect(() => releaseService.createAction(1, mockActionArgs)).rejects.toThrow(
+        'Release already published'
+      );
     });
   });
 
@@ -177,7 +307,27 @@ describe('release service', () => {
   });
 
   describe('delete', () => {
-    it('throws an error if the release does not exist', () => {
+    it('deletes the release', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+        db: {
+          transaction: jest.fn(),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const release = await releaseService.delete(1);
+
+      expect(release).toEqual({ id: 1, name: 'test' });
+    });
+
+    it('throws an error if the release does not exist or was already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
         entityService: {
@@ -293,6 +443,82 @@ describe('release service', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('deleteAction', () => {
+    it('deletes the action', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            delete: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const release = await releaseService.deleteAction(1, 1);
+
+      expect(release).toEqual({ id: 1, type: 'publish' });
+    });
+
+    it('throws an error if the release does not exist', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            delete: jest.fn().mockReturnValue(null),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      expect(() => releaseService.deleteAction(1, 1)).rejects.toThrow(
+        'Action with id 1 not found in release with id 1 or it is already published'
+      );
+    });
+  });
+
+  describe('updateAction', () => {
+    it('updates the action', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            update: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const release = await releaseService.updateAction(1, 1, { type: 'publish' });
+
+      expect(release).toEqual({ id: 1, type: 'publish' });
+    });
+
+    it('throws an error if the release does not exist or was already published', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            update: jest.fn().mockReturnValue(null),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      expect(() => releaseService.updateAction(1, 1, { type: 'publish' })).rejects.toThrow(
+        'Action with id 1 not found in release with id 1 or it is already published'
+      );
     });
   });
 });
