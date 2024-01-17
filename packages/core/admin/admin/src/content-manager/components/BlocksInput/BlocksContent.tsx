@@ -109,7 +109,6 @@ type DragAndDropElementProps = Direction & {
   children: RenderElementProps['children'];
   index: Array<number>;
   dragHandleTopMargin?: CSSProperties['marginTop'];
-  dragButtonHidden: boolean;
 };
 
 const DragAndDropElement = ({
@@ -118,7 +117,6 @@ const DragAndDropElement = ({
   setDragDirection,
   dragDirection,
   dragHandleTopMargin,
-  dragButtonHidden,
 }: DragAndDropElementProps) => {
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
@@ -126,9 +124,6 @@ const DragAndDropElement = ({
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
-      const [newNode] = Editor.node(editor, newIndex);
-      const [draggedNode] = Editor.node(editor, currentIndex);
-
       Transforms.moveNodes(editor, {
         at: currentIndex,
         to: newIndex,
@@ -150,70 +145,6 @@ const DragAndDropElement = ({
           }
         )
       );
-
-      if (Element.isElement(newNode) && Element.isElement(draggedNode)) {
-        // If a node is dragged into the list block then convert it to a list-item
-        if (newNode.type === 'list-item' && draggedNode.type !== 'list-item') {
-          Transforms.setNodes(
-            editor,
-            { ...getAttributesToClear(draggedNode), type: 'list-item' },
-            {
-              at:
-                newIndex[0] > currentIndex[0] ? [newIndex[0] - 1, ...newIndex.slice(1)] : newIndex,
-            }
-          );
-
-          // When a node is dragged downward into the list, the items shift upward by one index
-          if (newIndex[0] > currentIndex[0]) {
-            Transforms.moveNodes(editor, {
-              at: [newIndex[0] - 1, ...newIndex.slice(1)],
-              to: [newIndex[0] - 1, newIndex[1] + 1, ...newIndex.slice(2)],
-            });
-          }
-        }
-
-        // If a node is dragged out of the list block then convert it to a paragraph
-        if (newNode.type !== 'list-item' && draggedNode.type === 'list-item') {
-          Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
-
-          if (newIndex[0] < currentIndex[0]) {
-            // Node is dragged upwards out of list block
-            currentIndex[0] += 1;
-          }
-
-          // Node is dragged downwards out of list block, as items are not shifting by 1 we move the item below the dragged index
-          if (newIndex[0] > currentIndex[0]) {
-            Transforms.moveNodes(editor, {
-              at: newIndex,
-              to: [newIndex[0] + 1],
-            });
-          }
-        }
-
-        // If a list item is dragged into the another list block
-        if (newNode.type === 'list-item' && draggedNode.type === 'list-item') {
-          // Node is dragged downwards out of list block, as items are not shifting by 1 we move the item below the dragged index
-          if (newIndex[0] > currentIndex[0]) {
-            Transforms.moveNodes(editor, {
-              at: newIndex,
-              to: [newIndex[0], newIndex[1] + 1, ...newIndex.slice(2)],
-            });
-          }
-        }
-
-        // If a dragged node is the only list-item then delete list block
-        if (draggedNode.type === 'list-item') {
-          const [listNode, listNodePath] = Editor.parent(editor, currentIndex);
-
-          const isListEmpty =
-            listNode.children?.length === 1 &&
-            listNode.children?.[0].type === 'text' &&
-            listNode.children?.[0].text === '';
-          if (isListEmpty) {
-            Transforms.removeNodes(editor, { at: listNodePath });
-          }
-        }
-      }
     },
     [editor, formatMessage, name, setLiveText]
   );
@@ -288,7 +219,7 @@ const DragAndDropElement = ({
           onSelect={() => setDragVisibility('visible')}
           onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
-          dragVisibility={!dragButtonHidden && dragVisibility}
+          dragVisibility={dragVisibility}
         >
           <DragIconButton
             forwardedAs="div"
@@ -369,27 +300,21 @@ const baseRenderElement = ({
   setDragDirection,
   dragDirection,
 }: BaseRenderElementProps) => {
-  const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
+  const { element } = props;
+
+  const blockMatch = Object.values(blocks).find((block) => block.matchNode(element));
   const block = blockMatch || blocks.paragraph;
-  const nodePath = ReactEditor.findPath(editor, props.element);
-  let hideDragButton = false;
+  const nodePath = ReactEditor.findPath(editor, element);
 
   // Link is inline block so it cannot be dragged
-  // List is skipped from dragged items
-  if (isLinkNode(props.element) || isListNode(props.element)) return block.renderElement(props);
-
-  const isListItem = props.element.type === 'list-item';
-
-  const listNodeEntry =
-    isListItem &&
-    Editor.above(editor, {
-      at: nodePath,
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-    });
-
-  // Hide drag button for nested lists i.e. lists with indentlevel higher than 0
-  if (listNodeEntry && !Editor.isEditor(listNodeEntry[0]) && listNodeEntry[0].listIndentLevel > 0)
-    hideDragButton = true;
+  // List items and nested list blocks i.e. lists with indent level higher than 0 are skipped from dragged items
+  if (
+    isLinkNode(element) ||
+    (isListNode(element) && element.listIndentLevel && element.listIndentLevel > 0) ||
+    element.type === 'list-item'
+  ) {
+    return block.renderElement(props);
+  }
 
   return (
     <DragAndDropElement
@@ -397,7 +322,6 @@ const baseRenderElement = ({
       setDragDirection={setDragDirection}
       dragDirection={dragDirection}
       dragHandleTopMargin={block.dragHandleTopMargin}
-      dragButtonHidden={hideDragButton}
     >
       {block.renderElement(props)}
     </DragAndDropElement>
