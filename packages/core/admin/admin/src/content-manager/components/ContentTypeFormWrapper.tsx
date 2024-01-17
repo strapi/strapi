@@ -427,7 +427,11 @@ const ContentTypeFormWrapper = ({
       const { data } = await post<Contracts.CollectionTypes.Publish.Response>(
         isSingleType
           ? `/content-manager/${collectionType}/${slug}/actions/publish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`,
+        {},
+        {
+          params,
+        }
       );
 
       trackUsage('didPublishEntry');
@@ -525,7 +529,9 @@ const ContentTypeFormWrapper = ({
       const { data } = await post<Contracts.CollectionTypes.Unpublish.Response>(
         isSingleType
           ? `/content-manager/${collectionType}/${slug}/actions/unpublish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`,
+        {},
+        { params }
       );
 
       trackUsage('didUnpublishEntry');
