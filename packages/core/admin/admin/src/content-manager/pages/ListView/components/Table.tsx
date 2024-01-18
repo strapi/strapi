@@ -14,6 +14,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { AutoCloneFailureModal, type ProhibitedCloningFields } from './AutoCloneFailureModal';
 import { DialogConfirmDelete } from './DialogConfirmDelete';
 
 const stopPropagation = (e: React.SyntheticEvent) => e.stopPropagation();
@@ -152,6 +153,9 @@ interface RootProps {
   onConfirmDelete: (id: Entity.ID) => Promise<void>;
   isConfirmDeleteRowOpen: boolean;
   setIsConfirmDeleteRowOpen: (isOpen: boolean) => void;
+  clonedEntryId: Entity.ID | null;
+  onCloseAutoCloneModal: () => void;
+  prohibitedCloningFields: ProhibitedCloningFields;
 }
 
 const Root = ({
@@ -159,6 +163,9 @@ const Root = ({
   onConfirmDelete,
   isConfirmDeleteRowOpen,
   setIsConfirmDeleteRowOpen,
+  clonedEntryId,
+  onCloseAutoCloneModal,
+  prohibitedCloningFields,
 }: RootProps) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { selectedEntries, setSelectedEntries } = useTableContext();
@@ -184,6 +191,11 @@ const Root = ({
         onConfirm={handleConfirmDelete}
         onToggleDialog={() => setIsConfirmDeleteRowOpen(!isConfirmDeleteRowOpen)}
         isOpen={isConfirmDeleteRowOpen}
+      />
+      <AutoCloneFailureModal
+        entryId={clonedEntryId}
+        onClose={onCloseAutoCloneModal}
+        prohibitedFields={prohibitedCloningFields}
       />
     </HelperPluginTable.Body>
   );

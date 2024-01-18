@@ -4,6 +4,9 @@ describe('Populate', () => {
   const fakeModels = {
     simple: {
       modelName: 'Fake simple model',
+      info: {
+        displayName: 'Simple',
+      },
       attributes: {
         text: {
           type: 'string',
@@ -21,6 +24,9 @@ describe('Populate', () => {
     },
     component: {
       modelName: 'Fake component model',
+      info: {
+        displayName: 'Fake component',
+      },
       attributes: {
         componentAttrName: {
           type: 'component',
@@ -30,6 +36,9 @@ describe('Populate', () => {
     },
     componentUnique: {
       modelName: 'Fake component model',
+      info: {
+        displayName: 'Unique Component',
+      },
       attributes: {
         componentAttrName: {
           type: 'component',
@@ -126,46 +135,48 @@ describe('Populate', () => {
 
     test('model without unique fields', () => {
       const prohibitedFields = getProhibitedCloningFields('simple');
-      expect(prohibitedFields).toEqual({});
+      expect(prohibitedFields).toHaveLength(0);
     });
 
     test('model with unique fields', () => {
       const prohibitedFields = getProhibitedCloningFields('simpleUnique');
-      expect(prohibitedFields).toEqual({ text: 'unique' });
+      expect(prohibitedFields).toEqual([[['text'], 'unique']]);
     });
 
     test('model with component', () => {
       const prohibitedFields = getProhibitedCloningFields('component');
-      expect(prohibitedFields).toEqual({});
+      expect(prohibitedFields).toHaveLength(0);
     });
 
     test('model with component & unique fields', () => {
       const prohibitedFields = getProhibitedCloningFields('componentUnique');
-      expect(prohibitedFields).toEqual({ 'componentAttrName.text': 'unique' });
+      expect(prohibitedFields).toEqual([[['componentAttrName', 'text'], 'unique']]);
     });
 
     test('model with dynamic zone', () => {
       const prohibitedFields = getProhibitedCloningFields('dynZone');
-      expect(prohibitedFields).toEqual({});
+      expect(prohibitedFields).toHaveLength(0);
     });
 
     test('model with unique component in dynamic zone', () => {
       const prohibitedFields = getProhibitedCloningFields('dynZoneUnique');
-      expect(prohibitedFields).toEqual({ 'dynZoneAttrName[1].componentAttrName.text': 'unique' });
+      expect(prohibitedFields).toEqual([
+        [['dynZoneAttrName', 'Unique Component', 'componentAttrName', 'text'], 'unique'],
+      ]);
     });
 
     test('model with relations', () => {
       const prohibitedFields = getProhibitedCloningFields('relations');
-      expect(prohibitedFields).toEqual({
-        one_to_one: 'relation',
-        one_to_many: 'relation',
-        many_way: 'relation',
-      });
+      expect(prohibitedFields).toEqual([
+        [['one_to_one'], 'relation'],
+        [['one_to_many'], 'relation'],
+        [['many_way'], 'relation'],
+      ]);
     });
 
     test('model with media', () => {
       const prohibitedFields = getProhibitedCloningFields('media');
-      expect(prohibitedFields).toEqual({});
+      expect(prohibitedFields).toHaveLength(0);
     });
   });
 });

@@ -192,10 +192,10 @@ export default {
   async autoClone(ctx: any) {
     const { model } = ctx.params;
 
-    // Trying to automatically clone the entity and model has unique or relational fields
+    // Check if the model has fields that prevent auto cloning
     const prohibitedFields = getProhibitedCloningFields(model);
-    console.log(prohibitedFields);
-    if (Object.keys(prohibitedFields).length > 0) {
+
+    if (prohibitedFields.length > 0) {
       return ctx.badRequest(
         'Entity could not be cloned as it has unique and/or relational fields. ' +
           'Please edit those fields manually and save to complete the cloning.',

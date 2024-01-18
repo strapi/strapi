@@ -66,6 +66,7 @@ import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import { useAllowedAttributes } from './hooks/useAllowedAttributes';
 
+import type { ProhibitedCloningFields } from './components/AutoCloneFailureModal';
 import type { Entity } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
@@ -597,6 +598,10 @@ const ListViewPage = ({
     });
   };
 
+  const [duplicatedEntryId, setDuplicatedEntryId] = React.useState<Entity.ID | null>(null);
+  const [prohibitedCloningFields, setProhibitedCloningFields] =
+    React.useState<ProhibitedCloningFields>({});
+
   const handleCloneClick =
     (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
       try {
@@ -613,11 +618,9 @@ const ListViewPage = ({
         }
       } catch (err) {
         if (err instanceof AxiosError) {
-          push({
-            pathname: `${pathname}/create/clone/${id}`,
-            state: { from: pathname, error: formatAPIError(err) },
-            search: pluginsQueryParams,
-          });
+          const { prohibitedFields } = err.response?.data.error.details;
+          setDuplicatedEntryId(id);
+          setProhibitedCloningFields(prohibitedFields);
         }
       }
     };
@@ -751,6 +754,9 @@ const ListViewPage = ({
                   onConfirmDelete={handleConfirmDeleteData}
                   isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
                   setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                  clonedEntryId={duplicatedEntryId}
+                  onCloseAutoCloneModal={() => setDuplicatedEntryId(null)}
+                  prohibitedCloningFields={prohibitedCloningFields}
                 >
                   {data.map((rowData, index) => {
                     return (

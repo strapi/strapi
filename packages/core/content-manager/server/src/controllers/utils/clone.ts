@@ -3,16 +3,18 @@ import strapiUtils from '@strapi/utils';
 
 const { isVisibleAttribute } = strapiUtils.contentTypes;
 
-type ProhibitedCloningFields = Record<string, 'unique' | 'relation'>;
+/**
+ * Use an array of strings to represent the path to a field, so we can show breadcrumbs in the admin
+ * We can't use special characters as delimiters, because the path includes display names
+ * for dynamic zone components, which can contain any character.
+ */
+type ProhibitedCloningField = [string[], 'unique' | 'relation'];
 
-function isProhibitedRelation(
-  model: any,
-  attributeName: any,
-  path: string
-): ProhibitedCloningFields {
+function checkRelation(model: any, attributeName: any, path: string[]): ProhibitedCloningField[] {
   // we don't care about createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
-    return {};
+    // Return empty array and not null so we can always spread the result
+    return [];
   }
 
   /**
@@ -23,57 +25,48 @@ function isProhibitedRelation(
   const isOneToOne = relation === 'oneToOne' && inversedBy != null;
 
   if (relation === 'oneToMany' || isOneToOne) {
-    return { [`${path}${attributeName}`]: 'relation' };
+    return [[[...path, attributeName], 'relation']];
   }
 
-  return {};
+  return [];
 }
 
-const getProhibitedCloningFields = (uid: any, pathPrefix = ''): ProhibitedCloningFields => {
+const getProhibitedCloningFields = (
+  uid: any,
+  pathPrefix: string[] = []
+): ProhibitedCloningField[] => {
   const model = strapi.getModel(uid);
 
-  const prohibitedFields = Object.keys(model.attributes).reduce<ProhibitedCloningFields>(
+  const prohibitedFields = Object.keys(model.attributes).reduce<ProhibitedCloningField[]>(
     (acc, attributeName) => {
       const attribute: any = model.attributes[attributeName];
-      const baseAttributePath = `${pathPrefix}${attributeName}`;
+      const attributePath = [...pathPrefix, attributeName];
 
       switch (attribute.type) {
         case 'relation':
-          return {
-            ...acc,
-            ...isProhibitedRelation(model, attributeName, pathPrefix),
-          };
+          return [...acc, ...checkRelation(model, attributeName, pathPrefix)];
         case 'component':
-          return {
-            ...acc,
-            ...getProhibitedCloningFields(attribute.component, `${baseAttributePath}.`),
-          };
+          return [...acc, ...getProhibitedCloningFields(attribute.component, attributePath)];
         case 'dynamiczone':
-          return {
+          return [
             ...acc,
-            ...Object.assign(
-              {},
-              ...(attribute.components || []).map((componentUID: any, index: number) =>
-                getProhibitedCloningFields(componentUID, `${baseAttributePath}[${index}].`)
-              )
+            ...(attribute.components || []).flatMap((componentUID: any) =>
+              getProhibitedCloningFields(componentUID, [
+                ...attributePath,
+                strapi.getModel(componentUID).info.displayName,
+              ])
             ),
-          };
+          ];
         case 'uid':
-          return {
-            ...acc,
-            [baseAttributePath]: 'unique',
-          };
+          return [...acc, [attributePath, 'unique']];
         default:
           if (attribute?.unique) {
-            return {
-              ...acc,
-              [baseAttributePath]: 'unique',
-            };
+            return [...acc, [attributePath, 'unique']];
           }
           return acc;
       }
     },
-    {}
+    []
   );
 
   return prohibitedFields;
