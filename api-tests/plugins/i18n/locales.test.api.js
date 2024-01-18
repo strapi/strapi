@@ -398,14 +398,18 @@ describe('CRUD locales', () => {
       const { body: frenchProduct } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
-        qs: { plugins: { i18n: { locale: 'fr-FR' } } },
+        qs: { locale: 'fr-FR' },
         body: { name: 'product name' },
       });
 
       await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
-        qs: { plugins: { i18n: { locale: 'en', relatedEntityId: frenchProduct.id } } },
+        qs: {
+          // TODO v5: reintroduce when relatedEntityId logic is fixed for document IDs
+          // plugins: { i18n: { relatedEntityId: frenchProduct.id } },
+          locale: 'en',
+        },
         body: { name: 'product name' },
       });
 

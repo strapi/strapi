@@ -31,7 +31,7 @@ interface ValidatorMeta<TAttribute = Attribute.Any> {
 
 interface ValidatorContext {
   isDraft?: boolean;
-  locale?: string;
+  locale?: string | null;
 }
 
 interface AttributeValidatorMetas {
@@ -318,8 +318,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
       { model, data, entity },
       {
         isDraft: options?.isDraft ?? false,
-        // TODO should we pass the default locale here?
-        locale: options?.locale ?? 'en',
+        locale: options?.locale ?? null,
       }
     )
       .test('relations-test', 'check that all relations exist', async function (data) {
