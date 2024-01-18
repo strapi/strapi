@@ -1,6 +1,6 @@
 import { setCreatorFields, errors } from '@strapi/utils';
 
-import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
+import type { LoadedStrapi, EntityService, UID, Schema } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
@@ -38,13 +38,13 @@ type LocaleDictionary = {
 const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   switch (queryValue) {
     case 'contentType':
-      return 'entry.contentType.displayName';
+      return 'contentType.displayName';
     case 'action':
       return 'type';
     case 'locale':
-      return _.getOr('No locale', 'entry.locale.name');
+      return _.getOr('No locale', 'locale.name');
     default:
-      return 'entry.contentType.displayName';
+      return 'contentType.displayName';
   }
 };
 
@@ -238,7 +238,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
       ...query,
       populate: {
-        entry: true,
+        entry: {
+          populate: '*',
+        },
       },
       filters: {
         release: releaseId,
@@ -268,14 +270,11 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
       return {
         ...action,
-        entry: {
-          id: action.entry.id,
-          contentType: {
-            displayName,
-            mainFieldValue: action.entry[mainField],
-          },
-          locale: action.locale ? allLocalesDictionary[action.locale] : null,
-          status: action.entry.publishedAt ? 'published' : 'draft',
+        locale: action.locale ? allLocalesDictionary[action.locale] : null,
+        contentType: {
+          displayName,
+          mainFieldValue: action.entry[mainField],
+          uid: action.contentType,
         },
       };
     });
@@ -316,6 +315,47 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     }
 
     return contentTypesData;
+  },
+
+  getContentTypeModelsFromActions(actions: ReleaseAction[]) {
+    const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
+      if (!acc.includes(action.contentType)) {
+        acc.push(action.contentType);
+      }
+
+      return acc;
+    }, []);
+
+    const contentTypeModelsMap = contentTypeUids.reduce(
+      (
+        acc: { [key: ReleaseAction['contentType']]: Schema.ContentType },
+        contentTypeUid: ReleaseAction['contentType']
+      ) => {
+        acc[contentTypeUid] = strapi.getModel(contentTypeUid);
+
+        return acc;
+      },
+      {}
+    );
+
+    return contentTypeModelsMap;
+  },
+
+  async getAllComponents() {
+    const contentManagerComponentsService = strapi.plugin('content-manager').service('components');
+
+    const components = await contentManagerComponentsService.findAllComponents();
+
+    const componentsMap = components.reduce(
+      (acc: { [key: Schema.Component['uid']]: Schema.Component }, component: Schema.Component) => {
+        acc[component.uid] = component;
+
+        return acc;
+      },
+      {}
+    );
+
+    return componentsMap;
   },
 
   async delete(releaseId: DeleteRelease.Request['params']['id']) {
