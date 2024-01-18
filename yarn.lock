@@ -10211,7 +10211,7 @@ __metadata:
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
     "@strapi/pack-up": "npm:4.17.1"
-    "@strapi/plugin-upload": "npm:4.17.1"
+    "@strapi/types": "npm:4.17.1"
     "@strapi/utils": "npm:4.17.1"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:4.17.1"
