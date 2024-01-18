@@ -8,55 +8,55 @@ const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (features.isEnabled('cms-content-releases')) {
-      strapi.db.lifecycles.subscribe({
-        afterDelete(event) {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-          const { model, result } = event;
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const { id } = result;
-            strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-              where: {
-                target_type: model.uid,
-                target_id: id,
+    strapi.db.lifecycles.subscribe({
+      afterDelete(event) {
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+        const { model, result } = event;
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+          const { id } = result;
+          strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+            where: {
+              target_type: model.uid,
+              target_id: id,
+            },
+          });
+        }
+      },
+      /**
+       * deleteMany hook doesn't return the deleted entries ids
+       * so we need to fetch them before deleting the entries to save the ids on our state
+       */
+      async beforeDeleteMany(event) {
+        const { model, params } = event;
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+          const { where } = params;
+          const entriesToDelete = await strapi.db
+            .query(model.uid)
+            .findMany({ select: ['id'], where });
+          event.state.entriesToDelete = entriesToDelete;
+        }
+      },
+      /**
+       * We delete the release actions related to deleted entries
+       * We make this only after deleteMany is succesfully executed to avoid errors
+       */
+      async afterDeleteMany(event) {
+        const { model, state } = event;
+        const entriesToDelete = state.entriesToDelete;
+        if (entriesToDelete) {
+          await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+            where: {
+              target_type: model.uid,
+              target_id: {
+                $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
               },
-            });
-          }
-        },
-        /**
-         * deleteMany hook doesn't return the deleted entries ids
-         * so we need to fetch them before deleting the entries to save the ids on our state
-         */
-        async beforeDeleteMany(event) {
-          const { model, params } = event;
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const { where } = params;
-            const entriesToDelete = await strapi.db
-              .query(model.uid)
-              .findMany({ select: ['id'], where });
-            event.state.entriesToDelete = entriesToDelete;
-          }
-        },
-        /**
-         * We delete the release actions related to deleted entries
-         * We make this only after deleteMany is succesfully executed to avoid errors
-         */
-        async afterDeleteMany(event) {
-          const { model, state } = event;
-          const entriesToDelete = state.entriesToDelete;
-          if (entriesToDelete) {
-            await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-              where: {
-                target_type: model.uid,
-                target_id: {
-                  $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
-                },
-              },
-            });
-          }
-        },
-      });
+            },
+          });
+        }
+      },
+    });
     const releaseActionService = getService('release-action', { strapi });
 
     const eventManager = getService('event-manager', { strapi });
@@ -64,19 +64,24 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
     const destroyContentTypeUpdateListener = strapi.eventHub.on(
       'content-type.update',
       async ({ contentType }) => {
+        console.log('update contentType', contentType.schema?.options?.draftAndPublish);
         if (contentType.schema?.options?.draftAndPublish === false) {
-          await releaseActionService.deleteManyForContentType(contentType.uid);
+          try {
+            await releaseActionService.deleteManyForContentType(contentType.uid);
+          } catch (error) {
+            console.error(error);
+          }
         }
       }
     );
     eventManager.addDestroyListenerCallback(destroyContentTypeUpdateListener);
     // Clean up release-actions when a content-type is deleted
-    const destroyContentTypeDeleteListener = strapi.eventHub.on(
-      'content-type.delete',
-      async ({ contentType }) => {
-        await releaseActionService.deleteManyForContentType(contentType.uid);
-      }
-    );
-    eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
+    // const destroyContentTypeDeleteListener = strapi.eventHub.on(
+    //   'content-type.delete',
+    //   async ({ contentType }) => {
+    //     await releaseActionService.deleteManyForContentType(contentType.uid);
+    //   }
+    // );
+    // eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
   }
 };
