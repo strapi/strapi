@@ -1,3 +1,4 @@
+import EE from '@strapi/strapi/dist/utils/ee';
 import type { CreateReleaseAction } from '../../../../shared/contracts/release-actions';
 import createReleaseValidationService from '../validation';
 
@@ -9,6 +10,12 @@ const baseStrapiMock = {
   },
   contentType: jest.fn(),
 };
+
+jest.mock('@strapi/strapi/dist/utils/ee', () => ({
+  features: {
+    get: jest.fn(),
+  },
+}));
 
 describe('Release Validation service', () => {
   describe('validateEntryContentType', () => {
@@ -105,6 +112,90 @@ describe('Release Validation service', () => {
       ).rejects.toThrow(
         'Entry with id 1 and contentType api::category.category already exists in release with id 1'
       );
+    });
+  });
+  describe('validatePendingReleasesLimit', () => {
+    it('should throw an error if the default pending release limit has been reached', () => {
+      // @ts-expect-error - get is a mock
+      EE.features.get.mockReturnValue({});
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            findWithCount: jest.fn().mockReturnValue([[], 4]),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      expect(() => releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
+        'You have reached the maximum number of pending releases'
+      );
+    });
+
+    it('should pass if the default pending release limit has NOT been reached', async () => {
+      // @ts-expect-error - get is a mock
+      EE.features.get.mockReturnValue({});
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            findWithCount: jest.fn().mockReturnValue([[], 2]),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
+    });
+
+    it('should throw an error if the license pending release limit has been reached', () => {
+      // @ts-expect-error - get is a mock
+      EE.features.get.mockReturnValue({
+        options: {
+          maximumReleases: 5,
+        },
+      });
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            findWithCount: jest.fn().mockReturnValue([[], 5]),
+          }),
+        },
+      };
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      expect(() => releaseValidationService.validatePendingReleasesLimit()).rejects.toThrow(
+        'You have reached the maximum number of pending releases'
+      );
+    });
+
+    it('should pass if the license pending release limit has NOT been reached', async () => {
+      // @ts-expect-error - get is a mock
+      EE.features.get.mockReturnValue({
+        options: {
+          maximumReleases: 5,
+        },
+      });
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn().mockReturnValue({
+            findWithCount: jest.fn().mockReturnValue([[], 4]),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
     });
   });
 });

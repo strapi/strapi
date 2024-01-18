@@ -165,6 +165,24 @@ describe('Release controller', () => {
             },
           },
         },
+        plugins: {
+          // @ts-expect-error Ignore missing properties
+          'content-manager': {
+            services: {
+              'content-types': {
+                findAllContentTypes: jest
+                  .fn()
+                  .mockReturnValue([
+                    { uid: 'api::contentTypeA.contentTypeA' },
+                    { uid: 'api::contentTypeB.contentTypeB' },
+                  ]),
+              },
+              components: {
+                findAllComponents: jest.fn().mockReturnValue([{ uid: 'component.component' }]),
+              },
+            },
+          },
+        },
       };
     });
 
