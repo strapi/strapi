@@ -1,6 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import get from 'lodash/get';
-import set from 'lodash/set';
 
 import {
   CreateReleaseAction,
@@ -200,7 +199,7 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: (result, error, arg) => [{ type: 'ReleaseAction', id: 'LIST' }],
+        invalidatesTags: () => [{ type: 'ReleaseAction', id: 'LIST' }],
         async onQueryStarted({ body, params, query, actionPath }, { dispatch, queryFulfilled }) {
           // We need to mimic the same params received by the getReleaseActions query
           const paramsWithoutActionId = {
