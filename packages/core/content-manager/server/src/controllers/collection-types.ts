@@ -1,9 +1,7 @@
-import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
+import { setCreatorFields, pipeAsync } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
-
-const { ApplicationError } = errors;
 
 export default {
   async find(ctx: any) {
