@@ -70,7 +70,7 @@ export default (dir: string) => {
     }
 
     // restricted names are also restricted from being prefixes
-    const res = RESTRICTED_FILENAMES.find((restrictedName) =>
+    const restrictedPrefix = RESTRICTED_FILENAMES.find((restrictedName) =>
       restrictedName.startsWith(baseNameLower)
     );
 
@@ -86,8 +86,10 @@ export default (dir: string) => {
 
       return acc;
     }
-    if (res) {
-      logWarning(`Config file not loaded, filename cannot start with ${res}: ${file.name}`);
+    if (restrictedPrefix) {
+      logWarning(
+        `Config file not loaded, filename cannot start with ${restrictedPrefix}: ${file.name}`
+      );
     }
 
     /**
