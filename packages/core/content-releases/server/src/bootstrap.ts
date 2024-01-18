@@ -64,24 +64,19 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
     const destroyContentTypeUpdateListener = strapi.eventHub.on(
       'content-type.update',
       async ({ contentType }) => {
-        console.log('update contentType', contentType.schema?.options?.draftAndPublish);
         if (contentType.schema?.options?.draftAndPublish === false) {
-          try {
-            await releaseActionService.deleteManyForContentType(contentType.uid);
-          } catch (error) {
-            console.error(error);
-          }
+          await releaseActionService.deleteManyForContentType(contentType.uid);
         }
       }
     );
     eventManager.addDestroyListenerCallback(destroyContentTypeUpdateListener);
     // Clean up release-actions when a content-type is deleted
-    // const destroyContentTypeDeleteListener = strapi.eventHub.on(
-    //   'content-type.delete',
-    //   async ({ contentType }) => {
-    //     await releaseActionService.deleteManyForContentType(contentType.uid);
-    //   }
-    // );
-    // eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
+    const destroyContentTypeDeleteListener = strapi.eventHub.on(
+      'content-type.delete',
+      async ({ contentType }) => {
+        await releaseActionService.deleteManyForContentType(contentType.uid);
+      }
+    );
+    eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
   }
 };
