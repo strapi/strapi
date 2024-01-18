@@ -1,7 +1,7 @@
 import { join } from 'path';
 import fse from 'fs-extra';
 import { merge } from 'lodash/fp';
-import { loadFile } from '../../app-configuration/load-config-file';
+import { loadConfigFile } from '../../utils/load-config-file';
 
 /**
  * Return user defined plugins' config
@@ -20,12 +20,12 @@ export const getUserPluginsConfig = async () => {
 
   // assign global user config if exists
   if (await fse.pathExists(globalUserConfigPath)) {
-    config = loadFile(globalUserConfigPath);
+    config = loadConfigFile(globalUserConfigPath);
   }
 
   // and merge user config by environment if exists
   if (await fse.pathExists(currentEnvUserConfigPath)) {
-    config = merge(config, loadFile(currentEnvUserConfigPath));
+    config = merge(config, loadConfigFile(currentEnvUserConfigPath));
   }
 
   return config;

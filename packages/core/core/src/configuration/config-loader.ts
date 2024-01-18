@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { loadFile } from './load-config-file';
+import { loadConfigFile } from '../utils/load-config-file';
 
 const VALID_EXTENSIONS = ['.js', '.json'];
 
@@ -13,7 +13,7 @@ export default (dir: string) => {
     .reduce((acc, file) => {
       const key = path.basename(file.name, path.extname(file.name));
 
-      acc[key] = loadFile(path.resolve(dir, file.name));
+      acc[key] = loadConfigFile(path.resolve(dir, file.name));
 
       return acc;
     }, {} as Record<string, unknown>);

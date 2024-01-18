@@ -30,14 +30,14 @@ import type {
   Schema,
 } from '@strapi/types';
 
-import loadConfiguration from './core/app-configuration';
+import loadConfiguration from './configuration';
 
 import * as factories from './factories';
 import compile from './compile';
 
 import * as utils from './utils';
-import * as registries from './core/registries';
-import * as loaders from './core/loaders';
+import * as registries from './registries';
+import * as loaders from './loaders';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
@@ -59,7 +59,7 @@ import createStartupLogger from './utils/startup-logger';
 import { createStrapiFetch } from './utils/fetch';
 import { LIFECYCLES } from './utils/lifecycles';
 import ee from './utils/ee';
-import bootstrap from './core/bootstrap';
+import bootstrap from './bootstrap';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import convertCustomFieldType from './utils/convert-custom-field-type';
