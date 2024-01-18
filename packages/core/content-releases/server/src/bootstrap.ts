@@ -8,6 +8,30 @@ const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (features.isEnabled('cms-content-releases')) {
+    const releaseActionService = getService('release-action', { strapi });
+    const eventManager = getService('event-manager', { strapi });
+    // Clean up release-actions when draft and publish is disabled
+    const destroyContentTypeUpdateListener = strapi.eventHub.on(
+      'content-type.update',
+      async ({ contentType }) => {
+        if (contentType.schema?.options?.draftAndPublish === false) {
+          await releaseActionService.deleteManyForContentType(contentType.uid);
+        }
+      }
+    );
+    eventManager.addDestroyListenerCallback(destroyContentTypeUpdateListener);
+    // Clean up release-actions when a content-type is deleted
+    const destroyContentTypeDeleteListener = strapi.eventHub.on(
+      'content-type.delete',
+      async ({ contentType }) => {
+        if (contentType.schema?.options?.draftAndPublish) {
+          await releaseActionService.deleteManyForContentType(contentType.uid);
+        }
+      }
+    );
+    eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
+
+    // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
       afterDelete(event) {
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
@@ -57,28 +81,5 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         }
       },
     });
-
-    const releaseActionService = getService('release-action', { strapi });
-    const eventManager = getService('event-manager', { strapi });
-    // Clean up release-actions when draft and publish is disabled
-    const destroyContentTypeUpdateListener = strapi.eventHub.on(
-      'content-type.update',
-      async ({ contentType }) => {
-        if (contentType.schema?.options?.draftAndPublish === false) {
-          await releaseActionService.deleteManyForContentType(contentType.uid);
-        }
-      }
-    );
-    eventManager.addDestroyListenerCallback(destroyContentTypeUpdateListener);
-    // Clean up release-actions when a content-type is deleted
-    const destroyContentTypeDeleteListener = strapi.eventHub.on(
-      'content-type.delete',
-      async ({ contentType }) => {
-        if (contentType.schema?.options?.draftAndPublish) {
-          await releaseActionService.deleteManyForContentType(contentType.uid);
-        }
-      }
-    );
-    eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
   }
 };
