@@ -313,7 +313,7 @@ const baseRenderElement = ({
   // List items and nested list blocks i.e. lists with indent level higher than 0 are skipped from dragged items
   if (
     isLinkNode(element) ||
-    (isListNode(element) && element.listIndentLevel && element.listIndentLevel > 0) ||
+    (isListNode(element) && element.indentLevel && element.indentLevel > 0) ||
     element.type === 'list-item'
   ) {
     return block.renderElement(props);
@@ -333,9 +333,10 @@ const baseRenderElement = ({
 
 interface BlocksInputProps {
   placeholder?: string;
+  ariaLabel: string;
 }
 
-const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder, ariaLabel }: BlocksInputProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
@@ -511,19 +512,16 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     // Find the right block-specific handlers for enter and backspace key presses
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      return handleEnter(event);
-    }
-    if (event.key === 'Backspace') {
-      return handleBackspaceEvent(event);
-    }
-    if (event.key === 'Tab') {
-      return handleTab(event);
-    }
-    if (event.key === 'Escape') {
-      ReactEditor.blur(editor);
-      return;
+    switch (event.key) {
+      case 'Enter':
+        event.preventDefault();
+        return handleEnter(event);
+      case 'Backspace':
+        return handleBackspaceEvent(event);
+      case 'Tab':
+        return handleTab(event);
+      case 'Escape':
+        return ReactEditor.blur(editor);
     }
 
     handleKeyboardShortcuts(event);
@@ -577,6 +575,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       paddingBottom={3}
     >
       <StyledEditable
+        aria-labelledby={ariaLabel}
         readOnly={disabled}
         placeholder={placeholder}
         isExpandedMode={isExpandedMode}

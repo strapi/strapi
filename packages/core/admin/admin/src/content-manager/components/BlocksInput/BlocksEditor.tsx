@@ -41,7 +41,6 @@ interface BaseBlock {
   handleTab?: (editor: Editor) => void;
   snippets?: string[];
   dragHandleTopMargin?: CSSProperties['marginTop'];
-  styles?: string[];
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -163,6 +162,7 @@ const pipe =
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
 interface BlocksEditorProps {
+  ariaLabel: string;
   name: string;
   onChange: (event: {
     target: { name: string; value: Attribute.BlocksValue; type: 'blocks' };
@@ -174,7 +174,7 @@ interface BlocksEditorProps {
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
+  ({ disabled = false, name, placeholder, onChange, value, error, ariaLabel }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
@@ -263,7 +263,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent placeholder={formattedPlaceholder} />
+              <BlocksContent placeholder={formattedPlaceholder} ariaLabel={ariaLabel} />
               {!isExpandedMode && (
                 <ExpandIconButton
                   aria-label={formatMessage({

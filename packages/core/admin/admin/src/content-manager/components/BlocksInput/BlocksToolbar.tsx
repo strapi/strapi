@@ -167,7 +167,7 @@ const handleToggleList = (
       const [, lastNodePath] = Editor.last(editor, []);
 
       Transforms.unwrapNodes(editor, {
-        match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
+        match: (node) => isListNode(node),
         split: true,
         at: editor.selection ?? lastNodePath,
       });
@@ -226,7 +226,7 @@ const BlocksDropdown = () => {
       Transforms.select(editor, Editor.start(editor, [0, 0]));
     }
 
-    // If selection is a list-item, toggle format
+    // If selection is already a list block, toggle its format
     const currentListEntry = Editor.above(editor, {
       match: (node) => !Editor.isEditor(node) && node.type === 'list',
     });
@@ -237,7 +237,7 @@ const BlocksDropdown = () => {
       return;
     }
 
-    // Let the block handle the Slate conversion logic except list
+    // Let the block handle the Slate conversion logic
     const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
     handleConversionResult(maybeRenderModal);
 
@@ -286,7 +286,9 @@ const BlocksDropdown = () => {
           Transforms.setNodes(editor, { type: 'paragraph' });
           // @ts-expect-error convert explicitly type to paragraph
           selectedNode = { ...anchorNode, type: 'paragraph' };
-        } else selectedNode = anchorNode;
+        } else {
+          selectedNode = anchorNode;
+        }
       }
 
       // Find the block key that matches the anchor node

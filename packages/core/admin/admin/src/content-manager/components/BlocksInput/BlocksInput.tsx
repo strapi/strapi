@@ -37,7 +37,13 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
       <>
         <Flex direction="column" alignItems="stretch" gap={1}>
           <Flex gap={1}>
-            <Typography variant="pi" fontWeight="bold" textColor="neutral800">
+            <Typography
+              variant="pi"
+              fontWeight="bold"
+              textColor="neutral800"
+              as="label"
+              id="blocks-label"
+            >
               {label}
               {required && (
                 <Typography textColor="danger600" lineHeight="0px">
@@ -47,7 +53,13 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             </Typography>
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
-          <BlocksEditor name={name} error={error} ref={forwardedRef} {...editorProps} />
+          <BlocksEditor
+            name={name}
+            error={error}
+            ref={forwardedRef}
+            {...editorProps}
+            ariaLabel="blocks-label"
+          />
           <Hint hint={hint} name={name} error={error} />
         </Flex>
         {error && (

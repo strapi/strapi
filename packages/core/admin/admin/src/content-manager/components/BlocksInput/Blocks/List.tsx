@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { BulletList, NumberList } from '@strapi/icons';
 import { type Text, Editor, Node, Transforms, Path } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled, { CSSProperties, css } from 'styled-components';
+import styled, { type CSSProperties, css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
@@ -29,15 +29,18 @@ const listStyle = css`
   }
 `;
 
-const Orderedlist = styled.ol<{ listStyle: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyle};
+const Orderedlist = styled.ol<{ listStyleType: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.listStyleType};
   ${listStyle}
 `;
 
-const Unorderedlist = styled.ul<{ listStyle: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyle};
+const Unorderedlist = styled.ul<{ listStyleType: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.listStyleType};
   ${listStyle}
 `;
+
+const orderedStyles = ['decimal', 'lower-alpha', 'upper-roman'];
+const unorderedStyles = ['disc', 'circle', 'square'];
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
   if (!isListNode(element)) {
@@ -45,20 +48,20 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
   }
 
   // Determine next style based on the current style
-  const listStyles = listBlocks[`list-${element.format}`].styles;
-  const nextIndex = (element.listIndentLevel || 0) % listStyles!.length;
-  const listStyle = listStyles![nextIndex];
+  const listStyles = element.format === 'ordered' ? orderedStyles : unorderedStyles;
+  const nextIndex = (element.indentLevel || 0) % listStyles!.length;
+  const listStyleType = listStyles![nextIndex];
 
   if (element.format === 'ordered') {
     return (
-      <Orderedlist listStyle={listStyle} {...attributes}>
+      <Orderedlist listStyleType={listStyleType} {...attributes}>
         {children}
       </Orderedlist>
     );
   }
 
   return (
-    <Unorderedlist listStyle={listStyle} {...attributes}>
+    <Unorderedlist listStyleType={listStyleType} {...attributes}>
       {children}
     </Unorderedlist>
   );
@@ -148,9 +151,9 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
         const {
           type: previousType,
           format: previousFormat,
-          listIndentLevel: previousIndent,
+          indentLevel: previousIndent,
         } = previousNode;
-        const { type: nextType, format: nextFormat, listIndentLevel: nextIndent } = nextNode;
+        const { type: nextType, format: nextFormat, indentLevel: nextIndent } = nextNode;
         if (
           previousType === 'list' &&
           nextType === 'list' &&
@@ -197,16 +200,16 @@ const handleEnterKeyOnList = (editor: Editor) => {
     if (
       !Editor.isEditor(currentList) &&
       isListNode(currentList) &&
-      currentList?.listIndentLevel &&
-      currentList.listIndentLevel > 0
+      currentList?.indentLevel &&
+      currentList.indentLevel > 0
     ) {
-      const previousIndentLevel = currentList.listIndentLevel - 1;
+      const previousIndentLevel = currentList.indentLevel - 1;
 
       const parentListNodeEntry = Editor.above(editor, {
         match: (node) =>
           !Editor.isEditor(node) &&
           node.type === 'list' &&
-          (node.listIndentLevel || 0) === previousIndentLevel,
+          (node.indentLevel || 0) === previousIndentLevel,
       });
 
       if (parentListNodeEntry) {
@@ -305,7 +308,7 @@ const handleTabOnList = (editor: Editor) => {
     Transforms.wrapNodes(editor, {
       type: 'list',
       format: currentList.format,
-      listIndentLevel: (currentList.listIndentLevel || 0) + 1,
+      indentLevel: (currentList.indentLevel || 0) + 1,
       children: [],
     });
   }
@@ -326,7 +329,6 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     handleBackspaceKey: handleBackspaceKeyOnList,
     handleTab: handleTabOnList,
     snippets: ['1.'],
-    styles: ['decimal', 'lower-alpha', 'upper-roman'],
   },
   'list-unordered': {
     renderElement: (props) => <List {...props} />,
@@ -342,7 +344,6 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     handleBackspaceKey: handleBackspaceKeyOnList,
     handleTab: handleTabOnList,
     snippets: ['-', '*', '+'],
-    styles: ['disc', 'circle', 'square'],
   },
   'list-item': {
     renderElement: (props) => (
