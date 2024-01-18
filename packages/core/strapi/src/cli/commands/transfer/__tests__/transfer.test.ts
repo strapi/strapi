@@ -1,10 +1,11 @@
+import * as mockDataTransfer from '@strapi/data-transfer';
+
 import transferAction from '../action';
 import { expectExit } from '../../__tests__/commands.test.utils';
-import * as mockDataTransfer from '../../..';
 
-jest.mock('../../data-transfer', () => {
+jest.mock('../../../utils/data-transfer', () => {
   return {
-    ...jest.requireActual('../../data-transfer'),
+    ...jest.requireActual('../../../utils/data-transfer'),
     getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -31,44 +32,46 @@ jest.mock('../../data-transfer', () => {
 });
 
 // mock data transfer
-jest.mock('../../../engine', () => {
-  const acutal = jest.requireActual('../../../engine');
+jest.mock('@strapi/data-transfer', () => {
+  const acutal = jest.requireActual('@strapi/data-transfer');
   return {
     ...acutal,
-    createTransferEngine() {
-      return {
-        transfer: jest.fn(() => {
-          return {
-            engine: {},
-          };
-        }),
-        progress: {
-          on: jest.fn(),
-          stream: {
-            on: jest.fn(),
-          },
-        },
-        sourceProvider: { name: 'testSource' },
-        destinationProvider: { name: 'testDestination' },
-        diagnostics: {
-          on: jest.fn().mockReturnThis(),
-          onDiagnostic: jest.fn().mockReturnThis(),
-        },
-        onSchemaDiff: jest.fn(),
-        addErrorHandler: jest.fn(),
-      };
+    strapi: {
+      ...acutal.strapi,
+      providers: {
+        ...acutal.strapi.providers,
+        createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
+        createLocalStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testLocalDest' }),
+        createRemoteStrapiDestinationProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testRemoteDest' }),
+      },
     },
-  };
-});
-
-jest.mock('../../../strapi', () => {
-  const actual = jest.requireActual('../../../strapi');
-  return {
-    ...actual,
-    providers: {
-      createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
-      createLocalStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testLocalDest' }),
-      createRemoteStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testRemoteDest' }),
+    engine: {
+      ...acutal.engine,
+      createTransferEngine() {
+        return {
+          transfer: jest.fn(() => {
+            return {
+              engine: {},
+            };
+          }),
+          progress: {
+            on: jest.fn(),
+            stream: {
+              on: jest.fn(),
+            },
+          },
+          sourceProvider: { name: 'testSource' },
+          destinationProvider: { name: 'testDestination' },
+          diagnostics: {
+            on: jest.fn().mockReturnThis(),
+            onDiagnostic: jest.fn().mockReturnThis(),
+          },
+          onSchemaDiff: jest.fn(),
+          addErrorHandler: jest.fn(),
+        };
+      },
     },
   };
 });

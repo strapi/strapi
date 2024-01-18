@@ -1,9 +1,14 @@
 import path from 'path';
 import { createCommand, Option } from 'commander';
 import inquirer from 'inquirer';
-import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
-import { getCommanderConfirmMessage, forceOption } from '../commander';
-import { exitWith } from '../helpers';
+import {
+  excludeOption,
+  onlyOption,
+  throttleOption,
+  validateExcludeOnly,
+} from '../../utils/data-transfer';
+import { getCommanderConfirmMessage, forceOption } from '../../utils/commander';
+import { exitWith } from '../../utils/helpers';
 import action from './action';
 
 /**

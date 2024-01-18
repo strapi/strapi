@@ -1,7 +1,8 @@
+import { file as fileDataTransfer } from '@strapi/data-transfer';
+
 import exportAction from '../action';
-import * as mockUtils from '../../data-transfer';
+import * as mockUtils from '../../../utils/data-transfer';
 import { expectExit } from '../../__tests__/commands.test.utils';
-import * as fileDatatransfer from '../../../file';
 
 jest.mock('fs-extra', () => ({
   ...jest.requireActual('fs-extra'),
@@ -10,9 +11,9 @@ jest.mock('fs-extra', () => ({
 
 const defaultFileName = 'defaultFilename';
 
-jest.mock('../../data-transfer', () => {
+jest.mock('../../../utils/data-transfer', () => {
   return {
-    ...jest.requireActual('../../data-transfer'),
+    ...jest.requireActual('../../../utils/data-transfer'),
     getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -36,75 +37,68 @@ jest.mock('../../data-transfer', () => {
   };
 });
 
-jest.mock('../../../engine', () => {
-  const actual = jest.requireActual('../../../engine');
+jest.mock('@strapi/data-transfer', () => {
+  const actual = jest.requireActual('@strapi/data-transfer');
 
   return {
     ...actual,
-    createTransferEngine: jest.fn(() => {
-      return {
-        transfer: jest.fn(() => {
-          return {
-            engine: {},
-            destination: {
-              file: {
-                path: 'path',
-              },
-            },
-          };
-        }),
-        progress: {
-          on: jest.fn(),
-          stream: {
-            on: jest.fn(),
-          },
-        },
-        sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
-        destinationProvider: {
-          name: 'testStrapiDest',
+    file: {
+      ...actual.file,
+      providers: {
+        ...actual.file.providers,
+        createLocalFileSourceProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
+        createLocalFileDestinationProvider: jest.fn().mockReturnValue({
+          name: 'testFileDestination',
           type: 'destination',
           getMetadata: jest.fn(),
-        },
-        diagnostics: {
-          on: jest.fn().mockReturnThis(),
-          onDiagnostic: jest.fn().mockReturnThis(),
-        },
-        onSchemaDiff: jest.fn(),
-        addErrorHandler: jest.fn(),
-      };
-    }),
-  };
-});
-
-jest.mock('../../../file', () => {
-  const actual = jest.requireActual('../../../file');
-
-  return {
-    ...actual,
-    providers: {
-      ...actual.providers,
-      createLocalFileSourceProvider: jest
-        .fn()
-        .mockReturnValue({ name: 'testFileSource', type: 'source', getMetadata: jest.fn() }),
-      createLocalFileDestinationProvider: jest.fn().mockReturnValue({
-        name: 'testFileDestination',
-        type: 'destination',
-        getMetadata: jest.fn(),
-      }),
+        }),
+      },
     },
-  };
-});
-
-jest.mock('../../../strapi', () => {
-  const actual = jest.requireActual('../../../strapi');
-
-  return {
-    ...actual,
-    providers: {
-      ...actual.providers,
-      createLocalStrapiDestinationProvider: jest
-        .fn()
-        .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
+    strapi: {
+      ...actual.strapi,
+      providers: {
+        ...actual.strapi.providers,
+        createLocalStrapiDestinationProvider: jest
+          .fn()
+          .mockReturnValue({ name: 'testStrapiDest', type: 'destination', getMetadata: jest.fn() }),
+      },
+    },
+    engine: {
+      ...actual.engine,
+      createTransferEngine: jest.fn(() => {
+        return {
+          transfer: jest.fn(() => {
+            return {
+              engine: {},
+              destination: {
+                file: {
+                  path: 'path',
+                },
+              },
+            };
+          }),
+          progress: {
+            on: jest.fn(),
+            stream: {
+              on: jest.fn(),
+            },
+          },
+          sourceProvider: { name: 'testFileSource', type: 'source', getMetadata: jest.fn() },
+          destinationProvider: {
+            name: 'testStrapiDest',
+            type: 'destination',
+            getMetadata: jest.fn(),
+          },
+          diagnostics: {
+            on: jest.fn().mockReturnThis(),
+            onDiagnostic: jest.fn().mockReturnThis(),
+          },
+          onSchemaDiff: jest.fn(),
+          addErrorHandler: jest.fn(),
+        };
+      }),
     },
   };
 });
@@ -130,7 +124,7 @@ describe('Export', () => {
     });
 
     expect(console.error).not.toHaveBeenCalled();
-    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: filename },
       })
@@ -144,7 +138,7 @@ describe('Export', () => {
     });
 
     expect(mockUtils.getDefaultExportName).toHaveBeenCalledTimes(1);
-    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         file: { path: defaultFileName },
       })
@@ -157,7 +151,7 @@ describe('Export', () => {
       await exportAction({ encrypt });
     });
 
-    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt },
       })
@@ -171,7 +165,7 @@ describe('Export', () => {
       await exportAction({ encrypt, key });
     });
 
-    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         encryption: { enabled: encrypt, key },
       })
@@ -183,7 +177,7 @@ describe('Export', () => {
       await exportAction({ compress: false });
     });
 
-    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         compression: { enabled: false },
       })
@@ -191,7 +185,7 @@ describe('Export', () => {
     await expectExit(0, async () => {
       await exportAction({ compress: true });
     });
-    expect(fileDatatransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+    expect(fileDataTransfer.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         compression: { enabled: true },
       })

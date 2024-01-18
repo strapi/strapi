@@ -7,15 +7,6 @@ import { loadTsConfig } from './utils/tsconfig';
 import { CLIContext } from './types';
 
 const createCLI = async (argv: string[], command = new Command()) => {
-  try {
-    // NOTE: this is a hack to allow loading dts commands without make dts a dependency of strapi and thus avoiding circular dependencies
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const dtsCommands = require(require.resolve('@strapi/data-transfer')).commands;
-    strapiCommands.push(...dtsCommands);
-  } catch (e) {
-    // noop
-  }
-
   // Initial program setup
   command.storeOptionsAsProperties(false).allowUnknownOption(true);
 

@@ -21,6 +21,9 @@ import { command as generateCommand } from './generate';
 import { command as reportCommand } from './report';
 import { command as startCommand } from './start';
 import { command as versionCommand } from './version';
+import exportCommand from './export/command';
+import importCommand from './import/command';
+import transferCommand from './transfer/command';
 
 import { command as buildPluginCommand } from './plugin/build';
 import { command as initPluginCommand } from './plugin/init';
@@ -53,6 +56,9 @@ export const commands: StrapiCommand[] = [
   versionCommand,
   buildCommand,
   developCommand,
+  exportCommand,
+  importCommand,
+  transferCommand,
   /**
    * Plugins
    */

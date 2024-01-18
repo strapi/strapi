@@ -1,8 +1,14 @@
 import inquirer from 'inquirer';
 import { createCommand, Option } from 'commander';
-import { getCommanderConfirmMessage, forceOption, parseURL } from '../commander';
-import { exitWith, assertUrlHasProtocol, ifOptions } from '../helpers';
-import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
+import { getCommanderConfirmMessage, forceOption, parseURL } from '../../utils/commander';
+import { exitWith, assertUrlHasProtocol, ifOptions } from '../../utils/helpers';
+import {
+  excludeOption,
+  onlyOption,
+  throttleOption,
+  validateExcludeOnly,
+} from '../../utils/data-transfer';
+
 import action from './action';
 
 /**
