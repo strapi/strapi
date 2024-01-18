@@ -40,7 +40,7 @@ const RESTRICTED_FILENAMES = [
   ...Object.keys(MISTAKEN_FILENAMES),
 ];
 
-const warnSkippedConfig = (message) => {
+const warnSkippedConfig = (message: string) => {
   console.warn(message);
 };
 
