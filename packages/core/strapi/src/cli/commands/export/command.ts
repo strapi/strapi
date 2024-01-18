@@ -1,6 +1,12 @@
 import { createCommand, Option } from 'commander';
-import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
-import { promptEncryptionKey } from '../commander';
+
+import {
+  excludeOption,
+  onlyOption,
+  throttleOption,
+  validateExcludeOnly,
+} from '../../utils/data-transfer';
+import { promptEncryptionKey } from '../../utils/commander';
 import action from './action';
 
 /**

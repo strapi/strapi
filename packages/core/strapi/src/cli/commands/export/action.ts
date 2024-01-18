@@ -4,6 +4,12 @@ import chalk from 'chalk';
 import type { LoadedStrapi } from '@strapi/types';
 
 import {
+  engine as engineDataTransfer,
+  strapi as strapiDataTransfer,
+  file as fileDataTransfer,
+} from '@strapi/data-transfer';
+
+import {
   getDefaultExportName,
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
@@ -14,18 +20,15 @@ import {
   abortTransfer,
   getTransferTelemetryPayload,
   setSignalHandler,
-} from '../data-transfer';
-import { exitWith } from '../helpers';
-import { TransferGroupFilter, createTransferEngine, ITransferResults, errors } from '../../engine';
-import * as strapiDatatransfer from '../../strapi';
-import * as file from '../../file';
+} from '../../utils/data-transfer';
+import { exitWith } from '../../utils/helpers';
 
 const {
   providers: { createLocalFileDestinationProvider },
-} = file;
+} = fileDataTransfer;
 const {
   providers: { createLocalStrapiSourceProvider },
-} = strapiDatatransfer;
+} = strapiDataTransfer;
 
 const BYTES_IN_MB = 1024 * 1024;
 
@@ -34,8 +37,8 @@ interface CmdOptions {
   encrypt?: boolean;
   key?: string;
   compress?: boolean;
-  only?: (keyof TransferGroupFilter)[];
-  exclude?: (keyof TransferGroupFilter)[];
+  only?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
   maxSizeJsonl?: number;
 }
@@ -58,7 +61,7 @@ export default async (opts: CmdOptions) => {
   const source = createSourceProvider(strapi);
   const destination = createDestinationProvider(opts);
 
-  const engine = createTransferEngine(source, destination, {
+  const engine = engineDataTransfer.createTransferEngine(source, destination, {
     versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     exclude: opts.exclude,
@@ -109,7 +112,7 @@ export default async (opts: CmdOptions) => {
     await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
   });
 
-  let results: ITransferResults<typeof source, typeof destination>;
+  let results: engineDataTransfer.ITransferResults<typeof source, typeof destination>;
   let outFile: string;
   try {
     // Abort transfer if user interrupts process
@@ -119,7 +122,9 @@ export default async (opts: CmdOptions) => {
     outFile = results.destination?.file?.path ?? '';
     const outFileExists = await fs.pathExists(outFile);
     if (!outFileExists) {
-      throw new errors.TransferEngineTransferError(`Export file not created "${outFile}"`);
+      throw new engineDataTransfer.errors.TransferEngineTransferError(
+        `Export file not created "${outFile}"`
+      );
     }
 
     // Note: we need to await telemetry or else the process ends before it is sent

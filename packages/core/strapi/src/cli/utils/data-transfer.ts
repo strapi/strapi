@@ -6,15 +6,14 @@ import { strapiFactory } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
 import type { LoadedStrapi, Strapi } from '@strapi/types';
+import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
 import { readableBytes, exitWith } from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
-import * as engineDatatransfer from '../engine';
-import * as strapiDataTransfer from '../strapi';
 
 const {
   errors: { TransferEngineInitializationError },
-} = engineDatatransfer;
+} = engineDataTransfer;
 
 const exitMessageText = (process: string, error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
@@ -49,9 +48,9 @@ const getDefaultExportName = () => {
   return `export_${yyyymmddHHMMSS()}`;
 };
 
-type ResultData = engineDatatransfer.ITransferResults<
-  engineDatatransfer.ISourceProvider,
-  engineDatatransfer.IDestinationProvider
+type ResultData = engineDataTransfer.ITransferResults<
+  engineDataTransfer.ISourceProvider,
+  engineDataTransfer.IDestinationProvider
 >['engine'];
 
 const buildTransferTable = (resultData: ResultData) => {
@@ -66,7 +65,7 @@ const buildTransferTable = (resultData: ResultData) => {
 
   let totalBytes = 0;
   let totalItems = 0;
-  (Object.keys(resultData) as engineDatatransfer.TransferStage[]).forEach((stage) => {
+  (Object.keys(resultData) as engineDataTransfer.TransferStage[]).forEach((stage) => {
     const item = resultData[stage];
 
     if (!item) {
@@ -123,7 +122,7 @@ const abortTransfer = async ({
   engine,
   strapi,
 }: {
-  engine: engineDatatransfer.TransferEngine;
+  engine: engineDataTransfer.TransferEngine;
   strapi: LoadedStrapi;
 }) => {
   try {
@@ -166,7 +165,7 @@ const createStrapiInstance = async (
   }
 };
 
-const transferDataTypes = Object.keys(engineDatatransfer.TransferGroupPresets);
+const transferDataTypes = Object.keys(engineDataTransfer.TransferGroupPresets);
 
 const throttleOption = new Option(
   '--throttle <delay after each entity>',
@@ -213,7 +212,7 @@ const errorColors = {
 const formatDiagnostic =
   (
     operation: string
-  ): Parameters<engineDatatransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
+  ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
   ({ details, kind }) => {
     const logger = createLogger(
       configs.createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
@@ -245,11 +244,11 @@ const formatDiagnostic =
   };
 
 type Loaders = {
-  [key in engineDatatransfer.TransferStage]: ora.Ora;
+  [key in engineDataTransfer.TransferStage]: ora.Ora;
 };
 
 type Data = {
-  [key in engineDatatransfer.TransferStage]?: {
+  [key in engineDataTransfer.TransferStage]?: {
     startTime?: number;
     endTime?: number;
     bytes?: number;
@@ -259,7 +258,7 @@ type Data = {
 
 const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
   const loaders = defaultLoaders;
-  const updateLoader = (stage: engineDatatransfer.TransferStage, data: Data) => {
+  const updateLoader = (stage: engineDataTransfer.TransferStage, data: Data) => {
     if (!(stage in loaders)) {
       createLoader(stage);
     }
@@ -280,12 +279,12 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
     return loaders[stage];
   };
 
-  const createLoader = (stage: engineDatatransfer.TransferStage) => {
+  const createLoader = (stage: engineDataTransfer.TransferStage) => {
     Object.assign(loaders, { [stage]: ora() });
     return loaders[stage];
   };
 
-  const getLoader = (stage: engineDatatransfer.TransferStage) => {
+  const getLoader = (stage: engineDataTransfer.TransferStage) => {
     return loaders[stage];
   };
 
@@ -299,7 +298,7 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
 /**
  * Get the telemetry data to be sent for a didDEITSProcess* event from an initialized transfer engine object
  */
-const getTransferTelemetryPayload = (engine: engineDatatransfer.TransferEngine) => {
+const getTransferTelemetryPayload = (engine: engineDataTransfer.TransferEngine) => {
   return {
     eventProperties: {
       source: engine?.sourceProvider?.name,
@@ -312,7 +311,7 @@ const getTransferTelemetryPayload = (engine: engineDatatransfer.TransferEngine) 
  * Get a transfer engine schema diff handler that confirms with the user before bypassing a schema check
  */
 const getDiffHandler = (
-  engine: engineDatatransfer.TransferEngine,
+  engine: engineDataTransfer.TransferEngine,
   {
     force,
     action,
@@ -322,8 +321,8 @@ const getDiffHandler = (
   }
 ) => {
   return async (
-    context: engineDatatransfer.SchemaDiffHandlerContext,
-    next: (ctx: engineDatatransfer.SchemaDiffHandlerContext) => void
+    context: engineDataTransfer.SchemaDiffHandlerContext,
+    next: (ctx: engineDataTransfer.SchemaDiffHandlerContext) => void
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
@@ -395,7 +394,7 @@ const getDiffHandler = (
 };
 
 const getAssetsBackupHandler = (
-  engine: engineDatatransfer.TransferEngine,
+  engine: engineDataTransfer.TransferEngine,
   {
     force,
     action,
@@ -405,8 +404,8 @@ const getAssetsBackupHandler = (
   }
 ) => {
   return async (
-    context: engineDatatransfer.ErrorHandlerContext,
-    next: (ctx: engineDatatransfer.ErrorHandlerContext) => void
+    context: engineDataTransfer.ErrorHandlerContext,
+    next: (ctx: engineDataTransfer.ErrorHandlerContext) => void
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
@@ -435,8 +434,8 @@ const getAssetsBackupHandler = (
 };
 
 const shouldSkipStage = (
-  opts: Partial<engineDatatransfer.ITransferEngineOptions>,
-  dataKind: engineDatatransfer.TransferFilterPreset
+  opts: Partial<engineDataTransfer.ITransferEngineOptions>,
+  dataKind: engineDataTransfer.TransferFilterPreset
 ) => {
   if (opts.exclude?.includes(dataKind)) {
     return true;
@@ -453,7 +452,7 @@ type RestoreConfig = NonNullable<
 >;
 
 // Based on exclude/only from options, create the restore object to match
-const parseRestoreFromOptions = (opts: Partial<engineDatatransfer.ITransferEngineOptions>) => {
+const parseRestoreFromOptions = (opts: Partial<engineDataTransfer.ITransferEngineOptions>) => {
   const entitiesOptions: RestoreConfig['entities'] = {
     exclude: DEFAULT_IGNORED_CONTENT_TYPES,
     include: undefined,
