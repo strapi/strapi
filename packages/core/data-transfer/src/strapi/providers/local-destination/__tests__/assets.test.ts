@@ -81,7 +81,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     await provider.bootstrap();
 
     expect(async () => provider.createAssetsWriteStream()).rejects.toThrow(
-      'Attempting to transfer assets when they are not included'
+      'Attempting to transfer assets when `assets` is not set in restore options'
     );
   });
 
