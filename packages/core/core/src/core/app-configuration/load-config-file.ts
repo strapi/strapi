@@ -5,7 +5,7 @@ import { register } from 'esbuild-register/dist/node';
 
 const loadJsFile = (file: string) => {
   try {
-    // In typescript projects, we don't need to compile the ts to js, so we can
+    // In typescript projects, we don't need to compile the ts to js, so we can load it directly
     const esbuildOptions: Parameters<typeof register>[0] = {
       extensions: ['.js', '.mjs', '.ts'],
     };
