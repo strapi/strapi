@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "4.15.5",
+  "version": "4.17.1",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -30,7 +30,6 @@
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
@@ -38,15 +37,15 @@
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
-    "@strapi/utils": "4.15.5",
+    "@strapi/utils": "4.17.1",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.5",
-    "eslint-config-custom": "4.15.5",
-    "tsconfig": "4.15.5"
+    "@strapi/pack-up": "4.17.1",
+    "eslint-config-custom": "4.17.1",
+    "tsconfig": "4.17.1"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

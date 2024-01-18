@@ -23,13 +23,14 @@ import {
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
+import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
 import { FieldSchema, useFieldHint } from '../hooks/useFieldHint';
 import { useFocusInputField } from '../hooks/useFocusInputField';
 import { pxToRem } from '../utils/pxToRem';
 
-import type { InputType, TranslationMessage } from '../types';
+import type { TranslationMessage } from '../types';
 import type { Attribute } from '@strapi/types';
 
 interface InputOption {
@@ -63,7 +64,7 @@ export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.
       target: {
         name: string;
         value: Attribute.GetValue<TAttribute>;
-        type?: InputType;
+        type?: string;
       };
     },
     shouldSetInitialValue?: boolean
@@ -72,7 +73,7 @@ export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.
   placeholder?: TranslationMessage;
   required?: boolean;
   step?: number;
-  type: InputType;
+  type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: Attribute.GetValue<TAttribute>;
   isNullable?: boolean;
@@ -559,4 +560,11 @@ const GenericInput = ({
   }
 };
 
-export { GenericInput };
+/**
+ * we've memoized this component because we use a context to store all the data in our form in the content-manager.
+ * This then causes _every_ component to re-render because there are no selects incurring performance issues
+ * in content-types as the content-type gets more complicated.
+ */
+const MemoizedGenericInput = React.memo(GenericInput, isEqual);
+
+export { MemoizedGenericInput as GenericInput };

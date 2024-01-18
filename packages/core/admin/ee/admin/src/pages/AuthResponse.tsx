@@ -1,9 +1,11 @@
 import * as React from 'react';
 
-import { auth, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import Cookies from 'js-cookie';
 import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+
+import { useAuth } from '../../../../admin/src/features/Auth';
 
 const AuthResponse = () => {
   const match = useRouteMatch<{ authResponse: string }>('/auth/login/:authResponse');
@@ -21,34 +23,7 @@ const AuthResponse = () => {
     );
   }, [push, formatMessage]);
 
-  const { get } = useFetchClient();
-
-  /**
-   * TODO: refactor this to use `react-query`
-   */
-  const fetchUserInfo = React.useCallback(async () => {
-    try {
-      const jwtToken = Cookies.get('jwtToken');
-
-      auth.clearAppStorage();
-
-      if (jwtToken) {
-        auth.setToken(jwtToken, true);
-        const requestUrl = '/admin/users/me';
-        const {
-          data: { data },
-        } = await get(requestUrl);
-
-        auth.setUserInfo(data, true);
-
-        Cookies.remove('jwtToken');
-
-        push('/auth/login');
-      }
-    } catch (e) {
-      redirectToOops();
-    }
-  }, [get, push, redirectToOops]);
+  const setToken = useAuth('AuthResponse', (state) => state.setToken);
 
   React.useEffect(() => {
     if (match?.params.authResponse === 'error') {
@@ -56,9 +31,19 @@ const AuthResponse = () => {
     }
 
     if (match?.params.authResponse === 'success') {
-      fetchUserInfo();
+      const jwtToken = Cookies.get('jwtToken');
+
+      if (jwtToken) {
+        setToken(jwtToken);
+
+        Cookies.remove('jwtToken');
+
+        push('/auth/login');
+      } else {
+        redirectToOops();
+      }
     }
-  }, [match, fetchUserInfo, redirectToOops]);
+  }, [match, redirectToOops, setToken, push]);
 
   return <LoadingIndicatorPage />;
 };

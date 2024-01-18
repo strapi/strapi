@@ -4,6 +4,7 @@ import { insertLink } from '../utils/links';
 
 interface LinkEditor extends BaseEditor {
   lastInsertedLinkPath: Path | null;
+  shouldSaveLinkPath: boolean;
 }
 
 const withLinks = (editor: Editor) => {
@@ -21,13 +22,21 @@ const withLinks = (editor: Editor) => {
   // We intercept the apply method, so everytime we insert a new link, we save its path
   editor.apply = (operation) => {
     if (operation.type === 'insert_node') {
-      if (!Editor.isEditor(operation.node) && operation.node.type === 'link') {
+      if (
+        !Editor.isEditor(operation.node) &&
+        operation.node.type === 'link' &&
+        editor.shouldSaveLinkPath
+      ) {
         editor.lastInsertedLinkPath = operation.path;
       }
     } else if (operation.type === 'move_node') {
       // We need to update the last inserted link path when link is moved
       // If link is the first word in the paragraph we dont need to update the path
-      if (Path.hasPrevious(operation.path) && editor.lastInsertedLinkPath) {
+      if (
+        Path.hasPrevious(operation.path) &&
+        editor.lastInsertedLinkPath &&
+        editor.shouldSaveLinkPath
+      ) {
         editor.lastInsertedLinkPath = Path.transform(editor.lastInsertedLinkPath, operation);
       }
     }
@@ -72,8 +81,9 @@ const withLinks = (editor: Editor) => {
       try {
         // eslint-disable-next-line no-new
         new URL(pastedText);
+        // Do not show link popup on copy-paste a link, so do not save its path
+        editor.shouldSaveLinkPath = false;
         insertLink(editor, { url: pastedText });
-
         return;
       } catch (error) {
         // continue normal data insertion

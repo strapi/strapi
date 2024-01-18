@@ -33,6 +33,9 @@ export default {
       type: 'string',
       required: true,
     },
+    locale: {
+      type: 'string',
+    },
     release: {
       type: 'relation',
       relation: 'manyToOne',

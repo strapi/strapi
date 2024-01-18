@@ -1,4 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
+import get from 'lodash/get';
+import set from 'lodash/set';
 
 import {
   CreateReleaseAction,
@@ -11,6 +13,7 @@ import { axiosBaseQuery } from './axios';
 import type {
   GetReleaseActions,
   UpdateReleaseAction,
+  ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type {
   CreateRelease,
@@ -36,6 +39,7 @@ export interface GetReleasesQueryParams {
 export interface GetReleaseActionsQueryParams {
   page?: number;
   pageSize?: number;
+  groupBy?: ReleaseActionGroupBy;
 }
 
 type GetReleasesTabResponse = GetReleases.Response & {
@@ -133,25 +137,16 @@ const releaseApi = createApi({
         GetReleaseActions.Response,
         GetReleaseActions.Request['params'] & GetReleaseActions.Request['query']
       >({
-        query({ releaseId, page, pageSize }) {
+        query({ releaseId, ...params }) {
           return {
             url: `/content-releases/${releaseId}/actions`,
             method: 'GET',
             config: {
-              params: {
-                page,
-                pageSize,
-              },
+              params,
             },
           };
         },
-        providesTags: (result, error, arg) =>
-          result
-            ? [
-                ...result.data.map(({ id }) => ({ type: 'ReleaseAction' as const, id })),
-                { type: 'ReleaseAction', id: 'LIST' },
-              ]
-            : [{ type: 'ReleaseAction', id: 'LIST' }],
+        providesTags: [{ type: 'ReleaseAction', id: 'LIST' }],
       }),
       createRelease: build.mutation<CreateRelease.Response, CreateRelease.Request['body']>({
         query(data) {
@@ -194,7 +189,9 @@ const releaseApi = createApi({
       }),
       updateReleaseAction: build.mutation<
         UpdateReleaseAction.Response,
-        UpdateReleaseAction.Request & { query: GetReleaseActions.Request['query'] }
+        UpdateReleaseAction.Request & { query: GetReleaseActions.Request['query'] } & {
+          actionPath: [string, number];
+        }
       >({
         query({ body, params }) {
           return {
@@ -203,10 +200,8 @@ const releaseApi = createApi({
             data: body,
           };
         },
-        invalidatesTags: (result, error, arg) => [
-          { type: 'ReleaseAction', id: arg.params.actionId },
-        ],
-        async onQueryStarted({ body, params, query }, { dispatch, queryFulfilled }) {
+        invalidatesTags: (result, error, arg) => [{ type: 'ReleaseAction', id: 'LIST' }],
+        async onQueryStarted({ body, params, query, actionPath }, { dispatch, queryFulfilled }) {
           // We need to mimic the same params received by the getReleaseActions query
           const paramsWithoutActionId = {
             releaseId: params.releaseId,
@@ -215,8 +210,7 @@ const releaseApi = createApi({
 
           const patchResult = dispatch(
             releaseApi.util.updateQueryData('getReleaseActions', paramsWithoutActionId, (draft) => {
-              // @ts-expect-error Type instantiation is excessively deep and possibly infinite.
-              const action = draft.data.find((action) => action.id === params.actionId);
+              const action = get(draft.data, actionPath);
 
               if (action) {
                 action.type = body.type;

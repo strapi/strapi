@@ -11,19 +11,14 @@ import {
   NavSections,
   NavUser,
 } from '@strapi/design-system/v2';
-import {
-  auth,
-  getFetchClient,
-  useAppInfo,
-  usePersistentState,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
 import { Exit, Write } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
+import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useConfiguration } from '../contexts/configuration';
+import { useAuth } from '../features/Auth';
+import { useConfiguration } from '../features/Configuration';
 import { Menu } from '../hooks/useMenu';
 
 const LinkUserWrapper = styled(Box)`
@@ -61,14 +56,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const [userLinksVisible, setUserLinksVisible] = React.useState(false);
   const {
     logos: { menu },
-  } = useConfiguration();
+  } = useConfiguration('LeftMenu');
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
-  const history = useHistory();
-  const { post } = getFetchClient();
+  const logout = useAuth('Logout', (state) => state.logout);
 
   const initials = userDisplayName
     .split(' ')
@@ -77,13 +71,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     .substring(0, 2);
 
   const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
-
-  const handleLogout = async () => {
-    await post('/admin/logout');
-    auth.clearAppStorage();
-    handleToggleUserLinks();
-    history.push('/auth/login');
-  };
 
   const handleBlur: React.FocusEventHandler = (e) => {
     if (
@@ -117,7 +104,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         title={menuTitle}
         icon={
           <img
-            src={menu.custom || menu.default}
+            src={menu.custom?.url || menu.default}
             alt={formatMessage({
               id: 'app.components.LeftMenu.logo.alt',
               defaultMessage: 'Application logo',
@@ -224,7 +211,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     })}
                   </Typography>
                 </LinkUser>
-                <LinkUser tabIndex={0} onClick={handleLogout} to="/auth/login">
+                <LinkUser tabIndex={0} onClick={logout} to="/auth/login">
                   <Typography textColor="danger600">
                     {formatMessage({
                       id: 'app.components.LeftMenu.logout',

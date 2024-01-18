@@ -9,7 +9,7 @@ import { mockReleasesPageData } from './mockReleasesPageData';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element}) => <div>{children}</div>
+  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
 }));
 
 describe('Releases home page', () => {

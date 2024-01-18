@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   ContentLayout,
+  Divider,
   EmptyStateLayout,
   Flex,
   Grid,
@@ -30,7 +31,7 @@ import {
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases } from '../../../shared/contracts/releases';
@@ -172,21 +173,55 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 /* -------------------------------------------------------------------------------------------------
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
+interface CustomLocationState {
+  errors?: Record<'code', string>[];
+}
+
 const INITIAL_FORM_VALUES = {
   name: '',
 } satisfies FormValues;
 
 const ReleasesPage = () => {
+  const tabRef = React.useRef<any>(null);
+  const location = useLocation<CustomLocationState>();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
 
   const { isLoading, isSuccess, isError } = response;
+  const activeTab = response?.currentData?.meta?.activeTab || 'pending';
+  const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
+
+  // Check if we have some errors and show a notification to the user to explain the error
+  React.useEffect(() => {
+    if (location?.state?.errors) {
+      toggleNotification({
+        type: 'warning',
+        title: formatMessage({
+          id: 'content-releases.pages.Releases.notification.error.title',
+          defaultMessage: 'Your request could not be processed.',
+        }),
+        message: formatMessage({
+          id: 'content-releases.pages.Releases.notification.error.message',
+          defaultMessage: 'Please try again or open another release.',
+        }),
+      });
+      replace({ state: null });
+    }
+  }, [formatMessage, location?.state?.errors, replace, toggleNotification]);
+
+  // TODO: Replace this solution with v2 of the Design System
+  // Check if the active tab index changes and call the handler of the ref to update the tab group component
+  React.useEffect(() => {
+    if (tabRef.current) {
+      tabRef.current._handlers.setSelectedTabIndex(activeTabIndex);
+    }
+  }, [activeTabIndex]);
 
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
@@ -216,8 +251,6 @@ const ReleasesPage = () => {
       },
     });
   };
-
-  const activeTab = response?.currentData?.meta?.activeTab || 'pending';
 
   const handleAddRelease = async (values: FormValues) => {
     const response = await createRelease({
@@ -259,8 +292,9 @@ const ReleasesPage = () => {
               defaultMessage: 'Releases list',
             })}
             variant="simple"
-            initialSelectedTabIndex={['pending', 'done'].indexOf(activeTab)}
+            initialSelectedTabIndex={activeTabIndex}
             onTabChange={handleTabChange}
+            ref={tabRef}
           >
             <Box paddingBottom={8}>
               <Tabs>
@@ -277,6 +311,7 @@ const ReleasesPage = () => {
                   })}
                 </Tab>
               </Tabs>
+              <Divider />
             </Box>
             <TabPanels>
               {/* Pending releases */}
@@ -324,10 +359,4 @@ const ReleasesPage = () => {
   );
 };
 
-const ProtectedReleasesPage = () => (
-  <CheckPermissions permissions={PERMISSIONS.main}>
-    <ReleasesPage />
-  </CheckPermissions>
-);
-
-export { ReleasesPage, ProtectedReleasesPage };
+export { ReleasesPage };
