@@ -19,9 +19,9 @@ const getPlugin = () => {
       controllers,
       routes,
       destroy() {
-        // if (features.isEnabled('cms-content-releases')) {
-        //   getService('event-manager').destroyAllListeners();
-        // }
+        if (features.isEnabled('cms-content-releases')) {
+          getService('event-manager').destroyAllListeners();
+        }
       },
     };
   }
