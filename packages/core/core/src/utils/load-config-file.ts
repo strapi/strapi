@@ -33,7 +33,7 @@ const loadJSONFile = (file: string) => {
   }
 };
 
-export const loadFile = (file: string) => {
+export const loadConfigFile = (file: string) => {
   const ext = path.extname(file);
 
   switch (ext) {

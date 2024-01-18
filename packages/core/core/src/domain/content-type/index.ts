@@ -133,6 +133,7 @@ const pickSchema = (model: Schema.ContentType) => {
       'options',
       'pluginOptions',
       'attributes',
+      'kind',
     ])
   );
 

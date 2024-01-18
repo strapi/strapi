@@ -10,7 +10,7 @@ import filePathToPath from './filepath-to-prop-path';
  * Returns an Object build from a list of files matching a glob pattern in a directory
  * It builds a tree structure resembling the folder structure in dir
  */
-export default async function loadFiles<T extends object>(
+export async function loadFiles<T extends object>(
   dir: string,
   pattern: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

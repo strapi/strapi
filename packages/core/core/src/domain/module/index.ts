@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Strapi, Common, Schema } from '@strapi/types';
 
-import { removeNamespace } from '../../utils';
+import { removeNamespace } from '../../registries/namespace';
 import { validateModule } from './validation';
 
 interface LifecyclesState {
