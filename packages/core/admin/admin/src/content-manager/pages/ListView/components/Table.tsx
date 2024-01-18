@@ -14,7 +14,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { AutoCloneFailureModal, type ProhibitedCloningFields } from './AutoCloneFailureModal';
+import { AutoCloneFailureModal, type ProhibitedCloningField } from './AutoCloneFailureModal';
 import { DialogConfirmDelete } from './DialogConfirmDelete';
 
 const stopPropagation = (e: React.SyntheticEvent) => e.stopPropagation();
@@ -155,7 +155,7 @@ interface RootProps {
   setIsConfirmDeleteRowOpen: (isOpen: boolean) => void;
   clonedEntryId: Entity.ID | null;
   onCloseAutoCloneModal: () => void;
-  prohibitedCloningFields: ProhibitedCloningFields;
+  prohibitedCloningFields: ProhibitedCloningField[];
 }
 
 const Root = ({

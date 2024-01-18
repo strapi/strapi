@@ -21,12 +21,12 @@ import { getTranslation } from '../../../utils/translations';
 import type { Entity } from '@strapi/types';
 
 type Reason = 'relation' | 'unique';
-type ProhibitedCloningFields = [string[], Reason][];
+type ProhibitedCloningField = [string[], Reason];
 
 interface AutoCloneFailureModalProps {
   onClose: () => void;
   entryId: Entity.ID | null;
-  prohibitedFields: ProhibitedCloningFields;
+  prohibitedFields: ProhibitedCloningField[];
 }
 
 const AutoCloneFailureModal = ({
@@ -143,4 +143,4 @@ const AutoCloneFailureModal = ({
 };
 
 export { AutoCloneFailureModal };
-export type { ProhibitedCloningFields };
+export type { ProhibitedCloningField };

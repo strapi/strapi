@@ -66,7 +66,7 @@ import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import { useAllowedAttributes } from './hooks/useAllowedAttributes';
 
-import type { ProhibitedCloningFields } from './components/AutoCloneFailureModal';
+import type { ProhibitedCloningField } from './components/AutoCloneFailureModal';
 import type { Entity } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
@@ -599,8 +599,9 @@ const ListViewPage = ({
   };
 
   const [duplicatedEntryId, setDuplicatedEntryId] = React.useState<Entity.ID | null>(null);
-  const [prohibitedCloningFields, setProhibitedCloningFields] =
-    React.useState<ProhibitedCloningFields>({});
+  const [prohibitedCloningFields, setProhibitedCloningFields] = React.useState<
+    ProhibitedCloningField[]
+  >([]);
 
   const handleCloneClick =
     (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
