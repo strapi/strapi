@@ -5,7 +5,7 @@ import { contentTypes } from './content-types';
 import { services } from './services';
 import { controllers } from './controllers';
 import { routes } from './routes';
-// import { getService } from './utils';
+import { getService } from './utils';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
@@ -19,9 +19,9 @@ const getPlugin = () => {
       controllers,
       routes,
       destroy() {
-        // if (features.isEnabled('cms-content-releases')) {
-        //   getService('event-manager').destroyAllListeners();
-        // }
+        if (features.isEnabled('cms-content-releases')) {
+          getService('event-manager').destroyAllListeners();
+        }
       },
     };
   }
