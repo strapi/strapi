@@ -14,7 +14,7 @@ import { AttributeIcon, IconByType } from '../AttributeIcon';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
 
-const newAttributes = [];
+const newAttributes: string[] = [];
 
 const NewBadge = () => (
   <Flex grow={1} justifyContent="flex-end">
