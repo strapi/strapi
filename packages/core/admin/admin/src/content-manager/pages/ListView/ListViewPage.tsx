@@ -59,6 +59,10 @@ import { getDisplayName } from '../../utils/users';
 import { getData, getDataSucceeded } from '../ListViewLayoutManager';
 
 import { AdminUsersFilter } from './components/AdminUsersFilter';
+import {
+  AutoCloneFailureModal,
+  type ProhibitedCloningField,
+} from './components/AutoCloneFailureModal';
 import { BulkActionButtons } from './components/BulkActions/Buttons';
 import { Filter } from './components/Filter';
 import { Table } from './components/Table';
@@ -66,7 +70,6 @@ import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import { useAllowedAttributes } from './hooks/useAllowedAttributes';
 
-import type { ProhibitedCloningField } from './components/AutoCloneFailureModal';
 import type { Entity } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
@@ -598,7 +601,7 @@ const ListViewPage = ({
     });
   };
 
-  const [duplicatedEntryId, setDuplicatedEntryId] = React.useState<Entity.ID | null>(null);
+  const [clonedEntryId, setClonedEntryId] = React.useState<Entity.ID | null>(null);
   const [prohibitedCloningFields, setProhibitedCloningFields] = React.useState<
     ProhibitedCloningField[]
   >([]);
@@ -620,7 +623,7 @@ const ListViewPage = ({
       } catch (err) {
         if (err instanceof AxiosError) {
           const { prohibitedFields } = err.response?.data.error.details;
-          setDuplicatedEntryId(id);
+          setClonedEntryId(id);
           setProhibitedCloningFields(prohibitedFields);
         }
       }
@@ -750,14 +753,17 @@ const ListViewPage = ({
                     ) : null
                   }
                 />
+                <AutoCloneFailureModal
+                  entryId={clonedEntryId}
+                  onClose={() => setClonedEntryId(null)}
+                  prohibitedFields={prohibitedCloningFields}
+                  pluginQueryParams={pluginsQueryParams}
+                />
                 {/* Content */}
                 <Table.Root
                   onConfirmDelete={handleConfirmDeleteData}
                   isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
                   setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
-                  clonedEntryId={duplicatedEntryId}
-                  onCloseAutoCloneModal={() => setDuplicatedEntryId(null)}
-                  prohibitedCloningFields={prohibitedCloningFields}
                 >
                   {data.map((rowData, index) => {
                     return (

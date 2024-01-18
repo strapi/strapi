@@ -31,19 +31,19 @@ const render = (props: React.ComponentProps<typeof AutoCloneFailureModal>) =>
         );
       },
     },
-    initialEntries: ['/content-manager/collection-types/api::model.model'],
+    initialEntries: ['/content-manager/collection-types/api::model.model?plugins[i18n][locale]=en'],
   });
 
 describe('AutoCloneFailureModal', () => {
   it('renders nothing if there is no entryId', () => {
-    render({ entryId: null, onClose: jest.fn(), prohibitedFields: [] });
+    render({ entryId: null, onClose: jest.fn(), prohibitedFields: [], pluginQueryParams: '' });
 
     expect(screen.queryByText(/duplicate/i)).not.toBeInTheDocument();
   });
 
   it('toggles the modal', async () => {
     const onClose = jest.fn();
-    render({ entryId: 1, onClose, prohibitedFields: [] });
+    render({ entryId: 1, onClose, prohibitedFields: [], pluginQueryParams: '' });
 
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -57,6 +57,7 @@ describe('AutoCloneFailureModal', () => {
         [['dynZoneAttrName', 'Unique Component', 'componentAttrName', 'text'], 'unique'],
         [['oneToOneRelation'], 'relation'],
       ],
+      pluginQueryParams: 'plugins[i18n][locale]=en',
     });
 
     expect(screen.getByText(/duplicating the relation would remove it/i)).toBeInTheDocument();
@@ -69,5 +70,6 @@ describe('AutoCloneFailureModal', () => {
     expect(testLocation.pathname).toBe(
       '/content-manager/collection-types/api::model.model/create/clone/1'
     );
+    expect(testLocation.search).toBe('?plugins[i18n][locale]=en');
   });
 });

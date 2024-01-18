@@ -27,12 +27,14 @@ interface AutoCloneFailureModalProps {
   onClose: () => void;
   entryId: Entity.ID | null;
   prohibitedFields: ProhibitedCloningField[];
+  pluginQueryParams: string;
 }
 
 const AutoCloneFailureModal = ({
   onClose,
   entryId,
   prohibitedFields,
+  pluginQueryParams,
 }: AutoCloneFailureModalProps) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -41,7 +43,8 @@ const AutoCloneFailureModal = ({
     return null;
   }
 
-  const editPath = `${pathname}/create/clone/${entryId}`;
+  const editPath = `${pathname}/create/clone/${entryId}?${pluginQueryParams}`;
+
   const getDefaultErrorMessage = (reason: Reason) => {
     switch (reason) {
       case 'relation':
