@@ -31,7 +31,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return this.findUniqueUID({
       contentTypeUID,
       field,
-      value: slugify(defaultValue || contentType.modelName, options),
+      value: slugify(
+        _.isFunction(defaultValue) ? defaultValue() : defaultValue || contentType.modelName,
+        options
+      ),
     });
   },
 
