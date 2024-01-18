@@ -42,7 +42,7 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
               fontWeight="bold"
               textColor="neutral800"
               as="label"
-              id="blocks-label"
+              id={`blocks-${label}`}
             >
               {label}
               {required && (
@@ -58,7 +58,7 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             error={error}
             ref={forwardedRef}
             {...editorProps}
-            ariaLabel="blocks-label"
+            ariaLabel={`blocks-${label}`}
           />
           <Hint hint={hint} name={name} error={error} />
         </Flex>
