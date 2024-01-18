@@ -27,7 +27,7 @@ const RESTRICTED_FILENAMES = [
   'internal',
 
   // root level config options
-  // TODO: these might be better out of root config
+  // TODO: it would be better to move these out of the root config and allow them to be loaded
   'launchedAt',
   'serveAdminPanel',
   'autoReload',
@@ -39,6 +39,9 @@ const RESTRICTED_FILENAMES = [
   // probably mistaken/typo filenames
   ...Object.keys(MISTAKEN_FILENAMES),
 ];
+
+// Existing Strapi configuration files
+const STRAPI_CONFIG_FILENAMES = ['admin', 'middlewares', 'server', 'plugins', 'api', 'database'];
 
 // Note: we don't have access to strapi logger at this point so we can't use it
 const logWarning = (message: string) => {
@@ -69,11 +72,6 @@ export default (dir: string) => {
       return acc;
     }
 
-    // restricted names are also restricted from being prefixes
-    const res = RESTRICTED_FILENAMES.find((restrictedName) =>
-      restrictedName.startsWith(baseNameLower)
-    );
-
     if (RESTRICTED_FILENAMES.includes(baseNameLower)) {
       logWarning(`Config file not loaded, restricted filename: ${file.name}`);
 
@@ -86,8 +84,15 @@ export default (dir: string) => {
 
       return acc;
     }
-    if (res) {
-      logWarning(`Config file not loaded, filename cannot start with ${res}: ${file.name}`);
+
+    // restricted names and Strapi configs are also restricted from being prefixes
+    const restrictedPrefix = [...RESTRICTED_FILENAMES, ...STRAPI_CONFIG_FILENAMES].find(
+      (restrictedName) => restrictedName.startsWith(baseNameLower)
+    );
+    if (restrictedPrefix) {
+      logWarning(
+        `Config file not loaded, filename cannot start with ${restrictedPrefix}: ${file.name}`
+      );
     }
 
     /**
