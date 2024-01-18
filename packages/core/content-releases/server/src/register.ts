@@ -2,8 +2,6 @@
 import type { LoadedStrapi } from '@strapi/types';
 import { ACTIONS } from './constants';
 
-import { getService } from './utils';
-
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
