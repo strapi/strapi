@@ -73,8 +73,10 @@ export default (dir: string) => {
       warnSkippedConfig(`Config file not loaded, restricted filename: ${file.name}`);
 
       // suggest the filename they probably meant
-      if (Object.keys(MISTAKEN_FILENAMES).includes(baseNameLower)) {
-        console.log(`Did you mean ${MISTAKEN_FILENAMES[file.name]} ?`);
+      if (baseNameLower in MISTAKEN_FILENAMES) {
+        console.log(
+          `Did you mean ${MISTAKEN_FILENAMES[baseNameLower as keyof typeof MISTAKEN_FILENAMES]}]} ?`
+        );
       }
 
       return acc;
