@@ -400,7 +400,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         populate: {
           actions: {
             populate: {
-              entry: true,
+              entry: {
+                populate: '*',
+              },
             },
           },
         },
