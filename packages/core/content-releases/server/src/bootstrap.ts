@@ -57,13 +57,12 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
     //       }
     //     },
     //   });
-
     const releaseActionService = getService('release-action', { strapi });
+
     const eventManager = getService('event-manager', { strapi });
     // Clean up release-actions when draft and publish is disabled
     const destroyContentTypeUpdateListener = strapi.eventHub.on(
       'content-type.update',
-
       async ({ contentType }) => {
         if (contentType.schema?.options?.draftAndPublish === false) {
           await releaseActionService.deleteManyForContentType(contentType.uid);
@@ -74,7 +73,6 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
     // Clean up release-actions when a content-type is deleted
     const destroyContentTypeDeleteListener = strapi.eventHub.on(
       'content-type.delete',
-
       async ({ contentType }) => {
         await releaseActionService.deleteManyForContentType(contentType.uid);
       }
