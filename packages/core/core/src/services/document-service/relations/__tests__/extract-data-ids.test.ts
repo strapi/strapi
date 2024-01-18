@@ -17,25 +17,33 @@ const createSchemaFromAttributes = (
   };
 };
 
+const CATEGORY_UID = 'api::category.category';
+const PRODUCT_UID = 'api::product.product';
+
 const models: Record<string, Schema.ContentType> = {
-  'api::category.category': createSchemaFromAttributes('api::category.category', {
+  [CATEGORY_UID]: createSchemaFromAttributes(CATEGORY_UID, {
     name: {
       type: 'string',
     },
   }),
-  'api::product.product': createSchemaFromAttributes('api::product.product', {
+  [PRODUCT_UID]: createSchemaFromAttributes(PRODUCT_UID, {
     name: {
       type: 'string',
     },
     categories: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'api::category.category',
+      target: CATEGORY_UID,
     },
     category: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::category.category',
+      target: CATEGORY_UID,
+    },
+    relatedProducts: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: PRODUCT_UID,
     },
   }),
 };
@@ -53,9 +61,10 @@ describe('Extract document ids from relation data', () => {
     const ids = await getIds({
       categories: [1, 2, 3],
       category: 4,
+      relatedProducts: [5, 6, 7],
     });
 
-    expect(ids).toEqual([1, 2, 3, 4]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 3, 4], [PRODUCT_UID]: [5, 6, 7] });
   });
 
   it('Longhand syntax', async () => {
@@ -64,7 +73,7 @@ describe('Extract document ids from relation data', () => {
       category: { id: 4 },
     });
 
-    expect(ids).toEqual([1, 2, 3, 4]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 3, 4] });
   });
 
   it('Null', async () => {
@@ -73,7 +82,7 @@ describe('Extract document ids from relation data', () => {
       category: null,
     });
 
-    expect(ids).toEqual([]);
+    expect(ids).toEqual({});
   });
 
   it('Set', async () => {
@@ -82,7 +91,7 @@ describe('Extract document ids from relation data', () => {
       category: { set: 4 },
     });
 
-    expect(ids).toEqual([1, 2, 3, 4]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 3, 4] });
   });
 
   it('Connect', async () => {
@@ -91,7 +100,7 @@ describe('Extract document ids from relation data', () => {
       category: { connect: 4 },
     });
 
-    expect(ids).toEqual([1, 2, 3, 4]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 3, 4] });
   });
 
   it('Connect before', async () => {
@@ -100,7 +109,7 @@ describe('Extract document ids from relation data', () => {
       category: { connect: { id: 4, position: { before: 5 } } },
     });
 
-    expect(ids).toEqual([1, 2, 4, 5]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 4, 5] });
   });
 
   it('Connect after', async () => {
@@ -109,7 +118,7 @@ describe('Extract document ids from relation data', () => {
       category: { connect: { id: 4, position: { after: 5 } } },
     });
 
-    expect(ids).toEqual([1, 2, 4, 5]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 4, 5] });
   });
 
   it('Disconnect', async () => {
@@ -118,7 +127,7 @@ describe('Extract document ids from relation data', () => {
       category: { disconnect: 4 },
     });
 
-    expect(ids).toEqual([1, 2, 3, 4]);
+    expect(ids).toEqual({ [CATEGORY_UID]: [1, 2, 3, 4] });
   });
 
   it('Multiple', async () => {
@@ -135,6 +144,8 @@ describe('Extract document ids from relation data', () => {
       },
     });
 
-    expect(ids).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+    expect(ids).toEqual({
+      [CATEGORY_UID]: expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    });
   });
 });

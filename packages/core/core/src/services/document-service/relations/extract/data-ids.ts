@@ -59,35 +59,30 @@ const extractRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
  * Those will later be transformed to entity ids.
  */
 const extractDataIds = async (schema: Schema.ContentType, data: Record<string, any>) => {
-  const ids: ID[] = [];
+  const idMap: Record<string, ID[]> = {};
 
   await traverseEntity(
     ({ value, attribute }) => {
       // Find relational attributes, and return the document ids
       if (attribute.type === 'relation') {
-        ids.push(...extractRelationIdsVisitor(value as any));
+        const extractedIds = extractRelationIdsVisitor(value as any);
+        const target = attribute.target;
+
+        // TODO: Handle morph relations (they have multiple targets)
+        if (!target || !extractedIds.length) return;
+
+        if (idMap[target]) {
+          idMap[target].push(...extractedIds);
+        } else {
+          idMap[target] = extractedIds;
+        }
       }
     },
     { schema },
     data
   );
 
-  return ids;
-};
-
-// Whats the best way to , given documentIds, find the entityIds?
-const queryIds = async (
-  strapi: LoadedStrapi,
-  opts: { uid: string; locale: string; isDraft: boolean; documentIds: ID[] }
-) => {
-  return strapi.db.query(opts.uid).findMany({
-    select: ['id', 'documentId'],
-    where: {
-      id: { $in: opts.documentIds },
-      locale: opts.locale,
-      published_at: opts.isDraft ? null : { $ne: null },
-    },
-  });
+  return idMap;
 };
 
 export { extractDataIds };
