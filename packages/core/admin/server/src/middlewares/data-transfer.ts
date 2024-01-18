@@ -21,6 +21,7 @@ export default () => async (ctx: Context, next: Next) => {
   if (!hasValidTokenSalt()) {
     return ctx.notImplemented(
       'The server configuration for data transfer is invalid. Please contact your server administrator.',
+      // @ts-ignore-error TODO we need to extend the context here to support this
       {
         code: 'INVALID_TOKEN_SALT',
       }

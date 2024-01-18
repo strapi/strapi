@@ -17,13 +17,13 @@ const isRemoteTransferEnabled = (): boolean => {
   const { utils } = getService('transfer');
 
   // TODO v6: Remove this warning
-  if (env.bool('STRAPI_DISABLE_REMOTE_DATA_TRANSFER')) {
+  if (env.bool('STRAPI_DISABLE_REMOTE_DATA_TRANSFER') !== undefined) {
     strapi.log.warn(
       'STRAPI_DISABLE_REMOTE_DATA_TRANSFER is no longer supported. Instead, set transfer.remote.enabled to false in your server configuration'
     );
   }
 
-  return strapi.config.get('server.transfer.remote.enabled') && utils.hasValidTokenSalt();
+  return utils.hasValidTokenSalt() && strapi.config.get('server.transfer.remote.enabled');
 };
 
 export { isRemoteTransferEnabled, hasValidTokenSalt };

@@ -2,7 +2,6 @@ import type { Fetch, Strapi } from '@strapi/types';
 import { ProxyAgent } from 'undici';
 
 // TODO: once core Node exposes a stable way to create a ProxyAgent we will use that instead of undici
-export type { Fetch };
 
 // Create a wrapper for Node's Fetch API that applies a global proxy
 export function createStrapiFetch(strapi: Strapi): Fetch {
@@ -24,3 +23,5 @@ export function createStrapiFetch(strapi: Strapi): Fetch {
 
   return strapiFetch;
 }
+
+export type { Fetch };

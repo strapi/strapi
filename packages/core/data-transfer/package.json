@@ -40,7 +40,6 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/core": "4.17.1",
     "@strapi/logger": "4.17.1",
     "@strapi/types": "4.17.1",
     "@strapi/utils": "4.17.1",
