@@ -154,6 +154,8 @@ const build = async (opts: BuildOptions = {}) => {
       },
       error(err) {
         handler.fail(ctx, task, err);
+        // exit as soon as one task fails
+        process.exit(1);
       },
     });
   }

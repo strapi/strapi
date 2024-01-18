@@ -52,14 +52,14 @@
     "@strapi/types": "4.17.1",
     "@strapi/utils": "4.17.1",
     "koa": "2.13.4",
-    "koa-bodyparser": "4.4.1",
     "lodash": "4.17.21",
     "qs": "6.11.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
     "@types/jest": "29.5.2",
-    "@types/lodash": "^4.14.191"
+    "@types/lodash": "^4.14.191",
+    "koa-body": "4.2.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

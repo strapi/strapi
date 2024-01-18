@@ -24,7 +24,7 @@ export const resetDatabaseAndImportDataFromPath = async (filePath) => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
     schemaStrategy: 'ignore',
-    only: ['content'],
+    only: ['content', 'files'],
     transforms: {
       links: [
         {
@@ -69,6 +69,7 @@ const createDestinationProvider = () => {
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {
+      assets: true,
       entities: {
         include: ALLOWED_CONTENT_TYPES,
       },

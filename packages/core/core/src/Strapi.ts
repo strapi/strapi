@@ -178,6 +178,9 @@ class Strapi extends Container implements StrapiI {
 
   features: FeaturesService;
 
+  // @ts-expect-error - Assigned in constructor
+  ee: StrapiI['ee'];
+
   constructor(opts: StrapiOptions = {}) {
     super();
 

@@ -1,5 +1,4 @@
 import { traverseQueryPopulate } from '../traverse';
-import { setGlobalStrapi, getStrapiFactory } from './test-utils';
 
 describe('traverseQueryPopulate', () => {
   test('should return an empty object incase no populatable field exists', async () => {
@@ -18,7 +17,7 @@ describe('traverseQueryPopulate', () => {
   });
 
   test('should return all populatable fields', async () => {
-    const strapi = getStrapiFactory({
+    const strapi = {
       getModel: jest.fn((uid) => {
         return {
           uid,
@@ -39,9 +38,9 @@ describe('traverseQueryPopulate', () => {
           })),
         },
       },
-    })();
+    } as any;
 
-    setGlobalStrapi(strapi);
+    global.strapi = strapi;
 
     const query = await traverseQueryPopulate(jest.fn(), {
       schema: {
@@ -68,7 +67,7 @@ describe('traverseQueryPopulate', () => {
   });
 
   test('should return only selected populatable field', async () => {
-    const strapi = getStrapiFactory({
+    const strapi = {
       getModel: jest.fn((uid) => {
         return {
           uid,
@@ -88,9 +87,9 @@ describe('traverseQueryPopulate', () => {
           })),
         },
       },
-    })();
+    } as any;
 
-    setGlobalStrapi(strapi);
+    global.strapi = strapi;
 
     const query = await traverseQueryPopulate(jest.fn(), {
       schema: {
@@ -117,7 +116,7 @@ describe('traverseQueryPopulate', () => {
   });
 
   test('should populate dynamiczone', async () => {
-    const strapi = getStrapiFactory({
+    const strapi = {
       getModel: jest.fn((uid) => {
         return {
           uid,
@@ -137,9 +136,9 @@ describe('traverseQueryPopulate', () => {
           })),
         },
       },
-    })();
+    } as any;
 
-    setGlobalStrapi(strapi);
+    global.strapi = strapi;
 
     const query = await traverseQueryPopulate(jest.fn(), {
       schema: {
@@ -174,7 +173,7 @@ describe('traverseQueryPopulate', () => {
   });
 
   test('should deep populate dynamiczone components', async () => {
-    const strapi = getStrapiFactory({
+    const strapi = {
       getModel: jest.fn((uid) => {
         if (uid === 'blog.test-como') {
           return {
@@ -224,9 +223,9 @@ describe('traverseQueryPopulate', () => {
           })),
         },
       },
-    })();
+    } as any;
 
-    setGlobalStrapi(strapi);
+    global.strapi = strapi;
 
     const query = await traverseQueryPopulate(jest.fn(), {
       schema: {

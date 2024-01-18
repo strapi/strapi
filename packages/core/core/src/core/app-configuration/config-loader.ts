@@ -41,7 +41,15 @@ const RESTRICTED_FILENAMES = [
 ];
 
 // Existing Strapi configuration files
-const STRAPI_CONFIG_FILENAMES = ['admin', 'middlewares', 'server', 'plugins', 'api', 'database'];
+const STRAPI_CONFIG_FILENAMES = [
+  'admin',
+  'server',
+  'api',
+  'database',
+  'middlewares',
+  'plugins',
+  'features',
+];
 
 // Note: we don't have access to strapi logger at this point so we can't use it
 const logWarning = (message: string) => {

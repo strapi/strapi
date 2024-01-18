@@ -1,3 +1,4 @@
+import type { IncomingMessage } from 'node:http';
 import { randomUUID } from 'crypto';
 import type { Context } from 'koa';
 import type { RawData, ServerOptions } from 'ws';
@@ -9,7 +10,7 @@ import { ProviderError, ProviderTransferError } from '../../../errors/providers'
 import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
 import { TransferMethod } from '../constants';
 
-type WSCallback = (client: WebSocket, request: Response) => void;
+type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
 
 export interface HandlerOptions {
   verify: (ctx: Context, scope?: TransferMethod) => Promise<void>;
