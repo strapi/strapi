@@ -1,10 +1,17 @@
 import path from 'path';
 import fs from 'fs';
 import { templateConfiguration, env, importDefault } from '@strapi/utils';
+import { register } from 'esbuild-register/dist/node';
 
 const loadJsFile = (file: string) => {
   try {
+    // In typescript projects, we don't need to compile the ts to js, so we can
+    const esbuildOptions: Parameters<typeof register>[0] = {
+      extensions: ['.js', '.mjs', '.ts'],
+    };
+    const { unregister } = register(esbuildOptions);
     const jsModule = importDefault(file);
+    unregister();
 
     // call if function
     if (typeof jsModule === 'function') {
@@ -38,6 +45,7 @@ export const loadFile = (file: string) => {
 
   switch (ext) {
     case '.js':
+    case '.ts':
       return loadJsFile(file);
     case '.json':
       return loadJSONFile(file);

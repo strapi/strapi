@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { loadFile } from './load-config-file';
 
-const VALID_EXTENSIONS = ['.js', '.json'];
+const VALID_EXTENSIONS = ['.js', '.json', '.ts'];
 
 // These filenames are restricted, but will also emit a warning that the filename is probably a mistake
 const MISTAKEN_FILENAMES = {
