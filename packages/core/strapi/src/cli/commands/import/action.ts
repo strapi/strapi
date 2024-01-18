@@ -1,7 +1,13 @@
 import type { LoadedStrapi } from '@strapi/types';
 import { isObject } from 'lodash/fp';
-
 import chalk from 'chalk';
+
+import {
+  engine as engineDataTransfer,
+  strapi as strapiDataTransfer,
+  file as fileDataTransfer,
+} from '@strapi/data-transfer';
+
 import {
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
@@ -14,21 +20,19 @@ import {
   setSignalHandler,
   getDiffHandler,
   parseRestoreFromOptions,
-} from '../data-transfer';
-import { exitWith } from '../helpers';
-import * as engine from '../../engine';
-import * as strapiDatatransfer from '../../strapi';
-import * as file from '../../file';
+} from '../../utils/data-transfer';
+import { exitWith } from '../../utils/helpers';
 
 const {
   providers: { createLocalFileSourceProvider },
-} = file;
+} = fileDataTransfer;
 
 const {
   providers: { createLocalStrapiDestinationProvider, DEFAULT_CONFLICT_STRATEGY },
-} = strapiDatatransfer;
+} = strapiDataTransfer;
 
-const { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY } = engine;
+const { createTransferEngine, DEFAULT_VERSION_STRATEGY, DEFAULT_SCHEMA_STRATEGY } =
+  engineDataTransfer;
 
 interface CmdOptions {
   file?: string;
@@ -37,8 +41,8 @@ interface CmdOptions {
   key?: string;
   conflictStrategy?: 'restore';
   force?: boolean;
-  only?: (keyof engine.TransferGroupFilter)[];
-  exclude?: (keyof engine.TransferGroupFilter)[];
+  only?: (keyof engineDataTransfer.TransferGroupFilter)[];
+  exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
 }
 
@@ -137,7 +141,7 @@ export default async (opts: CmdOptions) => {
     );
   });
 
-  let results: engine.ITransferResults<typeof source, typeof destination>;
+  let results: engineDataTransfer.ITransferResults<typeof source, typeof destination>;
   try {
     // Abort transfer if user interrupts process
     setSignalHandler(() => abortTransfer({ engine, strapi: strapi as LoadedStrapi }));
@@ -174,7 +178,7 @@ const getLocalFileSourceOptions = (opts: {
   decrypt?: boolean;
   key?: string;
 }) => {
-  const options: file.providers.ILocalFileSourceProviderOptions = {
+  const options: fileDataTransfer.providers.ILocalFileSourceProviderOptions = {
     file: { path: opts.file ?? '' },
     compression: { enabled: !!opts.decompress },
     encryption: { enabled: !!opts.decrypt, key: opts.key },
