@@ -75,4 +75,19 @@ const extractDataIds = async (schema: Schema.ContentType, data: Record<string, a
   return ids;
 };
 
+// Whats the best way to , given documentIds, find the entityIds?
+const queryIds = async (
+  strapi: LoadedStrapi,
+  opts: { uid: string; locale: string; isDraft: boolean; documentIds: ID[] }
+) => {
+  return strapi.db.query(opts.uid).findMany({
+    select: ['id', 'documentId'],
+    where: {
+      id: { $in: opts.documentIds },
+      locale: opts.locale,
+      published_at: opts.isDraft ? null : { $ne: null },
+    },
+  });
+};
+
 export { extractDataIds };

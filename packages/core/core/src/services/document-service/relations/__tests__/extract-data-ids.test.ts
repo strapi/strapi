@@ -1,6 +1,6 @@
 import { curry } from 'lodash/fp';
 import { LoadedStrapi, Schema, Common } from '@strapi/types';
-import { extractDataIds } from '../extract-ids/extract-data-ids';
+import { extractDataIds } from '../extract/data-ids';
 
 const createSchemaFromAttributes = (
   uid: Common.UID.ContentType,
