@@ -269,6 +269,126 @@ describe('BlocksToolbar', () => {
     expect(ReactEditor.focus).toHaveBeenCalledTimes(2);
   });
 
+  it('toggles the nested list format', async () => {
+    setup([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'list item 2',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    await select({
+      anchor: { path: [0, 1, 0, 0], offset: 0 },
+      focus: { path: [0, 1, 0, 0], offset: 0 },
+    });
+
+    // Get modifier buttons
+    const unorderedListButton = screen.getByLabelText(/bulleted list/i);
+    const orderedListButton = screen.getByLabelText(/^numbered list/i);
+
+    // Convert the selection to an unordered list
+    await user.click(unorderedListButton);
+    expect(unorderedListButton).toHaveAttribute('data-state', 'on');
+    expect(orderedListButton).toHaveAttribute('data-state', 'off');
+
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'unordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'list item 2',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('transforms the selection to a heading and transforms it back to text when selected again', async () => {
     setup();
 
