@@ -40,7 +40,8 @@ const RESTRICTED_FILENAMES = [
   ...Object.keys(MISTAKEN_FILENAMES),
 ];
 
-const warnSkippedConfig = (message: string) => {
+// Note: we don't have access to strapi logger at this point so we can't use it
+const logWarning = (message: string) => {
   console.warn(message);
 };
 
@@ -59,9 +60,8 @@ export default (dir: string) => {
       return acc;
     }
 
-    // Note: we don't have access to strapi logger at this point so we can't check if
     if (!VALID_EXTENSIONS.includes(extensionLower)) {
-      warnSkippedConfig(
+      logWarning(
         `Config file not loaded, extension must be one of ${VALID_EXTENSIONS.join(',')}): ${
           file.name
         }`
@@ -69,8 +69,13 @@ export default (dir: string) => {
       return acc;
     }
 
+    // restricted names are also restricted from being prefixes
+    const res = RESTRICTED_FILENAMES.find((restrictedName) =>
+      restrictedName.startsWith(baseNameLower)
+    );
+
     if (RESTRICTED_FILENAMES.includes(baseNameLower)) {
-      warnSkippedConfig(`Config file not loaded, restricted filename: ${file.name}`);
+      logWarning(`Config file not loaded, restricted filename: ${file.name}`);
 
       // suggest the filename they probably meant
       if (baseNameLower in MISTAKEN_FILENAMES) {
@@ -81,19 +86,25 @@ export default (dir: string) => {
 
       return acc;
     }
-
-    // filter filenames with non-alphanumberic characters
-    // because underscore (_) is reserved as a separator for use when loading env vars into config
-    if (!/^[A-Za-z0-9]+$/.test(baseName)) {
-      warnSkippedConfig(
-        `Config file not loaded, includes non-alphanumeric characters: ${file.name}`
-      );
-      return acc;
+    if (res) {
+      logWarning(`Config file not loaded, filename cannot start with ${res}: ${file.name}`);
     }
+
+    /**
+     *  Note: If user config files contain non-alpha-numeric characters, we won't be able to auto-load env
+     * into them.
+     *
+     * For the initial feature, we will only load our internal configs, but later when we provide a method
+     * to define the shape of custom configs, we will need to warn that those filenames can't be loaded
+     * for technical limitations on env variable names
+     *  */
+    // if (!/^[A-Za-z0-9]+$/.test(baseName)) {
+    //   logWarning("Using a non-alphanumeric config file name prevents Strapi from auto-loading it from environment variables.")
+    // }
 
     // filter filenames without case-insensitive uniqueness
     if (seenFilenames.has(baseNameLower)) {
-      warnSkippedConfig(
+      logWarning(
         `Config file not loaded, case-insensitive name matches other config file: ${file.name}`
       );
       return acc;
