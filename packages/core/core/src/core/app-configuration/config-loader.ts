@@ -40,6 +40,8 @@ const RESTRICTED_FILENAMES = [
   ...Object.keys(MISTAKEN_FILENAMES),
 ];
 
+const STRAPI_CONFIG_FILENAMES = ['admin', 'middlewares', 'server', 'plugins', 'api', 'database'];
+
 // Note: we don't have access to strapi logger at this point so we can't use it
 const logWarning = (message: string) => {
   console.warn(message);
@@ -82,9 +84,9 @@ export default (dir: string) => {
       return acc;
     }
 
-    // restricted names are also restricted from being prefixes
-    const restrictedPrefix = RESTRICTED_FILENAMES.find((restrictedName) =>
-      restrictedName.startsWith(baseNameLower)
+    // restricted names and Strapi configs are also restricted from being prefixes
+    const restrictedPrefix = [...RESTRICTED_FILENAMES, ...STRAPI_CONFIG_FILENAMES].find(
+      (restrictedName) => restrictedName.startsWith(baseNameLower)
     );
     if (restrictedPrefix) {
       logWarning(
