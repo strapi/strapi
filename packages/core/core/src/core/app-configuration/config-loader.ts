@@ -27,7 +27,7 @@ const RESTRICTED_FILENAMES = [
   'internal',
 
   // root level config options
-  // TODO: these might be better out of root config
+  // TODO: it would be better to move these out of the root config and allow them to be loaded
   'launchedAt',
   'serveAdminPanel',
   'autoReload',
@@ -40,6 +40,7 @@ const RESTRICTED_FILENAMES = [
   ...Object.keys(MISTAKEN_FILENAMES),
 ];
 
+// Existing Strapi configuration files
 const STRAPI_CONFIG_FILENAMES = ['admin', 'middlewares', 'server', 'plugins', 'api', 'database'];
 
 // Note: we don't have access to strapi logger at this point so we can't use it
