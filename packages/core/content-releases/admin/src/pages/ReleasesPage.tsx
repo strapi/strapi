@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  Alert,
   Box,
   Button,
   ContentLayout,
@@ -51,6 +52,7 @@ interface ReleasesLayoutProps {
   isLoading?: boolean;
   totalReleases?: number;
   onClickAddRelease: () => void;
+  reachedTheMaxNumberOfPendingReleases?: boolean;
   children: React.ReactNode;
 }
 
@@ -58,6 +60,7 @@ export const ReleasesLayout = ({
   isLoading,
   totalReleases,
   onClickAddRelease,
+  reachedTheMaxNumberOfPendingReleases = false,
   children,
 }: ReleasesLayoutProps) => {
   const { formatMessage } = useIntl();
@@ -81,7 +84,11 @@ export const ReleasesLayout = ({
         }
         primaryAction={
           <CheckPermissions permissions={PERMISSIONS.create}>
-            <Button startIcon={<Plus />} onClick={onClickAddRelease}>
+            <Button
+              startIcon={<Plus />}
+              onClick={onClickAddRelease}
+              disabled={reachedTheMaxNumberOfPendingReleases}
+            >
               {formatMessage({
                 id: 'content-releases.header.actions.add-release',
                 defaultMessage: 'New release',
@@ -177,6 +184,15 @@ interface CustomLocationState {
   errors?: Record<'code', string>[];
 }
 
+const CustomAlert = styled(Alert)`
+  button {
+    display: none;
+  }
+  p + div {
+    margin-left: auto;
+  }
+`;
+
 const INITIAL_FORM_VALUES = {
   name: '',
 } satisfies FormValues;
@@ -185,6 +201,8 @@ const ReleasesPage = () => {
   const tabRef = React.useRef<any>(null);
   const location = useLocation<CustomLocationState>();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
+  const [reachedTheMaxNumberOfPendingReleases, setReachedTheMaxNumberOfPendingReleases] =
+    React.useState(false);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { push, replace } = useHistory();
@@ -196,6 +214,8 @@ const ReleasesPage = () => {
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
+  // TODO: Replace this with the real number
+  const maximumNumberOfPendingReleases = 3;
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {
@@ -229,7 +249,11 @@ const ReleasesPage = () => {
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
+      <ReleasesLayout
+        onClickAddRelease={toggleAddReleaseModal}
+        isLoading
+        reachedTheMaxNumberOfPendingReleases={reachedTheMaxNumberOfPendingReleases}
+      >
         <ContentLayout>
           <LoadingIndicatorPage />
         </ContentLayout>
@@ -238,6 +262,13 @@ const ReleasesPage = () => {
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
+  if (
+    activeTab === 'pending' &&
+    totalReleases >= maximumNumberOfPendingReleases &&
+    !reachedTheMaxNumberOfPendingReleases
+  ) {
+    setReachedTheMaxNumberOfPendingReleases(true);
+  }
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -283,9 +314,39 @@ const ReleasesPage = () => {
   };
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
+    <ReleasesLayout
+      onClickAddRelease={toggleAddReleaseModal}
+      totalReleases={totalReleases}
+      reachedTheMaxNumberOfPendingReleases={reachedTheMaxNumberOfPendingReleases}
+    >
       <ContentLayout>
         <>
+          {reachedTheMaxNumberOfPendingReleases && (
+            <CustomAlert
+              marginTop={6}
+              marginBottom={6}
+              action={
+                <Link href="https://strapi.io/pricing-cloud" isExternal>
+                  {formatMessage({
+                    id: 'content-releases.pages.Releases.max-limit-reached.action',
+                    defaultMessage: 'Explore plans',
+                  })}
+                </Link>
+              }
+              title={formatMessage({
+                id: 'content-releases.pages.Releases.max-limit-reached.title',
+                defaultMessage: 'You have reached the 3 pending releases limit.',
+              })}
+              onClose={() => {}}
+              closeLabel=""
+            >
+              {formatMessage({
+                id: 'content-releases.pages.Releases.max-limit-reached.message',
+                defaultMessage:
+                  'Upgrade to Enterprise Edition to manage an unlimited number of releases.',
+              })}
+            </CustomAlert>
+          )}
           <TabGroup
             label={formatMessage({
               id: 'content-releases.pages.Releases.tab-group.label',
