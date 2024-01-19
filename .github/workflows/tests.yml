@@ -19,10 +19,27 @@ permissions:
   actions: read
 
 jobs:
+  typescript:
+    name: 'typescript'
+    needs: []
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: nrwl/nx-set-shas@v3
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
   # EE
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: []
+    needs: [typescript]
     name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
