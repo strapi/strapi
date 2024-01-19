@@ -153,16 +153,6 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
       return true;
     }
 
-    /**
-     * If the attribute is unchanged we skip the unique verification. This will
-     * prevent the validator to be triggered in case the user activated the
-     * unique constraint after already creating multiple entries with
-     * the same attribute value for that field.
-     */
-    if (entity && updatedAttribute.value === entity[updatedAttribute.name]) {
-      return true;
-    }
-
     const whereParams = entity
       ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
       : { [updatedAttribute.name]: value };
