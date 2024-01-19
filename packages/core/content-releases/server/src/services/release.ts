@@ -26,7 +26,7 @@ import type {
 import type { Entity, UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
-interface Locale extends Entity {
+export interface Locale extends Entity {
   name: string;
   code: string;
 }
