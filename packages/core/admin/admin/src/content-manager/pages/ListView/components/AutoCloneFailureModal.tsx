@@ -93,7 +93,7 @@ const AutoCloneFailureModal = ({
               padding={6}
               key={fieldPath.join()}
             >
-              <Flex direction="row" as="ul">
+              <Flex direction="row" as="ol">
                 {fieldPath.map((pathSegment, index) => (
                   <Typography fontWeight="semiBold" as="li" key={index}>
                     {pathSegment}
