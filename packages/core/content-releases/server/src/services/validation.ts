@@ -75,10 +75,11 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
         releasedAt: {
           $null: true,
         },
+        name,
       },
     })) as Release[];
 
-    const isNameUnique = !pendingReleases.some((release) => release.name === name);
+    const isNameUnique = pendingReleases.length === 0;
 
     if (!isNameUnique) {
       throw new errors.ValidationError(`Release with name ${name} already exists`);

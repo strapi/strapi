@@ -209,9 +209,6 @@ describe('Release Validation service', () => {
             {
               name: 'release1',
             },
-            {
-              name: 'release2',
-            },
           ]),
         },
       };
@@ -222,6 +219,22 @@ describe('Release Validation service', () => {
       await expect(
         releaseValidationService.validateUniqueNameForPendingRelease('release1')
       ).rejects.toThrow('Release with name release1 already exists');
+    });
+
+    it('should pass if a release with the same name does NOT already exist', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findMany: jest.fn().mockReturnValue([]),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(
+        releaseValidationService.validateUniqueNameForPendingRelease('release1')
+      ).resolves.not.toThrow();
     });
   });
 });
