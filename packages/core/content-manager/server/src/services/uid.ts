@@ -8,10 +8,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID,
     field,
     data,
+    locale,
   }: {
     contentTypeUID: UID.ContentType;
     field: string;
     data: Record<string, any>;
+    locale: string;
   }) {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
@@ -25,6 +27,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         contentTypeUID,
         field,
         value: slugify(targetValue, options),
+        locale,
       });
     }
 
@@ -32,6 +35,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       contentTypeUID,
       field,
       value: slugify(defaultValue || contentType.modelName, options),
+      locale,
     });
   },
 
@@ -39,16 +43,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID,
     field,
     value,
+    locale,
   }: {
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
+    locale: string;
   }) {
     const query = strapi.db.query(contentTypeUID);
 
     const possibleColisions: string[] = await query
       .findMany({
-        where: { [field]: { $contains: value } },
+        where: {
+          [field]: { $contains: value },
+          locale,
+        },
       })
       .then((results: any) => results.map((result: any) => result[field]));
 
@@ -70,15 +79,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID,
     field,
     value,
+    locale,
   }: {
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
+    locale: string;
   }) {
     const query = strapi.db.query(contentTypeUID);
 
     const count: number = await query.count({
-      where: { [field]: value },
+      where: { [field]: value, locale },
     });
 
     if (count > 0) {

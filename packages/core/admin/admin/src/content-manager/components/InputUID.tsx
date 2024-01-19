@@ -8,6 +8,7 @@ import {
   useCMEditViewDataManager,
   useFetchClient,
   useNotification,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -16,6 +17,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
 
+import { buildValidGetParams } from '../utils/api';
 import { useDebounce } from '../../hooks/useDebounce';
 
 /* -------------------------------------------------------------------------------------------------
@@ -66,6 +68,8 @@ const InputUID = React.forwardRef<
     const { formatAPIError } = useAPIErrorHandler();
     const { formatMessage } = useIntl();
     const { post } = useFetchClient();
+    const [{ query }] = useQueryParams();
+    const params = React.useMemo(() => buildValidGetParams(query), [query]);
 
     const label = intlLabel.id
       ? formatMessage(
@@ -130,7 +134,10 @@ const InputUID = React.forwardRef<
           Contracts.UID.GenerateUID.Response,
           AxiosResponse<Contracts.UID.GenerateUID.Response>,
           Contracts.UID.GenerateUID.Request['body']
-        >('/content-manager/uid/generate', body);
+        >('/content-manager/uid/generate', {
+          ...body,
+          locale: params?.locale,
+        });
 
         return data;
       },
@@ -155,12 +162,14 @@ const InputUID = React.forwardRef<
       async queryFn({ queryKey }) {
         const [, body] = queryKey;
 
-        // TODO change this endpoint to check availability based on new UID logic
         const { data } = await post<
           Contracts.UID.CheckUIDAvailability.Response,
           AxiosResponse<Contracts.UID.CheckUIDAvailability.Response>,
           Contracts.UID.CheckUIDAvailability.Request['body']
-        >('/content-manager/uid/check-availability', body);
+        >('/content-manager/uid/check-availability', {
+          ...body,
+          locale: params?.locale,
+        });
 
         return data;
       },

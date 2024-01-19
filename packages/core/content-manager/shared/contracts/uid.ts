@@ -13,6 +13,7 @@ export declare namespace GenerateUID {
       contentTypeUID: string;
       data: Entity;
       field: string;
+      locale: string | null;
     };
     query: {};
   }
@@ -31,6 +32,7 @@ export declare namespace CheckUIDAvailability {
       contentTypeUID: string;
       field: string;
       value: string;
+      locale: string | null;
     };
     query: {};
   }
