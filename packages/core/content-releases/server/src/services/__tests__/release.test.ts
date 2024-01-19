@@ -279,8 +279,8 @@ describe('release service', () => {
     });
   });
 
-  describe('findManyForContentTypeEntry', () => {
-    it('should format the return value correctly when hasEntryAttached is true', async () => {
+  describe('findManyWithContentTypeEntryAttached', () => {
+    it('should format the return value correctly', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -294,12 +294,9 @@ describe('release service', () => {
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
-      const releases = await releaseService.findManyForContentTypeEntry(
+      const releases = await releaseService.findManyWithContentTypeEntryAttached(
         'api::contentType.contentType',
-        1,
-        {
-          hasEntryAttached: true,
-        }
+        1
       );
 
       expect(releases).toEqual([{ name: 'test release', action: { type: 'publish' } }]);
