@@ -56,9 +56,8 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   api_ce_sqlite:
-    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [build, typescript]
     name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
