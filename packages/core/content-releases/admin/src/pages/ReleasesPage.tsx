@@ -263,6 +263,7 @@ const ReleasesPage = () => {
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
   if (
     activeTab === 'pending' &&
+    maximumNumberOfPendingReleases !== undefined &&
     totalReleases >= maximumNumberOfPendingReleases &&
     !reachedTheMaxNumberOfPendingReleases
   ) {
