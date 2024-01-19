@@ -1,5 +1,18 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { Navigate, RouteObject } from 'react-router-dom';
+import { UID } from '@strapi/types';
+import { Navigate, RouteObject, useLoaderData } from 'react-router-dom';
+
+const Redirect = () => {
+  const pathname = useLoaderData() as string;
+
+  return (
+    <Navigate
+      to={{
+        pathname,
+      }}
+    />
+  );
+};
 
 const routes: RouteObject[] = [
   {
@@ -19,11 +32,21 @@ const routes: RouteObject[] = [
        */
       {
         path: 'collectionType/:slug',
-        element: <Navigate to="/collection-types/:slug" />,
+        loader: ({ params }) => {
+          const slug = params.slug;
+
+          return `/content-manager/collection-types/${slug}`;
+        },
+        element: <Redirect />,
       },
       {
         path: 'singleType/:slug',
-        element: <Navigate to="/single-types/:slug" />,
+        loader: ({ params }) => {
+          const slug = params.slug;
+
+          return `/content-manager/single-types/${slug}`;
+        },
+        element: <Redirect />,
       },
       {
         path: ':collectionType/:slug',
