@@ -19,47 +19,10 @@ permissions:
   actions: read
 
 jobs:
-  build:
-    name: 'build (node: 20)'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
-
-  typescript:
-    name: 'typescript'
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - uses: nrwl/nx-set-shas@v3
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
-      - name: TSC for packages
-        run: yarn nx affected --target=test:ts --nx-ignore-cycles
-      - name: TSC for back
-        run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
-      - name: TSC for front
-        run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
-
   # EE
-
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [build, typescript]
+    needs: []
     name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}

@@ -15,7 +15,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       'content-type.update',
       async ({ contentType }) => {
         if (contentType.schema?.options?.draftAndPublish === false) {
-          // await releaseActionService.deleteManyForContentType(contentType.uid);
+          await releaseActionService.deleteManyForContentType(contentType.uid);
         }
       }
     );
@@ -36,15 +36,16 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       afterDelete(event) {
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         const { model, result } = event;
+
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const { id } = result;
-          strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-            where: {
-              target_type: model.uid,
-              target_id: id,
-            },
-          });
+          // const { id } = result;
+          // strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+          //   where: {
+          //     target_type: model.uid,
+          //     target_id: id,
+          //   },
+          // });
         }
       },
       /**
@@ -55,11 +56,11 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         const { model, params } = event;
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const { where } = params;
-          const entriesToDelete = await strapi.db
-            .query(model.uid)
-            .findMany({ select: ['id'], where });
-          event.state.entriesToDelete = entriesToDelete;
+          // const { where } = params;
+          // const entriesToDelete = await strapi.db
+          //   .query(model.uid)
+          //   .findMany({ select: ['id'], where });
+          // event.state.entriesToDelete = entriesToDelete;
         }
       },
       /**
@@ -70,14 +71,14 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         const { model, state } = event;
         const entriesToDelete = state.entriesToDelete;
         if (entriesToDelete) {
-          await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-            where: {
-              target_type: model.uid,
-              target_id: {
-                $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
-              },
-            },
-          });
+          // await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+          //   where: {
+          //     target_type: model.uid,
+          //     target_id: {
+          //       $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
+          //     },
+          //   },
+          // });
         }
       },
     });
