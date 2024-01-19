@@ -101,7 +101,7 @@ const CMEditViewLocalePicker = ({
 
       let status: BulletProps['status'] = 'did-not-create-locale';
 
-      if (matchingLocaleInData) {
+      if (matchingLocaleInData && matchingLocaleInData.publishedAt !== undefined) {
         status = matchingLocaleInData.publishedAt === null ? 'draft' : 'published';
       }
 
