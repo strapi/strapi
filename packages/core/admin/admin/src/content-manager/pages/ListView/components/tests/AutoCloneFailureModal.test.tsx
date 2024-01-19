@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render as renderRTL, screen } from '@tests/utils';
 import { Route } from 'react-router-dom';
@@ -60,10 +61,19 @@ describe('AutoCloneFailureModal', () => {
       pluginQueryParams: 'plugins[i18n][locale]=en',
     });
 
-    expect(screen.getByText(/duplicating the relation would remove it/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/identical values in a unique field are not allowed/i)
-    ).toBeInTheDocument();
+    const lists = screen.getAllByRole('list');
+    expect(lists).toHaveLength(2);
+    screen.getByText(/identical values in a unique field are not allowed/i);
+    screen.getByText(/duplicating the relation would remove it/i);
+
+    const uniqueSegments = within(lists[0]).getAllByRole('listitem');
+    expect(uniqueSegments).toHaveLength(4);
+    within(uniqueSegments[1]).getByText('Unique Component');
+    within(uniqueSegments[3]).getByText('text');
+
+    const relationSegments = within(lists[1]).getAllByRole('listitem');
+    expect(relationSegments).toHaveLength(1);
+    within(relationSegments[0]).getByText('oneToOneRelation');
 
     // Links to the edit cloned entry page
     await user.click(screen.getByRole('link', { name: /create/i }));

@@ -93,25 +93,23 @@ const AutoCloneFailureModal = ({
               padding={6}
               key={fieldPath.join()}
             >
-              <Typography as="p" fontWeight="semiBold">
-                {fieldPath.map((pathSegment, index) => {
-                  return (
-                    <React.Fragment key={index}>
-                      {pathSegment}
-                      {index !== fieldPath.length - 1 && (
-                        <Icon
-                          as={ChevronRight}
-                          color="neutral500"
-                          height={2}
-                          width={2}
-                          marginLeft={2}
-                          marginRight={2}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </Typography>
+              <Flex direction="row" as="ul">
+                {fieldPath.map((pathSegment, index) => (
+                  <Typography fontWeight="semiBold" as="li" key={index}>
+                    {pathSegment}
+                    {index !== fieldPath.length - 1 && (
+                      <Icon
+                        as={ChevronRight}
+                        color="neutral500"
+                        height={2}
+                        width={2}
+                        marginLeft={2}
+                        marginRight={2}
+                      />
+                    )}
+                  </Typography>
+                ))}
+              </Flex>
               <Typography as="p" textColor="neutral600">
                 {formatMessage({
                   id: getTranslation(`containers.ListPage.autoCloneModal.error.${reason}`),
@@ -135,7 +133,7 @@ const AutoCloneFailureModal = ({
           // @ts-expect-error - types are not inferred correctly through the as prop.
           <LinkButton as={NavLink} to={editPath}>
             {formatMessage({
-              id: 'TODO',
+              id: getTranslation('containers.ListPage.autoCloneModal.create'),
               defaultMessage: 'Create',
             })}
           </LinkButton>
