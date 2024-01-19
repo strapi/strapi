@@ -21,15 +21,15 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
     );
     eventManager.addDestroyListenerCallback(destroyContentTypeUpdateListener);
     // Clean up release-actions when a content-type is deleted
-    const destroyContentTypeDeleteListener = strapi.eventHub.on(
-      'content-type.delete',
-      async ({ contentType }) => {
-        if (contentType.schema?.options?.draftAndPublish) {
-          await releaseActionService.deleteManyForContentType(contentType.uid);
-        }
-      }
-    );
-    eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
+    // const destroyContentTypeDeleteListener = strapi.eventHub.on(
+    //   'content-type.delete',
+    //   async ({ contentType }) => {
+    //     if (contentType.schema?.options?.draftAndPublish) {
+    //       await releaseActionService.deleteManyForContentType(contentType.uid);
+    //     }
+    //   }
+    // );
+    // eventManager.addDestroyListenerCallback(destroyContentTypeDeleteListener);
 
     // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
