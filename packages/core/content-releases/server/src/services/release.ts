@@ -79,60 +79,80 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     });
   },
 
-  async findManyForContentTypeEntry(
+  async findManyWithContentTypeEntryAttached(
     contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
-    entryId: GetContentTypeEntryReleases.Request['query']['entryId'],
-    {
-      hasEntryAttached,
-    }: { hasEntryAttached?: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] } = {
-      hasEntryAttached: false,
-    }
+    entryId: GetContentTypeEntryReleases.Request['query']['entryId']
   ) {
-    const whereActions = hasEntryAttached
-      ? {
-          // Find all Releases where the content type entry is present
-          actions: {
-            target_type: contentTypeUid,
-            target_id: entryId,
-          },
-        }
-      : {
-          // Find all Releases where the content type entry is not present
-          $or: [
-            {
-              $not: {
-                actions: {
-                  target_type: contentTypeUid,
-                  target_id: entryId,
-                },
-              },
-            },
-            {
-              actions: null,
-            },
-          ],
-        };
-    const populateAttachedAction = hasEntryAttached
-      ? {
-          // Filter the action to get only the content type entry
-          actions: {
-            where: {
-              target_type: contentTypeUid,
-              target_id: entryId,
-            },
-          },
-        }
-      : {};
-
     const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
       where: {
-        ...whereActions,
+        actions: {
+          target_type: contentTypeUid,
+          target_id: entryId,
+        },
         releasedAt: {
           $null: true,
         },
       },
       populate: {
-        ...populateAttachedAction,
+        // Filter the action to get only the content type entry
+        actions: {
+          where: {
+            target_type: contentTypeUid,
+            target_id: entryId,
+          },
+        },
+      },
+    });
+
+    return releases.map((release) => {
+      if (release.actions?.length) {
+        const [actionForEntry] = release.actions;
+
+        // Remove the actions key to replace it with an action key
+        delete release.actions;
+
+        return {
+          ...release,
+          action: actionForEntry,
+        };
+      }
+
+      return release;
+    });
+  },
+
+  async findManyWithoutContentTypeEntryAttached(
+    contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
+    entryId: GetContentTypeEntryReleases.Request['query']['entryId']
+  ) {
+    // We get the list of releases where the entry is present
+    const releasesRelated = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+      where: {
+        releasedAt: {
+          $null: true,
+        },
+        actions: {
+          target_type: contentTypeUid,
+          target_id: entryId,
+        },
+      },
+    });
+
+    const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+      where: {
+        $or: [
+          {
+            id: {
+              $notIn: releasesRelated.map((release) => release.id),
+            },
+          },
+          {
+            actions: null,
+          },
+        ],
+        releasedAt: {
+          $null: true,
+        },
       },
     });
 
