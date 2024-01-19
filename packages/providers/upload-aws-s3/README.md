@@ -231,8 +231,8 @@ upload: {
     provider: 'aws-s3',
     providerOptions: {
       credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_ACCESS_SECRET,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_ACCESS_SECRET,
       },
       region: process.env.AWS_REGION,
       baseUrl: `https://s3.${region}.amazonaws.com/${bucket}`, // This line sets the custom url format
