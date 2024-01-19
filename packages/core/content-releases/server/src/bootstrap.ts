@@ -15,7 +15,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       'content-type.update',
       async ({ contentType }) => {
         if (contentType.schema?.options?.draftAndPublish === false) {
-          await releaseActionService.deleteManyForContentType(contentType.uid);
+          // await releaseActionService.deleteManyForContentType(contentType.uid);
         }
       }
     );
@@ -25,7 +25,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       'content-type.delete',
       async ({ contentType }) => {
         if (contentType.schema?.options?.draftAndPublish) {
-          // await releaseActionService.deleteManyForContentType(contentType.uid);
+          await releaseActionService.deleteManyForContentType(contentType.uid);
         }
       }
     );
