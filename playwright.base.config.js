@@ -1,6 +1,13 @@
 // @ts-check
 const { devices } = require('@playwright/test');
 
+const getEnvNum = (envVar, defaultValue) => {
+  if (envVar !== undefined && envVar !== null) {
+    return Number(envVar);
+  }
+  return defaultValue;
+};
+
 /**
  * @typedef ConfigOptions
  * @type {{ port: number; testDir: string; appDir: string }}
@@ -14,7 +21,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
   testDir,
 
   // set default timeout to 30s
-  timeout: process.env.PLAYWRIGHT_TIMEOUT ? Number(process.env.PLAYWRIGHT_TIMEOUT) : 30 * 1000,
+  timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 30 * 1000),
 
   expect: {
     /**
@@ -39,7 +46,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
     baseURL: `http://127.0.0.1:${port}`,
 
     /* Maximum time each action such as `click()` can take. Default to 20s */
-    actionTimeout: process.env.PLAYWRIGHT_ACTION_TIMEOUT ? Number(process.env.PLAYWRIGHT_ACTION_TIMEOUT) : 20 * 1000,
+    actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
 
     /* Collect trace when a test failed on the CI. See https://playwright.dev/docs/trace-viewer
        Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
@@ -80,7 +87,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
     command: `cd ${appDir} && yarn develop`,
     url: `http://127.0.0.1:${port}`,
     // default Strapi server startup timeout to 160s
-    timeout: process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT ? Number(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT) || 160 * 1000,
+    timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
     reuseExistingServer: true,
     stdout: 'pipe',
   },
