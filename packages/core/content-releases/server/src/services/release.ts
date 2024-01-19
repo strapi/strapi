@@ -447,8 +447,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
      */
     const actions: {
       [key: UID.ContentType]: {
-        actionsToPublishIds: ReleaseAction['entry']['id'][];
-        actionsToUnpublishIds: ReleaseAction['entry']['id'][];
+        entriestoPublishIds: ReleaseAction['entry']['id'][];
+        entriesToUnpublishIds: ReleaseAction['entry']['id'][];
       };
     } = {};
     for (const action of releaseWithPopulatedActionEntries.actions) {
@@ -456,15 +456,15 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
       if (!actions[contentTypeUid]) {
         actions[contentTypeUid] = {
-          actionsToPublishIds: [],
-          actionsToUnpublishIds: [],
+          entriestoPublishIds: [],
+          entriesToUnpublishIds: [],
         };
       }
 
       if (action.type === 'publish') {
-        actions[contentTypeUid].actionsToPublishIds.push(action.entry.id);
+        actions[contentTypeUid].entriestoPublishIds.push(action.entry.id);
       } else {
-        actions[contentTypeUid].actionsToUnpublishIds.push(action.entry.id);
+        actions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
       }
     }
 
@@ -479,7 +479,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
           .populateDeep(Infinity)
           .build();
 
-        const { actionsToPublishIds, actionsToUnpublishIds } =
+        const { entriestoPublishIds, entriesToUnpublishIds } =
           actions[contentTypeUid as UID.ContentType];
 
         /**
@@ -487,36 +487,36 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
          * Considering that populate doesn't work well with morph relations we can't get the entries from the Release model
          * So, we need to fetch them manually
          */
-        const actionsToPublish = (await strapi.entityService.findMany(
+        const entriesToPublish = (await strapi.entityService.findMany(
           contentTypeUid as UID.ContentType,
           {
             filters: {
               id: {
-                $in: actionsToPublishIds,
+                $in: entriestoPublishIds,
               },
             },
             populate,
           }
         )) as Entity[];
 
-        const actionsToUnpublish = (await strapi.entityService.findMany(
+        const entriesToUnpublish = (await strapi.entityService.findMany(
           contentTypeUid as UID.ContentType,
           {
             filters: {
               id: {
-                $in: actionsToUnpublishIds,
+                $in: entriesToUnpublishIds,
               },
             },
             populate,
           }
         )) as Entity[];
 
-        if (actionsToPublish.length > 0) {
-          await entityManagerService.publishMany(actionsToPublish, contentTypeUid);
+        if (entriesToPublish.length > 0) {
+          await entityManagerService.publishMany(entriesToPublish, contentTypeUid);
         }
 
-        if (actionsToUnpublish.length > 0) {
-          await entityManagerService.unpublishMany(actionsToUnpublish, contentTypeUid);
+        if (entriesToUnpublish.length > 0) {
+          await entityManagerService.unpublishMany(entriesToUnpublish, contentTypeUid);
         }
       }
     });
