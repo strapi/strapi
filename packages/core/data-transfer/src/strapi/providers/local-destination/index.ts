@@ -282,7 +282,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
     if (!this.#areAssetsIncluded()) {
-      throw new ProviderTransferError('Attempting to transfer assets when they are not included');
+      throw new ProviderTransferError(
+        'Attempting to transfer assets when `assets` is not set in restore options'
+      );
     }
 
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
