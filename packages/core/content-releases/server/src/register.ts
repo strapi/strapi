@@ -2,7 +2,10 @@
 import type { LoadedStrapi } from '@strapi/types';
 
 import { ACTIONS } from './constants';
-import { deleteActionsOnDeleteContentType, deleteActionsOnDisableDraftAndPublish } from './migrations';
+import {
+  deleteActionsOnDeleteContentType,
+  deleteActionsOnDisableDraftAndPublish,
+} from './migrations';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
