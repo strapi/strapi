@@ -238,16 +238,29 @@ describe('release service', () => {
       const mockPublishMany = jest.fn();
       const mockUnpublishMany = jest.fn();
 
+      const servicesMock = {
+        'entity-manager': {
+          publishMany: mockPublishMany,
+          unpublishMany: mockUnpublishMany,
+        },
+        'populate-builder': () => ({
+          default: jest.fn().mockReturnThis(),
+          populateDeep: jest.fn().mockReturnThis(),
+          build: jest.fn().mockReturnThis(),
+        }),
+      };
+
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           transaction: jest.fn().mockImplementation((cb) => cb()),
         },
         plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({
-            publishMany: mockPublishMany,
-            unpublishMany: mockUnpublishMany,
-          }),
+          service: jest
+            .fn()
+            .mockImplementation((service: 'entity-manager' | 'populate-builder') => {
+              return servicesMock[service];
+            }),
         }),
         entityService: {
           findOne: jest.fn().mockReturnValue({
@@ -265,6 +278,7 @@ describe('release service', () => {
               },
             ],
           }),
+          findMany: jest.fn(),
           update: jest.fn().mockReturnValue({}),
         },
       };
@@ -272,10 +286,31 @@ describe('release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
+      strapiMock.entityService.findMany.mockReturnValueOnce([
+        {
+          contentType: 'contentType',
+          type: 'publish',
+          entry: { id: 1 },
+        },
+      ]);
+      strapiMock.entityService.findMany.mockReturnValueOnce([
+        {
+          contentType: 'contentType',
+          type: 'unpublish',
+          entry: { id: 2 },
+        },
+      ]);
+
       await releaseService.publish(1);
 
-      expect(mockPublishMany).toHaveBeenCalledWith([{ id: 1 }], 'contentType');
-      expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'contentType');
+      expect(mockPublishMany).toHaveBeenCalledWith(
+        [{ contentType: 'contentType', entry: { id: 1 }, type: 'publish' }],
+        'contentType'
+      );
+      expect(mockUnpublishMany).toHaveBeenCalledWith(
+        [{ contentType: 'contentType', entry: { id: 2 }, type: 'unpublish' }],
+        'contentType'
+      );
     });
   });
 

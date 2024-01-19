@@ -48,10 +48,10 @@ module.exports = ({ env }) => ({
       providerOptions: {
         baseUrl: env('CDN_URL'),
         rootPath: env('CDN_ROOT_PATH'),
-        s3Options: {  
+        s3Options: {
           credentials: {
-            accessKeyId: env("AWS_ACCESS_KEY_ID"),
-            secretAccessKey: env("AWS_ACCESS_SECRET"),
+            accessKeyId: env('AWS_ACCESS_KEY_ID'),
+            secretAccessKey: env('AWS_ACCESS_SECRET'),
           },
           region: env('AWS_REGION'),
           params: {
@@ -90,8 +90,8 @@ module.exports = ({ env }) => ({
       provider: 'aws-s3',
       providerOptions: {
         credentials: {
-          accessKeyId: env("AWS_ACCESS_KEY_ID"),
-          secretAccessKey: env("AWS_ACCESS_SECRET"),
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
         },
         region: env('AWS_REGION'),
         params: {
@@ -124,8 +124,8 @@ module.exports = ({ env }) => ({
       provider: 'aws-s3',
       providerOptions: {
         credentials: {
-          accessKeyId: env("SCALEWAY_ACCESS_KEY_ID"),
-          secretAccessKey: env("SCALEWAY_ACCESS_SECRET"),
+          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
         },
         endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
         params: {
@@ -231,8 +231,8 @@ upload: {
     provider: 'aws-s3',
     providerOptions: {
       credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_ACCESS_SECRET,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_ACCESS_SECRET,
       },
       region: process.env.AWS_REGION,
       baseUrl: `https://s3.${region}.amazonaws.com/${bucket}`, // This line sets the custom url format
