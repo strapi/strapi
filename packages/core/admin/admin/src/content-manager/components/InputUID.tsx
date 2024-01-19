@@ -155,6 +155,7 @@ const InputUID = React.forwardRef<
       async queryFn({ queryKey }) {
         const [, body] = queryKey;
 
+        // TODO change this endpoint to check availability based on new UID logic
         const { data } = await post<
           Contracts.UID.CheckUIDAvailability.Response,
           AxiosResponse<Contracts.UID.CheckUIDAvailability.Response>,

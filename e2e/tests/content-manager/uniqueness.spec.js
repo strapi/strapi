@@ -17,9 +17,7 @@ test.describe('Uniqueness', () => {
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
-    // TODO V5: How should UIDs work? Should they be globally unique or per locale and publication state?
-    // This currently violates a DB constraint and fails the test spec
-    // { name: 'UID', value: 'unique' },
+    { name: 'UID', value: 'unique' },
   ];
 
   const clickSave = async (page) => {
