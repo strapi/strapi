@@ -428,7 +428,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         populate: {
           actions: {
             populate: {
-              entry: true,
+              entry: {
+                fields: ['id'],
+              },
             },
           },
         },
@@ -449,11 +451,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     /**
      * We separate publish and unpublish actions group by content type
+     * And we keep only their ids to fetch them later to get all information needed
      */
     const actions: {
       [key: UID.ContentType]: {
-        publish: ReleaseAction['entry'][];
-        unpublish: ReleaseAction['entry'][];
+        entriestoPublishIds: ReleaseAction['entry']['id'][];
+        entriesToUnpublishIds: ReleaseAction['entry']['id'][];
       };
     } = {};
     for (const action of releaseWithPopulatedActionEntries.actions) {
@@ -461,31 +464,67 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
       if (!actions[contentTypeUid]) {
         actions[contentTypeUid] = {
-          publish: [],
-          unpublish: [],
+          entriestoPublishIds: [],
+          entriesToUnpublishIds: [],
         };
       }
 
       if (action.type === 'publish') {
-        actions[contentTypeUid].publish.push(action.entry);
+        actions[contentTypeUid].entriestoPublishIds.push(action.entry.id);
       } else {
-        actions[contentTypeUid].unpublish.push(action.entry);
+        actions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
       }
     }
 
     const entityManagerService = strapi.plugin('content-manager').service('entity-manager');
+    const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
 
     // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
     await strapi.db.transaction(async () => {
       for (const contentTypeUid of Object.keys(actions)) {
-        const { publish, unpublish } = actions[contentTypeUid as UID.ContentType];
+        // @ts-expect-error - populateBuilderService should be a function but is returning service
+        const populate = await populateBuilderService(contentTypeUid)
+          .populateDeep(Infinity)
+          .build();
 
-        if (publish.length > 0) {
-          await entityManagerService.publishMany(publish, contentTypeUid);
+        const { entriestoPublishIds, entriesToUnpublishIds } =
+          actions[contentTypeUid as UID.ContentType];
+
+        /**
+         * We need to get the populate entries to be able to publish without errors on components/relations/dynamicZones
+         * Considering that populate doesn't work well with morph relations we can't get the entries from the Release model
+         * So, we need to fetch them manually
+         */
+        const entriesToPublish = (await strapi.entityService.findMany(
+          contentTypeUid as UID.ContentType,
+          {
+            filters: {
+              id: {
+                $in: entriestoPublishIds,
+              },
+            },
+            populate,
+          }
+        )) as Entity[];
+
+        const entriesToUnpublish = (await strapi.entityService.findMany(
+          contentTypeUid as UID.ContentType,
+          {
+            filters: {
+              id: {
+                $in: entriesToUnpublishIds,
+              },
+            },
+            populate,
+          }
+        )) as Entity[];
+
+        if (entriesToPublish.length > 0) {
+          await entityManagerService.publishMany(entriesToPublish, contentTypeUid);
         }
 
-        if (unpublish.length > 0) {
-          await entityManagerService.unpublishMany(unpublish, contentTypeUid);
+        if (entriesToUnpublish.length > 0) {
+          await entityManagerService.unpublishMany(entriesToUnpublish, contentTypeUid);
         }
       }
     });
