@@ -27,6 +27,7 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
+import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
@@ -100,7 +101,7 @@ const ContentTypeFormWrapper = ({
   const { put, post, del } = fetchClient;
 
   const isSingleType = collectionType === 'single-types';
-  const isCreatingEntry = (!isSingleType && !id) || id === 'create';
+  const isCreatingEntry = !isSingleType && id === 'create';
 
   const requestURL =
     isCreatingEntry && !origin
@@ -172,7 +173,10 @@ const ContentTypeFormWrapper = ({
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, {
+          cancelToken: source.token,
+          params: buildValidGetParams(query),
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
@@ -231,6 +235,7 @@ const ContentTypeFormWrapper = ({
     redirectionLink,
     toggleNotification,
     isSingleType,
+    query,
   ]);
 
   const displayErrors = React.useCallback(
@@ -455,7 +460,9 @@ const ContentTypeFormWrapper = ({
           Contracts.CollectionTypes.Update.Response,
           AxiosResponse<Contracts.CollectionTypes.Update.Response>,
           Contracts.CollectionTypes.Update.Request['body']
-        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
+        >(`/content-manager/${collectionType}/${slug}/${id}`, body, {
+          params: query,
+        });
 
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({

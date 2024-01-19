@@ -7,7 +7,7 @@ import * as f from '../format';
 
 import type { Logger } from '../logger';
 import type { Project } from '../project';
-import type { UpgradeReport } from '../upgrader/types';
+import type { UpgradeReport } from '../upgrader';
 import type { CodemodRunnerInterface, CodemodRunnerReport, SelectCodemodsCallback } from './types';
 import type { Version } from '../version';
 
@@ -61,6 +61,8 @@ export class CodemodRunner implements CodemodRunnerInterface {
     repository.refresh();
 
     const allVersionedCodemods = repository.findByRange(this.range);
+
+    // If a selection callback is set, use it, else keep every codemods
     const versionedCodemods = this.selectCodemodsCallback
       ? await this.selectCodemodsCallback(allVersionedCodemods)
       : allVersionedCodemods;
@@ -72,12 +74,18 @@ export class CodemodRunner implements CodemodRunnerInterface {
       return successReport();
     }
 
-    this.logger?.debug(`Found codemods for ${f.highlight(versionedCodemods.length)} version(s)`);
+    this.logger?.debug(
+      `Found codemods for ${f.highlight(
+        versionedCodemods.length
+      )} version(s) using ${f.versionRange(this.range)}`
+    );
     versionedCodemods.forEach(({ version, codemods }) =>
       this.logger?.debug(`- ${f.version(version)} (${codemods.length})`)
     );
+
     // Flatten the collection to a single list of codemods, the original list should already be sorted
     const codemods = versionedCodemods.map(({ codemods }) => codemods).flat();
+
     try {
       const reports = await this.project.runCodemods(codemods, { dry: this.isDry });
       this.logger?.raw(f.reports(reports));

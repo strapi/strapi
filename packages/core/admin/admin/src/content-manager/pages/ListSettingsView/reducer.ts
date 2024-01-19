@@ -82,7 +82,7 @@ const initialState = {
 
 const reducer = (state: ListSettingsViewState, action: Action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, (draftState: ListSettingsViewState) => {
+  produce(state, (draftState) => {
     const layoutFieldListPath = ['modifiedData', 'layouts', 'list'];
     switch (action.type) {
       case 'ADD_FIELD': {

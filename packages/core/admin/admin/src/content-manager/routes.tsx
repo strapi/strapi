@@ -93,8 +93,9 @@ const routes: RouteObject[] = [
       {
         path: ':collectionType/:slug/configurations/edit',
         lazy: async () => {
-          // @ts-expect-error – This will be done in CONTENT-1952
-          const { ProtectedEditSettingsView } = await import('./pages/EditSettingsView');
+          const { ProtectedEditSettingsView } = await import(
+            './pages/EditSettingsView/EditSettingsView'
+          );
 
           return {
             Component: ProtectedEditSettingsView,

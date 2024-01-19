@@ -23,7 +23,6 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
 
     const devMiddleware = webpackDevMiddleware(compiler);
 
-    // @ts-expect-error ignored
     const hotMiddleware = webpackHotMiddleware(compiler, {
       log: false,
       path: '/__webpack_hmr',

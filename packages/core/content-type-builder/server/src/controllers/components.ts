@@ -49,7 +49,7 @@ export default {
    * @param {Object} ctx - koa context
    */
   async createComponent(ctx: Context) {
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     try {
       await validateComponentInput(body);
@@ -83,7 +83,7 @@ export default {
    */
   async updateComponent(ctx: Context) {
     const { uid } = ctx.params;
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     if (!_.has(strapi.components, uid)) {
       return ctx.send({ error: 'component.notFound' }, 404);

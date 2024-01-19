@@ -7,7 +7,8 @@ const { ApplicationError } = errors;
 
 const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
   const { model } = ctx.params;
-  const { query, body } = ctx.request;
+  const { query } = ctx.request;
+  const body = ctx.request.body as any;
 
   const {
     getValidLocale,
@@ -40,7 +41,7 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
   if (modelDef.kind === 'singleType') {
     const entity = await strapi.entityService.findMany(modelDef.uid, {
       locale: entityLocale,
-    } as any);
+    } as any); // TODO: add this type to entityService
 
     ctx.request.query.locale = body.locale;
 

@@ -1,13 +1,18 @@
-import { isEmpty, mergeWith, isArray } from 'lodash/fp';
-import { ApolloServer } from 'apollo-server-koa';
+import { isEmpty, mergeWith, isArray, isObject } from 'lodash/fp';
+import { ApolloServer, type ApolloServerOptions } from '@apollo/server';
 import {
-  ApolloServerPluginLandingPageDisabled,
-  ApolloServerPluginLandingPageGraphQLPlayground,
-} from 'apollo-server-core';
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
+import { koaMiddleware } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
-import { graphqlUploadKoa } from 'graphql-upload';
-import type { Config } from 'apollo-server-core';
-import type { Strapi } from '@strapi/types';
+// eslint-disable-next-line import/extensions
+import graphqlUploadKoa from 'graphql-upload/graphqlUploadKoa.js';
+import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
+
+import type { Strapi, Common } from '@strapi/types';
+import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
 
@@ -48,19 +53,27 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
 
   const path: string = config('endpoint');
 
-  const defaultServerConfig: Config & {
+  // TODO: rename playgroundAlways since it's not playground anymore
+  const playgroundEnabled = !(process.env.NODE_ENV === 'production' && !config('playgroundAlways'));
+
+  let landingPage;
+  if (playgroundEnabled) {
+    landingPage = ApolloServerPluginLandingPageLocalDefault();
+    strapi.log.debug('Using Apollo sandbox landing page');
+  } else {
+    landingPage = ApolloServerPluginLandingPageProductionDefault();
+    strapi.log.debug('Using Apollo production landing page');
+  }
+
+  type CustomOptions = {
     cors: boolean;
     uploads: boolean;
     bodyParserConfig: boolean;
-  } = {
+  };
+
+  const defaultServerConfig: ApolloServerOptions<BaseContext> & CustomOptions = {
     // Schema
     schema,
-
-    // Initialize loaders for this request.
-    context: ({ ctx }) => ({
-      state: ctx.state,
-      koaContext: ctx,
-    }),
 
     // Validation
     validationRules: [depthLimit(config('depthLimit') as number) as any],
@@ -72,17 +85,17 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     cors: false,
     uploads: false,
     bodyParserConfig: true,
-
-    plugins: [
-      process.env.NODE_ENV === 'production' && !config('playgroundAlways')
-        ? ApolloServerPluginLandingPageDisabled()
-        : ApolloServerPluginLandingPageGraphQLPlayground(),
-    ],
+    // send 400 http status instead of 200 for input validation errors
+    status400ForVariableCoercionErrors: true,
+    plugins: [landingPage],
 
     cache: 'bounded' as const,
   };
 
-  const serverConfig = merge(defaultServerConfig, config('apolloServer'));
+  const serverConfig = merge(
+    defaultServerConfig,
+    config('apolloServer')
+  ) as ApolloServerOptions<BaseContext> & CustomOptions;
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
@@ -91,7 +104,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   useUploadMiddleware(strapi, path);
 
   try {
-    // Since Apollo-Server v3, server.start() must be called before using server.applyMiddleware()
+    // server.start() must be called before using server.applyMiddleware()
     await server.start();
   } catch (error) {
     if (error instanceof Error) {
@@ -101,33 +114,59 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     throw error;
   }
 
-  // Link the Apollo server & the Strapi app
+  // Create the route handlers for Strapi
+  const handler: Common.MiddlewareHandler[] = [];
+
+  // add cors middleware
+  if (cors) {
+    handler.push(cors());
+  }
+
+  // add koa bodyparser middleware
+  if (isObject(serverConfig.bodyParserConfig)) {
+    handler.push(bodyParser(serverConfig.bodyParserConfig));
+  } else if (serverConfig.bodyParserConfig) {
+    handler.push(bodyParser());
+  } else {
+    strapi.log.debug('Body parser has been disabled for Apollo server');
+  }
+
+  // add the Strapi auth middleware
+  handler.push((ctx, next) => {
+    ctx.state.route = {
+      info: {
+        // Indicate it's a content API route
+        type: 'content-api',
+      },
+    };
+
+    // allow graphql playground to load without authentication
+    // WARNING: this means graphql should not accept GET requests generally
+    // TODO: find a better way and remove this, it is causing issues such as https://github.com/strapi/strapi/issues/19073
+    if (ctx.request.method === 'GET') {
+      return next();
+    }
+
+    return strapi.auth.authenticate(ctx, next);
+  });
+
+  // add the graphql server for koa
+  handler.push(
+    koaMiddleware<DefaultStateExtends, DefaultContextExtends>(server, {
+      // Initialize loaders for this request.
+      context: async ({ ctx }) => ({
+        state: ctx.state,
+        koaContext: ctx,
+      }),
+    })
+  );
+
+  // now that handlers are set up, add the graphql route to our apollo server
   strapi.server.routes([
     {
       method: 'ALL',
       path,
-      handler: [
-        (ctx, next) => {
-          ctx.state.route = {
-            info: {
-              // Indicate it's a content API route
-              type: 'content-api',
-            },
-          };
-
-          // allow graphql playground to load without authentication
-          if (ctx.request.method === 'GET') return next();
-
-          return strapi.auth.authenticate(ctx, next);
-        },
-
-        // Apollo Server
-        server.getMiddleware({
-          path,
-          cors: serverConfig.cors,
-          bodyParserConfig: serverConfig.bodyParserConfig,
-        }),
-      ],
+      handler,
       config: {
         auth: false,
       },

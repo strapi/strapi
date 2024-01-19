@@ -30,14 +30,14 @@ import type {
   Schema,
 } from '@strapi/types';
 
-import loadConfiguration from './core/app-configuration';
+import loadConfiguration from './configuration';
 
 import * as factories from './factories';
 import compile from './compile';
 
 import * as utils from './utils';
-import * as registries from './core/registries';
-import * as loaders from './core/loaders';
+import * as registries from './registries';
+import * as loaders from './loaders';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
@@ -59,13 +59,13 @@ import createStartupLogger from './utils/startup-logger';
 import { createStrapiFetch } from './utils/fetch';
 import { LIFECYCLES } from './utils/lifecycles';
 import ee from './utils/ee';
-import bootstrap from './core/bootstrap';
+import bootstrap from './bootstrap';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import convertCustomFieldType from './utils/convert-custom-field-type';
 import { transformContentTypesToModels } from './utils/transform-content-types-to-models';
-import { createDocumentRepository } from './services/document-service/document-repository';
 import { FeaturesService, createFeaturesService } from './services/features';
+import { createDocumentService } from './services/document-service/document-service';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -152,7 +152,7 @@ class Strapi extends Container implements StrapiI {
 
   entityService?: EntityService.EntityService;
 
-  documents?: Documents.Repository;
+  documents?: Documents.Service;
 
   telemetry: TelemetryService;
 
@@ -177,6 +177,9 @@ class Strapi extends Container implements StrapiI {
   reload: Reloader;
 
   features: FeaturesService;
+
+  // @ts-expect-error - Assigned in constructor
+  ee: StrapiI['ee'];
 
   constructor(opts: StrapiOptions = {}) {
     super();
@@ -512,7 +515,7 @@ class Strapi extends Container implements StrapiI {
       entityValidator: this.entityValidator,
     });
 
-    this.documents = createDocumentRepository(this);
+    this.documents = createDocumentService(this);
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});

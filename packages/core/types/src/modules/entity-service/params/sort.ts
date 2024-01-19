@@ -61,7 +61,9 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type E = [42]; // ❌
  * type F = 'title'; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID>[];
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> =
+  | StringNotation<TSchemaUID>[]
+  | ObjectNotation<TSchemaUID>[];
 
 /**
  * Object notation for a sort
@@ -74,15 +76,21 @@ export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID
  * type E = ['title']; // ❌
  * type F = 'title'; // ❌
  */
-export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
-  [TKey in ObjectNotationKeys<TSchemaUID>]?: TKey extends SingleAttribute<TSchemaUID>
-    ? // First level sort (scalar attributes, id, ...)
-      OrderKind.Any
-    : TKey extends Attribute.GetKeysWithTarget<TSchemaUID>
-    ? // Deep sort (relations with a target, components, media, ...)
-      ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>
-    : never;
-};
+export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = Utils.Expression.If<
+  Common.AreSchemaRegistriesExtended,
+  {
+    [TKey in ObjectNotationKeys<TSchemaUID>]?: TKey extends SingleAttribute<TSchemaUID>
+      ? // First level sort (scalar attributes, id, ...)
+        OrderKind.Any
+      : TKey extends Attribute.GetKeysWithTarget<TSchemaUID>
+      ? // Deep sort (relations with a target, components, media, ...)
+        ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>
+      : never;
+  },
+  {
+    [key: string]: OrderKind.Any | ObjectNotation<TSchemaUID>;
+  }
+>;
 
 /**
  * Represents the keys of an object notation for a sort

@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { semVerFactory, isLiteralSemVer, isSemVer, isSemVerReleaseType } from '../semver';
+import { semVerFactory, isLiteralSemVer, isSemverInstance, isSemVerReleaseType } from '../semver';
 import * as Version from '../types';
 
 describe('Version Utilities', () => {
@@ -29,12 +29,12 @@ describe('Version Utilities', () => {
   describe('isSemVer', () => {
     it('should return true for semver.SemVer instances', () => {
       const semVerInstance = new semver.SemVer('1.0.0');
-      expect(isSemVer(semVerInstance)).toBe(true);
+      expect(isSemverInstance(semVerInstance)).toBe(true);
     });
 
     it('should return false for non-SemVer instances', () => {
-      expect(isSemVer({})).toBe(false);
-      expect(isSemVer('1.0.0')).toBe(false);
+      expect(isSemverInstance({})).toBe(false);
+      expect(isSemverInstance('1.0.0')).toBe(false);
     });
   });
 

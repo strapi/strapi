@@ -3,6 +3,7 @@ import { setCreatorFields, errors } from '@strapi/utils';
 import type { LoadedStrapi, EntityService, UID } from '@strapi/types';
 
 import _ from 'lodash/fp';
+
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
@@ -50,6 +51,8 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
 const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
     const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
+
+    await getService('release-validation', { strapi }).validatePendingReleasesLimit();
 
     return strapi.entityService.create(RELEASE_MODEL_UID, {
       data: releaseWithCreatorFields,
@@ -155,22 +158,28 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     releaseData: UpdateRelease.Request['body'],
     { user }: { user: UserInfo }
   ) {
-    const updatedRelease = await setCreatorFields({ user, isEdition: true })(releaseData);
+    const releaseWithCreatorFields = await setCreatorFields({ user, isEdition: true })(releaseData);
 
-    const release = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
-      /*
-       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
-       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
-       */
-      // @ts-expect-error see above
-      data: updatedRelease,
-    });
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id);
 
     if (!release) {
       throw new errors.NotFoundError(`No release found for id ${id}`);
     }
 
-    return release;
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
+
+    const updatedRelease = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
+      /*
+       * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
+       * is not compatible with the type we are passing here: UpdateRelease.Request['body']
+       */
+      // @ts-expect-error see above
+      data: releaseWithCreatorFields,
+    });
+
+    return updatedRelease;
   },
 
   async createAction(
@@ -185,6 +194,16 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       validateEntryContentType(action.entry.contentType),
       validateUniqueEntry(releaseId, action),
     ]);
+
+    const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+
+    if (!release) {
+      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
+    }
+
+    if (release.releasedAt) {
+      throw new errors.ValidationError('Release already published');
+    }
 
     const { entry, type } = action;
 
@@ -242,12 +261,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const allReleaseContentTypesDictionary = await this.getContentTypesDataForActions(
       contentTypeUids
     );
-    const allLocales: Locale[] = await strapi.plugin('i18n').service('locales').find();
-    const allLocalesDictionary = allLocales.reduce<LocaleDictionary>((acc, locale) => {
-      acc[locale.code] = { name: locale.name, code: locale.code };
-
-      return acc;
-    }, {});
+    const allLocalesDictionary = await this.getLocalesDataForActions();
 
     const formattedData = actions.map((action: ReleaseAction) => {
       const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
@@ -268,6 +282,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     const groupName = getGroupName(groupBy);
     return _.groupBy(groupName)(formattedData);
+  },
+
+  async getLocalesDataForActions() {
+    if (!strapi.plugin('i18n')) {
+      return {};
+    }
+
+    const allLocales: Locale[] = (await strapi.plugin('i18n').service('locales').find()) || [];
+    return allLocales.reduce<LocaleDictionary>((acc, locale) => {
+      acc[locale.code] = { name: locale.name, code: locale.code };
+
+      return acc;
+    }, {});
   },
 
   async getContentTypesDataForActions(contentTypesUids: ReleaseAction['contentType'][]) {
@@ -417,14 +444,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
       where: {
         id: actionId,
-        release: releaseId,
+        release: {
+          id: releaseId,
+          releasedAt: {
+            $null: true,
+          },
+        },
       },
       data: update,
     });
 
     if (!updatedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in release with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
       );
     }
 
@@ -438,13 +470,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const deletedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
       where: {
         id: actionId,
-        release: releaseId,
+        release: {
+          id: releaseId,
+          releasedAt: {
+            $null: true,
+          },
+        },
       },
     });
 
     if (!deletedAction) {
       throw new errors.NotFoundError(
-        `Action with id ${actionId} not found in release with id ${releaseId}`
+        `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
       );
     }
 

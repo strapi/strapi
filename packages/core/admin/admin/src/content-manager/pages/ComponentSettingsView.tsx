@@ -10,8 +10,7 @@ import { reducer, initialState } from '../sharedReducers/crud/reducer';
 import { mergeMetasWithSchema } from '../utils/schemas';
 
 import { selectSchemas } from './App';
-// @ts-expect-error – This will be done in CONTENT-1952
-import { EditSettingsView } from './EditSettingsView';
+import { SettingsForm } from './EditSettingsView/components/SettingsForm/SettingsForm';
 
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = React.useReducer(reducer, initialState);
@@ -54,7 +53,7 @@ const ComponentSettingsView = () => {
 
   return (
     <CheckPagePermissions permissions={permissions.contentManager?.componentsConfigurations}>
-      <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
+      <SettingsForm components={layout.components} layout={layout.component} />
     </CheckPagePermissions>
   );
 };

@@ -4,7 +4,7 @@ import validateComponentCategory from './validation/component-category';
 
 export default {
   async editCategory(ctx: Context) {
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     try {
       await validateComponentCategory(body);

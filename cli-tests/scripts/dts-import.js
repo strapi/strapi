@@ -38,7 +38,7 @@ const createSourceProvider = (filePath) =>
   createLocalFileSourceProvider({
     file: { path: resolve(filePath) },
     encryption: { enabled: false },
-    compression: { enabled: false },
+    compression: { enabled: true },
   });
 
 const createDestinationProvider = () => {
