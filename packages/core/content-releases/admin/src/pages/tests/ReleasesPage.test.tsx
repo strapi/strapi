@@ -54,5 +54,11 @@ describe('Releases home page', () => {
 
     const lastEntry = screen.getByRole('heading', { level: 3, name: 'entry 17' });
     expect(lastEntry).toBeInTheDocument();
+
+    // Check if you reached the maximum number of releases for license
+    const newReleaseButton = screen.queryByRole('button', { name: /new release/i });
+    expect(newReleaseButton).toBeDisabled();
+    const limitReachedMessage = screen.getByText(/you have reached the 3 pending releases limit/i);
+    expect(limitReachedMessage).toBeInTheDocument();
   });
 });
