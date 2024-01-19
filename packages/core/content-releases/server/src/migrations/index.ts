@@ -25,7 +25,6 @@ export async function deleteActionsOnDisableDraftAndPublish({
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    // if d&p was disabled remove unpublish content before sync
     if (
       contentTypesUtils.hasDraftAndPublish(oldContentType) &&
       !contentTypesUtils.hasDraftAndPublish(contentType)
