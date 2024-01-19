@@ -332,17 +332,20 @@ const ReleasesPage = () => {
                   })}
                 </Link>
               }
-              title={formatMessage({
-                id: 'content-releases.pages.Releases.max-limit-reached.title',
-                defaultMessage: 'You have reached the 3 pending releases limit.',
-              })}
+              title={formatMessage(
+                {
+                  id: 'content-releases.pages.Releases.max-limit-reached.title',
+                  defaultMessage:
+                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit',
+                },
+                { number: maximumNumberOfPendingReleases }
+              )}
               onClose={() => {}}
               closeLabel=""
             >
               {formatMessage({
                 id: 'content-releases.pages.Releases.max-limit-reached.message',
-                defaultMessage:
-                  'Upgrade to Enterprise Edition to manage an unlimited number of releases.',
+                defaultMessage: 'Upgrade to manage an unlimited number of releases.',
               })}
             </CustomAlert>
           )}
