@@ -1,4 +1,4 @@
-import { prop, isEmpty, uniq, flow, concat, uniqBy } from 'lodash/fp';
+import { prop, isEmpty, uniq, flow, uniqBy, concat } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -254,34 +254,40 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
 
     if (isAnyToMany(attribute)) {
-      const resWithIds = await strapi.entityService.loadPages(
-        model,
-        { id },
-        targetField,
-        {
-          fields: ['id'],
-        } as any,
-        {
-          page: ctx.request.query.page,
-          pageSize: ctx.request.query.pageSize,
-        }
-      );
+      const [resWithIds, res] = await Promise.all([
+        strapi.entityService.loadPages(
+          model,
+          { id },
+          targetField,
+          {
+            fields: ['id'],
+          } as any,
+          {
+            page: ctx.request.query.page,
+            pageSize: ctx.request.query.pageSize,
+          }
+        ),
+        strapi.entityService.loadPages(
+          model,
+          { id },
+          targetField,
+          {
+            ...permissionQuery,
+            ordering: 'desc',
+          } as any,
+          {
+            page: ctx.request.query.page,
+            pageSize: ctx.request.query.pageSize,
+          }
+        ),
+      ]);
 
-      const res = await strapi.entityService.loadPages(
-        model,
-        { id },
-        targetField,
-        {
-          ...permissionQuery,
-          ordering: 'desc',
-        } as any,
-        {
-          page: ctx.request.query.page,
-          pageSize: ctx.request.query.pageSize,
-        }
+      // Filter out the results that don't exist in resWithIds to preserve correct pagination
+      const results = res.results.filter((item: any) =>
+        resWithIds.results.some((s: any) => item.id === s.id)
       );
+      res.results = uniqBy('id', concat(results, resWithIds.results));
 
-      res.results = uniqBy('id', concat(res.results, resWithIds.results));
       ctx.body = res;
     } else {
       const result = await strapi.entityService.load(model, { id }, targetField, queryParams);
