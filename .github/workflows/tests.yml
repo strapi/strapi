@@ -48,6 +48,12 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
+      - name: TSC for packages
+        run: yarn nx affected --target=test:ts --nx-ignore-cycles
+      - name: TSC for back
+        run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
+      - name: TSC for front
+        run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   # EE
 
