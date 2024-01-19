@@ -20,6 +20,8 @@ Currently, Strapi loads every .js and .json file within a project's `./config` d
 
 (COMING SOON) In v5, Strapi will load every defined value from the `STRAPI_` environment namespace into the configuration, using underscore (\_) as the object delimiter. For example, if you define `STRAPI_ADMIN_APP_KEYS=abcd,efg` it will be available from `strapi.config.get('admin.app.keys')` as `['abcd', 'efg']`
 
+Along with that feature, all configuration values will become case-insensitive. That is, accessing `strapi.config.get('admin.App.Keys')` will return the same value as `strapi.config.get('admin.app.keys')`.
+
 ## Base Strapi Configurations
 
 The following are considered 'base' Strapi configurations and a description of what each file contains is given, so that new settings can be placed in the appropriate place.
@@ -107,3 +109,7 @@ In Strapi v5, environment variables with the prefix `STRAPI_` will be loaded aut
 - All base Strapi configurations and a set of restricted names currently found in `packages/core/core/src/configuration/config-loader.ts` may not be used **even as prefixes**
 
 IMPORTANT: Any new base Strapi configurations should also be limited to a-z0-9, no special characters! This is necessary to allow environment variable loading. The same restriction does not apply to user config files, but if not followed that file will not support autoloading env.
+
+### Base attribute name restrictions
+
+Configuration options defined for Strapi configurations must include only a-zA-Z0-9! If a key is used with a special character, underscore, or dash, it will not be configurable from the environment variables, and people will get angry that it was poorly designed. Please use camelCase like all existing Strapi configuration keys. There are not currently any special characters defined in Strapi configurations, with the sole exception of plugins.js 'users-permissions', please keep it that way.
