@@ -18,7 +18,7 @@ NOTE: For now. in theory, we could define some configuration files that do not d
 
 Currently, Strapi loads every .js and .json file within a project's `./config` directory directly into the strapi config object. That is, if there is a file called `./config/myconfig.js` it will be loaded automatically and accessible from `strapi.config.get('myconfig')`
 
-(COMING SOON) In v5, Strapi will load every defined value from the `STRAPI_` environment namespace into the configuration, using underscore (\*) as the object delimiter. For example, if you define `STRAPI_ADMIN_APP_KEYS=abcd,efg` it will be available from `strapi.config.get('admin.app.keys')` as `['abcd', 'efg']`
+(COMING SOON) In v5, Strapi will load every defined value from the `STRAPI_` environment namespace into the configuration, using underscore (\_) as the object delimiter. For example, if you define `STRAPI_ADMIN_APP_KEYS=abcd,efg` it will be available from `strapi.config.get('admin.app.keys')` as `['abcd', 'efg']`
 
 ## Base Strapi Configurations
 
