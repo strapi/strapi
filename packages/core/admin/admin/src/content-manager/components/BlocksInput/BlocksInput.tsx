@@ -15,10 +15,11 @@ const LabelAction = styled(Box)`
 `;
 
 interface BlocksInputProps
-  extends React.ComponentPropsWithoutRef<typeof BlocksEditor>,
+  extends Omit<React.ComponentPropsWithoutRef<typeof BlocksEditor>, 'placeholder'>,
     Pick<HintProps, 'hint'> {
   intlLabel: MessageDescriptor;
   attribute: { type: string; [key: string]: unknown };
+  placeholder?: MessageDescriptor;
   description?: MessageDescriptor;
   labelAction?: React.ReactNode;
   required?: boolean;
@@ -26,12 +27,24 @@ interface BlocksInputProps
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   (
-    { intlLabel, labelAction, name, required = false, error = '', hint, ...editorProps },
+    {
+      intlLabel,
+      labelAction,
+      name,
+      required = false,
+      error = '',
+      hint,
+      placeholder,
+      ...editorProps
+    },
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
-
+    const uniqueId = React.useId();
     const label = intlLabel.id ? formatMessage(intlLabel) : name;
+    const formattedPlaceholder =
+      placeholder &&
+      formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
 
     return (
       <>
@@ -42,7 +55,7 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
               fontWeight="bold"
               textColor="neutral800"
               as="label"
-              id={`blocks-${label}`}
+              id={uniqueId}
             >
               {label}
               {required && (
@@ -58,7 +71,8 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             error={error}
             ref={forwardedRef}
             {...editorProps}
-            ariaLabel={`blocks-${label}`}
+            ariaLabel={uniqueId}
+            placeholder={formattedPlaceholder}
           />
           <Hint hint={hint} name={name} error={error} />
         </Flex>

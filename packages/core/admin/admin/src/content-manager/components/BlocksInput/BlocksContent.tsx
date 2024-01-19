@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, IconButton } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Editor, Range, Transforms, Element } from 'slate';
+import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled, { CSSProperties, css } from 'styled-components';
 
@@ -15,7 +15,6 @@ import { getTranslation } from '../../utils/translations';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { getAttributesToClear } from './utils/conversions';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
@@ -331,12 +330,12 @@ const baseRenderElement = ({
   );
 };
 
-interface BlocksInputProps {
+interface BlocksContentProps {
   placeholder?: string;
   ariaLabel: string;
 }
 
-const BlocksContent = ({ placeholder, ariaLabel }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder, ariaLabel }: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
@@ -596,4 +595,4 @@ const BlocksContent = ({ placeholder, ariaLabel }: BlocksInputProps) => {
   );
 };
 
-export { BlocksContent };
+export { BlocksContent, BlocksContentProps };

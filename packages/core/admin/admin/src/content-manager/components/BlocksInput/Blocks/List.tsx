@@ -13,7 +13,7 @@ import { isListNode, type Block } from '../utils/types';
 const listStyle = css`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spaces[1]};
+  gap: ${({ theme }) => theme.spaces[2]};
   margin-inline-start: ${({ theme }) => theme.spaces[0]};
   margin-inline-end: ${({ theme }) => theme.spaces[0]};
   padding-inline-start: ${({ theme }) => theme.spaces[2]};
@@ -47,7 +47,8 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
     return null;
   }
 
-  // Determine next style based on the current style
+  // Decide the subsequent style by referencing the given styles according to the format,
+  // allowing for infinite nested lists
   const listStyles = element.format === 'ordered' ? orderedStyles : unorderedStyles;
   const nextIndex = (element.indentLevel || 0) % listStyles!.length;
   const listStyleType = listStyles![nextIndex];
@@ -192,9 +193,23 @@ const handleEnterKeyOnList = (editor: Editor) => {
     currentListItem.children.length === 1 &&
     isText(currentListItem.children[0]) &&
     currentListItem.children[0].text === '';
+  const isFocusAtTheBeginningOfAChild =
+    editor.selection.focus.offset === 0 && editor.selection.focus.path.at(-1) === 0;
 
   if (isListEmpty) {
     replaceListWithEmptyBlock(editor, currentListPath);
+  } else if (isFocusAtTheBeginningOfAChild && !isListItemEmpty) {
+    // If the focus is at the beginning of a child node, shift below the list item and create a new list-item
+    const currentNode = Editor.above(editor, { at: editor.selection.anchor });
+    Transforms.insertNodes(editor, { type: 'list-item', children: [{ type: 'text', text: '' }] });
+    if (currentNode) {
+      const path = currentNode[1];
+      const updatedPath = [...path.slice(0, -1), path[path.length - 1] + 1];
+      Transforms.select(editor, {
+        anchor: { path: updatedPath.concat(0), offset: 0 },
+        focus: { path: updatedPath.concat(0), offset: 0 },
+      });
+    }
   } else if (isListItemEmpty) {
     // Check if there is a list above the current list and shift list-item under it
     if (
