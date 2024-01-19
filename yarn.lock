@@ -7487,13 +7487,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.14.2":
-  version: 1.14.2
-  resolution: "@remix-run/router@npm:1.14.2"
-  checksum: 422844e88b985f1e287301b302c6cf8169c9eea792f80d40464f97b25393bb2e697228ebd7a7b61444d5a51c5873c4a637aad20acde5886a5caf62e833c5ceee
-  languageName: node
-  linkType: hard
-
 "@rollup/pluginutils@npm:^5.0.2":
   version: 5.0.2
   resolution: "@rollup/pluginutils@npm:5.0.2"
@@ -9721,7 +9714,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-cloud@npm:4.17.1, @strapi/plugin-cloud@workspace:packages/plugins/cloud":
+"@strapi/plugin-cloud@workspace:packages/plugins/cloud":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
@@ -28695,19 +28688,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.0.0":
-  version: 6.21.2
-  resolution: "react-router-dom@npm:6.21.2"
-  dependencies:
-    "@remix-run/router": "npm:1.14.2"
-    react-router: "npm:6.21.2"
-  peerDependencies:
-    react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: 24d1470e68f11369776c623b8873c8cf0af476d102317cb3aa6b13b48c86908f10a6e51209ce24dccf40e429538d4e23fda796c190f2ff98f894cb476d51f44d
-  languageName: node
-  linkType: hard
-
 "react-router@npm:6.21.1":
   version: 6.21.1
   resolution: "react-router@npm:6.21.1"
@@ -28716,17 +28696,6 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: 1220cc75e0c915a26dde9dbb6509a8f0b0163d96e5ad591af91d9bb5a92a18401718f8d872a03d1cb366e7a6216c165a5cadd12375adf97943f37d7f5c487a90
-  languageName: node
-  linkType: hard
-
-"react-router@npm:6.21.2":
-  version: 6.21.2
-  resolution: "react-router@npm:6.21.2"
-  dependencies:
-    "@remix-run/router": "npm:1.14.2"
-  peerDependencies:
-    react: ">=16.8"
-  checksum: 08701bfe9e7b860442dd0f3c6e36d3ea6106d86db5ec9da930fd56d5782a13b82612826de7dd31bb38832f3fa76437d7a0ca36e63a76256f62d5b738f529a48c
   languageName: node
   linkType: hard
 
@@ -31742,24 +31711,6 @@ __metadata:
   checksum: b7d44c0d35bf74da9ba1415f73771cdc9fae9c3adc667724951dec27274e9acb796261c3d971dbafb4d9fdf43da98172b8213263a501025b9c9fe93cdd94d262
   languageName: node
   linkType: hard
-
-"test-app-0@workspace:test-apps/e2e/test-app-0":
-  version: 0.0.0-use.local
-  resolution: "test-app-0@workspace:test-apps/e2e/test-app-0"
-  dependencies:
-    "@strapi/plugin-cloud": "npm:4.17.1"
-    "@strapi/plugin-documentation": "npm:4.17.1"
-    "@strapi/plugin-graphql": "npm:4.17.1"
-    "@strapi/plugin-i18n": "npm:4.17.1"
-    "@strapi/plugin-users-permissions": "npm:4.17.1"
-    "@strapi/strapi": "npm:4.17.1"
-    better-sqlite3: "npm:9.0.0"
-    react: "npm:18.2.0"
-    react-dom: "npm:18.2.0"
-    react-router-dom: "npm:^6.0.0"
-    styled-components: "npm:5.3.3"
-  languageName: unknown
-  linkType: soft
 
 "test-exclude@npm:^6.0.0":
   version: 6.0.0

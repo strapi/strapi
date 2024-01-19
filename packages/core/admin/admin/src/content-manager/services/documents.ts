@@ -161,6 +161,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
+      transformResponse: (res: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response) =>
+        res.data,
     }),
     publishDocument: builder.mutation<
       Contracts.CollectionTypes.Publish.Response,

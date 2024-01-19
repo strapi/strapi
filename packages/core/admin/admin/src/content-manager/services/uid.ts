@@ -16,7 +16,7 @@ const uidApi = contentManagerApi.injectEndpoints({
         return {
           url: '/content-manager/uid/generate',
           method: 'POST',
-          body: data,
+          data,
         };
       },
       transformResponse: (response: Contracts.UID.GenerateUID.Response) => response.data,
@@ -28,7 +28,7 @@ const uidApi = contentManagerApi.injectEndpoints({
       query: (data) => ({
         url: '/content-manager/uid/generate',
         method: 'POST',
-        body: data,
+        data,
       }),
       transformResponse: (response: Contracts.UID.GenerateUID.Response) => response.data,
     }),
@@ -39,7 +39,7 @@ const uidApi = contentManagerApi.injectEndpoints({
       query: (data) => ({
         url: '/content-manager/uid/check-availability',
         method: 'POST',
-        body: data,
+        data,
       }),
     }),
   }),

@@ -27,8 +27,7 @@
     "examples/*",
     "examples/plugins/*",
     ".github/actions/*",
-    "scripts/*",
-    "test-apps/e2e/*"
+    "scripts/*"
   ],
   "scripts": {
     "build": "nx run-many --target=build --nx-ignore-cycles",
