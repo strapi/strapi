@@ -86,13 +86,13 @@ NOTE: Because this configuration contains user and plugin keys and Strapi does n
 
 The configuration of middlewares.
 
-NOTE: This is the only configuration that is currently an array rather than an object
+NOTE: This is the only configuration that is currently an array rather than an object. It also very loosely typed. Future improvements are planned to strongly type all the built-in Strapi middlewares.
 
 ### Typings
 
 Most of the base configurations have been typed, although they are not currently publicly available. They can be found in: `packages/core/types/src/types/core/config`
 
-Any time a new configuration option is added to Strapi, it must also be added to the types for the appropriate config file.
+Any time a new configuration option is added to Strapi, it must also be added to the types for the appropriate config file (and once the env var loading feature is available, a parser for it such as string, integer, stringArray, etc must be defined)
 
 In Strapi v5, they will be used for:
 
