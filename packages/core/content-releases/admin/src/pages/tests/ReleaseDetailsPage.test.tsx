@@ -17,6 +17,15 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
+/**
+ * Mocking the useDocument hook to avoid validation errors for testing
+ */
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  unstable_useDocument: jest
+    .fn()
+    .mockReturnValue({ validate: jest.fn().mockReturnValue({ errors: {} }) }),
+}));
+
 describe('Releases details page', () => {
   it('renders the details page with no actions', async () => {
     server.use(
@@ -97,19 +106,19 @@ describe('Releases details page', () => {
     // should show the entries
     expect(
       screen.getByText(
-        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.contentType
+        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].contentType
           .mainFieldValue
       )
     ).toBeInTheDocument();
     expect(
       screen.getByRole('gridcell', {
-        name: mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.contentType
+        name: mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].contentType
           .displayName,
       })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].entry.locale.name
+        mockReleaseDetailsPageData.withActionsBodyData.data['Category'][0].locale.name
       )
     ).toBeInTheDocument();
 
