@@ -17,7 +17,7 @@ import { RELEASE_ACTION_MODEL_UID } from '../constants';
 const releaseActionController = {
   async create(ctx: Koa.Context) {
     const releaseId: CreateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
-    const releaseActionArgs: CreateReleaseAction.Request['body'] = ctx.request.body;
+    const releaseActionArgs = ctx.request.body as CreateReleaseAction.Request['body'];
 
     await validateReleaseAction(releaseActionArgs);
 
@@ -91,7 +91,7 @@ const releaseActionController = {
   async update(ctx: Koa.Context) {
     const actionId: UpdateReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: UpdateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
-    const releaseActionUpdateArgs: UpdateReleaseAction.Request['body'] = ctx.request.body;
+    const releaseActionUpdateArgs = ctx.request.body as UpdateReleaseAction.Request['body'];
 
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
