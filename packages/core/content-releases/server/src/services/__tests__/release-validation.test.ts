@@ -114,6 +114,7 @@ describe('Release Validation service', () => {
       );
     });
   });
+
   describe('validatePendingReleasesLimit', () => {
     it('should throw an error if the default pending release limit has been reached', () => {
       // @ts-expect-error - get is a mock
@@ -196,6 +197,31 @@ describe('Release Validation service', () => {
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
       await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
+    });
+  });
+
+  describe('validateUniqueNameForPendingRelease', () => {
+    it('should throw an error if a release with the same name already exists', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findMany: jest.fn().mockReturnValue([
+            {
+              name: 'release1',
+            },
+            {
+              name: 'release2',
+            },
+          ]),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(
+        releaseValidationService.validateUniqueNameForPendingRelease('release1')
+      ).rejects.toThrow('Release with name release1 already exists');
     });
   });
 });

@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 import { LoadedStrapi } from '@strapi/types';
 import EE from '@strapi/strapi/dist/utils/ee';
-import type { Release } from '../../../shared/contracts/releases';
+import type { Release, CreateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
 
@@ -67,6 +67,21 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     // Unlimited is a number that will never be reached like 9999
     if (pendingReleasesCount >= maximumPendingReleases) {
       throw new errors.ValidationError('You have reached the maximum number of pending releases');
+    }
+  },
+  async validateUniqueNameForPendingRelease(name: CreateRelease.Request['body']['name']) {
+    const pendingReleases = (await strapi.entityService.findMany(RELEASE_MODEL_UID, {
+      filters: {
+        releasedAt: {
+          $null: true,
+        },
+      },
+    })) as Release[];
+
+    const isNameUnique = !pendingReleases.some((release) => release.name === name);
+
+    if (!isNameUnique) {
+      throw new errors.ValidationError(`Release with name ${name} already exists`);
     }
   },
 });
