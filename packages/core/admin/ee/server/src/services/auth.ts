@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { getAbsoluteAdminUrl } from '@strapi/utils';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
@@ -23,8 +22,8 @@ const forgotPassword = async ({ email }: any = {}) => {
   await getService('user').updateById(user.id, { resetPasswordToken });
 
   // Send an email to the admin.
-  const url = `${getAbsoluteAdminUrl(
-    strapi.config
+  const url = `${strapi.config.get(
+    'admin.absoluteUrl'
   )}/auth/reset-password?code=${resetPasswordToken}`;
   return strapi
     .plugin('email')
