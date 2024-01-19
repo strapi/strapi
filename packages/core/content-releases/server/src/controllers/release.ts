@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
+import EE from '@strapi/strapi/dist/utils/ee';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease } from './validation/release';
 import type {
@@ -62,7 +63,11 @@ const releaseController = {
         };
       });
 
-      ctx.body = { data, meta: { pagination } };
+      const maximumPendingReleases =
+        // @ts-expect-error - options is not typed into features
+        EE.features.get('cms-content-releases')?.options?.maximumReleases || 3;
+
+      ctx.body = { data, meta: { pagination, maximumPendingReleases } };
     }
   },
 

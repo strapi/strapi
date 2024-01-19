@@ -214,8 +214,7 @@ const ReleasesPage = () => {
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
-  // TODO: Replace this with the real number
-  const maximumNumberOfPendingReleases = 3;
+  const maximumNumberOfPendingReleases = response?.currentData?.meta?.maximumPendingReleases;
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {
