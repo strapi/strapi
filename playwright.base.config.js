@@ -20,7 +20,7 @@ const getEnvNum = (envVar, defaultValue) => {
 const createConfig = ({ port, testDir, appDir }) => ({
   testDir,
 
-  // set default timeout to 30s
+  /* default timeout for a jest test to 30s */
   timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 30 * 1000),
 
   expect: {
@@ -45,7 +45,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: `http://127.0.0.1:${port}`,
 
-    /* Maximum time each action such as `click()` can take. Default to 20s */
+    /* Default time each action such as `click()` can take to 20s */
     actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
 
     /* Collect trace when a test failed on the CI. See https://playwright.dev/docs/trace-viewer
@@ -86,7 +86,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
   webServer: {
     command: `cd ${appDir} && yarn develop`,
     url: `http://127.0.0.1:${port}`,
-    // default Strapi server startup timeout to 160s
+    /* default Strapi server startup timeout to 160s */
     timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
     reuseExistingServer: true,
     stdout: 'pipe',
