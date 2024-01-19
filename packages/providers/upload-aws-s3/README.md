@@ -48,10 +48,10 @@ module.exports = ({ env }) => ({
       providerOptions: {
         baseUrl: env('CDN_URL'),
         rootPath: env('CDN_ROOT_PATH'),
-        s3Options: {  
+        s3Options: {
           credentials: {
-            accessKeyId: env("AWS_ACCESS_KEY_ID"),
-            secretAccessKey: env("AWS_ACCESS_SECRET"),
+            accessKeyId: env('AWS_ACCESS_KEY_ID'),
+            secretAccessKey: env('AWS_ACCESS_SECRET'),
           },
           region: env('AWS_REGION'),
           params: {
@@ -90,8 +90,8 @@ module.exports = ({ env }) => ({
       provider: 'aws-s3',
       providerOptions: {
         credentials: {
-          accessKeyId: env("AWS_ACCESS_KEY_ID"),
-          secretAccessKey: env("AWS_ACCESS_SECRET"),
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
         },
         region: env('AWS_REGION'),
         params: {
@@ -124,8 +124,8 @@ module.exports = ({ env }) => ({
       provider: 'aws-s3',
       providerOptions: {
         credentials: {
-          accessKeyId: env("SCALEWAY_ACCESS_KEY_ID"),
-          secretAccessKey: env("SCALEWAY_ACCESS_SECRET"),
+          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
         },
         endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
         params: {
