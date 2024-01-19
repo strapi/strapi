@@ -48,7 +48,7 @@ const AutoCloneFailureModal = ({
   const getDefaultErrorMessage = (reason: Reason) => {
     switch (reason) {
       case 'relation':
-        return 'Duplicating the relation would remove it from the original entry.';
+        return 'Duplicating the relation could remove it from the original entry.';
       case 'unique':
         return 'Identical values in a unique field are not allowed';
       default:

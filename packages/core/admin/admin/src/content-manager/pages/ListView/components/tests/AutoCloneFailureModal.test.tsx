@@ -64,7 +64,7 @@ describe('AutoCloneFailureModal', () => {
     const lists = screen.getAllByRole('list');
     expect(lists).toHaveLength(2);
     screen.getByText(/identical values in a unique field are not allowed/i);
-    screen.getByText(/duplicating the relation would remove it/i);
+    screen.getByText(/duplicating the relation could remove it/i);
 
     const uniqueSegments = within(lists[0]).getAllByRole('listitem');
     expect(uniqueSegments).toHaveLength(4);
