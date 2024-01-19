@@ -52,7 +52,7 @@ interface ReleasesLayoutProps {
   isLoading?: boolean;
   totalReleases?: number;
   onClickAddRelease: () => void;
-  reachedTheMaxNumberOfPendingReleases?: boolean;
+  isPrimaryActionDisabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -60,7 +60,7 @@ export const ReleasesLayout = ({
   isLoading,
   totalReleases,
   onClickAddRelease,
-  reachedTheMaxNumberOfPendingReleases = false,
+  isPrimaryActionDisabled = false,
   children,
 }: ReleasesLayoutProps) => {
   const { formatMessage } = useIntl();
@@ -87,7 +87,7 @@ export const ReleasesLayout = ({
             <Button
               startIcon={<Plus />}
               onClick={onClickAddRelease}
-              disabled={reachedTheMaxNumberOfPendingReleases}
+              disabled={isPrimaryActionDisabled}
             >
               {formatMessage({
                 id: 'content-releases.header.actions.add-release',
@@ -201,8 +201,6 @@ const ReleasesPage = () => {
   const tabRef = React.useRef<any>(null);
   const location = useLocation<CustomLocationState>();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
-  const [reachedTheMaxNumberOfPendingReleases, setReachedTheMaxNumberOfPendingReleases] =
-    React.useState(false);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { push, replace } = useHistory();
@@ -248,11 +246,7 @@ const ReleasesPage = () => {
 
   if (isLoading) {
     return (
-      <ReleasesLayout
-        onClickAddRelease={toggleAddReleaseModal}
-        isLoading
-        reachedTheMaxNumberOfPendingReleases={reachedTheMaxNumberOfPendingReleases}
-      >
+      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
         <ContentLayout>
           <LoadingIndicatorPage />
         </ContentLayout>
@@ -261,14 +255,9 @@ const ReleasesPage = () => {
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
-  if (
-    activeTab === 'pending' &&
-    maximumNumberOfPendingReleases !== undefined &&
-    totalReleases >= maximumNumberOfPendingReleases &&
-    !reachedTheMaxNumberOfPendingReleases
-  ) {
-    setReachedTheMaxNumberOfPendingReleases(true);
-  }
+  const hasReachedMaximumPendingReleases = maximumNumberOfPendingReleases
+    ? totalReleases >= maximumNumberOfPendingReleases
+    : false;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -317,11 +306,11 @@ const ReleasesPage = () => {
     <ReleasesLayout
       onClickAddRelease={toggleAddReleaseModal}
       totalReleases={totalReleases}
-      reachedTheMaxNumberOfPendingReleases={reachedTheMaxNumberOfPendingReleases}
+      isPrimaryActionDisabled={hasReachedMaximumPendingReleases}
     >
       <ContentLayout>
         <>
-          {reachedTheMaxNumberOfPendingReleases && (
+          {activeTab === 'pending' && hasReachedMaximumPendingReleases && (
             <CustomAlert
               marginTop={6}
               marginBottom={6}
