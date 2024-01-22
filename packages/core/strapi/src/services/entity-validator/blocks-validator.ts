@@ -18,14 +18,27 @@ const textNodeValidator = yup.object().shape({
   code: yup.boolean(),
 });
 
+const checkValidLink = (link: string) => {
+  try {
+    // eslint-disable-next-line no-new
+    new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
+  } catch (error) {
+    return false;
+  }
+  return true;
+};
+
 const linkNodeValidator = yup.object().shape({
   type: yup.string().equals(['link']).required(),
-  url: yup.string().url().required(),
+  url: yup
+    .string()
+    .test('invalid-url', 'Please specify a valid link.', (value) => checkValidLink(value ?? '')),
   children: yup.array().of(textNodeValidator).required(),
 });
 
 // TODO: remove any with a correct Type
 const inlineNodeValidator: any = yup.lazy((value: { type: string }) => {
+  console.log(`validating online node of of ${value.type}`);
   switch (value.type) {
     case 'text':
       return textNodeValidator;
