@@ -170,7 +170,6 @@ describe('Populate', () => {
       expect(prohibitedFields).toEqual([
         [['one_to_one'], 'relation'],
         [['one_to_many'], 'relation'],
-        [['many_way'], 'relation'],
       ]);
     });
 

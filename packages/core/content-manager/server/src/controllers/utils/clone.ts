@@ -18,13 +18,15 @@ function checkRelation(model: any, attributeName: any, path: string[]): Prohibit
   }
 
   /**
-   * Only one-to-many and one-to-one (when it's reversed, not one-way) are dangerous,
+   * Only one-to-many and one-to-one (when they're reversed, not one-way) are dangerous,
    * because the other relations don't "steal" the relation from the entry we're cloning
    */
-  const { relation, inversedBy } = model.attributes[attributeName];
-  const isOneToOne = relation === 'oneToOne' && inversedBy != null;
+  const { relation, inversedBy, mappedBy } = model.attributes[attributeName];
 
-  if (relation === 'oneToMany' || isOneToOne) {
+  if (
+    ['oneToOne', 'oneToMany'].includes(relation) &&
+    [mappedBy, inversedBy].some((key) => key != null)
+  ) {
     return [[[...path, attributeName], 'relation']];
   }
 
