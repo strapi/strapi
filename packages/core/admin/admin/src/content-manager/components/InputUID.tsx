@@ -6,17 +6,19 @@ import {
   TranslationMessage,
   useAPIErrorHandler,
   useCMEditViewDataManager,
-  useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
 
 import { useDebounce } from '../../hooks/useDebounce';
+import {
+  useGenerateUIDMutation,
+  useGetAvailabilityQuery,
+  useGetDefaultUIDQuery,
+} from '../services/uid';
 
 /* -------------------------------------------------------------------------------------------------
  * InputUID
@@ -35,6 +37,9 @@ interface InputUIDProps
 }
 
 const InputUID = React.forwardRef<
+  /**
+   * TODO: remove this evil ref hack when we integrate the DS@2
+   */
   {
     inputWrapperRef: React.MutableRefObject<HTMLDivElement>;
     input: React.MutableRefObject<HTMLInputElement>;
@@ -63,9 +68,8 @@ const InputUID = React.forwardRef<
     const debouncedValue = useDebounce(value, 300);
     const { modifiedData, initialData } = useCMEditViewDataManager();
     const toggleNotification = useNotification();
-    const { formatAPIError } = useAPIErrorHandler();
+    const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
     const { formatMessage } = useIntl();
-    const { post } = useFetchClient();
 
     const label = intlLabel.id
       ? formatMessage(
@@ -81,32 +85,30 @@ const InputUID = React.forwardRef<
         )
       : '';
 
-    const { data: defaultGeneratedUID, isLoading: isGeneratingDefaultUID } = useQuery({
-      queryKey: ['uid', { contentTypeUID, field: name, data: modifiedData }] as const,
-      async queryFn({ queryKey }) {
-        const [, body] = queryKey;
-
-        const {
-          data: { data },
-        } = await post<
-          Contracts.UID.GenerateUID.Response,
-          AxiosResponse<Contracts.UID.GenerateUID.Response>,
-          Contracts.UID.GenerateUID.Request['body']
-          // @ts-expect-error – TODO: fix this
-        >('/content-manager/uid/generate', body);
-
-        return data;
+    const {
+      data: defaultGeneratedUID,
+      isLoading: isGeneratingDefaultUID,
+      error: apiError,
+    } = useGetDefaultUIDQuery(
+      {
+        contentTypeUID,
+        field: name,
+        // @ts-expect-error – TODO: modified data is too vague for the type the API expects.
+        data: modifiedData,
       },
-      onError(err) {
-        if (err instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(err),
-          });
-        }
-      },
-      enabled: !value && required,
-    });
+      {
+        skip: value || !required,
+      }
+    );
+
+    React.useEffect(() => {
+      if (apiError) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(apiError),
+        });
+      }
+    }, [apiError, formatAPIError, toggleNotification]);
 
     /**
      * If the defaultGeneratedUID is available, then we set it as the value,
@@ -118,65 +120,56 @@ const InputUID = React.forwardRef<
       }
     }, [defaultGeneratedUID, name, onChange]);
 
-    const { mutate: generateUID, isLoading: isGeneratingUID } = useMutation<
-      Contracts.UID.GenerateUID.Response['data'],
-      Contracts.UID.GenerateUID.Response['error'],
-      Contracts.UID.GenerateUID.Request['body']
-    >({
-      async mutationFn(body) {
-        const {
-          data: { data },
-        } = await post<
-          Contracts.UID.GenerateUID.Response,
-          AxiosResponse<Contracts.UID.GenerateUID.Response>,
-          Contracts.UID.GenerateUID.Request['body']
-        >('/content-manager/uid/generate', body);
+    const [generateUID, { isLoading: isGeneratingUID }] = useGenerateUIDMutation();
 
-        return data;
-      },
-      onSuccess(data) {
-        onChange({ target: { name, value: data, type: 'text' } });
-      },
-      onError(err) {
-        if (err instanceof AxiosError) {
+    const handleRegenerateClick = async () => {
+      try {
+        // @ts-expect-error – TODO: modified data is too vague for the type the API expects.
+        const res = await generateUID({ contentTypeUID, field: name, data: modifiedData });
+
+        if ('data' in res) {
+          onChange({ target: { name, value: res.data, type: 'text' } });
+        } else {
           toggleNotification({
             type: 'warning',
-            message: formatAPIError(err),
+            message: formatAPIError(res.error),
           });
         }
-      },
-    });
+      } catch (err) {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occurred.' },
+        });
+      }
+    };
 
-    const { data: availabilityData, isLoading: isCheckingAvailability } = useQuery({
-      queryKey: [
-        'uid',
-        { contentTypeUID, field: name, value: debouncedValue ? debouncedValue.trim() : '' },
-      ] as const,
-      async queryFn({ queryKey }) {
-        const [, body] = queryKey;
-
-        const { data } = await post<
-          Contracts.UID.CheckUIDAvailability.Response,
-          AxiosResponse<Contracts.UID.CheckUIDAvailability.Response>,
-          Contracts.UID.CheckUIDAvailability.Request['body']
-        >('/content-manager/uid/check-availability', body);
-
-        return data;
+    const {
+      data: availabilityData,
+      isLoading: isCheckingAvailability,
+      error: availabilityError,
+    } = useGetAvailabilityQuery(
+      {
+        contentTypeUID,
+        field: name,
+        value: debouncedValue ? debouncedValue.trim() : '',
       },
-      enabled: Boolean(
-        debouncedValue !== initialData[name] &&
-          debouncedValue &&
-          UID_REGEX.test(debouncedValue.trim())
-      ),
-      onError(err) {
-        if (err instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(err),
-          });
-        }
-      },
-    });
+      {
+        skip: !Boolean(
+          debouncedValue !== initialData[name] &&
+            debouncedValue &&
+            UID_REGEX.test(debouncedValue.trim())
+        ),
+      }
+    );
+
+    React.useEffect(() => {
+      if (availabilityError) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(availabilityError),
+        });
+      }
+    }, [availabilityError, formatAPIError, toggleNotification]);
 
     React.useEffect(() => {
       /**
@@ -256,8 +249,7 @@ const InputUID = React.forwardRef<
                 )}
 
                 <FieldActionWrapper
-                  // @ts-expect-error – TODO: fix this
-                  onClick={() => generateUID({ contentTypeUID, field: name, data: modifiedData })}
+                  onClick={handleRegenerateClick}
                   label={formatMessage({
                     id: 'content-manager.components.uid.regenerate',
                     defaultMessage: 'Regenerate',

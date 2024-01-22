@@ -17,6 +17,8 @@ interface BaseOptions {
   stats?: boolean;
   minify?: boolean;
   sourcemaps?: boolean;
+  bundler?: 'webpack' | 'vite';
+  open?: boolean;
 }
 
 interface BuildContext<TOptions = unknown> extends BaseContext {
@@ -51,7 +53,7 @@ const DEFAULT_BROWSERSLIST = [
   'not dead',
 ];
 
-const createBuildContext = async <TOptions>({
+const createBuildContext = async <TOptions extends BaseOptions>({
   cwd,
   logger,
   tsconfig,

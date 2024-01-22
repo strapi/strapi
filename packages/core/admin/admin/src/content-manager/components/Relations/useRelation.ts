@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 
-import { useCallbackRef, useFetchClient } from '@strapi/helper-plugin';
-import { useInfiniteQuery } from 'react-query';
+import { useCallbackRef } from '@strapi/helper-plugin';
+
+import { useGetRelationsQuery, useLazySearchRelationsQuery } from '../../services/relations';
 
 import {
   NormalizeRelationArgs,
@@ -13,90 +14,49 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 
 interface UseRelationArgs {
   relation: {
-    enabled: boolean;
-    endpoint: string;
+    skip: boolean;
+    params: Contracts.Relations.FindExisting.Params | null;
     normalizeArguments: NormalizeRelationArgs;
     onLoad: (data: NormalizedRelation[]) => void;
-    pageParams?: Record<string, any>;
     pageGoal?: number;
+    pageParams?: Record<string, any>;
   };
   search: {
-    endpoint: string;
+    searchParams: Contracts.Relations.FindAvailable.Params;
     pageParams?: Record<string, any>;
   };
 }
 
-const useRelation = (cacheKey: any[] = [], { relation, search }: UseRelationArgs) => {
-  const [searchParams, setSearchParams] = useState({});
-  const [currentPage, setCurrentPage] = useState(0);
-  const { get } = useFetchClient();
-
+/**
+ * TODO: we can probably refactor this to be leaner.
+ */
+const useRelation = ({ relation, search }: UseRelationArgs) => {
+  const [currentPage, setCurrentPage] = useState(1);
   const { onLoad: onLoadRelations, normalizeArguments } = relation;
 
-  const relationsRes = useInfiniteQuery(
-    ['relation', ...cacheKey],
-    async ({ pageParam = 1 }) => {
-      try {
-        const { data } = await get<Contracts.Relations.FindExisting.Response>(relation?.endpoint, {
-          params: {
-            ...(relation.pageParams ?? {}),
-            page: pageParam,
-          },
-        });
-
-        setCurrentPage(pageParam);
-
-        return data;
-      } catch (err) {
-        return null;
-      }
+  const relationsRes = useGetRelationsQuery(
+    {
+      model: relation.params?.model ?? '',
+      targetField: relation.params?.targetField ?? '',
+      id: relation.params?.id ?? '',
+      pagination: {
+        ...relation.pageParams,
+        page: currentPage,
+      },
     },
     {
-      cacheTime: 0,
-      enabled: relation.enabled,
-      getNextPageParam(lastPage) {
-        const isXToOneRelation = lastPage && !('pagination' in lastPage);
-
-        if (
-          !lastPage || // the API may send an empty 204 response
-          isXToOneRelation || // xToOne relations do not have a pagination
-          lastPage?.pagination.page >= lastPage?.pagination.pageCount
-        ) {
-          return undefined;
-        }
-
-        // eslint-disable-next-line consistent-return
-        return lastPage.pagination.page + 1;
-      },
-      select: (data) => ({
-        ...data,
-        pages: data.pages.map((page) => {
-          if (!page) {
-            return page;
-          }
-
-          let normalizedResults: Contracts.Relations.RelationResult[] = [];
-
-          // xToOne relations return an object, which we normalize so that relations
-          // always have the same shape
-          if ('data' in page && page.data) {
-            normalizedResults = [page.data];
-          } else if ('results' in page && page.results) {
-            normalizedResults = [...page.results].reverse();
-          }
-
-          return {
-            pagination: 'pagination' in page ? page.pagination : undefined,
-            results: normalizedResults,
-          };
-        }),
-      }),
+      skip: relation.skip,
     }
   );
 
   const { pageGoal } = relation;
 
-  const { status, data, fetchNextPage, hasNextPage } = relationsRes;
+  const { status, data } = relationsRes;
+  const fetchNextPage = useCallback(() => {
+    setCurrentPage((prev) => prev + 1);
+  }, []);
+
+  const hasNextPage = data?.pagination ? data.pagination.page < data?.pagination.pageCount : false;
 
   useEffect(() => {
     /**
@@ -104,22 +64,17 @@ const useRelation = (cacheKey: any[] = [], { relation, search }: UseRelationArgs
      * state i.e. in circumstances where you add 10 relations, the browserState knows this,
      * but the hook would think it could fetch more, when in reality, it can't.
      */
-    if (pageGoal && pageGoal > currentPage && hasNextPage && status === 'success') {
-      fetchNextPage({
-        pageParam: currentPage + 1,
-      });
+    if (pageGoal && pageGoal > currentPage && hasNextPage && status === 'fulfilled') {
+      setCurrentPage(currentPage + 1);
     }
   }, [pageGoal, currentPage, fetchNextPage, hasNextPage, status]);
 
   const onLoadRelationsCallback = useCallbackRef(onLoadRelations);
 
   useEffect(() => {
-    if (status === 'success' && data && data.pages?.at(-1)?.results && onLoadRelationsCallback) {
+    if (status === 'fulfilled' && data && data.results && onLoadRelationsCallback) {
       // everytime we fetch, we normalize prior to adding to redux
-      const normalizedResults = normalizeRelations(
-        data.pages.at(-1)?.results ?? [],
-        normalizeArguments
-      );
+      const normalizedResults = normalizeRelations(data.results ?? [], normalizeArguments);
 
       // this is loadRelation from EditViewDataManagerProvider
       onLoadRelationsCallback(normalizedResults);
@@ -128,48 +83,59 @@ const useRelation = (cacheKey: any[] = [], { relation, search }: UseRelationArgs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, onLoadRelationsCallback, data]);
 
-  const searchRes = useInfiniteQuery(
-    ['relation', ...cacheKey, 'search', JSON.stringify(searchParams)],
-    async ({ pageParam = 1 }) => {
-      try {
-        const { data } = await get<Contracts.Relations.FindAvailable.Response>(search.endpoint, {
-          params: {
-            ...(search.pageParams ?? {}),
-            ...searchParams,
-            page: pageParam,
-          },
-        });
+  const [searchForTrigger, searchRes] = useLazySearchRelationsQuery();
 
-        return data;
-      } catch (err) {
-        return null;
-      }
-    },
-    {
-      enabled: Object.keys(searchParams).length > 0,
-      getNextPageParam(lastPage) {
-        if (
-          !lastPage?.pagination ||
-          (lastPage.pagination && lastPage.pagination.page >= lastPage.pagination.pageCount)
-        ) {
-          return undefined;
-        }
+  const [searchQueryParams, setSearchQueryParams] = useState<
+    | (Contracts.Relations.FindAvailable.Params & {
+        params: Contracts.Relations.FindAvailable.Request['query'];
+      })
+    | null
+  >(null);
 
-        // eslint-disable-next-line consistent-return
-        return lastPage.pagination.page + 1;
-      },
-    }
-  );
+  useEffect(() => {
+    if (!searchQueryParams) return;
+
+    searchForTrigger(searchQueryParams);
+  }, [searchForTrigger, searchQueryParams]);
 
   const searchFor = (term: string, options: object = {}) => {
-    setSearchParams({
-      ...options,
-      _q: term,
-      _filter: '$containsi',
+    setSearchQueryParams({
+      ...search.searchParams,
+      params: {
+        ...options,
+        _q: term,
+        _filter: '$containsi',
+      },
     });
   };
 
-  return { relations: relationsRes, search: searchRes, searchFor };
+  return {
+    relations: {
+      ...relationsRes,
+      fetchNextPage,
+      hasNextPage,
+    },
+    search: {
+      data: searchRes.data,
+      isLoading: searchRes.isLoading,
+      hasNextPage: searchRes.data?.pagination
+        ? searchRes.data?.pagination.page < searchRes.data?.pagination.pageCount
+        : false,
+      fetchNextPage: () => {
+        setSearchQueryParams((s) => {
+          const page = s?.params.page ?? Math.floor((searchRes.data?.results?.length ?? 1) / 10);
+          return {
+            ...(s ?? search.searchParams),
+            params: {
+              ...s?.params,
+              page: page + 1,
+            },
+          };
+        });
+      },
+    },
+    searchFor,
+  };
 };
 
 export { useRelation };

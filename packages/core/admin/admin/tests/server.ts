@@ -611,7 +611,34 @@ export const server = setupServer(
             },
           ],
           pagination: {
-            total: 1,
+            page: 1,
+            pageCount: 1,
+            total: 3,
+          },
+        })
+      );
+    }),
+    rest.get('/content-manager/relations/:contentType/:fieldName', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          results: [
+            {
+              id: 1,
+              name: 'Relation entity 1',
+            },
+            {
+              id: 2,
+              name: 'Relation entity 2',
+            },
+            {
+              id: 3,
+              name: 'Relation entity 3',
+            },
+          ],
+          pagination: {
+            page: 1,
+            pageCount: 1,
+            total: 3,
           },
         })
       );

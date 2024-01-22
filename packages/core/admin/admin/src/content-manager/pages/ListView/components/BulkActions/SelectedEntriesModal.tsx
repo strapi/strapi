@@ -20,23 +20,23 @@ import {
   useTableContext,
   Table as HelperPluginTable,
   getYupInnerErrors,
-  useFetchClient,
   useQueryParams,
   useNotification,
   TranslationMessage,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { Entity } from '@strapi/types';
-import { AxiosError, AxiosResponse } from 'axios';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { UseQueryResult, useMutation, useQuery } from 'react-query';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import {
+  useGetAllDocumentsQuery,
+  usePublishManyDocumentsMutation,
+} from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
 import { Table } from '../Table';
@@ -226,7 +226,7 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
 
 interface SelectedEntriesModalContentProps
   extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
-  refetchModalData: UseQueryResult['refetch'];
+  refetchModalData: React.MouseEventHandler<HTMLButtonElement>;
   setEntriesToFetch: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
   setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
   toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
@@ -249,13 +249,12 @@ const SelectedEntriesModalContent = ({
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [rowsToDisplay, setRowsToDisplay] = React.useState<Array<TableRow>>([]);
   const [publishedCount, setPublishedCount] = React.useState(0);
-  const { formatAPIError } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const entriesToPublish = rows
     .filter(({ id }) => selectedEntries.includes(id) && !validationErrors[id])
     .map(({ id }) => id);
 
-  const { post } = useFetchClient();
   const toggleNotification = useNotification();
   const { contentType } = useTypedSelector((state) => state['content-manager_listView']);
 
@@ -268,56 +267,60 @@ const SelectedEntriesModalContent = ({
   const selectedEntriesWithNoErrorsCount =
     selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublished;
 
-  const bulkPublishMutation = useMutation<
-    AxiosResponse<Contracts.CollectionTypes.BulkPublish.Response>,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkPublish.Response, 'error'>>>,
-    Contracts.CollectionTypes.BulkPublish.Request['body']
-  >(
-    (data) =>
-      post(`/content-manager/collection-types/${contentType!.uid}/actions/bulkPublish`, data),
-    {
-      onSuccess() {
-        const update = rowsToDisplay.filter((row) => {
-          if (entriesToPublish.includes(row.id)) {
-            // Deselect the entries that have been published from the modal table
-            onSelectRow({ name: row.id, value: false });
-          }
-
-          // Remove the entries that have been published from the table
-          return !entriesToPublish.includes(row.id);
-        });
-
-        setRowsToDisplay(update);
-        const publishedIds = update.map(({ id }) => id);
-        // Set the parent's entries to fetch when clicking refresh
-        setEntriesToFetch(publishedIds);
-        // Deselect the entries that were published in the list view
-        setSelectedListViewEntries(publishedIds);
-
-        if (update.length === 0) {
-          toggleModal();
-        }
-
-        toggleNotification({
-          type: 'success',
-          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
-        });
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-    }
-  );
-
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
+  const [publishManyDocuments, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
   const handleConfirmBulkPublish = async () => {
     toggleDialog();
-    const { data } = await bulkPublishMutation.mutateAsync({ ids: entriesToPublish });
-    setPublishedCount(data.count);
+
+    try {
+      const res = await publishManyDocuments({ model: contentType!.uid, ids: entriesToPublish });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+
+        return;
+      }
+
+      const update = rowsToDisplay.filter((row) => {
+        if (entriesToPublish.includes(row.id)) {
+          // Deselect the entries that have been published from the modal table
+          onSelectRow({ name: row.id, value: false });
+        }
+
+        // Remove the entries that have been published from the table
+        return !entriesToPublish.includes(row.id);
+      });
+
+      setRowsToDisplay(update);
+      const publishedIds = update.map(({ id }) => id);
+      // Set the parent's entries to fetch when clicking refresh
+      setEntriesToFetch(publishedIds);
+      // Deselect the entries that were published in the list view
+      setSelectedListViewEntries(publishedIds);
+
+      if (update.length === 0) {
+        toggleModal();
+      }
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+      });
+
+      setPublishedCount(res.data.count);
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    }
   };
 
   const getFormattedCountMessage = () => {
@@ -373,7 +376,7 @@ const SelectedEntriesModalContent = ({
         <Typography>{getFormattedCountMessage()}</Typography>
         <Box marginTop={5}>
           <SelectedEntriesTableContent
-            isPublishing={bulkPublishMutation.isLoading}
+            isPublishing={isSubmittingForm}
             rowsToDisplay={rowsToDisplay}
             entriesToPublish={entriesToPublish}
             validationErrors={validationErrors}
@@ -391,7 +394,7 @@ const SelectedEntriesModalContent = ({
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={() => refetchModalData()} variant="tertiary" loading={isFetching}>
+            <Button onClick={refetchModalData} variant="tertiary" loading={isFetching}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -401,7 +404,7 @@ const SelectedEntriesModalContent = ({
                 selectedEntries.length === selectedEntriesWithErrorsCount ||
                 isLoading
               }
-              loading={bulkPublishMutation.isLoading}
+              loading={isSubmittingForm}
             >
               {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
             </Button>
@@ -411,7 +414,7 @@ const SelectedEntriesModalContent = ({
       <ConfirmDialogPublishAll
         isOpen={isDialogOpen}
         onToggleDialog={toggleDialog}
-        isConfirmButtonLoading={bulkPublishMutation.isLoading}
+        isConfirmButtonLoading={isSubmittingForm}
         onConfirm={handleConfirmBulkPublish}
       />
     </ModalLayout>
@@ -443,39 +446,29 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     },
   ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
 
-  const queryParams = {
-    page: 1,
-    pageSize: entriesToFetch.length,
-    sort,
-    filters: {
-      id: {
-        $in: entriesToFetch,
-      },
-    },
-    locale: plugins?.i18n?.locale,
-  };
-
-  const { get } = useFetchClient();
-
   const {
     data = [],
+    refetch,
     isLoading,
     isFetching,
-    refetch,
-  } = useQuery(
-    ['entries', contentType?.uid, queryParams],
-    async () => {
-      const { data } = await get<Contracts.CollectionTypes.Find.Response>(
-        `content-manager/collection-types/${contentType!.uid}`,
-        {
-          params: queryParams,
-        }
-      );
-
-      return data.results;
+  } = useGetAllDocumentsQuery(
+    {
+      model: contentType!.uid,
+      query: {
+        page: 1,
+        pageSize: entriesToFetch.length,
+        sort,
+        filters: {
+          id: {
+            $in: entriesToFetch,
+          },
+        },
+        locale: plugins?.i18n?.locale,
+      },
     },
     {
-      enabled: contentType !== null,
+      skip: !contentType,
+      selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
     }
   );
 

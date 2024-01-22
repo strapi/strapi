@@ -351,6 +351,8 @@ interface SettingsViewComponentLayout
   metadatas: Record<string, MetadataWithStringMainField>;
 }
 
+type SettingsViewLayout = SettingsViewContentTypeLayout | SettingsViewComponentLayout;
+
 export { formatLayouts, formatLayoutForSettingsView };
 export type {
   FormattedLayouts,
@@ -359,6 +361,7 @@ export type {
   ListLayoutRow,
   EditLayoutRow,
   Metadata,
+  SettingsViewLayout,
   SettingsViewContentTypeLayout,
   SettingsViewComponentLayout,
   MainField,

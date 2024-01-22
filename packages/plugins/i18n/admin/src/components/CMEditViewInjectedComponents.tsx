@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 
 import { useContentTypePermissions } from '../hooks/useContentTypePermissions';
 import { useTypedSelector } from '../store/hooks';
-import { getLocalizationsFromData } from '../utils/data';
+import { Localization, getLocalizationsFromData } from '../utils/data';
 import { getTranslation } from '../utils/getTranslation';
 
 import { CMEditViewCopyLocale } from './CMEditViewCopyLocale';
@@ -22,7 +22,7 @@ const CMEditViewInjectedComponents = () => {
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { formatMessage } = useIntl();
 
-  const currentEntityId = params.id ?? null;
+  const currentEntityId = params.id;
   const defaultLocale = locales.find((loc) => loc.isDefault); // we always have a default locale;
   const currentLocale = get(query, 'plugins.i18n.locale', defaultLocale?.code);
   const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
@@ -35,7 +35,16 @@ const CMEditViewInjectedComponents = () => {
     return null;
   }
 
-  const localizations = getLocalizationsFromData(modifiedData);
+  const localizations = [
+    ...getLocalizationsFromData(modifiedData),
+    // current locale
+    {
+      // TODO: fix why we think currentEntityId can be undefined & what it means if we don't have it.
+      id: currentEntityId!,
+      locale: currentLocale,
+      publishedAt: modifiedData.publishedAt,
+    },
+  ] satisfies Localization[];
 
   return (
     <Box paddingTop={6}>

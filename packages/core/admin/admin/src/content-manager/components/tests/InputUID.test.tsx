@@ -1,11 +1,4 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { render as renderRTL, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { render as renderRTL, waitFor, act } from '@tests/utils';
 
 import { InputUID, InputUIDProps } from '../InputUID';
 
@@ -21,78 +14,23 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const server = setupServer(
-  rest.post('*/uid/generate', async (req, res, ctx) => {
-    const body = await req.json();
-
-    return res(
-      ctx.json({
-        data: body?.data?.target ?? 'regenerated',
-      })
-    );
-  }),
-
-  rest.post('*/uid/check-availability', async (req, res, ctx) => {
-    const body = await req.json();
-
-    return res(
-      ctx.json({
-        isAvailable: body?.value === 'available',
-      })
-    );
-  })
-);
-
-const render = (props?: Partial<InputUIDProps>) => {
-  return {
-    ...renderRTL(
-      <InputUID
-        // @ts-expect-error – Mock attribute
-        attribute={{ targetField: 'target', required: true }}
-        contentTypeUID="api::test.test"
-        intlLabel={{
-          id: 'test',
-          defaultMessage: 'Label',
-        }}
-        name="name"
-        onChange={jest.fn()}
-        {...props}
-      />,
-      {
-        wrapper({ children }) {
-          const client = new QueryClient({
-            defaultOptions: {
-              queries: {
-                retry: false,
-              },
-            },
-          });
-
-          return (
-            <QueryClientProvider client={client}>
-              <ThemeProvider theme={lightTheme}>
-                <IntlProvider locale="en" messages={{}}>
-                  <NotificationsProvider>{children}</NotificationsProvider>
-                </IntlProvider>
-              </ThemeProvider>
-            </QueryClientProvider>
-          );
-        },
-      }
-    ),
-    user: userEvent.setup(),
-  };
-};
+const render = (props?: Partial<InputUIDProps>) =>
+  renderRTL(
+    <InputUID
+      // @ts-expect-error – Mock attribute
+      attribute={{ targetField: 'target', required: true }}
+      contentTypeUID="api::test.test"
+      intlLabel={{
+        id: 'test',
+        defaultMessage: 'Label',
+      }}
+      name="name"
+      onChange={jest.fn()}
+      {...props}
+    />
+  );
 
 describe('InputUID', () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });

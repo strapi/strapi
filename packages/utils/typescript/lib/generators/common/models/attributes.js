@@ -1,11 +1,13 @@
 'use strict';
 
-const { factory } = require('typescript');
+const ts = require('typescript');
 const _ = require('lodash/fp');
 
 const { addImport } = require('../imports');
 const { getTypeNode, toTypeLiteral, withAttributeNamespace, NAMESPACES } = require('./utils');
 const mappers = require('./mappers');
+
+const { factory } = ts;
 
 /**
  * Create the base type node for a given attribute
@@ -100,14 +102,39 @@ const getAttributeModifiers = (attribute) => {
   }
 
   // Min / Max
-  // TODO: Always provide a second type argument for min/max (ie: resolve the attribute scalar type with a `GetAttributeType<${mappers[attribute][0]}>` (useful for biginter (string values)))
   if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
     const minMaxProperties = _.pick(['min', 'max'], attribute);
+    const { min, max } = minMaxProperties;
+
+    const typeofMin = typeof min;
+    const typeofMax = typeof max;
+
+    // Throws error if min/max exist but have different types to prevent unexpected behavior
+    if (min !== undefined && max !== undefined && typeofMin !== typeofMax) {
+      throw new Error('typeof min/max values mismatch');
+    }
+
+    const typeofMinMax = (max && typeofMax) ?? (min && typeofMin);
+    let typeKeyword;
+
+    // Determines type keyword (string/number) based on min/max options, throws error for invalid types
+    switch (typeofMinMax) {
+      case 'string':
+        typeKeyword = ts.SyntaxKind.StringKeyword;
+        break;
+      case 'number':
+        typeKeyword = ts.SyntaxKind.NumberKeyword;
+        break;
+      default:
+        throw new Error(
+          `Invalid data type for min/max options. Must be string or number, but found ${typeofMinMax}`
+        );
+    }
 
     modifiers.push(
       factory.createTypeReferenceNode(
         factory.createIdentifier(withAttributeNamespace('SetMinMax')),
-        [toTypeLiteral(minMaxProperties)]
+        [toTypeLiteral(minMaxProperties), factory.createKeywordTypeNode(typeKeyword)]
       )
     );
   }

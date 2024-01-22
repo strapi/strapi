@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
-import 'koa-bodyparser';
+import type {} from 'koa-body';
 import type { UID } from '@strapi/types';
 import { getService } from '../utils';
 import {
