@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "4.16.2",
+  "version": "4.17.1",
   "description": "Send Strapi error events to Sentry",
   "repository": {
     "type": "git",
@@ -22,35 +22,42 @@
   ],
   "exports": {
     "./strapi-admin": {
-      "source": "./admin/src/index.js",
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./strapi-server.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
   },
+  "files": [
+    "./dist",
+    "strapi-server.js"
+  ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "strapi plugin:build --force",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "strapi plugin:watch"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "@strapi/design-system": "1.14.0",
-    "@strapi/helper-plugin": "4.16.2",
-    "@strapi/icons": "1.14.0"
+    "@strapi/design-system": "1.14.1",
+    "@strapi/helper-plugin": "4.17.1",
+    "@strapi/icons": "1.14.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.16.2",
-    "@strapi/strapi": "4.16.2",
+    "@strapi/pack-up": "4.17.1",
+    "@strapi/strapi": "4.17.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",

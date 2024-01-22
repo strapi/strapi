@@ -25,6 +25,7 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
+    "examples/plugins/*",
     ".github/actions/*",
     "scripts/*"
   ],
@@ -45,7 +46,7 @@
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts,jsx,tsx,json}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
-    "setup": "yarn && yarn clean && yarn build",
+    "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node test/scripts/run-api-tests.js",
     "test:clean": "rimraf ./coverage",
     "test:e2e": "node test/scripts/run-e2e-tests.js",
@@ -71,7 +72,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.15.0-typescript.0",
+    "@strapi/design-system": "1.15.0-typescript.1",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {

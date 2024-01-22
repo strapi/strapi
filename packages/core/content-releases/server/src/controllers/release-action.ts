@@ -1,6 +1,6 @@
 import type Koa from 'koa';
-import { Entity } from '../../../shared/types';
 
+import { mapAsync } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
@@ -8,21 +8,11 @@ import {
 import type {
   CreateReleaseAction,
   GetReleaseActions,
-  ReleaseAction,
   UpdateReleaseAction,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
-
-interface Locale extends Entity {
-  name: string;
-  code: string;
-}
-
-type LocaleDictionary = {
-  [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
-};
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -38,6 +28,7 @@ const releaseActionController = {
       data: releaseAction,
     };
   },
+
   async findMany(ctx: Koa.Context) {
     const releaseId: GetReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
@@ -47,38 +38,52 @@ const releaseActionController = {
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const releaseService = getService('release', { strapi });
-    const { results, pagination } = await releaseService.findActions(releaseId, query);
-    const allReleaseContentTypesDictionary = await releaseService.getContentTypesDataForActions(
-      releaseId
-    );
+    const { results, pagination } = await releaseService.findActions(releaseId, {
+      sort: query.groupBy === 'action' ? 'type' : query.groupBy,
+      ...query,
+    });
 
-    const allLocales: Locale[] = await strapi.plugin('i18n').service('locales').find();
-    const allLocalesDictionary = allLocales.reduce<LocaleDictionary>((acc, locale) => {
-      acc[locale.code] = { name: locale.name, code: locale.code };
+    /**
+     * Release actions can be related to entries of different content types.
+     * We need to sanitize the entry output according to that content type.
+     * So, we group the sanitized output function by content type.
+     */
+    const contentTypeOutputSanitizers = results.reduce((acc, action) => {
+      if (acc[action.contentType]) {
+        return acc;
+      }
+
+      const contentTypePermissionsManager =
+        strapi.admin.services.permission.createPermissionsManager({
+          ability: ctx.state.userAbility,
+          model: action.contentType,
+        });
+
+      acc[action.contentType] = contentTypePermissionsManager.sanitizeOutput;
 
       return acc;
     }, {});
 
-    const data = results.map((action: ReleaseAction) => {
-      const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
+    /**
+     * sanitizeOutput doesn't work if you use it directly on the Release Action model, it doesn't sanitize the entries
+     * So, we need to sanitize manually each entry inside a Release Action
+     */
+    const sanitizedResults = await mapAsync(results, async (action) => ({
+      ...action,
+      entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
+    }));
 
-      return {
-        ...action,
-        entry: {
-          id: action.entry.id,
-          contentType: {
-            displayName,
-            mainFieldValue: action.entry[mainField],
-          },
-          locale: allLocalesDictionary[action.entry.locale],
-        },
-      };
-    });
+    const groupedData = await releaseService.groupActions(sanitizedResults, query.groupBy);
+
+    const contentTypes = releaseService.getContentTypeModelsFromActions(results);
+    const components = await releaseService.getAllComponents();
 
     ctx.body = {
-      data,
+      data: groupedData,
       meta: {
         pagination,
+        contentTypes,
+        components,
       },
     };
   },
@@ -91,6 +96,7 @@ const releaseActionController = {
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
     const releaseService = getService('release', { strapi });
+
     const updatedAction = await releaseService.updateAction(
       actionId,
       releaseId,
@@ -106,10 +112,9 @@ const releaseActionController = {
     const actionId: DeleteReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: DeleteReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
 
-    const deletedReleaseAction = await getService('release', { strapi }).deleteAction(
-      actionId,
-      releaseId
-    );
+    const releaseService = getService('release', { strapi });
+
+    const deletedReleaseAction = await releaseService.deleteAction(actionId, releaseId);
 
     ctx.body = {
       data: deletedReleaseAction,

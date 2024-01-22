@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { register } from './register';
+import { bootstrap } from './bootstrap';
 import { contentTypes } from './content-types';
 import { services } from './services';
 import { controllers } from './controllers';
@@ -8,12 +9,10 @@ import { routes } from './routes';
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 const getPlugin = () => {
-  if (
-    features.isEnabled('cms-content-releases') &&
-    strapi.features.future.isEnabled('contentReleases')
-  ) {
+  if (features.isEnabled('cms-content-releases')) {
     return {
       register,
+      bootstrap,
       contentTypes,
       services,
       controllers,

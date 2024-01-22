@@ -98,6 +98,7 @@ const AddActionToReleaseModal = ({
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
+  const { modifiedData } = useCMEditViewDataManager();
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
@@ -110,9 +111,11 @@ const AddActionToReleaseModal = ({
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
   const handleSubmit = async (values: FormValues) => {
+    const locale = modifiedData.locale as string | undefined;
     const releaseActionEntry = {
       contentType: contentTypeUid,
       id: entryId,
+      locale,
     };
     const response = await createReleaseAction({
       body: { type: values.type, entry: releaseActionEntry },
@@ -353,7 +356,14 @@ export const CMReleasesContainer = () => {
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
-                  <ReleaseActionMenu releaseId={release.id} actionId={release.action.id} />
+                  <CheckPermissions permissions={PERMISSIONS.deleteAction}>
+                    <ReleaseActionMenu.Root hasTriggerBorder>
+                      <ReleaseActionMenu.DeleteReleaseActionItem
+                        releaseId={release.id}
+                        actionId={release.action.id}
+                      />
+                    </ReleaseActionMenu.Root>
+                  </CheckPermissions>
                 </Flex>
               </Flex>
             );

@@ -31,6 +31,10 @@ const TestComponent = () => {
 };
 
 describe('ConfigurationProvider', () => {
+  beforeAll(() => {
+    window.localStorage.setItem('jwtToken', JSON.stringify('test-token'));
+  });
+
   it('should not crash', async () => {
     const { getByText, findByText } = render(
       <ConfigurationProvider

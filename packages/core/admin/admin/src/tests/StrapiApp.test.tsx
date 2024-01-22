@@ -17,6 +17,22 @@ describe('ADMIN | new StrapiApp', () => {
 
     expect(store.getState()).toMatchInlineSnapshot(`
       {
+        "adminApi": {
+          "config": {
+            "focused": true,
+            "keepUnusedDataFor": 60,
+            "middlewareRegistered": false,
+            "online": true,
+            "reducerPath": "adminApi",
+            "refetchOnFocus": false,
+            "refetchOnMountOrArgChange": false,
+            "refetchOnReconnect": false,
+          },
+          "mutations": {},
+          "provided": {},
+          "queries": {},
+          "subscriptions": {},
+        },
         "admin_app": {
           "language": {
             "locale": "en",

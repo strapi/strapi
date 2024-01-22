@@ -49,8 +49,10 @@ module.exports = ({ env }) => ({
         baseUrl: env('CDN_URL'),
         rootPath: env('CDN_ROOT_PATH'),
         s3Options: {
-          accessKeyId: env('AWS_ACCESS_KEY_ID'),
-          secretAccessKey: env('AWS_ACCESS_SECRET'),
+          credentials: {
+            accessKeyId: env('AWS_ACCESS_KEY_ID'),
+            secretAccessKey: env('AWS_ACCESS_SECRET'),
+          },
           region: env('AWS_REGION'),
           params: {
             ACL: env('AWS_ACL', 'public-read'),
@@ -87,8 +89,10 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: env('AWS_ACCESS_SECRET'),
+        credentials: {
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
+        },
         region: env('AWS_REGION'),
         params: {
           ACL: 'private', // <== set ACL to private
@@ -119,8 +123,10 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
-        secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+        credentials: {
+          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+        },
         endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
         params: {
           Bucket: env('SCALEWAY_BUCKET'),
@@ -224,8 +230,10 @@ upload: {
   config: {
     provider: 'aws-s3',
     providerOptions: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_ACCESS_SECRET,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_ACCESS_SECRET,
+      },
       region: process.env.AWS_REGION,
       baseUrl: `https://s3.${region}.amazonaws.com/${bucket}`, // This line sets the custom url format
       params: {

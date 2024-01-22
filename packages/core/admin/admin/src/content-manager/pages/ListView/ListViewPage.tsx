@@ -48,8 +48,8 @@ import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-d
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../../core/store/hooks';
-import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { useAdminUsers } from '../../../services/users';
 import { CREATOR_FIELDS } from '../../constants/attributes';
 import { buildValidGetParams } from '../../utils/api';
 import { FormattedLayouts, ListLayoutRow } from '../../utils/layouts';
@@ -59,6 +59,10 @@ import { getDisplayName } from '../../utils/users';
 import { getData, getDataSucceeded } from '../ListViewLayoutManager';
 
 import { AdminUsersFilter } from './components/AdminUsersFilter';
+import {
+  AutoCloneFailureModal,
+  type ProhibitedCloningField,
+} from './components/AutoCloneFailureModal';
 import { BulkActionButtons } from './components/BulkActions/Buttons';
 import { Filter } from './components/Filter';
 import { Table } from './components/Table';
@@ -162,21 +166,23 @@ const ListViewPage = ({
       return acc;
     }, []) ?? [];
 
-  const { users, isLoading: isLoadingAdminUsers } = useAdminUsers(
+  const { data: userData, isLoading: isLoadingAdminUsers } = useAdminUsers(
     { filters: { id: { $in: selectedUserIds } } },
     {
       // fetch the list of admin users only if the filter contains users and the
       // current user has permissions to display users
-      enabled:
-        selectedUserIds.length > 0 &&
+      skip:
+        selectedUserIds.length === 0 ||
         findMatchingPermissions(allPermissions, [
           {
             action: 'admin::users.read',
             subject: null,
           },
-        ]).length > 0,
+        ]).length === 0,
     }
   );
+
+  const { users = [] } = userData ?? {};
 
   useFocusWhenNavigate();
 
@@ -595,6 +601,11 @@ const ListViewPage = ({
     });
   };
 
+  const [clonedEntryId, setClonedEntryId] = React.useState<Entity.ID | null>(null);
+  const [prohibitedCloningFields, setProhibitedCloningFields] = React.useState<
+    ProhibitedCloningField[]
+  >([]);
+
   const handleCloneClick =
     (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
       try {
@@ -611,11 +622,9 @@ const ListViewPage = ({
         }
       } catch (err) {
         if (err instanceof AxiosError) {
-          push({
-            pathname: `${pathname}/create/clone/${id}`,
-            state: { from: pathname, error: formatAPIError(err) },
-            search: pluginsQueryParams,
-          });
+          const { prohibitedFields } = err.response?.data.error.details;
+          setClonedEntryId(id);
+          setProhibitedCloningFields(prohibitedFields);
         }
       }
     };
@@ -743,6 +752,12 @@ const ListViewPage = ({
                       />
                     ) : null
                   }
+                />
+                <AutoCloneFailureModal
+                  entryId={clonedEntryId}
+                  onClose={() => setClonedEntryId(null)}
+                  prohibitedFields={prohibitedCloningFields}
+                  pluginQueryParams={pluginsQueryParams}
                 />
                 {/* Content */}
                 <Table.Root

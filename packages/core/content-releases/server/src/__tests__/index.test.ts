@@ -18,6 +18,14 @@ describe('register', () => {
         isEnabled: () => true,
       },
     },
+    plugin: jest.fn(() => ({
+      service: jest.fn(() => ({
+        addDestroyListenerCallback: jest.fn(),
+      })),
+    })),
+    hook: jest.fn(() => ({
+      register: jest.fn(),
+    })),
     admin: {
       services: {
         permission: {
