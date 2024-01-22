@@ -6,7 +6,7 @@ import path from 'node:path';
 import nodemon from 'nodemon';
 import { outdent } from 'outdent';
 
-import { notifyExperimentalCommand, runAction } from '../../utils/helpers';
+import { runAction } from '../../utils/helpers';
 import type { CLIContext, StrapiCommand } from '../../types';
 import { loadPkg, validatePkg } from '../../utils/pkg';
 
@@ -14,11 +14,6 @@ interface ActionOptions {}
 
 const action = async (_opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {
-    /**
-     * Notify users this is an experimental command.
-     */
-    await notifyExperimentalCommand('plugin:watch:link', { force: true });
-
     const outDir = './dist';
     const extensions = 'ts,js,png,svg,gif,jpeg,css';
 

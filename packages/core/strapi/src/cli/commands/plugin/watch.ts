@@ -3,7 +3,7 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import { ConfigBundle, WatchCLIOptions, watch } from '@strapi/pack-up';
 
-import { runAction, notifyExperimentalCommand } from '../../utils/helpers';
+import { runAction } from '../../utils/helpers';
 import { Export, loadPkg, validatePkg } from '../../utils/pkg';
 import type { StrapiCommand, CLIContext } from '../../types';
 
@@ -11,11 +11,6 @@ interface ActionOptions extends WatchCLIOptions {}
 
 const action = async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {
-    /**
-     * Notify users this is an experimental command.
-     */
-    await notifyExperimentalCommand('plugin:watch', { force: true });
-
     const pkg = await loadPkg({ cwd, logger });
     const pkgJson = await validatePkg({ pkg });
 
