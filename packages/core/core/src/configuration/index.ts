@@ -4,7 +4,7 @@ import path from 'path';
 import _ from 'lodash';
 import { omit } from 'lodash/fp';
 import dotenv from 'dotenv';
-
+import type { Config } from '@strapi/types';
 import loadConfigDir from './config-loader';
 
 dotenv.config({ path: process.env.ENV_PATH });
@@ -16,18 +16,31 @@ const { version: strapiVersion } = require(path.join(__dirname, '../../package.j
 const defaultConfig = {
   server: {
     host: process.env.HOST || os.hostname() || 'localhost',
-    port: process.env.PORT || 1337,
+    port: Number(process.env.PORT) || 1337,
     proxy: false,
     cron: { enabled: false },
     admin: { autoOpen: false },
     dirs: { public: './public' },
-  },
-  admin: {},
+    transfer: {
+      remote: {
+        enabled: true,
+      },
+    },
+    logger: {
+      updates: {
+        enabled: true,
+      },
+      startup: {
+        enabled: true,
+      },
+    },
+  } satisfies Partial<Config.Server>,
+  admin: {} satisfies Partial<Config.Admin>,
   api: {
     rest: {
       prefix: '/api',
     },
-  },
+  } satisfies Partial<Config.Api>,
 };
 
 export default (dirs: { app: string; dist: string }, initialConfig: any = {}) => {

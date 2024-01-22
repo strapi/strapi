@@ -82,10 +82,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     return this.mapEntity(entities, uid);
   },
 
-  async find(
-    opts: Parameters<typeof strapi.entityService.findMany>[1],
-    uid: Common.UID.ContentType
-  ) {
+  async find(opts: Parameters<typeof strapi.documents.findMany>[1], uid: Common.UID.ContentType) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
     const entities = await strapi.documents(uid).findMany(params);
     return this.mapEntitiesResponse(entities, uid);
@@ -129,7 +126,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
 
   async create(
     uid: Common.UID.ContentType,
-    opts: Parameters<Documents.RepositoryInstance['create']>[0] = {} as any
+    opts: Parameters<Documents.ServiceInstance['create']>[0] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
     const params = { ...opts, status: 'draft', populate };
@@ -149,7 +146,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
   async update(
     document: Entity,
     uid: Common.UID.ContentType,
-    opts: Parameters<Documents.RepositoryInstance['update']>[1] = {} as any
+    opts: Parameters<Documents.ServiceInstance['update']>[1] = {} as any
   ) {
     const publishData = omitPublishedAtField(opts.data || {});
     const populate = await buildDeepPopulate(uid);
@@ -216,7 +213,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
   async delete(
     document: Entity,
     uid: Common.UID.ContentType,
-    opts: Parameters<Documents.RepositoryInstance['delete']>[1] = {} as any
+    opts: Parameters<Documents.ServiceInstance['delete']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
 
@@ -244,7 +241,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
   async publish(
     document: Entity,
     uid: Common.UID.ContentType,
-    opts: Parameters<Documents.RepositoryInstance['publish']>[1] = {} as any
+    opts: Parameters<Documents.ServiceInstance['publish']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
     const params = { ...opts, populate };
@@ -342,7 +339,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
   async unpublish(
     document: Entity,
     uid: Common.UID.ContentType,
-    opts: Parameters<Documents.RepositoryInstance['unpublish']>[1] = {} as any
+    opts: Parameters<Documents.ServiceInstance['unpublish']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
     const params = { ...opts, populate };
