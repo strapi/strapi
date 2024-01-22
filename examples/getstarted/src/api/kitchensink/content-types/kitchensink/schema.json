@@ -9,87 +9,109 @@
     "name": "Kitchen Sink"
   },
   "options": {
+    "reviewWorkflows": false,
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
     "short_text": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {}
     },
     "long_text": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": {}
     },
     "rich_text": {
-      "type": "richtext"
+      "type": "richtext",
+      "pluginOptions": {}
     },
     "blocks": {
-      "type": "blocks"
+      "type": "blocks",
+      "pluginOptions": {}
     },
     "integer": {
-      "type": "integer"
+      "type": "integer",
+      "pluginOptions": {}
     },
     "biginteger": {
-      "type": "biginteger"
+      "type": "biginteger",
+      "pluginOptions": {}
     },
     "decimal": {
-      "type": "decimal"
+      "type": "decimal",
+      "pluginOptions": {}
     },
     "float": {
-      "type": "float"
+      "type": "float",
+      "pluginOptions": {}
     },
     "date": {
-      "type": "date"
+      "type": "date",
+      "pluginOptions": {}
     },
     "datetime": {
-      "type": "datetime"
+      "type": "datetime",
+      "pluginOptions": {}
     },
     "time": {
-      "type": "time"
+      "type": "time",
+      "pluginOptions": {}
     },
     "timestamp": {
       "type": "timestamp"
     },
     "boolean": {
-      "type": "boolean"
+      "type": "boolean",
+      "pluginOptions": {}
     },
     "email": {
-      "type": "email"
+      "type": "email",
+      "pluginOptions": {}
     },
     "password": {
-      "type": "password"
+      "type": "password",
+      "pluginOptions": {}
     },
     "enumeration": {
       "type": "enumeration",
-      "enum": ["A", "B", "C", "D", "E"]
+      "enum": ["A", "B", "C", "D", "E"],
+      "pluginOptions": {}
     },
     "single_media": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": ["images", "files", "videos"],
+      "pluginOptions": {}
     },
     "multiple_media": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": ["images", "files", "videos"],
+      "pluginOptions": {}
     },
     "json": {
-      "type": "json"
+      "type": "json",
+      "pluginOptions": {}
     },
     "single_compo": {
       "type": "component",
       "repeatable": false,
-      "component": "basic.simple"
+      "component": "basic.simple",
+      "pluginOptions": {}
     },
     "repeatable_compo": {
       "type": "component",
       "repeatable": true,
-      "component": "basic.simple"
+      "component": "basic.simple",
+      "pluginOptions": {}
     },
     "dynamiczone": {
       "type": "dynamiczone",
-      "components": ["basic.simple", "blog.test-como", "default.closingperiod"]
+      "components": ["basic.simple", "blog.test-como", "default.closingperiod"],
+      "pluginOptions": {}
     },
     "one_way_tag": {
       "type": "relation",
@@ -145,7 +167,8 @@
     },
     "cats": {
       "type": "dynamiczone",
-      "components": ["basic.relation", "basic.simple"]
+      "components": ["basic.relation", "basic.simple"],
+      "pluginOptions": {}
     }
   }
 }

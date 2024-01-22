@@ -633,7 +633,7 @@ const ReleaseDetailsBody = () => {
         <Flex>
           <SingleSelect
             aria-label={formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.groupBy.label',
+              id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
               defaultMessage: 'Group by',
             })}
             customizeContent={(value) =>
@@ -659,7 +659,7 @@ const ReleaseDetailsBody = () => {
         </Flex>
         {Object.keys(releaseActions).map((key) => (
           <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
-            <Flex>
+            <Flex role="separator" aria-label={key}>
               <Badge>{key}</Badge>
             </Flex>
             <Table.Root
