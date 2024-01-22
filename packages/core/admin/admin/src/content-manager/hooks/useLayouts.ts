@@ -1,39 +1,25 @@
 import * as React from 'react';
 
-import { useFetchClient } from '@strapi/helper-plugin';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { useQuery } from 'react-query';
-
 import { useTypedSelector } from '../../core/store/hooks';
 import { selectSchemas } from '../pages/App';
+import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { type FormattedLayouts, formatLayouts } from '../utils/layouts';
 
-const useContentTypeLayout = (contentTypeUID: string = '') => {
+const useContentTypeLayout = (
+  contentTypeUID: string = ''
+): {
+  isLoading: boolean;
+  layout: FormattedLayouts | null;
+} => {
   const schemas = useTypedSelector(selectSchemas);
-  const { get } = useFetchClient();
 
-  const { data, isLoading, refetch } = useQuery(
-    ['content-manager', 'content-types', contentTypeUID, 'configuration'],
-    async () => {
-      const {
-        data: { data },
-      } = await get<Contracts.ContentTypes.FindContentTypeConfiguration.Response>(
-        `/content-manager/content-types/${contentTypeUID}/configuration`
-      );
+  const { data, isLoading } = useGetContentTypeConfigurationQuery(contentTypeUID);
 
-      return data;
-    }
-  );
-
-  const layout: FormattedLayouts | null = React.useMemo(
-    () => (data ? formatLayouts(data, schemas) : null),
-    [data, schemas]
-  );
+  const layout = React.useMemo(() => (data ? formatLayouts(data, schemas) : null), [data, schemas]);
 
   return {
     isLoading,
     layout,
-    updateLayout: refetch,
   };
 };
 

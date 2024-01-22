@@ -294,7 +294,6 @@ describe('Content-Manager || RelationInput', () => {
           data: [],
           isLoading: true,
           hasNextPage: true,
-          isFetchingNextPage: false,
         },
       });
 
@@ -307,7 +306,6 @@ describe('Content-Manager || RelationInput', () => {
           data: [],
           isLoading: false,
           hasNextPage: false,
-          isFetchingNextPage: false,
         },
       });
 

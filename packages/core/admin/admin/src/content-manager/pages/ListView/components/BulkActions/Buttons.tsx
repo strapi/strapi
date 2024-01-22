@@ -4,15 +4,15 @@ import { Button, Typography } from '@strapi/design-system';
 import { useTracking, useTableContext } from '@strapi/helper-plugin';
 import { Check, Trash } from '@strapi/icons';
 import { Entity } from '@strapi/types';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useTypedSelector } from '../../../../../core/store/hooks';
 import { getTranslation } from '../../../../utils/translations';
 import { InjectionZoneList } from '../InjectionZoneList';
 
 import { ConfirmBulkActionDialog, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 import { SelectedEntriesModal } from './SelectedEntriesModal';
+
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialogUnpublishAll
@@ -108,11 +108,12 @@ const ConfirmDialogDeleteAll = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface BulkActionButtonsProps {
+  data?: Contracts.CollectionTypes.Find.Response['results'];
+  refetchData: () => Promise<void>;
   showPublish?: boolean;
   showDelete?: boolean;
   onConfirmDeleteAll: (ids: Entity.ID[]) => Promise<void>;
   onConfirmUnpublishAll: (ids: Entity.ID[]) => Promise<void>;
-  refetchData: () => void;
 }
 
 const BulkActionButtons = ({
@@ -120,11 +121,11 @@ const BulkActionButtons = ({
   showDelete = false,
   onConfirmDeleteAll,
   onConfirmUnpublishAll,
+  data = [],
   refetchData,
 }: BulkActionButtonsProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { data } = useTypedSelector((state) => state['content-manager_listView']);
   const { selectedEntries, setSelectedEntries } = useTableContext();
 
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
@@ -220,22 +221,6 @@ const BulkActionButtons = ({
       )}
     </>
   );
-};
-
-BulkActionButtons.defaultProps = {
-  showPublish: false,
-  showDelete: false,
-  onConfirmDeleteAll() {},
-  onConfirmUnpublishAll() {},
-  refetchData() {},
-};
-
-BulkActionButtons.propTypes = {
-  showPublish: PropTypes.bool,
-  showDelete: PropTypes.bool,
-  onConfirmDeleteAll: PropTypes.func,
-  onConfirmUnpublishAll: PropTypes.func,
-  refetchData: PropTypes.func,
 };
 
 export { BulkActionButtons };

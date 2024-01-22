@@ -21,7 +21,7 @@ const getPlugin = () => {
       routes,
       destroy() {
         if (
-          features.isEnabled('cms-content-releases') &&
+          strapi.ee.features.isEnabled('cms-content-releases') &&
           strapi.features.future.isEnabled('contentReleases')
         ) {
           getService('event-manager').destroyAllListeners();

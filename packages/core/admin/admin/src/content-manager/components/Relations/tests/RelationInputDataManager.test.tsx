@@ -1,15 +1,5 @@
-/* eslint-disable testing-library/no-node-access */
-import React from 'react';
-
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { render, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { render, fireEvent } from '@tests/utils';
 
 import {
   RelationInputDataManager,
@@ -17,46 +7,31 @@ import {
 } from '../RelationInputDataManager';
 import { useRelation } from '../useRelation';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 jest.mock('../useRelation', () => ({
   useRelation: jest.fn().mockReturnValue({
     relations: {
       fetchNextPage: jest.fn(),
       hasNextPage: true,
-      isFetchingNextPage: false,
       isLoading: false,
       isSuccess: true,
-      status: 'success',
+      status: 'fulfilled',
     },
     search: {
       data: {
-        pages: [
+        results: [
           {
-            results: [
-              {
-                id: '11',
-                title: 'Search 1',
-              },
+            id: '11',
+            title: 'Search 1',
+          },
 
-              {
-                id: '22',
-                title: 'Search 2',
-              },
-            ],
+          {
+            id: '22',
+            title: 'Search 2',
           },
         ],
       },
-      isFetchingNextPage: false,
       isLoading: false,
-      isSuccess: true,
-      status: 'success',
+      status: 'fulfilled',
     },
 
     searchFor: jest.fn(),
@@ -89,6 +64,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       ],
     },
     modifiedData: {
+      id: '1',
       relation: [
         {
           id: '1',
@@ -144,20 +120,7 @@ const RelationInputDataManagerComponent = (props?: Partial<RelationInputDataMana
 );
 
 const setup = (props?: Partial<RelationInputDataManagerProps>) => ({
-  ...render(<RelationInputDataManagerComponent {...props} />, {
-    wrapper: ({ children }) => (
-      <MemoryRouter>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={lightTheme}>
-            <DndProvider backend={HTML5Backend}>
-              <IntlProvider locale="en">{children}</IntlProvider>
-            </DndProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
-    ),
-  }),
-  user: userEvent.setup(),
+  ...render(<RelationInputDataManagerComponent {...props} />),
 });
 
 describe('RelationInputDataManager', () => {
@@ -201,7 +164,6 @@ describe('RelationInputDataManager', () => {
     });
 
     expect(useRelation).toBeCalledWith(
-      expect.arrayContaining([expect.any(String)]),
       expect.objectContaining({
         search: expect.objectContaining({
           pageParams: expect.objectContaining({
@@ -242,7 +204,9 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      modifiedData: {},
+      modifiedData: {
+        id: '1',
+      },
       relationLoad: jest.fn(),
     });
 
@@ -281,7 +245,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      modifiedData: {},
+      modifiedData: { id: '1' },
       relationLoad: jest.fn(),
     });
 
@@ -347,7 +311,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: ['relation'],
       slug: 'test',
       initialData: {},
-      modifiedData: {},
+      modifiedData: { id: '1' },
       relationLoad: jest.fn(),
     });
 
@@ -479,6 +443,7 @@ describe('RelationInputDataManager', () => {
           relation: [],
         },
         modifiedData: {
+          id: '1',
           relation: [],
         },
       }));
@@ -500,6 +465,7 @@ describe('RelationInputDataManager', () => {
           relation: [],
         },
         modifiedData: {
+          id: '1',
           relation: [
             {
               id: '1',
@@ -524,13 +490,9 @@ describe('RelationInputDataManager', () => {
       useRelation.mockImplementation(() => ({
         relations: {
           data: {
-            pages: [
-              {
-                pagination: {
-                  total: 8,
-                },
-              },
-            ],
+            pagination: {
+              total: 8,
+            },
           },
           hasNextPage: true,
           isFetchingNextPage: false,
@@ -562,6 +524,7 @@ describe('RelationInputDataManager', () => {
           ],
         },
         modifiedData: {
+          id: '1',
           relation: [
             {
               id: '1',
@@ -590,7 +553,9 @@ describe('RelationInputDataManager', () => {
             },
           ],
         },
-        modifiedData: {},
+        modifiedData: {
+          id: '1',
+        },
       }));
 
       expect(setup).not.toThrow();
@@ -601,13 +566,9 @@ describe('RelationInputDataManager', () => {
       useRelation.mockImplementation(() => ({
         relations: {
           data: {
-            pages: [
-              {
-                pagination: {
-                  total: 8,
-                },
-              },
-            ],
+            pagination: {
+              total: 8,
+            },
           },
           hasNextPage: true,
           isFetchingNextPage: false,
@@ -639,6 +600,7 @@ describe('RelationInputDataManager', () => {
           ],
         },
         modifiedData: {
+          id: '1',
           relation: [
             {
               id: '1',
@@ -669,6 +631,7 @@ describe('RelationInputDataManager', () => {
           ],
         },
         modifiedData: {
+          id: '1',
           relation: [],
         },
       }));
