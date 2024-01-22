@@ -1,6 +1,7 @@
-import { EntityService, Attribute, Schema, LoadedStrapi } from '@strapi/types';
-import { traverseEntity } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
+import { EntityService, Attribute, Common } from '@strapi/types';
+import { traverseEntity } from '@strapi/utils';
+import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, ID } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 
@@ -21,7 +22,7 @@ const handlePrimitive = (
 /**
  * Get all relations document ids from a relation input value
  */
-const extractRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
+const extractRelationIds = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>
 ): ID[] => {
   const ids = handlePrimitive(relation);
@@ -58,31 +59,27 @@ const extractRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
  * Iterate over all attributes of a Data object and extract all relational document ids.
  * Those will later be transformed to entity ids.
  */
-const extractDataIds = async (schema: Schema.ContentType, data: Record<string, any>) => {
-  const idMap: Record<string, ID[]> = {};
-
-  await traverseEntity(
+const extractDataIds = (
+  idMap: IdMap,
+  data: Record<string, any>,
+  opts: { uid: Common.UID.Schema; locale: string; isDraft: boolean }
+) => {
+  return traverseEntity(
     ({ value, attribute }) => {
       // Find relational attributes, and return the document ids
       if (attribute.type === 'relation') {
-        const extractedIds = extractRelationIdsVisitor(value as any);
+        const extractedIds = extractRelationIds(value as any);
         const target = attribute.target;
 
         // TODO: Handle morph relations (they have multiple targets)
-        if (!target || !extractedIds.length) return;
+        if (!target) return;
 
-        if (idMap[target]) {
-          idMap[target].push(...extractedIds);
-        } else {
-          idMap[target] = extractedIds;
-        }
+        extractedIds.forEach((id) => idMap.add(target, id as string, opts.locale));
       }
     },
-    { schema },
+    { schema: strapi.getModel(opts.uid) },
     data
   );
-
-  return idMap;
 };
 
 export { extractDataIds };
