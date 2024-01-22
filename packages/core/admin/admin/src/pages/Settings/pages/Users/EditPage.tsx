@@ -180,18 +180,17 @@ const EditPage = () => {
   /**
    * TODO: Convert this to react-query.
    */
-  const handleSubmit = async (body: Partial<InitialData>, actions: FormikHelpers<InitialData>) => {
+  const handleSubmit = async (body: InitialData, actions: FormikHelpers<InitialData>) => {
     lockApp?.();
 
-    // The password should not be sent if it wasn't changed,
-    // it leads to a validation error if the string is empty
-    if (body.password === '') {
-      body = omit(body, 'password');
-    }
+    const { confirmPassword, password, ...bodyRest } = body;
 
     const res = await updateUser({
       id,
-      ...omit(body, 'confirmPassword'),
+      ...bodyRest,
+      // The password should not be sent if it wasn't changed,
+      // it leads to a validation error if the string is empty
+      ...(password !== '' && {password}),
     });
 
     if ('error' in res && isBaseQueryError(res.error)) {
