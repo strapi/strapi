@@ -167,7 +167,7 @@ const EditPage = () => {
 
   type InitialData = Pick<Update.Request['body'], (typeof fieldsToPick)[number]> & {
     confirmPassword: string;
-    password: string;
+    password?: string;
   };
 
   const initialData = {
@@ -182,6 +182,12 @@ const EditPage = () => {
    */
   const handleSubmit = async (body: InitialData, actions: FormikHelpers<InitialData>) => {
     lockApp?.();
+
+    // The password should not be sent if it wasn't changed,
+    // it leads to a validation error if the string is empty
+    if (body.password === '') {
+      body = omit(body, 'password')
+    }
 
     const res = await updateUser({
       id,
