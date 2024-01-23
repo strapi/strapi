@@ -18,7 +18,7 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';
-import { createDocumentIdTransform } from './transform/id-transform';
+import { transformParamsDocumentId, transformOutputDocumentId } from './transform/id-transform';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -122,35 +122,31 @@ const createDocumentEngine = ({
   },
 
   async create(uid, params) {
-    // TODO: Entity validator.
-    // TODO: File upload - Probably in the lifecycles?
-    const documentIdTransform = createDocumentIdTransform({ strapi });
-    const { data } = await documentIdTransform.transformInput(params, {
-      uid,
+    // Param parsing
+    const { data, ...restParams } = await transformParamsDocumentId(uid, params, {
       locale: params.locale,
       isDraft: true,
     });
+    const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
-    if (!data) {
+    // Validation
+    if (!params.data) {
       throw new Error('Create requires data attribute');
     }
-
-    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
-
+    const model = strapi.getModel(uid);
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft: true });
 
+    // Component handling
     const componentData = await createComponents(uid, validData as any);
     const entryData = createPipeline(
       Object.assign(omitComponentData(model, validData), componentData),
-      {
-        contentType: model,
-      }
+      { contentType: model }
     );
 
-    // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params) as any);
-
-    return db.query(uid).create({ ...query, data: entryData });
+    return db
+      .query(uid)
+      .create({ ...query, data: entryData })
+      .then((doc) => transformOutputDocumentId(uid, doc));
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to update?
