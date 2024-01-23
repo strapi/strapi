@@ -1,22 +1,53 @@
 import os from 'node:os';
 import path from 'node:path';
+import fs from 'node:fs';
+import camelCase from 'lodash/camelCase';
 import { env } from '@strapi/utils';
 import { getModule, PackageJson } from './dependencies';
-import { loadFile } from './files';
-import { BuildContext, CreateBuildContextArgs } from '../createBuildContext';
+import { convertModulePathToSystemPath, convertSystemPathToModulePath, loadFile } from './files';
+import { BuildContext } from '../createBuildContext';
+import { isError } from './errors';
 
-const CORE_PLUGINS = [
-  '@strapi/plugin-content-manager',
-  '@strapi/plugin-content-type-builder',
-  '@strapi/plugin-email',
-  '@strapi/plugin-upload',
-];
-
-interface PluginMeta {
+interface LocalPluginMeta {
   name: string;
-  pathToPlugin: string;
-  isLocal?: boolean;
+  /**
+   * camelCased version of the plugin name
+   */
+  importName: string;
+  /**
+   * The path to the plugin, relative to the app's root directory
+   * in system format
+   */
+  path: string;
+  /**
+   * The path to the plugin, relative to the runtime directory
+   * in module format (i.e. with forward slashes) because thats
+   * where it should be used as an import
+   */
+  modulePath: string;
+  type: 'local';
 }
+
+interface ModulePluginMeta {
+  name: string;
+  /**
+   * camelCased version of the plugin name
+   */
+  importName: string;
+  /**
+   * Modules don't have a path because we never resolve them to their node_modules
+   * because we simply do not require it.
+   */
+  path?: never;
+  /**
+   * The path to the plugin, relative to the app's root directory
+   * in module format (i.e. with forward slashes)
+   */
+  modulePath: string;
+  type: 'module';
+}
+
+type PluginMeta = LocalPluginMeta | ModulePluginMeta;
 
 interface StrapiPlugin extends PackageJson {
   strapi: {
@@ -39,30 +70,15 @@ const validatePackageHasStrapi = (
 const validatePackageIsPlugin = (pkg: PackageJson): pkg is StrapiPlugin =>
   validatePackageHasStrapi(pkg) && pkg.strapi.kind === 'plugin';
 
-export const getEnabledPlugins = async ({
-  strapi,
+const getEnabledPlugins = async ({
   cwd,
   logger,
-}: Pick<BuildContext, 'cwd' | 'logger' | 'strapi'>) => {
+  runtimeDir,
+  strapi,
+}: Pick<BuildContext, 'cwd' | 'logger' | 'strapi' | 'runtimeDir'>): Promise<
+  Record<string, PluginMeta>
+> => {
   const plugins: Record<string, PluginMeta> = {};
-
-  logger.debug('Core plugins', os.EOL, CORE_PLUGINS);
-
-  for (const plugin of CORE_PLUGINS) {
-    const pkg = await getModule(plugin, cwd);
-
-    if (pkg && validatePackageIsPlugin(pkg)) {
-      /**
-       * We know there's a name because these are our packages.
-       */
-      const name = (pkg.strapi.name || pkg.name)!;
-
-      plugins[name] = {
-        name,
-        pathToPlugin: plugin,
-      };
-    }
-  }
 
   /**
    * This is the list of dependencies that are installed in the user's project.
@@ -90,7 +106,9 @@ export const getEnabledPlugins = async ({
 
       plugins[name] = {
         name,
-        pathToPlugin: dep,
+        importName: camelCase(name),
+        type: 'module',
+        modulePath: dep,
       };
     }
   }
@@ -101,14 +119,17 @@ export const getEnabledPlugins = async ({
 
   for (const [userPluginName, userPluginConfig] of Object.entries(userPluginsFile)) {
     if (userPluginConfig.enabled && userPluginConfig.resolve) {
+      const sysPath = convertModulePathToSystemPath(userPluginConfig.resolve);
       plugins[userPluginName] = {
         name: userPluginName,
-        isLocal: true,
+        importName: camelCase(userPluginName),
+        type: 'local',
         /**
          * User plugin paths are resolved from the entry point
          * of the app, because that's how you import them.
          */
-        pathToPlugin: userPluginConfig.resolve,
+        modulePath: convertSystemPathToModulePath(path.relative(runtimeDir, sysPath)),
+        path: sysPath,
       };
     }
   }
@@ -135,3 +156,56 @@ const loadUserPluginsFile = async (root: string): Promise<UserPluginConfigFile> 
 
   return {};
 };
+
+const getMapOfPluginsWithAdmin = (plugins: Record<string, PluginMeta>) =>
+  Object.values(plugins)
+    .filter((plugin) => {
+      if (!plugin) {
+        return false;
+      }
+
+      /**
+       * There are two ways a plugin should be imported, either it's local to the strapi app,
+       * or it's an actual npm module that's installed and resolved via node_modules.
+       *
+       * We first check if the plugin is local to the strapi app, using a regular `fs.existsSync` because
+       * the pathToPlugin will be relative i.e. `/Users/my-name/strapi-app/src/plugins/my-plugin`.
+       *
+       * If the file doesn't exist well then it's probably a node_module, so instead we use `require.resolve`
+       * which will resolve the path to the module in node_modules. If it fails with the specific code `MODULE_NOT_FOUND`
+       * then it doesn't have an admin part to the package.
+       */
+      try {
+        const isLocalPluginWithLegacyAdminFile =
+          plugin.path && fs.existsSync(path.join(plugin.path, 'strapi-admin.js'));
+
+        if (!isLocalPluginWithLegacyAdminFile) {
+          const isModuleWithFE = require.resolve(`${plugin.modulePath}/strapi-admin`);
+
+          return isModuleWithFE;
+        }
+
+        return isLocalPluginWithLegacyAdminFile;
+      } catch (err) {
+        if (
+          isError(err) &&
+          'code' in err &&
+          (err.code === 'MODULE_NOT_FOUND' || err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED')
+        ) {
+          /**
+           * the plugin does not contain FE code, so we
+           * don't want to import it anyway
+           */
+          return false;
+        }
+
+        throw err;
+      }
+    })
+    .map((plugin) => ({
+      ...plugin,
+      modulePath: `${plugin.modulePath}/strapi-admin`,
+    }));
+
+export { getEnabledPlugins, getMapOfPluginsWithAdmin };
+export type { PluginMeta, LocalPluginMeta, ModulePluginMeta };

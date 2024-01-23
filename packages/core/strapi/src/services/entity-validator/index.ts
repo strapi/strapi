@@ -275,7 +275,7 @@ const createAttributeValidator =
 const createModelValidator =
   (createOrUpdate: CreateOrUpdate) =>
   ({ model, data, entity }: ModelValidatorMetas, options: ValidatorContext) => {
-    const writableAttributes = model ? getWritableAttributes(model) : [];
+    const writableAttributes = model ? getWritableAttributes(model as any) : [];
 
     const schema = writableAttributes.reduce((validators, attributeName) => {
       const metas = {

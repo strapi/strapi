@@ -8,7 +8,7 @@ import type { TranslationMessage } from '../types';
  * packages/core/admin/admin/src/core/apis/CustomFields.js
  */
 interface CustomFieldComponents {
-  Input: () => Promise<React.ComponentType>;
+  Input: () => Promise<{ default?: React.ComponentType }>;
 }
 
 type CustomFieldType =
@@ -92,7 +92,7 @@ type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
  * -----------------------------------------------------------------------------------------------*/
 
 interface CustomFieldsContextValue {
-  get: (uid: CustomFieldUID) => CustomField | undefined;
+  get: (uid: string) => CustomField | undefined;
   getAll: () => Record<string, CustomField>;
 }
 

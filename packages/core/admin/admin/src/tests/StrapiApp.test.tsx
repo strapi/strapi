@@ -1,5 +1,3 @@
-/* eslint-disable check-file/filename-naming-convention */
-import { fixtures } from '@strapi/admin-test-utils';
 import { render } from '@testing-library/react';
 
 import { StrapiApp } from '../StrapiApp';
@@ -17,7 +15,66 @@ describe('ADMIN | new StrapiApp', () => {
 
     const store = app.createStore();
 
-    expect(store.getState()).toEqual(fixtures.store.state);
+    expect(store.getState()).toMatchInlineSnapshot(`
+      {
+        "admin_app": {
+          "language": {
+            "locale": "en",
+            "localeNames": {
+              "en": "English",
+            },
+          },
+          "permissions": {},
+          "theme": {
+            "availableThemes": [],
+            "currentTheme": "system",
+          },
+        },
+        "content-manager_app": {
+          "collectionTypeLinks": [],
+          "components": [],
+          "fieldSizes": {},
+          "models": [],
+          "singleTypeLinks": [],
+          "status": "loading",
+        },
+        "content-manager_editViewCrudReducer": {
+          "componentsDataStructure": {},
+          "contentTypeDataStructure": {},
+          "data": null,
+          "isLoading": true,
+          "setModifiedDataOnly": false,
+          "status": "resolved",
+        },
+        "content-manager_editViewLayoutManager": {
+          "currentLayout": {
+            "components": {},
+            "contentType": null,
+          },
+        },
+        "content-manager_listView": {
+          "components": {},
+          "contentType": null,
+          "data": [],
+          "displayedHeaders": [],
+          "initialDisplayedHeaders": [],
+          "isLoading": true,
+          "pagination": {
+            "page": 0,
+            "pageCount": 0,
+            "pageSize": 0,
+            "total": 0,
+          },
+        },
+        "content-manager_rbacManager": {
+          "permissions": null,
+        },
+        "rbacProvider": {
+          "allPermissions": null,
+          "collectionTypesRelatedPermissions": {},
+        },
+      }
+    `);
   });
 
   describe('Hook api', () => {

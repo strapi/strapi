@@ -94,7 +94,12 @@ export type PickRelationsFromTo<
 export type RelationPluralityModifier<
   TRelationKind extends RelationKind.Any,
   TValue
-> = TRelationKind extends Utils.String.Suffix<string, 'Many'> ? TValue[] : TValue;
+> = Utils.Expression.If<IsManyRelation<TRelationKind>, TValue[], TValue>;
+
+export type IsManyRelation<TRelationKind extends RelationKind.Any> = Utils.Expression.Extends<
+  TRelationKind,
+  Utils.String.Suffix<string, 'Many'>
+>;
 
 export type RelationValue<
   TRelationKind extends RelationKind.Any,
