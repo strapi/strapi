@@ -22,7 +22,7 @@ const {
   validateChangePasswordBody,
 } = require('./validation/auth');
 
-const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
+const { sanitize } = utils;
 const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
 
 const sanitizeUser = (user, ctx) => {
@@ -234,8 +234,8 @@ module.exports = {
       resetPasswordSettings.message,
       {
         URL: advancedSettings.email_reset_password,
-        SERVER_URL: getAbsoluteServerUrl(strapi.config),
-        ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
+        SERVER_URL: strapi.config.get('server.absoluteUrl'),
+        ADMIN_URL: strapi.config.get('admin.absoluteUrl'),
         USER: userInfo,
         TOKEN: resetPasswordToken,
       }

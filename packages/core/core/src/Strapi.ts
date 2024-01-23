@@ -59,7 +59,6 @@ import createStartupLogger from './utils/startup-logger';
 import { createStrapiFetch } from './utils/fetch';
 import { LIFECYCLES } from './utils/lifecycles';
 import ee from './utils/ee';
-import bootstrap from './bootstrap';
 import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import convertCustomFieldType from './utils/convert-custom-field-type';
@@ -469,8 +468,6 @@ class Strapi extends Container implements StrapiI {
 
   async register() {
     await loaders.loadApplicationContext(this);
-
-    await bootstrap({ strapi: this });
 
     // init webhook runner
     this.webhookRunner = createWebhookRunner({

@@ -3,7 +3,6 @@
 const path = require('path');
 const fs = require('fs-extra');
 const { produce } = require('immer');
-const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
@@ -150,7 +149,7 @@ module.exports = ({ strapi }) => {
         (draft) => {
           if (draft.servers.length === 0) {
             // When no servers found set the defaults
-            const serverUrl = getAbsoluteServerUrl(strapi.config);
+            const serverUrl = strapi.config.get('server.absoluteUrl');
             const apiPath = strapi.config.get('api.rest.prefix');
             draft.servers = [
               {
