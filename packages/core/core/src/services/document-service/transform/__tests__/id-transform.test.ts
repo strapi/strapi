@@ -1,6 +1,6 @@
 import { LoadedStrapi } from '@strapi/types';
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
-import { transformDocumentId } from '../id-transform';
+import { createDocumentIdTransform } from '../id-transform';
 
 const findProducts = jest.fn(() => ({}));
 const findCategories = jest.fn(() => ({}));
@@ -10,6 +10,9 @@ const findManyQueries = {
   [CATEGORY_UID]: findCategories,
 } as Record<string, jest.Mock>;
 
+// TODO: Relation between published documents
+// TODO: Relation between non localized and localized documents
+// TODO: Relation between ct with D&P enabled and ct with D&P disabled
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],
@@ -18,7 +21,7 @@ describe('Transform relational data', () => {
     },
   } as unknown as LoadedStrapi;
 
-  const docTransform = transformDocumentId({ strapi: global.strapi });
+  const documentIdTransform = createDocumentIdTransform({ strapi: global.strapi });
 
   beforeEach(() => {
     findCategories.mockReturnValueOnce([
@@ -44,7 +47,7 @@ describe('Transform relational data', () => {
   });
 
   it('Shorthand syntax', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -65,7 +68,7 @@ describe('Transform relational data', () => {
   });
 
   it('Longhand syntax', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -84,7 +87,7 @@ describe('Transform relational data', () => {
   });
 
   it('Set', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -103,7 +106,7 @@ describe('Transform relational data', () => {
   });
 
   it('Connect', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -122,7 +125,7 @@ describe('Transform relational data', () => {
   });
 
   it('Connect before', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -141,7 +144,7 @@ describe('Transform relational data', () => {
   });
 
   it('Connect after', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -160,7 +163,7 @@ describe('Transform relational data', () => {
   });
 
   it('Disconnect', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',
@@ -179,7 +182,7 @@ describe('Transform relational data', () => {
   });
 
   it('Multiple', async () => {
-    const { data } = await docTransform.transformInput(
+    const { data } = await documentIdTransform.transformInput(
       {
         data: {
           name: 'test',

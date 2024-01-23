@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Common, Documents, Schema, Shared, Strapi } from '@strapi/types';
+import type { Common, Documents, LoadedStrapi, Schema, Shared, Strapi } from '@strapi/types';
 import { contentTypes as contentTypesUtils, convertQueryParams, mapAsync } from '@strapi/utils';
 
 import { isArray, omit } from 'lodash/fp';
@@ -18,6 +18,7 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';
+import { createDocumentIdTransform } from './transform/id-transform';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -123,7 +124,12 @@ const createDocumentEngine = ({
   async create(uid, params) {
     // TODO: Entity validator.
     // TODO: File upload - Probably in the lifecycles?
-    const { data } = params;
+    const documentIdTransform = createDocumentIdTransform({ strapi });
+    const { data } = await documentIdTransform.transformInput(params, {
+      uid,
+      locale: params.locale,
+      isDraft: true,
+    });
 
     if (!data) {
       throw new Error('Create requires data attribute');
@@ -133,7 +139,7 @@ const createDocumentEngine = ({
 
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft: true });
 
-    const componentData = await createComponents(uid, validData);
+    const componentData = await createComponents(uid, validData as any);
     const entryData = createPipeline(
       Object.assign(omitComponentData(model, validData), componentData),
       {

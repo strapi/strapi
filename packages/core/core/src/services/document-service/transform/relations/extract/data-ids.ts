@@ -62,7 +62,7 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale: string; isDraft: boolean }
+  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft: boolean }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {

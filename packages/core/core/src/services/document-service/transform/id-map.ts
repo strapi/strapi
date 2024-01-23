@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import { Strapi } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 
 const encodeKey = (...values: string[]) => {
@@ -7,17 +7,17 @@ const encodeKey = (...values: string[]) => {
 
 export interface IdMap {
   loadedIds: Map<string, string>;
-  toLoadIds: Map<string, { uid: string; documentId: string; locale: string | null }>;
-  add(uid: string, documentId: string, locale: string | null): void;
+  toLoadIds: Map<string, { uid: string; documentId: string; locale?: string | null }>;
+  add(uid: string, documentId: string, locale?: string | null): void;
   load(): Promise<void>;
-  get(uid: string, documentId: string, locale: string | null): string | undefined;
+  get(uid: string, documentId: string, locale?: string | null): string | undefined;
   clear(): void;
 }
 
 /**
  * Holds a registry of document ids and their corresponding entity ids.
  */
-const createIdMap = ({ strapi }: { strapi: LoadedStrapi }): IdMap => {
+const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
   const loadedIds = new Map();
   const toLoadIds = new Map();
 
@@ -27,7 +27,7 @@ const createIdMap = ({ strapi }: { strapi: LoadedStrapi }): IdMap => {
     /**
      * Register a new document id and its corresponding entity id.
      */
-    add(uid: string, documentId: string, locale: string | null) {
+    add(uid: string, documentId: string, locale?: string | null) {
       const key = encodeKey(uid, documentId, locale || '');
 
       // If the id is already loaded, do nothing
@@ -59,7 +59,7 @@ const createIdMap = ({ strapi }: { strapi: LoadedStrapi }): IdMap => {
       await mapAsync(
         Object.values(idsByUidAndLocale),
         async ({ uid, locale, documentIds }: any) => {
-          const result = await strapi.db.query(uid).findMany({
+          const result = await strapi?.db?.query(uid).findMany({
             select: ['id', 'documentId', 'locale'],
             where: {
               documentId: { $in: documentIds },
@@ -71,7 +71,7 @@ const createIdMap = ({ strapi }: { strapi: LoadedStrapi }): IdMap => {
           });
 
           // 3. Store result in loadedIds
-          result.forEach(({ documentId, id, locale }) => {
+          result?.forEach(({ documentId, id, locale }) => {
             const key = encodeKey(uid, documentId, locale || '');
             loadedIds.set(key, id);
           });
@@ -85,7 +85,7 @@ const createIdMap = ({ strapi }: { strapi: LoadedStrapi }): IdMap => {
     /**
      * Get the entity id for a given document id.
      */
-    get(uid: string, documentId: string, locale: string | null) {
+    get(uid: string, documentId: string, locale?: string | null) {
       const key = encodeKey(uid, documentId, locale || '');
       return loadedIds.get(key);
     },

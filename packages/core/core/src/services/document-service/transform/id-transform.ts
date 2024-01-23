@@ -1,11 +1,11 @@
-import { LoadedStrapi, Common } from '@strapi/types';
+import { Strapi, Common } from '@strapi/types';
 
 import { createIdMap } from './id-map';
 import { extractDataIds as extractDataRelationIds } from './relations/extract/data-ids';
 import { transformDataIdsVisitor as transformRelationDataIds } from './relations/transform/data-ids';
 
 /** Maps document id and entity ids */
-const transformDocumentId = ({ strapi }: { strapi: LoadedStrapi }) => {
+const createDocumentIdTransform = ({ strapi }: { strapi: Strapi }) => {
   const idMap = createIdMap({ strapi });
 
   return {
@@ -16,7 +16,7 @@ const transformDocumentId = ({ strapi }: { strapi: LoadedStrapi }) => {
       input: { data?: any; fields?: any; filters?: any; populate?: any; sort?: any },
       opts: {
         uid: Common.UID.Schema;
-        locale: string;
+        locale?: string | null;
         isDraft: boolean;
       }
     ) {
@@ -65,4 +65,4 @@ const transformDocumentId = ({ strapi }: { strapi: LoadedStrapi }) => {
   };
 };
 
-export { transformDocumentId };
+export { createDocumentIdTransform };

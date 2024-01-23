@@ -72,7 +72,7 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
 const transformDataIdsVisitor = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale: string; isDraft: boolean }
+  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft: boolean }
 ) => {
   return traverseEntity(
     ({ key, value, attribute }, { set }) => {
