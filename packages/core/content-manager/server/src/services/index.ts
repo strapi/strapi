@@ -8,6 +8,7 @@ import permissionChecker from './permission-checker';
 import permission from './permission';
 import populateBuilder from './populate-builder';
 import uid from './uid';
+import history from '../history';
 
 export default {
   components,
@@ -20,4 +21,5 @@ export default {
   permission,
   'populate-builder': populateBuilder,
   uid,
+  ...(history.services ? history.services : {}),
 };
