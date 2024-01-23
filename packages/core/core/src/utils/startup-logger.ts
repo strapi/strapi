@@ -4,7 +4,7 @@ import _ from 'lodash/fp';
 
 import type { Strapi } from '@strapi/types';
 
-export default (app: Strapi) => {
+export const createStartupLogger = (app: Strapi) => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
