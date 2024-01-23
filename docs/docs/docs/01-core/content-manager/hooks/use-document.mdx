@@ -10,3 +10,63 @@ tags:
 :::warning
 This hook is considered unstable and may change in a future release.
 :::
+
+Returns a document based on the model, collection type & id passed as arguments. Also extracts it's schema from the redux cache to be used for creating a validation schema.
+
+## Usage
+
+```tsx
+const { id, model, collectionType } = useParams<{
+  id: string;
+  model: string;
+  collectionType: string;
+}>();
+
+if (!model || !collectionType) return null;
+
+const { document, isLoading, validate } = useDocument({
+  id,
+  model,
+  collectionType,
+  params: { locale: 'en-GB' },
+});
+const { update } = useDocumentOperations();
+
+const onSubmit = async (entity: Entity) => {
+  const errors = validate(entity);
+
+  if (errors) {
+    // handle errors
+  }
+
+  await update({ collectionType, model, id }, entity);
+};
+```
+
+### Content Manager
+
+If you're using this in the Strapi Content-Manager package, it is preferable to import `useDoc` because this uses react-router hooks to pre-provide the information for you e.g. `model` and `collectionType`.
+
+## Typescript
+
+```ts
+import type { Attribute } from '@strapi/strapi';
+
+interface Entity {
+  id: string;
+  [key: string]: Attribute.GetValue<Attribute.Any>;
+}
+
+interface UseDocumentArgs {
+  collectionType: string;
+  model: string;
+  id?: string;
+  params?: object;
+}
+
+type UseDocument = (args: UseDocumentArgs) => {
+  document?: Entity;
+  isLoading: boolean;
+  validate: (entity: Entity) => null | Record<string, TranslationMessage>;
+};
+```

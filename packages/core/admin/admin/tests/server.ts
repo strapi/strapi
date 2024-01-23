@@ -457,6 +457,55 @@ export const server = setupServer(
      * CONTENT_MANAGER
      *
      */
+    rest.get('/content-manager/:collectionType/:uid/:id', (req, res, ctx) => {
+      const { id, collectionType, uid } = req.params;
+
+      if (id === '12345' && collectionType === 'collection-types' && uid === 'api::test.test') {
+        return res(
+          ctx.json({
+            data: {
+              id,
+              name: 'Entry 1',
+              createdAt: '',
+              updatedAt: '',
+              publishedAt: '',
+            },
+          })
+        );
+      } else {
+        return res(ctx.status(404));
+      }
+    }),
+    rest.get('/content-manager/init', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            contentTypes: [
+              {
+                uid: 'api::test.test',
+                attributes: {
+                  id: {
+                    type: 'string',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                  publishedAt: {
+                    type: 'datetime',
+                  },
+                  createdAt: {
+                    type: 'datetime',
+                  },
+                  updatedAt: {
+                    type: 'datetime',
+                  },
+                },
+              },
+            ],
+          },
+        })
+      );
+    }),
     rest.put('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
       return res(ctx.status(200));
     }),

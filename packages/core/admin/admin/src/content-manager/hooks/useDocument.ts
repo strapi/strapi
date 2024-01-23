@@ -1,3 +1,9 @@
+/**
+ * This hook doesn't use a context provider because we fetch directly from the server,
+ * this sounds expensive but actually, it's really not. Because we have redux-toolkit-query
+ * being a cache layer so if nothing invalidates the cache, we don't fetch again.
+ */
+
 import * as React from 'react';
 
 import {
@@ -18,7 +24,7 @@ import { createYupSchema } from '../utils/validation';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
 
-interface Entity {
+interface Document {
   id: string;
   [key: string]: Attribute.GetValue<Attribute.Any>;
 }
@@ -31,9 +37,10 @@ interface UseDocumentArgs {
 }
 
 type UseDocument = (args: UseDocumentArgs) => {
-  document?: Contracts.CollectionTypes.FindOne.Response;
+  document?: Contracts.CollectionTypes.FindOne.Response['data'];
+  meta?: Contracts.CollectionTypes.FindOne.Response['meta'];
   isLoading: boolean;
-  validate: (entity: Entity) => null | Record<string, TranslationMessage>;
+  validate: (document: Document) => null | Record<string, TranslationMessage>;
 };
 
 /**
@@ -49,14 +56,14 @@ type UseDocument = (args: UseDocumentArgs) => {
  * const { document, isLoading, validate } = useDocument({ id, model, collectionType, params: { locale: 'en-GB' } })
  * const { update } = useDocumentOperations()
  *
- * const onSubmit = async (entity: Entity) => {
- *  const errors = validate(entity);
+ * const onSubmit = async (document: Document) => {
+ *  const errors = validate(document);
  *
  *  if(errors) {
  *      // handle errors
  *  }
  *
- *  await update({ collectionType, model, id }, entity)
+ *  await update({ collectionType, model, id }, document)
  * }
  * ```
  */
@@ -64,7 +71,7 @@ const useDocument: UseDocument = (args) => {
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { data: document, isLoading: isLoadingDocument, error } = useGetDocumentQuery(args);
+  const { data, isLoading: isLoadingDocument, error } = useGetDocumentQuery(args);
   const {
     components,
     contentType,
@@ -103,7 +110,7 @@ const useDocument: UseDocument = (args) => {
     return createYupSchema(contentType.attributes, componentsByKey);
   }, [contentType, components]);
 
-  const validate = (entry: Entity) => {
+  const validate = (document: Document) => {
     if (!validationSchema) {
       throw new Error(
         'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
@@ -111,7 +118,7 @@ const useDocument: UseDocument = (args) => {
     }
 
     try {
-      validationSchema.validateSync(entry, { abortEarly: false });
+      validationSchema.validateSync(document, { abortEarly: false, strict: true });
 
       return null;
     } catch (error) {
@@ -124,7 +131,8 @@ const useDocument: UseDocument = (args) => {
   };
 
   return {
-    document,
+    document: data?.data,
+    meta: data?.meta,
     isLoading: isLoadingDocument || isLoadingSchema,
     validate,
   } satisfies ReturnType<UseDocument>;
@@ -135,8 +143,9 @@ const useDocument: UseDocument = (args) => {
  * therefore, it shouldn't be used outside of the content-manager because it won't work as intended.
  */
 const useDoc = () => {
-  const { id, slug, collectionType } = useParams<{
+  const { id, slug, collectionType, origin } = useParams<{
     id: string;
+    origin: string;
     slug: string;
     collectionType: string;
   }>();
@@ -151,8 +160,8 @@ const useDoc = () => {
     throw new Error('Could not find model in url params');
   }
 
-  return useDocument({ id, model: slug, collectionType, params });
+  return useDocument({ id: origin || id, model: slug, collectionType, params });
 };
 
 export { useDocument, useDoc };
-export type { UseDocument, UseDocumentArgs };
+export type { UseDocument, UseDocumentArgs, Document };

@@ -71,9 +71,7 @@ const createYupSchema = (
       if (attribute.type === 'component') {
         const componentFieldSchema = createYupSchema(
           components[attribute.component]?.attributes,
-          {
-            components,
-          },
+          components,
           { ...options, isFromComponent: true }
         );
 
@@ -127,11 +125,10 @@ const createYupSchema = (
         let dynamicZoneSchema = yup.array().of(
           // @ts-expect-error – see comment at top of file
           yup.lazy(({ __component }) => {
-            return createYupSchema(
-              components[__component]?.attributes,
-              { components },
-              { ...options, isFromComponent: true }
-            );
+            return createYupSchema(components[__component]?.attributes, components, {
+              ...options,
+              isFromComponent: true,
+            });
           })
         );
 

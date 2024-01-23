@@ -14,6 +14,9 @@ import {
   RenderResult,
   act,
   screen,
+  RenderHookOptions,
+  RenderHookResult,
+  Queries,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
@@ -30,7 +33,6 @@ import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
 import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
 import { contentManagerApi } from '../src/content-manager/services/api';
-import { reducer as crudReducer } from '../src/content-manager/sharedReducers/crud/reducer';
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
 import { reducer as appReducer } from '../src/reducer';
@@ -71,7 +73,6 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       'content-manager_listView': listViewReducer,
       'content-manager_rbacManager': rbacManagerReducer,
       'content-manager_editViewLayoutManager': editViewReducer,
-      'content-manager_editViewCrudReducer': crudReducer,
     },
     // @ts-expect-error – this fails.
     middleware: (getDefaultMiddleware) => [
@@ -173,12 +174,22 @@ const render = (
   };
 };
 
-const renderHook: typeof renderHookRTL = (hook, options) => {
-  const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = options ?? {};
+const renderHook = <
+  Result,
+  Props,
+  Q extends Queries,
+  Container extends Element | DocumentFragment = HTMLElement,
+  BaseElement extends Element | DocumentFragment = Container
+>(
+  hook: (initialProps: Props) => Result,
+  options?: RenderHookOptions<Props, Q, Container, BaseElement> &
+    Pick<RenderOptions, 'initialEntries'>
+): RenderHookResult<Result, Props> => {
+  const { wrapper: Wrapper = fallbackWrapper, initialEntries, ...restOptions } = options ?? {};
 
   return renderHookRTL(hook, {
     wrapper: ({ children }) => (
-      <Providers>
+      <Providers initialEntries={initialEntries}>
         <Wrapper>{children}</Wrapper>
       </Providers>
     ),

@@ -1,13 +1,19 @@
 import { errors } from '@strapi/utils';
-import { Schema, Common, EntityService, Entity as SEntity } from '@strapi/types';
+import { Schema, Common, Documents } from '@strapi/types';
 
-// Admin entity response follows the same format as the entity service
-type Entity = EntityService.Result<Common.UID.Schema>;
-type PaginatedEntities = EntityService.PaginatedResult<Common.UID.Schema>;
+type PaginatedDocuments = Documents.PaginatedResult<Common.UID.Schema>;
+type PaginationQuery = Documents.Params.Pagination.PageNotation;
+type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
 
-type PaginationQuery = EntityService.Params.Pagination.PageNotation;
-type Filters = EntityService.Params.Pick<Common.UID.Schema, 'filters'>;
-type SortQuery = EntityService.Params.Sort.StringNotation<Common.UID.Schema> & string;
+// Admin document response follows the same format as the document service
+type Document = Documents.Document<any>;
+type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
+export type DocumentMetadata = {
+  // All status of the returned locale
+  availableStatus: Pick<Document, 'id' | AT_FIELDS | 'status'>[];
+  // Available locales within the same status of the returned document
+  availableLocales: Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>[];
+};
 
 /**
  * GET /collection-types/:model
@@ -15,11 +21,11 @@ type SortQuery = EntityService.Params.Sort.StringNotation<Common.UID.Schema> & s
 export declare namespace Find {
   export interface Request {
     body: {};
-    query: PaginationQuery &
-      Filters & {
-        sort?: SortQuery;
-        [key: string]: unknown;
-      };
+    query: {
+      page: PaginationQuery['page'];
+      pageSize: PaginationQuery['pageSize'];
+      sort: SortQuery;
+    };
   }
 
   export interface Params {
@@ -27,8 +33,7 @@ export declare namespace Find {
   }
 
   export interface Response {
-    results: PaginatedEntities['results'];
-    pagination: PaginatedEntities['pagination'];
+    data: PaginatedDocuments;
     error?: errors.ApplicationError;
   }
 }
@@ -44,14 +49,14 @@ export declare namespace FindOne {
 
   export interface Params {
     model: string;
-    id: number;
+    id: Documents.ID;
   }
 
-  export type Response =
-    | Entity
-    | {
-        error?: errors.ApplicationError;
-      };
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -67,11 +72,11 @@ export declare namespace Create {
     model: string;
   }
 
-  export type Response =
-    | Entity
-    | {
-        error?: errors.ApplicationError;
-      };
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -85,14 +90,14 @@ export declare namespace AutoClone {
 
   export interface Params {
     model: string;
-    sourceId: Entity['id'];
+    sourceId: Documents.ID;
   }
 
-  export type Response =
-    | Entity
-    | {
-        error?: errors.ApplicationError;
-      };
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -106,11 +111,12 @@ export declare namespace Clone {
 
   export interface Params {
     model: string;
-    sourceId: SEntity.ID;
+    sourceId: Documents.ID;
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -120,20 +126,20 @@ export declare namespace Clone {
  */
 export declare namespace Update {
   export interface Request {
-    body: Entity;
+    body: Document;
     query: {};
   }
 
   export interface Params {
     model: string;
-    id: number;
+    id: Documents.ID;
   }
 
-  export type Response =
-    | Entity
-    | {
-        error?: errors.ApplicationError;
-      };
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -147,11 +153,12 @@ export declare namespace Delete {
 
   export interface Params {
     model: string;
-    id: Entity['id'];
+    id: Documents.ID;
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -167,14 +174,14 @@ export declare namespace Publish {
 
   export interface Params {
     model: string;
-    id: number;
+    id: Documents.ID;
   }
 
-  export type Response =
-    | Entity
-    | {
-        error?: errors.ApplicationError;
-      };
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -188,14 +195,14 @@ export declare namespace Unpublish {
 
   export interface Params {
     model: string;
-    id: Entity['id'];
+    id: Documents.ID;
   }
 
-  export type Response =
-    | Entity
-    | {
-        error?: errors.ApplicationError;
-      };
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
 }
 
 /**
@@ -204,7 +211,7 @@ export declare namespace Unpublish {
 export declare namespace BulkDelete {
   export interface Request {
     body: {
-      ids: Entity['id'][];
+      ids: string[];
     };
     query: {};
   }
@@ -227,7 +234,7 @@ export declare namespace BulkDelete {
 export declare namespace BulkPublish {
   export interface Request {
     body: {
-      ids: Entity['id'][];
+      ids: Documents.ID[];
     };
     query: {};
   }
@@ -248,7 +255,7 @@ export declare namespace BulkPublish {
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      ids: Entity['id'][];
+      ids: number[];
     };
     query: {};
   }
@@ -289,11 +296,10 @@ export declare namespace CountDraftRelations {
  */
 export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
-    body: {};
-    query: {
-      ids: Entity['id'][];
-      [key: string]: unknown;
+    body: {
+      ids: number[];
     };
+    query: {};
   }
 
   export interface Params {
