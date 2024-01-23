@@ -23,21 +23,11 @@ import {
   useUnpublishDocumentMutation,
   useUpdateDocumentMutation,
 } from '../services/documents';
-import {
-  getData,
-  getDataSucceeded,
-  initForm,
-  resetProps,
-  setDataStructures,
-  setStatus,
-  submitSucceeded,
-} from '../sharedReducers/crud/actions';
 import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
 import type { EditViewPageParams } from '../pages/EditView/EditViewPage';
-import type { EntityData } from '../sharedReducers/crud/reducer';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 interface RenderChildProps {
@@ -94,8 +84,6 @@ const ContentTypeFormWrapper = ({
   const navigate = useNavigate();
   const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useTypedDispatch();
-  const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
-    useTypedSelector((state) => state['content-manager_editViewCrudReducer']);
   const redirectionLink = useFindRedirectionLink(slug);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
@@ -105,6 +93,7 @@ const ContentTypeFormWrapper = ({
 
   const cleanReceivedData = React.useCallback(
     (data: EntityData) => {
+      return null;
       const cleaned = removePasswordFieldsFromData(
         data,
         allLayoutData.contentType!,
@@ -116,45 +105,39 @@ const ContentTypeFormWrapper = ({
     [allLayoutData]
   );
 
-  // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
-  React.useEffect(() => {
-    const componentsDataStructure = Object.keys(allLayoutData.components).reduce<
-      Record<string, any>
-    >((acc, current) => {
-      const defaultComponentForm = createDefaultDataStructure(
-        allLayoutData.components[current].attributes,
-        allLayoutData.components
-      );
+  // // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
+  // React.useEffect(() => {
+  //   const componentsDataStructure = Object.keys(allLayoutData.components).reduce<
+  //     Record<string, any>
+  //   >((acc, current) => {
+  //     const defaultComponentForm = createDefaultDataStructure(
+  //       allLayoutData.components[current].attributes,
+  //       allLayoutData.components
+  //     );
 
-      acc[current] = formatContentTypeData(
-        defaultComponentForm,
-        // @ts-expect-error – the helper-plugin doesn't (and can't) know about the types we have in the admin. TODO: fix this.
-        allLayoutData.components[current],
-        allLayoutData.components
-      );
+  //     acc[current] = formatContentTypeData(
+  //       defaultComponentForm,
+  //       // @ts-expect-error – the helper-plugin doesn't (and can't) know about the types we have in the admin. TODO: fix this.
+  //       allLayoutData.components[current],
+  //       allLayoutData.components
+  //     );
 
-      return acc;
-    }, {});
+  //     return acc;
+  //   }, {});
 
-    const contentTypeDataStructure = createDefaultDataStructure(
-      allLayoutData.contentType!.attributes,
-      allLayoutData.components
-    );
+  //   const contentTypeDataStructure = createDefaultDataStructure(
+  //     allLayoutData.contentType!.attributes,
+  //     allLayoutData.components
+  //   );
 
-    const contentTypeDataStructureFormatted = formatContentTypeData(
-      contentTypeDataStructure,
-      allLayoutData.contentType!,
-      allLayoutData.components
-    );
+  //   const contentTypeDataStructureFormatted = formatContentTypeData(
+  //     contentTypeDataStructure,
+  //     allLayoutData.contentType!,
+  //     allLayoutData.components
+  //   );
 
-    dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
-  }, [allLayoutData, dispatch]);
-
-  React.useEffect(() => {
-    return () => {
-      dispatch(resetProps());
-    };
-  }, [dispatch]);
+  //   dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
+  // }, [allLayoutData, dispatch]);
 
   const getDocumentResponse = useGetDocumentQuery(
     {
@@ -596,6 +579,8 @@ const ContentTypeFormWrapper = ({
     toggleNotification,
     formatAPIError,
   ]);
+
+  console.log(data);
 
   return children({
     componentsDataStructure,

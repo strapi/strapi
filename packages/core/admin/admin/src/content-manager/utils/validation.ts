@@ -7,8 +7,8 @@ import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
 import { isFieldTypeNumber } from './fields';
-import { FormattedComponentLayout, FormattedContentTypeLayout } from './layouts';
 
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type Lazy from 'yup/lib/Lazy';
 import type { MixedSchema } from 'yup/lib/mixed';
 
@@ -32,8 +32,8 @@ interface CreateYupSchemaOpts {
 }
 
 const createYupSchema = (
-  model: FormattedContentTypeLayout | FormattedComponentLayout,
-  { components }: { components: Record<string, FormattedComponentLayout> },
+  attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
+  components: Record<string, Contracts.Components.Component> = {},
   options: CreateYupSchemaOpts = {
     isCreatingEntry: true,
     isDraft: true,
@@ -41,8 +41,6 @@ const createYupSchema = (
     isJSONTestDisabled: false,
   }
 ) => {
-  const { attributes } = model;
-
   return yup.object().shape(
     Object.keys(attributes).reduce<Record<string, MixedSchema | Lazy<any>>>((acc, current) => {
       const attribute = attributes[current];
@@ -72,7 +70,7 @@ const createYupSchema = (
 
       if (attribute.type === 'component') {
         const componentFieldSchema = createYupSchema(
-          components[attribute.component],
+          components[attribute.component]?.attributes,
           {
             components,
           },
@@ -130,7 +128,7 @@ const createYupSchema = (
           // @ts-expect-error – see comment at top of file
           yup.lazy(({ __component }) => {
             return createYupSchema(
-              components[__component],
+              components[__component]?.attributes,
               { components },
               { ...options, isFromComponent: true }
             );

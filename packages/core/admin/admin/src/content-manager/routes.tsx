@@ -31,7 +31,7 @@ const routes: RouteObject[] = [
        * for simplicity
        */
       {
-        path: 'collectionType/:slug',
+        path: 'collectionType/:model',
         loader: ({ params }) => {
           const slug = params.slug;
 

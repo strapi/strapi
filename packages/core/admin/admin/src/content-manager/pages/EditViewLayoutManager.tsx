@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
-import { useContentTypeLayout } from '../hooks/useLayouts';
+import { EditLayout, useContentTypeLayout } from '../hooks/useLayouts';
 import { useSyncRbac } from '../hooks/useSyncRbac';
 
 import { ProtectedEditViewPage } from './EditView/EditViewPage';
@@ -27,15 +27,18 @@ const EditViewLayoutManager = () => {
   const [{ query }] = useQueryParams();
   const { runHookWaterfall } = useStrapiApp();
   const { slug } = useParams<{ slug: string }>();
-  const { isLoading, layout } = useContentTypeLayout(slug);
+  const { isLoading, layout } = useContentTypeLayout(slug!, 'edit');
   const { permissions, isValid: isValidPermissions } = useSyncRbac(query, slug, 'editView');
 
   React.useEffect(() => {
     if (layout) {
       // Allow the plugins to extend the edit view layout
-      const mutatedLayout = runHookWaterfall(MUTATE_EDIT_VIEW_LAYOUT, { layout, query });
+      const { layout: mutatedLayout } = runHookWaterfall(MUTATE_EDIT_VIEW_LAYOUT, {
+        layout,
+        query,
+      });
 
-      dispatch(setLayout(mutatedLayout.layout, query));
+      dispatch(setLayout(mutatedLayout, query));
     }
 
     return () => {
@@ -43,7 +46,7 @@ const EditViewLayoutManager = () => {
     };
   }, [layout, dispatch, query, runHookWaterfall]);
 
-  if (isLoading || !currentLayout.contentType || !isValidPermissions) {
+  if (isLoading || !currentLayout || !isValidPermissions) {
     return <LoadingIndicatorPage />;
   }
 
@@ -66,7 +69,7 @@ const SET_LAYOUT = 'ContentManager/EditViewLayoutManager/SET_LAYOUT';
 
 interface SetLayoutAction {
   type: typeof SET_LAYOUT;
-  layout: FormattedLayouts;
+  layout: EditLayout;
   query: object;
 }
 
@@ -78,17 +81,19 @@ const setLayout = (layout: SetLayoutAction['layout'], query: SetLayoutAction['qu
   } satisfies SetLayoutAction);
 
 interface EditViewLayoutManagerState {
-  currentLayout: {
-    components: FormattedLayouts['components'];
-    contentType: FormattedLayouts['contentType'] | null;
-  };
+  // currentLayout: {
+  //   components: FormattedLayouts['components'];
+  //   contentType: FormattedLayouts['contentType'] | null;
+  // };
+  currentLayout: EditLayout;
 }
 
 const initialState = {
-  currentLayout: {
-    components: {},
-    contentType: null,
-  },
+  // currentLayout: {
+  //   components: {},
+  //   contentType: null,
+  // },
+  currentLayout: [],
 } satisfies EditViewLayoutManagerState;
 
 type Action = ResetPropsAction | SetLayoutAction;

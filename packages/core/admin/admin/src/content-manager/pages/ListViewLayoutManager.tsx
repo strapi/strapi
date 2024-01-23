@@ -22,7 +22,7 @@ const ListViewLayoutManager = () => {
   const { slug } = useParams<{ slug: string }>();
   const [{ query, rawQuery }] = useQueryParams();
   const { permissions, isValid: isValidPermissions } = useSyncRbac(query, slug, 'listView');
-  const { isLoading, layout } = useContentTypeLayout(slug);
+  const { isLoading, layout } = useContentTypeLayout(slug, 'list');
   const redirectionLink = useFindRedirectionLink(slug ?? '');
 
   React.useEffect(() => {

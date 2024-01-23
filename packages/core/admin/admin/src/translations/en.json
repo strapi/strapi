@@ -863,7 +863,7 @@
   "content-manager.global.displayedFields": "Displayed Fields",
   "content-manager.groups": "Groups",
   "content-manager.groups.numbered": "Groups ({number})",
-  "content-manager.header.name": "Content",
+  "content-manager.header.name": "Content Manager",
   "content-manager.link-to-ctb": "Edit the model",
   "content-manager.models": "Collection Types",
   "content-manager.models.numbered": "Collection Types ({number})",

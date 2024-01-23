@@ -56,7 +56,7 @@ import {
   useGetAllDocumentsQuery,
   useUnpublishManyDocumentsMutation,
 } from '../../services/documents';
-import { buildValidGetParams } from '../../utils/api';
+import { buildValidParams } from '../../utils/api';
 import { FormattedLayouts, ListLayoutRow } from '../../utils/layouts';
 import { generatePermissionsObject } from '../../utils/permissions';
 import { getTranslation } from '../../utils/translations';
@@ -183,7 +183,7 @@ const ListViewPage = ({
 
   useFocusWhenNavigate();
 
-  const params = React.useMemo(() => buildValidGetParams(query), [query]);
+  const params = React.useMemo(() => buildValidParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const displayedAttributeFilters = allowedAttributes.map((name) => {

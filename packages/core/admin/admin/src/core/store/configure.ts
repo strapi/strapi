@@ -12,7 +12,6 @@ import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-m
 import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
 import { contentManagerApi } from '../../content-manager/services/api';
-import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
 import { adminApi } from '../../services/api';
 
@@ -28,7 +27,6 @@ const staticReducers = {
   'content-manager_listView': listViewReducer,
   'content-manager_rbacManager': rbacManagerReducer,
   'content-manager_editViewLayoutManager': editViewReducer,
-  'content-manager_editViewCrudReducer': crudReducer,
 } as const;
 
 const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => StoreEnhancer =

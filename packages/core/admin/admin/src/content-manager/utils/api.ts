@@ -9,7 +9,7 @@ interface Query {
  * Creates a valid query params object for get requests
  * ie. plugins[18n][locale]=en becomes locale=en
  */
-const buildValidGetParams = (query: Query = {}) => {
+const buildValidParams = (query: Query = {}) => {
   // Extract pluginOptions from the query, they shouldn't be part of the URL
   const {
     plugins: _,
@@ -31,4 +31,4 @@ const buildValidGetParams = (query: Query = {}) => {
   return validQueryParams;
 };
 
-export { buildValidGetParams };
+export { buildValidParams };
