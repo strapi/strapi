@@ -141,7 +141,7 @@ describe('Transform relational data', () => {
 
     expect(data).toEqual({
       name: 'test',
-      categories: { connect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
+      categories: { connect: [{ id: 'doc1-en-draft', position: { before: 'doc2-en-draft' } }] },
       category: { connect: 'doc4-en-draft' },
     });
   });
@@ -152,7 +152,7 @@ describe('Transform relational data', () => {
       {
         data: {
           name: 'test',
-          categories: { connect: ['doc1', 'doc2', 'doc3'] },
+          categories: { connect: [{ id: 'doc1', position: { after: 'doc2' } }] },
           category: { connect: 'doc4' },
         },
       },
@@ -161,7 +161,7 @@ describe('Transform relational data', () => {
 
     expect(data).toEqual({
       name: 'test',
-      categories: { connect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
+      categories: { connect: [{ id: 'doc1-en-draft', position: { after: 'doc2-en-draft' } }] },
       category: { connect: 'doc4-en-draft' },
     });
   });
