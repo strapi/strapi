@@ -56,6 +56,19 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 
+**Get all releases with/without an entry**:
+
+- method: `GET`
+- endpoint: `/content-releases/`
+- params:
+  ```ts
+  {
+    contentTypeUid: string;
+    entryId: number;
+    hasEntryAttached?: boolean;
+  }
+  ```
+
 **Get a single release**
 
 - method: `GET`
@@ -83,6 +96,11 @@ packages/core/content-releases/server/src/routes/release.ts
   }
   ```
 
+**Delete a release**:
+
+- method: `DELETE`
+- endpoint: `/content-releases/:id`
+
 **Publish a release**:
 
 - method: `POST`
@@ -100,9 +118,22 @@ packages/core/content-releases/server/src/routes/release.ts
   {
     entry: {
       id: number,
-      contentType: string
+      contentType: string,
+      locale: string,
     }
     type: 'publish' | 'unpublish'
+  }
+  ```
+
+**Get release actions from a release**
+
+- method: `GET`
+- endpoint: `/content-releases/:releaseId/actions`
+- body:
+  ```ts
+  {
+    page: number;
+    pageSize: number;
   }
   ```
 
@@ -153,3 +184,19 @@ Exposes validation functions to run before performing operations on a Release
 ```
 packages/core/content-releases/server/src/services/validation.ts
 ```
+
+## Migrations
+
+We have two migrations that we run every time we sync the content types.
+
+### `deleteActionsOnDisableDraftAndPublish`
+
+Every time an user disabled Draft and Publish in one Content Type we make sure to remove all the release actions related to entries of that content type to avoid errors.
+
+### `deleteActionsOnDeleteContentType`
+
+Similar to last one, we make sure to delete all the release actions related to entries from a just deleted Content Type.
+
+## Subscribing to Lifecycles Events
+
+We also make sure to subscribe the delete events on the database. So we can remove actions with entries just deleted.
