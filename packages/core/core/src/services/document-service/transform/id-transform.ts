@@ -20,7 +20,7 @@ async function transformParamsDocumentId(
 ) {
   const idMap = createIdMap({ strapi });
 
-  // Data
+  // Extract any relation ids from the input
   if (input.data) {
     await extractDataRelationIds(idMap, input.data, { ...opts, uid });
   }
@@ -28,7 +28,7 @@ async function transformParamsDocumentId(
   // Load any relation the extract methods found
   await idMap.load();
 
-  // Data
+  // Transform any relation ids to entity ids
   let data = input.data;
   if (input.data) {
     data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
