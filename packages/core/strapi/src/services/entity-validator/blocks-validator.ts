@@ -38,7 +38,6 @@ const linkNodeValidator = yup.object().shape({
 
 // TODO: remove any with a correct Type
 const inlineNodeValidator: any = yup.lazy((value: { type: string }) => {
-  console.log(`validating online node of of ${value.type}`);
   switch (value.type) {
     case 'text':
       return textNodeValidator;
