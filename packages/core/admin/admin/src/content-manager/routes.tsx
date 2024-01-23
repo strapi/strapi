@@ -2,6 +2,8 @@
 import { UID } from '@strapi/types';
 import { Navigate, RouteObject, useLoaderData } from 'react-router-dom';
 
+import { routes as historyRoutes } from './history/routes';
+
 const Redirect = () => {
   const pathname = useLoaderData() as string;
 
@@ -132,6 +134,7 @@ const routes: RouteObject[] = [
           };
         },
       },
+      ...historyRoutes,
     ],
   },
 ];
