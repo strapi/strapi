@@ -1,3 +1,4 @@
+import { errors } from '@strapi/utils';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import * as qs from 'qs';
@@ -475,6 +476,124 @@ export const server = setupServer(
       } else {
         return res(ctx.status(404));
       }
+    }),
+    rest.put('/content-manager/:collectionType/:uid/:id', async (req, res, ctx) => {
+      const { id, collectionType, uid } = req.params;
+      const data = await req.json();
+
+      if (id === '12345' && collectionType === 'collection-types' && uid === 'api::test.test') {
+        return res(
+          ctx.json({
+            data: {
+              id,
+              name: 'Entry 1',
+              ...data,
+              createdAt: '',
+              updatedAt: '',
+              publishedAt: '',
+            },
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
+    }),
+    rest.post('/content-manager/:collectionType/:uid', async (req, res, ctx) => {
+      const data = await req.json();
+
+      return res(
+        ctx.json({
+          data: {
+            id: '12345',
+            ...data,
+          },
+        })
+      );
+    }),
+    rest.post('/content-manager/:collectionType/:uid/clone/:id', async (req, res, ctx) => {
+      const data = await req.json();
+
+      return res(
+        ctx.json({
+          data: {
+            id: '67890',
+            ...data,
+          },
+        })
+      );
+    }),
+    rest.post(
+      '/content-manager/:collectionType/:uid/:id/actions/publish',
+      async (req, res, ctx) => {
+        const { id } = req.params;
+
+        if (id === '12345') {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              id: '12345',
+              title: 'test',
+              publishedAt: '2024-01-23T16:23:38.948Z',
+            })
+          );
+        }
+
+        return res(
+          ctx.status(404),
+          ctx.json({
+            error: new errors.NotFoundError('Document not found'),
+          })
+        );
+      }
+    ),
+    rest.post(
+      '/content-manager/:collectionType/:uid/:id/actions/unpublish',
+      async (req, res, ctx) => {
+        const { id } = req.params;
+
+        if (id === '12345') {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              id: '12345',
+              title: 'test',
+              publishedAt: null,
+            })
+          );
+        }
+
+        return res(
+          ctx.status(404),
+          ctx.json({
+            error: new errors.NotFoundError('Document not found'),
+          })
+        );
+      }
+    ),
+    rest.delete('/content-manager/:collectionType/:uid/:id', (req, res, ctx) => {
+      const { id } = req.params;
+
+      if (id === '12345') {
+        return res(
+          ctx.status(200),
+          ctx.json({
+            id: '12345',
+            title: 'test',
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
     }),
     rest.get('/content-manager/init', (req, res, ctx) => {
       return res(

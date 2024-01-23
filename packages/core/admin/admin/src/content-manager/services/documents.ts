@@ -25,7 +25,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       Contracts.CollectionTypes.Clone.Response,
       Contracts.CollectionTypes.Clone.Params & {
         data: Contracts.CollectionTypes.Clone.Request['body'];
-        params: Contracts.CollectionTypes.Clone.Request['query'];
+        params?: Contracts.CollectionTypes.Clone.Request['query'];
       }
     >({
       query: ({ model, sourceId: id, data, params }) => ({
@@ -209,7 +209,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         model: string;
         id?: string;
         data: Contracts.CollectionTypes.Update.Request['body'];
-        params: Contracts.CollectionTypes.Update.Request['query'];
+        params?: Contracts.CollectionTypes.Update.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, data, params }) => ({
@@ -273,6 +273,7 @@ const {
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
   useGetAllDocumentsQuery,
+  useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
@@ -290,6 +291,7 @@ export {
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
   useGetAllDocumentsQuery,
+  useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,

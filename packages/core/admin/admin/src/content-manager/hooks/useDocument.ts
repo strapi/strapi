@@ -45,6 +45,7 @@ type UseDocument = (args: UseDocumentArgs) => {
 
 /**
  * @alpha
+ * @public
  * @description Returns a document based on the model, collection type & id passed as arguments.
  * Also extracts it's schema from the redux cache to be used for creating a validation schema.
  * @example
@@ -66,6 +67,8 @@ type UseDocument = (args: UseDocumentArgs) => {
  *  await update({ collectionType, model, id }, document)
  * }
  * ```
+ *
+ * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document} for more information
  */
 const useDocument: UseDocument = (args) => {
   const toggleNotification = useNotification();
@@ -110,25 +113,28 @@ const useDocument: UseDocument = (args) => {
     return createYupSchema(contentType.attributes, componentsByKey);
   }, [contentType, components]);
 
-  const validate = (document: Document) => {
-    if (!validationSchema) {
-      throw new Error(
-        'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
-      );
-    }
-
-    try {
-      validationSchema.validateSync(document, { abortEarly: false, strict: true });
-
-      return null;
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        return getYupInnerErrors(error);
+  const validate = React.useCallback(
+    (document: Document) => {
+      if (!validationSchema) {
+        throw new Error(
+          'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
+        );
       }
 
-      throw error;
-    }
-  };
+      try {
+        validationSchema.validateSync(document, { abortEarly: false, strict: true });
+
+        return null;
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          return getYupInnerErrors(error);
+        }
+
+        throw error;
+      }
+    },
+    [validationSchema]
+  );
 
   return {
     document: data?.data,
