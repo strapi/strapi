@@ -103,7 +103,7 @@ const releaseController = {
 
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
-    const releaseArgs: CreateRelease.Request['body'] = ctx.request.body;
+    const releaseArgs = ctx.request.body as CreateRelease.Request['body'];
 
     await validateRelease(releaseArgs);
 
@@ -122,7 +122,7 @@ const releaseController = {
 
   async update(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
-    const releaseArgs: UpdateRelease.Request['body'] = ctx.request.body;
+    const releaseArgs = ctx.request.body as UpdateRelease.Request['body'];
     const id: UpdateRelease.Request['params']['id'] = ctx.params.id;
 
     await validateRelease(releaseArgs);

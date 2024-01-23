@@ -9330,7 +9330,6 @@ __metadata:
     "@strapi/helper-plugin": "npm:4.17.1"
     "@strapi/icons": "npm:1.14.1"
     "@strapi/pack-up": "workspace:*"
-    "@strapi/strapi": "npm:4.17.1"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:4.17.1"
     "@testing-library/react": "npm:14.0.0"
@@ -9352,7 +9351,6 @@ __metadata:
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^4.19.0
-    "@strapi/strapi": ^4.15.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
