@@ -64,13 +64,12 @@ async function transformOutputDocumentId(uid: Common.UID.Schema, output: Record<
   // TODO: Ensure we always have documentId on output
   if (!isObject(output) || !output?.documentId) return output;
 
-  const result = await pipeAsync(
+  return pipeAsync(
     // Switch top level id -> documentId
     switchIdForDocumentId,
     // Switch relations id -> documentId
     (output) => transformRelationOutputIds(uid, output)
   )(output);
-  return result;
 }
 
 export { transformParamsDocumentId, transformOutputDocumentId };
