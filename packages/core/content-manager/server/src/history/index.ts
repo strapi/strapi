@@ -1,9 +1,6 @@
 import type { Plugin } from '@strapi/types';
-import { register } from './register';
-import { bootstrap } from './bootstrap';
 import { controllers } from './controllers';
 import { services } from './services';
-import { destroy } from './destroy';
 
 /**
  * Check once if the feature is enabled (both license info & feature flag) before loading it,
@@ -12,6 +9,13 @@ import { destroy } from './destroy';
 const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   // TODO: add license check here when it's ready on the license registry
   if (strapi.features.future.isEnabled('history')) {
+    const register: Plugin.LoadedPlugin['register'] = async () => {
+      // TODO: remove log once there are actual features
+      console.log('registering history feature');
+    };
+    const bootstrap: Plugin.LoadedPlugin['bootstrap'] = async () => {};
+    const destroy: Plugin.LoadedPlugin['destroy'] = async () => {};
+
     return {
       register,
       bootstrap,
