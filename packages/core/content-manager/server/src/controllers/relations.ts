@@ -254,47 +254,46 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
 
     if (isAnyToMany(attribute)) {
-      const [resWithOnlyIds, res] = await Promise.all([
-        strapi.entityService.loadPages(
-          model,
-          { id },
-          targetField,
-          {
-            fields: ['id'],
-          } as any,
-          {
-            page: ctx.request.query.page,
-            pageSize: ctx.request.query.pageSize,
-          }
-        ),
-        strapi.entityService.loadPages(
-          model,
-          { id },
-          targetField,
-          {
-            ...permissionQuery,
-            ordering: 'desc',
-          } as any,
-          {
-            page: ctx.request.query.page,
-            pageSize: ctx.request.query.pageSize,
-          }
-        ),
-      ]);
-
-      // Filter out the results that don't exist in resWithIds to preserve correct pagination
-      const results = res.results.filter((item: any) =>
-        resWithOnlyIds.results.some((s: any) => item.id === s.id)
+      const resWithOnlyIds = await strapi.entityService.loadPages(
+        model,
+        { id },
+        targetField,
+        {
+          fields: ['id'],
+          ordering: 'desc',
+        } as any,
+        {
+          page: ctx.request.query.page,
+          pageSize: ctx.request.query.pageSize,
+        }
       );
-      res.results = uniqBy('id', concat(results, resWithOnlyIds.results));
+      const ids = resWithOnlyIds.results.map((item: any) => item.id);
+
+      addFiltersClause(permissionQuery, { id: { $in: ids } });
+
+      const res = await strapi.entityService.loadPages(
+        model,
+        { id },
+        targetField,
+        {
+          ...permissionQuery,
+          ordering: 'desc',
+        } as any,
+        {
+          page: ctx.request.query.page,
+          pageSize: ctx.request.query.pageSize,
+        }
+      );
+
+      res.results = uniqBy('id', concat(res.results, resWithOnlyIds.results));
 
       ctx.body = res;
     } else {
       const [resWithOnlyId, res] = await Promise.all([
-        await strapi.entityService.load(model, { id }, targetField, {
+        strapi.entityService.load(model, { id }, targetField, {
           fields: ['id'],
         }),
-        await strapi.entityService.load(model, { id }, targetField, {
+        strapi.entityService.load(model, { id }, targetField, {
           ...permissionQuery,
         }),
       ]);
