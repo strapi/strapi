@@ -53,12 +53,6 @@ const App = () => {
             defaultMessage: 'Content Manager',
           })}
         />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTranslation('header.name'),
-            defaultMessage: 'Content',
-          })}
-        />
         <LoadingIndicatorPage />
       </Main>
     );

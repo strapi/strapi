@@ -5,6 +5,8 @@ import * as qs from 'qs';
 
 import { MockData, mockData } from './mockData';
 
+import type { Schema } from '../src/content-manager/hooks/useDocument';
+
 export const server = setupServer(
   ...[
     /**
@@ -599,6 +601,41 @@ export const server = setupServer(
       return res(
         ctx.json({
           data: {
+            components: [
+              {
+                info: {
+                  displayName: 'Seo',
+                },
+                uid: 'document.seo',
+                options: {},
+                attributes: {
+                  title: {
+                    type: 'string',
+                  },
+                  description: {
+                    type: 'string',
+                  },
+                  image: {
+                    type: 'media',
+                  },
+                },
+              },
+              {
+                info: {
+                  displayName: 'Image',
+                },
+                uid: 'profiles.image',
+                options: {},
+                attributes: {
+                  caption: {
+                    type: 'string',
+                  },
+                  image: {
+                    type: 'media',
+                  },
+                },
+              },
+            ],
             contentTypes: [
               {
                 uid: 'api::test.test',
@@ -609,6 +646,10 @@ export const server = setupServer(
                   name: {
                     type: 'string',
                   },
+                  seo: {
+                    type: 'component',
+                    component: 'document.seo',
+                  },
                   publishedAt: {
                     type: 'datetime',
                   },
@@ -618,7 +659,7 @@ export const server = setupServer(
                   updatedAt: {
                     type: 'datetime',
                   },
-                },
+                } satisfies Schema['attributes'],
               },
             ],
           },

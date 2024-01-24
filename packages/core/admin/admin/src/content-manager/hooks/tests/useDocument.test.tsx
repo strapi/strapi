@@ -107,6 +107,86 @@ describe('useDocument', () => {
       `"There is no validation schema generated, this is likely due to the schema not being loaded yet."`
     );
   });
+
+  it("should return the schema of the document we've fetched", async () => {
+    const { result } = renderHook(() =>
+      useDocument({
+        collectionType: 'collection-types',
+        model: 'api::test.test',
+        id: '12345',
+      })
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.schema).toMatchInlineSnapshot(`
+      {
+        "attributes": {
+          "createdAt": {
+            "type": "datetime",
+          },
+          "id": {
+            "type": "string",
+          },
+          "name": {
+            "type": "string",
+          },
+          "publishedAt": {
+            "type": "datetime",
+          },
+          "seo": {
+            "component": "document.seo",
+            "type": "component",
+          },
+          "updatedAt": {
+            "type": "datetime",
+          },
+        },
+        "uid": "api::test.test",
+      }
+    `);
+  });
+
+  it('should return the components used in that schema', async () => {
+    const { result } = renderHook(() =>
+      useDocument({
+        collectionType: 'collection-types',
+        model: 'api::test.test',
+        id: '12345',
+      })
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.components).toMatchInlineSnapshot(`
+      {
+        "document.seo": {
+          "attributes": {
+            "description": {
+              "type": "string",
+            },
+            "image": {
+              "type": "media",
+            },
+            "title": {
+              "type": "string",
+            },
+          },
+          "info": {
+            "displayName": "Seo",
+          },
+          "options": {},
+          "uid": "document.seo",
+        },
+      }
+    `);
+
+    /**
+     * This is returned by the API, but it's not in the content-type schema,
+     * so therefore should not be in the dictionary.
+     */
+    expect(result.current.components['profiles.image']).toBeUndefined();
+  });
 });
 
 /**

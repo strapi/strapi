@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { createSelector } from '@reduxjs/toolkit';
+import pipe from 'lodash/fp/pipe';
 // import { Main, ContentLayout, Grid, GridItem, Flex, Box } from '@strapi/design-system';
 import {
   CheckPermissions,
@@ -11,6 +12,8 @@ import {
   useRBAC,
   Permission,
   AllowedActions,
+  AnErrorOccurred,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 // import { Layer, Pencil } from '@strapi/icons';
 import { Attribute } from '@strapi/types';
@@ -26,21 +29,39 @@ import { useOnce } from '../../../hooks/useOnce';
 // import { EditViewDataManagerProvider } from '../../components/EditViewDataManagerProvider/Provider';
 // import { FieldComponent } from '../../components/FieldComponent';
 // import { Inputs } from '../../components/Inputs';
-import { useDoc } from '../../hooks/useDocument';
+import { Form } from '../../components/Form';
+import { Document, useDoc } from '../../hooks/useDocument';
 // import { useLazyComponents } from '../../hooks/useLazyComponents';
 import {
-  generatePermissionsObject,
+  // generatePermissionsObject,
   getFieldsActionMatchingPermissions,
 } from '../../utils/permissions';
 // import { getTranslation } from '../../utils/translations';
 
 // import { DeleteLink } from './components/DeleteLink';
 // import { DraftAndPublishBadge } from './components/DraftAndPublishBadge';
-// import { Header } from './components/Header';
+import { Header } from './components/Header';
 import { InformationBoxCE } from './components/InformationBoxCE';
 
 import type { RootState } from '../../../core/store/configure';
 import type { EditLayoutRow, FormattedLayouts } from '../../utils/layouts';
+import { prepareRelations, removeProhibitedFields } from './utils/data';
+import { createDefaultForm } from './utils/forms';
+import {
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  Main,
+  Tab,
+  TabGroup,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@strapi/design-system';
+import { DocumentActionsRBAC, useDocumentActionsRBAC } from '../../features/DocumentActionsRBAC';
+import styled from 'styled-components';
+import { getTranslation } from '../../utils/translations';
 
 // TODO: this seems suspicious
 const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -56,15 +77,9 @@ interface EditViewPageParams {
   origin?: string;
 }
 
-interface EditViewPageProps {
-  allowedActions: AllowedActions;
-  userPermissions?: Permission[];
-}
-
-const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProps) => {
+const EditViewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { slug, collectionType, id, origin } = useParams();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
@@ -102,39 +117,131 @@ const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProp
 
   // const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
-  const configurationPermissions =
-    (collectionType === 'single-types'
-      ? permissions.contentManager?.singleTypesConfigurations
-      : permissions.contentManager?.collectionTypesConfigurations) ?? [];
+  // const configurationPermissions =
+  //   (collectionType === 'single-types'
+  //     ? permissions.contentManager?.singleTypesConfigurations
+  //     : permissions.contentManager?.collectionTypesConfigurations) ?? [];
 
   // Check if a block is a dynamic zone
-  const isDynamicZone = (
-    block: EditLayoutRow[][]
-  ): block is Array<
-    Omit<EditLayoutRow, 'fieldSchema'> & {
-      fieldSchema: Attribute.DynamicZone;
-    }
-  >[] => {
-    return block.every((subBlock) => {
-      return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
-    });
-  };
+  // const isDynamicZone = (
+  //   block: EditLayoutRow[][]
+  // ): block is Array<
+  //   Omit<EditLayoutRow, 'fieldSchema'> & {
+  //     fieldSchema: Attribute.DynamicZone;
+  //   }
+  // >[] => {
+  //   return block.every((subBlock) => {
+  //     return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
+  //   });
+  // };
 
-  const { document, isLoading, validate } = useDoc();
+  const isLoadingActionsRBAC = useDocumentActionsRBAC('EditViewPage', (state) => state.isLoading);
+  const {
+    document,
+    isLoading: isLoadingDocument,
+    validate,
+    schema,
+    components,
+    collectionType,
+    model,
+    id,
+  } = useDoc();
+
+  const isSingleType = collectionType === 'single-types';
+  /**
+   * single-types don't current have an id, but because they're a singleton
+   * we can simply use the update operation to continuously update the same
+   * document with varying params.
+   */
+  const isCreatingDocument = !id && !isSingleType;
+
+  const isLoading = isLoadingActionsRBAC || isLoadingDocument;
+
+  /**
+   * Here we prepare the form for editing, we need to:
+   * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
+   * - swap out count objects on relations for empty arrays
+   * - set __temp_key__ on array objects for drag & drop
+   *
+   * We also prepare the form for new documents, so we need to:
+   * - set default values on fields
+   */
+  const initialValues = React.useMemo(() => {
+    if ((!document && !isCreatingDocument) || !schema) {
+      return undefined;
+    }
+
+    if (isCreatingDocument) {
+      return createDefaultForm(schema, components);
+    }
+
+    return pipe(removeProhibitedFields(['password']), prepareRelations)(
+      document,
+      schema,
+      components
+    ) as Document;
+  }, [document, isCreatingDocument, schema, components]);
 
   // wait until the EE component is fully loaded before rendering, to prevent flickering
   if (/*isLazyLoading ||*/ !Information || isLoading) {
-    return <LoadingIndicatorPage />;
+    return (
+      <Main aria-busy={true}>
+        <LoadingIndicatorPage />
+      </Main>
+    );
   }
 
-  if (!collectionType || !slug) {
-    return <Navigate to="/content-manager" />;
+  if (!initialValues) {
+    return (
+      <Main height="100%">
+        <Flex alignItems="center" height="100%" justifyContent="center">
+          <AnErrorOccurred />
+        </Flex>
+      </Main>
+    );
   }
 
-  // const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
-  //   getFieldsActionMatchingPermissions(userPermissions, slug);
+  const handleSubmit = async () => {};
 
-  return null;
+  const status = document?.status ?? 'draft';
+
+  return (
+    <Main paddingLeft={10} paddingRight={10}>
+      <Header isCreating={isCreatingDocument} status={status} />
+      <TabGroup variant="simple" label="Document version">
+        <StatusTabs>
+          <StatusTab>
+            {formatMessage({
+              id: getTranslation('containers.edit.tabs.draft'),
+              defaultMessage: 'draft',
+            })}
+          </StatusTab>
+          <StatusTab>
+            {formatMessage({
+              id: getTranslation('containers.edit.tabs.published'),
+              defaultMessage: 'published',
+            })}
+          </StatusTab>
+        </StatusTabs>
+        <TabPanels>
+          <TabPanel>
+            <Form
+              initialValues={initialValues}
+              onSubmit={handleSubmit}
+              method={isCreatingDocument ? 'POST' : 'PUT'}
+              // validate={validate}
+            >
+              <Grid gap={4}>
+                <GridItem col={9} s={12}>
+                  <Flex direction="column" alignItems="stretch" gap={6}></Flex>
+                </GridItem>
+              </Grid>
+            </Form>
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
+    </Main>
+  );
 
   // return (
   //   <ContentTypeFormWrapper collectionType={collectionType} slug={slug} id={id} origin={origin}>
@@ -330,30 +437,50 @@ const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProp
   // );
 };
 
+/**
+ * These style changes are implemented to match the designs,
+ * it appears this is unique to the EditView.
+ */
+const StatusTabs = styled(Tabs)`
+  border-bottom: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
+  display: flex;
+  // re-introduces the gap we removed below
+  gap: ${({ theme }) => theme.spaces[6]};
+`;
+
+const StatusTab = styled(Tab)`
+  text-transform: uppercase;
+  // removes the padding from the Tab so the button is only as wide as the given text
+  & > div {
+    padding-left: 0;
+    padding-right: 0;
+  }
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * Selectors
  * -----------------------------------------------------------------------------------------------*/
 
-const selectCustomFieldUids = createSelector(
-  (state: RootState) => state['content-manager_editViewLayoutManager'].currentLayout,
-  (layout) => {
-    if (!layout.contentType) return [];
-    // Get all the fields on the content-type and its components
-    const allFields = [
-      ...layout.contentType.layouts.edit,
-      ...Object.values(layout.components).flatMap((component) => component.layouts.edit),
-    ].flat();
+// const selectCustomFieldUids = createSelector(
+//   (state: RootState) => state['content-manager_editViewLayoutManager'].currentLayout,
+//   (layout) => {
+//     if (!layout.contentType) return [];
+//     // Get all the fields on the content-type and its components
+//     const allFields = [
+//       ...layout.contentType.layouts.edit,
+//       ...Object.values(layout.components).flatMap((component) => component.layouts.edit),
+//     ].flat();
 
-    // Filter that down to custom fields and map the uids
-    const customFieldUids = allFields
-      .filter((field) => field.fieldSchema.customField)
-      .map((customField) => customField.fieldSchema.customField!);
-    // Make sure the list is unique
-    const uniqueCustomFieldUids = [...new Set(customFieldUids)];
+//     // Filter that down to custom fields and map the uids
+//     const customFieldUids = allFields
+//       .filter((field) => field.fieldSchema.customField)
+//       .map((customField) => customField.fieldSchema.customField!);
+//     // Make sure the list is unique
+//     const uniqueCustomFieldUids = [...new Set(customFieldUids)];
 
-    return uniqueCustomFieldUids;
-  }
-);
+//     return uniqueCustomFieldUids;
+//   }
+// );
 
 /* -------------------------------------------------------------------------------------------------
  * ProtectedEditViewPage
@@ -361,21 +488,17 @@ const selectCustomFieldUids = createSelector(
 
 interface ProtectedEditViewPageProps extends Omit<EditViewPageProps, 'allowedActions'> {}
 
+/**
+ * TODO: this isn't stopping users getting to the create form if they don't have the `canCreate` action
+ * for the specific content-type.
+ */
 const ProtectedEditViewPage = ({ userPermissions = [] }: ProtectedEditViewPageProps) => {
-  const { slug } = useParams();
-  const viewPermissions = React.useMemo(() => generatePermissionsObject(slug), [slug]);
-  const { isLoading, allowedActions } = useRBAC(
-    viewPermissions,
-    // TODO: just make userPermissions undefined by default in the reducer?
-    userPermissions
+  return (
+    <DocumentActionsRBAC permissions={userPermissions}>
+      <EditViewPage />
+    </DocumentActionsRBAC>
   );
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
-  return <EditViewPage allowedActions={allowedActions} userPermissions={userPermissions} />;
 };
 
 export { EditViewPage, ProtectedEditViewPage };
-export type { EditViewPageProps, EditViewPageParams, ProtectedEditViewPageProps };
+export type { EditViewPageParams, ProtectedEditViewPageProps };

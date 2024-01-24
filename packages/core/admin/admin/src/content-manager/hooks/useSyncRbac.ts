@@ -10,7 +10,9 @@ import type { RBACState } from '../../components/RBACProvider';
 /* -------------------------------------------------------------------------------------------------
  * useSyncRbac
  * -----------------------------------------------------------------------------------------------*/
-
+/**
+ * TODO: figure out how to get rid of this.
+ */
 const useSyncRbac = (
   query: { plugins?: object },
   collectionTypeUID: string = '',

@@ -11,8 +11,6 @@ import { useSyncRbac } from '../hooks/useSyncRbac';
 
 import { ProtectedEditViewPage } from './EditView/EditViewPage';
 
-import type { FormattedLayouts } from '../utils/layouts';
-
 const { MUTATE_EDIT_VIEW_LAYOUT } = HOOKS;
 
 /* -------------------------------------------------------------------------------------------------
