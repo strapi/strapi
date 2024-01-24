@@ -150,7 +150,11 @@ describe('Single Types', () => {
               assocCreatorRoles(entity: any) {
                 return entity;
               },
+              exists: jest.fn(() => false),
               create: createFn,
+            },
+            'document-metadata': {
+              formatDocumentWithMetadata: jest.fn((model: any, obj: any) => obj),
             },
             'permission-checker': {
               create() {
@@ -186,13 +190,15 @@ describe('Single Types', () => {
     expect(permissionChecker.cannot.create).toHaveBeenCalled();
 
     expect(createFn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'test',
-        createdBy: 1,
-        updatedBy: 1,
-      }),
       modelUid,
-      { params: {} }
+      expect.objectContaining({
+        data: {
+          title: 'test',
+          createdBy: 1,
+          updatedBy: 1,
+        },
+        locale: undefined,
+      })
     );
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
@@ -293,7 +299,7 @@ describe('Single Types', () => {
 
     await singleTypes.delete(ctx);
 
-    expect(deleteFn).toHaveBeenCalledWith(entity, modelUid);
+    expect(deleteFn).toHaveBeenCalledWith(entity, modelUid, { locale: undefined });
     expect(permissionChecker.cannot.delete).toHaveBeenCalledWith(entity);
     expect(permissionChecker.sanitizeOutput).toHaveBeenCalled();
   });
