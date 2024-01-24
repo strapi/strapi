@@ -4,6 +4,7 @@ import { renderHook, server, waitFor, screen } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
+import { mockData } from '../../../../tests/mockData';
 import { useDocument, useDoc } from '../useDocument';
 
 describe('useDocument', () => {
@@ -11,7 +12,7 @@ describe('useDocument', () => {
     const { result } = renderHook(() =>
       useDocument({
         collectionType: 'collection-types',
-        model: 'api::test.test',
+        model: mockData.contentManager.contentType,
         id: '12345',
       })
     );
@@ -44,7 +45,7 @@ describe('useDocument', () => {
     const { result } = renderHook(() =>
       useDocument({
         collectionType: 'collection-types',
-        model: 'api::test.test',
+        model: mockData.contentManager.contentType,
         id: '12345',
       })
     );
@@ -60,7 +61,7 @@ describe('useDocument', () => {
     const { result } = renderHook(() =>
       useDocument({
         collectionType: 'collection-types',
-        model: 'api::test.test',
+        model: mockData.contentManager.contentType,
         id: '12345',
       })
     );
@@ -69,13 +70,16 @@ describe('useDocument', () => {
 
     expect(result.current.validate).toBeInstanceOf(Function);
 
-    expect(result.current.validate({ id: '12345', name: 'Hello there!' })).toBeNull();
+    expect(
+      result.current.validate({ id: '12345', postal_code: 'N2', notrepeat_req: {} })
+    ).toBeNull();
 
-    expect(result.current.validate({ id: '12345', name: 123 })).toMatchInlineSnapshot(`
+    expect(result.current.validate({ id: '12345', notrepeat_req: {}, postal_code: 12 }))
+      .toMatchInlineSnapshot(`
       {
-        "name": {
-          "defaultMessage": "name must be a \`string\` type, but the final value was: \`123\`.",
-          "id": "name must be a \`string\` type, but the final value was: \`123\`.",
+        "postal_code": {
+          "defaultMessage": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
+          "id": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
           "values": {
             "typeError": undefined,
           },
@@ -94,7 +98,7 @@ describe('useDocument', () => {
     const { result } = renderHook(() =>
       useDocument({
         collectionType: 'collection-types',
-        model: 'api::test.test',
+        model: mockData.contentManager.contentType,
         id: '12345',
       })
     );
@@ -102,7 +106,7 @@ describe('useDocument', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(() =>
-      result.current.validate({ id: '12345', name: 'Hello there!' })
+      result.current.validate({ id: '12345', postal_code: 'N227SN' })
     ).toThrowErrorMatchingInlineSnapshot(
       `"There is no validation schema generated, this is likely due to the schema not being loaded yet."`
     );
@@ -112,7 +116,7 @@ describe('useDocument', () => {
     const { result } = renderHook(() =>
       useDocument({
         collectionType: 'collection-types',
-        model: 'api::test.test',
+        model: mockData.contentManager.contentType,
         id: '12345',
       })
     );
@@ -121,28 +125,123 @@ describe('useDocument', () => {
 
     expect(result.current.schema).toMatchInlineSnapshot(`
       {
+        "apiID": "address",
         "attributes": {
+          "categories": {
+            "inversedBy": "addresses",
+            "relation": "manyToMany",
+            "relationType": "manyToMany",
+            "target": "api::category.category",
+            "targetModel": "api::category.category",
+            "type": "relation",
+          },
+          "city": {
+            "maxLength": 200,
+            "pluginOptions": {},
+            "required": true,
+            "type": "string",
+          },
+          "cover": {
+            "allowedTypes": [
+              "files",
+              "images",
+              "videos",
+              "audios",
+            ],
+            "multiple": false,
+            "pluginOptions": {},
+            "required": false,
+            "type": "media",
+          },
           "createdAt": {
             "type": "datetime",
+          },
+          "createdBy": {
+            "configurable": false,
+            "private": true,
+            "relation": "oneToOne",
+            "relationType": "oneToOne",
+            "target": "admin::user",
+            "targetModel": "admin::user",
+            "type": "relation",
+            "useJoinTable": false,
+            "visible": false,
+            "writable": false,
           },
           "id": {
             "type": "string",
           },
-          "name": {
+          "images": {
+            "allowedTypes": [
+              "images",
+            ],
+            "multiple": true,
+            "pluginOptions": {},
+            "required": false,
+            "type": "media",
+          },
+          "json": {
+            "pluginOptions": {},
+            "type": "json",
+          },
+          "notrepeat_req": {
+            "component": "blog.test-como",
+            "pluginOptions": {},
+            "repeatable": false,
+            "required": true,
+            "type": "component",
+          },
+          "postal_code": {
+            "maxLength": 2,
+            "pluginOptions": {},
             "type": "string",
           },
-          "publishedAt": {
-            "type": "datetime",
-          },
-          "seo": {
-            "component": "document.seo",
+          "repeat_req": {
+            "component": "blog.test-como",
+            "pluginOptions": {},
+            "repeatable": true,
+            "required": true,
             "type": "component",
+          },
+          "repeat_req_min": {
+            "component": "blog.test-como",
+            "min": 2,
+            "pluginOptions": {},
+            "repeatable": true,
+            "required": false,
+            "type": "component",
+          },
+          "slug": {
+            "type": "uid",
           },
           "updatedAt": {
             "type": "datetime",
           },
+          "updatedBy": {
+            "configurable": false,
+            "private": true,
+            "relation": "oneToOne",
+            "relationType": "oneToOne",
+            "target": "admin::user",
+            "targetModel": "admin::user",
+            "type": "relation",
+            "useJoinTable": false,
+            "visible": false,
+            "writable": false,
+          },
         },
-        "uid": "api::test.test",
+        "info": {
+          "description": "",
+          "displayName": "Address",
+          "name": "Address",
+          "pluralName": "addresses",
+          "singularName": "address",
+        },
+        "isDisplayed": true,
+        "kind": "collectionType",
+        "options": {},
+        "pluginOptions": {},
+        "uid": "api::address.address",
       }
     `);
   });
@@ -151,7 +250,7 @@ describe('useDocument', () => {
     const { result } = renderHook(() =>
       useDocument({
         collectionType: 'collection-types',
-        model: 'api::test.test',
+        model: mockData.contentManager.contentType,
         id: '12345',
       })
     );
@@ -160,23 +259,26 @@ describe('useDocument', () => {
 
     expect(result.current.components).toMatchInlineSnapshot(`
       {
-        "document.seo": {
+        "blog.test-como": {
+          "apiID": "test-como",
           "attributes": {
-            "description": {
+            "id": {
               "type": "string",
             },
-            "image": {
-              "type": "media",
-            },
-            "title": {
+            "name": {
+              "default": "toto",
               "type": "string",
             },
           },
+          "category": "blog",
           "info": {
-            "displayName": "Seo",
+            "description": "",
+            "displayName": "test comp",
+            "icon": "air-freshener",
           },
+          "isDisplayed": true,
           "options": {},
-          "uid": "document.seo",
+          "uid": "blog.test-como",
         },
       }
     `);
@@ -196,7 +298,9 @@ describe('useDocument', () => {
 describe('useDoc', () => {
   it('should return the document based on the url', async () => {
     const { result } = renderHook(() => useDoc(), {
-      initialEntries: ['/content-manager/collection-types/api::test.test/12345'],
+      initialEntries: [
+        `/content-manager/collection-types/${mockData.contentManager.contentType}/12345`,
+      ],
       wrapper: ({ children }) => (
         <Routes>
           <Route path="/content-manager/:collectionType/:slug/:id" element={children} />

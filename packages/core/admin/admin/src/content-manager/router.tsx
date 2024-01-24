@@ -1,6 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { UID } from '@strapi/types';
-import { Navigate, RouteObject, useLoaderData } from 'react-router-dom';
+import { lazy } from 'react';
+import { Navigate, RouteObject, useLoaderData, useParams } from 'react-router-dom';
 
 const Redirect = () => {
   const pathname = useLoaderData() as string;
@@ -14,14 +14,38 @@ const Redirect = () => {
   );
 };
 
+const ProtectedEditViewPage = lazy(() =>
+  import('./pages/EditView/EditViewPage').then((mod) => ({ default: mod.ProtectedEditViewPage }))
+);
+const ListViewLayoutManager = lazy(() =>
+  import('./pages/ListViewLayoutManager').then((mod) => ({ default: mod.ListViewLayoutManager }))
+);
+
+const CollectionTypePages = () => {
+  const { collectionType } = useParams<{ collectionType: string }>();
+
+  /**
+   * We only support two types of collections.
+   */
+  if (collectionType !== 'collection-types' && collectionType !== 'single-types') {
+    return <Navigate to="/404" />;
+  }
+
+  return collectionType === 'collection-types' ? (
+    <ListViewLayoutManager />
+  ) : (
+    <ProtectedEditViewPage />
+  );
+};
+
 const routes: RouteObject[] = [
   {
     path: 'content-manager/*',
     lazy: async () => {
-      const { App } = await import('./pages/App');
+      const { Layout } = await import('./layout');
 
       return {
-        Component: App,
+        Component: Layout,
       };
     },
     children: [
@@ -51,8 +75,6 @@ const routes: RouteObject[] = [
       {
         path: ':collectionType/:slug',
         lazy: async () => {
-          const { CollectionTypePages } = await import('./pages/CollectionTypePages');
-
           return {
             Component: CollectionTypePages,
           };
@@ -61,20 +83,20 @@ const routes: RouteObject[] = [
       {
         path: ':collectionType/:slug/:id',
         lazy: async () => {
-          const { EditViewLayoutManager } = await import('./pages/EditViewLayoutManager');
+          const { ProtectedEditViewPage } = await import('./pages/EditView/EditViewPage');
 
           return {
-            Component: EditViewLayoutManager,
+            Component: ProtectedEditViewPage,
           };
         },
       },
       {
         path: ':collectionType/:slug/create/clone/:origin',
         lazy: async () => {
-          const { EditViewLayoutManager } = await import('./pages/EditViewLayoutManager');
+          const { ProtectedEditViewPage } = await import('./pages/EditView/EditViewPage');
 
           return {
-            Component: EditViewLayoutManager,
+            Component: ProtectedEditViewPage,
           };
         },
       },

@@ -28,9 +28,8 @@ import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-rou
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { RBACReducer } from '../src/components/RBACProvider';
 import { Theme } from '../src/components/Theme';
-import { reducer as rbacManagerReducer } from '../src/content-manager/hooks/useSyncRbac';
-import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
-import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
+import { reducer as cmAppReducer } from '../src/content-manager/layout';
+import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
 import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
 import { contentManagerApi } from '../src/content-manager/services/api';
 import { AuthProvider } from '../src/features/Auth';
@@ -71,8 +70,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       'content-manager_app': cmAppReducer,
       [contentManagerApi.reducerPath]: contentManagerApi.reducer,
       'content-manager_listView': listViewReducer,
-      'content-manager_rbacManager': rbacManagerReducer,
-      'content-manager_editViewLayoutManager': editViewReducer,
+      'content-manager': contentManagerReducer,
     },
     // @ts-expect-error – this fails.
     middleware: (getDefaultMiddleware) => [

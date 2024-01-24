@@ -26,7 +26,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
+import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
 import { formatLayoutForSettingsView } from '../../utils/layouts';
@@ -46,7 +46,7 @@ const ListSettingsView = () => {
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { isLoading: isLoadingLayout, layout: fetchedLayout } = useContentTypeLayout(slug);
+  const { isLoading: isLoadingLayout, layout: fetchedLayout } = useDocumentLayout(slug);
 
   const { rawContentTypeLayout: layout } = React.useMemo(() => {
     let rawContentTypeLayout = null;

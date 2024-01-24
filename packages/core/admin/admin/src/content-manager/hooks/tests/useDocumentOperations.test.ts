@@ -2,6 +2,7 @@ import { errors } from '@strapi/utils';
 import { act, renderHook, screen, server } from '@tests/utils';
 import { rest } from 'msw';
 
+import { mockData } from '../../../../tests/mockData';
 import { useDocumentOperations } from '../useDocumentOperations';
 
 describe('useDocumentOperations', () => {
@@ -28,7 +29,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.clone(
           {
-            model: 'api::test.test',
+            model: mockData.contentManager.contentType,
             id: '12345',
           },
           {
@@ -71,7 +72,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.clone(
           {
-            model: 'api::test.test',
+            model: mockData.contentManager.contentType,
             id: '12345',
           },
           {
@@ -107,7 +108,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.create(
           {
-            model: 'api::test.test',
+            model: mockData.contentManager.contentType,
           },
           {
             title: 'test',
@@ -148,7 +149,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.create(
           {
-            model: 'api::test.test',
+            model: mockData.contentManager.contentType,
           },
           {
             title: 'test',
@@ -182,7 +183,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
-          model: 'api::test.test',
+          model: mockData.contentManager.contentType,
           id: '12345',
         });
 
@@ -216,7 +217,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
-          model: 'api::test.test',
+          model: mockData.contentManager.contentType,
           id: '12345',
         });
 
@@ -246,7 +247,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.publish({
           collectionType: 'collection-types',
-          model: 'api::test.test',
+          model: mockData.contentManager.contentType,
           id: '12345',
         });
 
@@ -281,7 +282,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.publish({
           collectionType: 'collection-types',
-          model: 'api::test.test',
+          model: mockData.contentManager.contentType,
           id: '12345',
         });
 
@@ -312,7 +313,7 @@ describe('useDocumentOperations', () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
-            model: 'api::test.test',
+            model: mockData.contentManager.contentType,
             id: '12345',
           },
           {
@@ -358,7 +359,7 @@ describe('useDocumentOperations', () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
-            model: 'api::test.test',
+            model: mockData.contentManager.contentType,
             id: '12345',
           },
           {
@@ -393,7 +394,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
-          model: 'api::test.test',
+          model: mockData.contentManager.contentType,
           id: '12345',
         });
 
@@ -428,7 +429,7 @@ describe('useDocumentOperations', () => {
       await act(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
-          model: 'api::test.test',
+          model: mockData.contentManager.contentType,
           id: '12345',
         });
 

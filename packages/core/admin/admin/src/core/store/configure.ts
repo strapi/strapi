@@ -7,9 +7,8 @@ import {
 } from '@reduxjs/toolkit';
 
 import { RBACReducer, RBACState } from '../../components/RBACProvider';
-import { reducer as rbacManagerReducer } from '../../content-manager/hooks/useSyncRbac';
-import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-manager/pages/App';
-import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
+import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-manager/layout';
+import { reducer as contentManagerReducers } from '../../content-manager/modules/reducers';
 import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
 import { contentManagerApi } from '../../content-manager/services/api';
 import { reducer as appReducer, AppState } from '../../reducer';
@@ -25,8 +24,7 @@ const staticReducers = {
   'content-manager_app': cmAppReducer,
   [contentManagerApi.reducerPath]: contentManagerApi.reducer,
   'content-manager_listView': listViewReducer,
-  'content-manager_rbacManager': rbacManagerReducer,
-  'content-manager_editViewLayoutManager': editViewReducer,
+  'content-manager': contentManagerReducers,
 } as const;
 
 const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => StoreEnhancer =

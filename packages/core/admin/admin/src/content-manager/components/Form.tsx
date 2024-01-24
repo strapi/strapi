@@ -33,7 +33,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   children: React.ReactNode;
   method: 'POST' | 'PUT';
   onSubmit: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
-  validate: (values: TFormValues) => object | Promise<object>;
+  validate?: (values: TFormValues) => object | null | Promise<object | null>;
 }
 
 const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
@@ -81,7 +81,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
 
     const field = name || id;
 
-    if (!field && __DEV__) {
+    // TODO: make the error DEV only.
+    if (!field /*&& __DEV__*/) {
       /**
        * TODO: add warning that there is no field
        */

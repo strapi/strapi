@@ -1,53 +1,8 @@
 import * as React from 'react';
 
 import { createSelector } from '@reduxjs/toolkit';
-import pipe from 'lodash/fp/pipe';
-// import { Main, ContentLayout, Grid, GridItem, Flex, Box } from '@strapi/design-system';
 import {
-  CheckPermissions,
-  LinkButton,
-  LoadingIndicatorPage,
-  useNotification,
-  useTracking,
-  useRBAC,
-  Permission,
-  AllowedActions,
-  AnErrorOccurred,
-  CheckPagePermissions,
-} from '@strapi/helper-plugin';
-// import { Layer, Pencil } from '@strapi/icons';
-import { Attribute } from '@strapi/types';
-import { useIntl } from 'react-intl';
-import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
-
-// import { InjectionZone } from '../../../components/InjectionZone';
-import { useTypedSelector } from '../../../core/store/hooks';
-import { useEnterprise } from '../../../hooks/useEnterprise';
-import { useOnce } from '../../../hooks/useOnce';
-// import { ContentTypeFormWrapper } from '../../components/ContentTypeFormWrapper';
-// import { DynamicZone } from '../../components/DynamicZone/Field';
-// import { EditViewDataManagerProvider } from '../../components/EditViewDataManagerProvider/Provider';
-// import { FieldComponent } from '../../components/FieldComponent';
-// import { Inputs } from '../../components/Inputs';
-import { Form } from '../../components/Form';
-import { Document, useDoc } from '../../hooks/useDocument';
-// import { useLazyComponents } from '../../hooks/useLazyComponents';
-import {
-  // generatePermissionsObject,
-  getFieldsActionMatchingPermissions,
-} from '../../utils/permissions';
-// import { getTranslation } from '../../utils/translations';
-
-// import { DeleteLink } from './components/DeleteLink';
-// import { DraftAndPublishBadge } from './components/DraftAndPublishBadge';
-import { Header } from './components/Header';
-import { InformationBoxCE } from './components/InformationBoxCE';
-
-import type { RootState } from '../../../core/store/configure';
-import type { EditLayoutRow, FormattedLayouts } from '../../utils/layouts';
-import { prepareRelations, removeProhibitedFields } from './utils/data';
-import { createDefaultForm } from './utils/forms';
-import {
+  Box,
   ContentLayout,
   Flex,
   Grid,
@@ -59,9 +14,56 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { DocumentActionsRBAC, useDocumentActionsRBAC } from '../../features/DocumentActionsRBAC';
+import {
+  CheckPermissions,
+  LinkButton,
+  LoadingIndicatorPage,
+  useNotification,
+  useTracking,
+  useRBAC,
+  Permission,
+  AllowedActions,
+  AnErrorOccurred,
+  CheckPagePermissions,
+  useQueryParams,
+} from '@strapi/helper-plugin';
+import { Attribute } from '@strapi/types';
+import pipe from 'lodash/fp/pipe';
+// import { Main, ContentLayout, Grid, GridItem, Flex, Box } from '@strapi/design-system';
+// import { Layer, Pencil } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
+
+// import { InjectionZone } from '../../../components/InjectionZone';
 import styled from 'styled-components';
+
+import { useTypedSelector } from '../../../core/store/hooks';
+import { useEnterprise } from '../../../hooks/useEnterprise';
+import { useOnce } from '../../../hooks/useOnce';
+// import { ContentTypeFormWrapper } from '../../components/ContentTypeFormWrapper';
+// import { DynamicZone } from '../../components/DynamicZone/Field';
+// import { EditViewDataManagerProvider } from '../../components/EditViewDataManagerProvider/Provider';
+// import { FieldComponent } from '../../components/FieldComponent';
+// import { Inputs } from '../../components/Inputs';
+import { Form } from '../../components/Form';
+import { DocumentActionsRBAC, useDocumentActionsRBAC } from '../../features/DocumentActionsRBAC';
+import { Document, useDoc } from '../../hooks/useDocument';
+// import { useLazyComponents } from '../../hooks/useLazyComponents';
+// import {
+//   getFieldsActionMatchingPermissions,
+// } from '../../utils/permissions';
+// import { getTranslation } from '../../utils/translations';
+
+// import { DeleteLink } from './components/DeleteLink';
+// import { DraftAndPublishBadge } from './components/DraftAndPublishBadge';
+import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
+
+import { Header } from './components/Header';
+import { InformationBoxCE } from './components/InformationBoxCE';
+import { prepareRelations, removeProhibitedFields } from './utils/data';
+import { createDefaultForm } from './utils/forms';
 
 // TODO: this seems suspicious
 const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -70,19 +72,9 @@ const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject:
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-interface EditViewPageParams {
-  collectionType: string;
-  slug: string;
-  id?: string;
-  origin?: string;
-}
-
 const EditViewPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const toggleNotification = useNotification();
   const Information = useEnterprise(
     InformationBoxCE,
@@ -92,9 +84,6 @@ const EditViewPage = () => {
           '../../../../../ee/admin/src/content-manager/pages/EditView/components/InformationBoxEE'
         )
       ).InformationBoxEE
-  );
-  const layout = useTypedSelector(
-    (state) => state['content-manager_editViewLayoutManager']['currentLayout']
   );
 
   useOnce(() => {
@@ -139,15 +128,15 @@ const EditViewPage = () => {
   const {
     document,
     isLoading: isLoadingDocument,
-    validate,
     schema,
     components,
     collectionType,
-    model,
     id,
+    model,
   } = useDoc();
 
   const isSingleType = collectionType === 'single-types';
+
   /**
    * single-types don't current have an id, but because they're a singleton
    * we can simply use the update operation to continuously update the same
@@ -156,6 +145,8 @@ const EditViewPage = () => {
   const isCreatingDocument = !id && !isSingleType;
 
   const isLoading = isLoadingActionsRBAC || isLoadingDocument;
+
+  const { edit: layout } = useDocumentLayout(model);
 
   /**
    * Here we prepare the form for editing, we need to:
@@ -209,7 +200,7 @@ const EditViewPage = () => {
     <Main paddingLeft={10} paddingRight={10}>
       <Header isCreating={isCreatingDocument} status={status} />
       <TabGroup variant="simple" label="Document version">
-        <StatusTabs>
+        <Tabs>
           <StatusTab>
             {formatMessage({
               id: getTranslation('containers.edit.tabs.draft'),
@@ -222,7 +213,7 @@ const EditViewPage = () => {
               defaultMessage: 'published',
             })}
           </StatusTab>
-        </StatusTabs>
+        </Tabs>
         <TabPanels>
           <TabPanel>
             <Form
@@ -231,9 +222,73 @@ const EditViewPage = () => {
               method={isCreatingDocument ? 'POST' : 'PUT'}
               // validate={validate}
             >
-              <Grid gap={4}>
+              <Grid paddingTop={8} gap={4}>
                 <GridItem col={9} s={12}>
-                  <Flex direction="column" alignItems="stretch" gap={6}></Flex>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    {layout.schema.map((panel, index) => {
+                      if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
+                        return <h1 key={index}>dynamic zone pls</h1>;
+                      }
+
+                      return (
+                        <Box
+                          key={index}
+                          hasRadius
+                          background="neutral0"
+                          shadow="tableShadow"
+                          paddingLeft={6}
+                          paddingRight={6}
+                          paddingTop={6}
+                          paddingBottom={6}
+                          borderColor="neutral150"
+                        >
+                          <Flex direction="column" alignItems="stretch" gap={6}>
+                            {panel.map((row, gridRowIndex) => (
+                              <Grid key={gridRowIndex} gap={4}>
+                                {row.map((field) => {
+                                  if (field.type === 'component') {
+                                    // const {
+                                    //   component,
+                                    //   max,
+                                    //   min,
+                                    //   repeatable = false,
+                                    //   required = false,
+                                    // } = fieldSchema;
+                                    // return (
+                                    //   <GridItem col={size} s={12} xs={12} key={component}>
+                                    //     <FieldComponent
+                                    //       componentUid={component}
+                                    //       isRepeatable={repeatable}
+                                    //       intlLabel={{
+                                    //         id: metadatas.label,
+                                    //         defaultMessage: metadatas.label,
+                                    //       }}
+                                    //       max={max}
+                                    //       min={min}
+                                    //       name={name}
+                                    //       required={required}
+                                    //       {...restProps}
+                                    //     />
+                                    //   </GridItem>
+                                    // );
+
+                                    return 'component';
+                                  }
+
+                                  return (
+                                    <GridItem col={field.size} key={field.name} s={12} xs={12}>
+                                      {/* <Inputs {...field} /> */}
+                                      field
+                                    </GridItem>
+                                  );
+                                })}
+                              </Grid>
+                            ))}
+                          </Flex>
+                        </Box>
+                      );
+                    })}
+                  </Flex>
                 </GridItem>
               </Grid>
             </Form>
@@ -437,24 +492,8 @@ const EditViewPage = () => {
   // );
 };
 
-/**
- * These style changes are implemented to match the designs,
- * it appears this is unique to the EditView.
- */
-const StatusTabs = styled(Tabs)`
-  border-bottom: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
-  display: flex;
-  // re-introduces the gap we removed below
-  gap: ${({ theme }) => theme.spaces[6]};
-`;
-
 const StatusTab = styled(Tab)`
   text-transform: uppercase;
-  // removes the padding from the Tab so the button is only as wide as the given text
-  & > div {
-    padding-left: 0;
-    padding-right: 0;
-  }
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -486,19 +525,36 @@ const StatusTab = styled(Tab)`
  * ProtectedEditViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-interface ProtectedEditViewPageProps extends Omit<EditViewPageProps, 'allowedActions'> {}
+const ProtectedEditViewPage = () => {
+  const { model } = useDoc();
+  const [{ query }] = useQueryParams();
+  const { permissions = [], isLoading, isError } = useSyncRbac(model, query, 'editView');
 
-/**
- * TODO: this isn't stopping users getting to the create form if they don't have the `canCreate` action
- * for the specific content-type.
- */
-const ProtectedEditViewPage = ({ userPermissions = [] }: ProtectedEditViewPageProps) => {
+  if (isLoading) {
+    return (
+      <Main aria-busy={true}>
+        <LoadingIndicatorPage />
+      </Main>
+    );
+  }
+
+  if (!isLoading && isError) {
+    return (
+      <Main height="100%">
+        <Flex alignItems="center" height="100%" justifyContent="center">
+          <AnErrorOccurred />
+        </Flex>
+      </Main>
+    );
+  }
+
   return (
-    <DocumentActionsRBAC permissions={userPermissions}>
-      <EditViewPage />
-    </DocumentActionsRBAC>
+    <CheckPagePermissions permissions={permissions}>
+      <DocumentActionsRBAC permissions={permissions}>
+        <EditViewPage />
+      </DocumentActionsRBAC>
+    </CheckPagePermissions>
   );
 };
 
 export { EditViewPage, ProtectedEditViewPage };
-export type { EditViewPageParams, ProtectedEditViewPageProps };

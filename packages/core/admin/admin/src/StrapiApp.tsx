@@ -31,7 +31,7 @@ import {
 } from './components/InjectionZone';
 import { Providers } from './components/Providers';
 import { HOOKS } from './constants';
-import { routes as cmRoutes } from './content-manager/routes';
+import { routes as cmRoutes } from './content-manager/router';
 import { Components, Component } from './core/apis/Components';
 import { CustomFields } from './core/apis/CustomFields';
 import { Field, Fields } from './core/apis/Fields';

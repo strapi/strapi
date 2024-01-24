@@ -460,10 +460,28 @@ export const server = setupServer(
      * CONTENT_MANAGER
      *
      */
+    rest.put('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+      return res(ctx.status(200));
+    }),
+    rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: mockData.contentManager.configuration,
+        })
+      );
+    }),
     rest.get('/content-manager/:collectionType/:uid/:id', (req, res, ctx) => {
       const { id, collectionType, uid } = req.params;
 
-      if (id === '12345' && collectionType === 'collection-types' && uid === 'api::test.test') {
+      if (id === 'configuration') {
+        return;
+      }
+
+      if (
+        id === '12345' &&
+        collectionType === 'collection-types' &&
+        uid === mockData.contentManager.contentType
+      ) {
         return res(
           ctx.json({
             data: {
@@ -476,14 +494,21 @@ export const server = setupServer(
           })
         );
       } else {
-        return res(ctx.status(404));
+        return res(
+          ctx.status(404),
+          ctx.json({ error: new errors.NotFoundError('Document not found') })
+        );
       }
     }),
     rest.put('/content-manager/:collectionType/:uid/:id', async (req, res, ctx) => {
       const { id, collectionType, uid } = req.params;
       const data = await req.json();
 
-      if (id === '12345' && collectionType === 'collection-types' && uid === 'api::test.test') {
+      if (
+        id === '12345' &&
+        collectionType === 'collection-types' &&
+        uid === mockData.contentManager.contentType
+      ) {
         return res(
           ctx.json({
             data: {
@@ -601,78 +626,9 @@ export const server = setupServer(
       return res(
         ctx.json({
           data: {
-            components: [
-              {
-                info: {
-                  displayName: 'Seo',
-                },
-                uid: 'document.seo',
-                options: {},
-                attributes: {
-                  title: {
-                    type: 'string',
-                  },
-                  description: {
-                    type: 'string',
-                  },
-                  image: {
-                    type: 'media',
-                  },
-                },
-              },
-              {
-                info: {
-                  displayName: 'Image',
-                },
-                uid: 'profiles.image',
-                options: {},
-                attributes: {
-                  caption: {
-                    type: 'string',
-                  },
-                  image: {
-                    type: 'media',
-                  },
-                },
-              },
-            ],
-            contentTypes: [
-              {
-                uid: 'api::test.test',
-                attributes: {
-                  id: {
-                    type: 'string',
-                  },
-                  name: {
-                    type: 'string',
-                  },
-                  seo: {
-                    type: 'component',
-                    component: 'document.seo',
-                  },
-                  publishedAt: {
-                    type: 'datetime',
-                  },
-                  createdAt: {
-                    type: 'datetime',
-                  },
-                  updatedAt: {
-                    type: 'datetime',
-                  },
-                } satisfies Schema['attributes'],
-              },
-            ],
+            components: mockData.contentManager.components,
+            contentTypes: mockData.contentManager.contentTypes,
           },
-        })
-      );
-    }),
-    rest.put('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
-      return res(ctx.status(200));
-    }),
-    rest.get('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
-      return res(
-        ctx.json({
-          data: mockData.contentManager.layout,
         })
       );
     }),
@@ -717,7 +673,7 @@ export const server = setupServer(
         })
       );
     }),
-    rest.get('*/content-manager/content-types', (req, res, ctx) =>
+    rest.get('/content-manager/content-types', (req, res, ctx) =>
       res(
         ctx.json({
           data: [
@@ -750,7 +706,7 @@ export const server = setupServer(
         })
       )
     ),
-    rest.get('*/content-manager/components', (req, res, ctx) =>
+    rest.get('/content-manager/components', (req, res, ctx) =>
       res(
         ctx.json({
           data: [

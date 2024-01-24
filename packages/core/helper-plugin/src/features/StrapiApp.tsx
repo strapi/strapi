@@ -109,9 +109,9 @@ const StrapiAppContext = React.createContext<StrapiAppContextValue>({
   settings: {},
   // These functions are required but should not resolve to undefined as they do here
   runHookParallel: () => Promise.resolve(),
-  runHookWaterfall: () => Promise.resolve(),
+  runHookWaterfall: (_name, data) => data,
   // @ts-expect-error – TODO: fix this.
-  runHookSeries: () => Promise.resolve(),
+  runHookSeries: () => {},
 });
 
 /* -------------------------------------------------------------------------------------------------

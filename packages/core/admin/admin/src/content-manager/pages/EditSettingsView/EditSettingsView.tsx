@@ -4,14 +4,14 @@ import { AnErrorOccurred, CheckPagePermissions, LoadingIndicatorPage } from '@st
 import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
+import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { type SettingsViewComponentLayout, formatLayoutForSettingsView } from '../../utils/layouts';
 
 import { SettingsForm } from './components/SettingsForm/SettingsForm';
 
 const EditSettingsView = () => {
   const { slug } = useParams();
-  const { isLoading, layout } = useContentTypeLayout(slug);
+  const { isLoading, layout } = useDocumentLayout(slug);
 
   const { rawContentTypeLayout, rawComponentsLayouts } = React.useMemo(() => {
     let rawContentTypeLayout = null;

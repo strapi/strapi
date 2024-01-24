@@ -5,8 +5,8 @@ import produce from 'immer';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useTypedDispatch } from '../../core/store/hooks';
+import { useDocumentLayout } from '../hooks/useDocumentLayout';
 import { useFindRedirectionLink } from '../hooks/useFindRedirectionLink';
-import { useContentTypeLayout } from '../hooks/useLayouts';
 import { useSyncRbac } from '../hooks/useSyncRbac';
 import { FormattedLayouts, ListLayoutRow } from '../utils/layouts';
 
@@ -17,40 +17,36 @@ import { ProtectedListViewPage } from './ListView/ListViewPage';
  * -----------------------------------------------------------------------------------------------*/
 
 const ListViewLayoutManager = () => {
+  return null;
+
   const dispatch = useTypedDispatch();
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const [{ query, rawQuery }] = useQueryParams();
-  const { permissions, isValid: isValidPermissions } = useSyncRbac(query, slug, 'listView');
-  const { isLoading, layout } = useContentTypeLayout(slug, 'list');
+  const { permissions, isError } = useSyncRbac(query, slug, 'listView');
+  const { isLoading, list: layout } = useDocumentLayout(slug);
   const redirectionLink = useFindRedirectionLink(slug ?? '');
-
   React.useEffect(() => {
     if (!rawQuery) {
       navigate(redirectionLink, { replace: true });
     }
   }, [rawQuery, navigate, redirectionLink]);
-
   React.useEffect(() => {
     if (layout) {
       dispatch(setLayout(layout));
     }
   }, [dispatch, layout]);
-
   React.useEffect(() => {
     return () => {
       dispatch(resetProps());
     };
   }, [dispatch]);
-
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
-
-  if (!isValidPermissions || !layout) {
+  if (!isError || !layout) {
     return null;
   }
-
   return <ProtectedListViewPage layout={layout} permissions={permissions} />;
 };
 

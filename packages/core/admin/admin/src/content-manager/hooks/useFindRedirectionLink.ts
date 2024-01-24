@@ -4,7 +4,7 @@ import QueryString, { parse, stringify } from 'qs';
 import { useTypedSelector } from '../../core/store/hooks';
 import { isObject } from '../../utils/objects';
 
-import type { ContentManagerAppState } from '../pages/App';
+import type { ContentManagerAppState } from '../layout';
 
 const useFindRedirectionLink = (slug: string) => {
   const [{ rawQuery }] = useQueryParams();

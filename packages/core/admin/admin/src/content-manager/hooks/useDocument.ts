@@ -51,6 +51,9 @@ type UseDocument = (
   document?: Document;
   meta?: Contracts.CollectionTypes.FindOne.Response['meta'];
   isLoading: boolean;
+  /**
+   * This is the schema of the content type, it is not the same as the layout.
+   */
   schema?: Schema;
   validate: (document: Document) => null | Record<string, TranslationMessage>;
 };
