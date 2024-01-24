@@ -16,10 +16,9 @@ import {
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
 
+import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { Filters } from '../../../../../../../admin/src/pages/Settings/components/Filters';
-import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
 import { SanitizedAdminUserForAuditLogs } from '../../../../../../../shared/contracts/audit-logs';
 
 import { Modal } from './components/Modal';
@@ -28,19 +27,25 @@ import { TableHeader, TableRows } from './components/TableRows';
 import { useAuditLogsData } from './hooks/useAuditLogsData';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
 
-export const ListView = () => {
+const ListPage = () => {
   const { formatMessage } = useIntl();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
 
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
+    isLoading: isLoadingRBAC,
   } = useRBAC({
-    ...permissions.settings?.auditLogs,
-    readUsers: permissions.settings?.users.read || [],
+    ...permissions?.auditLogs,
+    readUsers: permissions?.users.read || [],
   });
 
   const [{ query }, setQuery] = useQueryParams<{ id?: string | null }>();
-  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({
+  const {
+    auditLogs,
+    users,
+    isLoading: isLoadingData,
+    hasError,
+  } = useAuditLogsData({
     canReadAuditLogs,
     canReadUsers,
   });
@@ -48,11 +53,6 @@ export const ListView = () => {
   useFocusWhenNavigate();
 
   const displayedFilters = getDisplayedFilters({ formatMessage, users, canReadUsers });
-
-  const title = formatMessage({
-    id: 'global.auditLogs',
-    defaultMessage: 'Audit Logs',
-  });
 
   const headers = [
     {
@@ -104,17 +104,26 @@ export const ListView = () => {
     );
   }
 
+  const isLoading = isLoadingData || isLoadingRBAC;
+
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle name={title} />
+      <SettingsPageTitle
+        name={formatMessage({
+          id: 'global.auditLogs',
+          defaultMessage: 'Audit Logs',
+        })}
+      />
       <HeaderLayout
-        title={title}
+        title={formatMessage({
+          id: 'global.auditLogs',
+          defaultMessage: 'Audit Logs',
+        })}
         subtitle={formatMessage({
           id: 'Settings.permissions.auditLogs.listview.header.subtitle',
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
-      {/* @ts-expect-error – TODO: fix the way filters work and are passed around, this will be a headache. */}
       <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
       <ContentLayout>
         <DynamicTable
@@ -137,12 +146,16 @@ export const ListView = () => {
   );
 };
 
-export const ProtectedAuditLogsListPage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+const ProtectedListPage = () => {
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.auditLogs?.main
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.auditLogs?.main}>
-      <ListView />
+    <CheckPagePermissions permissions={permissions}>
+      <ListPage />
     </CheckPagePermissions>
   );
 };
+
+export { ListPage, ProtectedListPage };

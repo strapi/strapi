@@ -22,7 +22,7 @@ interface Workflow extends Entity {
 namespace GetAll {
   export interface Request {
     body: {};
-    query: EntityService.Params.Pick<'admin::review-workflow', 'filters'>;
+    query: EntityService.Params.Pick<'admin::review-workflow', 'filters' | 'populate:string'>;
   }
 
   export interface Response {
@@ -66,7 +66,7 @@ namespace Update {
 
 namespace Create {
   export interface Request {
-    body: Workflow;
+    body: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'>;
     query: {};
   }
 

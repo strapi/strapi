@@ -11,7 +11,7 @@ const Logo = () => {
     logos: { auth },
   } = useConfiguration('UnauthenticatedLogo');
 
-  return <Img src={auth?.custom?.url ?? auth.default} aria-hidden alt="" />;
+  return <Img src={auth?.custom?.url || auth.default} aria-hidden alt="" />;
 };
 
 export { Logo };

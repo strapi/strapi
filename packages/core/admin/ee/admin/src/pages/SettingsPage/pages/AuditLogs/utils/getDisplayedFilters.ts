@@ -1,3 +1,4 @@
+import { FilterData } from '@strapi/helper-plugin';
 import { IntlShape } from 'react-intl';
 
 import { SanitizedAdminUser } from '../../../../../../../../shared/contracts/shared';
@@ -24,21 +25,7 @@ export const getDisplayedFilters = ({
   formatMessage: IntlShape['formatMessage'];
   users: SanitizedAdminUser[];
   canReadUsers: boolean;
-}) => {
-  // Default return of Object.keys function is string
-  const actionOptions = (Object.keys(actionTypes) as (keyof typeof actionTypes)[]).map((action) => {
-    return {
-      label: formatMessage(
-        {
-          id: `Settings.permissions.auditLogs.${action}`,
-          defaultMessage: getDefaultMessage(action),
-        },
-        { model: undefined }
-      ),
-      customValue: action,
-    };
-  });
-
+}): FilterData[] => {
   const filters = [
     {
       name: 'action',
@@ -49,7 +36,17 @@ export const getDisplayedFilters = ({
           defaultMessage: 'Action',
         }),
         customInput: ComboboxFilter,
-        options: actionOptions,
+        // Default return of Object.keys function is string
+        options: (Object.keys(actionTypes) as (keyof typeof actionTypes)[]).map((action) => ({
+          label: formatMessage(
+            {
+              id: `Settings.permissions.auditLogs.${action}`,
+              defaultMessage: getDefaultMessage(action),
+            },
+            { model: undefined }
+          ),
+          customValue: action,
+        })),
       },
       fieldSchema: { type: 'enumeration' },
     },
@@ -63,7 +60,7 @@ export const getDisplayedFilters = ({
       },
       fieldSchema: { type: 'datetime' },
     },
-  ];
+  ] satisfies FilterData[];
 
   if (canReadUsers && users) {
     const getDisplayNameFromUser = (user: SanitizedAdminUser) => {
@@ -87,14 +84,6 @@ export const getDisplayedFilters = ({
       return user.email;
     };
 
-    const userOptions = users.map((user) => {
-      return {
-        label: getDisplayNameFromUser(user),
-        // Combobox expects a string value
-        customValue: user.id.toString(),
-      };
-    });
-
     return [
       ...filters,
       {
@@ -105,11 +94,15 @@ export const getDisplayedFilters = ({
             id: 'Settings.permissions.auditLogs.user',
             defaultMessage: 'User',
           }),
-          options: userOptions,
+          options: users.map((user) => ({
+            label: getDisplayNameFromUser(user),
+            // Combobox expects a string value
+            customValue: user.id.toString(),
+          })),
           customInput: ComboboxFilter,
         },
         fieldSchema: { type: 'relation', mainField: { name: 'id' } },
-      },
+      } satisfies FilterData,
     ];
   }
 

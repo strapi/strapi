@@ -147,7 +147,7 @@ describe('EE | Content Manager | EditView | InformationBox | AssigneeSelect', ()
     await user.click(getByRole('combobox'));
     await user.click(getByText('John Doe'));
 
-    await findByText('Request failed with status code 500');
+    await findByText('There was an unknown error response from the API');
 
     console.error = origConsoleError;
   });

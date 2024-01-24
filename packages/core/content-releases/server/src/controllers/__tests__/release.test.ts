@@ -1,14 +1,16 @@
 import releaseController from '../release';
 
 const mockFindPage = jest.fn();
-const mockFindManyForContentTypeEntry = jest.fn();
+const mockFindManyWithContentTypeEntryAttached = jest.fn();
+const mockFindManyWithoutContentTypeEntryAttached = jest.fn();
 const mockCountActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
     findOne: jest.fn(() => ({ id: 1 })),
     findPage: mockFindPage,
-    findManyForContentTypeEntry: mockFindManyForContentTypeEntry,
+    findManyWithContentTypeEntryAttached: mockFindManyWithContentTypeEntryAttached,
+    findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
     countActions: mockCountActions,
     getContentTypesDataForActions: jest.fn(),
   })),
@@ -19,7 +21,7 @@ describe('Release controller', () => {
   describe('findMany', () => {
     it('should call findPage', async () => {
       mockFindPage.mockResolvedValue({ results: [], pagination: {} });
-      mockFindManyForContentTypeEntry.mockResolvedValue([]);
+      mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -53,9 +55,9 @@ describe('Release controller', () => {
       expect(mockFindPage).toHaveBeenCalled();
     });
 
-    it('should call findManyForContentTypeEntry', async () => {
+    it('should call findManyWithoutContentTypeEntryAttached', async () => {
       mockFindPage.mockResolvedValue({ results: [], pagination: {} });
-      mockFindManyForContentTypeEntry.mockResolvedValue([]);
+      mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -86,7 +88,7 @@ describe('Release controller', () => {
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(mockFindManyForContentTypeEntry).toHaveBeenCalled();
+      expect(mockFindManyWithoutContentTypeEntryAttached).toHaveBeenCalled();
     });
   });
   describe('create', () => {
@@ -162,6 +164,24 @@ describe('Release controller', () => {
               createPermissionsManager: jest.fn(() => ({
                 sanitizeOutput: jest.fn(),
               })),
+            },
+          },
+        },
+        plugins: {
+          // @ts-expect-error Ignore missing properties
+          'content-manager': {
+            services: {
+              'content-types': {
+                findAllContentTypes: jest
+                  .fn()
+                  .mockReturnValue([
+                    { uid: 'api::contentTypeA.contentTypeA' },
+                    { uid: 'api::contentTypeB.contentTypeB' },
+                  ]),
+              },
+              components: {
+                findAllComponents: jest.fn().mockReturnValue([{ uid: 'component.component' }]),
+              },
             },
           },
         },

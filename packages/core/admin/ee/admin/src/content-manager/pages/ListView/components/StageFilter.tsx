@@ -17,10 +17,9 @@ interface StageFilterProps extends Pick<SingleSelectProps, 'value' | 'onChange'>
 
 const StageFilter = ({ value, onChange, uid }: StageFilterProps) => {
   const { formatMessage } = useIntl();
-  const {
-    workflows: [workflow],
-    isLoading,
-  } = useReviewWorkflows({ filters: { contentTypes: uid } });
+  const { workflows, isLoading } = useReviewWorkflows({ filters: { contentTypes: uid } });
+
+  const [workflow] = workflows ?? [];
 
   return (
     <SingleSelect
