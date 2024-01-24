@@ -124,23 +124,6 @@ const InputUID = React.forwardRef<
       }
     }, [defaultGeneratedUID, name, onChange]);
 
-    // const { mutate: generateUID, isLoading: isGeneratingUID } = useMutation<
-    //   Contracts.UID.GenerateUID.Response['data'],
-    //   Contracts.UID.GenerateUID.Response['error'],
-    //   Contracts.UID.GenerateUID.Request['body']
-    // >({
-    //   async mutationFn(body) {
-    //     const {
-    //       data: { data },
-    //     } = await post<
-    //       Contracts.UID.GenerateUID.Response,
-    //       AxiosResponse<Contracts.UID.GenerateUID.Response>,
-    //       Contracts.UID.GenerateUID.Request['body']
-    //     >('/content-manager/uid/generate', {
-    //       ...body,
-    //       locale: params?.locale,
-    //     });
-    // TODO check locale is being passed correctly in new changes
     const [generateUID, { isLoading: isGeneratingUID }] = useGenerateUIDMutation();
 
     const handleRegenerateClick = async () => {
@@ -169,24 +152,6 @@ const InputUID = React.forwardRef<
       }
     };
 
-    // const { data: availabilityData, isLoading: isCheckingAvailability } = useQuery({
-    //   queryKey: [
-    //     'uid',
-    //     { contentTypeUID, field: name, value: debouncedValue ? debouncedValue.trim() : '' },
-    //   ] as const,
-    //   async queryFn({ queryKey }) {
-    //     const [, body] = queryKey;
-
-    //     const { data } = await post<
-    //       Contracts.UID.CheckUIDAvailability.Response,
-    //       AxiosResponse<Contracts.UID.CheckUIDAvailability.Response>,
-    //       Contracts.UID.CheckUIDAvailability.Request['body']
-    //     >('/content-manager/uid/check-availability', {
-    //       ...body,
-    //       locale: params?.locale,
-    //     });
-
-    //     return data;
     const {
       data: availabilityData,
       isLoading: isCheckingAvailability,
