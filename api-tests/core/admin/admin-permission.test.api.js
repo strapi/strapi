@@ -102,9 +102,7 @@ describe('Role CRUD End to End', () => {
                     "locales",
                   ],
                   "label": "Publish",
-                  "subjects": [
-                    "plugin::users-permissions.user",
-                  ],
+                  "subjects": [],
                 },
               ],
               [
@@ -178,6 +176,48 @@ describe('Role CRUD End to End', () => {
                 "displayName": "Configure view",
                 "plugin": "content-manager",
                 "subCategory": "single types",
+              },
+              {
+                "action": "plugin::content-releases.create",
+                "displayName": "Create",
+                "plugin": "content-releases",
+                "subCategory": "general",
+              },
+              {
+                "action": "plugin::content-releases.create-action",
+                "displayName": "Add an entry to a release",
+                "plugin": "content-releases",
+                "subCategory": "general",
+              },
+              {
+                "action": "plugin::content-releases.delete",
+                "displayName": "Delete",
+                "plugin": "content-releases",
+                "subCategory": "general",
+              },
+              {
+                "action": "plugin::content-releases.delete-action",
+                "displayName": "Remove an entry from a release",
+                "plugin": "content-releases",
+                "subCategory": "general",
+              },
+              {
+                "action": "plugin::content-releases.publish",
+                "displayName": "Publish",
+                "plugin": "content-releases",
+                "subCategory": "general",
+              },
+              {
+                "action": "plugin::content-releases.read",
+                "displayName": "Read",
+                "plugin": "content-releases",
+                "subCategory": "general",
+              },
+              {
+                "action": "plugin::content-releases.update",
+                "displayName": "Edit",
+                "plugin": "content-releases",
+                "subCategory": "general",
               },
               {
                 "action": "plugin::content-type-builder.read",
@@ -599,9 +639,7 @@ describe('Role CRUD End to End', () => {
                     "locales",
                   ],
                   "label": "Publish",
-                  "subjects": [
-                    "plugin::users-permissions.user",
-                  ],
+                  "subjects": [],
                 },
               ],
               [],

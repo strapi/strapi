@@ -61,7 +61,7 @@ export interface UniqueOption {
 }
 
 export interface DefaultOption<T> {
-  default?: T;
+  default?: T | (() => T);
 }
 
 export interface ConfigurableOption {

@@ -1,52 +1,44 @@
 import * as React from 'react';
 
-import { CheckPagePermissions, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
-import axios, { CancelTokenSource } from 'axios';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  useAPIErrorHandler,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../core/store/hooks';
-import { getData, getDataSucceeded } from '../sharedReducers/crud/actions';
-import { reducer, initialState } from '../sharedReducers/crud/reducer';
+import { useGetComponentConfigurationQuery } from '../services/components';
 import { mergeMetasWithSchema } from '../utils/schemas';
 
 import { selectSchemas } from './App';
-// @ts-expect-error – This will be done in CONTENT-1952
-import { EditSettingsView } from './EditSettingsView';
+import { SettingsForm } from './EditSettingsView/components/SettingsForm/SettingsForm';
 
 const ComponentSettingsView = () => {
-  const [{ isLoading, data: layout }, dispatch] = React.useReducer(reducer, initialState);
   const schemas = useTypedSelector(selectSchemas);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { uid } = useParams<{ uid: string }>();
-  const { get } = useFetchClient();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const toggleNotification = useNotification();
+
+  const { data, isLoading, error } = useGetComponentConfigurationQuery(uid!, {
+    skip: !uid,
+  });
 
   React.useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-    const fetchData = async (source: CancelTokenSource) => {
-      try {
-        dispatch(getData());
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+    }
+  }, [error, formatAPIError, toggleNotification]);
 
-        const {
-          data: { data },
-        } = await get(`/content-manager/components/${uid}/configuration`, {
-          cancelToken: source.token,
-        });
-        dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
-      } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-        console.error(err);
-      }
-    };
-
-    fetchData(source);
-
-    return () => {
-      source.cancel('Operation canceled by the user.');
-    };
-  }, [uid, schemas, get]);
+  const layout = React.useMemo(
+    () => (data ? mergeMetasWithSchema(data, schemas, 'component') : null),
+    [data, schemas]
+  );
 
   if (isLoading || !layout) {
     return <LoadingIndicatorPage />;
@@ -54,7 +46,7 @@ const ComponentSettingsView = () => {
 
   return (
     <CheckPagePermissions permissions={permissions.contentManager?.componentsConfigurations}>
-      <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
+      <SettingsForm components={layout.components} layout={layout.component} />
     </CheckPagePermissions>
   );
 };

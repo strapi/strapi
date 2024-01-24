@@ -46,7 +46,7 @@
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts,jsx,tsx,json}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
-    "setup": "yarn && yarn clean && yarn build",
+    "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node test/scripts/run-api-tests.js",
     "test:clean": "rimraf ./coverage",
     "test:cli": "node test/scripts/run-cli-tests.js",

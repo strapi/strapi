@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { BuildCLIOptions, ConfigBundle, build } from '@strapi/pack-up';
 
 import { forceOption } from '../../utils/commander';
-import { runAction, notifyExperimentalCommand } from '../../utils/helpers';
+import { runAction } from '../../utils/helpers';
 import { Export, loadPkg, validatePkg } from '../../utils/pkg';
 import type { CLIContext, StrapiCommand } from '../../types';
 
@@ -22,11 +22,6 @@ const action = async (
      * ALWAYS set production for using plugin build CLI.
      */
     process.env.NODE_ENV = 'production';
-    /**
-     * Notify users this is an experimental command and get them to approve first
-     * this can be opted out by setting the argument --force
-     */
-    await notifyExperimentalCommand('plugin:build', { force });
 
     const pkg = await loadPkg({ cwd, logger });
     const pkgJson = await validatePkg({ pkg });

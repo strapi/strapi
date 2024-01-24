@@ -2,6 +2,7 @@ import { pick } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 
 import type Koa from 'koa';
+import type {} from 'koa-body';
 import type { EmailConfig, SendOptions } from '../types';
 
 const { ApplicationError } = errors;
@@ -13,7 +14,7 @@ const { ApplicationError } = errors;
  */
 const emailController = {
   async send(ctx: Koa.Context) {
-    const options: SendOptions = ctx.request.body;
+    const options = ctx.request.body as SendOptions;
 
     try {
       await strapi.plugin('email').service('email').send(options);
@@ -32,7 +33,7 @@ const emailController = {
   },
 
   async test(ctx: Koa.Context) {
-    const { to } = ctx.request.body;
+    const { to } = ctx.request.body as Pick<SendOptions, 'to'>;
 
     if (!to) {
       throw new ApplicationError('No recipient(s) are given');

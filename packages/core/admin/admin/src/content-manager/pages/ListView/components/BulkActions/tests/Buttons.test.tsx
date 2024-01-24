@@ -17,35 +17,79 @@ jest.mock('../SelectedEntriesModal', () => ({
   SelectedEntriesModal: () => <div>SelectedEntriesModal</div>,
 }));
 
+const DEFAULT_DATA = [
+  { id: 1, publishedAt: null },
+  { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
+];
+
 describe('BulkActionsBar', () => {
   it('should render publish buttons if showPublish is true', async () => {
-    render(<BulkActionButtons showPublish />);
+    render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showPublish
+      />
+    );
 
     expect(screen.getByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /\bUnpublish\b/ })).toBeInTheDocument();
   });
 
   it('should not render publish buttons if showPublish is false', () => {
-    render(<BulkActionButtons />);
+    render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+      />
+    );
 
     expect(screen.queryByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
   });
 
   it('should render delete button if showDelete is true', () => {
-    render(<BulkActionButtons showDelete />);
+    render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showDelete
+      />
+    );
 
     expect(screen.getByRole('button', { name: /\bDelete\b/ })).toBeInTheDocument();
   });
 
   it('should not render delete button if showDelete is false', () => {
-    render(<BulkActionButtons showPublish />);
+    render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showPublish
+      />
+    );
 
     expect(screen.queryByRole('button', { name: /\bDelete\b/ })).not.toBeInTheDocument();
   });
 
   it('should show delete modal if delete button is clicked', async () => {
-    const { user } = render(<BulkActionButtons showDelete />);
+    const { user } = render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showDelete
+      />
+    );
 
     await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
 
@@ -56,7 +100,13 @@ describe('BulkActionsBar', () => {
     const mockConfirmDeleteAll = jest.fn();
 
     const { user } = render(
-      <BulkActionButtons onConfirmDeleteAll={mockConfirmDeleteAll} showDelete />
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        onConfirmDeleteAll={mockConfirmDeleteAll}
+        showDelete
+      />
     );
 
     await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
@@ -72,7 +122,15 @@ describe('BulkActionsBar', () => {
     //@ts-expect-error – mocking
     useTableContext.mockReturnValueOnce({ selectedEntries: [2] });
 
-    render(<BulkActionButtons showPublish />);
+    render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showPublish
+      />
+    );
 
     expect(screen.queryByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /\bUnpublish\b/ })).toBeInTheDocument();
@@ -81,14 +139,30 @@ describe('BulkActionsBar', () => {
   it('should not show unpublish button if selected entries are all unpublished', () => {
     //@ts-expect-error – mocking
     useTableContext.mockReturnValueOnce({ selectedEntries: [1] });
-    render(<BulkActionButtons showPublish />);
+    render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showPublish
+      />
+    );
 
     expect(screen.getByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
   });
 
   it('should show publish modal if publish button is clicked', async () => {
-    const { user } = render(<BulkActionButtons showPublish />);
+    const { user } = render(
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        onConfirmUnpublishAll={jest.fn()}
+        showPublish
+      />
+    );
 
     await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
 
@@ -100,7 +174,13 @@ describe('BulkActionsBar', () => {
     const onConfirmUnpublishAll = jest.fn();
 
     const { user } = render(
-      <BulkActionButtons showPublish onConfirmUnpublishAll={onConfirmUnpublishAll} />
+      <BulkActionButtons
+        data={DEFAULT_DATA}
+        refetchData={jest.fn()}
+        onConfirmDeleteAll={jest.fn()}
+        showPublish
+        onConfirmUnpublishAll={onConfirmUnpublishAll}
+      />
     );
 
     await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));

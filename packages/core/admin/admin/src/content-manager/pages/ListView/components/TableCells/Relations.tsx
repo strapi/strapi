@@ -2,17 +2,15 @@ import * as React from 'react';
 
 import { Typography, Badge, Flex, Loader, useNotifyAT } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
-import { useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import styled from 'styled-components';
 
+import { useGetRelationsQuery } from '../../../../services/relations';
 import { getTranslation } from '../../../../utils/translations';
 
 import { CellValue } from './CellValue';
 
 import type { CellContentProps } from './CellContent';
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Entity } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -51,38 +49,17 @@ const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationM
   const { notifyStatus } = useNotifyAT();
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const { get } = useFetchClient();
-
   const [fieldName] = name.split('.');
 
-  const { data, isLoading } = useQuery(
-    [uid, entityId, fieldName],
-    async () => {
-      const { data } = await get<Contracts.Relations.FindExisting.Response>(
-        `/content-manager/relations/${uid}/${entityId}/${fieldName}`
-      );
-
-      if ('data' in data && data.data) {
-        return {
-          results: [data.data],
-        };
-      }
-
-      if ('results' in data) {
-        return { results: data.results, pagination: data.pagination };
-      }
-
-      throw new Error(
-        `/content-manager/relations/${uid}/${entityId}/${fieldName} returned an error object with a success code.`
-      );
+  const { data, isLoading } = useGetRelationsQuery(
+    {
+      model: uid,
+      id: entityId.toString(),
+      targetField: fieldName,
     },
     {
-      enabled: isOpen,
-      staleTime: 0,
-      select: (data) => ({
-        ...data,
-        results: [...data.results].reverse(),
-      }),
+      skip: !isOpen,
+      refetchOnMountOrArgChange: true,
     }
   );
 

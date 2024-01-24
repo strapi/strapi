@@ -28,7 +28,6 @@ export const transformContentTypesToModels = (
 ): DatabaseConfig['models'] => {
   return contentTypes.map((contentType) => {
     // Add document id to content types
-    // @ts-expect-error - `default` function is not typed into `Attribute`
     // as it is not documented
     const documentIdAttribute: Record<string, Attribute.Any> =
       contentType.modelType === 'contentType'

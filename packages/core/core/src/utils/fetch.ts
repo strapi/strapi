@@ -23,3 +23,5 @@ export function createStrapiFetch(strapi: Strapi): Fetch {
 
   return strapiFetch;
 }
+
+export type { Fetch };

@@ -25,7 +25,7 @@ export const resetDatabaseAndImportDataFromPath = async (filePath, contentTypesT
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
     schemaStrategy: 'ignore',
-    only: ['content'],
+    only: ['content', 'files'],
     transforms: {
       links: [
         {
@@ -70,6 +70,7 @@ const createDestinationProvider = (contentTypesToWipe = []) => {
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {
+      assets: true,
       entities: {
         include: [...ALLOWED_CONTENT_TYPES, ...contentTypesToWipe],
       },
