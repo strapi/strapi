@@ -9,6 +9,7 @@ const ALLOWED_CONTENT_TYPES = [
   'api::author.author',
   'api::homepage.homepage',
   'api::upcoming-match.upcoming-match',
+  'api::unique.unique',
   /**
    * UPLOADS
    */

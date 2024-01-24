@@ -64,11 +64,13 @@ const documentApi = contentManagerApi.injectEndpoints({
       Contracts.CollectionTypes.Delete.Response['data'],
       Contracts.CollectionTypes.Delete.Params & {
         collectionType: string;
+        params: Contracts.CollectionTypes.Delete.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id }) => ({
+      query: ({ collectionType, model, id, params }) => ({
         url: `/content-manager/${collectionType}/${model}/${id}`,
         method: 'DELETE',
+        params,
       }),
       transformResponse: (res: Contracts.CollectionTypes.Delete.Response) => res.data,
       invalidatesTags: (_result, _error, { model, id }) => [
@@ -122,7 +124,7 @@ const documentApi = contentManagerApi.injectEndpoints({
          * You don't pass the ID if the document is a single-type
          */
         id?: string;
-        params?: object;
+        params?: Contracts.CollectionTypes.CountDraftRelations.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, params }) => ({
@@ -145,8 +147,13 @@ const documentApi = contentManagerApi.injectEndpoints({
         params?: Contracts.CollectionTypes.FindOne.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id }) =>
-        `/content-manager/${collectionType}/${model}${id ? `/${id}` : ''}`,
+      query: ({ collectionType, model, id, params }) => ({
+        url: `/content-manager/${collectionType}/${model}${id ? `/${id}` : ''}`,
+        method: 'GET',
+        config: {
+          params,
+        },
+      }),
       providesTags: (result, _error, { model, id }) => [
         // we prefer the result's id because we don't fetch single-types with an ID.
         { type: 'Document', id: `${model}_${result && 'id' in result ? result.id : id}` },
@@ -177,13 +184,17 @@ const documentApi = contentManagerApi.injectEndpoints({
          * You don't pass the ID if the document is a single-type
          */
         id?: string;
+        params?: Contracts.CollectionTypes.Publish.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id }) => ({
+      query: ({ collectionType, model, id, params }) => ({
         url: id
           ? `/content-manager/${collectionType}/${model}/${id}/actions/publish`
           : `/content-manager/${collectionType}/${model}/actions/publish`,
         method: 'POST',
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (result, _error, { model, id }) => {
         return [
@@ -238,13 +249,17 @@ const documentApi = contentManagerApi.injectEndpoints({
          * You don't pass the ID if the document is a single-type
          */
         id?: string;
+        params: Contracts.CollectionTypes.Unpublish.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id }) => ({
+      query: ({ collectionType, model, id, params }) => ({
         url: id
           ? `/content-manager/${collectionType}/${model}/${id}/actions/unpublish`
           : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (result, _error, { model, id }) => {
         return [
