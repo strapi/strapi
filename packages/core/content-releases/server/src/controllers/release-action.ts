@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 
+import { mapAsync } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
@@ -41,12 +42,48 @@ const releaseActionController = {
       sort: query.groupBy === 'action' ? 'type' : query.groupBy,
       ...query,
     });
-    const groupedData = await releaseService.groupActions(results, query.groupBy);
+
+    /**
+     * Release actions can be related to entries of different content types.
+     * We need to sanitize the entry output according to that content type.
+     * So, we group the sanitized output function by content type.
+     */
+    const contentTypeOutputSanitizers = results.reduce((acc, action) => {
+      if (acc[action.contentType]) {
+        return acc;
+      }
+
+      const contentTypePermissionsManager =
+        strapi.admin.services.permission.createPermissionsManager({
+          ability: ctx.state.userAbility,
+          model: action.contentType,
+        });
+
+      acc[action.contentType] = contentTypePermissionsManager.sanitizeOutput;
+
+      return acc;
+    }, {});
+
+    /**
+     * sanitizeOutput doesn't work if you use it directly on the Release Action model, it doesn't sanitize the entries
+     * So, we need to sanitize manually each entry inside a Release Action
+     */
+    const sanitizedResults = await mapAsync(results, async (action) => ({
+      ...action,
+      entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
+    }));
+
+    const groupedData = await releaseService.groupActions(sanitizedResults, query.groupBy);
+
+    const contentTypes = releaseService.getContentTypeModelsFromActions(results);
+    const components = await releaseService.getAllComponents();
 
     ctx.body = {
       data: groupedData,
       meta: {
         pagination,
+        contentTypes,
+        components,
       },
     };
   },

@@ -238,16 +238,29 @@ describe('release service', () => {
       const mockPublishMany = jest.fn();
       const mockUnpublishMany = jest.fn();
 
+      const servicesMock = {
+        'entity-manager': {
+          publishMany: mockPublishMany,
+          unpublishMany: mockUnpublishMany,
+        },
+        'populate-builder': () => ({
+          default: jest.fn().mockReturnThis(),
+          populateDeep: jest.fn().mockReturnThis(),
+          build: jest.fn().mockReturnThis(),
+        }),
+      };
+
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           transaction: jest.fn().mockImplementation((cb) => cb()),
         },
         plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({
-            publishMany: mockPublishMany,
-            unpublishMany: mockUnpublishMany,
-          }),
+          service: jest
+            .fn()
+            .mockImplementation((service: 'entity-manager' | 'populate-builder') => {
+              return servicesMock[service];
+            }),
         }),
         entityService: {
           findOne: jest.fn().mockReturnValue({
@@ -265,6 +278,7 @@ describe('release service', () => {
               },
             ],
           }),
+          findMany: jest.fn(),
           update: jest.fn().mockReturnValue({}),
         },
       };
@@ -272,15 +286,36 @@ describe('release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
+      strapiMock.entityService.findMany.mockReturnValueOnce([
+        {
+          contentType: 'contentType',
+          type: 'publish',
+          entry: { id: 1 },
+        },
+      ]);
+      strapiMock.entityService.findMany.mockReturnValueOnce([
+        {
+          contentType: 'contentType',
+          type: 'unpublish',
+          entry: { id: 2 },
+        },
+      ]);
+
       await releaseService.publish(1);
 
-      expect(mockPublishMany).toHaveBeenCalledWith([{ id: 1 }], 'contentType');
-      expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'contentType');
+      expect(mockPublishMany).toHaveBeenCalledWith(
+        [{ contentType: 'contentType', entry: { id: 1 }, type: 'publish' }],
+        'contentType'
+      );
+      expect(mockUnpublishMany).toHaveBeenCalledWith(
+        [{ contentType: 'contentType', entry: { id: 2 }, type: 'unpublish' }],
+        'contentType'
+      );
     });
   });
 
-  describe('findManyForContentTypeEntry', () => {
-    it('should format the return value correctly when hasEntryAttached is true', async () => {
+  describe('findManyWithContentTypeEntryAttached', () => {
+    it('should format the return value correctly', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -294,12 +329,9 @@ describe('release service', () => {
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
-      const releases = await releaseService.findManyForContentTypeEntry(
+      const releases = await releaseService.findManyWithContentTypeEntryAttached(
         'api::contentType.contentType',
-        1,
-        {
-          hasEntryAttached: true,
-        }
+        1
       );
 
       expect(releases).toEqual([{ name: 'test release', action: { type: 'publish' } }]);
@@ -407,38 +439,38 @@ describe('release service', () => {
         contentTypeA: [
           {
             id: 1,
-            locale: 'en',
-            contentType: 'api::contentTypeA.contentTypeA',
+            contentType: {
+              displayName: 'contentTypeA',
+              mainFieldValue: 'test 1',
+              uid: 'api::contentTypeA.contentTypeA',
+            },
+            locale: {
+              code: 'en',
+              name: 'English (en)',
+            },
             entry: {
               id: 1,
-              contentType: {
-                displayName: 'contentTypeA',
-                mainFieldValue: 'test 1',
-              },
-              locale: {
-                code: 'en',
-                name: 'English (en)',
-              },
-              status: 'published',
+              name: 'test 1',
+              publishedAt: '2021-01-01',
             },
           },
         ],
         contentTypeB: [
           {
             id: 2,
-            locale: 'fr',
-            contentType: 'api::contentTypeB.contentTypeB',
+            contentType: {
+              displayName: 'contentTypeB',
+              mainFieldValue: 'test 2',
+              uid: 'api::contentTypeB.contentTypeB',
+            },
+            locale: {
+              code: 'fr',
+              name: 'French (fr)',
+            },
             entry: {
               id: 2,
-              contentType: {
-                displayName: 'contentTypeB',
-                mainFieldValue: 'test 2',
-              },
-              locale: {
-                code: 'fr',
-                name: 'French (fr)',
-              },
-              status: 'draft',
+              name: 'test 2',
+              publishedAt: null,
             },
           },
         ],
