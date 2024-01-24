@@ -548,19 +548,27 @@ describe('Attributes', () => {
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
-          expect(modifiers[0].typeArguments).toHaveLength(1);
-          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
-          expect(modifiers[0].typeArguments[0].members).toHaveLength(1);
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
+
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
 
           // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('min');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('2');
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [min] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('2');
+
+          // Check for number keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
         });
 
         test('No Min, Max: 3', () => {
@@ -572,19 +580,27 @@ describe('Attributes', () => {
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
-          expect(modifiers[0].typeArguments).toHaveLength(1);
-          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
-          expect(modifiers[0].typeArguments[0].members).toHaveLength(1);
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
 
-          // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('max');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('3');
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [max] = definition.members;
+
+          expect(max.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(max.name.escapedText).toBe('max');
+          expect(max.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(max.type.text).toBe('3');
+
+          // Check for number keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
         });
 
         test('Min: 4, Max: 12', () => {
@@ -596,28 +612,64 @@ describe('Attributes', () => {
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
-          expect(modifiers[0].typeArguments).toHaveLength(1);
-          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
-          expect(modifiers[0].typeArguments[0].members).toHaveLength(2);
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
 
-          // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('min');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('4');
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
 
-          expect(modifiers[0].typeArguments[0].members[1].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[1].name.escapedText).toBe('max');
-          expect(modifiers[0].typeArguments[0].members[1].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[1].type.text).toBe('12');
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Min/Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(2);
+
+          const [min, max] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('4');
+
+          expect(max.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(max.name.escapedText).toBe('max');
+          expect(max.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(max.type.text).toBe('12');
+
+          // Check for number keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
+        });
+
+        test('Min: "1"', () => {
+          const attribute = { min: '1' };
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(1);
+
+          expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
+
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Min/Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [min] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.StringLiteral);
+          expect(min.type.text).toBe('1');
+
+          // Check for string keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.StringKeyword);
         });
       });
 

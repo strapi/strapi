@@ -4,21 +4,20 @@ import { useNotifyAT } from '@strapi/design-system';
 import {
   Permission,
   hasPermissions,
-  useFetchClient,
   useNotification,
   useRBACProvider,
   useStrapiApp,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { AxiosError } from 'axios';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
-import { SET_INIT_DATA } from '../pages/App';
+import { ContentManagerAppState, SET_INIT_DATA } from '../pages/App';
+import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
+import { useGetInitialDataQuery } from '../services/init';
 import { getTranslation } from '../utils/translations';
 
 const { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } = HOOKS;
@@ -34,71 +33,46 @@ interface ContentManagerLink {
   isDisplayed: boolean;
 }
 
-export const queryKeyPrefix = ['contentManager', 'init'];
-
-const useContentManagerInitData = () => {
+const useContentManagerInitData = (): ContentManagerAppState => {
   const dispatch = useTypedDispatch();
   const toggleNotification = useNotification();
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
   const state = useTypedSelector((state) => state['content-manager_app']);
 
-  const fetchInitialData = async () => {
-    const {
-      data: {
-        data: { components, contentTypes, fieldSizes },
-      },
-    } = await get<Contracts.Init.GetInitData.Response>('/content-manager/init');
+  const initialDataQuery = useGetInitialDataQuery();
 
-    return { components, contentTypes, fieldSizes };
-  };
-
-  const fetchContentTypeSettings = async () => {
-    const {
-      data: { data: contentTypeConfigurations },
-    } = await get<Contracts.ContentTypes.FindContentTypesSettings.Response>(
-      '/content-manager/content-types-settings'
-    );
-
-    return contentTypeConfigurations;
-  };
-
-  const initialDataQuery = useQuery([...queryKeyPrefix, 'data'], fetchInitialData, {
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        toggleNotification({ type: 'warning', message: formatAPIError(error) });
-      } else {
-        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
-      }
-    },
-    onSuccess: () => {
+  useEffect(() => {
+    if (initialDataQuery.data) {
       notifyStatus(
         formatMessage({
           id: getTranslation('App.schemas.data-loaded'),
           defaultMessage: 'The schemas have been successfully loaded.',
         })
       );
-    },
-  });
-
-  const contentTypeSettingsQuery = useQuery(
-    [...queryKeyPrefix, 'contentTypeSettings'],
-    fetchContentTypeSettings,
-    {
-      onError: (error) => {
-        if (error instanceof AxiosError) {
-          toggleNotification({ type: 'warning', message: formatAPIError(error) });
-        } else {
-          toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
-        }
-      },
     }
-  );
+  }, [formatMessage, initialDataQuery.data, notifyStatus]);
+
+  useEffect(() => {
+    if (initialDataQuery.error) {
+      toggleNotification({ type: 'warning', message: formatAPIError(initialDataQuery.error) });
+    }
+  }, [formatAPIError, initialDataQuery.error, toggleNotification]);
+
+  const contentTypeSettingsQuery = useGetAllContentTypeSettingsQuery();
+
+  useEffect(() => {
+    if (contentTypeSettingsQuery.error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(contentTypeSettingsQuery.error),
+      });
+    }
+  }, [formatAPIError, contentTypeSettingsQuery.error, toggleNotification]);
 
   const formatData = async (
     components: Contracts.Components.Component[],
@@ -171,9 +145,6 @@ const useContentManagerInitData = () => {
     });
   };
 
-  const isLoading =
-    initialDataQuery.isLoading || contentTypeSettingsQuery.isLoading || state.isLoading;
-
   useEffect(() => {
     if (initialDataQuery.data && contentTypeSettingsQuery.data) {
       formatData(
@@ -185,7 +156,7 @@ const useContentManagerInitData = () => {
     }
   }, [initialDataQuery.data, contentTypeSettingsQuery.data]);
 
-  return { ...state, isLoading };
+  return { ...state };
 };
 
 const generateLinks = (

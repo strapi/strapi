@@ -120,9 +120,8 @@ const RelationInputDataManager = ({
 
   const entityId = origin || modifiedData.id;
 
-  // /content-manager/relations/[model]/[id]/[field-name]
-  const relationFetchEndpoint = React.useMemo(() => {
-    if (isCreatingEntry && !origin) {
+  const fetchParams: Contracts.Relations.FindExisting.Params | null = React.useMemo(() => {
+    if (!entityId || !slug) {
       return null;
     }
 
@@ -131,20 +130,36 @@ const RelationInputDataManager = ({
       // if no componentId exists in modifiedData it means that the user just created it
       // there then are no relations to request
       return componentId
-        ? `/content-manager/relations/${componentUid}/${componentId}/${fieldNameKeys.at(-1)}`
+        ? ({
+            model: componentUid,
+            id: componentId,
+            // TODO: can we remove non-null assertion here?
+            targetField: fieldNameKeys.at(-1)!,
+          } satisfies Contracts.Relations.FindExisting.Params)
         : null;
     }
 
-    return `/content-manager/relations/${slug}/${entityId}/${name.split('.').at(-1)}`;
-  }, [isCreatingEntry, origin, componentUid, slug, entityId, name, componentId, fieldNameKeys]);
+    return {
+      model: slug,
+      id: entityId.toString(),
+      // TODO: can we remove non-null assertion here?
+      targetField: name.split('.').at(-1)!,
+    } satisfies Contracts.Relations.FindExisting.Params;
+  }, [componentUid, slug, entityId, name, componentId, fieldNameKeys]);
 
   // /content-manager/relations/[model]/[field-name]
-  const relationSearchEndpoint = React.useMemo(() => {
+  const searchParams: Contracts.Relations.FindAvailable.Params = React.useMemo(() => {
     if (componentUid) {
-      return `/content-manager/relations/${componentUid}/${name.split('.').at(-1)}`;
+      return {
+        model: componentUid,
+        targetField: name.split('.').at(-1)!,
+      } satisfies Contracts.Relations.FindAvailable.Params;
     }
 
-    return `/content-manager/relations/${slug}/${name.split('.').at(-1)}`;
+    return {
+      model: slug!,
+      targetField: name.split('.').at(-1)!,
+    } satisfies Contracts.Relations.FindAvailable.Params;
   }, [componentUid, slug, name]);
 
   const [liveText, setLiveText] = React.useState('');
@@ -158,48 +173,45 @@ const RelationInputDataManager = ({
 
   const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
-  const { relations, search, searchFor } = useRelation(
-    [slug, initialDataPath.join('.'), modifiedData.id, defaultParams],
-    {
-      relation: {
-        enabled: !!relationFetchEndpoint,
-        endpoint: relationFetchEndpoint!,
-        pageGoal: currentLastPage,
-        pageParams: {
-          ...defaultParams,
-          pageSize: RELATIONS_TO_DISPLAY,
-        },
-        onLoad(value) {
-          relationLoad?.({
-            target: {
-              initialDataPath: ['initialData', ...initialDataPath],
-              modifiedDataPath: ['modifiedData', ...nameSplit],
-              value,
-            },
-          });
-        },
-        normalizeArguments: {
-          mainFieldName: mainField.name,
-          shouldAddLink: shouldDisplayRelationLink,
-          targetModel,
-        },
+  const { relations, search, searchFor } = useRelation({
+    relation: {
+      skip: !fetchParams,
+      params: fetchParams,
+      pageGoal: currentLastPage,
+      pageParams: {
+        ...defaultParams,
+        pageSize: RELATIONS_TO_DISPLAY,
       },
-      search: {
-        endpoint: relationSearchEndpoint,
-        pageParams: {
-          ...defaultParams,
-          // eslint-disable-next-line no-nested-ternary
-          entityId:
-            isCreatingEntry || isCloningEntry
-              ? undefined
-              : isComponentRelation
-              ? componentId
-              : entityId,
-          pageSize: SEARCH_RESULTS_TO_DISPLAY,
-        },
+      onLoad(value) {
+        relationLoad?.({
+          target: {
+            initialDataPath: ['initialData', ...initialDataPath],
+            modifiedDataPath: ['modifiedData', ...nameSplit],
+            value,
+          },
+        });
       },
-    }
-  );
+      normalizeArguments: {
+        mainFieldName: mainField.name,
+        shouldAddLink: shouldDisplayRelationLink,
+        targetModel,
+      },
+    },
+    search: {
+      searchParams,
+      pageParams: {
+        ...defaultParams,
+        // eslint-disable-next-line no-nested-ternary
+        entityId:
+          isCreatingEntry || isCloningEntry
+            ? undefined
+            : isComponentRelation
+            ? componentId
+            : entityId,
+        pageSize: SEARCH_RESULTS_TO_DISPLAY,
+      },
+    },
+  });
 
   const isMorph = relationType.toLowerCase().includes('morph');
   const toOneRelation = [
@@ -353,7 +365,7 @@ const RelationInputDataManager = ({
    */
   const browserRelationsCount = relationsFromModifiedData.length;
   const serverRelationsCount = (get(initialData, initialDataPath) ?? []).length;
-  const realServerRelationsCount = relations.data?.pages[0]?.pagination?.total ?? 0;
+  const realServerRelationsCount = relations.data?.pagination?.total ?? 0;
   /**
    * _IF_ theres no relations data and the browserCount is the same as serverCount you can therefore assume
    * that the browser count is correct because we've just _made_ this entry and the in-component hook is now fetching.
@@ -436,14 +448,15 @@ const RelationInputDataManager = ({
         { ...relations, data: relationsFromModifiedData },
         'data',
         'hasNextPage',
-        'isFetchingNextPage',
-        'isLoading',
-        'isSuccess'
+        'isLoading'
       )}
       required={required}
-      searchResults={normalizeSearchResults(search, {
-        mainFieldName: mainField.name,
-      })}
+      searchResults={{
+        ...search,
+        data: normalizeSearchResults(search.data?.results, {
+          mainFieldName: mainField.name,
+        }),
+      }}
       size={size}
     />
   );

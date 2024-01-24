@@ -1,23 +1,28 @@
 import * as React from 'react';
 
 import {
-  ApiError,
   TrackingEvent,
   formatContentTypeData,
   useAPIErrorHandler,
-  useFetchClient,
   useGuidedTour,
   useNotification,
   useQueryParams,
   useTracking,
 } from '@strapi/helper-plugin';
-import axios, { AxiosError, AxiosResponse, CancelTokenSource } from 'axios';
-import get from 'lodash/get';
-import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
 import { useFindRedirectionLink } from '../hooks/useFindRedirectionLink';
+import {
+  useCloneDocumentMutation,
+  useCreateDocumentMutation,
+  useDeleteDocumentMutation,
+  useGetDocumentQuery,
+  useGetDraftRelationCountQuery,
+  usePublishDocumentMutation,
+  useUnpublishDocumentMutation,
+  useUpdateDocumentMutation,
+} from '../services/documents';
 import {
   getData,
   getDataSucceeded,
@@ -63,7 +68,7 @@ interface RenderChildProps {
       { name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry' }
     >['properties']
   ) => Promise<Contracts.SingleTypes.CreateOrUpdate.Response>;
-  onUnpublish: () => Promise<void>;
+  onUnpublish: () => Promise<Contracts.SingleTypes.UnPublish.Response>;
   redirectionLink: string;
   status: string;
 }
@@ -83,7 +88,6 @@ const ContentTypeFormWrapper = ({
   const allLayoutData = useTypedSelector(
     (state) => state['content-manager_editViewLayoutManager'].currentLayout
   );
-  const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
@@ -93,21 +97,11 @@ const ContentTypeFormWrapper = ({
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useTypedSelector((state) => state['content-manager_editViewCrudReducer']);
   const redirectionLink = useFindRedirectionLink(slug);
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
-
-  const isMounted = React.useRef(true);
-
-  const fetchClient = useFetchClient();
-  const { put, post, del } = fetchClient;
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
   const isSingleType = collectionType === 'single-types';
-  const isCreatingEntry = (!isSingleType && !id) || id === 'create';
-
-  const requestURL =
-    isCreatingEntry && !origin
-      ? null
-      : `/content-manager/${collectionType}/${slug}/${origin || id}`;
   const params = React.useMemo(() => buildValidGetParams(query), [query]);
+  const isCreatingEntry = !isSingleType && id === 'create';
 
   const cleanReceivedData = React.useCallback(
     (data: EntityData) => {
@@ -162,98 +156,69 @@ const ContentTypeFormWrapper = ({
     };
   }, [dispatch]);
 
-  React.useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
-    const fetchData = async (source: CancelTokenSource) => {
-      if (!requestURL) {
-        return;
-      }
-
-      dispatch(getData());
-
-      try {
-        const { data } = await fetchClient.get(requestURL, {
-          cancelToken: source.token,
-          params,
-        });
-
-        dispatch(getDataSucceeded(cleanReceivedData(data)));
-      } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-        const resStatus = get(err, 'response.status', null);
-
-        if (resStatus === 404 && !isSingleType) {
-          navigate(redirectionLink);
-
-          return;
-        } else if (resStatus === 404 && isSingleType) {
-          // Creating a single type
-          dispatch(initForm(rawQuery, true));
-        }
-
-        // Not allowed to read a document
-        if (resStatus === 403) {
-          toggleNotification({
-            type: 'info',
-            message: { id: getTranslation('permissions.not-allowed.update') },
-          });
-
-          navigate(redirectionLink);
-        }
-      }
-    };
-
-    // This is needed in order to reset the form when the query changes
-    const init = async () => {
-      dispatch(getData());
-      dispatch(initForm(rawQuery));
-    };
-
-    if (!isMounted.current) {
-      return () => {};
-    }
-
-    if (requestURL) {
-      fetchData(source);
-    } else {
-      init();
-    }
-
-    return () => {
-      source.cancel('Operation canceled by the user.');
-    };
-  }, [
-    fetchClient,
-    cleanReceivedData,
-    navigate,
-    requestURL,
-    dispatch,
-    rawQuery,
-    redirectionLink,
-    toggleNotification,
-    isSingleType,
-  ]);
-
-  const displayErrors = React.useCallback(
-    (err: AxiosError<{ error: ApiError }>) => {
-      toggleNotification({ type: 'warning', message: formatAPIError(err) });
+  const getDocumentResponse = useGetDocumentQuery(
+    {
+      collectionType,
+      model: slug,
+      id: origin || id,
+      params,
     },
-    [toggleNotification, formatAPIError]
+    {
+      skip: isCreatingEntry && !origin,
+      refetchOnMountOrArgChange: true,
+    }
   );
 
+  /**
+   * TODO: get rid of the CRUD reducer.
+   */
+  React.useEffect(() => {
+    if (isCreatingEntry && !origin) {
+      dispatch(getData());
+      dispatch(initForm(rawQuery));
+
+      return;
+    }
+
+    dispatch(getData());
+  }, [dispatch, isCreatingEntry, origin, rawQuery]);
+
+  React.useEffect(() => {
+    if (getDocumentResponse.data && getDocumentResponse.isSuccess) {
+      dispatch(getDataSucceeded(cleanReceivedData(getDocumentResponse.data)));
+    }
+  }, [cleanReceivedData, dispatch, getDocumentResponse.data, getDocumentResponse.isSuccess]);
+
+  React.useEffect(() => {
+    if (
+      getDocumentResponse.error &&
+      'status' in getDocumentResponse.error &&
+      getDocumentResponse.error.status === 404
+    ) {
+      if (isSingleType) {
+        dispatch(initForm(rawQuery, true));
+      } else {
+        navigate(redirectionLink);
+      }
+    }
+  }, [dispatch, getDocumentResponse.error, isSingleType, navigate, rawQuery, redirectionLink]);
+
+  const [deleteDocument] = useDeleteDocumentMutation();
   const onDelete: RenderChildProps['onDelete'] = React.useCallback(
     async (trackerProperty) => {
       try {
         trackUsage('willDeleteEntry', trackerProperty);
 
-        const { data } = await del<Contracts.CollectionTypes.Delete.Response>(
-          `/content-manager/${collectionType}/${slug}/${id}`,
-          { params }
-        );
+        const res = await deleteDocument({
+          collectionType,
+          model: slug,
+          id,
+          params,
+        });
+
+        if ('error' in res) {
+          return Promise.reject(res.error);
+        }
 
         toggleNotification({
           type: 'success',
@@ -268,7 +233,7 @@ const ContentTypeFormWrapper = ({
           navigate(redirectionLink, { replace: true });
         }
 
-        return Promise.resolve(data);
+        return Promise.resolve(res.data);
       } catch (err) {
         trackUsage('didNotDeleteEntry', { error: err, ...trackerProperty });
 
@@ -277,7 +242,7 @@ const ContentTypeFormWrapper = ({
     },
     [
       trackUsage,
-      del,
+      deleteDocument,
       collectionType,
       slug,
       id,
@@ -290,92 +255,138 @@ const ContentTypeFormWrapper = ({
     ]
   );
 
+  const [createDocument] = useCreateDocumentMutation();
+  const [cloneDocument] = useCloneDocumentMutation();
   const onPost: RenderChildProps['onPost'] = React.useCallback(
     async (body, trackerProperty) => {
       const isCloning = typeof origin === 'string';
-      /**
-       * If we're cloning we want to post directly to this endpoint
-       * so that the relations even if they're not listed in the EditView
-       * are correctly attached to the entry.
-       */
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
         const { id: _id, ...restBody } = body;
 
-        const { data } = await (isSingleType ? put : post)<
-          Contracts.CollectionTypes.Create.Response | Contracts.CollectionTypes.Clone.Response,
-          AxiosResponse<
-            Contracts.CollectionTypes.Create.Response | Contracts.CollectionTypes.Clone.Response
-          >,
-          | Contracts.CollectionTypes.Create.Request['body']
-          | Contracts.CollectionTypes.Clone.Request['body']
-        >(
-          isCloning
-            ? `/content-manager/collection-types/${slug}/clone/${origin}`
-            : `/content-manager/${collectionType}/${slug}`,
-          isCloning ? restBody : body,
-          {
+        if (isCloning) {
+          /**
+           * If we're cloning we want to post directly to this endpoint
+           * so that the relations even if they're not listed in the EditView
+           * are correctly attached to the entry.
+           */
+          const res = await cloneDocument({
+            model: slug,
+            sourceId: origin,
+            data: restBody,
             params,
-          }
-        );
+          });
 
-        trackUsage('didCreateEntry', trackerProperty);
+          if ('error' in res) {
+            toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+
+            trackUsage('didNotCreateEntry', { error: res.error, ...trackerProperty });
+
+            return Promise.reject(res.error);
+          }
+
+          trackUsage('didCreateEntry', trackerProperty);
+          toggleNotification({
+            type: 'success',
+            message: { id: getTranslation('success.record.save') },
+          });
+
+          setCurrentStep('contentManager.success');
+
+          dispatch(submitSucceeded(cleanReceivedData(res.data)));
+
+          if (!isSingleType) {
+            navigate(
+              {
+                // @ts-expect-error – TODO: look into this, the type is probably wrong.
+                pathname: `/content-manager/collection-types/${slug}/${res.data.id}`,
+                search: rawQuery,
+              },
+              {
+                replace: true,
+              }
+            );
+          }
+
+          return Promise.resolve(res.data);
+        } else {
+          const res = await createDocument({
+            model: slug,
+            data: body,
+            params,
+          });
+
+          if ('error' in res) {
+            toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+
+            trackUsage('didNotCreateEntry', { error: res.error, ...trackerProperty });
+
+            return Promise.reject(res.error);
+          }
+
+          trackUsage('didCreateEntry', trackerProperty);
+          toggleNotification({
+            type: 'success',
+            message: { id: getTranslation('success.record.save') },
+          });
+
+          setCurrentStep('contentManager.success');
+
+          dispatch(submitSucceeded(cleanReceivedData(res.data)));
+
+          if (!isSingleType) {
+            navigate(
+              {
+                // @ts-expect-error – TODO: look into this, the type is probably wrong.
+                pathname: `/content-manager/collection-types/${slug}/${res.data.id}`,
+                search: rawQuery,
+              },
+              {
+                replace: true,
+              }
+            );
+          }
+
+          return Promise.resolve(res.data);
+        }
+      } catch (err) {
         toggleNotification({
-          type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          type: 'warning',
+          message: {
+            id: 'notification.error',
+            defaultMessage: 'An error occurred, please try again',
+          },
         });
 
-        setCurrentStep('contentManager.success');
-
-        // TODO: need to find a better place, or a better abstraction
-        queryClient.invalidateQueries(['relation']);
-
-        dispatch(submitSucceeded(cleanReceivedData(data)));
-
-        // Enable navigation and remove loaders
-        dispatch(setStatus('resolved'));
-
-        if (!isSingleType) {
-          // @ts-expect-error – TODO: look into this, the type is probably wrong.
-          navigate(`/content-manager/${collectionType}/${slug}/${data.id}${rawQuery}`, {
-            replace: true,
-          });
-        }
-
-        return Promise.resolve(data);
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          displayErrors(err);
-        }
-
         trackUsage('didNotCreateEntry', { error: err, ...trackerProperty });
-        dispatch(setStatus('resolved'));
 
         return Promise.reject(err);
+      } finally {
+        // Enable navigation and remove loaders
+        dispatch(setStatus('resolved'));
       }
     },
     [
       origin,
       dispatch,
-      collectionType,
-      put,
-      post,
+      cloneDocument,
       slug,
       query,
       trackUsage,
       toggleNotification,
       setCurrentStep,
-      queryClient,
       cleanReceivedData,
       isSingleType,
+      formatAPIError,
       navigate,
       rawQuery,
-      displayErrors,
+      createDocument,
     ]
   );
 
+  const [getDraftRelationCount] = useGetDraftRelationCountQuery();
   const onDraftRelationCheck: RenderChildProps['onDraftRelationCheck'] =
     React.useCallback(async () => {
       try {
@@ -383,90 +394,98 @@ const ContentTypeFormWrapper = ({
 
         dispatch(setStatus('draft-relation-check-pending'));
 
-        const {
-          data: { data },
-        } = await fetchClient.get<Contracts.CollectionTypes.CountDraftRelations.Response>(
-          isSingleType
-            ? `/content-manager/${collectionType}/${slug}/actions/countDraftRelations`
-            : `/content-manager/${collectionType}/${slug}/${id}/actions/countDraftRelations`,
-          {
-            params,
-          }
-        );
+        const res = await getDraftRelationCount({
+          collectionType,
+          model: slug,
+          id,
+          params,
+        });
+
+        if ('error' in res && res.error) {
+          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+
+          return Promise.reject(res.error);
+        }
+
         trackUsage('didCheckDraftRelations');
 
-        dispatch(setStatus('resolved'));
-
-        return data;
+        return res.data ?? 0;
       } catch (err) {
-        if (err instanceof AxiosError) {
-          displayErrors(err);
-        }
-        dispatch(setStatus('resolved'));
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error',
+            defaultMessage: 'An error occurred, please try again',
+          },
+        });
 
         return Promise.reject(err);
+      } finally {
+        dispatch(setStatus('resolved'));
       }
     }, [
       trackUsage,
       dispatch,
-      fetchClient,
-      isSingleType,
+      getDraftRelationCount,
       collectionType,
       slug,
       id,
-      displayErrors,
-      params,
+      toggleNotification,
+      formatAPIError,
     ]);
 
+  const [publishDocument] = usePublishDocumentMutation();
   const onPublish: RenderChildProps['onPublish'] = React.useCallback(async () => {
     try {
       trackUsage('willPublishEntry');
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await post<Contracts.CollectionTypes.Publish.Response>(
-        isSingleType
-          ? `/content-manager/${collectionType}/${slug}/actions/publish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`,
-        {},
-        {
-          params,
-        }
-      );
+      const res = await publishDocument({
+        collectionType,
+        model: slug,
+        id,
+        params,
+      });
+
+      if ('error' in res) {
+        toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+        return Promise.reject(res.error);
+      }
 
       trackUsage('didPublishEntry');
-
-      dispatch(submitSucceeded(cleanReceivedData(data)));
-      dispatch(setStatus('resolved'));
 
       toggleNotification({
         type: 'success',
         message: { id: getTranslation('success.record.publish') },
       });
 
-      return Promise.resolve(data);
+      return Promise.resolve(res.data);
     } catch (err) {
-      if (err instanceof AxiosError) {
-        displayErrors(err);
-      }
-
-      dispatch(setStatus('resolved'));
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred, please try again',
+        },
+      });
 
       return Promise.reject(err);
+    } finally {
+      dispatch(setStatus('resolved'));
     }
   }, [
     trackUsage,
     dispatch,
-    post,
-    isSingleType,
+    publishDocument,
     collectionType,
     slug,
     id,
-    cleanReceivedData,
     toggleNotification,
-    displayErrors,
+    formatAPIError,
   ]);
 
+  const [updateDocument] = useUpdateDocumentMutation();
   const onPut: RenderChildProps['onPut'] = React.useCallback(
     async (body, trackerProperty) => {
       try {
@@ -474,11 +493,21 @@ const ContentTypeFormWrapper = ({
 
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await put<
-          Contracts.CollectionTypes.Update.Response,
-          AxiosResponse<Contracts.CollectionTypes.Update.Response>,
-          Contracts.CollectionTypes.Update.Request['body']
-        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
+        const res = await updateDocument({
+          collectionType,
+          model: slug,
+          id,
+          data: body,
+          params,
+        });
+
+        if ('error' in res) {
+          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+
+          trackUsage('didNotEditEntry', { error: res.error, ...trackerProperty });
+
+          return Promise.reject(res.error);
+        }
 
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
@@ -486,82 +515,89 @@ const ContentTypeFormWrapper = ({
           message: { id: getTranslation('success.record.save') },
         });
 
-        // TODO: need to find a better place, or a better abstraction
-        queryClient.invalidateQueries(['relation']);
+        dispatch(submitSucceeded(cleanReceivedData(res.data)));
 
-        dispatch(submitSucceeded(cleanReceivedData(data)));
-
-        dispatch(setStatus('resolved'));
-
-        return Promise.resolve(data);
+        return Promise.resolve(res.data);
       } catch (err) {
         trackUsage('didNotEditEntry', { error: err, ...trackerProperty });
 
-        if (err instanceof AxiosError) {
-          displayErrors(err);
-        }
-
-        dispatch(setStatus('resolved'));
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error',
+            defaultMessage: 'An error occurred, please try again',
+          },
+        });
 
         return Promise.reject(err);
+      } finally {
+        dispatch(setStatus('resolved'));
       }
     },
     [
       trackUsage,
       dispatch,
-      put,
+      updateDocument,
       collectionType,
       slug,
       id,
+      query,
       toggleNotification,
-      queryClient,
       cleanReceivedData,
-      displayErrors,
+      formatAPIError,
     ]
   );
 
+  const [unpublishDocument] = useUnpublishDocumentMutation();
   const onUnpublish: RenderChildProps['onUnpublish'] = React.useCallback(async () => {
     dispatch(setStatus('unpublish-pending'));
 
     try {
       trackUsage('willUnpublishEntry');
 
-      const { data } = await post<Contracts.CollectionTypes.Unpublish.Response>(
-        isSingleType
-          ? `/content-manager/${collectionType}/${slug}/actions/unpublish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`,
-        {},
-        { params }
-      );
+      const res = await unpublishDocument({
+        collectionType,
+        model: slug,
+        id,
+        params,
+      });
+
+      if ('error' in res) {
+        toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+
+        return Promise.reject(res.error);
+      }
 
       trackUsage('didUnpublishEntry');
+
       toggleNotification({
         type: 'success',
         message: { id: getTranslation('success.record.unpublish') },
       });
 
-      dispatch(submitSucceeded(cleanReceivedData(data)));
-      dispatch(setStatus('resolved'));
+      return Promise.resolve(res.data);
     } catch (err) {
-      dispatch(setStatus('resolved'));
-
-      if (err instanceof AxiosError) {
-        displayErrors(err);
-      }
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred, please try again',
+        },
+      });
 
       return Promise.reject(err);
+    } finally {
+      dispatch(setStatus('resolved'));
     }
   }, [
     dispatch,
     trackUsage,
-    post,
-    isSingleType,
+    unpublishDocument,
     collectionType,
     slug,
     id,
     toggleNotification,
-    cleanReceivedData,
-    displayErrors,
+    formatAPIError,
   ]);
 
   return children({

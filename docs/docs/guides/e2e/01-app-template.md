@@ -15,9 +15,95 @@ Here you can read about what content schemas the test instance has & the API cus
 
 ## Content Schemas
 
-:::note
-There's no content yet!
-:::
+### Article
+
+```json
+{
+  // ...
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "blocks"
+    },
+    "authors": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::author.author",
+      "inversedBy": "articles"
+    }
+  }
+  // ...
+}
+```
+
+### Author
+
+```json
+{
+  // ...
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "profile": {
+      "allowedTypes": ["images", "files", "videos", "audios"],
+      "type": "media",
+      "multiple": false
+    },
+    "articles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::article.article",
+      "mappedBy": "authors"
+    }
+  }
+  // ...
+}
+```
+
+### Homepage (Single Type)
+
+```json
+{
+  // ...
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "blocks"
+    },
+    "admin_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    }
+  }
+  // ...
+}
+```
+
+### Upcoming Match (Single Type)
+
+```json
+{
+  // ...
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "number_of_upcoming_matches": {
+      "type": "integer"
+    },
+    "next_match": {
+      "type": "date"
+    }
+  }
+  // ...
+}
+```
 
 ## API Customisations
 

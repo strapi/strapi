@@ -8,9 +8,10 @@ import {
 
 import { RBACReducer, RBACState } from '../../components/RBACProvider';
 import { reducer as rbacManagerReducer } from '../../content-manager/hooks/useSyncRbac';
-import { reducer as cmAppReducer } from '../../content-manager/pages/App';
+import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-manager/pages/App';
 import { reducer as editViewReducer } from '../../content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
+import { contentManagerApi } from '../../content-manager/services/api';
 import { reducer as crudReducer } from '../../content-manager/sharedReducers/crud/reducer';
 import { reducer as appReducer, AppState } from '../../reducer';
 import { adminApi } from '../../services/api';
@@ -23,6 +24,7 @@ const staticReducers = {
   admin_app: appReducer,
   rbacProvider: RBACReducer,
   'content-manager_app': cmAppReducer,
+  [contentManagerApi.reducerPath]: contentManagerApi.reducer,
   'content-manager_listView': listViewReducer,
   'content-manager_rbacManager': rbacManagerReducer,
   'content-manager_editViewLayoutManager': editViewReducer,
@@ -77,6 +79,7 @@ const configureStoreImpl = (
     middleware: (getDefaultMiddleware) => [
       ...getDefaultMiddleware(),
       adminApi.middleware,
+      contentManagerApi.middleware,
       ...appMiddlewares.map((m) => m()),
     ],
     enhancers: [injectReducerStoreEnhancer(coreReducers)],
@@ -93,4 +96,4 @@ type Store = ReturnType<typeof configureStoreImpl> & {
 type RootState = ReturnType<Store['getState']>;
 
 export { configureStoreImpl as configureStore };
-export type { RootState, AppState, RBACState, Store, PreloadState };
+export type { RootState, AppState, RBACState, Store, PreloadState, ContentManagerAppState };

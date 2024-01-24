@@ -10,8 +10,9 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { CheckPermissions, useCollator, useTracking } from '@strapi/helper-plugin';
+import { CheckPermissions, useCollator, useTracking, useQueryParams } from '@strapi/helper-plugin';
 import { Cog, Layer } from '@strapi/icons';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -30,6 +31,7 @@ const ViewSettingsMenu = ({ slug }: ViewSettingsMenuProps) => {
   const [isVisible, setIsVisible] = React.useState(false);
   const cogButtonRef = React.useRef<HTMLButtonElement>(null!);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const { formatMessage } = useIntl();
 
   const handleToggle = () => {
@@ -65,7 +67,12 @@ const ViewSettingsMenu = ({ slug }: ViewSettingsMenuProps) => {
                 variant="secondary"
                 as={NavLink}
                 // @ts-expect-error – inference from the as prop does not work in the DS.
-                to={'configurations/list'}
+                to={{
+                  pathname: 'configurations/list',
+                  search: query.plugins
+                    ? stringify({ plugins: query.plugins }, { encode: false })
+                    : '',
+                }}
               >
                 {formatMessage({
                   id: 'app.links.configure-view',

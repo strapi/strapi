@@ -5,6 +5,15 @@ const ALLOWED_CONTENT_TYPES = [
   'admin::role',
   'admin::permission',
   'plugin::i18n.locale',
+  'api::article.article',
+  'api::author.author',
+  'api::homepage.homepage',
+  'api::upcoming-match.upcoming-match',
+  'api::unique.unique',
+  /**
+   * UPLOADS
+   */
+  'plugin::upload.file',
 ];
 
 // TODO: we should start using @strapi.io addresses to have the chance one day to

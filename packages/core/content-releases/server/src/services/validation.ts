@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { LoadedStrapi } from '@strapi/types';
-import type { Release } from '../../../shared/contracts/releases';
+import type { Release, CreateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
 
@@ -41,12 +41,39 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     if (!contentType) {
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);
     }
+  },
+  async validatePendingReleasesLimit() {
+    // Use the maximum releases option if it exists, otherwise default to 3
+    const maximumPendingReleases =
+      strapi.ee.features.get('cms-content-releases')?.options?.maximumReleases || 3;
 
-    // TODO: V5 migration - All contentType will have draftAndPublish enabled
-    if (!contentType.options?.draftAndPublish) {
-      throw new errors.ValidationError(
-        `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
-      );
+    const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
+      filters: {
+        releasedAt: {
+          $null: true,
+        },
+      },
+    });
+
+    // Unlimited is a number that will never be reached like 9999
+    if (pendingReleasesCount >= maximumPendingReleases) {
+      throw new errors.ValidationError('You have reached the maximum number of pending releases');
+    }
+  },
+  async validateUniqueNameForPendingRelease(name: CreateRelease.Request['body']['name']) {
+    const pendingReleases = (await strapi.entityService.findMany(RELEASE_MODEL_UID, {
+      filters: {
+        releasedAt: {
+          $null: true,
+        },
+        name,
+      },
+    })) as Release[];
+
+    const isNameUnique = pendingReleases.length === 0;
+
+    if (!isNameUnique) {
+      throw new errors.ValidationError(`Release with name ${name} already exists`);
     }
   },
 });

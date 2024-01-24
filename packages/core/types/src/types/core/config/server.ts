@@ -15,6 +15,25 @@ export interface WebhooksProp {
   populateRelations?: boolean;
 }
 
+export interface LoggerProp {
+  updates?: {
+    enabled?: boolean;
+  };
+  startup?: {
+    enabled?: boolean;
+  };
+}
+
+export interface TransferProp {
+  remote?: {
+    enabled?: boolean;
+  };
+}
+
+export interface AdminProp {
+  autoOpen?: boolean;
+}
+
 export interface Server {
   // required
   host: string;
@@ -30,4 +49,7 @@ export interface Server {
   cron?: CronProp;
   dirs?: DirsProp;
   webhooks?: WebhooksProp;
+  logger?: LoggerProp;
+  transfer?: TransferProp;
+  admin?: AdminProp;
 }
