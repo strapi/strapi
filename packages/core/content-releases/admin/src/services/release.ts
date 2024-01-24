@@ -43,7 +43,6 @@ export interface GetReleaseActionsQueryParams {
 type GetReleasesTabResponse = GetReleases.Response & {
   meta: {
     activeTab: 'pending' | 'done';
-    maximumPendingReleases: number;
   };
 };
 

@@ -12,6 +12,21 @@ jest.mock('@strapi/helper-plugin', () => ({
   CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
 }));
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useLicenseLimits: jest.fn().mockReturnValue({
+    isLoading: false,
+    isError: false,
+    license: {
+      enforcementUserCount: 10,
+      licenseLimitStatus: '',
+      permittedSeats: 3,
+      isHostedOnStrapiCloud: false,
+    },
+    getFeature: jest.fn().mockReturnValue({ maximumReleases: 3 }),
+  }),
+}));
+
 describe('Releases home page', () => {
   it('renders the tab content correctly when there are no releases', async () => {
     server.use(

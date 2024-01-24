@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+// TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
+import { useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Box,
@@ -208,11 +210,15 @@ const ReleasesPage = () => {
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
-
+  const { getFeature } = useLicenseLimits();
+  const limits = getFeature('cms-content-releases');
+  let maximumNumberOfPendingReleases = 3;
+  if (limits && limits['maximumReleases']) {
+    maximumNumberOfPendingReleases = limits['maximumReleases'] as number;
+  }
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
-  const maximumNumberOfPendingReleases = response?.currentData?.meta?.maximumPendingReleases;
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {

@@ -11,7 +11,6 @@ const EMPTY_MOCK_DATA = {
       pageCount: 0,
       total: 0,
     },
-    maximumPendingReleases: 3,
   },
 };
 
@@ -233,7 +232,6 @@ const PENDING_RELEASES_MOCK_DATA = {
       pageCount: 2,
       total: 17,
     },
-    maximumPendingReleases: 3,
   },
 };
 
