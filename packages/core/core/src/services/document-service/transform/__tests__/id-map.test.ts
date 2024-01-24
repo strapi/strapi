@@ -5,7 +5,7 @@ const ARTICLE_UID = 'api::article.article';
 const CATEGORY_UID = 'api::category.category';
 
 const expectedQuery = (documentId: string, locale: string) => ({
-  select: ['id', 'documentId'],
+  select: ['id', 'documentId', 'locale'],
   where: {
     documentId: { $in: [documentId] },
     locale,

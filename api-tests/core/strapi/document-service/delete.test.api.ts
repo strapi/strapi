@@ -22,9 +22,9 @@ describe('Document Service', () => {
       'delete an entire document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).delete(articleDb.id);
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+        const articles = await findArticlesDb({ documentId: articleDb.id });
 
         expect(articles).toHaveLength(0);
       })
@@ -45,7 +45,7 @@ describe('Document Service', () => {
 
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
       // update article
-      const updatedArticle = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+      const updatedArticle = await strapi.documents(ARTICLE_UID).update(articleDb.id, {
         locale: 'en',
         data: {
           comp: componentData.comp,
@@ -55,7 +55,7 @@ describe('Document Service', () => {
       });
 
       // delete article
-      await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, { locale: 'en' });
+      await strapi.documents(ARTICLE_UID).delete(articleDb.id, { locale: 'en' });
 
       // Components should not be in the database anymore
       const compTable = strapi.db.metadata.get('article.comp').tableName;
@@ -79,11 +79,11 @@ describe('Document Service', () => {
       'delete a document locale',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        await strapi.documents(ARTICLE_UID).delete(articleDb.id, {
           locale: 'fr',
         });
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+        const articles = await findArticlesDb({ documentId: articleDb.id });
 
         expect(articles.length).toBeGreaterThan(0);
         // Should not have french locale
@@ -97,7 +97,7 @@ describe('Document Service', () => {
       'cannot delete a draft directly',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
-        const articlePromise = strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        const articlePromise = strapi.documents(ARTICLE_UID).delete(articleDb.id, {
           status: 'draft',
         });
 
@@ -109,11 +109,11 @@ describe('Document Service', () => {
       'deleting a published version keeps the draft version',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        await strapi.documents(ARTICLE_UID).delete(articleDb.id, {
           status: 'published',
         });
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+        const articles = await findArticlesDb({ documentId: articleDb.id });
 
         expect(articles.length).toBe(1);
         expect(articles[0].publishedAt).toBeNull();

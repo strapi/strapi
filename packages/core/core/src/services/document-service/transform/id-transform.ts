@@ -56,9 +56,12 @@ async function transformParamsDocumentId(
 /**
  * Transform response of a query to map entity ids to document ids.
  */
-async function transformOutputDocumentId(uid: Common.UID.Schema, output: Record<string, any>) {
+async function transformOutputDocumentId(
+  uid: Common.UID.Schema,
+  output: Record<string, any> | Record<string, any>[]
+) {
   if (Array.isArray(output)) {
-    return mapAsync(output, transformOutputDocumentId);
+    return mapAsync(output, (o: Record<string, any>) => transformOutputDocumentId(uid, o));
   }
 
   // TODO: Ensure we always have documentId on output
