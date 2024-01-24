@@ -6,6 +6,7 @@
     "moduleResolution": "Node",
     "lib": ["ES2020"],
     "target": "ES2019",
+    "sourceMap": true,
 
     "strict": false,
     "skipLibCheck": true,
