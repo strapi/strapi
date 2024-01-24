@@ -9,11 +9,12 @@ import { NavLink, useNavigate } from 'react-router-dom';
 const VersionDetails = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  const headerId = React.useId();
 
   return (
-    <Main grow={1} labelledBy="title">
+    <Main grow={1} labelledBy={headerId}>
       <HeaderLayout
-        id="title"
+        id={headerId}
         title="History"
         navigationAction={
           <Link
