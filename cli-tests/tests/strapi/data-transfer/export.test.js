@@ -18,9 +18,23 @@ describe('export', () => {
 
   it('should export the data', async () => {
     await coffee
-      .spawn('yarn', ['strapi', 'export', '-f', outputFilename, '--no-encrypt', '--no-compress'], {
-        cwd: appPath,
-      })
+      .spawn(
+        'npm',
+        [
+          'run',
+          '-s',
+          'strapi',
+          '--',
+          'export',
+          '-f',
+          outputFilename,
+          '--no-encrypt',
+          '--no-compress',
+        ],
+        {
+          cwd: appPath,
+        }
+      )
       .expect('code', 0)
       .end();
   });

@@ -17,7 +17,7 @@ describe('--version', () => {
 
   it('should output version', async () => {
     await coffee
-      .spawn('yarn', ['strapi', 'version'], { cwd: appPath })
+      .spawn('npm', ['run', '-s', 'strapi', '--', 'version'], { cwd: appPath })
       .expect('stderr', '')
       .expect('stdout', `${currentVersion}\n`)
       .expect('code', 0)
@@ -26,7 +26,7 @@ describe('--version', () => {
 
   it('should output version with --version', async () => {
     await coffee
-      .spawn('yarn', ['strapi', '--version'], { cwd: appPath })
+      .spawn('npm', ['run', '-s', 'strapi', '--', '--version'], { cwd: appPath })
       .expect('stdout', `${currentVersion}\n`)
       .expect('code', 0)
       .end();

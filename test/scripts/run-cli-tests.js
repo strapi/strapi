@@ -148,6 +148,7 @@ yargs
                   useNullAsDefault: true,
                 },
                 template: templateDir,
+                link: true,
               });
 
               /**
@@ -210,7 +211,9 @@ yargs
               try {
                 const env = {
                   TEST_APPS: testApps.join(','),
+                  JWT_SECRET: 'test-jwt-secret',
                 };
+
                 const domainDir = path.join(testsDir, domain);
                 console.log('Running jest for domain', domain, 'in', domainDir);
                 // run the command 'jest --rootDir <domainDir>'

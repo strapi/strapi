@@ -15,15 +15,35 @@ describe('import', () => {
     appPath = testApps.at(0);
     currentVersion = require(`${appPath}/package.json`).dependencies['@strapi/strapi'];
     await coffee
-      .spawn('yarn', ['strapi', 'export', '--no-encrypt', '--no-compress', '-f', outputFilename], {
-        cwd: appPath,
-      })
+      .spawn(
+        'npm',
+        [
+          'run',
+          '-s',
+          'strapi',
+          '--',
+          'export',
+          '--no-encrypt',
+          '--no-compress',
+          '-f',
+          outputFilename,
+        ],
+        {
+          cwd: appPath,
+        }
+      )
       .end();
   });
 
   it('should import the data', async () => {
     await coffee
-      .spawn('yarn', ['strapi', 'import', '-f', `${outputFilename}.tar`], { cwd: appPath })
+      .spawn('npm', ['run', '-s', 'strapi', '--', 'import', '-f', `${outputFilename}.tar`], {
+        cwd: appPath,
+        stdio: 'inherit',
+      })
+      .waitForPrompt()
+      .write('Y\n')
+      .waitForPrompt()
       .write('Y\n')
       .expect('code', 0)
       .end();
@@ -31,9 +51,14 @@ describe('import', () => {
 
   it('should import the data without asking for confirmation', async () => {
     await coffee
-      .spawn('yarn', ['strapi', 'import', '-f', `${outputFilename}.tar`, '--force'], {
-        cwd: appPath,
-      })
+      .spawn(
+        'npm',
+        ['run', '-s', 'strapi', '--', 'import', '-f', `${outputFilename}.tar`, '--force'],
+        {
+          cwd: appPath,
+          stdio: 'inherit',
+        }
+      )
       .expect('code', 0)
       .end();
   });
