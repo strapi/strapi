@@ -41,6 +41,12 @@ export default function createComponentBuilder() {
         infos.category
       )}_${nameToCollectionName(pluralize(infos.displayName))}`;
 
+      this.components.forEach((compo: any) => {
+        if (compo.schema.collectionName === collectionName) {
+          throw new ApplicationError('component.alreadyExists');
+        }
+      });
+
       handler
         .setUID(uid)
         .set('collectionName', collectionName)
