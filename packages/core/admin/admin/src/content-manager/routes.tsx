@@ -1,6 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { UID } from '@strapi/types';
-import { Navigate, RouteObject, useLoaderData } from 'react-router-dom';
+import { Navigate, type RouteObject, useLoaderData } from 'react-router-dom';
 
 import { routes as historyRoutes } from './history/routes';
 
