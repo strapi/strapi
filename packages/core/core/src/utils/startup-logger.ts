@@ -1,11 +1,10 @@
 import chalk from 'chalk';
 import CLITable from 'cli-table3';
 import _ from 'lodash/fp';
-import { getAbsoluteAdminUrl, getAbsoluteServerUrl } from '@strapi/utils';
 
 import type { Strapi } from '@strapi/types';
 
-export default (app: Strapi) => {
+export const createStartupLogger = (app: Strapi) => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
@@ -35,6 +34,10 @@ export default (app: Strapi) => {
     },
 
     logFirstStartupMessage() {
+      if (!strapi.config.get('server.logger.startup.enabled')) {
+        return;
+      }
+
       this.logStats();
 
       console.log(chalk.bold('One more thing...'));
@@ -45,7 +48,7 @@ export default (app: Strapi) => {
 
       const addressTable = new CLITable();
 
-      const adminUrl = getAbsoluteAdminUrl(strapi.config);
+      const adminUrl = strapi.config.get('admin.absoluteUrl');
       addressTable.push([chalk.bold(adminUrl)]);
 
       console.log(`${addressTable.toString()}`);
@@ -53,35 +56,34 @@ export default (app: Strapi) => {
     },
 
     logDefaultStartupMessage() {
+      if (!strapi.config.get('server.logger.startup.enabled')) {
+        return;
+      }
       this.logStats();
 
       console.log(chalk.bold('Welcome back!'));
 
-      if (app.config.serveAdminPanel === true) {
+      if (app.config.get('admin.serveAdminPanel') === true) {
         console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-        const adminUrl = getAbsoluteAdminUrl(strapi.config);
+        const adminUrl = strapi.config.get('admin.absoluteUrl');
         console.log(chalk.bold(adminUrl));
         console.log();
       }
 
       console.log(chalk.grey('To access the server ⚡️, go to:'));
-      const serverUrl = getAbsoluteServerUrl(strapi.config);
+      const serverUrl = strapi.config.get('server.absoluteUrl');
       console.log(chalk.bold(serverUrl));
       console.log();
     },
 
     logStartupMessage({ isInitialized }: { isInitialized: boolean }) {
-      // Should the startup message be displayed?
-      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
-        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
-        : false;
-
-      if (hideStartupMessage === false) {
-        if (!isInitialized) {
-          this.logFirstStartupMessage();
-        } else {
-          this.logDefaultStartupMessage();
-        }
+      if (!strapi.config.get('server.logger.startup.enabled')) {
+        return;
+      }
+      if (!isInitialized) {
+        this.logFirstStartupMessage();
+      } else {
+        this.logDefaultStartupMessage();
       }
     },
   };

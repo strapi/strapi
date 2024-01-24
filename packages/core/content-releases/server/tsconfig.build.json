@@ -1,9 +1,10 @@
 {
-  "extends": "./server/tsconfig.json",
-  "include": ["./server/src", "./server/custom.d.ts", "./shared"],
-  "exclude": ["./server/src/**/*.test.ts"],
+  "extends": "./tsconfig.json",
+  "include": ["./src", "./custom.d.ts", "../shared"],
+  "exclude": ["**/*.test.ts"],
   "compilerOptions": {
-    "rootDir": ".",
+    "rootDir": "../",
+    "baseUrl": ".",
     "outDir": "./dist"
   }
 }

@@ -71,19 +71,27 @@ describe('ADMIN | new StrapiApp', () => {
         "content-manager_listView": {
           "components": {},
           "contentType": null,
-          "data": [],
           "displayedHeaders": [],
           "initialDisplayedHeaders": [],
-          "isLoading": true,
-          "pagination": {
-            "page": 0,
-            "pageCount": 0,
-            "pageSize": 0,
-            "total": 0,
-          },
         },
         "content-manager_rbacManager": {
           "permissions": null,
+        },
+        "contentManagerApi": {
+          "config": {
+            "focused": true,
+            "keepUnusedDataFor": 60,
+            "middlewareRegistered": false,
+            "online": true,
+            "reducerPath": "contentManagerApi",
+            "refetchOnFocus": false,
+            "refetchOnMountOrArgChange": false,
+            "refetchOnReconnect": false,
+          },
+          "mutations": {},
+          "provided": {},
+          "queries": {},
+          "subscriptions": {},
         },
         "rbacProvider": {
           "allPermissions": null,

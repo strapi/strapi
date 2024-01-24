@@ -22,9 +22,9 @@ describe('register', () => {
         addDestroyListenerCallback: jest.fn(),
       })),
     })),
-    eventHub: {
-      on: jest.fn(),
-    },
+    hook: jest.fn(() => ({
+      register: jest.fn(),
+    })),
     admin: {
       services: {
         permission: {

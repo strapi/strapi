@@ -13,7 +13,7 @@ import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  useFetchClient,
+  useAPIErrorHandler,
   useNotification,
   useQueryParams,
   useTracking,
@@ -23,12 +23,11 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
 import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
-import { queryKeyPrefix as initDataQueryKey } from '../../hooks/useContentManagerInitData';
 import { useContentTypeLayout } from '../../hooks/useLayouts';
+import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
 import { formatLayoutForSettingsView } from '../../utils/layouts';
 import { getTranslation } from '../../utils/translations';
@@ -39,17 +38,13 @@ import { SortDisplayedFields } from './components/SortDisplayedFields';
 import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 import { reducer, initialState } from './reducer';
 
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { AxiosError, AxiosResponse } from 'axios';
-
 const ListSettingsView = () => {
-  const queryClient = useQueryClient();
-  const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const { collectionType, slug } = useParams<{ collectionType: string; slug: string }>();
   const toggleNotification = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { isLoading: isLoadingLayout, layout: fetchedLayout } = useContentTypeLayout(slug);
 
@@ -100,30 +95,6 @@ const ListSettingsView = () => {
     });
   };
 
-  const { isLoading: isSubmittingForm, mutate } = useMutation<
-    AxiosResponse<Contracts.ContentTypes.UpdateContentTypeConfiguration.Response>,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkPublish.Response, 'error'>>>,
-    Contracts.ContentTypes.UpdateContentTypeConfiguration.Request['body']
-  >((body) => put(`/content-manager/content-types/${slug}/configuration`, body), {
-    onSuccess() {
-      toggleNotification({
-        type: 'success',
-        message: { id: getTranslation('success.record.save') },
-      });
-
-      trackUsage('didEditListSettings');
-
-      queryClient.invalidateQueries(initDataQueryKey);
-      queryClient.invalidateQueries(['content-manager', 'content-types', slug, 'configuration']);
-    },
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    },
-  });
-
   const handleAddField = (item: string) => {
     dispatch({
       type: 'ADD_FIELD',
@@ -147,20 +118,42 @@ const ListSettingsView = () => {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [updateContentTypeConfiguration, { isLoading: isSubmittingForm }] =
+    useUpdateContentTypeConfigurationMutation();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!modifiedData) return;
+    if (!modifiedData || !slug) return;
 
     const { layouts, settings, metadatas } = modifiedData;
+    try {
+      trackUsage('willSaveContentTypeLayout');
 
-    mutate({
-      layouts,
-      settings,
-      metadatas,
-    });
+      const res = await updateContentTypeConfiguration({
+        layouts,
+        settings,
+        metadatas,
+        uid: slug,
+      });
 
-    trackUsage('willSaveContentTypeLayout');
+      if ('data' in res) {
+        trackUsage('didEditListSettings');
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        });
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+      }
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
+      });
+    }
   };
 
   const handleClickEditField = (fieldToEdit: string) => {

@@ -11,7 +11,7 @@ import { SettingsForm } from './components/SettingsForm/SettingsForm';
 
 const EditSettingsView = () => {
   const { slug } = useParams();
-  const { isLoading, layout, updateLayout } = useContentTypeLayout(slug);
+  const { isLoading, layout } = useContentTypeLayout(slug);
 
   const { rawContentTypeLayout, rawComponentsLayouts } = React.useMemo(() => {
     let rawContentTypeLayout = null;
@@ -42,13 +42,7 @@ const EditSettingsView = () => {
     return <AnErrorOccurred />;
   }
 
-  return (
-    <SettingsForm
-      layout={rawContentTypeLayout}
-      components={rawComponentsLayouts}
-      updateLayout={updateLayout}
-    />
-  );
+  return <SettingsForm layout={rawContentTypeLayout} components={rawComponentsLayouts} />;
 };
 
 const ProtectedEditSettingsView = () => {

@@ -4,18 +4,18 @@ import fse from 'fs-extra';
 
 import { importDefault } from '@strapi/utils';
 import { glob } from 'glob';
-import filePathToPath from './filepath-to-prop-path';
+import { filePathToPropPath } from './filepath-to-prop-path';
 
 /**
  * Returns an Object build from a list of files matching a glob pattern in a directory
  * It builds a tree structure resembling the folder structure in dir
  */
-export async function loadFiles<T extends object>(
+export const loadFiles = async <T extends object>(
   dir: string,
   pattern: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { requireFn = importDefault, shouldUseFileNameAsKey = (_: any) => true, globArgs = {} } = {}
-): Promise<T> {
+): Promise<T> => {
   const root = {};
   const files = await glob(pattern, { cwd: dir, ...globArgs });
 
@@ -39,11 +39,11 @@ export async function loadFiles<T extends object>(
       value: path.basename(file),
     });
 
-    const propPath = filePathToPath(file, shouldUseFileNameAsKey(file));
+    const propPath = filePathToPropPath(file, shouldUseFileNameAsKey(file));
 
     if (propPath.length === 0) _.merge(root, mod);
     _.merge(root, _.setWith({}, propPath, mod, Object));
   }
 
   return root as T;
-}
+};

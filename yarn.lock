@@ -9324,12 +9324,12 @@ __metadata:
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin": "npm:4.17.1"
     "@strapi/admin-test-utils": "npm:4.17.1"
     "@strapi/design-system": "npm:1.14.1"
     "@strapi/helper-plugin": "npm:4.17.1"
     "@strapi/icons": "npm:1.14.1"
     "@strapi/pack-up": "workspace:*"
-    "@strapi/strapi": "npm:4.17.1"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:4.17.1"
     "@testing-library/react": "npm:14.0.0"
@@ -9350,7 +9350,7 @@ __metadata:
     typescript: "npm:5.2.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^4.15.1
+    "@strapi/admin": ^4.19.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
