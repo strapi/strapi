@@ -13,12 +13,18 @@ const historyVersion: Plugin.LoadedPlugin['contentTypes'][string] = {
       pluralName: 'history-versions',
       displayName: 'History Version',
     },
+    options: {
+      reviewWorkflows: false,
+    },
     pluginOptions: {
       'content-manager': {
         visible: false,
       },
       'content-type-builder': {
         visible: false,
+      },
+      i18n: {
+        localized: true,
       },
     },
     attributes: {
