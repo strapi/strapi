@@ -171,7 +171,6 @@ describe('Attributes', () => {
           expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
-          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
 
           const tupleElements = typeNode.typeArguments[0].elements;
 
@@ -191,7 +190,6 @@ describe('Attributes', () => {
 
           expect(typeNode.typeArguments).toHaveLength(2);
 
-          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
 
           const tupleElements = typeNode.typeArguments[0].elements;
