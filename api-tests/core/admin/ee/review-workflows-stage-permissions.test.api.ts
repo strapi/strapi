@@ -35,7 +35,8 @@ const getStageTransitionPermissions = (roleIds) => {
 };
 
 // TODO: V5 fix review workflows
-describeOnCondition(edition === 'EE').skip('Review workflows', () => {
+// describeOnCondition(edition === 'EE').skip('Review workflows', () => {
+describe.skip('Review workflows', () => {
   const builder = createTestBuilder();
 
   let strapi;

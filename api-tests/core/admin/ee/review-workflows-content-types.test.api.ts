@@ -46,7 +46,8 @@ const articleModel = {
 };
 
 // TODO: V5 fix review workflows
-describeOnCondition(edition === 'EE').skip('Review workflows - Content Types', () => {
+// describeOnCondition(edition === 'EE').skip('Review workflows - Content Types', () => {
+describe.skip('Review workflows - Content Types', () => {
   const builder = createTestBuilder();
 
   const requests = { admin: null };
