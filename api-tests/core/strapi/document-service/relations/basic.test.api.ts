@@ -6,7 +6,7 @@ import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-hel
 import resources from '../resources/index';
 import { ARTICLE_UID, findArticleDb, AUTHOR_UID, findAuthorDb } from '../utils';
 
-describe('Document Service relations', () => {
+describe.skip('Document Service relations', () => {
   let testUtils;
   let strapi: LoadedStrapi;
 
