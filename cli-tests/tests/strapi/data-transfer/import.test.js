@@ -43,8 +43,6 @@ describe('import', () => {
       })
       .waitForPrompt()
       .write('Y\n')
-      .waitForPrompt()
-      .write('Y\n')
       .expect('code', 0)
       .end();
   });
