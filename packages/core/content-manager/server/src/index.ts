@@ -5,6 +5,7 @@ import routes from './routes';
 import policies from './policies';
 import controllers from './controllers';
 import services from './services';
+import history from './history';
 
 export default () => {
   return {
@@ -15,5 +16,6 @@ export default () => {
     routes,
     policies,
     services,
+    contentTypes: history.contentTypes,
   };
 };

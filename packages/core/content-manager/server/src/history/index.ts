@@ -1,6 +1,7 @@
 import type { Plugin } from '@strapi/types';
 import { controllers } from './controllers';
 import { services } from './services';
+import { contentTypes } from './content-types';
 
 /**
  * Check once if the feature is enabled (both license info & feature flag) before loading it,
@@ -22,10 +23,15 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
       controllers,
       services,
       destroy,
+      contentTypes,
     };
   }
 
-  return {};
+  /**
+   * Keep returning contentTypes to avoid losing the data if the feature is disabled,
+   * or if the license expires.
+   */
+  return { contentTypes };
 };
 
 export default getFeature();
