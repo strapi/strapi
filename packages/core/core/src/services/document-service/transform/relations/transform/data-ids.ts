@@ -69,6 +69,8 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   return relation;
 };
 
+const EXCLUDED_FIELDS = ['createdBy', 'updatedBy', 'localizations', 'strapi_stage'];
+
 const transformDataIdsVisitor = (
   idMap: IdMap,
   data: Record<string, any>,
@@ -81,6 +83,8 @@ const transformDataIdsVisitor = (
         const target = attribute.target;
         // TODO: Handle polymorphic relations
         if (!target) return;
+        // TODO: Handle this differently
+        if (EXCLUDED_FIELDS.includes(key)) return;
 
         const getIdOrThrow = (documentId: ID): ID => {
           const entryId = idMap.get(target, documentId as string, opts.locale);
