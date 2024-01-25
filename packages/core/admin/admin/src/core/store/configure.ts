@@ -9,7 +9,6 @@ import {
 import { RBACReducer, RBACState } from '../../components/RBACProvider';
 import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-manager/layout';
 import { reducer as contentManagerReducers } from '../../content-manager/modules/reducers';
-import { reducer as listViewReducer } from '../../content-manager/pages/ListViewLayoutManager';
 import { contentManagerApi } from '../../content-manager/services/api';
 import { reducer as appReducer, AppState } from '../../reducer';
 import { adminApi } from '../../services/api';
@@ -23,7 +22,6 @@ const staticReducers = {
   rbacProvider: RBACReducer,
   'content-manager_app': cmAppReducer,
   [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-  'content-manager_listView': listViewReducer,
   'content-manager': contentManagerReducers,
 } as const;
 

@@ -1,5 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { lazy } from 'react';
+
 import { Navigate, RouteObject, useLoaderData, useParams } from 'react-router-dom';
 
 const Redirect = () => {
@@ -17,8 +18,8 @@ const Redirect = () => {
 const ProtectedEditViewPage = lazy(() =>
   import('./pages/EditView/EditViewPage').then((mod) => ({ default: mod.ProtectedEditViewPage }))
 );
-const ListViewLayoutManager = lazy(() =>
-  import('./pages/ListViewLayoutManager').then((mod) => ({ default: mod.ListViewLayoutManager }))
+const ProtectedListViewPage = lazy(() =>
+  import('./pages/ListView/ListViewPage').then((mod) => ({ default: mod.ProtectedListViewPage }))
 );
 
 const CollectionTypePages = () => {
@@ -32,7 +33,7 @@ const CollectionTypePages = () => {
   }
 
   return collectionType === 'collection-types' ? (
-    <ListViewLayoutManager />
+    <ProtectedListViewPage />
   ) : (
     <ProtectedEditViewPage />
   );

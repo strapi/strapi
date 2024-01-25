@@ -39,7 +39,7 @@ import {
 } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
-import { Table } from '../Table';
+import { Table } from '../TableParts/Table';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
@@ -132,7 +132,7 @@ const SelectedEntriesTableContent = ({
   const { formatMessage } = useIntl();
 
   const contentTypeSettings = useTypedSelector(
-    (state) => state['content-manager_listView'].contentType?.settings
+    (state) => state['content-manager'].listView.contentType?.settings
   );
   const mainField = contentTypeSettings?.mainField;
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
@@ -256,7 +256,7 @@ const SelectedEntriesModalContent = ({
     .map(({ id }) => id);
 
   const toggleNotification = useNotification();
-  const { contentType } = useTypedSelector((state) => state['content-manager_listView']);
+  const { contentType } = useTypedSelector((state) => state['content-manager'].listView);
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
     ({ id }) => selectedEntries.includes(id) && validationErrors[id]
@@ -435,7 +435,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     setSelectedEntries: setSelectedListViewEntries,
   } = useTableContext();
   const { contentType, components } = useTypedSelector(
-    (state) => state['content-manager_listView']
+    (state) => state['content-manager'].listView
   );
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);

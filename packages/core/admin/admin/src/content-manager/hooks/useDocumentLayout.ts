@@ -9,18 +9,49 @@ import {
 } from '@strapi/helper-plugin';
 
 import { HOOKS } from '../../constants';
-import { useTypedSelector } from '../../core/store/hooks';
 import { BaseQueryError } from '../../utils/baseQuery';
-import { selectSchemas } from '../layout';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
-import { formatLayouts } from '../utils/layouts';
 
 import { ComponentsDictionary, Schema, useDocument } from './useDocument';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
+import type { MessageDescriptor } from 'react-intl';
 
-interface FieldLayout {
+interface ListFieldLayout {
+  /**
+   * The attribute data from the content-type's schema for the field
+   */
+  attribute: Attribute.Any | { type: 'custom' };
+  /**
+   * Typically used by plugins to render a custom cell
+   */
+  cellFormatter?: (
+    data: Contracts.CollectionTypes.Find.Response['results'][number],
+    header: Omit<ListFieldLayout, 'cellFormatter'>
+  ) => React.ReactNode;
+  label: string | MessageDescriptor;
+  /**
+   * the name of the attribute we use to display the actual name e.g. relations
+   * are just ids, so we use the mainField to display something meaninginful by
+   * looking at the target's schema
+   */
+  mainField?: string;
+  name: string;
+  searchable?: boolean;
+  sortable?: boolean;
+}
+
+interface ListLayout {
+  schema: ListFieldLayout[];
+  metadatas: {
+    [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['list'];
+  };
+  components?: never;
+  settings: Contracts.ContentTypes.Settings;
+}
+
+interface EditFieldLayout {
   /**
    * translated from the editable property of an attribute's metadata
    */
@@ -40,10 +71,12 @@ interface FieldLayout {
 }
 
 interface EditLayout {
-  schema: Array<Array<FieldLayout[]>>;
+  schema: Array<Array<EditFieldLayout[]>>;
   components: {
-    [uid: string]: Array<FieldLayout[]>;
+    [uid: string]: Array<EditFieldLayout[]>;
   };
+  metadatas?: never;
+  settings?: never;
 }
 
 type UseDocumentLayout = (model: string) => {
@@ -53,12 +86,8 @@ type UseDocumentLayout = (model: string) => {
    * This is the layout for the edit view,
    */
   edit: EditLayout;
+  list: ListLayout;
 };
-
-const DEFAULT_LAYOUT = {
-  schema: [],
-  components: {},
-} satisfies EditLayout;
 
 /* -------------------------------------------------------------------------------------------------
  * useDocumentLayout
@@ -100,33 +129,52 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     }
   }, [error, formatAPIError, toggleNotifcation]);
 
-  const schemas = useTypedSelector(selectSchemas);
-  const layouts = React.useMemo(
-    () => ({
-      edit: data ? formatEditLayout(data, { schema, components }) : DEFAULT_LAYOUT,
-      /**
-       * TODO: refactor this to be easier to understand.
-       */
-      list: data ? formatLayouts(data, schemas) : DEFAULT_LAYOUT,
-    }),
-    [data, schema, components, schemas]
+  const editLayout = React.useMemo(
+    () =>
+      data
+        ? formatEditLayout(data, { schema, components })
+        : ({
+            schema: [],
+            components: {},
+          } as EditLayout),
+    [data, schema, components]
+  );
+
+  const listLayout = React.useMemo(
+    () =>
+      data
+        ? formatListLayout(data, { schema })
+        : ({
+            schema: [],
+            metadatas: {},
+            settings: {
+              bulkable: false,
+              filterable: false,
+              searchable: false,
+              pagination: false,
+              defaultSortBy: '',
+              defaultSortOrder: 'asc',
+              mainField: 'id',
+              pageSize: 10,
+            },
+          } as ListLayout),
+    [data, schema]
   );
 
   const { layout: edit } = React.useMemo(
     () =>
       runHookWaterfall(HOOKS.MUTATE_EDIT_VIEW_LAYOUT, {
-        layout: layouts.edit,
+        layout: editLayout,
         query,
       }),
-    [layouts.edit, query, runHookWaterfall]
+    [editLayout, query, runHookWaterfall]
   );
 
   return {
     error,
     isLoading,
     edit,
-    // @ts-expect-error – TODO: fix me later when we refactor the list view.
-    list: layouts.list,
+    list: listLayout,
   } satisfies ReturnType<UseDocumentLayout>;
 };
 
@@ -152,7 +200,7 @@ const formatEditLayout = (
     data.contentType.layouts.edit,
     schema?.attributes,
     data.contentType.metadatas
-  ).reduce<Array<FieldLayout[][]>>((panels, row) => {
+  ).reduce<Array<EditFieldLayout[][]>>((panels, row) => {
     if (row.some((field) => field.type === 'dynamiczone')) {
       panels.push([row]);
       currentPanelIndex += 2;
@@ -218,11 +266,81 @@ const convertEditLayoutToFieldLayouts = (
           unique: 'unique' in attribute ? attribute.unique : false,
           visible: metadata.visible ?? true,
           type: attribute.type,
-        } satisfies FieldLayout;
+        } satisfies EditFieldLayout;
       })
       .filter((field) => field !== null)
-  ) as FieldLayout[][];
+  ) as EditFieldLayout[][];
 };
 
-export { useDocumentLayout };
-export type { EditLayout, FieldLayout, UseDocumentLayout };
+/* -------------------------------------------------------------------------------------------------
+ * formatListLayout
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description takes the complete configuration data, the schema & the components used in the schema and
+ * formats a list view layout for the content-type. This is much simpler than the edit view layout as there
+ * are less options to consider.
+ */
+const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): ListLayout => {
+  const listMetadatas = Object.entries(data.contentType.metadatas).reduce<ListLayout['metadatas']>(
+    (acc, [attribute, metadata]) => {
+      return {
+        ...acc,
+        [attribute]: metadata.list,
+      };
+    },
+    {}
+  );
+  /**
+   * The fields arranged by the panels, new panels are made for dynamic zones only.
+   */
+  const listAttributes = convertListLayoutToFieldLayouts(
+    data.contentType.layouts.list,
+    schema?.attributes,
+    listMetadatas
+  );
+
+  return { schema: listAttributes, settings: data.contentType.settings, metadatas: listMetadatas };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * convertListLayoutToFieldLayouts
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description takes the columns from the list view configuration and formats them into a generic object
+ * combinining metadata and attribute data.
+ *
+ * @note We do use this to reformat the list of strings when updating the displayed headers for the list view.
+ */
+const convertListLayoutToFieldLayouts = (
+  columns: LayoutData['contentType']['layouts']['list'],
+  attributes: Schema['attributes'] = {},
+  metadatas: ListLayout['metadatas']
+) => {
+  return columns
+    .map((name) => {
+      const attribute = attributes[name];
+
+      if (!attribute) {
+        return null;
+      }
+
+      const metadata = metadatas[name];
+
+      return {
+        attribute,
+        label: metadata.label ?? '',
+        mainField: metadata.mainField,
+        name: name,
+        searchable: metadata.searchable ?? true,
+        sortable: metadata.sortable ?? true,
+      } satisfies ListFieldLayout;
+    })
+    .filter((field) => field !== null) as ListFieldLayout[];
+};
+
+export { useDocumentLayout, convertListLayoutToFieldLayouts };
+export type { EditLayout, EditFieldLayout, ListLayout, ListFieldLayout, UseDocumentLayout };

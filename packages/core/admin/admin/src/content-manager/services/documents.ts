@@ -92,19 +92,21 @@ const documentApi = contentManagerApi.injectEndpoints({
      */
     getAllDocuments: builder.query<
       Contracts.CollectionTypes.Find.Response,
-      Contracts.CollectionTypes.Find.Params & Pick<Contracts.CollectionTypes.Find.Request, 'query'>
+      Contracts.CollectionTypes.Find.Params & {
+        params?: Contracts.CollectionTypes.Find.Request['query'];
+      }
     >({
-      query: (data) => ({
-        url: `/content-manager/collection-types/${data.model}`,
+      query: ({ model, params }) => ({
+        url: `/content-manager/collection-types/${model}`,
         method: 'GET',
         config: {
-          params: data.query,
+          params,
         },
       }),
       providesTags: (result, _error, arg) => {
         return [
           { type: 'Document', id: `${arg.model}_LIST` },
-          ...(result?.data.results.map(({ id }) => ({
+          ...(result?.results.map(({ id }) => ({
             type: 'Document' as const,
             id: `${arg.model}_${id}`,
           })) ?? []),

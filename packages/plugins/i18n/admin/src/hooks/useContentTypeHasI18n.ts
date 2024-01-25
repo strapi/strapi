@@ -3,7 +3,7 @@ import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
 
 const useContentTypeHasI18n = (): boolean => {
   const pluginOptions = useTypedSelector(
-    (state) => state['content-manager_listView'].contentType?.pluginOptions
+    (state) => state['content-manager'].listView.contentType?.pluginOptions
   );
 
   if (doesPluginOptionsHaveI18nLocalized(pluginOptions)) {

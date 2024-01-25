@@ -10,7 +10,7 @@ import { ViewSettingsMenu } from '../ViewSettingsMenu';
  */
 describe('ViewSettingsMenu', () => {
   it('should show the cog button by default', () => {
-    render(<ViewSettingsMenu slug="api::temp.temp" />);
+    render(<ViewSettingsMenu />);
 
     expect(
       screen.getByRole('button', {
@@ -20,7 +20,7 @@ describe('ViewSettingsMenu', () => {
   });
 
   it('should open the popover when you click on the button and render the available tools', async () => {
-    const { user } = render(<ViewSettingsMenu slug="api::temp.temp" />);
+    const { user } = render(<ViewSettingsMenu />);
 
     await user.click(
       screen.getByRole('button', {
@@ -51,7 +51,7 @@ describe('ViewSettingsMenu', () => {
   });
 
   it('should contains the initially selected headers within the popover', async () => {
-    const { user } = render(<ViewSettingsMenu slug="api::temp.temp" />);
+    const { user } = render(<ViewSettingsMenu />);
 
     await user.click(
       screen.getByRole('button', {
@@ -68,7 +68,7 @@ describe('ViewSettingsMenu', () => {
   });
 
   it('should select an header', async () => {
-    const { user } = render(<ViewSettingsMenu slug="api::temp.temp" />);
+    const { user } = render(<ViewSettingsMenu />);
 
     await user.click(
       screen.getByRole('button', {
@@ -88,7 +88,7 @@ describe('ViewSettingsMenu', () => {
   });
 
   it('should reset the header selection when the reset button is clicked', async () => {
-    const { user } = render(<ViewSettingsMenu slug="api::temp.temp" />);
+    const { user } = render(<ViewSettingsMenu />);
 
     await user.click(
       screen.getByRole('button', {
@@ -112,7 +112,7 @@ describe('ViewSettingsMenu', () => {
       return <span>{location.pathname}</span>;
     };
 
-    const { user } = render(<ViewSettingsMenu slug="api::temp.temp" />, {
+    const { user } = render(<ViewSettingsMenu />, {
       renderOptions: {
         wrapper({ children }) {
           return (

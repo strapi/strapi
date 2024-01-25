@@ -206,7 +206,7 @@ const useDoc = () => {
     ...useDocument(
       { id: origin || id, model: slug, collectionType, params },
       {
-        skip: id === 'create',
+        skip: id === 'create' || (!origin && !id),
       }
     ),
   };

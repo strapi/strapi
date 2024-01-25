@@ -92,7 +92,7 @@ const ConfirmDialogPublishAll = ({
   const { selectedEntries } = useTableContext();
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
-  const contentType = useTypedSelector((state) => state['content-manager_listView'].contentType);
+  const contentType = useTypedSelector((state) => state['content-manager'].listView.contentType);
   const [{ query }] = useQueryParams<{
     plugins?: {
       i18n?: {

@@ -22,9 +22,9 @@ export declare namespace Find {
   export interface Request {
     body: {};
     query: {
-      page: PaginationQuery['page'];
-      pageSize: PaginationQuery['pageSize'];
-      sort: SortQuery;
+      page?: string;
+      pageSize?: string;
+      sort?: SortQuery;
     };
   }
 
@@ -32,8 +32,7 @@ export declare namespace Find {
     model: string;
   }
 
-  export interface Response {
-    data: PaginatedDocuments;
+  export interface Response extends PaginatedDocuments {
     error?: errors.ApplicationError;
   }
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { createSelector } from '@reduxjs/toolkit';
 import {
   Flex,
   IconButton,
@@ -17,17 +16,14 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useTypedSelector, useTypedDispatch } from '../../../../core/store/hooks';
+import { useTypedSelector } from '../../../../core/store/hooks';
+import { useDoc } from '../../../hooks/useDocument';
+import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
-import { onChangeListHeaders, onResetListHeaders } from '../../ListViewLayoutManager';
 
-import type { RootState } from '../../../../core/store/configure';
+interface ViewSettingsMenuProps extends FieldPickerProps {}
 
-interface ViewSettingsMenuProps {
-  slug: string;
-}
-
-const ViewSettingsMenu = ({ slug }: ViewSettingsMenuProps) => {
+const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
   const [isVisible, setIsVisible] = React.useState(false);
   const cogButtonRef = React.useRef<HTMLButtonElement>(null!);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
@@ -81,7 +77,7 @@ const ViewSettingsMenu = ({ slug }: ViewSettingsMenuProps) => {
               </LinkButton>
             </CheckPermissions>
 
-            <FieldPicker />
+            <FieldPicker {...props} />
           </Flex>
         </Popover>
       )}
@@ -89,38 +85,49 @@ const ViewSettingsMenu = ({ slug }: ViewSettingsMenuProps) => {
   );
 };
 
-const selectDisplayedHeaderKeys = createSelector(
-  (state: RootState) => state['content-manager_listView'].displayedHeaders,
-  (displayedHeaders) => displayedHeaders.map(({ name }) => name)
-);
+interface FieldPickerProps {
+  headers?: string[];
+  setHeaders: (headers: string[]) => void;
+  resetHeaders: () => void;
+}
 
-const FieldPicker = () => {
-  const dispatch = useTypedDispatch();
-  const displayedHeadersKeys = useTypedSelector(selectDisplayedHeaderKeys);
-  const contentTypeLayout = useTypedSelector(
-    (state) => state['content-manager_listView'].contentType!
-  );
+const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
+
+  const { schema, model } = useDoc();
+  const { list } = useDocumentLayout(model);
+
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
 
-  const columns = Object.keys(contentTypeLayout.attributes)
-    .filter((name) => checkIfAttributeIsDisplayable(contentTypeLayout.attributes[name]))
+  const attributes = schema?.attributes ?? {};
+
+  const columns = Object.keys(attributes)
+    .filter((name) => checkIfAttributeIsDisplayable(attributes[name]))
     .map((name) => ({
       name,
-      label: contentTypeLayout.metadatas[name].list.label ?? '',
+      label: list.metadatas[name].label ?? '',
     }))
     .sort((a, b) => formatter.compare(a.label, b.label));
 
   const handleChange = (name: string) => {
     trackUsage('didChangeDisplayedFields');
-    dispatch(onChangeListHeaders({ name, value: displayedHeadersKeys.includes(name) }));
+
+    /**
+     * create an array of the new headers, if the new name exists it should be removed,
+     * otherwise it should be added
+     */
+    const newHeaders = headers.includes(name)
+      ? headers.filter((header) => header !== name)
+      : [...headers, name];
+
+    setHeaders(newHeaders);
   };
 
   const handleReset = () => {
-    dispatch(onResetListHeaders());
+    resetHeaders();
   };
 
   return (
@@ -143,7 +150,7 @@ const FieldPicker = () => {
 
       <Flex direction="column" alignItems="stretch">
         {columns.map((header) => {
-          const isActive = displayedHeadersKeys.includes(header.name);
+          const isActive = headers.includes(header.name);
 
           return (
             <ChackboxWrapper
@@ -176,4 +183,3 @@ const ChackboxWrapper = styled(Flex)`
 `;
 
 export { ViewSettingsMenu };
-export type { ViewSettingsMenuProps };
