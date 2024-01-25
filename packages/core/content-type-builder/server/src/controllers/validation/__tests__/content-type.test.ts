@@ -76,6 +76,41 @@ describe('Content type validator', () => {
         });
       });
     });
+
+    test('Throws when case-insensitive reserved names are used', async () => {
+      const data = {
+        contentType: {
+          singularName: 'test',
+          pluralName: 'tests',
+          displayName: 'Test',
+          attributes: {
+            THISISRESERVED: {
+              type: 'string',
+              default: '',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      expect.assertions(1);
+
+      await validateUpdateContentTypeInput(data).catch((err) => {
+        expect(err).toMatchObject({
+          name: 'ValidationError',
+          message: 'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+          details: {
+            errors: [
+              {
+                path: ['contentType', 'attributes', 'THISISRESERVED'],
+                message:
+                  'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      });
+    });
   });
 
   describe('validateContentTypeInput', () => {

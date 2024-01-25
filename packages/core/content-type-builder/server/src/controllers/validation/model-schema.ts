@@ -65,10 +65,13 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
 };
 
 const isForbiddenKey = (key: string) => {
-  return [
+  const forbiddenKeys = [
     ...FORBIDDEN_ATTRIBUTE_NAMES,
     ...getService('builder').getReservedNames().attributes,
-  ].includes(key);
+  ];
+
+  // check for a case-insensitive match
+  return forbiddenKeys.some((forbiddenKey) => forbiddenKey.toLowerCase() === key.toLowerCase());
 };
 
 const forbiddenValidator = () => {

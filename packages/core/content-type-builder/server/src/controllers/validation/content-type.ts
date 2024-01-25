@@ -140,7 +140,11 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test(value: unknown) {
-      return !(value && reservedNames.includes(value as string));
+      // test for a case-insensitive match
+      const lowercaseValue = (value as string)?.toLowerCase();
+      return !(
+        lowercaseValue && reservedNames.map((name) => name.toLowerCase()).includes(lowercaseValue)
+      );
     },
   };
 };
