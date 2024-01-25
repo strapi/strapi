@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { isKebabCase, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
 import type { Strapi, Common, Schema } from '@strapi/types';
-import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
+import { getGlobalId, type ContentTypeDefinition } from '../content-type';
 
 interface API {
   bootstrap: () => void | Promise<void>;

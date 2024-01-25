@@ -2,7 +2,6 @@ import _ from 'lodash/fp';
 
 import * as types from '../utils/types';
 import {
-  createRelation,
   getJoinTableName,
   isPolymorphic,
   isBidirectional,
@@ -27,7 +26,6 @@ export {
   isManyToAny,
 };
 
-// TODO: check if there isn't an attribute with an id already
 /**
  * Create Metadata from models configurations
  */
@@ -50,17 +48,9 @@ export const createMetadata = (models: Model[] = []): Metadata => {
   for (const meta of metadata.values()) {
     for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
       try {
-        if (types.isRelationalAttribute(attribute)) {
-          // skip already defined relations
-          if ('joinTable' in attribute || 'joinColumn' in attribute) {
-            continue;
-          }
-
-          createRelation(attributeName, attribute, meta, metadata);
-          continue;
+        if (types.isScalarAttribute(attribute)) {
+          createAttribute(attributeName, attribute);
         }
-
-        createAttribute(attributeName, attribute);
       } catch (error) {
         console.log(error);
         if (error instanceof Error) {

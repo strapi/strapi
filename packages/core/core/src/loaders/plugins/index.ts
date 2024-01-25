@@ -7,7 +7,7 @@ import { loadConfigFile } from '../../utils/load-config-file';
 import { loadFiles } from '../../utils/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
-import { getGlobalId } from '../../domain/content-type';
+import { getGlobalId } from '../../content-type';
 
 interface Plugins {
   [key: string]: Plugin.LoadedPlugin;

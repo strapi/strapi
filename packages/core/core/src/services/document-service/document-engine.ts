@@ -14,7 +14,7 @@ import {
   updateComponents,
 } from '../entity-service/components';
 
-import { createDocumentId } from '../../utils/transform-content-types-to-models';
+import { createDocumentId } from '../../content-type';
 import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';

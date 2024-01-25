@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import type { Strapi, Schema } from '@strapi/types';
-import { getGlobalId } from '../domain/content-type';
+import { getGlobalId } from '../content-type';
 
 export default async function loadAdmin(strapi: Strapi) {
   strapi.admin = require('@strapi/admin/strapi-server');

@@ -38,6 +38,7 @@ import compile from './compile';
 import * as utils from './utils';
 import * as registries from './registries';
 import * as loaders from './loaders';
+import { transformContentTypesToModels } from './content-type';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
@@ -484,7 +485,7 @@ class Strapi extends Container implements StrapiI {
     this.db = await Database.init({
       ...this.config.get('database'),
       models: [
-        ...utils.transformContentTypesToModels([
+        ...transformContentTypesToModels([
           ...Object.values(this.contentTypes),
           ...Object.values(this.components),
         ]),
