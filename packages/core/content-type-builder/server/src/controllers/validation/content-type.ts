@@ -139,7 +139,11 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test(value: unknown) {
-      return !(value && reservedNames.includes(value as string));
+      // test for a case-insensitive match
+      const lowercaseValue = (value as string)?.toLowerCase();
+      return !(
+        lowercaseValue && reservedNames.map((name) => name.toLowerCase()).includes(lowercaseValue)
+      );
     },
   };
 };
@@ -157,7 +161,8 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.includes(value as string);
+      const lowercaseValue = (value as string)?.toLowerCase();
+      return !usedNames.some((name: string) => name.toLowerCase() === lowercaseValue);
     },
   };
 };
@@ -165,7 +170,7 @@ const nameIsAvailable = (isEdition: boolean) => {
 const nameIsNotExistingCollectionName = (isEdition: boolean) => {
   const usedNames = Object.keys(strapi.contentTypes).map(
     (key) => strapi.contentTypes[key as UID.ContentType].collectionName
-  );
+  ) as string[];
 
   return {
     name: 'nameAlreadyUsed',
@@ -174,7 +179,8 @@ const nameIsNotExistingCollectionName = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.includes(value as string);
+      const lowercaseValue = (value as string)?.toLowerCase();
+      return !usedNames.some((name: string) => name.toLowerCase() === lowercaseValue);
     },
   };
 };
