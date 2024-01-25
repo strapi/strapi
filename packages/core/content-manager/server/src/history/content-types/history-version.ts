@@ -1,6 +1,6 @@
-import type { Plugin } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
-const historyVersion: Plugin.LoadedPlugin['contentTypes'][string] = {
+const historyVersion: { schema: Schema.CollectionType } = {
   schema: {
     uid: 'plugin::content-manager.history-version',
     modelName: 'history-version',
