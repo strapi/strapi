@@ -3,12 +3,6 @@ import type { Attribute, Common } from '..';
 import type { Utils } from '../..';
 
 export type Relation<
-  // TODO: TOrigin was originally needed to infer precise attribute literal types by doing a reverse lookup
-  // on TTarget -> TOrigin relations. Due to errors because of Attribute.Any [relation] very generic
-  // representation, type mismatches were encountered and mappedBy/inversedBy are now regular strings.
-  // It is kept to allow for future iterations without breaking the current type API
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
   TTarget extends Common.UID.ContentType = Common.UID.ContentType
 > = Attribute.OfType<'relation'> &
@@ -107,8 +101,6 @@ export type RelationValue<
 > = RelationPluralityModifier<TRelationKind, Attribute.GetValues<TTarget>>;
 
 export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TOrigin,
   infer TRelationKind,
   infer TTarget
 >
@@ -116,8 +108,6 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribut
   : never;
 
 export type GetRelationTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TOrigin,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   infer _TRelationKind,
   infer TTarget
