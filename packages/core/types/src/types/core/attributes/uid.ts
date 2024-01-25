@@ -1,4 +1,4 @@
-import type { Attribute, Common } from '..';
+import type { Attribute } from '..';
 
 export interface UIDOptions {
   separator?: string;
