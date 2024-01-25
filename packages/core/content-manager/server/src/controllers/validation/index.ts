@@ -20,7 +20,6 @@ const generateUIDInputSchema = yup.object({
   contentTypeUID: yup.string().required(),
   field: yup.string().required(),
   data: yup.object().required(),
-  locale: yup.string().nullable(),
 });
 
 const checkUIDAvailabilityInputSchema = yup.object({
@@ -30,7 +29,6 @@ const checkUIDAvailabilityInputSchema = yup.object({
     .string()
     .matches(/^[A-Za-z0-9-_.~]*$/)
     .required(),
-  locale: yup.string().nullable(),
 });
 
 const validateUIDField = (contentTypeUID: any, field: any) => {

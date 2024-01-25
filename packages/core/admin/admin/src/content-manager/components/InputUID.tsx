@@ -14,13 +14,13 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
-import { buildValidGetParams } from '../utils/api';
 import { useDebounce } from '../../hooks/useDebounce';
 import {
   useGenerateUIDMutation,
   useGetAvailabilityQuery,
   useGetDefaultUIDQuery,
 } from '../services/uid';
+import { buildValidGetParams } from '../utils/api';
 
 /* -------------------------------------------------------------------------------------------------
  * InputUID
@@ -133,7 +133,7 @@ const InputUID = React.forwardRef<
           field: name,
           // @ts-expect-error – TODO: modified data is too vague for the type the API expects.
           data: modifiedData,
-          locale: params?.locale,
+          params,
         });
 
         if ('data' in res) {
@@ -161,7 +161,7 @@ const InputUID = React.forwardRef<
         contentTypeUID,
         field: name,
         value: debouncedValue ? debouncedValue.trim() : '',
-        locale: params?.locale,
+        params,
       },
       {
         skip: !Boolean(

@@ -13,9 +13,10 @@ export declare namespace GenerateUID {
       contentTypeUID: string;
       data: Entity;
       field: string;
-      locale: string | null;
     };
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
   export interface Response {
     data: string;
@@ -32,9 +33,10 @@ export declare namespace CheckUIDAvailability {
       contentTypeUID: string;
       field: string;
       value: string;
-      locale: string | null;
     };
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
   export type Response =
     | {

@@ -2,26 +2,9 @@ import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
+import { getDocumentDimensions } from './utils/dimensions';
 
 const { ApplicationError } = errors;
-
-/**
- * From a request object, validates and returns the locale and status of the document
- */
-const getDocumentDimensions = (request: any) => {
-  const { locale, status, ...rest } = request || {};
-  // Sanitize locale and status
-  // Check locale format is a valid locale identifier
-  if (locale && !/^[a-z]{2}(-[A-Z]{2})?$/.test(locale)) {
-    throw new errors.ValidationError(`Invalid locale format: ${locale}`);
-  }
-
-  if (status && !['draft', 'published'].includes(status)) {
-    throw new errors.ValidationError(`Invalid status: ${status}`);
-  }
-
-  return { locale, status, ...rest };
-};
 
 export default {
   async find(ctx: any) {

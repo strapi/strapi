@@ -1,4 +1,6 @@
 import { getService } from '../utils';
+import { getDocumentDimensions } from './utils/dimensions';
+
 import {
   validateGenerateUIDInput,
   validateCheckUIDAvailabilityInput,
@@ -7,9 +9,10 @@ import {
 
 export default {
   async generateUID(ctx: any) {
-    const { contentTypeUID, field, data, locale } = await validateGenerateUIDInput(
-      ctx.request.body
-    );
+    const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
+
+    const { query = {} } = ctx.request;
+    const { locale } = getDocumentDimensions(query);
 
     await validateUIDField(contentTypeUID, field);
 
@@ -21,9 +24,12 @@ export default {
   },
 
   async checkUIDAvailability(ctx: any) {
-    const { contentTypeUID, field, value, locale } = await validateCheckUIDAvailabilityInput(
+    const { contentTypeUID, field, value } = await validateCheckUIDAvailabilityInput(
       ctx.request.body
     );
+
+    const { query = {} } = ctx.request;
+    const { locale } = getDocumentDimensions(query);
 
     await validateUIDField(contentTypeUID, field);
 
