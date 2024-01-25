@@ -481,16 +481,16 @@ class Strapi extends Container implements StrapiI {
   }
 
   async bootstrap() {
-    const contentTypes = [
-      coreStoreModel,
-      webhookModel,
-      ...Object.values(this.contentTypes),
-      ...Object.values(this.components),
-    ];
-
     this.db = await Database.init({
       ...this.config.get('database'),
-      models: utils.transformContentTypesToModels(contentTypes),
+      models: [
+        ...utils.transformContentTypesToModels([
+          ...Object.values(this.contentTypes),
+          ...Object.values(this.components),
+        ]),
+        coreStoreModel,
+        webhookModel,
+      ],
     });
 
     this.store = createCoreStore({ db: this.db });
@@ -514,7 +514,7 @@ class Strapi extends Container implements StrapiI {
     this.telemetry.bootstrap();
 
     let oldContentTypes;
-    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.collectionName)) {
+    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
       oldContentTypes = await this.store.get({
         type: 'strapi',
         name: 'content_types',

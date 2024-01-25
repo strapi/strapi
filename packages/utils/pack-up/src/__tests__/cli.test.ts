@@ -6,7 +6,7 @@ import { spawn } from '../../tests/spawn';
 describe.skip('cli', () => {
   const timeout = 1000 * 120;
 
-  describe('build & check', () => {
+  describe.skip('build & check', () => {
     it(
       'should build `cjs-js` package',
       async () => {
