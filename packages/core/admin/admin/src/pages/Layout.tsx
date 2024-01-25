@@ -130,7 +130,7 @@ const AdminLayout = () => {
     trackUsage('didAccessAuthenticatedAdministration');
   });
 
-  // Check if we're on a history route to known if we should render the left menu
+  // Check if we're on a history route to know if we should render the left menu
   const isHistoryRoute = useIsHistoryRoute();
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
