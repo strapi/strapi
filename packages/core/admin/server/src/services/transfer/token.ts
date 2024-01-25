@@ -313,10 +313,10 @@ const hash = (accessKey: string): string => {
 };
 
 const checkSaltIsDefined = () => {
-  const { hasValidTokenSalt, isDisabledFromEnv } = getService('transfer').utils;
+  const { hasValidTokenSalt } = getService('transfer').utils;
 
   // Ignore the check if the data-transfer feature is manually disabled
-  if (isDisabledFromEnv()) {
+  if (!strapi.config.get('server.transfer.remote.enabled')) {
     return;
   }
 

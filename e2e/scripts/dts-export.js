@@ -32,7 +32,7 @@ const exportData = async () => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
-    only: ['content'],
+    only: ['content', 'files'],
     transforms: {
       links: [
         {

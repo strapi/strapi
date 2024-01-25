@@ -95,7 +95,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
       <Flex>
         {canPublish && (
           <Button
-            disabled={didChangeData}
+            disabled={didChangeData || !initialData.createdAt}
             loading={isPublishButtonLoading}
             onClick={onClick}
             startIcon={<Check />}

@@ -72,7 +72,7 @@ const createDestinationProvider = (datasetPath) => {
   return createLocalFileDestinationProvider({
     file: { path: datasetPath },
     encryption: { enabled: false },
-    compression: { enabled: false },
+    compression: { enabled: true },
   });
 };
 

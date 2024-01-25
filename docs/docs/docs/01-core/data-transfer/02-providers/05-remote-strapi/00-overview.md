@@ -18,4 +18,16 @@ In order to use remote transfer providers, the remote Strapi server must have a 
 
 ## Disabling Remote Transfers
 
-If desired, the remote transfer feature of a server can be completely disabled by setting the environment variable `STRAPI_DISABLE_REMOTE_DATA_TRANSFER` to true.
+The remote transfer feature of a server can be completely disabled by setting the server config value:
+
+```javascript
+// in config/server.js
+{
+  transfer: {
+    remote: {
+      enabled: false;
+    }
+  }
+  // ...the rest of your server config
+}
+```

@@ -98,19 +98,19 @@ const RELEASE_WITH_ACTIONS_BODY_MOCK_DATA = {
       {
         id: 3,
         type: 'publish',
-        contentType: 'api::category.category',
         createdAt: '2023-12-05T09:03:57.155Z',
         updatedAt: '2023-12-05T09:03:57.155Z',
+        contentType: {
+          displayName: 'Category',
+          mainFieldValue: 'cat1',
+          uid: 'api::category.category',
+        },
+        locale: {
+          name: 'English (en)',
+          code: 'en',
+        },
         entry: {
           id: 1,
-          contentType: {
-            displayName: 'Category',
-            mainFieldValue: 'cat1',
-          },
-          locale: {
-            name: 'English (en)',
-            code: 'en',
-          },
         },
       },
     ],
@@ -122,6 +122,8 @@ const RELEASE_WITH_ACTIONS_BODY_MOCK_DATA = {
       total: 1,
       pageCount: 1,
     },
+    contentTypes: {},
+    components: {},
   },
 };
 
@@ -134,39 +136,39 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
       {
         id: 3,
         type: 'publish',
-        contentType: 'api::category.category',
         createdAt: '2023-12-05T09:03:57.155Z',
         updatedAt: '2023-12-05T09:03:57.155Z',
+        contentType: {
+          displayName: 'Category',
+          mainFieldValue: 'cat1',
+          uid: 'api::category.category',
+        },
+        locale: {
+          name: 'English (en)',
+          code: 'en',
+        },
         entry: {
           id: 1,
-          contentType: {
-            displayName: 'Category',
-            mainFieldValue: 'cat1',
-          },
-          locale: {
-            name: 'English (en)',
-            code: 'en',
-          },
-          status: 'draft',
+          publishedAt: null,
         },
       },
       {
         id: 4,
         type: 'unpublish',
-        contentType: 'api::category.category',
         createdAt: '2023-12-05T09:03:57.155Z',
         updatedAt: '2023-12-05T09:03:57.155Z',
+        contentType: {
+          displayName: 'Category',
+          mainFieldValue: 'cat2',
+          uid: 'api::category.category',
+        },
+        locale: {
+          name: 'English (en)',
+          code: 'en',
+        },
         entry: {
           id: 2,
-          contentType: {
-            displayName: 'Category',
-            mainFieldValue: 'cat2',
-          },
-          locale: {
-            name: 'English (en)',
-            code: 'en',
-          },
-          status: 'published',
+          publishedAt: '2023-12-05T09:03:57.155Z',
         },
       },
     ],
@@ -174,20 +176,20 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
       {
         id: 5,
         type: 'publish',
-        contentType: 'api::address.address',
         createdAt: '2023-12-05T09:03:57.155Z',
         updatedAt: '2023-12-05T09:03:57.155Z',
+        contentType: {
+          displayName: 'Address',
+          mainFieldValue: 'add1',
+          uid: 'api::address.address',
+        },
+        locale: {
+          name: 'English (en)',
+          code: 'en',
+        },
         entry: {
           id: 1,
-          contentType: {
-            displayName: 'Address',
-            mainFieldValue: 'add1',
-          },
-          locale: {
-            name: 'English (en)',
-            code: 'en',
-          },
-          status: 'published',
+          publishedAt: '2023-12-05T09:03:57.155Z',
         },
       },
     ],
@@ -199,6 +201,8 @@ const RELEASE_WITH_MULTIPLE_ACTIONS_BODY_MOCK_DATA = {
       total: 1,
       pageCount: 1,
     },
+    contentTypes: {},
+    components: {},
   },
 };
 

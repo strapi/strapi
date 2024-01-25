@@ -40,9 +40,9 @@ const releaseController = {
       const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
         typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
 
-      const data = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
-        hasEntryAttached,
-      });
+      const data = hasEntryAttached
+        ? await releaseService.findManyWithContentTypeEntryAttached(contentTypeUid, entryId)
+        : await releaseService.findManyWithoutContentTypeEntryAttached(contentTypeUid, entryId);
 
       ctx.body = { data };
     } else {

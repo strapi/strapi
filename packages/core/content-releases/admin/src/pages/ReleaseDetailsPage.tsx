@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { unstable_useDocument } from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
@@ -16,6 +17,7 @@ import {
   SingleSelect,
   SingleSelectOption,
   Icon,
+  Tooltip,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
@@ -31,8 +33,9 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
+import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,12 +53,16 @@ import {
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
   useDeleteReleaseMutation,
+  releaseApi,
 } from '../services/release';
+import { useTypedDispatch } from '../store/hooks';
 
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
+  ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -96,6 +103,10 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 300px;
+`;
+
 interface PopoverButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   disabled?: boolean;
@@ -122,18 +133,49 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 };
 
 interface EntryValidationTextProps {
-  status: ReleaseAction['entry']['status'];
   action: ReleaseAction['type'];
+  schema: Schema.ContentType;
+  components: { [key: Schema.Component['uid']]: Schema.Component };
+  entry: ReleaseActionEntry;
 }
 
-const EntryValidationText = ({ status, action }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
+  const { validate } = unstable_useDocument();
+
+  const { errors } = validate(entry, {
+    contentType: schema,
+    components,
+    isCreatingEntry: false,
+  });
+
+  if (Object.keys(errors).length > 0) {
+    const validationErrorsMessages = Object.entries(errors)
+      .map(([key, value]) =>
+        formatMessage(
+          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+          { field: key }
+        )
+      )
+      .join(' ');
+
+    return (
+      <Flex gap={2}>
+        <Icon color="danger600" as={CrossCircle} />
+        <Tooltip description={validationErrorsMessages}>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+            {validationErrorsMessages}
+          </TypographyMaxWidth>
+        </Tooltip>
+      </Flex>
+    );
+  }
 
   if (action == 'publish') {
     return (
       <Flex gap={2}>
         <Icon color="success600" as={CheckCircle} />
-        {status === 'published' ? (
+        {entry.publishedAt ? (
           <Typography textColor="success600" fontWeight="bold">
             {formatMessage({
               id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
@@ -155,7 +197,7 @@ const EntryValidationText = ({ status, action }: EntryValidationTextProps) => {
   return (
     <Flex gap={2}>
       <Icon color="success600" as={CheckCircle} />
-      {status === 'draft' ? (
+      {!entry.publishedAt ? (
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
@@ -205,6 +247,7 @@ const ReleaseDetailsLayout = ({
   const {
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
+  const dispatch = useTypedDispatch();
 
   const release = data?.data;
 
@@ -247,6 +290,10 @@ const ReleaseDetailsLayout = ({
   const openWarningConfirmDialog = () => {
     toggleWarningSubmit();
     handleTogglePopover();
+  };
+
+  const handleRefresh = () => {
+    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
   };
 
   if (isLoadingDetails) {
@@ -363,6 +410,12 @@ const ReleaseDetailsLayout = ({
                   </ReleaseInfoWrapper>
                 </Popover>
               )}
+              <Button size="S" variant="tertiary" onClick={handleRefresh}>
+                {formatMessage({
+                  id: 'content-releases.header.actions.refresh',
+                  defaultMessage: 'Refresh',
+                })}
+              </Button>
               <CheckPermissions permissions={PERMISSIONS.publish}>
                 <Button
                   size="S"
@@ -484,8 +537,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
+  const contentTypes = releaseMeta?.contentTypes || {};
+  const components = releaseMeta?.components || {};
 
-  if (isError || isReleaseError || !release || !releaseActions) {
+  if (isReleaseError || !release) {
     const errorsArray = [];
     if (releaseError) {
       errorsArray.push({
@@ -504,6 +559,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           errors: errorsArray,
         }}
       />
+    );
+  }
+
+  if (isError || !releaseActions) {
+    return (
+      <ContentLayout>
+        <AnErrorOccurred />
+      </ContentLayout>
     );
   }
 
@@ -628,22 +691,20 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, type, entry }) => (
+                  {releaseActions[key].map(({ id, contentType, locale, type, entry }) => (
                     <Tr key={id}>
-                      <Td width={'25%'}>
+                      <Td width="25%" maxWidth="200px">
                         <Typography ellipsis>{`${
-                          entry.contentType.mainFieldValue || entry.id
+                          contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td>
-                        <Typography>{`${
-                          entry?.locale?.name ? entry.locale.name : '-'
-                        }`}</Typography>
+                      <Td width="10%">
+                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
                       </Td>
-                      <Td>
-                        <Typography>{entry.contentType.displayName || ''}</Typography>
+                      <Td width="10%">
+                        <Typography>{contentType.displayName || ''}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="20%">
                         {release.releasedAt ? (
                           <Typography>
                             {formatMessage(
@@ -669,15 +730,32 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
-                          <EntryValidationText status={entry.status} action={type} />
-                        </Td>
+                        <>
+                          <Td width="20%" minWidth="200px">
+                            <EntryValidationText
+                              action={type}
+                              schema={contentTypes?.[contentType.uid]}
+                              components={components}
+                              entry={entry}
+                            />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu.Root>
+                                <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                  contentTypeUid={contentType.uid}
+                                  entryId={entry.id}
+                                  locale={locale?.code}
+                                />
+                                <ReleaseActionMenu.DeleteReleaseActionItem
+                                  releaseId={release.id}
+                                  actionId={id}
+                                />
+                              </ReleaseActionMenu.Root>
+                            </Flex>
+                          </Td>
+                        </>
                       )}
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
                     </Tr>
                   ))}
                 </Table.Body>

@@ -35,6 +35,10 @@ export default (app: Strapi) => {
     },
 
     logFirstStartupMessage() {
+      if (!strapi.config.get('server.logger.startup.enabled')) {
+        return;
+      }
+
       this.logStats();
 
       console.log(chalk.bold('One more thing...'));
@@ -53,6 +57,9 @@ export default (app: Strapi) => {
     },
 
     logDefaultStartupMessage() {
+      if (!strapi.config.get('server.logger.startup.enabled')) {
+        return;
+      }
       this.logStats();
 
       console.log(chalk.bold('Welcome back!'));
@@ -71,17 +78,13 @@ export default (app: Strapi) => {
     },
 
     logStartupMessage({ isInitialized }: { isInitialized: boolean }) {
-      // Should the startup message be displayed?
-      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
-        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
-        : false;
-
-      if (hideStartupMessage === false) {
-        if (!isInitialized) {
-          this.logFirstStartupMessage();
-        } else {
-          this.logDefaultStartupMessage();
-        }
+      if (!strapi.config.get('server.logger.startup.enabled')) {
+        return;
+      }
+      if (!isInitialized) {
+        this.logFirstStartupMessage();
+      } else {
+        this.logDefaultStartupMessage();
       }
     },
   };

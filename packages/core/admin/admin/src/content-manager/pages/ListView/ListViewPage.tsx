@@ -19,7 +19,6 @@ import {
   findMatchingPermissions,
   NoPermissions,
   SearchURLQuery,
-  useFetchClient,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -39,30 +38,28 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { AxiosError, AxiosResponse } from 'axios';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
-import {
-  useNavigate,
-  useLocation,
-  Link as ReactRouterLink,
-  useParams,
-  Navigate,
-} from 'react-router-dom';
+import { useNavigate, Link as ReactRouterLink, useParams, Navigate } from 'react-router-dom';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
-import { useTypedDispatch, useTypedSelector } from '../../../core/store/hooks';
+import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { useAdminUsers } from '../../../services/users';
 import { CREATOR_FIELDS } from '../../constants/attributes';
+import {
+  useAutoCloneDocumentMutation,
+  useDeleteDocumentMutation,
+  useDeleteManyDocumentsMutation,
+  useGetAllDocumentsQuery,
+  useUnpublishManyDocumentsMutation,
+} from '../../services/documents';
 import { buildValidGetParams } from '../../utils/api';
 import { FormattedLayouts, ListLayoutRow } from '../../utils/layouts';
 import { generatePermissionsObject } from '../../utils/permissions';
 import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
-import { getData, getDataSucceeded } from '../ListViewLayoutManager';
 
 import { AdminUsersFilter } from './components/AdminUsersFilter';
 import { BulkActionButtons } from './components/BulkActions/Buttons';
@@ -114,11 +111,6 @@ const ListViewPage = ({
   layout,
   slug,
 }: ListViewPageProps) => {
-  const dispatch = useTypedDispatch();
-  const { pagination, isLoading, data } = useTypedSelector(
-    (state) => state['content-manager_listView']
-  );
-  const { total } = pagination;
   const { contentType } = layout;
   const {
     info,
@@ -129,9 +121,9 @@ const ListViewPage = ({
   const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { allPermissions, refetchPermissions } = useRBACProvider();
+  const { allPermissions } = useRBACProvider();
   const { notifyStatus } = useNotifyAT();
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
@@ -146,10 +138,8 @@ const ListViewPage = ({
       }>;
     };
   }>();
-  const { pathname } = useLocation();
   const navigate = useNavigate();
   const { formatMessage, locale } = useIntl();
-  const { get, post, del } = useFetchClient();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
@@ -262,6 +252,7 @@ const ListViewPage = ({
       enabled: !!options?.reviewWorkflows,
     }
   );
+
   const ReviewWorkflowsColumns = useEnterprise(
     REVIEW_WORKFLOW_COLUMNS_CELL_CE,
     async () => {
@@ -340,184 +331,179 @@ const ListViewPage = ({
      */
   ) as FilterData[];
 
-  const { refetch } = useQuery<
-    Contracts.CollectionTypes.Find.Response,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.Find.Response, 'error'>>>
-  >(
-    ['content-manager', 'collection-types', slug, params],
-    async () => {
-      dispatch(getData());
-
-      const { data } = await get<Contracts.CollectionTypes.Find.Response>(
-        `/content-manager/collection-types/${slug}`,
-        { params }
-      );
-
-      return data;
+  const { data, error, isLoading, refetch } = useGetAllDocumentsQuery(
+    {
+      model: slug,
+      query: params,
     },
     {
-      enabled: canRead,
-      onError(err) {
-        const resStatus = err?.response?.status ?? null;
-
-        if (resStatus === 403) {
-          refetchPermissions();
-
-          toggleNotification({
-            type: 'info',
-            message: { id: getTranslation('permissions.not-allowed.update') },
-          });
-
-          navigate('/');
-
-          return;
-        }
-
-        toggleNotification({
-          type: 'warning',
-          message: { id: getTranslation('error.model.fetch') },
-        });
-      },
-      onSuccess({ pagination, results }) {
-        // If user enters a page number that doesn't exist, redirect him to the last page
-        if (pagination.page && pagination.page > pagination.pageCount && pagination.pageCount > 0) {
-          const query = {
-            ...params,
-            page: pagination.pageCount,
-          };
-
-          navigate(
-            {
-              pathname,
-              search: stringify(query),
-            },
-            {
-              state: { from: pathname },
-            }
-          );
-
-          return;
-        }
-
-        notifyStatus(
-          formatMessage(
-            {
-              id: getTranslation('utils.data-loaded'),
-              defaultMessage:
-                '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
-            },
-            // Using the plural form
-            { number: pagination.pageSize }
-          )
-        );
-
-        dispatch(getDataSucceeded(pagination, results));
-      },
+      skip: !canRead,
     }
   );
 
-  const bulkUnpublishMutation = useMutation<
-    Contracts.CollectionTypes.BulkUnpublish.Response,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkUnpublish.Response, 'error'>>>,
-    Contracts.CollectionTypes.BulkUnpublish.Request['body']
-  >(
-    async (body) => {
-      const { data } = await post<
-        Contracts.CollectionTypes.BulkUnpublish.Response,
-        AxiosResponse<Contracts.CollectionTypes.BulkUnpublish.Response>,
-        Contracts.CollectionTypes.BulkUnpublish.Request['body']
-      >(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, body);
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+    }
+  }, [error, formatAPIError, toggleNotification]);
 
-      return data;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: 'content-manager.success.record.unpublish',
-            defaultMessage: 'Unpublished',
+  React.useEffect(() => {
+    if (data?.pagination) {
+      const { pagination } = data;
+
+      if (pagination.page && pagination.page > pagination.pageCount && pagination.pageCount > 0) {
+        const query = {
+          ...params,
+          page: pagination.pageCount,
+        };
+
+        navigate({
+          search: stringify(query),
+        });
+
+        return;
+      }
+
+      notifyStatus(
+        formatMessage(
+          {
+            id: getTranslation('utils.data-loaded'),
+            defaultMessage:
+              '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
           },
-        });
-
-        refetch();
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
+          // Using the plural form
+          { number: pagination.pageSize }
+        )
+      );
     }
-  );
+  }, [data, formatMessage, notifyStatus, params, navigate]);
 
+  const [deleteManyDocuments] = useDeleteManyDocumentsMutation();
   const handleConfirmDeleteAllData = React.useCallback(
     async (ids: Contracts.CollectionTypes.BulkDelete.Request['body']['ids']) => {
       try {
-        await post<
-          Contracts.CollectionTypes.BulkDelete.Response,
-          AxiosResponse<Contracts.CollectionTypes.BulkDelete.Response>,
-          Contracts.CollectionTypes.BulkDelete.Request['body']
-        >(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
+        const res = await deleteManyDocuments({
+          model: slug,
           ids,
         });
 
-        await refetch();
-
-        trackUsage('didBulkDeleteEntries');
-      } catch (err) {
-        if (err instanceof AxiosError) {
+        if ('error' in res) {
           toggleNotification({
             type: 'warning',
-            message: formatAPIError(err),
+            message: formatAPIError(res.error),
           });
+
+          return;
         }
+
+        trackUsage('didBulkDeleteEntries');
+
+        /**
+         * TODO: add a success message?
+         */
+      } catch (err) {
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error',
+            defaultMessage: "Couldn't delete documents, an error occurred.",
+          },
+        });
       }
     },
-    [post, slug, refetch, trackUsage, toggleNotification, formatAPIError]
+    [deleteManyDocuments, slug, trackUsage, toggleNotification, formatAPIError]
   );
 
+  const [deleteDocument] = useDeleteDocumentMutation();
   const handleConfirmDeleteData = React.useCallback(
-    async (idToDelete: Contracts.CollectionTypes.Delete.Params['id']) => {
+    async (idToDelete: Entity.ID) => {
       try {
-        await del<Contracts.CollectionTypes.Delete.Response>(
-          `/content-manager/collection-types/${slug}/${idToDelete}`
-        );
+        const res = await deleteDocument({
+          model: slug,
+          collectionType: 'collection-types',
+          id: idToDelete,
+        });
 
-        await refetch();
+        if ('error' in res) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(res.error),
+          });
+          return;
+        }
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.delete') },
+          message: {
+            id: getTranslation('success.record.delete'),
+            defaultMessage: 'Deleted document',
+          },
         });
       } catch (err) {
-        if (err instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(err),
-          });
-        }
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error',
+            defaultMessage: "Couldn't delete document, an error occurred.",
+          },
+        });
       }
     },
-    [slug, toggleNotification, formatAPIError, del, refetch]
+    [deleteDocument, slug, toggleNotification, formatAPIError]
   );
+
+  const [unpublishManyDocuments] = useUnpublishManyDocumentsMutation();
 
   const handleConfirmUnpublishAllData = async (
     selectedEntries: Contracts.CollectionTypes.BulkUnpublish.Request['body']['ids']
   ) => {
-    await bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
+    try {
+      const res = await unpublishManyDocuments({
+        model: slug,
+        ids: selectedEntries,
+      });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+        return;
+      }
+
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: 'content-manager.success.record.unpublish',
+          defaultMessage: 'Unpublished',
+        },
+      });
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: "Couldn't unpublish documents, an error occurred.",
+        },
+      });
+    }
   };
 
-  const defaultHeaderLayoutTitle = formatMessage({
-    id: getTranslation('header.name'),
-    defaultMessage: 'Content',
-  });
   const headerLayoutTitle = formatMessage({
     id: info.displayName,
-    defaultMessage: info.displayName || defaultHeaderLayoutTitle,
+    defaultMessage:
+      info.displayName ||
+      formatMessage({
+        id: getTranslation('header.name'),
+        defaultMessage: 'Content',
+      }),
   });
 
   const { runHookWaterfall } = useStrapiApp();
+
   const displayedHeaders = useTypedSelector(
     (state) => state['content-manager_listView'].displayedHeaders
   );
@@ -590,47 +576,62 @@ const ListViewPage = ({
 
   const handleRowClick = (id: Entity.ID) => () => {
     trackUsage('willEditEntryFromList');
-    navigate(
-      {
-        pathname: id.toString(),
-        search: pluginsQueryParams,
-      },
-      {
-        state: { from: pathname },
-      }
-    );
+    navigate({
+      pathname: id.toString(),
+      search: pluginsQueryParams,
+    });
   };
+
+  const [autoCloneDocument] = useAutoCloneDocumentMutation();
 
   const handleCloneClick =
     (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
       try {
-        const { data } = await post<Contracts.CollectionTypes.AutoClone.Response>(
-          `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
-        );
+        // const { data } = await post<Contracts.CollectionTypes.AutoClone.Response>(
+        //   `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
+        // );
 
-        if ('id' in data) {
+        const res = await autoCloneDocument({
+          model: contentType.uid,
+          sourceId: id,
+          query: pluginsQueryParams,
+        });
+
+        if ('data' in res) {
+          navigate({
+            pathname: res.data.id.toString(),
+            search: pluginsQueryParams,
+          });
+        } else {
           navigate(
             {
-              pathname: data.id.toString(),
+              pathname: `create/clone/${id.toString()}`,
               search: pluginsQueryParams,
             },
             {
-              state: { from: pathname },
+              state: { error: formatAPIError(res.error) },
             }
           );
         }
       } catch (err) {
-        if (err instanceof AxiosError) {
-          navigate(
-            {
-              pathname: `create/clone/${id}`,
-              search: pluginsQueryParams,
+        /**
+         * If something odd happens, redirect to the clone route and
+         * display a much more generic error message.
+         */
+        navigate(
+          {
+            pathname: `create/clone/${id}`,
+            search: pluginsQueryParams,
+          },
+          {
+            state: {
+              error: formatMessage({
+                id: 'notification.error',
+                defaultMessage: "Couldn't clone entry, an error occurred.",
+              }),
             },
-            {
-              state: { from: pathname, error: formatAPIError(err) },
-            }
-          );
-        }
+          }
+        );
       }
     };
 
@@ -641,6 +642,8 @@ const ListViewPage = ({
   if (!ReviewWorkflowsColumns) {
     return null;
   }
+
+  const { results = [], pagination } = data ?? {};
 
   return (
     <Main aria-busy={isLoading}>
@@ -656,7 +659,7 @@ const ListViewPage = ({
                   defaultMessage:
                     '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
                 },
-                { number: total }
+                { number: pagination?.total }
               )
             : undefined
         }
@@ -717,14 +720,17 @@ const ListViewPage = ({
       <ContentLayout>
         {canRead ? (
           <Flex gap={4} direction="column" alignItems="stretch">
-            <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
+            <HelperPluginTable.Root rows={results} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
                 <BulkActionButtons
+                  data={data?.results}
+                  refetchData={async () => {
+                    await refetch();
+                  }}
                   showPublish={canPublish}
                   showDelete={canDelete}
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-                  refetchData={refetch}
                 />
               </HelperPluginTable.ActionBar>
               <HelperPluginTable.Content>
@@ -765,7 +771,7 @@ const ListViewPage = ({
                   isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
                   setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
                 >
-                  {data.map((rowData, index) => {
+                  {results.map((rowData, index) => {
                     return (
                       <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
                         {/* Bulk action row checkbox */}

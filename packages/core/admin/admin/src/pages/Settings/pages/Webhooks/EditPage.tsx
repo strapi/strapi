@@ -14,7 +14,6 @@ import { useNavigate, useMatch } from 'react-router-dom';
 
 import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
 import { useTypedSelector } from '../../../../core/store/hooks';
-import { useContentTypes } from '../../../../hooks/useContentTypes';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 
@@ -49,7 +48,6 @@ const EditPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const { isLoading: isLoadingForModels } = useContentTypes();
   const [isTriggering, setIsTriggering] = React.useState(false);
   const [triggerResponse, setTriggerResponse] = React.useState<TriggerWebhook.Response['data']>();
 
@@ -157,7 +155,7 @@ const EditPage = () => {
     }
   };
 
-  if (isLoading || isLoadingForModels) {
+  if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
