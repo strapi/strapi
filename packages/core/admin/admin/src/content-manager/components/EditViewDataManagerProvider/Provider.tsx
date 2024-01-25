@@ -11,6 +11,7 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
@@ -108,6 +109,7 @@ const EditViewDataManagerProvider = ({
     (state) => state['content-manager_editViewCrudReducer']
   );
   const reduxDispatch = useTypedDispatch();
+  const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
 
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -442,7 +444,7 @@ const EditViewDataManagerProvider = ({
   const handleSubmit = React.useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      let errors: Record<string, TranslationMessage> = {};
+      let errors: Record<string, TranslationMessage | string> = {};
 
       try {
         await yupSchema.validate(modifiedData, { abortEarly: false });
@@ -474,7 +476,7 @@ const EditViewDataManagerProvider = ({
         errors = {
           ...errors,
           // @ts-expect-error – remove the function later.
-          ...getAPIInnerErrors(err, { getTranslation }),
+          ...formatValidationErrors(err),
         };
       }
 
@@ -484,14 +486,15 @@ const EditViewDataManagerProvider = ({
       });
     },
     [
-      createFormData,
-      isCreatingEntry,
-      modifiedData,
-      initialData,
-      onPost,
-      onPut,
-      trackerProperty,
       yupSchema,
+      modifiedData,
+      createFormData,
+      initialData,
+      isCreatingEntry,
+      onPost,
+      trackerProperty,
+      onPut,
+      formatValidationErrors,
     ]
   );
 

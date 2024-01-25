@@ -2,11 +2,12 @@ import { join } from 'path';
 import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import { env } from '@strapi/utils';
-import type { Strapi, Plugin } from '@strapi/types';
+import type { Strapi, Plugin, Schema } from '@strapi/types';
 import { loadConfigFile } from '../../utils/load-config-file';
 import { loadFiles } from '../../utils/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
 import { getUserPluginsConfig } from './get-user-plugins-config';
+import { getGlobalId } from '../../domain/content-type';
 
 interface Plugins {
   [key: string]: Plugin.LoadedPlugin;
@@ -111,6 +112,7 @@ export default async function loadPlugins(strapi: Strapi) {
     plugins[pluginName] = {
       ...defaultPlugin,
       ...pluginServer,
+      contentTypes: formatContentTypes(pluginName, pluginServer.contentTypes ?? {}),
       config: defaults(defaultPlugin.config, pluginServer.config),
       routes: pluginServer.routes ?? defaultPlugin.routes,
     };
@@ -124,3 +126,21 @@ export default async function loadPlugins(strapi: Strapi) {
     strapi.get('plugins').add(pluginName, plugins[pluginName]);
   }
 }
+
+const formatContentTypes = (
+  pluginName: string,
+  contentTypes: Record<string, { schema: Schema.ContentType }>
+) => {
+  Object.values(contentTypes).forEach((definition) => {
+    const { schema } = definition;
+
+    Object.assign(schema, {
+      plugin: pluginName,
+      collectionName:
+        schema.collectionName || `${pluginName}_${schema.info.singularName}`.toLowerCase(),
+      globalId: getGlobalId(schema, pluginName),
+    });
+  });
+
+  return contentTypes;
+};

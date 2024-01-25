@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "4.17.1",
-    "@strapi/plugin-upload": "4.17.1",
+    "@strapi/types": "4.17.1",
     "@types/jest": "29.5.2",
     "eslint-config-custom": "4.17.1",
     "memfs": "4.6.0",

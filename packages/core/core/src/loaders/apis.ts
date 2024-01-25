@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { isKebabCase, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
 import type { Strapi, Common, Schema } from '@strapi/types';
+import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
 
 interface API {
   bootstrap: () => void | Promise<void>;
@@ -48,7 +49,7 @@ export default async function loadAPIs(strapi: Strapi) {
   // only load folders
   for (const apiFD of apisFDs) {
     const apiName = normalizeName(apiFD.name);
-    const api = await loadAPI(join(strapi.dirs.dist.api, apiFD.name));
+    const api = await loadAPI(apiName, join(strapi.dirs.dist.api, apiFD.name));
 
     apis[apiName] = api;
   }
@@ -83,7 +84,7 @@ const validateContentTypesUnicity = (apis: APIs) => {
   });
 };
 
-const loadAPI = async (dir: string) => {
+const loadAPI = async (apiName: string, dir: string) => {
   const [index, config, routes, controllers, services, policies, middlewares, contentTypes] =
     await Promise.all([
       loadIndex(dir),
@@ -93,7 +94,7 @@ const loadAPI = async (dir: string) => {
       loadDir(join(dir, 'services')),
       loadDir(join(dir, 'policies')),
       loadDir(join(dir, 'middlewares')),
-      loadContentTypes(join(dir, 'content-types')),
+      loadContentTypes(apiName, join(dir, 'content-types')),
     ]);
 
   return {
@@ -114,7 +115,7 @@ const loadIndex = async (dir: string) => {
   }
 };
 
-const loadContentTypes = async (dir: string) => {
+const loadContentTypes = async (apiName: string, dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
   }
@@ -129,16 +130,24 @@ const loadContentTypes = async (dir: string) => {
     }
 
     const contentTypeName = normalizeName(fd.name);
-    const contentType = await loadDir(join(dir, fd.name));
+    const loadedContentType = await loadDir(join(dir, fd.name));
 
-    if (isEmpty(contentType) || isEmpty(contentType.schema)) {
+    if (isEmpty(loadedContentType) || isEmpty(loadedContentType.schema)) {
       throw new Error(`Could not load content type found at ${dir}`);
     }
 
-    contentTypes[normalizeName(contentTypeName)] = _.defaults(
-      contentType as { schema: Schema.ContentType },
-      DEFAULT_CONTENT_TYPE
-    );
+    const contentType = {
+      ...DEFAULT_CONTENT_TYPE,
+      ...loadedContentType,
+    } as ContentTypeDefinition;
+
+    Object.assign(contentType.schema, {
+      apiName,
+      collectionName: contentType.schema.collectionName || contentType.schema.info.singularName,
+      globalId: getGlobalId(contentType.schema),
+    });
+
+    contentTypes[normalizeName(contentTypeName)] = contentType;
   }
 
   return contentTypes;

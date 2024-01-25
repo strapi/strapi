@@ -74,7 +74,6 @@ interface RelationInputProps
   relations: {
     data: NormalizedRelation[];
     isLoading: boolean;
-    isFetchingNextPage: boolean;
     hasNextPage?: boolean;
   };
   searchResults: {
@@ -286,9 +285,9 @@ const RelationInput = ({
 
         {shouldDisplayLoadMoreButton && (
           <TextButton
-            disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
+            disabled={paginatedRelations.isLoading}
             onClick={handleLoadMore}
-            loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
+            loading={paginatedRelations.isLoading}
             startIcon={<Refresh />}
             // prevent the label from line-wrapping
             shrink={0}

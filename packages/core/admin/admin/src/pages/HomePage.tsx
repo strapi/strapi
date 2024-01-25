@@ -58,15 +58,7 @@ const HomePageCE = () => {
     navigate('/plugins/content-type-builder/content-types/create-content-type');
   };
 
-  const hasAlreadyCreatedContentTypes = React.useMemo(() => {
-    /**
-     * TODO: this can be done with a `some` call.
-     */
-    return (
-      collectionTypes.filter((c) => c.isDisplayed).length > 1 ||
-      singleTypes.filter((c) => c.isDisplayed).length > 0
-    );
-  }, [collectionTypes, singleTypes]);
+  const hasAlreadyCreatedContentTypes = collectionTypes.length > 1 || singleTypes.length > 0;
 
   if (isLoadingForModels) {
     return <LoadingIndicatorPage />;

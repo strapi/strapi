@@ -12,7 +12,6 @@ import {
   TemplateFile,
 } from '@strapi/pack-up';
 import { outdent } from 'outdent';
-import { notifyExperimentalCommand } from '../../../utils/helpers';
 
 import { CLIContext } from '../../../types';
 import { gitIgnoreFile } from './files/gitIgnore';
@@ -25,11 +24,6 @@ export default async (
   { logger, cwd }: CLIContext
 ) => {
   try {
-    /**
-     * Notify users this is an experimental command. We don't need to get them to approve first.
-     */
-    await notifyExperimentalCommand('plugin:init', { force: true });
-
     /**
      * Create the package // plugin
      */

@@ -20,13 +20,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
-import {
-  MemoryRouter,
-  MemoryRouterProps,
-  Outlet,
-  RouterProvider,
-  createMemoryRouter,
-} from 'react-router-dom';
+import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { RBACReducer } from '../src/components/RBACProvider';
@@ -35,6 +29,7 @@ import { reducer as rbacManagerReducer } from '../src/content-manager/hooks/useS
 import { reducer as cmAppReducer } from '../src/content-manager/pages/App';
 import { reducer as editViewReducer } from '../src/content-manager/pages/EditViewLayoutManager';
 import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
+import { contentManagerApi } from '../src/content-manager/services/api';
 import { reducer as crudReducer } from '../src/content-manager/sharedReducers/crud/reducer';
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -72,13 +67,18 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       admin_app: appReducer,
       rbacProvider: RBACReducer,
       'content-manager_app': cmAppReducer,
+      [contentManagerApi.reducerPath]: contentManagerApi.reducer,
       'content-manager_listView': listViewReducer,
       'content-manager_rbacManager': rbacManagerReducer,
       'content-manager_editViewLayoutManager': editViewReducer,
       'content-manager_editViewCrudReducer': crudReducer,
     },
     // @ts-expect-error – this fails.
-    middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), adminApi.middleware],
+    middleware: (getDefaultMiddleware) => [
+      ...getDefaultMiddleware(),
+      adminApi.middleware,
+      contentManagerApi.middleware,
+    ],
   });
 
   const router = createMemoryRouter(

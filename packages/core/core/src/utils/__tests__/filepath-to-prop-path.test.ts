@@ -1,4 +1,4 @@
-import filePathToPropPath from '../filepath-to-prop-path';
+import { filePathToPropPath } from '../filepath-to-prop-path';
 
 const commonCases: [string, string[]][] = [
   ['./config/test.js', ['config', 'test']],

@@ -31,7 +31,7 @@ Check out the new releases at: ${releaseLink}
 `.trim();
 };
 
-const createUpdateNotifier = (strapi: Strapi) => {
+export const createUpdateNotifier = (strapi: Strapi) => {
   let config: InstanceType<typeof Configstore>;
 
   try {
@@ -101,5 +101,3 @@ const createUpdateNotifier = (strapi: Strapi) => {
     },
   };
 };
-
-export default createUpdateNotifier;

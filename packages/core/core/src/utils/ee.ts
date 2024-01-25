@@ -1,3 +1,1 @@
-import EE from '../ee';
-
-export default EE;
+export { default as ee } from '../ee';
