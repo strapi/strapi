@@ -191,6 +191,7 @@ yargs
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
+          let failingTests = 0;
           await Promise.all(
             batch.map(async (domain) => {
               const config = domainConfigs[domain];
@@ -225,6 +226,7 @@ yargs
               } catch (err) {
                 // If any tests fail
                 console.error('Test suite failed for', domain);
+                failingTests += 1;
                 // TODO: determine how to integrate this with the CI, probably ending the process and returning an error exit code
               }
 
@@ -232,6 +234,9 @@ yargs
               availableTestApps.push(...testApps);
             })
           );
+          if (failingTests > 0) {
+            throw new Error(`${failingTests} tests failed`);
+          }
         }
       } catch (err) {
         console.error(chalk.red('Error running CLI tests:'));
