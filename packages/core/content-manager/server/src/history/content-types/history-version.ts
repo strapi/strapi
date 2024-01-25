@@ -13,9 +13,6 @@ const historyVersion: Plugin.LoadedPlugin['contentTypes'][string] = {
       pluralName: 'history-versions',
       displayName: 'History Version',
     },
-    options: {
-      reviewWorkflows: false,
-    },
     pluginOptions: {
       'content-manager': {
         visible: false,
@@ -24,7 +21,7 @@ const historyVersion: Plugin.LoadedPlugin['contentTypes'][string] = {
         visible: false,
       },
       i18n: {
-        localized: true,
+        localized: false,
       },
     },
     attributes: {
@@ -32,7 +29,7 @@ const historyVersion: Plugin.LoadedPlugin['contentTypes'][string] = {
         type: 'string',
         required: true,
       },
-      // relatedId is a reserved attribute name
+      // documentId is a reserved attribute name
       relatedDocumentId: {
         type: 'string',
         required: true,
