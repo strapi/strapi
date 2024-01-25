@@ -4,7 +4,6 @@ import contentTypesServiceFactory from '../content-types';
 const {
   isLocalizedContentType,
   getValidLocale,
-  getAndValidateRelatedEntity,
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
   fillNonLocalizedAttributes,
