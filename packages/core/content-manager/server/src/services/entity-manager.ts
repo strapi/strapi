@@ -136,9 +136,9 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
       .create(params)
       .then((entity: Entity) => this.mapEntity(entity, uid));
 
-    if (isWebhooksPopulateRelationsEnabled()) {
-      return getDeepRelationsCount(document, uid);
-    }
+    // if (isWebhooksPopulateRelationsEnabled()) {
+    //   return getDeepRelationsCount(document, uid);
+    // }
 
     return document;
   },
@@ -162,9 +162,9 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
       // @ts-expect-error mapEntity can be extended
       .then((document: Entity) => this.mapEntity(document, uid));
 
-    if (isWebhooksPopulateRelationsEnabled()) {
-      return getDeepRelationsCount(updatedDocument, uid);
-    }
+    // if (isWebhooksPopulateRelationsEnabled()) {
+    //   return getDeepRelationsCount(updatedDocument, uid);
+    // }
 
     return updatedDocument;
   },
