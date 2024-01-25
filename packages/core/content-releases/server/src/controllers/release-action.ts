@@ -17,7 +17,7 @@ import { RELEASE_ACTION_MODEL_UID } from '../constants';
 const releaseActionController = {
   async create(ctx: Koa.Context) {
     const releaseId: CreateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
-    const releaseActionArgs: CreateReleaseAction.Request['body'] = ctx.request.body;
+    const releaseActionArgs = ctx.request.body as CreateReleaseAction.Request['body'];
 
     await validateReleaseAction(releaseActionArgs);
 
@@ -48,7 +48,7 @@ const releaseActionController = {
      * We need to sanitize the entry output according to that content type.
      * So, we group the sanitized output function by content type.
      */
-    const contentTypeOutputSanitizers = results.reduce((acc, action) => {
+    const contentTypeOutputSanitizers = results.reduce((acc: Record<string, any>, action: any) => {
       if (acc[action.contentType]) {
         return acc;
       }
@@ -68,7 +68,7 @@ const releaseActionController = {
      * sanitizeOutput doesn't work if you use it directly on the Release Action model, it doesn't sanitize the entries
      * So, we need to sanitize manually each entry inside a Release Action
      */
-    const sanitizedResults = await mapAsync(results, async (action) => ({
+    const sanitizedResults = await mapAsync(results, async (action: any) => ({
       ...action,
       entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
     }));
@@ -91,7 +91,7 @@ const releaseActionController = {
   async update(ctx: Koa.Context) {
     const actionId: UpdateReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: UpdateReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
-    const releaseActionUpdateArgs: UpdateReleaseAction.Request['body'] = ctx.request.body;
+    const releaseActionUpdateArgs = ctx.request.body as UpdateReleaseAction.Request['body'];
 
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 

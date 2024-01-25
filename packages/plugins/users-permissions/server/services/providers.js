@@ -8,7 +8,6 @@
 const _ = require('lodash');
 const urlJoin = require('url-join');
 
-const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => {
@@ -105,7 +104,13 @@ module.exports = ({ strapi }) => {
 
   const buildRedirectUri = (provider = '') => {
     const apiPrefix = strapi.config.get('api.rest.prefix');
-    return urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, 'connect', provider, 'callback');
+    return urlJoin(
+      strapi.config.get('server.absoluteUrl'),
+      apiPrefix,
+      'connect',
+      provider,
+      'callback'
+    );
   };
 
   return {

@@ -6,7 +6,7 @@ export type Options = {
   dist: string;
 };
 
-const getDirs = (
+export const getDirs = (
   { app: appDir, dist: distDir }: Options,
   { strapi }: { strapi: Strapi }
 ): StrapiDirectories => ({
@@ -34,5 +34,3 @@ const getDirs = (
     public: resolve(appDir, strapi.config.get('server.dirs.public')),
   },
 });
-
-export default getDirs;
