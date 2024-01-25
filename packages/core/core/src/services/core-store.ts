@@ -1,10 +1,14 @@
 import { toString } from 'lodash/fp';
-import type { Database } from '@strapi/database';
+import type { Model, Database } from '@strapi/database';
 
-const coreStoreModel = {
+const coreStoreModel: Model = {
   uid: 'strapi::core-store',
-  collectionName: 'strapi_core_store_settings',
+  singularName: 'strapi_core_store_settings',
+  tableName: 'strapi_core_store_settings',
   attributes: {
+    id: {
+      type: 'increments',
+    },
     key: {
       type: 'string',
     },

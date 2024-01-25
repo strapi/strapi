@@ -83,7 +83,10 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
 
     // If result is null, no locale has been found, so create it
     if (!res && docId) {
-      const documentExists = await strapi.documents(ctx.uid).findOne(docId);
+      const documentExists = await strapi.db
+        .query(ctx.uid)
+        .findOne({ where: { documentId: docId } });
+
       if (documentExists) {
         return strapi.documents(ctx.uid).create({
           ...ctx.params,

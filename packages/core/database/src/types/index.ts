@@ -29,8 +29,6 @@ export interface BaseAttribute {
   column?: ColumnInfo;
   required?: boolean;
   unique?: boolean;
-  component?: string;
-  repeatable?: boolean;
   columnType?: {
     type: string;
     args: unknown[];
@@ -204,8 +202,6 @@ export interface BaseRelationalAttribute {
   owner?: boolean;
   morphColumn?: MorphColumn;
   joinColumn?: JoinColumn;
-  // TODO: remove this
-  component?: string;
 }
 
 export interface MorphRelationalAttribute extends BaseRelationalAttribute {

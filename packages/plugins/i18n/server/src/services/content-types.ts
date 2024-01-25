@@ -27,53 +27,6 @@ const getValidLocale = async (locale: any) => {
 };
 
 /**
- * Get the related entity used for entity creation
- * @param {Object} relatedEntity related entity
- * @returns {id[]} related entity
- */
-const getNewLocalizationsFrom = async (relatedEntity: any) => {
-  if (relatedEntity) {
-    return [relatedEntity.id, ...relatedEntity.localizations.map(prop('id'))];
-  }
-
-  return [];
-};
-
-/**
- * Get the related entity used for entity creation
- * @param {id} relatedEntityId related entity id
- * @param {string} model corresponding model
- * @param {string} locale locale of the entity to create
- * @returns {Object} related entity
- */
-const getAndValidateRelatedEntity = async (relatedEntityId: any, model: any, locale: any) => {
-  const { kind } = strapi.getModel(model) as any;
-  let relatedEntity;
-
-  if (kind === 'singleType') {
-    relatedEntity = await strapi.query(model).findOne({ populate: ['localizations'] });
-  } else if (relatedEntityId) {
-    relatedEntity = await strapi
-      .query(model)
-      .findOne({ where: { id: relatedEntityId }, populate: ['localizations'] });
-  }
-
-  if (relatedEntityId && !relatedEntity) {
-    throw new ApplicationError("The related entity doesn't exist");
-  }
-
-  if (
-    relatedEntity &&
-    (relatedEntity.locale === locale ||
-      relatedEntity.localizations.map(prop('locale')).includes(locale))
-  ) {
-    throw new ApplicationError('The entity already exists in this locale');
-  }
-
-  return relatedEntity;
-};
-
-/**
  * Returns whether an attribute is localized or not
  * @param {*} attribute
  * @returns
@@ -222,11 +175,9 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
 const contentTypes = () => ({
   isLocalizedContentType,
   getValidLocale,
-  getNewLocalizationsFrom,
   getLocalizedAttributes,
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
-  getAndValidateRelatedEntity,
   fillNonLocalizedAttributes,
   getNestedPopulateOfNonLocalizedAttributes,
 });
