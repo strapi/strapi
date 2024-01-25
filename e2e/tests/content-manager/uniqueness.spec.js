@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 
-test.describe('Uniqueness', () => {
+test.describe.only('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
     // TODO: the default should be to wipe all entries, but we need to fix the import script first
@@ -12,6 +12,7 @@ test.describe('Uniqueness', () => {
     await login({ page });
 
     await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Unique' }).click();
   });
 
   const FIELDS_TO_TEST = [
