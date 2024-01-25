@@ -61,9 +61,10 @@ describe('Attributes', () => {
       expect(prop.type.types).toHaveLength(1);
       expect(prop.type.types[0].kind).toBe(ts.SyntaxKind.TypeReference);
       expect(prop.type.types[0].typeName.escapedText).toBe('Attribute.Component');
-      expect(prop.type.types[0].typeArguments).toHaveLength(1);
+      expect(prop.type.types[0].typeArguments).toHaveLength(2);
       expect(prop.type.types[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
       expect(prop.type.types[0].typeArguments[0].text).toBe('default.comp');
+      expect(prop.type.types[0].typeArguments[1].kind).toBe(ts.SyntaxKind.FalseKeyword);
     });
 
     test('Attribute with type argument and options', () => {
@@ -305,10 +306,12 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Component');
 
-          expect(typeNode.typeArguments).toHaveLength(1);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(typeNode.typeArguments[0].text).toBe('default.comp');
+
+          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.FalseKeyword);
         });
       });
 
