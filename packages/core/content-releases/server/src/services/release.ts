@@ -452,27 +452,42 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     /**
      * We separate publish and unpublish actions group by content type
      * And we keep only their ids to fetch them later to get all information needed
+     *
+     * We also need to separate collectionType entries from singleType entries because they work differently
      */
-    const actions: {
+    const collectionTypeActions: {
       [key: UID.ContentType]: {
         entriestoPublishIds: ReleaseAction['entry']['id'][];
         entriesToUnpublishIds: ReleaseAction['entry']['id'][];
       };
     } = {};
+    const singleTypeActions: {
+      uid: UID.ContentType;
+      id: ReleaseAction['entry']['id'];
+      action: ReleaseAction['type'];
+    }[] = [];
     for (const action of releaseWithPopulatedActionEntries.actions) {
       const contentTypeUid = action.contentType;
 
-      if (!actions[contentTypeUid]) {
-        actions[contentTypeUid] = {
-          entriestoPublishIds: [],
-          entriesToUnpublishIds: [],
-        };
-      }
+      if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
+        if (!collectionTypeActions[contentTypeUid]) {
+          collectionTypeActions[contentTypeUid] = {
+            entriestoPublishIds: [],
+            entriesToUnpublishIds: [],
+          };
+        }
 
-      if (action.type === 'publish') {
-        actions[contentTypeUid].entriestoPublishIds.push(action.entry.id);
+        if (action.type === 'publish') {
+          collectionTypeActions[contentTypeUid].entriestoPublishIds.push(action.entry.id);
+        } else {
+          collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
+        }
       } else {
-        actions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
+        singleTypeActions.push({
+          uid: contentTypeUid,
+          action: action.type,
+          id: action.entry.id,
+        });
       }
     }
 
@@ -481,14 +496,37 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
     await strapi.db.transaction(async () => {
-      for (const contentTypeUid of Object.keys(actions)) {
+      // First we publish all the singleTypes
+      for (const { uid, action, id } of singleTypeActions) {
+        // @ts-expect-error - populateBuilderService should be a function but is returning service
+        const populate = await populateBuilderService(uid).populateDeep(Infinity).build();
+
+        const entry = await strapi.entityService.findOne(uid, id, { populate });
+
+        try {
+          if (action === 'publish') {
+            await entityManagerService.publish(entry, uid);
+          } else {
+            await entityManagerService.unpublish(entry, uid);
+          }
+        } catch (error) {
+          if (error instanceof errors.ApplicationError && error.message === 'already.published') {
+            // do nothing
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      // Then, we can continue with publishing the collectionTypes
+      for (const contentTypeUid of Object.keys(collectionTypeActions)) {
         // @ts-expect-error - populateBuilderService should be a function but is returning service
         const populate = await populateBuilderService(contentTypeUid)
           .populateDeep(Infinity)
           .build();
 
         const { entriestoPublishIds, entriesToUnpublishIds } =
-          actions[contentTypeUid as UID.ContentType];
+          collectionTypeActions[contentTypeUid as UID.ContentType];
 
         /**
          * We need to get the populate entries to be able to publish without errors on components/relations/dynamicZones

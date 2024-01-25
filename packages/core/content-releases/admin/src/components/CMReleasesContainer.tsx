@@ -23,10 +23,11 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useParams, Link as ReactRouterLink } from 'react-router-dom';
+import { Link as ReactRouterLink } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
@@ -250,15 +251,16 @@ export const CMReleasesContainer = () => {
   const { formatMessage } = useIntl();
   const {
     isCreatingEntry,
-    allLayoutData: { contentType },
+    hasDraftAndPublish,
+    initialData: { id: entryId },
+    slug,
   } = useCMEditViewDataManager();
-  const params = useParams<{ id: string }>();
 
-  const canFetch = params?.id != null && contentType?.uid != null;
+  const canFetch = entryId != null && slug != null;
   const fetchParams = canFetch
     ? {
-        contentTypeUid: contentType.uid,
-        entryId: params.id,
+        contentTypeUid: slug as Common.UID.ContentType,
+        entryId: entryId,
         hasEntryAttached: true,
       }
     : skipToken;
@@ -267,7 +269,7 @@ export const CMReleasesContainer = () => {
   const releases = response.data?.data;
 
   /**
-   * If we don't have a contentType.uid or params.id then the data was never fetched
+   * If we don't have a contentType.uid or entryId then the data was never fetched
    * TODO: Should we handle this with an error message in the UI or just not show the container?
    */
   if (!canFetch) {
@@ -279,7 +281,7 @@ export const CMReleasesContainer = () => {
    * - Content types without draft and publish cannot add entries to release
    * TODO v5: All contentTypes will have draft and publish enabled
    */
-  if (isCreatingEntry || !contentType?.options?.draftAndPublish) {
+  if (isCreatingEntry || !hasDraftAndPublish) {
     return null;
   }
 
@@ -388,8 +390,8 @@ export const CMReleasesContainer = () => {
         {isModalOpen && (
           <AddActionToReleaseModal
             handleClose={toggleModal}
-            contentTypeUid={contentType.uid}
-            entryId={params.id}
+            contentTypeUid={slug as Common.UID.ContentType}
+            entryId={entryId}
           />
         )}
       </Box>
