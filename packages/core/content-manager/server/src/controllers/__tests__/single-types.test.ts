@@ -88,7 +88,7 @@ describe('Single Types', () => {
     expect(notFound).toHaveBeenCalled();
   });
 
-  test('Successfull create', async () => {
+  test('Successful create', async () => {
     const modelUid = 'test-uid';
 
     const state = {
@@ -150,7 +150,13 @@ describe('Single Types', () => {
               assocCreatorRoles(entity: any) {
                 return entity;
               },
+              exists() {
+                return false;
+              },
               create: createFn,
+            },
+            'document-metadata': {
+              formatDocumentWithMetadata: (model: any, obj: any) => obj,
             },
             'permission-checker': {
               create() {
@@ -185,15 +191,14 @@ describe('Single Types', () => {
 
     expect(permissionChecker.cannot.create).toHaveBeenCalled();
 
-    expect(createFn).toHaveBeenCalledWith(
-      expect.objectContaining({
+    expect(createFn).toHaveBeenCalledWith(modelUid, {
+      data: expect.objectContaining({
         title: 'test',
         createdBy: 1,
         updatedBy: 1,
       }),
-      modelUid,
-      { params: {} }
-    );
+      locale: undefined,
+    });
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
       eventProperties: {
@@ -202,7 +207,7 @@ describe('Single Types', () => {
     });
   });
 
-  test('Successfull delete', async () => {
+  test('Successful delete', async () => {
     const modelUid = 'test-uid';
 
     const entity = {
@@ -293,7 +298,7 @@ describe('Single Types', () => {
 
     await singleTypes.delete(ctx);
 
-    expect(deleteFn).toHaveBeenCalledWith(entity, modelUid);
+    expect(deleteFn).toHaveBeenCalledWith(entity, modelUid, { locale: undefined });
     expect(permissionChecker.cannot.delete).toHaveBeenCalledWith(entity);
     expect(permissionChecker.sanitizeOutput).toHaveBeenCalled();
   });

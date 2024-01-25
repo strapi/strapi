@@ -3,14 +3,18 @@
  */
 
 import { errors } from '@strapi/utils';
-import type { Database } from '@strapi/database';
+import type { Model, Database } from '@strapi/database';
 
 const { ValidationError } = errors;
 
-const webhookModel = {
+const webhookModel: Model = {
   uid: 'webhook',
-  collectionName: 'strapi_webhooks',
+  singularName: 'strapi_webhooks',
+  tableName: 'strapi_webhooks',
   attributes: {
+    id: {
+      type: 'increments',
+    },
     name: {
       type: 'string',
     },
