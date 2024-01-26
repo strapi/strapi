@@ -3,15 +3,22 @@ import * as React from 'react';
 import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render as renderRTL, screen } from '@tests/utils';
-import { Route } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { AutoCloneFailureModal } from '../AutoCloneFailureModal';
 
-import type { Location } from 'history';
-
 const user = userEvent.setup();
 
-let testLocation: Location = null!;
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return (
+    <div>
+      <span data-testid="location-pathname">{location.pathname}</span>
+      <span data-testid="location-search">{location.search}</span>
+    </div>
+  );
+};
 
 const render = (props: React.ComponentProps<typeof AutoCloneFailureModal>) =>
   renderRTL(<AutoCloneFailureModal {...props} />, {
@@ -19,15 +26,10 @@ const render = (props: React.ComponentProps<typeof AutoCloneFailureModal>) =>
       wrapper({ children }) {
         return (
           <>
-            {children}
-            <Route
-              path="*"
-              render={({ location }) => {
-                testLocation = location;
-
-                return null;
-              }}
-            />
+            <Routes>
+              <Route path="/content-manager/:collectionType/:model" element={children} />
+            </Routes>
+            <LocationDisplay />
           </>
         );
       },
@@ -77,9 +79,9 @@ describe('AutoCloneFailureModal', () => {
 
     // Links to the edit cloned entry page
     await user.click(screen.getByRole('link', { name: /create/i }));
-    expect(testLocation.pathname).toBe(
+    expect(screen.getByTestId('location-pathname')).toHaveTextContent(
       '/content-manager/collection-types/api::model.model/create/clone/1'
     );
-    expect(testLocation.search).toBe('?plugins[i18n][locale]=en');
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?plugins[i18n][locale]=en');
   });
 });
