@@ -288,6 +288,7 @@ export default {
   async publish(ctx: any) {
     const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
+    const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
@@ -306,7 +307,7 @@ export default {
       .build();
 
     // TODO: Publish many locales
-    const { locale = 'en' } = getDocumentDimensions(ctx.request.body);
+    const { locale = 'en' } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, { populate, locale });
 
     if (!document) {
@@ -407,6 +408,7 @@ export default {
   async unpublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
+    const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
@@ -423,7 +425,7 @@ export default {
       .build();
 
     // TODO: Unpublish many locales
-    const { locale = 'en' } = getDocumentDimensions(ctx.request.body);
+    const { locale = 'en' } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, {
       populate,
       locale,
