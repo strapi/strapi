@@ -1,5 +1,5 @@
 import { toString } from 'lodash/fp';
-import type { Model, Database } from '@strapi/database';
+import type { Database, Model } from '@strapi/database';
 
 const coreStoreModel: Model = {
   uid: 'strapi::core-store',

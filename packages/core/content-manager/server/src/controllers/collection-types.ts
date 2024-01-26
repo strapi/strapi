@@ -1,9 +1,7 @@
 import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
-import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
-
-const { ApplicationError } = errors;
+import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 
 /**
  * From a request object, validates and returns the locale and status of the document
@@ -258,11 +256,16 @@ export default {
   async autoClone(ctx: any) {
     const { model } = ctx.params;
 
-    // Trying to automatically clone the entity and model has unique or relational fields
-    if (hasProhibitedCloningFields(model)) {
-      throw new ApplicationError(
+    // Check if the model has fields that prevent auto cloning
+    const prohibitedFields = getProhibitedCloningFields(model);
+
+    if (prohibitedFields.length > 0) {
+      return ctx.badRequest(
         'Entity could not be cloned as it has unique and/or relational fields. ' +
-          'Please edit those fields manually and save to complete the cloning.'
+          'Please edit those fields manually and save to complete the cloning.',
+        {
+          prohibitedFields,
+        }
       );
     }
 
