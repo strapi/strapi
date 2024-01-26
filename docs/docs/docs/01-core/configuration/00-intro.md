@@ -103,7 +103,7 @@ In Strapi v5, they will be used for:
 
 ### Configuration filename restrictions
 
-In Strapi v5, environment variables with the prefix `STRAPI_` will be loaded automatically intro Strapi configuration. Because of that, some naming restrictions have been added to prevent conflicts.
+In Strapi v5, environment variables with the prefix `STRAPI_` will be loaded automatically into Strapi configuration. Because of that, some naming restrictions have been added to prevent conflicts.
 
 - filenames without extension must be case-insensitive unique (ie, only one file among ADMIN.js and admin.js or admin.js and admin.json)
 - All base Strapi configurations and a set of restricted names currently found in `packages/core/core/src/configuration/config-loader.ts` may not be used **even as prefixes**
