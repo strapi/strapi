@@ -14,8 +14,9 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { CarretDown } from '@strapi/icons';
+import { useField } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
-import { useIntl, MessageDescriptor } from 'react-intl';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useComposedRefs } from '../hooks/useComposeRefs';
@@ -78,38 +79,18 @@ const ColorPickerPopover = styled(Popover)`
  * TODO: A lot of these props should extend `FieldProps`
  */
 interface ColorPickerInputProps {
-  intlLabel: MessageDescriptor;
-  /**
-   * TODO: this should be extended from `FieldInputProps['onChange']
-   * but that conflicts with it's secondary usage in `HexColorPicker`
-   */
-  onChange: (event: { target: { name: string; value: string; type: string } }) => void;
-  attribute: { type: string; [key: string]: unknown };
+  label: string;
   name: string;
-  description?: MessageDescriptor;
+  hint?: string;
   disabled?: boolean;
-  error?: string;
   labelAction?: React.ReactNode;
   required?: boolean;
-  value?: string;
+  type: string;
 }
 
 export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerInputProps>(
-  (
-    {
-      attribute,
-      description,
-      disabled = false,
-      error,
-      intlLabel,
-      labelAction,
-      name,
-      onChange,
-      required = false,
-      value = '',
-    },
-    forwardedRef
-  ) => {
+  ({ hint, disabled = false, labelAction, label, name, required = false }, forwardedRef) => {
+    const { onChange, value, error } = useField(name);
     const [showColorPicker, setShowColorPicker] = React.useState(false);
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();
@@ -131,11 +112,11 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
         id={name}
         // GenericInput calls formatMessage and returns a string for the error
         error={error}
-        hint={description && formatMessage(description)}
+        hint={hint}
         required={required}
       >
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel action={labelAction}>{formatMessage(intlLabel)}</FieldLabel>
+          <FieldLabel action={labelAction}>{label}</FieldLabel>
           <ColorPickerToggle
             ref={composedRefs}
             aria-label={formatMessage({
@@ -169,12 +150,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
               spacing={4}
             >
               <FocusTrap onEscape={() => setShowColorPicker(false)}>
-                <ColorPicker
-                  color={color}
-                  onChange={(hexValue) =>
-                    onChange({ target: { name, value: hexValue, type: attribute.type } })
-                  }
-                />
+                <ColorPicker color={color} onChange={(hexValue) => onChange(name, hexValue)} />
                 <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
                   <Box paddingRight={2}>
                     <Typography variant="omega" as="label" textColor="neutral600">

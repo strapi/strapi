@@ -1,6 +1,6 @@
 ---
-title: useDocumentOperations
-description: API reference for the useDocumentOperations hook from Strapi's Content Manager
+title: useDocumentActions
+description: API reference for the useDocumentActions hook from Strapi's Content Manager
 tags:
   - content-manager
   - hooks
@@ -25,7 +25,7 @@ const { id, model, collectionType } = useParams<{
   model: string;
   collectionType: string;
 }>();
-const { update } = useDocumentOperations();
+const { update } = useDocumentActions();
 
 const handleSubmit = async (data) => {
   await update({ collectionType, model, id }, data);
@@ -41,7 +41,7 @@ type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> 
   | Pick<TResponse, 'data' | 'meta'>
   | { error: BaseQueryError | SerializedError };
 
-type UseDocumentOperations = () => {
+type UseDocumentActions = () => {
   clone: (
     args: {
       model: string;

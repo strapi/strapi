@@ -30,7 +30,7 @@ const { document, isLoading, validate } = useDocument({
   collectionType,
   params: { locale: 'en-GB' },
 });
-const { update } = useDocumentOperations();
+const { update } = useDocumentActions();
 
 const onSubmit = async (entity: Entity) => {
   const errors = validate(entity);

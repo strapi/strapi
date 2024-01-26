@@ -74,7 +74,7 @@ type UseDocument = (
  * if(!model || !collectionType) return null;
  *
  * const { document, isLoading, validate } = useDocument({ id, model, collectionType, params: { locale: 'en-GB' } })
- * const { update } = useDocumentOperations()
+ * const { update } = useDocumentActions()
  *
  * const onSubmit = async (document: Document) => {
  *  const errors = validate(document);

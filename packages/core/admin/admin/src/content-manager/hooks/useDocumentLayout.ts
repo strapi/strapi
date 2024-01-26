@@ -12,8 +12,9 @@ import { HOOKS } from '../../constants';
 import { BaseQueryError } from '../../utils/baseQuery';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 
-import { ComponentsDictionary, Schema, useDocument } from './useDocument';
+import { ComponentsDictionary, Schema, useDoc, useDocument } from './useDocument';
 
+import type { InputProps } from '../components/FormInputs/types';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';
@@ -43,37 +44,38 @@ interface ListFieldLayout {
 }
 
 interface ListLayout {
-  schema: ListFieldLayout[];
+  layout: ListFieldLayout[];
+  components?: never;
   metadatas: {
     [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['list'];
   };
-  components?: never;
   settings: Contracts.ContentTypes.Settings;
 }
-
-interface EditFieldLayout {
-  /**
-   * translated from the editable property of an attribute's metadata
-   */
-  disabled?: boolean;
-  /**
-   * translated from the description property of an attribute's metadata
-   */
-  hint?: string;
-  label: string;
-  name: string;
-  placeholder?: string;
-  required?: boolean;
+interface EditFieldSharedProps extends Omit<InputProps, 'type'> {
+  mainField?: string;
   size: number;
-  type: Attribute.Kind;
   unique?: boolean;
   visible?: boolean;
 }
 
+/**
+ * Map over all the types in Attribute Types and use that to create a union of new types where the attribute type
+ * is under the property attribute and the type is under the property type.
+ */
+type EditFieldLayout = {
+  [K in Attribute.Kind]: EditFieldSharedProps & {
+    attribute: Extract<Attribute.Any, { type: K }>;
+    type: K;
+  };
+}[Attribute.Kind];
+
 interface EditLayout {
-  schema: Array<Array<EditFieldLayout[]>>;
+  layout: Array<Array<EditFieldLayout[]>>;
   components: {
-    [uid: string]: Array<EditFieldLayout[]>;
+    [uid: string]: {
+      layout: Array<EditFieldLayout[]>;
+      settings: Contracts.Components.ComponentConfiguration['settings'];
+    };
   };
   metadatas?: never;
   settings?: never;
@@ -134,7 +136,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
       data
         ? formatEditLayout(data, { schema, components })
         : ({
-            schema: [],
+            layout: [],
             components: {},
           } as EditLayout),
     [data, schema, components]
@@ -145,7 +147,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
       data
         ? formatListLayout(data, { schema })
         : ({
-            schema: [],
+            layout: [],
             metadatas: {},
             settings: {
               bulkable: false,
@@ -179,6 +181,19 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * useDocLayout
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal this hook uses the internal useDoc hook, as such it shouldn't be used outside of the
+ * content-manager because it won't work as intended.
+ */
+const useDocLayout = () => {
+  const { model } = useDoc();
+  return useDocumentLayout(model);
+};
+
+/* -------------------------------------------------------------------------------------------------
  * formatEditLayout
  * -----------------------------------------------------------------------------------------------*/
 type LayoutData = Contracts.ContentTypes.FindContentTypeConfiguration.Response['data'];
@@ -199,7 +214,8 @@ const formatEditLayout = (
   const panelledEditAttributes = convertEditLayoutToFieldLayouts(
     data.contentType.layouts.edit,
     schema?.attributes,
-    data.contentType.metadatas
+    data.contentType.metadatas,
+    data.components
   ).reduce<Array<EditFieldLayout[][]>>((panels, row) => {
     if (row.some((field) => field.type === 'dynamiczone')) {
       panels.push([row]);
@@ -216,17 +232,20 @@ const formatEditLayout = (
 
   const componentEditAttributes = Object.entries(data.components).reduce<EditLayout['components']>(
     (acc, [uid, configuration]) => {
-      acc[uid] = convertEditLayoutToFieldLayouts(
-        configuration.layouts.edit,
-        components[uid].attributes,
-        configuration.metadatas
-      );
+      acc[uid] = {
+        layout: convertEditLayoutToFieldLayouts(
+          configuration.layouts.edit,
+          components[uid].attributes,
+          configuration.metadatas
+        ),
+        settings: configuration.settings,
+      };
       return acc;
     },
     {}
   );
 
-  return { schema: panelledEditAttributes, components: componentEditAttributes };
+  return { layout: panelledEditAttributes, components: componentEditAttributes };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -242,7 +261,8 @@ const formatEditLayout = (
 const convertEditLayoutToFieldLayouts = (
   rows: LayoutData['contentType']['layouts']['edit'],
   attributes: Schema['attributes'] = {},
-  metadatas: Contracts.ContentTypes.Metadatas
+  metadatas: Contracts.ContentTypes.Metadatas,
+  components?: Record<string, Contracts.Components.ComponentConfiguration>
 ) => {
   return rows.map((row) =>
     row
@@ -255,18 +275,26 @@ const convertEditLayoutToFieldLayouts = (
 
         const { edit: metadata } = metadatas[field.name];
 
+        const settings =
+          attribute.type === 'component' && components
+            ? components[attribute.component].settings
+            : {};
+
         return {
+          attribute,
           disabled: !metadata.editable,
           hint: metadata.description,
           label: metadata.label ?? '',
           name: field.name,
+          // @ts-expect-error – mainField does exist on the metadata for a relation.
+          mainField: metadata.mainField || settings?.mainField,
           placeholder: metadata.placeholder ?? '',
           required: attribute.required ?? false,
           size: field.size,
           unique: 'unique' in attribute ? attribute.unique : false,
           visible: metadata.visible ?? true,
           type: attribute.type,
-        } satisfies EditFieldLayout;
+        };
       })
       .filter((field) => field !== null)
   ) as EditFieldLayout[][];
@@ -301,7 +329,7 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
     listMetadatas
   );
 
-  return { schema: listAttributes, settings: data.contentType.settings, metadatas: listMetadatas };
+  return { layout: listAttributes, settings: data.contentType.settings, metadatas: listMetadatas };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -342,5 +370,5 @@ const convertListLayoutToFieldLayouts = (
     .filter((field) => field !== null) as ListFieldLayout[];
 };
 
-export { useDocumentLayout, convertListLayoutToFieldLayouts };
+export { useDocLayout, useDocumentLayout, convertListLayoutToFieldLayouts };
 export type { EditLayout, EditFieldLayout, ListLayout, ListFieldLayout, UseDocumentLayout };

@@ -40,3 +40,4 @@ const { actions, reducer } = rbacSlice;
 const { setPermissions, resetPermissions } = actions;
 
 export { reducer, setPermissions, resetPermissions };
+export type { SyncRbacState };

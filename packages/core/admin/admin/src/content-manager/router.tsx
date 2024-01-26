@@ -101,40 +101,40 @@ const routes: RouteObject[] = [
           };
         },
       },
-      {
-        path: ':collectionType/:slug/configurations/list',
-        lazy: async () => {
-          const { ProtectedListSettingsView } = await import(
-            './pages/ListSettingsView/ListSettingsView'
-          );
+      // {
+      //   path: ':collectionType/:slug/configurations/list',
+      //   lazy: async () => {
+      //     const { ProtectedListSettingsView } = await import(
+      //       './pages/ListSettingsView/ListSettingsView'
+      //     );
 
-          return {
-            Component: ProtectedListSettingsView,
-          };
-        },
-      },
-      {
-        path: ':collectionType/:slug/configurations/edit',
-        lazy: async () => {
-          const { ProtectedEditSettingsView } = await import(
-            './pages/EditSettingsView/EditSettingsView'
-          );
+      //     return {
+      //       Component: ProtectedListSettingsView,
+      //     };
+      //   },
+      // },
+      // {
+      //   path: ':collectionType/:slug/configurations/edit',
+      //   lazy: async () => {
+      //     const { ProtectedEditSettingsView } = await import(
+      //       './pages/EditSettingsView/EditSettingsView'
+      //     );
 
-          return {
-            Component: ProtectedEditSettingsView,
-          };
-        },
-      },
-      {
-        path: 'components/:uid/configurations/edit',
-        lazy: async () => {
-          const { ProtectedComponentSettingsView } = await import('./pages/ComponentSettingsView');
+      //     return {
+      //       Component: ProtectedEditSettingsView,
+      //     };
+      //   },
+      // },
+      // {
+      //   path: 'components/:uid/configurations/edit',
+      //   lazy: async () => {
+      //     const { ProtectedComponentSettingsView } = await import('./pages/ComponentSettingsView');
 
-          return {
-            Component: ProtectedComponentSettingsView,
-          };
-        },
-      },
+      //     return {
+      //       Component: ProtectedComponentSettingsView,
+      //     };
+      //   },
+      // },
       {
         path: '403',
         lazy: async () => {

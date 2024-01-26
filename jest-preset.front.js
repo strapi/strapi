@@ -81,7 +81,10 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing)/)',
   ],
-  testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
+  testMatch: [
+    '**/tests/**/?(*.)+(spec|test).[jt]s?(x)',
+    '**/admin/src/**/__tests__/**/?(*.)+(spec|test).[jt]s?(x)',
+  ],
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',
   },

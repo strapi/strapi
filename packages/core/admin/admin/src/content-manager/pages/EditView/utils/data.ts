@@ -1,5 +1,7 @@
-import type { Schema, ComponentsDictionary, Document } from '../../../hooks/useDocument';
-import type { Attribute, Common } from '@strapi/types';
+import pipe from 'lodash/fp/pipe';
+
+import type { ComponentsDictionary, Document } from '../../../hooks/useDocument';
+import type { Schema, Attribute, Common } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * traverseData
@@ -27,8 +29,9 @@ const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component'];
  */
 const traverseData =
   (predicate: Predicate, transform: Transform) =>
-  (data: AnyData, schema: Schema, components: ComponentsDictionary = {}) => {
-    const traverse = (datum: AnyData, attributes: Schema['attributes']) => {
+  (schema: Schema.Schema, components: ComponentsDictionary = {}) =>
+  (data: AnyData = {}) => {
+    const traverse = (datum: AnyData, attributes: Schema.Schema['attributes']) => {
       return Object.entries(datum).reduce<AnyData>((acc, [key, value]) => {
         const attribute = attributes[key];
 
@@ -95,7 +98,8 @@ const removeProhibitedFields = (prohibitedFields: Attribute.Kind[]) =>
  * -----------------------------------------------------------------------------------------------*/
 
 /**
- * @internal Sets all relation values to an empty array.
+ * @internal
+ * @description Sets all relation values to an empty array.
  */
 const prepareRelations = traverseData(
   (attribute) => attribute.type === 'relation',
@@ -103,7 +107,38 @@ const prepareRelations = traverseData(
 );
 
 /* -------------------------------------------------------------------------------------------------
- * prepareDragAndDrop
+ * prepareTempKeys
  * -----------------------------------------------------------------------------------------------*/
 
-export { removeProhibitedFields, prepareRelations };
+/**
+ * @internal
+ * @description TODO
+ */
+const prepareTempKeys = traverseData(
+  () => false,
+  (v) => v
+);
+
+/* -------------------------------------------------------------------------------------------------
+ * transformDocuments
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description Takes a document data structure (this could be from the API or a default form structure)
+ * and applies consistent data transformations to it. This is also used when we add new components to the
+ * form to ensure the data is correctly prepared from their default state e.g. relations are set to an empty array.
+ */
+const transformDocument =
+  (schema: Schema.Schema, components: ComponentsDictionary = {}) =>
+  (document: AnyData) => {
+    const transformations = pipe(
+      removeProhibitedFields(['password'])(schema, components),
+      prepareRelations(schema, components),
+      prepareTempKeys(schema, components)
+    );
+
+    return transformations(document);
+  };
+
+export { removeProhibitedFields, prepareRelations, transformDocument };

@@ -1,7 +1,17 @@
 import * as React from 'react';
 
 import { BaseCheckbox } from '@strapi/design-system';
-import { Table, useTableContext } from '@strapi/helper-plugin';
+import {
+  ActionBarProps,
+  BulkDeleteButtonProps,
+  ContentProps,
+  EmptyBodyProps,
+  HeadProps,
+  HeaderCellProps,
+  RootProps,
+  Table,
+  useTableContext,
+} from '@strapi/helper-plugin';
 import { Documents, Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
@@ -191,3 +201,12 @@ const TableImpl = {
 };
 
 export { TableImpl as Table };
+export type {
+  ActionBarProps,
+  BulkDeleteButtonProps,
+  ContentProps,
+  EmptyBodyProps,
+  HeadProps,
+  HeaderCellProps,
+  RootProps,
+};

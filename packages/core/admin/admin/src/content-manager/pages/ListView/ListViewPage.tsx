@@ -37,7 +37,7 @@ import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { DocumentActionsRBAC, useDocumentActionsRBAC } from '../../features/DocumentActionsRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
 import {
   ListFieldLayout,
@@ -83,8 +83,8 @@ const ListViewPage = () => {
   const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
 
   React.useEffect(() => {
-    setDisplayedHeaders(list.schema);
-  }, [list.schema]);
+    setDisplayedHeaders(list.layout);
+  }, [list.layout]);
 
   const handleSetHeaders = (headers: string[]) => {
     setDisplayedHeaders(
@@ -92,7 +92,7 @@ const ListViewPage = () => {
     );
   };
 
-  const [{ query, rawQuery }] = useQueryParams<{
+  const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
     page?: string;
     pageSize?: string;
@@ -126,7 +126,7 @@ const ListViewPage = () => {
   const { results = [], pagination } = data ?? {};
 
   React.useEffect(() => {
-    if (pagination && pagination.page > pagination.pageCount) {
+    if (pagination && pagination.pageCount > 0 && pagination.page > pagination.pageCount) {
       navigate(
         {
           search: stringify({
@@ -139,7 +139,7 @@ const ListViewPage = () => {
     }
   }, [pagination, formatMessage, query, navigate]);
 
-  const { canCreate } = useDocumentActionsRBAC('ListViewPage', ({ canCreate }) => ({
+  const { canCreate } = useDocumentRBAC('ListViewPage', ({ canCreate }) => ({
     canCreate,
   }));
 
@@ -302,7 +302,7 @@ const ListViewPage = () => {
             <InjectionZone area="contentManager.listView.actions" />
             <ViewSettingsMenu
               setHeaders={handleSetHeaders}
-              resetHeaders={() => setDisplayedHeaders(list.schema)}
+              resetHeaders={() => setDisplayedHeaders(list.layout)}
               headers={displayedHeaders.map((header) => header.name)}
             />
           </>
@@ -523,9 +523,9 @@ const ProtectedListViewPage = () => {
 
   return (
     <CheckPagePermissions permissions={permissions}>
-      <DocumentActionsRBAC permissions={permissions}>
+      <DocumentRBAC permissions={permissions}>
         <ListViewPage />
-      </DocumentActionsRBAC>
+      </DocumentRBAC>
     </CheckPagePermissions>
   );
 };

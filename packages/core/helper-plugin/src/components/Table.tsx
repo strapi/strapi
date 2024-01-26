@@ -479,3 +479,15 @@ const Table = {
 };
 
 export { Table, useTableContext };
+
+export type {
+  ActionBarProps,
+  BodyProps,
+  BulkDeleteButtonProps,
+  ContentProps,
+  EmptyBodyProps,
+  HeaderCellProps,
+  HeadProps,
+  RootProps,
+  TableContextValue,
+};

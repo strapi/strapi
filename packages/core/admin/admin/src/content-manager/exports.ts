@@ -5,5 +5,6 @@
  */
 
 export { useDocument as unstable_useDocument } from './hooks/useDocument';
-export { useDocumentOperations as unstable_useDocumentOperations } from './hooks/useDocumentOperations';
+export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';
 export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocumentLayout';
+export * from './components/Form';
