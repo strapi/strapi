@@ -1,6 +1,6 @@
 import type { LoadedStrapi } from '@strapi/types';
 import { HISTORY_VERSION_UID } from '../constants';
-import { HistoryVersions } from '../../../../shared/contracts';
+import type { HistoryVersions } from '../../../../shared/contracts';
 
 const createHistoryVersionService = ({ strapi }: { strapi: LoadedStrapi }) => {
   /**
@@ -11,18 +11,12 @@ const createHistoryVersionService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
   return {
-    plop() {
-      console.log('plop!');
-    },
-
     async create(historyVersionData: HistoryVersions.CreateHistoryVersion) {
-      console.log('creating history version!', historyVersionData);
-      console.log('request state', strapi.requestContext.get()?.state);
-
       await query.create({
         data: {
           ...historyVersionData,
           createdAt: new Date(),
+          createdBy: strapi.requestContext.get()?.state?.user.id,
         },
       });
     },
