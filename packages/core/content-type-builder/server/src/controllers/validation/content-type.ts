@@ -1,6 +1,6 @@
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
-import { flatMap, getOr, has } from 'lodash/fp';
+import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
 import type { Schema, UID } from '@strapi/types';
@@ -140,7 +140,13 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test(value: unknown) {
-      return !(value && reservedNames.includes(value as string));
+      return !(
+        value &&
+        reservedNames.some((reserved) => {
+          // we compare snake case to check the actual column names that will be used in the database
+          return snakeCase(reserved) === snakeCase(value as string);
+        })
+      );
     },
   };
 };
@@ -158,7 +164,10 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.includes(value as string);
+      return !usedNames.some((reserved) => {
+        // we compare snake case to check the actual column names that will be used in the database
+        return snakeCase(reserved) === snakeCase(value as string);
+      });
     },
   };
 };
@@ -175,7 +184,10 @@ const nameIsNotExistingCollectionName = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.includes(value as string);
+      return !usedNames.some((reserved) => {
+        // we compare snake case to check the actual column names that will be used in the database
+        return snakeCase(reserved as string) === snakeCase(value as string);
+      });
     },
   };
 };
