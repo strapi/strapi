@@ -198,7 +198,8 @@ class Strapi extends Container implements StrapiI {
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators())
       .add('content-api', createContentAPI(this))
-      .add('auth', createAuth());
+      .add('auth', createAuth())
+      .add('models', registries.models());
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -461,6 +462,8 @@ class Strapi extends Container implements StrapiI {
   async register() {
     await loaders.loadApplicationContext(this);
 
+    this.get('models').add(coreStoreModel).add(webhookModel);
+
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
       eventHub: this.eventHub,
@@ -481,17 +484,15 @@ class Strapi extends Container implements StrapiI {
   }
 
   async bootstrap() {
-    this.db = await Database.init({
-      ...this.config.get('database'),
-      models: [
-        ...utils.transformContentTypesToModels([
-          ...Object.values(this.contentTypes),
-          ...Object.values(this.components),
-        ]),
-        coreStoreModel,
-        webhookModel,
-      ],
-    });
+    const models = [
+      ...utils.transformContentTypesToModels([
+        ...Object.values(this.contentTypes),
+        ...Object.values(this.components),
+      ]),
+      ...this.get('models').get(),
+    ];
+
+    this.db = await Database.init({ ...this.config.get('database'), models });
 
     this.store = createCoreStore({ db: this.db });
     this.webhookStore = createWebhookStore({ db: this.db });
