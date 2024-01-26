@@ -20,6 +20,14 @@ describe('Content-Manager', () => {
           findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
           update: jest.fn().mockReturnValue({ id: 1, publishedAt: new Date() }),
         },
+        documents: jest.fn().mockReturnValue({
+          findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+          update: jest.fn().mockReturnValue({ id: 1, publishedAt: new Date() }),
+          publish: jest.fn().mockReturnValue({
+            id: 1,
+            versions: [{ id: 1, locale: 'en', publishedAt: new Date() }],
+          }),
+        }),
         db: {
           query: jest.fn(() => ({
             updateMany: queryUpdateMock,
@@ -54,19 +62,12 @@ describe('Content-Manager', () => {
 
     test('Publish a single entity for a content-type', async () => {
       const uid = 'api::test.test';
-      const entity = { id: 1, publishedAt: null };
-      await entityManager.publish(entity, uid, {});
+      const document = { id: 1, publishedAt: null };
+      await entityManager.publish(document, uid, {});
 
-      expect(strapi.entityService.update).toBeCalledWith(uid, entity.id, {
-        data: { publishedAt: expect.any(Date) },
+      expect(strapi.documents).toBeCalledWith(uid);
+      expect(strapi.documents('api::test.test').publish).toBeCalledWith(document.id, {
         populate: {},
-      });
-      expect(strapi.eventHub.emit).toBeCalledWith('entry.publish', {
-        model: fakeModel.modelName,
-        entry: {
-          id: 1,
-          publishedAt: expect.any(Date),
-        },
       });
     });
 
@@ -156,6 +157,14 @@ describe('Content-Manager', () => {
           findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
           update: jest.fn().mockReturnValue({ id: 1, publishedAt: null }),
         },
+        documents: jest.fn().mockReturnValue({
+          findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+          update: jest.fn().mockReturnValue({ id: 1, publishedAt: new Date() }),
+          unpublish: jest.fn().mockReturnValue({
+            id: 1,
+            versions: [{ id: 1, locale: 'en', publishedAt: new Date() }],
+          }),
+        }),
         eventHub: { emit: jest.fn(), sanitizeEntity: (entity: any) => entity },
         getModel: jest.fn(() => fakeModel),
         config: {
@@ -184,16 +193,9 @@ describe('Content-Manager', () => {
       const entity = { id: 1, publishedAt: new Date() };
       await entityManager.unpublish(entity, uid, {});
 
-      expect(strapi.entityService.update).toHaveBeenCalledWith(uid, entity.id, {
-        data: { publishedAt: null },
+      expect(strapi.documents).toBeCalledWith(uid);
+      expect(strapi.documents('api::test.test').unpublish).toBeCalledWith(entity.id, {
         populate: {},
-      });
-      expect(strapi.eventHub.emit).toBeCalledWith('entry.unpublish', {
-        model: fakeModel.modelName,
-        entry: {
-          id: 1,
-          publishedAt: null,
-        },
       });
     });
 

@@ -8,11 +8,13 @@ import permissionChecker from './permission-checker';
 import permission from './permission';
 import populateBuilder from './populate-builder';
 import uid from './uid';
+import documentMetadata from './document-metadata';
 
 export default {
   components,
   'content-types': contentTypes,
   'data-mapper': dataMapper,
+  'document-metadata': documentMetadata,
   'entity-manager': entityManager,
   'field-sizes': fieldSizes,
   metrics,

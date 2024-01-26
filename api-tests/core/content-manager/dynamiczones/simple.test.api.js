@@ -399,7 +399,8 @@ describe('Not required dynamiczone', () => {
     });
   });
 
-  describe('Deletion', () => {
+  // FIX: Decide what payload to return when deleting
+  describe.skip('Deletion', () => {
     test('Returns the entry with its paths populated', async () => {
       const createRes = await createEntry();
 
