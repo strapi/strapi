@@ -18,7 +18,7 @@ NOTE: For now. in theory, we could define some configuration files that do not d
 
 Currently, Strapi loads every .js and .json file within a project's `./config` directory directly into the strapi config object. That is, if there is a file called `./config/myconfig.js` it will be loaded automatically and accessible from `strapi.config.get('myconfig')`
 
-(COMING SOON) In v5, Strapi will load every defined value from the `STRAPI_` environment namespace into the configuration, using underscore (\_) as the object delimiter. For example, if you define `STRAPI_ADMIN_APP_KEYS=abcd,efg` it will be available from `strapi.config.get('admin.app.keys')` as `['abcd', 'efg']`
+(NOT YET IMPLEMENTED) Starting in Strapi v5, will load every defined value from the `STRAPI_` environment namespace into the configuration, using underscore (\_) as the object delimiter. For example, if you define `STRAPI_ADMIN_APP_KEYS=abcd,efg` it will be available from `strapi.config.get('admin.app.keys')` as `['abcd', 'efg']`
 
 Along with that feature, all configuration values will become case-insensitive. That is, accessing `strapi.config.get('admin.App.Keys')` will return the same value as `strapi.config.get('admin.app.keys')`.
 
@@ -26,11 +26,11 @@ Along with that feature, all configuration values will become case-insensitive. 
 
 The following are considered 'base' Strapi configurations and a description of what each file contains is given, so that new settings can be placed in the appropriate place.
 
-Starting in Strapi v5, the contents of the base configurations will be strictly defined and no values that are not created by Strapi will be allowed in them; that is, an error will be thrown on unrecognized values. Any user additions must go in separate configuration namespaces.
-
 A Strapi configuration file must export either an object, or a function that returns an object.
 
 WARNING: There are some discrepancies where certain configuration files such as middlewares may return an array and some files may not be able to export a function. Please confirm before use, and update this documentation when exceptions are found.
+
+(NOT YET IMPLEMENTED) Starting in Strapi v5, the contents of the base configurations will be strictly defined and no values that are not created by Strapi will be allowed in them; that is, an error will be thrown on unrecognized values. Any user additions must go in separate configuration namespaces.
 
 ### Base Config Names
 
