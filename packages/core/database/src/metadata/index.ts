@@ -53,11 +53,6 @@ export const createMetadata = (models: Model[] = []): Metadata => {
     for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
       try {
         if (types.isRelationalAttribute(attribute)) {
-          // skip already defined relations
-          if ('joinTable' in attribute || 'joinColumn' in attribute) {
-            continue;
-          }
-
           createRelation(attributeName, attribute, meta, metadata);
           continue;
         }
