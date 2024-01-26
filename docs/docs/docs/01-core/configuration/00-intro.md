@@ -30,7 +30,7 @@ Starting in Strapi v5, the contents of the base configurations will be strictly 
 
 A Strapi configuration file must export either an object, or a function that returns an object.
 
-WARNING: There are some discrepencies where certain configuration files such as middlewares may return an array and some files may not be able to export a function. Please confirm before use, and update this documentation when exceptions are found.
+WARNING: There are some discrepancies where certain configuration files such as middlewares may return an array and some files may not be able to export a function. Please confirm before use, and update this documentation when exceptions are found.
 
 ### Base Config Names
 
