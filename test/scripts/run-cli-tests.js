@@ -222,6 +222,7 @@ yargs
                   stdio: 'inherit',
                   cwd: domainDir, // run from the domain directory
                   env, // pass it our custom env values
+                  timeout: 30000, // 30 seconds
                 });
               } catch (err) {
                 // If any tests fail
