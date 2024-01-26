@@ -451,6 +451,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     /**
      * We separate publish and unpublish actions group by content type
+     * Because we need to publish singleTypes using publish and collectionTypes using publishMany
      * And we keep only their ids to fetch them later to get all information needed
      *
      * We also need to separate collectionType entries from singleType entries because they work differently
@@ -510,8 +511,11 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
             await entityManagerService.unpublish(entry, uid);
           }
         } catch (error) {
-          if (error instanceof errors.ApplicationError && error.message === 'already.published') {
-            // do nothing
+          if (
+            error instanceof errors.ApplicationError &&
+            (error.message === 'already.published' || error.message === 'already.draft')
+          ) {
+            // We don't want throw an error if the entry is already published or draft
           } else {
             throw error;
           }

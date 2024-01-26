@@ -256,10 +256,12 @@ export const CMReleasesContainer = () => {
     slug,
   } = useCMEditViewDataManager();
 
-  const canFetch = entryId != null && slug != null;
+  const contentTypeUid = slug as Common.UID.ContentType;
+
+  const canFetch = entryId != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
-        contentTypeUid: slug as Common.UID.ContentType,
+        contentTypeUid: contentTypeUid,
         entryId: entryId,
         hasEntryAttached: true,
       }
@@ -269,8 +271,7 @@ export const CMReleasesContainer = () => {
   const releases = response.data?.data;
 
   /**
-   * If we don't have a contentType.uid or entryId then the data was never fetched
-   * TODO: Should we handle this with an error message in the UI or just not show the container?
+   * If we don't have a contentTypeUid or entryId then the data was never fetched
    */
   if (!canFetch) {
     return null;
@@ -390,7 +391,7 @@ export const CMReleasesContainer = () => {
         {isModalOpen && (
           <AddActionToReleaseModal
             handleClose={toggleModal}
-            contentTypeUid={slug as Common.UID.ContentType}
+            contentTypeUid={contentTypeUid}
             entryId={entryId}
           />
         )}
