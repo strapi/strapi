@@ -37,6 +37,8 @@ export default function createComponentBuilder() {
         filename: `${nameToSlug(infos.displayName)}.json`,
       });
 
+      // TODO: create a utility for this
+      // Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
       const collectionName = `components_${nameToCollectionName(
         infos.category
       )}_${nameToCollectionName(pluralize(infos.displayName))}`;
