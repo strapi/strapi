@@ -174,6 +174,9 @@ export interface ReviewWorkflowsFeature {
 
 export interface ContentReleasesFeature {
   name: 'cms-content-releases';
+  options?: {
+    maximumReleases: number;
+  };
 }
 
 /**

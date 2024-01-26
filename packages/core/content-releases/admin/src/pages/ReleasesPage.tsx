@@ -186,7 +186,7 @@ interface CustomLocationState {
   errors?: Record<'code', string>[];
 }
 
-const CustomAlert = styled(Alert)`
+const StyledAlert = styled(Alert)`
   button {
     display: none;
   }
@@ -211,11 +211,7 @@ const ReleasesPage = () => {
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
-  const limits = getFeature('cms-content-releases');
-  let maximumNumberOfPendingReleases = 3;
-  if (limits && limits['maximumReleases']) {
-    maximumNumberOfPendingReleases = limits['maximumReleases'] as number;
-  }
+  const { maximumNumberOfPendingReleases = 3 } = getFeature('cms-content-releases');
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
@@ -261,9 +257,7 @@ const ReleasesPage = () => {
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
-  const hasReachedMaximumPendingReleases = maximumNumberOfPendingReleases
-    ? totalReleases >= maximumNumberOfPendingReleases
-    : false;
+  const hasReachedMaximumPendingReleases = totalReleases >= maximumNumberOfPendingReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -317,8 +311,7 @@ const ReleasesPage = () => {
       <ContentLayout>
         <>
           {activeTab === 'pending' && hasReachedMaximumPendingReleases && (
-            <CustomAlert
-              marginTop={6}
+            <StyledAlert
               marginBottom={6}
               action={
                 <Link href="https://strapi.io/pricing-cloud" isExternal>
@@ -332,7 +325,7 @@ const ReleasesPage = () => {
                 {
                   id: 'content-releases.pages.Releases.max-limit-reached.title',
                   defaultMessage:
-                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit',
+                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
                 },
                 { number: maximumNumberOfPendingReleases }
               )}
@@ -343,7 +336,7 @@ const ReleasesPage = () => {
                 id: 'content-releases.pages.Releases.max-limit-reached.message',
                 defaultMessage: 'Upgrade to manage an unlimited number of releases.',
               })}
-            </CustomAlert>
+            </StyledAlert>
           )}
           <TabGroup
             label={formatMessage({
