@@ -20,6 +20,11 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
             return next(context);
           }
 
+          // Ignore content types not created by the user
+          if (!context.uid.startsWith('api::')) {
+            return next(context);
+          }
+
           const fieldsToIgnore = [
             'createdAt',
             'updatedAt',
