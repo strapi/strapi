@@ -122,13 +122,17 @@ const documentApi = contentManagerApi.injectEndpoints({
          * You don't pass the ID if the document is a single-type
          */
         id?: string;
+        params?: object;
       }
     >({
-      query: ({ collectionType, model, id }) => ({
+      query: ({ collectionType, model, id, params }) => ({
         url: id
           ? `/content-manager/${collectionType}/${model}/${id}/actions/countDraftRelations`
           : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
         method: 'GET',
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: Contracts.CollectionTypes.CountDraftRelations.Response) => res.data,
     }),
