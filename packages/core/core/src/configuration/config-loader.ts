@@ -95,7 +95,8 @@ export default (dir: string) => {
 
     // restricted names and Strapi configs are also restricted from being prefixes
     const restrictedPrefix = [...RESTRICTED_FILENAMES, ...STRAPI_CONFIG_FILENAMES].find(
-      (restrictedName) => restrictedName.startsWith(baseNameLower)
+      (restrictedName) =>
+        restrictedName.startsWith(baseNameLower) && restrictedName !== baseNameLower
     );
     if (restrictedPrefix) {
       logWarning(

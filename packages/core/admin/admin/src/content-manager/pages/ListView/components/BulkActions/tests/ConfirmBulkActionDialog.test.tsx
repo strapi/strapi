@@ -1,4 +1,5 @@
 import { Table, useQueryParams } from '@strapi/helper-plugin';
+import { errors } from '@strapi/utils';
 import { within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
@@ -127,6 +128,8 @@ describe('ConfirmDialogPublishAll', () => {
   });
 
   it('should not show the Confirmation component if there is an error coming from the API', async () => {
+    const ERROR_MSG = 'The request has failed';
+
     server.use(
       rest.get(
         '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
@@ -134,7 +137,7 @@ describe('ConfirmDialogPublishAll', () => {
           return res.once(
             ctx.status(500),
             ctx.json({
-              errorMessage: 'Error',
+              error: new errors.ApplicationError(ERROR_MSG),
             })
           );
         }
@@ -144,7 +147,7 @@ describe('ConfirmDialogPublishAll', () => {
     const { queryByRole, findByText } = render();
 
     await waitFor(() => expect(queryByRole('dialog')).not.toBeInTheDocument());
-    await findByText('Request failed with status code 500');
+    await findByText(ERROR_MSG);
   });
 
   it('should show the warning message with 2 draft relations and 2 entries even if the locale param is not passed', async () => {

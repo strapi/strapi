@@ -27,7 +27,12 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 
 const App = () => {
   const contentTypeMatch = useMatch('/content-manager/:kind/:uid/*');
+
   const { isLoading, collectionTypeLinks, models, singleTypeLinks } = useContentManagerInitData();
+  const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
@@ -58,10 +63,6 @@ const App = () => {
       </Main>
     );
   }
-
-  const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
-    a.title.localeCompare(b.title)
-  );
 
   // Array of models that are displayed in the content manager
   const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);

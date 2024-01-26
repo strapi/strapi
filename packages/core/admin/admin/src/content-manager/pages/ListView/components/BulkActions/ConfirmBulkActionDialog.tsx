@@ -11,21 +11,17 @@ import {
 } from '@strapi/design-system';
 import {
   useTableContext,
-  useFetchClient,
   useNotification,
   useAPIErrorHandler,
   useQueryParams,
 } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { InjectionZoneList } from '../InjectionZoneList';
-
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { AxiosError } from 'axios';
 
 interface ConfirmBulkActionDialogProps extends Pick<DialogFooterProps, 'endAction'> {
   onToggleDialog: () => void;
@@ -93,10 +89,9 @@ const ConfirmDialogPublishAll = ({
   onConfirm,
 }: ConfirmDialogPublishAllProps) => {
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
   const { selectedEntries } = useTableContext();
   const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const contentType = useTypedSelector((state) => state['content-manager_listView'].contentType);
   const [{ query }] = useQueryParams<{
     plugins?: {
@@ -111,39 +106,25 @@ const ConfirmDialogPublishAll = ({
   const {
     data: countDraftRelations = 0,
     isLoading,
-    isError,
-  } = useQuery<
-    Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response['data'],
-    AxiosError<
-      Required<Pick<Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response, 'error'>>
-    >
-  >(
-    ['content-manager', 'draft-relations', slug, selectedEntries],
-    async () => {
-      const {
-        data: { data },
-      } = await get<Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response>(
-        `/content-manager/collection-types/${slug}/actions/countManyEntriesDraftRelations`,
-        {
-          params: {
-            ids: selectedEntries,
-            locale: query?.plugins?.i18n?.locale,
-          },
-        }
-      );
-
-      return data;
+    error,
+  } = useGetManyDraftRelationCountQuery(
+    {
+      model: slug,
+      ids: selectedEntries,
+      locale: query?.plugins?.i18n?.locale,
     },
     {
-      // The API is called everytime you select/deselect an entry, this check avoids us sending a query with bad data
-      enabled: selectedEntries.length > 0,
-      onError(error) {
-        toggleNotification({ type: 'warning', message: formatAPIError(error) });
-      },
+      skip: selectedEntries.length === 0,
     }
   );
 
-  if (isError) {
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({ type: 'warning', message: formatAPIError(error) });
+    }
+  }, [error, formatAPIError, toggleNotification]);
+
+  if (error) {
     return null;
   }
 

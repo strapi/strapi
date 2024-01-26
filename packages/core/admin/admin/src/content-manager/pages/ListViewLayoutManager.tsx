@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import produce from 'immer';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -59,8 +58,6 @@ const ListViewLayoutManager = () => {
  * Reducer
  * -----------------------------------------------------------------------------------------------*/
 
-const GET_DATA = 'ContentManager/ListView/GET_DATA';
-const GET_DATA_SUCCEEDED = 'ContentManager/ListView/GET_DATA_SUCCEEDED';
 const RESET_PROPS = 'ContentManager/ListView/RESET_PROPS';
 const ON_CHANGE_LIST_HEADERS = 'ContentManager/ListView/ON_CHANGE_LIST_HEADERS ';
 const ON_RESET_LIST_HEADERS = 'ContentManager/ListView/ON_RESET_LIST_HEADERS ';
@@ -69,47 +66,16 @@ const SET_LIST_LAYOUT = 'ContentManager/ListView/SET_LIST_LAYOUT ';
 interface ListViewLayoutManagerState {
   contentType: FormattedLayouts['contentType'] | null;
   components: FormattedLayouts['components'];
-  data: Contracts.CollectionTypes.Find.Response['results'];
   displayedHeaders: ListLayoutRow[];
   initialDisplayedHeaders: ListLayoutRow[];
-  isLoading: boolean;
-  pagination: Contracts.CollectionTypes.Find.Response['pagination'];
 }
 
 const initialState = {
-  data: [],
-  isLoading: true,
   components: {},
   contentType: null,
   initialDisplayedHeaders: [],
   displayedHeaders: [],
-  pagination: {
-    page: 0,
-    pageCount: 0,
-    pageSize: 0,
-    total: 0,
-  },
 } satisfies ListViewLayoutManagerState;
-
-interface GetDataAction {
-  type: typeof GET_DATA;
-}
-
-const getData = () => ({ type: GET_DATA } satisfies GetDataAction);
-
-interface GetDataSucceededAction extends Pick<ListViewLayoutManagerState, 'data' | 'pagination'> {
-  type: typeof GET_DATA_SUCCEEDED;
-}
-
-const getDataSucceeded = (
-  pagination: GetDataSucceededAction['pagination'],
-  data: GetDataSucceededAction['data']
-) =>
-  ({
-    type: GET_DATA_SUCCEEDED,
-    pagination,
-    data,
-  } satisfies GetDataSucceededAction);
 
 interface onResetListHeadersAction {
   type: typeof ON_RESET_LIST_HEADERS;
@@ -155,8 +121,6 @@ const onChangeListHeaders = (target: OnChangeListHeadersAction['target']) =>
   ({ type: ON_CHANGE_LIST_HEADERS, target } satisfies OnChangeListHeadersAction);
 
 type Action =
-  | GetDataAction
-  | GetDataSucceededAction
   | ResetPropsAction
   | SetLayoutAction
   | OnChangeListHeadersAction
@@ -165,23 +129,6 @@ type Action =
 const reducer = (state: ListViewLayoutManagerState = initialState, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
-      case GET_DATA: {
-        return {
-          ...initialState,
-          contentType: state.contentType,
-          components: state.components,
-          initialDisplayedHeaders: state.initialDisplayedHeaders,
-          displayedHeaders: state.displayedHeaders,
-        };
-      }
-
-      case GET_DATA_SUCCEEDED: {
-        draftState.pagination = action.pagination;
-        draftState.data = action.data;
-        draftState.isLoading = false;
-        break;
-      }
-
       case ON_CHANGE_LIST_HEADERS: {
         const {
           target: { name, value },
@@ -265,12 +212,5 @@ const reducer = (state: ListViewLayoutManagerState = initialState, action: Actio
     }
   });
 
-export {
-  ListViewLayoutManager,
-  reducer,
-  getData,
-  getDataSucceeded,
-  onChangeListHeaders,
-  onResetListHeaders,
-};
+export { ListViewLayoutManager, reducer, onChangeListHeaders, onResetListHeaders };
 export type { ListViewLayoutManagerState };

@@ -17,7 +17,7 @@ import {
 import {
   ConfirmDialog,
   Link,
-  useFetchClient,
+  useAPIErrorHandler,
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
@@ -26,10 +26,11 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useUpdateComponentConfigurationMutation } from '../../../../services/components';
+import { useUpdateContentTypeConfigurationMutation } from '../../../../services/contentTypes';
 import { getTranslation } from '../../../../utils/translations';
 import { DisplayedFields } from '../DisplayedFields';
 import { FormModal } from '../FormModal';
@@ -38,21 +39,15 @@ import { LayoutDndProvider } from '../LayoutDndProvider';
 import { init } from './init';
 import { reducer, initialState } from './reducer';
 
-import type {
-  SettingsViewComponentLayout,
-  SettingsViewContentTypeLayout,
-} from '../../../../utils/layouts';
+import type { SettingsViewComponentLayout, SettingsViewLayout } from '../../../../utils/layouts';
 import type { EditLayout, Layout } from '../../utils/layout';
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { AxiosError, AxiosResponse } from 'axios';
 
 interface SettingsFormProps {
-  layout: SettingsViewContentTypeLayout;
+  layout: SettingsViewLayout;
   components: Record<string, SettingsViewComponentLayout>;
-  updateLayout?: () => void;
 }
 
-const SettingsForm = ({ layout, components, updateLayout }: SettingsFormProps) => {
+const SettingsForm = ({ layout, components }: SettingsFormProps) => {
   const match = useMatch('/content-manager/:modelType/:model/configurations/edit');
   const { modelType, model: slug = '' } = match?.params ?? {};
   const [reducerState, dispatch] = React.useReducer(reducer, initialState, () =>
@@ -67,10 +62,10 @@ const SettingsForm = ({ layout, components, updateLayout }: SettingsFormProps) =
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const modelName = layout?.info?.displayName;
   const attributes = modifiedData?.attributes ?? {};
   const fieldSizes = useTypedSelector((state) => state['content-manager_app'].fieldSizes);
-  const { put } = useFetchClient();
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = attributes?.[attr]?.type ?? '';
@@ -150,52 +145,56 @@ const SettingsForm = ({ layout, components, updateLayout }: SettingsFormProps) =
     toggleConfirmDialog();
   };
 
-  const submitMutation = useMutation<
-    AxiosResponse<Contracts.ContentTypes.UpdateContentTypeConfiguration.Response>,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkPublish.Response, 'error'>>>,
-    Contracts.ContentTypes.UpdateContentTypeConfiguration.Request['body']
-  >(
-    (body) => {
-      return put(
-        `/content-manager/${
-          modelType !== 'components' ? 'content-types' : modelType
-        }/${slug}/configuration`,
-        body
-      );
-    },
-    {
-      onSuccess() {
-        if (updateLayout) {
-          updateLayout();
-        }
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-        toggleConfirmDialog();
-        trackUsage('didEditEditSettings');
-      },
-      onError() {
-        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
-      },
-    }
-  );
-  const { isLoading: isSubmittingForm } = submitMutation;
-
-  const handleConfirm = () => {
+  const [updateContentTypeConfiguration, { isLoading: isSubmittingContentTypeMutation }] =
+    useUpdateContentTypeConfigurationMutation();
+  const [updateComponentConfiguration, { isLoading: isSubmittingComponentMutation }] =
+    useUpdateComponentConfigurationMutation();
+  const isSubmittingForm = isSubmittingContentTypeMutation || isSubmittingComponentMutation;
+  const handleConfirm = async () => {
     if (!modifiedData) {
       return;
     }
 
-    const { layouts, metadatas, settings } = cloneDeep(modifiedData);
+    try {
+      const { layouts, metadatas, settings } = cloneDeep(modifiedData);
 
-    submitMutation.mutate({
-      layouts: {
-        ...layouts,
-        edit: unformatLayout(layouts.edit),
-      },
-      metadatas,
-      settings,
-    });
+      const mutation =
+        modelType === 'collection-types'
+          ? updateContentTypeConfiguration
+          : updateComponentConfiguration;
+
+      const res = await mutation({
+        layouts: {
+          ...layouts,
+          edit: unformatLayout(layouts.edit),
+        },
+        metadatas,
+        settings,
+        uid: slug,
+      });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
+      }
+
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      toggleConfirmDialog();
+      trackUsage('didEditEditSettings');
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+      });
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
+      });
+    }
   };
 
   const moveItem = (

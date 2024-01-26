@@ -88,26 +88,7 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
   return { bucket: prefix.substring(0, prefix.length - 1) };
 }
 
-// TODO Remove this in V5 since we will only support the new config structure
 export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
-  // legacy
-  if (options.accessKeyId && options.secretAccessKey) {
-    return {
-      accessKeyId: options.accessKeyId,
-      secretAccessKey: options.secretAccessKey,
-    };
-  }
-  // Legacy
-  if (options.s3Options?.accessKeyId && options.s3Options.secretAccessKey) {
-    process.emitWarning(
-      'Credentials passed directly to s3Options is deprecated and will be removed in a future release. Please wrap them inside a credentials object.'
-    );
-    return {
-      accessKeyId: options.s3Options.accessKeyId,
-      secretAccessKey: options.s3Options.secretAccessKey,
-    };
-  }
-  // V5
   if (options.s3Options?.credentials) {
     return {
       accessKeyId: options.s3Options.credentials.accessKeyId,
