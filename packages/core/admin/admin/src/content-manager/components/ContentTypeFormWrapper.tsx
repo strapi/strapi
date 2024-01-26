@@ -100,6 +100,7 @@ const ContentTypeFormWrapper = ({
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
   const isSingleType = collectionType === 'single-types';
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const isCreatingEntry = !isSingleType && id === 'create';
 
   const cleanReceivedData = React.useCallback(
@@ -160,7 +161,7 @@ const ContentTypeFormWrapper = ({
       collectionType,
       model: slug,
       id: origin || id,
-      params: buildValidGetParams(query),
+      params,
     },
     {
       skip: isCreatingEntry && !origin,
@@ -396,6 +397,7 @@ const ContentTypeFormWrapper = ({
           collectionType,
           model: slug,
           id,
+          params,
         });
 
         if ('error' in res && res.error) {
