@@ -291,6 +291,18 @@ export const ReleaseDetailsLayout = ({
     dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
   };
 
+  const getCreatedByUser = () => {
+    if (!release?.createdBy) {
+      return null;
+    }
+
+    if (release.createdBy.lastname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname}`;
+    }
+
+    return release.createdBy.firstname;
+  };
+
   if (isLoadingDetails) {
     return (
       <Main aria-busy={isLoadingDetails}>
@@ -317,9 +329,7 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = release.createdBy.lastname
-    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
-    : `${release.createdBy.firstname}`;
+  const hasCreatedByUser = Boolean(getCreatedByUser());
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -346,7 +356,7 @@ export const ReleaseDetailsLayout = ({
               <IconButton
                 label={formatMessage({
                   id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release actions',
+                  defaultMessage: 'Release edit and delete menu',
                 })}
                 ref={moreButtonRef}
                 onClick={handleTogglePopover}
@@ -399,9 +409,10 @@ export const ReleaseDetailsLayout = ({
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage: ' by {createdBy}',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
                         },
-                        { createdBy }
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
