@@ -33,6 +33,7 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  useStrapiApp,
   AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
@@ -63,6 +64,8 @@ import type {
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
 import type { Schema } from '@strapi/types';
+
+const CHECK_LOCALE_TABLE_HOOK = 'ContentReleases/pages/DetailsView/check-locale';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -473,9 +476,14 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+  const { runHookWaterfall } = useStrapiApp();
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
+
+  const hasi18nInstalled = React.useMemo(() => {
+    return runHookWaterfall('ContentReleases/pages/DetailsView/check-locale', false);
+  }, [runHookWaterfall]);
 
   const {
     isLoading,
@@ -596,6 +604,10 @@ const ReleaseDetailsBody = () => {
     );
   }
 
+  const groupOptions = hasi18nInstalled
+    ? GROUP_BY_OPTIONS
+    : GROUP_BY_OPTIONS.filter((option) => option !== 'locale');
+
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
@@ -619,7 +631,7 @@ const ReleaseDetailsBody = () => {
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
-            {GROUP_BY_OPTIONS.map((option) => (
+            {groupOptions.map((option) => (
               <SingleSelectOption key={option} value={option}>
                 {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
@@ -650,14 +662,17 @@ const ReleaseDetailsBody = () => {
                     })}
                     name="name"
                   />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
+                  {hasi18nInstalled && (
+                    <Table.HeaderCell
+                      fieldSchemaType="string"
+                      label={formatMessage({
+                        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+                        defaultMessage: 'locale',
+                      })}
+                      name="locale"
+                    />
+                  )}
+
                   <Table.HeaderCell
                     fieldSchemaType="string"
                     label={formatMessage({
@@ -694,9 +709,12 @@ const ReleaseDetailsBody = () => {
                           contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td width="10%">
-                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                      </Td>
+                      {hasi18nInstalled && (
+                        <Td width="10%">
+                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                        </Td>
+                      )}
+
                       <Td width="10%">
                         <Typography>{contentType.displayName || ''}</Typography>
                       </Td>
