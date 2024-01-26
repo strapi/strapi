@@ -96,7 +96,7 @@ module.exports = {
     const params = [];
 
     const typesParam = allowedTypes
-      ? factory.createTupleTypeNode(
+      ? factory.createUnionTypeNode(
           allowedTypes.map((allowedType) => factory.createStringLiteral(allowedType))
         )
       : factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);

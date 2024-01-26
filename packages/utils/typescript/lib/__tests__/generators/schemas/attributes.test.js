@@ -170,12 +170,12 @@ describe('Attributes', () => {
 
           expect(typeNode.typeArguments).toHaveLength(1);
 
-          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UnionType);
 
-          const tupleElements = typeNode.typeArguments[0].elements;
+          const unionTypes = typeNode.typeArguments[0].types;
 
           attribute.allowedTypes.forEach((value, index) => {
-            const element = tupleElements[index];
+            const element = unionTypes[index];
 
             expect(element.kind).toBe(ts.SyntaxKind.StringLiteral);
             expect(element.text).toBe(value);
@@ -190,12 +190,12 @@ describe('Attributes', () => {
 
           expect(typeNode.typeArguments).toHaveLength(2);
 
-          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UnionType);
 
-          const tupleElements = typeNode.typeArguments[0].elements;
+          const unionTypes = typeNode.typeArguments[0].types;
 
           attribute.allowedTypes.forEach((value, index) => {
-            const element = tupleElements[index];
+            const element = unionTypes[index];
 
             expect(element.kind).toBe(ts.SyntaxKind.StringLiteral);
             expect(element.text).toBe(value);
