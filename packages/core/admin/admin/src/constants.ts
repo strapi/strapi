@@ -121,12 +121,6 @@ export const HOOKS = {
    * @type {string}
    */
   MUTATE_SINGLE_TYPES_LINKS: 'Admin/CM/pages/App/mutate-single-types-links',
-  /**
-   * Hook that checks if the locale column needs to be shown in the table or not
-   * @constant
-   * @type {string}
-   */
-  ADD_LOCALE_TO_RELEASE_TABLE: 'ContentReleases/pages/DetailsView/check-locale',
 };
 
 export interface SettingsMenuLink

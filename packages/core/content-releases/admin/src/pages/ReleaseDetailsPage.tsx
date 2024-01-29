@@ -65,8 +65,6 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import type { Schema } from '@strapi/types';
 
-const CHECK_LOCALE_TABLE_HOOK = 'ContentReleases/pages/DetailsView/check-locale';
-
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
@@ -476,14 +474,14 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
-  const { runHookWaterfall } = useStrapiApp();
+  const { getPlugin } = useStrapiApp();
+
+  const i18nPlugin = React.useMemo(() => {
+    return getPlugin('i18n');
+  }, [getPlugin]);
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
-
-  const hasi18nInstalled = React.useMemo(() => {
-    return runHookWaterfall('ContentReleases/pages/DetailsView/check-locale', false);
-  }, [runHookWaterfall]);
 
   const {
     isLoading,
@@ -604,7 +602,7 @@ const ReleaseDetailsBody = () => {
     );
   }
 
-  const groupOptions = hasi18nInstalled
+  const groupOptions = i18nPlugin
     ? GROUP_BY_OPTIONS
     : GROUP_BY_OPTIONS.filter((option) => option !== 'locale');
 
@@ -662,7 +660,7 @@ const ReleaseDetailsBody = () => {
                     })}
                     name="name"
                   />
-                  {hasi18nInstalled && (
+                  {i18nPlugin && (
                     <Table.HeaderCell
                       fieldSchemaType="string"
                       label={formatMessage({
@@ -709,7 +707,7 @@ const ReleaseDetailsBody = () => {
                           contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      {hasi18nInstalled && (
+                      {i18nPlugin && (
                         <Td width="10%">
                           <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
                         </Td>
