@@ -43,5 +43,5 @@ const validate(
 
 With this function, you can apply the same validations we use in the admin. Please be aware that for this function to work, you need to ensure the following:
 
-1. `entry` is a fully populated entry. If you are validating a Content Type with required fields that are relations/components/dynamic zones, you need to send these fields populated in the object. Otherwise, the validation will fail.
+1. If you are validating an entry with relations/components/dynamic zones then it **MUST** be populated. Otherwise, the validations will pass even if there is an error on one populated field.
 2. The correct schema for the contentType and the schemas for any components related to that content type are mandatory for this hook to function correctly.
