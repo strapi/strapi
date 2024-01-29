@@ -195,7 +195,7 @@ When a user disables Draft and Publish in one Content Type we make sure to remov
 
 ### `deleteActionsOnDeleteContentType`
 
-Similar to last one, we make sure to delete all the release actions related to entries from a just deleted Content Type.
+When a Content Type is deleted, delete all actions containing entries from that Content Type.
 
 ## Subscribing to Lifecycles Events
 
