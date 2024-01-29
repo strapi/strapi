@@ -59,6 +59,10 @@ import { getDisplayName } from '../../utils/users';
 import { getData, getDataSucceeded } from '../ListViewLayoutManager';
 
 import { AdminUsersFilter } from './components/AdminUsersFilter';
+import {
+  AutoCloneFailureModal,
+  type ProhibitedCloningField,
+} from './components/AutoCloneFailureModal';
 import { BulkActionButtons } from './components/BulkActions/Buttons';
 import { Filter } from './components/Filter';
 import { Table } from './components/Table';
@@ -597,6 +601,11 @@ const ListViewPage = ({
     });
   };
 
+  const [clonedEntryId, setClonedEntryId] = React.useState<Entity.ID | null>(null);
+  const [prohibitedCloningFields, setProhibitedCloningFields] = React.useState<
+    ProhibitedCloningField[]
+  >([]);
+
   const handleCloneClick =
     (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
       try {
@@ -613,11 +622,9 @@ const ListViewPage = ({
         }
       } catch (err) {
         if (err instanceof AxiosError) {
-          push({
-            pathname: `${pathname}/create/clone/${id}`,
-            state: { from: pathname, error: formatAPIError(err) },
-            search: pluginsQueryParams,
-          });
+          const { prohibitedFields } = err.response?.data.error.details;
+          setClonedEntryId(id);
+          setProhibitedCloningFields(prohibitedFields);
         }
       }
     };
@@ -745,6 +752,12 @@ const ListViewPage = ({
                       />
                     ) : null
                   }
+                />
+                <AutoCloneFailureModal
+                  entryId={clonedEntryId}
+                  onClose={() => setClonedEntryId(null)}
+                  prohibitedFields={prohibitedCloningFields}
+                  pluginQueryParams={pluginsQueryParams}
                 />
                 {/* Content */}
                 <Table.Root
