@@ -1,5 +1,4 @@
-import type { Entity, Plugin } from '@strapi/types';
-import { omit } from 'lodash/fp';
+import type { Plugin } from '@strapi/types';
 import { controllers } from './controllers';
 import { services } from './services';
 import { contentTypes } from './content-types';
@@ -14,42 +13,8 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   if (strapi.features.future.isEnabled('history')) {
     return {
       bootstrap({ strapi }) {
-        strapi.documents?.middlewares.add('_all', '_all', (context, next) => {
-          // Ignore actions that don't mutate documents
-          if (!['create', 'update'].includes(context.action)) {
-            return next(context);
-          }
-
-          // Ignore content types not created by the user
-          if (!context.uid.startsWith('api::')) {
-            return next(context);
-          }
-
-          const fieldsToIgnore = [
-            'createdAt',
-            'updatedAt',
-            'publishedAt',
-            'createdBy',
-            'updatedBy',
-            'localizations',
-            'locale',
-            'strapi_stage',
-            'strapi_assignee',
-          ];
-
-          // Don't await the creation of the history version to not slow down the request
-          getService('history-version').create({
-            contentType: context.uid,
-            relatedDocumentId: (context.options as { id: Entity.ID }).id,
-            locale: context.params.locale,
-            // TODO: check if drafts should should be "modified" once D&P is ready
-            status: context.params.status,
-            data: omit(fieldsToIgnore, context.params.data),
-            schema: omit(fieldsToIgnore, strapi.contentType(context.uid).attributes),
-          });
-
-          return next(context);
-        });
+        // Start recording history and saving history versions
+        getService(strapi, 'history').init();
       },
       controllers,
       services,

@@ -1,6 +1,6 @@
 import type { Plugin } from '@strapi/types';
-import { createHistoryVersionService } from './history-version';
+import { createHistoryService } from './history';
 
 export const services = {
-  'history-version': createHistoryVersionService,
+  history: createHistoryService,
 } satisfies Plugin.LoadedPlugin['services'];
