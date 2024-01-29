@@ -88,7 +88,7 @@ describe('Single Types', () => {
     expect(notFound).toHaveBeenCalled();
   });
 
-  test('Successfull create', async () => {
+  test('Successful create', async () => {
     const modelUid = 'test-uid';
 
     const state = {
@@ -154,7 +154,7 @@ describe('Single Types', () => {
               create: createFn,
             },
             'document-metadata': {
-              formatDocumentWithMetadata: jest.fn((model: any, obj: any) => obj),
+              formatDocumentWithMetadata: (model: any, obj: any) => obj,
             },
             'permission-checker': {
               create() {
@@ -189,17 +189,14 @@ describe('Single Types', () => {
 
     expect(permissionChecker.cannot.create).toHaveBeenCalled();
 
-    expect(createFn).toHaveBeenCalledWith(
-      modelUid,
-      expect.objectContaining({
-        data: {
-          title: 'test',
-          createdBy: 1,
-          updatedBy: 1,
-        },
-        locale: undefined,
-      })
-    );
+    expect(createFn).toHaveBeenCalledWith(modelUid, {
+      data: expect.objectContaining({
+        title: 'test',
+        createdBy: 1,
+        updatedBy: 1,
+      }),
+      locale: undefined,
+    });
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
       eventProperties: {
@@ -208,7 +205,7 @@ describe('Single Types', () => {
     });
   });
 
-  test('Successfull delete', async () => {
+  test('Successful delete', async () => {
     const modelUid = 'test-uid';
 
     const entity = {

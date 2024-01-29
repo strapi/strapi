@@ -7,7 +7,7 @@ type InputAttributes = {
   };
 };
 
-const convertCustomFieldType = (strapi: Strapi) => {
+export const convertCustomFieldType = (strapi: Strapi) => {
   const allContentTypeSchemaAttributes = Object.values(strapi.contentTypes).map(
     (schema) => schema.attributes
   );
@@ -29,5 +29,3 @@ const convertCustomFieldType = (strapi: Strapi) => {
     }
   }
 };
-
-export default convertCustomFieldType;

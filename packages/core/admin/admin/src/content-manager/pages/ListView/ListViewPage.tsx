@@ -47,6 +47,7 @@ import { HOOKS } from '../../../constants';
 import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { useAdminUsers } from '../../../services/users';
+import { isBaseQueryError } from '../../../utils/baseQuery';
 import { CREATOR_FIELDS } from '../../constants/attributes';
 import {
   useAutoCloneDocumentMutation,
@@ -62,6 +63,10 @@ import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
 
 import { AdminUsersFilter } from './components/AdminUsersFilter';
+import {
+  AutoCloneFailureModal,
+  type ProhibitedCloningField,
+} from './components/AutoCloneFailureModal';
 import { BulkActionButtons } from './components/BulkActions/Buttons';
 import { Filter } from './components/Filter';
 import { Table } from './components/Table';
@@ -584,6 +589,10 @@ const ListViewPage = ({
   };
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
+  const [clonedEntryId, setClonedEntryId] = React.useState<Entity.ID | null>(null);
+  const [prohibitedCloningFields, setProhibitedCloningFields] = React.useState<
+    ProhibitedCloningField[]
+  >([]);
 
   const handleCloneClick =
     (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
@@ -604,15 +613,20 @@ const ListViewPage = ({
             search: pluginsQueryParams,
           });
         } else {
-          navigate(
-            {
-              pathname: `create/clone/${id.toString()}`,
-              search: pluginsQueryParams,
-            },
-            {
-              state: { error: formatAPIError(res.error) },
-            }
-          );
+          if (
+            isBaseQueryError(res.error) &&
+            (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
+          ) {
+            // @ts-expect-error – TODO: fix this type assertion to know that we have the prohibitedFields
+            const { prohibitedFields } = res.error.details;
+            setClonedEntryId(id);
+            setProhibitedCloningFields(prohibitedFields);
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(res.error),
+            });
+          }
         }
       } catch (err) {
         /**
@@ -765,6 +779,12 @@ const ListViewPage = ({
                       />
                     ) : null
                   }
+                />
+                <AutoCloneFailureModal
+                  entryId={clonedEntryId}
+                  onClose={() => setClonedEntryId(null)}
+                  prohibitedFields={prohibitedCloningFields}
+                  pluginQueryParams={pluginsQueryParams}
                 />
                 {/* Content */}
                 <Table.Root

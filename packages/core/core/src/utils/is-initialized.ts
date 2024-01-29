@@ -5,7 +5,7 @@ import type { Strapi } from '@strapi/types';
 /**
  * Test if the strapi application is considered as initialized (1st user has been created)
  */
-export default async function isInitialized(strapi: Strapi): Promise<boolean> {
+export const isInitialized = async (strapi: Strapi): Promise<boolean> => {
   try {
     if (isEmpty(strapi.admin)) {
       return true;
@@ -18,4 +18,4 @@ export default async function isInitialized(strapi: Strapi): Promise<boolean> {
   } catch (err) {
     strapi.stopWithError(err);
   }
-}
+};

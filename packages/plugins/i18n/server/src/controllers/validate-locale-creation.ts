@@ -12,10 +12,10 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
 
   const {
     getValidLocale,
-    getNewLocalizationsFrom,
+
     isLocalizedContentType,
-    getAndValidateRelatedEntity,
-    fillNonLocalizedAttributes,
+
+    // fillNonLocalizedAttributes,
   } = getService('content-types');
 
   const modelDef = strapi.getModel(model) as Schema.ContentType;
@@ -26,7 +26,9 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
 
   // Prevent empty string locale
   const locale = get('locale', query) || get('locale', body) || undefined;
-  const relatedEntityId = get('plugins.i18n.relatedEntityId', query);
+
+  // TODO:
+  // const relatedEntityId = get('plugins.i18n.relatedEntityId', query);
   // cleanup to avoid creating duplicates in singletypes
   ctx.request.query = {};
 
@@ -52,18 +54,8 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
     }
   }
 
-  let relatedEntity;
-  try {
-    relatedEntity = await getAndValidateRelatedEntity(relatedEntityId, model, entityLocale);
-  } catch (e) {
-    throw new ApplicationError(
-      "The related entity doesn't exist or the entity already exists in this locale"
-    );
-  }
-
-  fillNonLocalizedAttributes(body, relatedEntity, { model });
-  const localizations = await getNewLocalizationsFrom(relatedEntity);
-  body.localizations = localizations;
+  // TODO V5 - non localized attributes
+  // fillNonLocalizedAttributes(body, relatedEntity, { model });
 
   return next();
 };

@@ -81,7 +81,7 @@ const products = ({ shop: shops }) => {
   return entries;
 };
 
-// TODO V5: Fix for relations
+// TODO: V5 - Fix relations
 describe.skip('i18n - Find existing relations', () => {
   const builder = createTestBuilder();
 

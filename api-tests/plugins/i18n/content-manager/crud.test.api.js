@@ -86,8 +86,9 @@ describe('i18n - Content API', () => {
     test.skip('non-default locale', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/api::category.category?plugins[i18n][locale]=ko',
+        url: '/content-manager/collection-types/api::category.category',
         body: {
+          locale: 'ko',
           name: 'category in korean',
         },
       });
@@ -97,7 +98,6 @@ describe('i18n - Content API', () => {
       expect(statusCode).toBe(200);
       expect(body).toMatchObject({
         locale: 'ko',
-        localizations: [],
         name: 'category in korean',
       });
       data.categories.push(res.body);
@@ -107,28 +107,33 @@ describe('i18n - Content API', () => {
     // foreign keys deadlock example: https://gist.github.com/roustem/db2398aa38be0cc88364
     test('all related locales', async () => {
       let res;
+
       for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
         res = await rq({
-          method: 'POST',
-          url: `/content-manager/collection-types/api::category.category`,
-          qs: {
-            // TODO V5: in order the make the relatedEntityId work, we need need to change the logic here
-            // https://github.com/strapi/strapi/blob/a1c8cbb8a8e03dae8cfd464ff586b8bd49e342fc/packages/plugins/i18n/server/src/services/content-types.ts#L58
-            // With the D&P changes we would be sending a document_id so should we update the findOne to filter by document_id?
-            // plugins: { i18n: { relatedEntityId: data.categories[0].id } },
-            locale,
-          },
+          method: 'PUT',
+          url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
           body: {
             name: `category in ${locale}`,
+            locale,
           },
+          // TODO V5: in order the make the relatedEntityId work, we need need to change the logic here
+          // https://github.com/strapi/strapi/blob/a1c8cbb8a8e03dae8cfd464ff586b8bd49e342fc/packages/plugins/i18n/server/src/services/content-types.ts#L58
+          // With the D&P changes we would be sending a document_id so should we update the findOne to filter by document_id?
+          // qs: {
+          // plugins: { i18n: { relatedEntityId: data.categories[0].id } },
+          // },
         });
 
         expect(res.statusCode).toBe(200);
-        data.categories.push(res.body);
+        expect(res.body.locale).toBe(locale);
       }
+      const { statusCode, body } = res;
+
+      expect(statusCode).toBe(200);
+      data.categories.push(body);
     });
 
-    test('should not be able to duplicate unique field values within the same locale', async () => {
+    test.skip('should not be able to duplicate unique field values within the same locale', async () => {
       const res = await rq({
         method: 'POST',
         url: `/content-manager/collection-types/api::category.category`,

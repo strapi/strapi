@@ -54,16 +54,7 @@ import requestContext from './services/request-context';
 import createAuth from './services/auth';
 import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
-import createUpdateNotifier from './utils/update-notifier';
-import createStartupLogger from './utils/startup-logger';
-import { createStrapiFetch } from './utils/fetch';
-import { LIFECYCLES } from './utils/lifecycles';
-import ee from './utils/ee';
-import bootstrap from './bootstrap';
-import { destroyOnSignal } from './utils/signals';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
-import convertCustomFieldType from './utils/convert-custom-field-type';
-import { transformContentTypesToModels } from './utils/transform-content-types-to-models';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service/document-service';
 
@@ -184,7 +175,7 @@ class Strapi extends Container implements StrapiI {
   constructor(opts: StrapiOptions = {}) {
     super();
 
-    destroyOnSignal(this);
+    utils.destroyOnSignal(this);
 
     const rootDirs = resolveWorkingDirectories(opts);
 
@@ -207,7 +198,8 @@ class Strapi extends Container implements StrapiI {
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators())
       .add('content-api', createContentAPI(this))
-      .add('auth', createAuth());
+      .add('auth', createAuth())
+      .add('models', registries.models());
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -222,27 +214,27 @@ class Strapi extends Container implements StrapiI {
     // Strapi utils instantiation
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
-    this.startupLogger = createStartupLogger(this);
+    this.startupLogger = utils.createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', { level: 'info' }));
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
     this.customFields = createCustomFields(this);
-    this.fetch = createStrapiFetch(this);
+    this.fetch = utils.createStrapiFetch(this);
     this.features = createFeaturesService(this);
 
-    createUpdateNotifier(this).notify();
+    utils.createUpdateNotifier(this).notify();
 
     Object.defineProperty<Strapi>(this, 'EE', {
       get: () => {
-        ee.init(this.dirs.app.root, this.log);
-        return ee.isEE;
+        utils.ee.init(this.dirs.app.root, this.log);
+        return utils.ee.isEE;
       },
       configurable: false,
     });
 
     Object.defineProperty<Strapi>(this, 'ee', {
-      get: () => ee,
+      get: () => utils.ee,
       configurable: false,
     });
   }
@@ -351,7 +343,7 @@ class Strapi extends Container implements StrapiI {
 
   async destroy() {
     await this.server.destroy();
-    await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
+    await this.runLifecyclesFunctions(utils.LIFECYCLES.DESTROY);
 
     this.eventHub.destroy();
 
@@ -470,7 +462,7 @@ class Strapi extends Container implements StrapiI {
   async register() {
     await loaders.loadApplicationContext(this);
 
-    await bootstrap({ strapi: this });
+    this.get('models').add(coreStoreModel).add(webhookModel);
 
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
@@ -484,25 +476,23 @@ class Strapi extends Container implements StrapiI {
 
     this.telemetry.register();
 
-    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
+    await this.runLifecyclesFunctions(utils.LIFECYCLES.REGISTER);
     // NOTE: Swap type customField for underlying data type
-    convertCustomFieldType(this);
+    utils.convertCustomFieldType(this);
 
     return this;
   }
 
   async bootstrap() {
-    const contentTypes = [
-      coreStoreModel,
-      webhookModel,
-      ...Object.values(this.contentTypes),
-      ...Object.values(this.components),
+    const models = [
+      ...utils.transformContentTypesToModels([
+        ...Object.values(this.contentTypes),
+        ...Object.values(this.components),
+      ]),
+      ...this.get('models').get(),
     ];
 
-    this.db = await Database.init({
-      ...this.config.get('database'),
-      models: transformContentTypesToModels(contentTypes),
-    });
+    this.db = await Database.init({ ...this.config.get('database'), models });
 
     this.store = createCoreStore({ db: this.db });
     this.webhookStore = createWebhookStore({ db: this.db });
@@ -525,7 +515,7 @@ class Strapi extends Container implements StrapiI {
     this.telemetry.bootstrap();
 
     let oldContentTypes;
-    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.collectionName)) {
+    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
       oldContentTypes = await this.store.get({
         type: 'strapi',
         name: 'content_types',
@@ -541,7 +531,7 @@ class Strapi extends Container implements StrapiI {
     await this.db.schema.sync();
 
     if (this.EE) {
-      await ee.checkLicense({ strapi: this });
+      await utils.ee.checkLicense({ strapi: this });
     }
 
     await this.hook('strapi::content-types.afterSync').call({
@@ -563,7 +553,7 @@ class Strapi extends Container implements StrapiI {
 
     await this.contentAPI.permissions.registerActions();
 
-    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
+    await this.runLifecyclesFunctions(utils.LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
 

@@ -9,9 +9,8 @@ import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
-
 import { validateDatabase } from './validations';
-import { Model } from './types';
+import type { Model } from './types';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -170,3 +169,4 @@ class Database {
 }
 
 export { Database, errors };
+export type { Model };

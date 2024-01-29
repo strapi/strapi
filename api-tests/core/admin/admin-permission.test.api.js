@@ -102,7 +102,9 @@ describe('Role CRUD End to End', () => {
                     "locales",
                   ],
                   "label": "Publish",
-                  "subjects": [],
+                  "subjects": [
+                    "plugin::users-permissions.user",
+                  ],
                 },
               ],
               [
@@ -639,7 +641,9 @@ describe('Role CRUD End to End', () => {
                     "locales",
                   ],
                   "label": "Publish",
-                  "subjects": [],
+                  "subjects": [
+                    "plugin::users-permissions.user",
+                  ],
                 },
               ],
               [],
