@@ -2,6 +2,7 @@ import type { Plugin } from '@strapi/types';
 import { controllers } from './controllers';
 import { services } from './services';
 import { contentTypes } from './content-types';
+import { getService } from './utils';
 
 /**
  * Check once if the feature is enabled (both license info & feature flag) before loading it,
@@ -10,19 +11,13 @@ import { contentTypes } from './content-types';
 const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   // TODO: add license check here when it's ready on the license registry
   if (strapi.features.future.isEnabled('history')) {
-    const register: Plugin.LoadedPlugin['register'] = async () => {
-      // TODO: remove log once there are actual features
-      console.log('registering history feature');
-    };
-    const bootstrap: Plugin.LoadedPlugin['bootstrap'] = async () => {};
-    const destroy: Plugin.LoadedPlugin['destroy'] = async () => {};
-
     return {
-      register,
-      bootstrap,
+      bootstrap({ strapi }) {
+        // Start recording history and saving history versions
+        getService(strapi, 'history').init();
+      },
       controllers,
       services,
-      destroy,
       contentTypes,
     };
   }

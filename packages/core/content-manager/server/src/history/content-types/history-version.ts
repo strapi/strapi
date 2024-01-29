@@ -1,8 +1,9 @@
 import type { Schema } from '@strapi/types';
+import { HISTORY_VERSION_UID } from '../constants';
 
 const historyVersion: { schema: Schema.CollectionType } = {
   schema: {
-    uid: 'plugin::content-manager.history-version',
+    uid: HISTORY_VERSION_UID,
     modelName: 'history-version',
     globalId: 'ContentManagerHistoryVersion',
     kind: 'collectionType',
