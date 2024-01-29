@@ -2,26 +2,9 @@ import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { hasProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
+import { getDocumentDimensions } from './utils/dimensions';
 
 const { ApplicationError } = errors;
-
-/**
- * From a request object, validates and returns the locale and status of the document
- */
-const getDocumentDimensions = (request: any) => {
-  const { locale, status, ...rest } = request || {};
-  // Sanitize locale and status
-  // Check locale format is a valid locale identifier
-  if (locale && !/^[a-z]{2}(-[A-Z]{2})?$/.test(locale)) {
-    throw new errors.ValidationError(`Invalid locale format: ${locale}`);
-  }
-
-  if (status && !['draft', 'published'].includes(status)) {
-    throw new errors.ValidationError(`Invalid status: ${status}`);
-  }
-
-  return { locale, status, ...rest };
-};
 
 export default {
   async find(ctx: any) {
@@ -305,6 +288,7 @@ export default {
   async publish(ctx: any) {
     const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
+    const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
@@ -323,7 +307,7 @@ export default {
       .build();
 
     // TODO: Publish many locales
-    const { locale = 'en' } = getDocumentDimensions(ctx.request.body);
+    const { locale = 'en' } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, { populate, locale });
 
     if (!document) {
@@ -424,6 +408,7 @@ export default {
   async unpublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
+    const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
@@ -440,7 +425,7 @@ export default {
       .build();
 
     // TODO: Unpublish many locales
-    const { locale = 'en' } = getDocumentDimensions(ctx.request.body);
+    const { locale = 'en' } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, {
       populate,
       locale,

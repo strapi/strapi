@@ -4,7 +4,7 @@
   "info": {
     "singularName": "unique",
     "pluralName": "uniques",
-    "displayName": "unique"
+    "displayName": "Unique"
   },
   "options": {
     "draftAndPublish": true
@@ -15,14 +15,6 @@
     }
   },
   "attributes": {
-    "title": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "uniqueString": {
       "pluginOptions": {
         "i18n": {

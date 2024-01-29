@@ -7,10 +7,12 @@ test.describe('Uniqueness', () => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
     // TODO: the default should be to wipe all entries, but we need to fix the import script first
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar', ['api::unique.unique']);
+
     await page.goto('/admin');
     await login({ page });
 
     await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Unique' }).click();
   });
 
   const FIELDS_TO_TEST = [
@@ -18,9 +20,7 @@ test.describe('Uniqueness', () => {
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
-    // TODO V5: How should UIDs work? Should they be globally unique or per locale and publication state?
-    // This currently violates a DB constraint and fails the test spec
-    // { name: 'UID', value: 'unique' },
+    { name: 'UID', value: 'unique' },
   ];
 
   const clickSave = async (page) => {
