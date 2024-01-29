@@ -117,12 +117,6 @@ describe('i18n - Content API', () => {
             name: `category in ${locale}`,
             locale,
           },
-          // TODO V5: in order the make the relatedEntityId work, we need need to change the logic here
-          // https://github.com/strapi/strapi/blob/a1c8cbb8a8e03dae8cfd464ff586b8bd49e342fc/packages/plugins/i18n/server/src/services/content-types.ts#L58
-          // With the D&P changes we would be sending a document_id so should we update the findOne to filter by document_id?
-          // qs: {
-          // plugins: { i18n: { relatedEntityId: data.categories[0].id } },
-          // },
         });
 
         expect(res.statusCode).toBe(200);

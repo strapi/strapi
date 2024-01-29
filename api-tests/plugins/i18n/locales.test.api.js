@@ -406,8 +406,6 @@ describe('CRUD locales', () => {
         method: 'PUT',
         body: { name: 'product name' },
         qs: {
-          // TODO v5: reintroduce when relatedEntityId logic is fixed for document IDs
-          // plugins: { i18n: { relatedEntityId: frenchProduct.id } },
           locale: 'en',
         },
       });
