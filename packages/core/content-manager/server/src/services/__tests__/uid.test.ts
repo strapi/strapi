@@ -354,10 +354,15 @@ describe('Test uid service', () => {
         contentTypeUID: 'my-model',
         field: 'slug',
         value: 'my-test-model',
+        locale: 'en',
       } as any);
 
       expect(findMany).toHaveBeenCalledWith({
-        where: { slug: { $contains: 'my-test-model' } },
+        where: {
+          slug: { $contains: 'my-test-model' },
+          locale: 'en',
+          published_at: null,
+        },
       });
     });
   });
@@ -381,9 +386,12 @@ describe('Test uid service', () => {
         contentTypeUID: 'my-model',
         field: 'slug',
         value: 'my-test-model',
+        locale: 'en',
       } as any);
 
-      expect(count).toHaveBeenCalledWith({ where: { slug: 'my-test-model' } });
+      expect(count).toHaveBeenCalledWith({
+        where: { slug: 'my-test-model', locale: 'en', published_at: null },
+      });
       expect(isAvailable).toBe(true);
     });
   });

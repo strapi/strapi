@@ -25,10 +25,6 @@
       "inputs": ["production", "^production"],
       "dependsOn": ["^build"]
     },
-    "build:ts": {
-      "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
-      "dependsOn": ["^build:ts"]
-    },
     "test:unit": {
       "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"]
     },
@@ -50,7 +46,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
+        "cacheableOperations": ["build", "lint", "test:unit", "test:front"]
       }
     }
   }

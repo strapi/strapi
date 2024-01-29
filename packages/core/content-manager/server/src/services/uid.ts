@@ -8,10 +8,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID,
     field,
     data,
+    locale,
   }: {
     contentTypeUID: UID.ContentType;
     field: string;
     data: Record<string, any>;
+    locale: string;
   }) {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
@@ -25,6 +27,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         contentTypeUID,
         field,
         value: slugify(targetValue, options),
+        locale,
       });
     }
 
@@ -35,6 +38,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         _.isFunction(defaultValue) ? defaultValue() : defaultValue || contentType.modelName,
         options
       ),
+      locale,
     });
   },
 
@@ -42,16 +46,24 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID,
     field,
     value,
+    locale,
   }: {
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
+    locale: string;
   }) {
     const query = strapi.db.query(contentTypeUID);
 
     const possibleColisions: string[] = await query
       .findMany({
-        where: { [field]: { $contains: value } },
+        where: {
+          [field]: { $contains: value },
+          locale,
+          // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+          // However, when publishing this "available" UID might collide with another published entry
+          published_at: null,
+        },
       })
       .then((results: any) => results.map((result: any) => result[field]));
 
@@ -73,15 +85,23 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID,
     field,
     value,
+    locale,
   }: {
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
+    locale: string;
   }) {
     const query = strapi.db.query(contentTypeUID);
 
     const count: number = await query.count({
-      where: { [field]: value },
+      where: {
+        [field]: value,
+        locale,
+        // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+        // However, when publishing this "available" UID might collide with another published entry
+        published_at: null,
+      },
     });
 
     if (count > 0) {

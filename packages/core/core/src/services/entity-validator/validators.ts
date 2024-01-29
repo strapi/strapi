@@ -14,6 +14,7 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
 
 interface ValidatorOptions {
   isDraft: boolean;
+  locale: string;
 }
 
 /* Validator utils */
@@ -34,7 +35,7 @@ const addMinLengthValidator = (
       | Attribute.Email
       | Attribute.UID;
   },
-  { isDraft }: { isDraft: boolean }
+  { isDraft }: ValidatorOptions
 ) => {
   return attr.minLength && _.isInteger(attr.minLength) && !isDraft
     ? validator.min(attr.minLength)
@@ -138,18 +139,24 @@ const addStringRegexValidator = (
  */
 const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   validator: T,
-  { attr, model, updatedAttribute, entity }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>
+  { attr, model, updatedAttribute, entity }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>,
+  options: ValidatorOptions
 ): T => {
   if (attr.type !== 'uid' && !attr.unique) {
     return validator;
   }
 
   return validator.test('unique', 'This attribute must be unique', async (value) => {
+    const isPublish = options.isDraft === false;
+
+    // When publishing, the value will not have changed so we take the value from the entity
+    const valueToCheck = isPublish ? entity?.[updatedAttribute.name] : value;
+
     /**
      * If the attribute value is `null` we want to skip the unique validation.
      * Otherwise it'll only accept a single `null` entry in the database.
      */
-    if (_.isNil(updatedAttribute.value)) {
+    if (_.isNil(valueToCheck)) {
       return true;
     }
 
@@ -159,17 +166,19 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
      * unique constraint after already creating multiple entries with
      * the same attribute value for that field.
      */
-    if (entity && updatedAttribute.value === entity[updatedAttribute.name]) {
+    if (!isPublish && entity && valueToCheck === entity[updatedAttribute.name]) {
       return true;
     }
 
-    const whereParams = entity
-      ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
-      : { [updatedAttribute.name]: value };
+    /**
+     * At this point we know that we are creating a new entry or that the unique field value has changed
+     * We check if there is an entry of this content type in the same locale with the same unique field value
+     */
 
-    const record = await strapi.query(model.uid).findOne({
-      select: ['id'],
-      where: whereParams,
+    const record = await strapi.documents(model.uid).findFirst({
+      filters: { [updatedAttribute.name]: valueToCheck },
+      locale: options.locale,
+      status: options.isDraft ? 'draft' : 'published',
     });
 
     return !record;
@@ -194,7 +203,7 @@ const stringValidator = (
   schema = addMinLengthValidator(schema, metas, options);
   schema = addMaxLengthValidator(schema, metas);
   schema = addStringRegexValidator(schema, metas);
-  schema = addUniqueValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas, options);
 
   return schema;
 };
@@ -216,35 +225,45 @@ const enumerationValidator = ({ attr }: { attr: Attribute.Enumeration }) => {
     .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null as any));
 };
 
-const integerValidator = (metas: ValidatorMetas<Attribute.Integer | Attribute.BigInteger>) => {
+const integerValidator = (
+  metas: ValidatorMetas<Attribute.Integer | Attribute.BigInteger>,
+  options: ValidatorOptions
+) => {
   let schema = yup.number().integer();
 
   schema = addMinIntegerValidator(schema, metas);
   schema = addMaxIntegerValidator(schema, metas);
-  schema = addUniqueValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas, options);
 
   return schema;
 };
 
-const floatValidator = (metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>) => {
+const floatValidator = (
+  metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>,
+  options: ValidatorOptions
+) => {
   let schema = yup.number();
   schema = addMinFloatValidator(schema, metas);
   schema = addMaxFloatValidator(schema, metas);
-  schema = addUniqueValidator(schema, metas);
+  schema = addUniqueValidator(schema, metas, options);
 
   return schema;
 };
 
-const bigintegerValidator = (metas: ValidatorMetas<Attribute.BigInteger>) => {
+const bigintegerValidator = (
+  metas: ValidatorMetas<Attribute.BigInteger>,
+  options: ValidatorOptions
+) => {
   const schema = yup.mixed();
-  return addUniqueValidator(schema, metas);
+  return addUniqueValidator(schema, metas, options);
 };
 
 const datesValidator = (
-  metas: ValidatorMetas<Attribute.Date | Attribute.DateTime | Attribute.Time | Attribute.Timestamp>
+  metas: ValidatorMetas<Attribute.Date | Attribute.DateTime | Attribute.Time | Attribute.Timestamp>,
+  options: ValidatorOptions
 ) => {
   const schema = yup.mixed();
-  return addUniqueValidator(schema, metas);
+  return addUniqueValidator(schema, metas, options);
 };
 
 export default {
