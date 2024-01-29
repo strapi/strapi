@@ -100,7 +100,29 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       strapi.container.get('policies').add(namespace, rawModule.policies);
       strapi.container.get('middlewares').add(namespace, rawModule.middlewares);
       strapi.container.get('controllers').add(namespace, rawModule.controllers);
-      strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
+
+      // TODO v5: we should not be merging anything into the Strapi api config like this; move them all to a custom namespace
+      /**
+       * This is a workaround to fix 'rest' and 'response' being merged into api.rest and api.response, breaking strapi
+       * It moves their configs to (for example) api.custom.rest to avoid overwriting known values
+       *  */
+      const normalizedNamespace = namespace.toLowerCase();
+      if (['api::rest', 'api::responses'].includes(normalizedNamespace)) {
+        // insert 'custom' after api::
+        const safeNamespace = `${namespace.substring(
+          0,
+          namespace.indexOf('::') + 2
+        )}custom.${namespace.substring(namespace.indexOf('::') + 2)}`;
+
+        strapi.log.warn(
+          `Renaming config value ${uidToPath(namespace)} to ${uidToPath(
+            safeNamespace
+          )} to avoid conflicts with api config.`
+        );
+        strapi.container.get('config').set(uidToPath(safeNamespace), rawModule.config);
+      } else {
+        strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
+      }
     },
     get routes() {
       return rawModule.routes ?? {};
