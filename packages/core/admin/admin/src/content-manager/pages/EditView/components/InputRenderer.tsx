@@ -44,9 +44,9 @@ const InputRenderer = ({ visible, ...props }: DistributiveOmit<EditFieldLayout, 
   const canUserEditField = canUserAction(props.name, editableFields, props.type);
 
   const { fields = {} } = useLibrary();
-  // const { lazyComponentStore } = useLazyComponents(
-  //   props.customField ? [props.customField] : undefined
-  // );
+  const { lazyComponentStore } = useLazyComponents(
+    attributeHasCustomFieldProperty(props.attribute) ? [props.attribute.customField] : undefined
+  );
 
   if (!visible) {
     return null;
@@ -71,36 +71,27 @@ const InputRenderer = ({ visible, ...props }: DistributiveOmit<EditFieldLayout, 
    * Because a custom field has a unique prop but the type could be confused with either
    * the useField hook or the type of the field we need to handle it separately and first.
    */
-  if ('customField' in props.attribute) {
-    // const CustomInput = lazyComponentStore[props.attribute.customField];
+  if (attributeHasCustomFieldProperty(props.attribute)) {
+    const CustomInput = lazyComponentStore[props.attribute.customField];
 
-    return (
+    if (CustomInput) {
+      // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+      return <CustomInput {...props} disabled={fieldIsDisabled} />;
+    } else {
       <FormInputRenderer
         {...props}
         // @ts-expect-error – this workaround lets us display that the custom field is missing.
-        type={props.customField}
+        type={props.attribute.customField}
         disabled={fieldIsDisabled}
-      />
-    );
-
-    // if (CustomInput) {
-    //   // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-    //   return <CustomInput {...props} disabled={fieldIsDisabled} />;
-    // } else {
-    //   <FormInputRenderer
-    //     {...props}
-    //     // @ts-expect-error – this workaround lets us display that the custom field is missing.
-    //     type={props.customField}
-    //     disabled={fieldIsDisabled}
-    //   />;
-    // }
+      />;
+    }
   }
 
   /**
    * This is where we handle ONLY the fields from the `useLibrary` hook.
    */
   const addedInputTypes = Object.keys(fields);
-  if (!('customField' in props.attribute) && addedInputTypes.includes(props.type)) {
+  if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
     const CustomInput = fields[props.type];
     // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
     return <CustomInput {...props} disabled={fieldIsDisabled} />;
@@ -145,5 +136,10 @@ const InputRenderer = ({ visible, ...props }: DistributiveOmit<EditFieldLayout, 
       );
   }
 };
+
+const attributeHasCustomFieldProperty = (
+  attribute: Attribute.Any
+): attribute is Attribute.Any & Attribute.CustomField<string> =>
+  'customField' in attribute && typeof attribute.customField === 'string';
 
 export { InputRenderer };
