@@ -11,10 +11,18 @@ import { isShortHand, isLongHand } from '../utils/data';
 const handlePrimitive = (
   relation: ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined | any
 ) => {
-  if (!relation) return []; // null
-  if (isShortHand(relation)) return [relation]; // id
-  if (isLongHand(relation)) return [relation.id]; // { id }
-  if (Array.isArray(relation)) return relation.map((item) => (isShortHand(item) ? item : item.id)); // id[]
+  if (!relation) {
+    return []; // null
+  }
+  if (isShortHand(relation)) {
+    return [relation]; // id
+  }
+  if (isLongHand(relation)) {
+    return [relation.id]; // { id }
+  }
+  if (Array.isArray(relation)) {
+    return relation.map((item) => (isShortHand(item) ? item : item.id)); // id[]
+  }
 
   return [];
 };
