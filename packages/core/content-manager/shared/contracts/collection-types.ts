@@ -295,10 +295,11 @@ export declare namespace CountDraftRelations {
  */
 export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
-    body: {
-      ids: number[];
+    body: {};
+    query: {
+      ids?: Array<Document['id']>;
+      locale?: string;
     };
-    query: {};
   }
 
   export interface Params {

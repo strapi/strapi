@@ -27,16 +27,10 @@ document.createRange = () => {
 
 window.focus = jest.fn();
 
-const render = ({ onChange = jest.fn(), ...restProps }: Partial<WysiwygProps> = {}) => ({
+const render = (props: Partial<WysiwygProps> = {}) => ({
   user: userEvent.setup(),
   ...renderRTL(
-    <Wysiwyg
-      name="rich-text"
-      intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
-      onChange={onChange}
-      disabled={false}
-      {...restProps}
-    />,
+    <Wysiwyg type="richtext" name="rich-text" label="hello world" disabled={false} {...props} />,
     {
       wrapper: ({ children }) => (
         <ThemeProvider theme={lightTheme}>
@@ -138,7 +132,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
   it('should render code markdown when clicking the code button', async () => {
     const onChange = jest.fn();
-    const { user, getByRole } = render({ onChange });
+    const { user, getByRole } = render();
 
     await user.click(getByRole('button', { name: 'More' }));
     await user.click(getByRole('button', { name: 'Code' }));
@@ -317,9 +311,7 @@ describe.skip('Wysiwyg expand mode', () => {
 
 describe('Wysiwyg error state', () => {
   it('should show error message', async () => {
-    const { getByText } = render({
-      error: 'This is a required field',
-    });
+    const { getByText } = render();
 
     expect(getByText('This is a required field')).toBeInTheDocument();
   });

@@ -1,5 +1,4 @@
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { act, render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
@@ -8,39 +7,9 @@ import { IntlProvider } from 'react-intl';
 
 import { DynamicZone, DynamicZoneProps } from '../Field';
 
-import { layoutData } from './fixtures';
-
 const toggleNotification = jest.fn();
 
 const TEST_NAME = 'DynamicZoneComponent';
-
-const defaultCMEditViewMock = {
-  isCreatingEntry: false,
-  addComponentToDynamicZone: jest.fn(),
-  removeComponentFromDynamicZone: jest.fn(),
-  moveComponentField: jest.fn(),
-  createActionAllowedFields: [TEST_NAME],
-  updateActionAllowedFields: [TEST_NAME],
-  readActionAllowedFields: [TEST_NAME],
-  modifiedData: {},
-  formErrors: {},
-};
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({
-    ...defaultCMEditViewMock,
-  })),
-  useNotification: jest.fn().mockImplementation(() => toggleNotification),
-  NotAllowedInput: () => 'This field is not allowed',
-}));
-
-jest.mock('../../../hooks/useContentTypeLayout', () => ({
-  useContentTypeLayout: jest.fn().mockReturnValue({
-    components: {},
-    getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
-  }),
-}));
 
 /**
  * We _could_ unmock this and use it, but it requires more
@@ -106,22 +75,6 @@ describe('DynamicZone', () => {
     });
 
     it('should render the dynamic zone of components when there are dynamic components to render', () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementationOnce(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
       const { getByText } = render();
 
       expect(getByText('dynamic zone')).toBeInTheDocument();
@@ -132,12 +85,6 @@ describe('DynamicZone', () => {
     });
 
     it('should render the not allowed input if the field is not allowed & the entry is being created', () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementationOnce(() => ({
-        ...defaultCMEditViewMock,
-        isCreatingEntry: true,
-        createActionAllowedFields: [],
-      }));
       const { queryByText, getByText } = render();
 
       expect(queryByText('dynamic zone')).not.toBeInTheDocument();
@@ -146,12 +93,6 @@ describe('DynamicZone', () => {
     });
 
     it('should render the not allowed input if the field is not allowed & the entry is not being created and the field is not readable', () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementationOnce(() => ({
-        ...defaultCMEditViewMock,
-        updateActionAllowedFields: [],
-        readActionAllowedFields: [],
-      }));
       const { queryByText, getByText } = render();
 
       expect(queryByText('dynamic zone')).not.toBeInTheDocument();
@@ -163,11 +104,6 @@ describe('DynamicZone', () => {
   describe('callbacks', () => {
     it('should call the addComponentToDynamicZone callback when the AddComponentButton is clicked', async () => {
       const addComponentToDynamicZone = jest.fn();
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        addComponentToDynamicZone,
-      }));
 
       const { user, getByRole } = render();
 
@@ -210,23 +146,6 @@ describe('DynamicZone', () => {
 
     it('should call the removeComponentFromDynamicZone callback when the RemoveButton is clicked', async () => {
       const removeComponentFromDynamicZone = jest.fn();
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementationOnce(() => ({
-        ...defaultCMEditViewMock,
-        removeComponentFromDynamicZone,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
 
       const { user, getByRole } = render();
 
@@ -240,29 +159,8 @@ describe('DynamicZone', () => {
 
   describe('side effects', () => {
     it('should call the toggleNotification callback if the amount of dynamic components has hit its max and the user tries to add another', async () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementationOnce(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-            {
-              __component: 'component3',
-              id: 0,
-            },
-          ],
-        },
-      }));
-
       const { user, getByRole } = render({
-        fieldSchema: {
+        attribute: {
           // @ts-expect-error – strings should be string.string
           components: ['component1', 'component2', 'component3'],
           max: 3,
@@ -284,46 +182,12 @@ describe('DynamicZone', () => {
 
   describe('Accessibility', () => {
     it('should have have description text', () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementationOnce(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
-
       const { getByText } = render();
 
       expect(getByText('Press spacebar to grab and re-order')).toBeInTheDocument();
     });
 
     it('should update the live text when an item has been grabbed', async () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
-
       const { getAllByRole, getByText, user } = render();
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
@@ -340,23 +204,6 @@ describe('DynamicZone', () => {
     });
 
     it('should change the live text when an item has been moved', async () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
-
       const { user, getAllByRole, getByText } = render();
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
@@ -372,23 +219,6 @@ describe('DynamicZone', () => {
     });
 
     it('should change the live text when an item has been dropped', async () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
-
       const { getAllByRole, user, getByText } = render();
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
@@ -405,23 +235,6 @@ describe('DynamicZone', () => {
     });
 
     it('should change the live text after the reordering interaction has been cancelled', async () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        modifiedData: {
-          [TEST_NAME]: [
-            {
-              __component: 'component1',
-              id: 0,
-            },
-            {
-              __component: 'component2',
-              id: 0,
-            },
-          ],
-        },
-      }));
-
       const { getAllByRole, user, getByText } = render();
 
       const [draggedItem] = getAllByRole('button', { name: 'Drag' });
@@ -449,34 +262,16 @@ describe('DynamicZone', () => {
     });
 
     it('should render the name of the field when the label is an empty string', () => {
-      const { getByRole } = render({ metadatas: {} });
+      const { getByRole } = render({ label: '' });
       expect(getByRole('button', { name: `Add a component to ${TEST_NAME}` })).toBeInTheDocument();
     });
 
     it('should render a too high error if there is hasMaxError is true and the component is not open', () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        formErrors: {
-          [TEST_NAME]: {
-            id: 'components.Input.error.validation.max',
-          },
-        },
-      }));
       const { getByRole } = render();
       expect(getByRole('button', { name: /The value is too high./ })).toBeInTheDocument();
     });
 
     it('should render a label telling the user there are X missing components if hasMinError is true and the component is not open', () => {
-      // @ts-expect-error – TODO: fix me – testing
-      useCMEditViewDataManager.mockImplementation(() => ({
-        ...defaultCMEditViewMock,
-        formErrors: {
-          [TEST_NAME]: {
-            id: 'components.Input.error.validation.min',
-          },
-        },
-      }));
       const { getByRole } = render();
       expect(getByRole('button', { name: /missing components/ })).toBeInTheDocument();
     });

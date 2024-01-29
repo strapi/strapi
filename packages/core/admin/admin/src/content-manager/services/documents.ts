@@ -93,7 +93,9 @@ const documentApi = contentManagerApi.injectEndpoints({
     getAllDocuments: builder.query<
       Contracts.CollectionTypes.Find.Response,
       Contracts.CollectionTypes.Find.Params & {
-        params?: Contracts.CollectionTypes.Find.Request['query'];
+        params?: Contracts.CollectionTypes.Find.Request['query'] & {
+          [key: string]: any;
+        };
       }
     >({
       query: ({ model, params }) => ({
@@ -152,7 +154,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       ],
     }),
     getManyDraftRelationCount: builder.query<
-      Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response,
+      Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response['data'],
       Contracts.CollectionTypes.CountManyEntriesDraftRelations.Request['query'] & {
         model: string;
       }
@@ -164,6 +166,9 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
+      transformResponse: (
+        response: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response
+      ) => response.data,
     }),
     publishDocument: builder.mutation<
       Contracts.CollectionTypes.Publish.Response,

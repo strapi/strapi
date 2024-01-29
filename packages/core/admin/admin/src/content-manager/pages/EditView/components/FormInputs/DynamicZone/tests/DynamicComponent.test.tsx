@@ -7,18 +7,7 @@ import { IntlProvider } from 'react-intl';
 
 import { DynamicComponent, DynamicComponentProps } from '../DynamicComponent';
 
-import { dynamicComponentsByCategory, layoutData } from './fixtures';
-
-jest.mock('../../../hooks/useContentTypeLayout', () => ({
-  useContentTypeLayout: jest.fn().mockReturnValue({
-    getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
-  }),
-}));
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({ modifiedData: {} })),
-}));
+import { dynamicComponentsByCategory } from './fixtures';
 
 /**
  * We _could_ unmock this and use it, but it requires more
@@ -35,12 +24,14 @@ describe('DynamicComponent', () => {
   });
 
   const defaultProps = {
+    index: 0,
     isFieldAllowed: true,
     componentUid: 'component1',
     name: 'dynamiczone',
+    onAddComponent: jest.fn(),
     onMoveComponent: jest.fn(),
     onRemoveComponentClick: jest.fn(),
-  };
+  } satisfies DynamicComponentProps;
 
   interface TestComponentProps extends Partial<DynamicComponentProps> {
     testingDnd?: boolean;
@@ -49,7 +40,7 @@ describe('DynamicComponent', () => {
   const TestComponent = ({ testingDnd, ...restProps }: TestComponentProps) => (
     <>
       <DynamicComponent {...defaultProps} {...restProps} />
-      {testingDnd ? <DynamicComponent {...defaultProps} {...restProps} /> : null}
+      {testingDnd ? <DynamicComponent {...defaultProps} index={1} {...restProps} /> : null}
     </>
   );
 
@@ -204,7 +195,6 @@ describe('DynamicComponent', () => {
   it('should handle errors in the fields', async () => {
     const { getByText } = render({
       index: 0,
-      formErrors: { [`${defaultProps.name}.0`]: 'Error here' },
     });
 
     expect(getByText('The component contains error(s)')).toBeInTheDocument();

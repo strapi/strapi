@@ -28,7 +28,7 @@ interface ListFieldLayout {
    * Typically used by plugins to render a custom cell
    */
   cellFormatter?: (
-    data: Contracts.CollectionTypes.Find.Response['results'][number],
+    data: { [key: string]: unknown },
     header: Omit<ListFieldLayout, 'cellFormatter'>
   ) => React.ReactNode;
   label: string | MessageDescriptor;

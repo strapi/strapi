@@ -29,56 +29,8 @@ const LAYOUT_DATA = {
   },
 };
 
-jest.mock('../FieldComponent', () => ({
-  FieldComponent: () => "I'm a field component",
-}));
-jest.mock('../Inputs', () => ({
-  Inputs: () => "I'm inputs",
-}));
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({
-    modifiedData: {
-      'repeatable-component': [
-        {
-          name: 'accordion1',
-        },
-        {
-          name: 'accordion2',
-        },
-      ],
-      'error-field': [
-        {
-          name: 'accordion1',
-        },
-        {
-          name: 'accordion2',
-        },
-      ],
-      'error-min': [
-        {
-          name: 'accordion1',
-        },
-        {
-          name: 'accordion2',
-        },
-      ],
-    },
-    formErrors: {
-      'error-field': { id: 'error', defaultMessage: 'This is an error' },
-      'error-min': { id: 'min-error', defaultMessage: 'This is an min error' },
-    },
-    triggerFormValidation: jest.fn(),
-    moveComponentField: jest.fn(),
-  })),
-}));
-
-jest.mock('../../hooks/useContentTypeLayout', () => ({
-  useContentTypeLayout: jest.fn().mockReturnValue({
-    // @ts-expect-error – this is a mock.
-    getComponentLayout: jest.fn().mockImplementation((componentUid) => LAYOUT_DATA[componentUid]),
-  }),
+jest.mock('../../InputRenderer', () => ({
+  Inputs: () => 'INPUT',
 }));
 
 describe('RepeatableComponents', () => {
@@ -88,8 +40,12 @@ describe('RepeatableComponents', () => {
 
   const defaultProps = {
     name: 'repeatable-component',
-    componentUid: 'test',
-  };
+    type: 'component',
+    attribute: {
+      component: 'test.test',
+      type: 'component',
+    },
+  } satisfies RepeatableComponentProps;
 
   const TestComponent = (props?: Partial<RepeatableComponentProps>) => (
     <RepeatableComponent {...defaultProps} {...props} />
@@ -110,12 +66,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should render components & a footer when there are components to render', async () => {
-      const { getAllByText, getByRole, user } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      const { getAllByText, getByRole, user } = render(<TestComponent />);
 
       const accordion1Button = getByRole('button', { name: /accordion1/ });
 
@@ -129,13 +80,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should render a passed error message', () => {
-      const { queryByText, getAllByRole, getByText } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-          name="error-field"
-        />
-      );
+      const { queryByText, getAllByRole, getByText } = render(<TestComponent name="error-field" />);
 
       expect(queryByText(/No entry yet/)).not.toBeInTheDocument();
       expect(getAllByRole('button', { name: /accordion/ })).toHaveLength(2);
@@ -143,14 +88,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should render a specific min error when error message contains the word min', () => {
-      const { queryByText, getAllByRole, getByText } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-          min={4}
-          name="error-min"
-        />
-      );
+      const { queryByText, getAllByRole, getByText } = render(<TestComponent name="error-min" />);
 
       expect(queryByText(/No entry yet/)).not.toBeInTheDocument();
       expect(getAllByRole('button', { name: /accordion/ })).toHaveLength(2);
@@ -162,30 +100,7 @@ describe('RepeatableComponents', () => {
     it('should call addRepeatableComponentToField when the footer button is clicked', async () => {
       const addRepeatableComponentToField = jest.fn();
 
-      // @ts-expect-error – test purposes
-      useCMEditViewDataManager.mockReturnValueOnce({
-        modifiedData: {
-          'repeatable-component': [
-            {
-              name: 'accordion1',
-            },
-            {
-              name: 'accordion2',
-            },
-          ],
-        },
-        formErrors: {
-          'error-field': { id: 'error', defaultMessage: 'This is an error' },
-        },
-        addRepeatableComponentToField,
-      });
-
-      const { getByRole, user } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      const { getByRole, user } = render(<TestComponent />);
 
       await user.click(getByRole('button', { name: 'Add an entry' }));
 
@@ -198,13 +113,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should fire a notification if the max number of components have been added and the user tries to add another', async () => {
-      const { getByRole, user, findByText } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-          max={2}
-        />
-      );
+      const { getByRole, user, findByText } = render(<TestComponent />);
 
       await user.click(getByRole('button', { name: 'Add an entry' }));
 
@@ -214,31 +123,7 @@ describe('RepeatableComponents', () => {
     it('should fire moveComponentField when a component is drag and dropped to a new location', async () => {
       const moveComponentField = jest.fn();
 
-      // @ts-expect-error – test purposes
-      useCMEditViewDataManager.mockReturnValueOnce({
-        modifiedData: {
-          'repeatable-component': [
-            {
-              name: 'accordion1',
-            },
-            {
-              name: 'accordion2',
-            },
-          ],
-        },
-        formErrors: {
-          'error-field': { id: 'error', defaultMessage: 'This is an error' },
-        },
-        moveComponentField,
-        triggerFormValidation: jest.fn(),
-      });
-
-      const { getAllByRole } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      const { getAllByRole } = render(<TestComponent />);
 
       const [draggedItem, dropZone] = getAllByRole('button', { name: /Drag/ });
 
@@ -257,31 +142,7 @@ describe('RepeatableComponents', () => {
     it('should not fire moveComponentField when a component is placed to the same position via drag and drop', () => {
       const moveComponentField = jest.fn();
 
-      // @ts-expect-error – test purposes
-      useCMEditViewDataManager.mockReturnValueOnce({
-        modifiedData: {
-          'repeatable-component': [
-            {
-              name: 'accordion1',
-            },
-            {
-              name: 'accordion2',
-            },
-          ],
-        },
-        formErrors: {
-          'error-field': { id: 'error', defaultMessage: 'This is an error' },
-        },
-        moveComponentField,
-        triggerFormValidation: jest.fn(),
-      });
-
-      const { getAllByRole } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      const { getAllByRole } = render(<TestComponent />);
 
       const [draggedItem] = getAllByRole('button', { name: /Drag/ });
 
@@ -298,46 +159,14 @@ describe('RepeatableComponents', () => {
     it('should open the new component by default when it is added', async () => {
       const addRepeatableComponentToField = jest.fn();
 
-      // @ts-expect-error – test purposes
-      useCMEditViewDataManager.mockImplementation(() => ({
-        modifiedData: {
-          'repeatable-component': [
-            {
-              name: 'accordion1',
-            },
-            {
-              name: 'accordion2',
-            },
-            {
-              name: 'accordion3',
-            },
-          ],
-        },
-        formErrors: {
-          'error-field': { id: 'error', defaultMessage: 'This is an error' },
-        },
-        addRepeatableComponentToField,
-        moveComponentField: jest.fn(),
-      }));
-
-      const { getByRole, rerender, user } = render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      const { getByRole, rerender, user } = render(<TestComponent />);
 
       expect(getByRole('button', { name: /accordion1/ })).toHaveAttribute('aria-expanded', 'false');
       expect(getByRole('button', { name: /accordion2/ })).toHaveAttribute('aria-expanded', 'false');
 
       await user.click(getByRole('button', { name: 'Add an entry' }));
 
-      rerender(
-        <TestComponent
-          componentValueLength={3}
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }, { __temp_key__: 3 }]}
-        />
-      );
+      rerender(<TestComponent />);
 
       expect(getByRole('button', { name: /accordion1/ })).toHaveAttribute('aria-expanded', 'false');
       expect(getByRole('button', { name: /accordion2/ })).toHaveAttribute('aria-expanded', 'false');
@@ -347,23 +176,13 @@ describe('RepeatableComponents', () => {
 
   describe('Accessibility', () => {
     it('should have have description text', () => {
-      render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      render(<TestComponent />);
 
       expect(screen.getByText('Press spacebar to grab and re-order')).toBeInTheDocument();
     });
 
     it('should update the live text when an item has been grabbed', async () => {
-      render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      render(<TestComponent />);
 
       const [draggedItem] = screen.getAllByText('Drag');
 
@@ -377,12 +196,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should change the live text when an item has been moved', () => {
-      render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      render(<TestComponent />);
 
       const [draggedItem] = screen.getAllByText('Drag');
 
@@ -393,12 +207,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should change the live text when an item has been dropped', () => {
-      render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      render(<TestComponent />);
 
       const [draggedItem] = screen.getAllByText('Drag');
 
@@ -410,12 +219,7 @@ describe('RepeatableComponents', () => {
     });
 
     it('should change the live text after the reordering interaction has been cancelled', () => {
-      render(
-        <TestComponent
-          componentValue={[{ __temp_key__: 1 }, { __temp_key__: 2 }]}
-          componentValueLength={2}
-        />
-      );
+      render(<TestComponent />);
 
       const [draggedItem] = screen.getAllByText('Drag');
 

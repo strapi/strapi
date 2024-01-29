@@ -3,6 +3,18 @@ import { useEffect } from 'react';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
 import { resetPermissions, setPermissions } from '../modules/rbac';
 
+import type { Permission } from '@strapi/helper-plugin';
+
+type UseSyncRbac = (
+  uid: string,
+  query: { plugins?: object },
+  containerName?: string
+) => {
+  isLoading: boolean;
+  isError: boolean;
+  permissions?: Permission[];
+};
+
 /* -------------------------------------------------------------------------------------------------
  * useSyncRbac
  * -----------------------------------------------------------------------------------------------*/
@@ -11,11 +23,7 @@ import { resetPermissions, setPermissions } from '../modules/rbac';
  * for the content-manager, if we devise a better way to handle RBAC in the entire app then this
  * can probably go...
  */
-const useSyncRbac = (
-  collectionTypeUID: string,
-  query: { plugins?: object },
-  containerName: string = 'listView'
-) => {
+const useSyncRbac: UseSyncRbac = (collectionTypeUID, query, containerName = 'listView') => {
   const dispatch = useTypedDispatch();
 
   const collectionTypesRelatedPermissions = useTypedSelector(

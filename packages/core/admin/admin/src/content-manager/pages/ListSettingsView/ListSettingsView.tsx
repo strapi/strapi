@@ -26,7 +26,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
-import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useDocLayout } from '../../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
 import { formatLayoutForSettingsView } from '../../utils/layouts';
@@ -46,21 +46,17 @@ const ListSettingsView = () => {
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { isLoading: isLoadingLayout, layout: fetchedLayout } = useDocumentLayout(slug);
+  const { isLoading: isLoadingLayout, list } = useDocLayout();
 
-  const { rawContentTypeLayout: layout } = React.useMemo(() => {
-    let rawContentTypeLayout = null;
-
-    if (fetchedLayout?.contentType) {
-      rawContentTypeLayout = formatLayoutForSettingsView(fetchedLayout.contentType);
-    }
-
-    return { rawContentTypeLayout };
-  }, [fetchedLayout]);
+  const layout = React.useMemo(() => {
+    // @ts-expect-error – TODO: remove this & fix the page
+    return formatLayoutForSettingsView(list.layout);
+  }, [list.layout]);
 
   const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
     reducer,
     initialState,
+    // @ts-expect-error – TODO: remove this & fix the page
     () => ({
       ...initialState,
       initialData: layout,
@@ -69,6 +65,7 @@ const ListSettingsView = () => {
   );
 
   React.useEffect(() => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'SET_DATA',
       data: layout,
@@ -87,6 +84,7 @@ const ListSettingsView = () => {
   }: {
     target: { name: string; value: string | number | boolean };
   }) => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'ON_CHANGE',
       keys: name,
@@ -96,6 +94,7 @@ const ListSettingsView = () => {
   };
 
   const handleAddField = (item: string) => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'ADD_FIELD',
       item,
@@ -111,6 +110,7 @@ const ListSettingsView = () => {
         message: { id: getTranslation('notification.info.minimumFields') },
       });
     } else {
+      // @ts-expect-error – TODO: remove this & fix the page
       dispatch({
         type: 'REMOVE_FIELD',
         index,
@@ -157,6 +157,7 @@ const ListSettingsView = () => {
   };
 
   const handleClickEditField = (fieldToEdit: string) => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
@@ -164,6 +165,7 @@ const ListSettingsView = () => {
   };
 
   const handleCloseModal = () => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'UNSET_FIELD_TO_EDIT',
     });
@@ -171,6 +173,7 @@ const ListSettingsView = () => {
 
   const handleSubmitFieldEdit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });
@@ -182,6 +185,7 @@ const ListSettingsView = () => {
   }: {
     target: { name: string; value: string | boolean };
   }) => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'ON_CHANGE_FIELD_METAS',
       name,
@@ -205,6 +209,7 @@ const ListSettingsView = () => {
     }));
 
   const move = (originalIndex: number, atIndex: number) => {
+    // @ts-expect-error – TODO: remove this & fix the page
     dispatch({
       type: 'MOVE_FIELD',
       originalIndex,

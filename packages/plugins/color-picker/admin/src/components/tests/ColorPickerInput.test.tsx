@@ -6,29 +6,16 @@ import { IntlProvider } from 'react-intl';
 import { ColorPickerInput } from '../ColorPickerInput';
 
 const render = () => ({
-  ...renderRTL(
-    <ColorPickerInput
-      name="color"
-      value=""
-      onChange={jest.fn()}
-      attribute={{
-        customField: 'plugin::color-picker.color',
-        pluginOptions: { i18n: { localized: true } },
-        type: 'string',
-      }}
-      intlLabel={{ id: 'color-picker', defaultMessage: 'color-picker' }}
-    />,
-    {
-      wrapper: ({ children }) => {
-        const locale = 'en';
-        return (
-          <IntlProvider locale={locale} messages={{}} textComponent="span">
-            <DesignSystemProvider locale={locale}>{children}</DesignSystemProvider>
-          </IntlProvider>
-        );
-      },
-    }
-  ),
+  ...renderRTL(<ColorPickerInput name="color" label={'color-picker'} type="string" />, {
+    wrapper: ({ children }) => {
+      const locale = 'en';
+      return (
+        <IntlProvider locale={locale} messages={{}} textComponent="span">
+          <DesignSystemProvider locale={locale}>{children}</DesignSystemProvider>
+        </IntlProvider>
+      );
+    },
+  }),
   user: userEvent.setup(),
 });
 

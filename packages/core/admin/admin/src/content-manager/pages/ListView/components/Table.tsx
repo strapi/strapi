@@ -194,7 +194,10 @@ const BodyImpl = ({
   );
 };
 
-const TableImpl = {
+const TableImpl: Omit<typeof Table, 'Body' | 'CheckboxDataCell'> & {
+  Body: typeof BodyImpl;
+  CheckboxDataCell: typeof CheckboxDataCell;
+} = {
   ...Table,
   Body: BodyImpl,
   CheckboxDataCell,

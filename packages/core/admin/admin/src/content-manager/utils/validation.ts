@@ -8,6 +8,7 @@ import * as yup from 'yup';
 
 import { isFieldTypeNumber } from './fields';
 
+import type { ComponentsDictionary } from '../hooks/useDocument';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type Lazy from 'yup/lib/Lazy';
 import type { MixedSchema } from 'yup/lib/mixed';
@@ -33,7 +34,7 @@ interface CreateYupSchemaOpts {
 
 const createYupSchema = (
   attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
-  components: Record<string, Contracts.Components.Component> = {},
+  components: ComponentsDictionary = {},
   options: CreateYupSchemaOpts = {
     isCreatingEntry: true,
     isDraft: true,

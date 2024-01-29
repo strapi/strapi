@@ -89,8 +89,7 @@ describe('Table', () => {
               <Table.HeaderCell
                 key={key}
                 name={name}
-                fieldSchemaType={fieldSchema.type}
-                isSortable={metadatas.sortable}
+                attribute={{ type: fieldSchema.type }}
                 label={metadatas.label}
               />
             ))}

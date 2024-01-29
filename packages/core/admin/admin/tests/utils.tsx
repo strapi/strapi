@@ -30,7 +30,6 @@ import { RBACReducer } from '../src/components/RBACProvider';
 import { Theme } from '../src/components/Theme';
 import { reducer as cmAppReducer } from '../src/content-manager/layout';
 import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
-import { reducer as listViewReducer } from '../src/content-manager/pages/ListViewLayoutManager';
 import { contentManagerApi } from '../src/content-manager/services/api';
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -69,7 +68,6 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       rbacProvider: RBACReducer,
       'content-manager_app': cmAppReducer,
       [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-      'content-manager_listView': listViewReducer,
       'content-manager': contentManagerReducer,
     },
     // @ts-expect-error – this fails.

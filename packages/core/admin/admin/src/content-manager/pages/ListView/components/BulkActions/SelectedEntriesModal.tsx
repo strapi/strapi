@@ -32,14 +32,15 @@ import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
-import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useDoc } from '../../../../hooks/useDocument';
+import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {
   useGetAllDocumentsQuery,
   usePublishManyDocumentsMutation,
 } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
-import { Table } from '../TableParts/Table';
+import { Table } from '../Table';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
@@ -131,21 +132,23 @@ const SelectedEntriesTableContent = ({
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
 
-  const contentTypeSettings = useTypedSelector(
-    (state) => state['content-manager'].listView.contentType?.settings
-  );
-  const mainField = contentTypeSettings?.mainField;
+  const {
+    list: {
+      settings: { mainField },
+    },
+  } = useDocLayout();
+
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
 
   return (
     <HelperPluginTable.Content>
       <HelperPluginTable.Head>
         <HelperPluginTable.HeaderCheckboxCell />
-        <HelperPluginTable.HeaderCell fieldSchemaType="integer" label="id" name="id" />
+        <HelperPluginTable.HeaderCell attribute={{ type: 'integer' }} label="id" name="id" />
         {shouldDisplayMainField && (
-          <HelperPluginTable.HeaderCell fieldSchemaType="string" label="name" name="name" />
+          <HelperPluginTable.HeaderCell attribute={{ type: 'string' }} label="name" name="name" />
         )}
-        <HelperPluginTable.HeaderCell fieldSchemaType="string" label="status" name="status" />
+        <HelperPluginTable.HeaderCell attribute={{ type: 'string' }} label="status" name="status" />
       </HelperPluginTable.Head>
       <HelperPluginTable.LoadingBody />
       <HelperPluginTable.Body>
@@ -256,7 +259,7 @@ const SelectedEntriesModalContent = ({
     .map(({ id }) => id);
 
   const toggleNotification = useNotification();
-  const { contentType } = useTypedSelector((state) => state['content-manager'].listView);
+  const { model } = useDoc();
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
     ({ id }) => selectedEntries.includes(id) && validationErrors[id]
@@ -274,7 +277,8 @@ const SelectedEntriesModalContent = ({
     toggleDialog();
 
     try {
-      const res = await publishManyDocuments({ model: contentType!.uid, ids: entriesToPublish });
+      // @ts-expect-error – TODO: this still expects Entity.ID instead of Document.ID
+      const res = await publishManyDocuments({ model: model, ids: entriesToPublish });
 
       if ('error' in res) {
         toggleNotification({
@@ -434,9 +438,8 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     selectedEntries: selectedListViewEntries,
     setSelectedEntries: setSelectedListViewEntries,
   } = useTableContext();
-  const { contentType, components } = useTypedSelector(
-    (state) => state['content-manager'].listView
-  );
+
+  const { model, schema, components } = useDoc();
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
   // We want to keep the selected entries order same as the list view
@@ -446,17 +449,12 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     },
   ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
 
-  const {
-    data = [],
-    refetch,
-    isLoading,
-    isFetching,
-  } = useGetAllDocumentsQuery(
+  const { data, refetch, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
-      model: contentType!.uid,
-      query: {
-        page: 1,
-        pageSize: entriesToFetch.length,
+      model,
+      params: {
+        page: '1',
+        pageSize: entriesToFetch.length.toString(),
         sort,
         filters: {
           id: {
@@ -467,22 +465,20 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
       },
     },
     {
-      skip: !contentType,
       selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
     }
   );
 
   const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && contentType) {
-      const schema = createYupSchema(
-        contentType,
-        { components },
-        { isDraft: false, isJSONTestDisabled: true }
-      );
+    if (data.length > 0 && schema) {
+      const validate = createYupSchema(schema.attributes, components, {
+        isDraft: false,
+        isJSONTestDisabled: true,
+      });
       const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
       const rows = data.map((entry) => {
         try {
-          schema.validateSync(entry, { abortEarly: false });
+          validate.validateSync(entry, { abortEarly: false });
 
           return entry;
         } catch (e) {
@@ -501,7 +497,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
       rows: [],
       validationErrors: {},
     };
-  }, [components, contentType, data]);
+  }, [components, data, schema]);
 
   return (
     <HelperPluginTable.Root

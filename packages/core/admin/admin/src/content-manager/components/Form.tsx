@@ -62,8 +62,6 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
     values: props.initialValues,
   });
 
-  console.log(state.values);
-
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     dispatch({
       type: 'SUBMIT_ATTEMPT',

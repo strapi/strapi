@@ -62,10 +62,7 @@ describe('DynamicZoneLabel', () => {
 
   it('should render a description if passed as a prop', () => {
     const { getByText } = render({
-      intlDescription: {
-        id: 'description',
-        defaultMessage: 'description',
-      },
+      hint: 'description',
     });
 
     expect(getByText(/description/)).toBeInTheDocument();

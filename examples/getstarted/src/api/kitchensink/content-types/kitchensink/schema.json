@@ -58,33 +58,19 @@
     },
     "enumeration": {
       "type": "enumeration",
-      "enum": [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E"
-      ]
+      "enum": ["A", "B", "C", "D", "E"]
     },
     "single_media": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ]
+      "allowedTypes": ["images", "files", "videos"]
     },
     "multiple_media": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ]
+      "allowedTypes": ["images", "files", "videos"]
     },
     "json": {
       "type": "json"
@@ -101,11 +87,7 @@
     },
     "dynamiczone": {
       "type": "dynamiczone",
-      "components": [
-        "basic.simple",
-        "blog.test-como",
-        "default.closingperiod"
-      ]
+      "components": ["basic.simple", "blog.test-como", "default.closingperiod"]
     },
     "one_way_tag": {
       "type": "relation",
@@ -161,10 +143,7 @@
     },
     "cats": {
       "type": "dynamiczone",
-      "components": [
-        "basic.relation",
-        "basic.simple"
-      ]
+      "components": ["basic.relation", "basic.simple"]
     },
     "slug": {
       "type": "uid",

@@ -2,21 +2,9 @@ import { render as renderRTL, waitFor, act } from '@tests/utils';
 
 import { UIDInput, UIDInputProps } from '../UID';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn(() => ({
-    modifiedData: {
-      target: 'source-string',
-    },
-    initialData: {
-      name: 'initial-data',
-    },
-  })),
-}));
-
-const render = (props?: Partial<InputUIDProps>) =>
+const render = (props?: Partial<UIDInputProps>) =>
   renderRTL(
-    <InputUID
+    <UIDInput
       // @ts-expect-error – Mock attribute
       attribute={{ targetField: 'target', required: true }}
       contentTypeUID="api::test.test"
@@ -31,16 +19,10 @@ const render = (props?: Partial<InputUIDProps>) =>
   );
 
 describe('InputUID', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   test('renders', async () => {
     const { getByText, getByRole, findByText } = render({
       hint: 'hint',
-      value: 'test',
       required: true,
-      labelAction: <>action</>,
     });
 
     await findByText('Unavailable');
@@ -53,10 +35,7 @@ describe('InputUID', () => {
   });
 
   test('renders an error', async () => {
-    const { getByText, findByText } = render({
-      value: 'test',
-      error: 'error',
-    });
+    const { getByText, findByText } = render();
 
     await findByText('Unavailable');
 
@@ -64,7 +43,7 @@ describe('InputUID', () => {
   });
 
   test('Hides the regenerate label when disabled', async () => {
-    const { queryByRole, findByText } = render({ disabled: true, value: 'test' });
+    const { queryByRole, findByText } = render({ disabled: true });
 
     await findByText('Unavailable');
 
@@ -73,7 +52,7 @@ describe('InputUID', () => {
 
   test('Calls onChange handler', async () => {
     const spy = jest.fn();
-    const { getByRole, user } = render({ value: 'test', onChange: spy });
+    const { getByRole, user } = render();
 
     const value = 'test-new';
 
@@ -84,7 +63,7 @@ describe('InputUID', () => {
 
   test('Regenerates the value based on the target field', async () => {
     const spy = jest.fn();
-    const { getByRole, queryByTestId, user } = render({ onChange: spy, value: '' });
+    const { getByRole, queryByTestId, user } = render();
 
     await user.click(getByRole('button', { name: /regenerate/i }));
 
@@ -103,9 +82,7 @@ describe('InputUID', () => {
     const spy = jest.fn();
 
     const { queryByTestId } = render({
-      value: '',
       required: true,
-      onChange: spy,
     });
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
@@ -126,9 +103,7 @@ describe('InputUID', () => {
     const spy = jest.fn();
 
     const { queryByTestId } = render({
-      value: 'test',
       required: true,
-      onChange: spy,
     });
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
@@ -141,9 +116,7 @@ describe('InputUID', () => {
     const spy = jest.fn();
 
     const { getByText, queryByText, queryByTestId } = render({
-      value: 'available',
       required: true,
-      onChange: spy,
     });
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
@@ -166,9 +139,7 @@ describe('InputUID', () => {
     const spy = jest.fn();
 
     const { getByText, queryByTestId, queryByText } = render({
-      value: 'not-available',
       required: true,
-      onChange: spy,
     });
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
@@ -184,9 +155,7 @@ describe('InputUID', () => {
     const spy = jest.fn();
 
     const { queryByText, queryByTestId } = render({
-      value: '',
       required: true,
-      onChange: spy,
     });
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());

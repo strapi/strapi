@@ -356,6 +356,7 @@ const ListViewPage = () => {
               >
                 {results.map((rowData, index) => {
                   return (
+                    // @ts-expect-error – TODO: fix this with V5 typing
                     <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
                       <Td>
                         <Table.CheckboxDataCell rowId={rowData.id} index={index} />

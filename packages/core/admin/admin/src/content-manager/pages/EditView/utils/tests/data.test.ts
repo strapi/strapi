@@ -6,14 +6,14 @@ describe('data', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;
 
-      expect(removeProhibitedFields(['password'])({}, contentType, components)).toEqual({});
+      expect(removeProhibitedFields(['password'])(contentType, components)({})).toEqual({});
     });
 
     it('should return the initial data if there is no password field', () => {
       const { components, contentType } = testData;
 
       expect(
-        removeProhibitedFields(['password'])({ name: 'test' }, contentType, components)
+        removeProhibitedFields(['password'])(contentType, components)({ name: 'test' })
       ).toEqual({
         name: 'test',
       });
@@ -23,21 +23,17 @@ describe('data', () => {
       const { components, contentType } = testData;
 
       expect(
-        removeProhibitedFields(['password'])(
-          {
-            name: 'test',
-            password: 'password',
-          },
-          contentType,
-          components
-        )
+        removeProhibitedFields(['password'])(contentType, components)({
+          name: 'test',
+          password: 'password',
+        })
       ).toEqual({ name: 'test', password: '' });
     });
 
     it('should remove all password fields', () => {
       const { components, contentType, modifiedData } = testData;
 
-      expect(removeProhibitedFields(['password'])(modifiedData, contentType, components))
+      expect(removeProhibitedFields(['password'])(contentType, components)(modifiedData))
         .toMatchInlineSnapshot(`
         {
           "createdAt": "2020-04-28T13:22:13.033Z",

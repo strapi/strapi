@@ -39,7 +39,90 @@ describe('useDocumentLayout', () => {
       }
     `);
 
-    expect(result.current.edit.schema).toMatchInlineSnapshot(`
+    expect(result.current.edit.layout).toMatchInlineSnapshot(`
+      [
+        [
+          [
+            {
+              "disabled": false,
+              "hint": "",
+              "label": "slug",
+              "name": "slug",
+              "placeholder": "",
+              "required": false,
+              "size": 6,
+              "type": "uid",
+              "unique": false,
+              "visible": true,
+            },
+          ],
+          [
+            {
+              "disabled": false,
+              "hint": "",
+              "label": "repeat_req_min",
+              "name": "repeat_req_min",
+              "placeholder": "",
+              "required": false,
+              "size": 12,
+              "type": "component",
+              "unique": false,
+              "visible": true,
+            },
+          ],
+          [
+            {
+              "disabled": false,
+              "hint": "",
+              "label": "json",
+              "name": "json",
+              "placeholder": "",
+              "required": false,
+              "size": 12,
+              "type": "json",
+              "unique": false,
+              "visible": true,
+            },
+          ],
+        ],
+      ]
+    `);
+  });
+
+  it('should return a correctly formatted list layout after loading', async () => {
+    const { result } = renderHook(() => useDocumentLayout(mockData.contentManager.contentType));
+
+    expect(result.current.list).toMatchInlineSnapshot(`
+      {
+        "components": {},
+        "schema": [],
+      }
+    `);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.list.components).toMatchInlineSnapshot(`
+      {
+        "blog.test-como": [
+          [
+            {
+              "disabled": false,
+              "hint": "",
+              "label": "name",
+              "name": "name",
+              "placeholder": "",
+              "required": false,
+              "size": 6,
+              "type": "string",
+              "unique": false,
+              "visible": true,
+            },
+          ],
+        ],
+      }
+    `);
+
+    expect(result.current.list.layout).toMatchInlineSnapshot(`
       [
         [
           [

@@ -16,21 +16,20 @@ const user = userEvent.setup();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useLibrary: () => ({ components: { 'media-library': jest.fn() } }),
+  useLibrary: () => ({ components: { media: jest.fn() } }),
 }));
 
 type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
 
-const setup = (props: Partial<BlocksEditorProps>) =>
+const setup = (props?: Partial<BlocksEditorProps>) =>
   render(
     <BlocksInput
-      attribute={{ type: 'blocks' }}
-      intlLabel={{ id: 'blocks', defaultMessage: 'blocks type' }}
+      label="blocks type"
       name="blocks-editor"
       hint="blocks description"
-      placeholder={{ id: 'blocksPlaceholder', defaultMessage: 'blocks placeholder' }}
-      onChange={jest.fn()}
+      placeholder="blocks placeholder"
       disabled={false}
+      type="blocks"
       {...props}
     />,
     {
@@ -46,7 +45,7 @@ const setup = (props: Partial<BlocksEditorProps>) =>
 
 describe('BlocksInput', () => {
   it('should render blocks without error', async () => {
-    setup({ value: undefined });
+    setup();
 
     expect(screen.getByText('blocks type')).toBeInTheDocument();
     expect(screen.getByText('blocks description')).toBeInTheDocument();
@@ -56,12 +55,12 @@ describe('BlocksInput', () => {
   });
 
   it('should render blocks with error', () => {
-    setup({ error: 'field is required', value: blocksData });
+    setup();
     expect(screen.getByText(/field is required/));
   });
 
   it('should render blocks with data', () => {
-    setup({ value: blocksData });
+    setup();
 
     expect(screen.getByText('This is bold text').parentElement).toHaveStyle({
       'font-weight': 600,
@@ -95,7 +94,7 @@ describe('BlocksInput', () => {
   });
 
   it('should open editor expand portal when clicking on expand button', async () => {
-    const { queryByText } = setup({ value: blocksData });
+    const { queryByText } = setup();
 
     expect(queryByText('Collapse')).not.toBeInTheDocument();
 
@@ -104,7 +103,7 @@ describe('BlocksInput', () => {
   });
 
   it('should close editor expand portal when clicking on collapse button', async () => {
-    const { queryByText } = setup({ value: blocksData });
+    const { queryByText } = setup();
 
     await user.click(screen.getByRole('button', { name: /Expand/ }));
     const collapseButton = screen.getByRole('button', { name: /Collapse/ });
