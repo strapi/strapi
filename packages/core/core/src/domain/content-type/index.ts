@@ -33,41 +33,25 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
 
   // general info
   Object.assign(schema, {
+    uid,
+    modelType: 'contentType',
     kind: schema.kind || 'collectionType',
     __schema__: pickSchema(definition.schema),
-    modelType: 'contentType',
     modelName: definition.schema.info.singularName,
-    connection: 'default',
+    actions,
+    lifecycles,
   });
 
-  if (uid.startsWith('api::')) {
-    Object.assign(schema, {
-      uid,
-      apiName: uid.split('::')[1].split('.')[0],
-      collectionName: schema.collectionName || schema.info.singularName,
-      globalId: getGlobalId(schema, schema.info.singularName),
-    });
-  } else if (uid.startsWith('plugin::')) {
-    const pluginName = uid.split('::')[1].split('.')[0];
-    Object.assign(schema, {
-      uid,
-      plugin: pluginName, // TODO: to be set in load-plugins.js
-      collectionName:
-        schema.collectionName || `${pluginName}_${schema.info.singularName}`.toLowerCase(),
-      globalId: getGlobalId(schema, schema.info.singularName, pluginName),
-    });
-  } else if (uid.startsWith('admin::')) {
-    Object.assign(schema, {
-      uid,
-      plugin: 'admin',
-      globalId: getGlobalId(schema, schema.info.singularName, 'admin'),
-    });
-  } else {
-    throw new Error(
-      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or admin::.`
-    );
-  }
+  addTimestamps(schema);
 
+  addDraftAndPublish(schema);
+
+  addCreatorFields(schema);
+
+  return schema;
+};
+
+const addTimestamps = (schema: Schema.ContentType) => {
   // attributes
   Object.assign(schema.attributes, {
     [CREATED_AT_ATTRIBUTE]: {
@@ -78,7 +62,9 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
       type: 'datetime',
     },
   });
+};
 
+const addDraftAndPublish = (schema: Schema.ContentType) => {
   schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
     type: 'datetime',
     configurable: false,
@@ -88,7 +74,9 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
       return new Date();
     },
   };
+};
 
+const addCreatorFields = (schema: Schema.ContentType) => {
   const isPrivate = !_.get(schema, 'options.populateCreatorFields', false);
 
   schema.attributes[CREATED_BY_ATTRIBUTE] = {
@@ -112,16 +100,13 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
     useJoinTable: false,
     private: isPrivate,
   };
-
-  Object.assign(schema, { actions, lifecycles });
-
-  return schema;
 };
 
-const getGlobalId = (model: any, modelName: string, prefix?: string) => {
+const getGlobalId = (schema: Schema.ContentType, prefix?: string) => {
+  const modelName = schema.info.singularName;
   const globalId = prefix ? `${prefix}-${modelName}` : modelName;
 
-  return model.globalId || _.upperFirst(_.camelCase(globalId));
+  return schema.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
 const pickSchema = (model: Schema.ContentType) => {
@@ -141,4 +126,4 @@ const pickSchema = (model: Schema.ContentType) => {
   return schema;
 };
 
-export { createContentType };
+export { createContentType, getGlobalId };

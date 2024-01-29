@@ -5,6 +5,8 @@ import _ from 'lodash';
 import { omit } from 'lodash/fp';
 import dotenv from 'dotenv';
 import type { Config } from '@strapi/types';
+import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from '@strapi/utils';
+
 import loadConfigDir from './config-loader';
 
 dotenv.config({ path: process.env.ENV_PATH });
@@ -53,7 +55,6 @@ export default (dirs: { app: string; dist: string }, initialConfig: any = {}) =>
 
   const rootConfig = {
     launchedAt: Date.now(),
-    serveAdminPanel,
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
@@ -62,6 +63,9 @@ export default (dirs: { app: string; dist: string }, initialConfig: any = {}) =>
       ...pkgJSON,
       strapi: strapiVersion,
     },
+    admin: {
+      serveAdminPanel,
+    },
   };
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later
@@ -69,5 +73,15 @@ export default (dirs: { app: string; dist: string }, initialConfig: any = {}) =>
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV as string);
   const envConfig = loadConfigDir(envDir);
 
-  return _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
+  const config = _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
+
+  const { serverUrl, adminUrl, adminPath } = getConfigUrls(config);
+
+  _.set(config, 'server.url', serverUrl);
+  _.set(config, 'server.absoluteUrl', getAbsoluteServerUrl(config));
+  _.set(config, 'admin.url', adminUrl);
+  _.set(config, 'admin.path', adminPath);
+  _.set(config, 'admin.absoluteUrl', getAbsoluteAdminUrl(config));
+
+  return config;
 };

@@ -116,6 +116,8 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::transfer-token',
   'admin::transfer-token-permission',
   'admin::audit-log',
+  'plugin::content-releases.release',
+  'plugin::content-releases.release-action',
 ];
 
 const abortTransfer = async ({

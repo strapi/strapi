@@ -56,30 +56,42 @@ type BiDirectionalProperties<
   TRelationKind extends RelationKind.BiDirectional,
   TTarget extends Common.UID.Schema
 > = {
-  relation: TRelationKind;
-  target: TTarget;
-} & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>;
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.BiDirectional]: {
+    relation: TKind;
+    target: TTarget;
+  } & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>;
+}[TRelationKind];
 
 type XWayProperties<TRelationKind extends RelationKind.XWay, TTarget extends Common.UID.Schema> = {
-  relation: TRelationKind;
-  target: TTarget;
-};
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.XWay]: {
+    relation: TKind;
+    target: TTarget;
+  };
+}[TRelationKind];
 
 type MorphReferenceProperties<
   TRelationKind extends RelationKind.MorphReference,
   TTarget extends Common.UID.Schema
 > = {
-  relation: TRelationKind;
-  target: TTarget;
-  morphBy?: Utils.Guard.Never<
-    Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
-    string
-  >;
-};
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.MorphReference]: {
+    relation: TKind;
+    target: TTarget;
+    morphBy?: Utils.Guard.Never<
+      Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
+      string
+    >;
+  };
+}[TRelationKind];
 
 type MorphOwnerProperties<TRelationKind extends RelationKind.MorphOwner> = {
-  relation: TRelationKind;
-};
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.MorphOwner]: {
+    relation: TKind;
+  };
+}[TRelationKind];
 
 export type RelationsKeysFromTo<
   TTarget extends Common.UID.Schema,

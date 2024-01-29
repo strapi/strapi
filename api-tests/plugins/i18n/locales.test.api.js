@@ -398,15 +398,13 @@ describe('CRUD locales', () => {
       const { body: frenchProduct } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
-        qs: { plugins: { i18n: { locale: 'fr-FR' } } },
-        body: { name: 'product name' },
+        body: { name: 'product name', locale: 'fr-FR' },
       });
 
       await rq({
-        url: '/content-manager/collection-types/api::product.product',
-        method: 'POST',
-        qs: { plugins: { i18n: { locale: 'en', relatedEntityId: frenchProduct.id } } },
-        body: { name: 'product name' },
+        url: `/content-manager/collection-types/api::product.product/${frenchProduct.id}`,
+        method: 'PUT',
+        body: { name: 'product name', locale: 'en' },
       });
 
       const {

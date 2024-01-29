@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "4.17.1",
+  "version": "4.19.0",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -21,14 +21,14 @@
   ],
   "exports": {
     "./strapi-admin": {
-      "types": "./dist/admin/index.d.ts",
+      "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
@@ -37,7 +37,7 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
@@ -56,10 +56,10 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.14.1",
-    "@strapi/helper-plugin": "4.17.1",
+    "@strapi/helper-plugin": "4.19.0",
     "@strapi/icons": "1.14.1",
     "@strapi/types": "workspace:*",
-    "@strapi/utils": "4.17.1",
+    "@strapi/utils": "4.19.0",
     "axios": "1.6.0",
     "formik": "2.4.0",
     "lodash": "4.17.21",
@@ -68,10 +68,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.17.1",
-    "@strapi/admin-test-utils": "4.17.1",
+    "@strapi/admin": "4.19.0",
+    "@strapi/admin-test-utils": "4.19.0",
     "@strapi/pack-up": "workspace:*",
-    "@strapi/strapi": "4.17.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/koa": "2.13.4",
@@ -86,7 +85,6 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^4.19.0",
-    "@strapi/strapi": "^4.15.1",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
@@ -95,11 +93,6 @@
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "nx": {
-    "implicitDependencies": [
-      "!@strapi/strapi"
-    ]
   },
   "strapi": {
     "name": "content-releases",

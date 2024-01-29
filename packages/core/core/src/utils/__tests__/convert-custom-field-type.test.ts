@@ -1,4 +1,4 @@
-import convertCustomFieldType from '../convert-custom-field-type';
+import { convertCustomFieldType } from '../convert-custom-field-type';
 
 describe('format attributes', () => {
   it('replaces type customField with the underlying data type', () => {

@@ -85,8 +85,9 @@ describe('i18n - Content API', () => {
     test.skip('non-default locale', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/api::category.category?plugins[i18n][locale]=ko',
+        url: '/content-manager/collection-types/api::category.category',
         body: {
+          locale: 'ko',
           name: 'category in korean',
         },
       });
@@ -96,7 +97,6 @@ describe('i18n - Content API', () => {
       expect(statusCode).toBe(200);
       expect(body).toMatchObject({
         locale: 'ko',
-        localizations: [],
         name: 'category in korean',
       });
       data.categories.push(res.body);
@@ -106,24 +106,23 @@ describe('i18n - Content API', () => {
     // foreign keys deadlock example: https://gist.github.com/roustem/db2398aa38be0cc88364
     test('all related locales', async () => {
       let res;
+
       for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
         res = await rq({
-          method: 'POST',
-          url: `/content-manager/collection-types/api::category.category`,
-          qs: {
-            plugins: { i18n: { locale, relatedEntityId: data.categories[0].id } },
-          },
+          method: 'PUT',
+          url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
           body: {
             name: `category in ${locale}`,
+            locale: locale,
           },
         });
         expect(res.statusCode).toBe(200);
+        expect(res.body.locale).toBe(locale);
       }
 
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body.localizations).toHaveLength(4);
       data.categories.push(res.body);
     });
   });

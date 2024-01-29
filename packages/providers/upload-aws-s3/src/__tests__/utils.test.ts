@@ -16,36 +16,6 @@ const defaultOptions = {
 
 describe('Utils', () => {
   describe('Extract credentials for V4 different aws provider configurations', () => {
-    test('[Legacy] Credentials directly in the options', () => {
-      const options: InitOptions = {
-        accessKeyId,
-        secretAccessKey,
-        ...defaultOptions,
-      };
-      const credentials = extractCredentials(options);
-
-      expect(credentials).toEqual({
-        accessKeyId,
-        secretAccessKey,
-      });
-    });
-
-    test('[Legacy] credentials directly in s3Options', () => {
-      const options: InitOptions = {
-        s3Options: {
-          accessKeyId,
-          secretAccessKey,
-          ...defaultOptions,
-        },
-      };
-      const credentials = extractCredentials(options);
-
-      expect(credentials).toEqual({
-        accessKeyId,
-        secretAccessKey,
-      });
-    });
-
     test('Credentials in credentials object inside s3Options', () => {
       const options: InitOptions = {
         s3Options: {

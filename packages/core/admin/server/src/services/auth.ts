@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
-import { getAbsoluteAdminUrl, errors } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import type { AdminUser } from '../../../shared/contracts/shared';
 import '@strapi/types';
@@ -63,8 +63,8 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
   await getService('user').updateById(user.id, { resetPasswordToken });
 
   // Send an email to the admin.
-  const url = `${getAbsoluteAdminUrl(
-    strapi.config
+  const url = `${strapi.config.get(
+    'admin.absoluteUrl'
   )}/auth/reset-password?code=${resetPasswordToken}`;
 
   return strapi
