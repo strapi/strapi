@@ -33,6 +33,7 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  useStrapiApp,
   AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
@@ -473,6 +474,11 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+  const { getPlugin } = useStrapiApp();
+
+  const i18nPlugin = React.useMemo(() => {
+    return getPlugin('i18n');
+  }, [getPlugin]);
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -596,6 +602,10 @@ const ReleaseDetailsBody = () => {
     );
   }
 
+  const groupOptions = i18nPlugin
+    ? GROUP_BY_OPTIONS
+    : GROUP_BY_OPTIONS.filter((option) => option !== 'locale');
+
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
@@ -619,7 +629,7 @@ const ReleaseDetailsBody = () => {
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
-            {GROUP_BY_OPTIONS.map((option) => (
+            {groupOptions.map((option) => (
               <SingleSelectOption key={option} value={option}>
                 {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
@@ -650,14 +660,17 @@ const ReleaseDetailsBody = () => {
                     })}
                     name="name"
                   />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
+                  {i18nPlugin && (
+                    <Table.HeaderCell
+                      fieldSchemaType="string"
+                      label={formatMessage({
+                        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+                        defaultMessage: 'locale',
+                      })}
+                      name="locale"
+                    />
+                  )}
+
                   <Table.HeaderCell
                     fieldSchemaType="string"
                     label={formatMessage({
@@ -694,9 +707,12 @@ const ReleaseDetailsBody = () => {
                           contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td width="10%">
-                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                      </Td>
+                      {i18nPlugin && (
+                        <Td width="10%">
+                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                        </Td>
+                      )}
+
                       <Td width="10%">
                         <Typography>{contentType.displayName || ''}</Typography>
                       </Td>

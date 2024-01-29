@@ -15,6 +15,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true },
   })),
+  useStrapiApp: jest.fn(() => ({ getPlugin: jest.fn(() => true) })),
 }));
 
 /**
