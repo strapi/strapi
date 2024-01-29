@@ -191,7 +191,7 @@ We have two migrations that we run every time we sync the content types.
 
 ### `deleteActionsOnDisableDraftAndPublish`
 
-Every time an user disabled Draft and Publish in one Content Type we make sure to remove all the release actions related to entries of that content type to avoid errors.
+When a user disables Draft and Publish in one Content Type we make sure to remove all the release actions related to entries of that content type to avoid errors.
 
 ### `deleteActionsOnDeleteContentType`
 
