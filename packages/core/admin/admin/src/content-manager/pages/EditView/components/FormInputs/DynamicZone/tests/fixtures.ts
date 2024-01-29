@@ -56,35 +56,10 @@ export const layoutData = {
 } as unknown as Record<string, FormattedComponentLayout>;
 
 export const dynamicComponentsByCategory = {
-  myComponents: [
+  blog: [
     {
-      componentUid: 'component1',
-      info: {
-        singularName: 'component1',
-        pluralName: 'component1',
-        displayName: 'component1',
-        icon: undefined,
-      },
-    },
-    {
-      componentUid: 'component2',
-      info: {
-        singularName: 'component2',
-        pluralName: 'component2',
-        displayName: 'component2',
-        icon: undefined,
-      },
+      uid: 'blog.test-como',
+      displayName: 'component',
     },
   ],
-  otherComponents: [
-    {
-      componentUid: 'component3',
-      info: {
-        singularName: 'component3',
-        pluralName: 'component3',
-        displayName: 'component3',
-        icon: undefined,
-      },
-    },
-  ],
-} as unknown as ComponentPickerProps['dynamicComponentsByCategory'];
+} satisfies ComponentPickerProps['dynamicComponentsByCategory'];

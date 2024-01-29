@@ -34,7 +34,14 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 interface DynamicZoneProps
   extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size'> {}
 
-const DynamicZone = ({ attribute, hint, label, name, required = false }: DynamicZoneProps) => {
+const DynamicZone = ({
+  attribute,
+  disabled,
+  hint,
+  label,
+  name,
+  required = false,
+}: DynamicZoneProps) => {
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = attribute ?? {};
 
@@ -59,7 +66,7 @@ const DynamicZone = ({ attribute, hint, label, name, required = false }: Dynamic
     return attribute.components.reduce<
       NonNullable<DynamicComponentProps['dynamicComponentsByCategory']>
     >((acc, componentUid) => {
-      const { category, info } = components[componentUid];
+      const { category, info } = components[componentUid] ?? { info: {} };
 
       const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
 
@@ -232,7 +239,7 @@ const DynamicZone = ({ attribute, hint, label, name, required = false }: Dynamic
               {value.map((field, index) => (
                 <DynamicComponent
                   key={field.__temp_key__}
-                  // isFieldAllowed={isFieldAllowed}
+                  disabled={disabled}
                   name={name}
                   index={index}
                   componentUid={field.__component}
@@ -251,7 +258,7 @@ const DynamicZone = ({ attribute, hint, label, name, required = false }: Dynamic
         <Flex justifyContent="center">
           <AddComponentButton
             // hasError={hasError}
-            // isDisabled={!isFieldAllowed}
+            isDisabled={disabled}
             isOpen={addComponentIsOpen}
             onClick={handleClickOpenPicker}
           >

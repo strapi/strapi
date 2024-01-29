@@ -439,7 +439,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     setSelectedEntries: setSelectedListViewEntries,
   } = useTableContext();
 
-  const { model, schema, components } = useDoc();
+  const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
   // We want to keep the selected entries order same as the list view
@@ -504,7 +504,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
       rows={rows}
       defaultSelectedEntries={selectedListViewEntries}
       colCount={4}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDoc}
       isFetching={isFetching}
     >
       <SelectedEntriesModalContent

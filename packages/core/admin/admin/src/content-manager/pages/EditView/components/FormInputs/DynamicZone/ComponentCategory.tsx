@@ -72,7 +72,7 @@ const ComponentCategory = ({
                   <ComponentIcon icon={icon} />
 
                   <Typography variant="pi" fontWeight="bold" textColor="neutral600">
-                    {formatMessage({ id: displayName, defaultMessage: displayName })}
+                    {displayName}
                   </Typography>
                 </Flex>
               </ComponentBox>

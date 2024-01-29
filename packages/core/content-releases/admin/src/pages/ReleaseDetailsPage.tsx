@@ -134,17 +134,22 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema: Schema.ContentType;
+  schema?: Schema.ContentType;
   components: { [key: Schema.Component['uid']]: Schema.Component };
   entry: ReleaseActionEntry;
 }
 
 const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument({
-    collectionType: schema.kind,
-    model: schema.uid,
-  });
+  const { validate } = unstable_useDocument(
+    {
+      collectionType: schema?.kind ?? '',
+      model: schema?.uid ?? '',
+    },
+    {
+      skip: !schema,
+    }
+  );
 
   const errors = validate(entry) ?? {};
 

@@ -12,7 +12,7 @@ describe('useDocumentLayout', () => {
     expect(result.current.edit).toMatchInlineSnapshot(`
       {
         "components": {},
-        "schema": [],
+        "layout": [],
       }
     `);
 
@@ -20,22 +20,38 @@ describe('useDocumentLayout', () => {
 
     expect(result.current.edit.components).toMatchInlineSnapshot(`
       {
-        "blog.test-como": [
-          [
-            {
-              "disabled": false,
-              "hint": "",
-              "label": "name",
-              "name": "name",
-              "placeholder": "",
-              "required": false,
-              "size": 6,
-              "type": "string",
-              "unique": false,
-              "visible": true,
-            },
+        "blog.test-como": {
+          "layout": [
+            [
+              {
+                "attribute": {
+                  "default": "toto",
+                  "type": "string",
+                },
+                "disabled": false,
+                "hint": "",
+                "label": "name",
+                "mainField": undefined,
+                "name": "name",
+                "placeholder": "",
+                "required": false,
+                "size": 6,
+                "type": "string",
+                "unique": false,
+                "visible": true,
+              },
+            ],
           ],
-        ],
+          "settings": {
+            "bulkable": true,
+            "defaultSortBy": "name",
+            "defaultSortOrder": "ASC",
+            "filterable": true,
+            "mainField": "name",
+            "pageSize": 10,
+            "searchable": true,
+          },
+        },
       }
     `);
 
@@ -44,9 +60,13 @@ describe('useDocumentLayout', () => {
         [
           [
             {
+              "attribute": {
+                "type": "uid",
+              },
               "disabled": false,
               "hint": "",
               "label": "slug",
+              "mainField": undefined,
               "name": "slug",
               "placeholder": "",
               "required": false,
@@ -58,9 +78,18 @@ describe('useDocumentLayout', () => {
           ],
           [
             {
+              "attribute": {
+                "component": "blog.test-como",
+                "min": 2,
+                "pluginOptions": {},
+                "repeatable": true,
+                "required": false,
+                "type": "component",
+              },
               "disabled": false,
               "hint": "",
               "label": "repeat_req_min",
+              "mainField": "name",
               "name": "repeat_req_min",
               "placeholder": "",
               "required": false,
@@ -72,9 +101,14 @@ describe('useDocumentLayout', () => {
           ],
           [
             {
+              "attribute": {
+                "pluginOptions": {},
+                "type": "json",
+              },
               "disabled": false,
               "hint": "",
               "label": "json",
+              "mainField": undefined,
               "name": "json",
               "placeholder": "",
               "required": false,
@@ -94,80 +128,61 @@ describe('useDocumentLayout', () => {
 
     expect(result.current.list).toMatchInlineSnapshot(`
       {
-        "components": {},
-        "schema": [],
+        "layout": [],
+        "metadatas": {},
+        "settings": {
+          "bulkable": false,
+          "defaultSortBy": "",
+          "defaultSortOrder": "asc",
+          "filterable": false,
+          "mainField": "id",
+          "pageSize": 10,
+          "pagination": false,
+          "searchable": false,
+        },
       }
     `);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.list.components).toMatchInlineSnapshot(`
-      {
-        "blog.test-como": [
-          [
-            {
-              "disabled": false,
-              "hint": "",
-              "label": "name",
-              "name": "name",
-              "placeholder": "",
-              "required": false,
-              "size": 6,
-              "type": "string",
-              "unique": false,
-              "visible": true,
-            },
-          ],
-        ],
-      }
-    `);
+    // list layouts don't need the components.
+    expect(result.current.list.components).toMatchInlineSnapshot(`undefined`);
 
     expect(result.current.list.layout).toMatchInlineSnapshot(`
       [
-        [
-          [
-            {
-              "disabled": false,
-              "hint": "",
-              "label": "slug",
-              "name": "slug",
-              "placeholder": "",
-              "required": false,
-              "size": 6,
-              "type": "uid",
-              "unique": false,
-              "visible": true,
-            },
-          ],
-          [
-            {
-              "disabled": false,
-              "hint": "",
-              "label": "repeat_req_min",
-              "name": "repeat_req_min",
-              "placeholder": "",
-              "required": false,
-              "size": 12,
-              "type": "component",
-              "unique": false,
-              "visible": true,
-            },
-          ],
-          [
-            {
-              "disabled": false,
-              "hint": "",
-              "label": "json",
-              "name": "json",
-              "placeholder": "",
-              "required": false,
-              "size": 12,
-              "type": "json",
-              "unique": false,
-              "visible": true,
-            },
-          ],
-        ],
+        {
+          "attribute": {
+            "type": "string",
+          },
+          "label": "id",
+          "mainField": undefined,
+          "name": "id",
+          "searchable": true,
+          "sortable": true,
+        },
+        {
+          "attribute": {
+            "pluginOptions": {},
+            "type": "json",
+          },
+          "label": "json",
+          "mainField": undefined,
+          "name": "json",
+          "searchable": false,
+          "sortable": false,
+        },
+        {
+          "attribute": {
+            "maxLength": 2,
+            "pluginOptions": {},
+            "type": "string",
+          },
+          "label": "postal_code",
+          "mainField": undefined,
+          "name": "postal_code",
+          "searchable": true,
+          "sortable": false,
+        },
       ]
     `);
   });

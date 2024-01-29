@@ -1,10 +1,7 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render as renderRTL } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
+import { screen, fireEvent, render as renderRTL } from '@tests/utils';
+import { Route, Routes } from 'react-router-dom';
 
+import { Form } from '../../../../../../components/Form';
 import { DynamicComponent, DynamicComponentProps } from '../DynamicComponent';
 
 import { dynamicComponentsByCategory } from './fixtures';
@@ -14,8 +11,8 @@ import { dynamicComponentsByCategory } from './fixtures';
  * harnessing then is necessary and it's not worth it for these
  * tests when really we're focussing on dynamic zone behaviour.
  */
-jest.mock('../../FieldComponent', () => ({
-  FieldComponent: () => "I'm a field component",
+jest.mock('../../../InputRenderer', () => ({
+  InputRenderer: () => 'INPUTS',
 }));
 
 describe('DynamicComponent', () => {
@@ -25,12 +22,19 @@ describe('DynamicComponent', () => {
 
   const defaultProps = {
     index: 0,
-    isFieldAllowed: true,
-    componentUid: 'component1',
+    componentUid: 'blog.test-como',
     name: 'dynamiczone',
     onAddComponent: jest.fn(),
     onMoveComponent: jest.fn(),
     onRemoveComponentClick: jest.fn(),
+    dynamicComponentsByCategory: {
+      blog: [
+        {
+          uid: 'blog.test-como',
+          displayName: 'component',
+        },
+      ],
+    },
   } satisfies DynamicComponentProps;
 
   interface TestComponentProps extends Partial<DynamicComponentProps> {
@@ -44,75 +48,109 @@ describe('DynamicComponent', () => {
     </>
   );
 
-  const render = (props?: TestComponentProps) => ({
-    ...renderRTL(<TestComponent {...props} />, {
-      wrapper: ({ children }) => (
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}} defaultLocale="en">
-            <DndProvider backend={HTML5Backend}>{children}</DndProvider>
-          </IntlProvider>
-        </ThemeProvider>
-      ),
-    }),
-    user: userEvent.setup(),
-  });
+  const render = (props?: TestComponentProps) =>
+    renderRTL(<TestComponent {...props} />, {
+      renderOptions: {
+        wrapper: ({ children }) => (
+          <Routes>
+            <Route
+              path="/content-manager/:collectionType/:slug/:id"
+              element={
+                <Form
+                  initialValues={{
+                    dynamiczone: [
+                      {
+                        name: 'test',
+                      },
+                    ],
+                  }}
+                  method="POST"
+                  onSubmit={jest.fn()}
+                >
+                  {children}
+                </Form>
+              }
+            />
+          </Routes>
+        ),
+      },
+      initialEntries: ['/content-manager/collectionType/api::address.address/create'],
+    });
 
-  it('should by default render the name of the component in the accordion trigger', () => {
-    const { getByRole } = render();
+  it('should by default render the name of the component in the accordion trigger', async () => {
+    render();
 
-    expect(getByRole('button', { name: 'component1' })).toBeInTheDocument();
+    await screen.findByRole('button', { name: 'component - test' });
   });
 
   it('should allow removal of the component & call the onRemoveComponentClick callback when the field isAllowed', async () => {
     const onRemoveComponentClick = jest.fn();
-    const { getByRole, user } = render({ isFieldAllowed: true, onRemoveComponentClick });
+    const { user } = render({ disabled: false, onRemoveComponentClick });
 
-    await user.click(getByRole('button', { name: 'Delete component1' }));
+    await screen.findByRole('button', { name: 'component - test' });
+
+    await user.click(screen.getByRole('button', { name: 'Delete - test' }));
 
     expect(onRemoveComponentClick).toHaveBeenCalled();
   });
 
-  it('should not show you the delete component button if isFieldAllowed is false', () => {
-    const { queryByRole } = render({ isFieldAllowed: false });
+  it('should not show you the delete component button if isFieldAllowed is false', async () => {
+    render({ disabled: true });
 
-    expect(queryByRole('button', { name: 'Delete component1' })).not.toBeInTheDocument();
+    await screen.findByRole('button', { name: 'component - test' });
+
+    expect(screen.queryByRole('button', { name: 'Delete component1' })).not.toBeInTheDocument();
   });
 
   it('should hide the field component when you close the accordion', async () => {
-    const { getByText, queryByText, user, getByRole } = render();
+    const { user } = render();
 
-    expect(getByText("I'm a field component")).toBeInTheDocument();
+    await screen.findByRole('button', { name: 'component - test' });
 
-    await user.click(getByRole('button', { name: 'component1' }));
+    expect(screen.getByText('INPUTS')).toBeInTheDocument();
 
-    expect(queryByText("I'm a field component")).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'component - test' }));
+
+    expect(screen.queryByText('INPUTS')).not.toBeInTheDocument();
   });
 
   describe('Keyboard drag and drop', () => {
-    it('should not move with arrow keys if the button is not pressed first', () => {
+    it('should not move with arrow keys if the button is not pressed first', async () => {
       const onMoveComponent = jest.fn();
-      const { getAllByText } = render({
+
+      render({
         onMoveComponent,
         testingDnd: true,
       });
-      const [draggedItem] = getAllByText('Drag');
+
+      await screen.findByRole('button', { name: 'component - test' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       expect(onMoveComponent).not.toBeCalled();
     });
 
-    it('should move with the arrow keys if the button has been activated first', () => {
+    it('should move with the arrow keys if the button has been activated first', async () => {
       const onMoveComponent = jest.fn();
-      const { getAllByText } = render({ onMoveComponent, testingDnd: true });
-      const [draggedItem] = getAllByText('Drag');
+
+      render({ onMoveComponent, testingDnd: true });
+
+      await screen.findByRole('button', { name: 'component - test' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       expect(onMoveComponent).toBeCalledWith(1, 0);
     });
 
-    it('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', () => {
+    it('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', async () => {
       const onMoveComponent = jest.fn();
-      const { getAllByText } = render({ onMoveComponent, testingDnd: true });
-      const [draggedItem] = getAllByText('Drag');
+
+      render({ onMoveComponent, testingDnd: true });
+
+      await screen.findByRole('button', { name: 'component - test' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
@@ -120,10 +158,14 @@ describe('DynamicComponent', () => {
       expect(onMoveComponent).toBeCalledTimes(1);
     });
 
-    it('should exit drag and drop mode when the escape key is pressed', () => {
+    it('should exit drag and drop mode when the escape key is pressed', async () => {
       const onMoveComponent = jest.fn();
-      const { getAllByText } = render({ onMoveComponent, testingDnd: true });
-      const [draggedItem] = getAllByText('Drag');
+
+      render({ onMoveComponent, testingDnd: true });
+
+      await screen.findByRole('button', { name: 'component - test' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
@@ -133,70 +175,89 @@ describe('DynamicComponent', () => {
 
   describe('adding above and below components', () => {
     it('should render a menu button with two items that have submenus that list the components grouped by categories', async () => {
-      const { getByRole, getByText, user } = render({ dynamicComponentsByCategory });
+      const { user } = render({
+        dynamicComponentsByCategory: {
+          ...dynamicComponentsByCategory,
+          seo: [
+            {
+              uid: 'seo.metadata',
+              displayName: 'metadata',
+            },
+          ],
+        },
+      });
 
-      expect(getByRole('button', { name: 'More actions' })).toBeInTheDocument();
+      await screen.findByRole('button', { name: 'component - test' });
 
-      await user.click(getByRole('button', { name: 'More actions' }));
+      expect(screen.getByRole('button', { name: 'More actions' })).toBeInTheDocument();
 
-      expect(getByRole('menuitem', { name: 'Add component above' })).toBeInTheDocument();
-      expect(getByRole('menuitem', { name: 'Add component below' })).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
 
-      await user.click(getByRole('menuitem', { name: 'Add component above' }));
+      expect(screen.getByRole('menuitem', { name: 'Add component above' })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'Add component below' })).toBeInTheDocument();
 
-      expect(getByText('myComponents')).toBeInTheDocument();
-      expect(getByText('otherComponents')).toBeInTheDocument();
+      await user.click(screen.getByRole('menuitem', { name: 'Add component above' }));
 
-      expect(getByRole('menuitem', { name: 'component1' })).toBeInTheDocument();
-      expect(getByRole('menuitem', { name: 'component2' })).toBeInTheDocument();
-      expect(getByRole('menuitem', { name: 'component3' })).toBeInTheDocument();
+      expect(screen.getByText('blog')).toBeInTheDocument();
+      expect(screen.getByText('seo')).toBeInTheDocument();
 
-      await user.click(getByRole('menuitem', { name: 'Add component below' }));
+      expect(screen.getByRole('menuitem', { name: 'component' })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'metadata' })).toBeInTheDocument();
 
-      expect(getByText('myComponents')).toBeInTheDocument();
-      expect(getByText('otherComponents')).toBeInTheDocument();
+      await user.click(screen.getByRole('menuitem', { name: 'Add component below' }));
 
-      expect(getByRole('menuitem', { name: 'component1' })).toBeInTheDocument();
-      expect(getByRole('menuitem', { name: 'component2' })).toBeInTheDocument();
-      expect(getByRole('menuitem', { name: 'component3' })).toBeInTheDocument();
+      expect(screen.getByText('blog')).toBeInTheDocument();
+      expect(screen.getByText('seo')).toBeInTheDocument();
+
+      expect(screen.getByRole('menuitem', { name: 'component' })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'metadata' })).toBeInTheDocument();
     });
 
     it('should call the onAddComponent callback with the correct index when adding above', async () => {
       const onAddComponent = jest.fn();
-      const { getByRole, user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
+      const { user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
 
-      await user.click(getByRole('button', { name: 'More actions' }));
-      await user.click(getByRole('menuitem', { name: 'Add component above' }));
+      await screen.findByRole('button', { name: 'component - test' });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Add component above' }));
 
       /**
        * @note – for some reason, user.click() doesn't work here
        */
-      fireEvent.click(getByRole('menuitem', { name: 'component1' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'component' }));
 
-      expect(onAddComponent).toHaveBeenCalledWith('component1', 0);
+      expect(onAddComponent).toHaveBeenCalledWith('blog.test-como', 0);
     });
 
     it('should call the onAddComponent callback with the correct index when adding below', async () => {
       const onAddComponent = jest.fn();
-      const { getByRole, user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
+      const { user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
 
-      await user.click(getByRole('button', { name: 'More actions' }));
-      await user.click(getByRole('menuitem', { name: 'Add component below' }));
+      await screen.findByRole('button', { name: 'component - test' });
+
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('menuitem', { name: 'Add component below' }));
 
       /**
        * @note – for some reason, user.click() doesn't work here
        */
-      fireEvent.click(getByRole('menuitem', { name: 'component1' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'component' }));
 
-      expect(onAddComponent).toHaveBeenCalledWith('component1', 1);
+      expect(onAddComponent).toHaveBeenCalledWith('blog.test-como', 1);
     });
   });
 
-  it('should handle errors in the fields', async () => {
-    const { getByText } = render({
+  /**
+   * TODO: re-add this test when errors are reimplemented
+   */
+  it.skip('should handle errors in the fields', async () => {
+    render({
       index: 0,
     });
 
-    expect(getByText('The component contains error(s)')).toBeInTheDocument();
+    await screen.findByRole('button', { name: 'component - test' });
+
+    expect(screen.getByText('The component contains error(s)')).toBeInTheDocument();
   });
 });

@@ -108,7 +108,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
     .filter((name) => checkIfAttributeIsDisplayable(attributes[name]))
     .map((name) => ({
       name,
-      label: list.metadatas[name].label ?? '',
+      label: list.metadatas[name]?.label ?? '',
     }))
     .sort((a, b) => formatter.compare(a.label, b.label));
 
@@ -183,3 +183,4 @@ const ChackboxWrapper = styled(Flex)`
 `;
 
 export { ViewSettingsMenu };
+export type { ViewSettingsMenuProps, FieldPickerProps };

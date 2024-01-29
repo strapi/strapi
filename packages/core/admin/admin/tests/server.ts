@@ -5,8 +5,6 @@ import * as qs from 'qs';
 
 import { MockData, mockData } from './mockData';
 
-import type { Schema } from '../src/content-manager/hooks/useDocument';
-
 export const server = setupServer(
   ...[
     /**
@@ -533,6 +531,13 @@ export const server = setupServer(
     rest.post('/content-manager/:collectionType/:uid', async (req, res, ctx) => {
       const data = await req.json();
 
+      if (
+        req.params.collectionType !== 'single-types' &&
+        req.params.collectionType !== 'collection-types'
+      ) {
+        return;
+      }
+
       return res(
         ctx.json({
           data: {
@@ -658,16 +663,19 @@ export const server = setupServer(
               id: 1,
               name: 'Entry 1',
               publishedAt: null,
+              notrepeat_req: {},
             },
             {
               id: 2,
               name: 'Entry 2',
               publishedAt: null,
+              notrepeat_req: {},
             },
             {
               id: 3,
               name: 'Entry 3',
               publishedAt: null,
+              notrepeat_req: {},
             },
           ],
         })

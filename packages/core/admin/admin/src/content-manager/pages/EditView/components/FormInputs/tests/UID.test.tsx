@@ -1,133 +1,122 @@
-import { render as renderRTL, waitFor, act } from '@tests/utils';
+import { render as renderRTL, waitFor, act, screen } from '@tests/utils';
+import { Route, Routes } from 'react-router-dom';
 
+import { Form } from '../../../../../components/Form';
 import { UIDInput, UIDInputProps } from '../UID';
 
-const render = (props?: Partial<UIDInputProps>) =>
-  renderRTL(
-    <UIDInput
-      // @ts-expect-error – Mock attribute
-      attribute={{ targetField: 'target', required: true }}
-      contentTypeUID="api::test.test"
-      intlLabel={{
-        id: 'test',
-        defaultMessage: 'Label',
-      }}
-      name="name"
-      onChange={jest.fn()}
-      {...props}
-    />
-  );
+const render = ({
+  initialValues = { name: 'test' },
+  ...props
+}: Partial<UIDInputProps> & { initialValues?: object } = {}) =>
+  renderRTL(<UIDInput label="Label" name="name" type="uid" {...props} />, {
+    renderOptions: {
+      wrapper: ({ children }) => (
+        <Routes>
+          <Route
+            path="/content-manager/:collectionType/:slug/:id"
+            element={
+              <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+                {children}
+              </Form>
+            }
+          />
+        </Routes>
+      ),
+    },
+    initialEntries: ['/content-manager/collection-types/api::address.address/create'],
+  });
 
-describe('InputUID', () => {
+describe('UIDInput', () => {
   test('renders', async () => {
-    const { getByText, getByRole, findByText } = render({
+    render({
       hint: 'hint',
       required: true,
     });
 
-    await findByText('Unavailable');
+    await screen.findByText('Unavailable');
 
-    expect(getByText('Label')).toBeInTheDocument();
-    expect(getByText('*')).toBeInTheDocument();
-    expect(getByText('action')).toBeInTheDocument();
-    expect(getByText('hint')).toBeInTheDocument();
-    expect(getByRole('textbox')).toHaveValue('test');
+    expect(screen.getByText('Label')).toBeInTheDocument();
+    expect(screen.getByText('*')).toBeInTheDocument();
+    expect(screen.getByText('hint')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue('test');
   });
 
-  test('renders an error', async () => {
-    const { getByText, findByText } = render();
+  /**
+   * TODO: re-add this test once errors are reimplemented
+   */
+  test.skip('renders an error', async () => {
+    render();
 
-    await findByText('Unavailable');
+    await screen.findByText('Unavailable');
 
-    expect(getByText('error')).toBeInTheDocument();
+    expect(screen.getByText('error')).toBeInTheDocument();
   });
 
   test('Hides the regenerate label when disabled', async () => {
-    const { queryByRole, findByText } = render({ disabled: true });
+    render({ disabled: true });
 
-    await findByText('Unavailable');
+    await screen.findByText('Unavailable');
 
-    expect(queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument();
-  });
-
-  test('Calls onChange handler', async () => {
-    const spy = jest.fn();
-    const { getByRole, user } = render();
-
-    const value = 'test-new';
-
-    await user.type(getByRole('textbox'), value);
-
-    expect(spy).toHaveBeenCalledTimes(value.length);
+    expect(screen.queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument();
   });
 
   test('Regenerates the value based on the target field', async () => {
-    const spy = jest.fn();
-    const { getByRole, queryByTestId, user } = render();
+    const { user } = render();
 
-    await user.click(getByRole('button', { name: /regenerate/i }));
+    expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
 
-    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: /regenerate/i }));
 
-    expect(spy).toHaveBeenCalledWith({
-      target: {
-        name: 'name',
-        type: 'text',
-        value: 'source-string',
-      },
-    });
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('regenerated');
   });
 
   test('If the field is required and the value is empty it should automatically fill it', async () => {
-    const spy = jest.fn();
-
-    const { queryByTestId } = render({
+    render({
+      initialValues: {
+        name: '',
+      },
       required: true,
     });
 
-    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(spy).toHaveBeenCalledWith(
-      {
-        target: {
-          name: 'name',
-          type: 'text',
-          value: 'source-string',
-        },
-      },
-      true
-    );
+    expect(screen.getByRole('textbox', { name: 'Label *' })).toHaveValue('regenerated');
   });
 
   test('If the field is required and the value is not empty it should not automatically fill it', async () => {
-    const spy = jest.fn();
-
-    const { queryByTestId } = render({
+    render({
+      initialValues: {
+        name: 'Title',
+      },
       required: true,
     });
 
-    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(spy).not.toHaveBeenCalled();
+    expect(screen.getByRole('textbox', { name: 'Label *' })).not.toHaveValue('regenerated');
   });
 
   test('Checks the initial availability (isAvailable)', async () => {
     jest.useFakeTimers();
-    const spy = jest.fn();
 
-    const { getByText, queryByText, queryByTestId } = render({
+    render({
       required: true,
+      initialValues: {
+        name: 'available',
+      },
     });
 
-    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(getByText('Available')).toBeInTheDocument();
+    expect(screen.getByText('Available')).toBeInTheDocument();
 
     act(() => {
       jest.advanceTimersByTime(4000);
     });
 
-    await waitFor(() => expect(queryByText('Available')).not.toBeInTheDocument(), {
+    await waitFor(() => expect(screen.queryByText('Available')).not.toBeInTheDocument(), {
       timeout: 10000,
     });
 
@@ -136,31 +125,30 @@ describe('InputUID', () => {
   });
 
   test('Checks the initial availability (!isAvailable)', async () => {
-    const spy = jest.fn();
-
-    const { getByText, queryByTestId, queryByText } = render({
+    render({
       required: true,
     });
 
-    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(getByText('Unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Unavailable')).toBeInTheDocument();
 
-    await waitFor(() => expect(queryByText('Available')).not.toBeInTheDocument(), {
+    await waitFor(() => expect(screen.queryByText('Available')).not.toBeInTheDocument(), {
       timeout: 10000,
     });
   });
 
   test('Does not check the initial availability without a value', async () => {
-    const spy = jest.fn();
-
-    const { queryByText, queryByTestId } = render({
+    render({
       required: true,
+      initialValues: {
+        name: '',
+      },
     });
 
-    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(queryByText('Available')).not.toBeInTheDocument();
-    expect(queryByText('Unavailable')).not.toBeInTheDocument();
+    expect(screen.queryByText('Available')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
   });
 });

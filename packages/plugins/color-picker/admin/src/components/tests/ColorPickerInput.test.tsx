@@ -1,4 +1,5 @@
 import { DesignSystemProvider } from '@strapi/design-system';
+import { Form } from '@strapi/strapi/admin';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -11,7 +12,11 @@ const render = () => ({
       const locale = 'en';
       return (
         <IntlProvider locale={locale} messages={{}} textComponent="span">
-          <DesignSystemProvider locale={locale}>{children}</DesignSystemProvider>
+          <DesignSystemProvider locale={locale}>
+            <Form onSubmit={jest.fn()} method="POST">
+              {children}
+            </Form>
+          </DesignSystemProvider>
         </IntlProvider>
       );
     },

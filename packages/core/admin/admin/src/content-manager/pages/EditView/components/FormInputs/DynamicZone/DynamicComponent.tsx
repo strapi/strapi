@@ -33,8 +33,8 @@ interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
   componentUid: string;
+  disabled?: boolean;
   index: number;
-  isFieldAllowed?: boolean;
   name: string;
   onAddComponent: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
@@ -43,8 +43,8 @@ interface DynamicComponentProps
 
 const DynamicComponent = ({
   componentUid,
+  disabled,
   index,
-  isFieldAllowed = false,
   name,
   onRemoveComponentClick,
   onMoveComponent,
@@ -62,22 +62,22 @@ const DynamicComponent = ({
   } = useDocLayout();
 
   const title = React.useMemo(() => {
-    const { mainField } = components[componentUid].settings;
+    const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
 
     const mainFieldValue = getIn(formValues, `${name}.${index}.${mainField}`);
 
     const displayedValue = mainField === 'id' ? '' : String(mainFieldValue).trim();
 
-    const mainValue = displayedValue.length > 0 ? ` - ${displayedValue}` : displayedValue;
+    const mainValue = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
     return mainValue;
   }, [componentUid, components, formValues, name, index]);
 
   const { icon, displayName } = React.useMemo(() => {
     const [category] = componentUid.split('.');
-    const { icon, displayName } = dynamicComponentsByCategory[category].find(
+    const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
       (component) => component.uid === componentUid
-    )!;
+    ) ?? { icon: null, displayName: null };
 
     return { icon, displayName };
   }, [componentUid, dynamicComponentsByCategory]);
@@ -106,12 +106,12 @@ const DynamicComponent = ({
   };
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
-    useDragAndDrop(isFieldAllowed, {
+    useDragAndDrop(!disabled, {
       type: `${ItemTypes.DYNAMIC_ZONE}_${name}`,
       index,
       item: {
         index,
-        displayedValue: `${displayName}${title}`,
+        displayedValue: `${displayName} ${title}`,
         icon,
       },
       onMoveItem: onMoveComponent,
@@ -126,7 +126,7 @@ const DynamicComponent = ({
 
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
-  const accordionActions = !isFieldAllowed ? null : (
+  const accordionActions = disabled ? null : (
     <ActionsFlex gap={0}>
       <IconButtonCustom
         borderWidth={0}
@@ -228,13 +228,13 @@ const DynamicComponent = ({
               // @ts-expect-error – Issue in DS where AccordionToggle props don't extend TextButton
               startIcon={<ComponentIcon icon={icon} showBackground={false} size="S" />}
               action={accordionActions}
-              title={`${displayName}${title}`}
+              title={`${displayName} ${title}`}
               togglePosition="left"
             />
             <AccordionContent>
               <AccordionContentRadius background="neutral0">
                 <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
-                  {components[componentUid].layout.map((row, rowInd) => (
+                  {components[componentUid]?.layout?.map((row, rowInd) => (
                     <Grid gap={4} key={rowInd}>
                       {row.map(({ size, ...field }) => {
                         const fieldName = `${name}.${index}.${field.name}`;

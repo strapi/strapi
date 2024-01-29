@@ -41,7 +41,7 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form');
  * -----------------------------------------------------------------------------------------------*/
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Pick<FormContextValue, 'initialValues'> {
+  extends Partial<Pick<FormContextValue, 'initialValues'>> {
   children: React.ReactNode;
   method: 'POST' | 'PUT';
   onSubmit: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
@@ -55,11 +55,11 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
-  const initialValues = React.useRef(props.initialValues);
+  const initialValues = React.useRef(props.initialValues ?? {});
   const [state, dispatch] = React.useReducer(reducer, {
     errors: {},
     isSubmitting: false,
-    values: props.initialValues,
+    values: props.initialValues ?? {},
   });
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
