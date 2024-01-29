@@ -98,7 +98,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     // TODO: Sanitize output of metadata
     return {
       data: document,
-      metadata: await this.getMetadata(uid, document, opts),
+      meta: await this.getMetadata(uid, document, opts),
     };
   },
 });
