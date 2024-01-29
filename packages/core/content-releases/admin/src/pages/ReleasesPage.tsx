@@ -48,67 +48,6 @@ import {
 } from '../services/release';
 
 /* -------------------------------------------------------------------------------------------------
- * ReleasesLayout
- * -----------------------------------------------------------------------------------------------*/
-interface ReleasesLayoutProps {
-  isLoading?: boolean;
-  totalReleases?: number;
-  onClickAddRelease: () => void;
-  isPrimaryActionDisabled?: boolean;
-  children: React.ReactNode;
-}
-
-export const ReleasesLayout = ({
-  isLoading,
-  totalReleases,
-  onClickAddRelease,
-  isPrimaryActionDisabled = false,
-  children,
-}: ReleasesLayoutProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Main aria-busy={isLoading}>
-      <HeaderLayout
-        title={formatMessage({
-          id: 'content-releases.pages.Releases.title',
-          defaultMessage: 'Releases',
-        })}
-        subtitle={
-          !isLoading
-            ? formatMessage(
-                {
-                  id: 'content-releases.pages.Releases.header-subtitle',
-                  defaultMessage:
-                    '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-                },
-                { number: totalReleases }
-              )
-            : formatMessage({
-                id: 'content-releases.pages.Releases.header-subtitle-default',
-                defaultMessage: 'No releases',
-              })
-        }
-        primaryAction={
-          <CheckPermissions permissions={PERMISSIONS.create}>
-            <Button
-              startIcon={<Plus />}
-              onClick={onClickAddRelease}
-              disabled={isPrimaryActionDisabled}
-            >
-              {formatMessage({
-                id: 'content-releases.header.actions.add-release',
-                defaultMessage: 'New release',
-              })}
-            </Button>
-          </CheckPermissions>
-        }
-      />
-      {children}
-    </Main>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
  * -----------------------------------------------------------------------------------------------*/
 interface ReleasesGridProps {
@@ -254,11 +193,9 @@ const ReleasesPage = () => {
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </ReleasesLayout>
+      <Main aria-busy={isLoading}>
+        <LoadingIndicatorPage />
+      </Main>
     );
   }
 
@@ -309,11 +246,34 @@ const ReleasesPage = () => {
   };
 
   return (
-    <ReleasesLayout
-      onClickAddRelease={toggleAddReleaseModal}
-      totalReleases={totalReleases}
-      isPrimaryActionDisabled={hasReachedMaximumPendingReleases}
-    >
+    <Main aria-busy={isLoading}>
+      <HeaderLayout
+        title={formatMessage({
+          id: 'content-releases.pages.Releases.title',
+          defaultMessage: 'Releases',
+        })}
+        subtitle={formatMessage(
+          {
+            id: 'content-releases.pages.Releases.header-subtitle',
+            defaultMessage: '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+          },
+          { number: totalReleases }
+        )}
+        primaryAction={
+          <CheckPermissions permissions={PERMISSIONS.create}>
+            <Button
+              startIcon={<Plus />}
+              onClick={toggleAddReleaseModal}
+              disabled={hasReachedMaximumPendingReleases}
+            >
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          </CheckPermissions>
+        }
+      />
       <ContentLayout>
         <>
           {activeTab === 'pending' && hasReachedMaximumPendingReleases && (
@@ -413,7 +373,7 @@ const ReleasesPage = () => {
           initialValues={INITIAL_FORM_VALUES}
         />
       )}
-    </ReleasesLayout>
+    </Main>
   );
 };
 
