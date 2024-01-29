@@ -1,4 +1,6 @@
 import { getService } from '../utils';
+import { getDocumentDimensions } from './utils/dimensions';
+
 import {
   validateGenerateUIDInput,
   validateCheckUIDAvailabilityInput,
@@ -9,12 +11,15 @@ export default {
   async generateUID(ctx: any) {
     const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
 
+    const { query = {} } = ctx.request;
+    const { locale } = getDocumentDimensions(query);
+
     await validateUIDField(contentTypeUID, field);
 
     const uidService = getService('uid');
 
     ctx.body = {
-      data: await uidService.generateUIDField({ contentTypeUID, field, data }),
+      data: await uidService.generateUIDField({ contentTypeUID, field, data, locale }),
     };
   },
 
@@ -23,16 +28,24 @@ export default {
       ctx.request.body
     );
 
+    const { query = {} } = ctx.request;
+    const { locale } = getDocumentDimensions(query);
+
     await validateUIDField(contentTypeUID, field);
 
     const uidService = getService('uid');
 
-    const isAvailable = await uidService.checkUIDAvailability({ contentTypeUID, field, value });
+    const isAvailable = await uidService.checkUIDAvailability({
+      contentTypeUID,
+      field,
+      value,
+      locale,
+    });
 
     ctx.body = {
       isAvailable,
       suggestion: !isAvailable
-        ? await uidService.findUniqueUID({ contentTypeUID, field, value })
+        ? await uidService.findUniqueUID({ contentTypeUID, field, value, locale })
         : null,
     };
   },

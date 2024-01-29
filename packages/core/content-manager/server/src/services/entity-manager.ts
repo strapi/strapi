@@ -1,7 +1,6 @@
 import { omit } from 'lodash/fp';
-import { mapAsync, contentTypes, sanitize } from '@strapi/utils';
+import { mapAsync, contentTypes, sanitize, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, EntityService, Documents } from '@strapi/types';
-import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import {
   getDeepPopulate,
