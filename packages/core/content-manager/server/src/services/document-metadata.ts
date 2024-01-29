@@ -96,9 +96,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     if (!document) return document;
 
     // TODO: Sanitize output of metadata
-    // @ts-expect-error -  TODO: Return { data, meta } format when UI is ready
-    document.__meta__ = await this.getMetadata(uid, document, opts);
-
-    return document;
+    return {
+      data: document,
+      metadata: await this.getMetadata(uid, document, opts),
+    };
   },
 });
