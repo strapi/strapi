@@ -211,7 +211,9 @@ const ReleasesPage = () => {
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
-  const { maximumNumberOfPendingReleases = 3 } = getFeature('cms-content-releases');
+  const { maximumNumberOfPendingReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumNumberOfPendingReleases: number;
+  };
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
