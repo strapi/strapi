@@ -450,11 +450,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     }
 
     /**
-     * We separate publish and unpublish actions group by content type
-     * Because we need to publish singleTypes using publish and collectionTypes using publishMany
-     * And we keep only their ids to fetch them later to get all information needed
-     *
-     * We also need to separate collectionType entries from singleType entries because they work differently
+     * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
+     * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
      */
     const collectionTypeActions: {
       [key: UID.ContentType]: {
