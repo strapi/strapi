@@ -5,14 +5,7 @@ import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@str
 import { pxToRem } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import {
-  Editor,
-  Transforms,
-  Element as SlateElement,
-  Node,
-  type NodeEntry,
-  type Ancestor,
-} from 'slate';
+import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -151,38 +144,6 @@ const ToolbarButton = ({
   );
 };
 
-const handleToggleList = (
-  editor: Editor,
-  currentListEntry: NodeEntry<Ancestor>,
-  format: Block<'list'>['format']
-) => {
-  const [currentList, currentListPath] = currentListEntry;
-
-  if (!Editor.isEditor(currentList) && isListNode(currentList)) {
-    // Format is different, toggle list format
-    if (currentList.format !== format) {
-      Transforms.setNodes(editor, { format }, { at: currentListPath });
-    } else {
-      // Format is same, convert selected list-item to paragraph
-      const [, lastNodePath] = Editor.last(editor, []);
-
-      Transforms.unwrapNodes(editor, {
-        match: (node) => isListNode(node),
-        split: true,
-        at: editor.selection ?? lastNodePath,
-      });
-
-      const [, updatedLastNodePath] = Editor.last(editor, []);
-
-      Transforms.setNodes(
-        editor,
-        { type: 'paragraph' },
-        { at: editor.selection ?? [updatedLastNodePath[0]] }
-      );
-    }
-  }
-};
-
 const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
@@ -232,8 +193,15 @@ const BlocksDropdown = () => {
     });
 
     if (currentListEntry && ['list-ordered', 'list-unordered'].includes(optionKey)) {
-      const format = optionKey.split('-')[1] as Block<'list'>['format'];
-      handleToggleList(editor, currentListEntry, format);
+      const [currentList, currentListPath] = currentListEntry;
+      const format = optionKey === 'list-ordered' ? 'ordered' : 'unordered';
+
+      if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+        // Format is different, toggle list format
+        if (currentList.format !== format) {
+          Transforms.setNodes(editor, { format }, { at: currentListPath });
+        }
+      }
       return;
     }
 
@@ -360,46 +328,13 @@ const isListNode = (node: unknown): node is Block<'list'> => {
   return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
 };
 
-const toggleList = (editor: Editor, format: Block<'list'>['format']) => {
-  let currentListEntry;
-  if (editor.selection)
-    currentListEntry = Editor.above(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-    });
-  else {
-    // If no selection, toggle last inserted node
-    const [_, lastNodePath] = Editor.last(editor, []);
-    currentListEntry = Editor.above(editor, {
-      match: (node) => !Editor.isEditor(node) && node.type === 'list',
-      at: lastNodePath,
-    });
-  }
-
-  // If selection is already a list then toggle format
-  if (currentListEntry) {
-    handleToggleList(editor, currentListEntry, format);
-  } else {
-    // If selection is not a list then convert it to list
-    const [_, lastNodePath] = Editor.last(editor, []);
-
-    Transforms.setNodes(
-      editor,
-      { type: 'list-item' },
-      { at: editor.selection ?? [lastNodePath[0]] }
-    );
-
-    const block = { type: 'list' as const, format, children: [] };
-    Transforms.wrapNodes(editor, block, { at: editor.selection ?? [lastNodePath[0]] });
-  }
-};
-
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
   format: Block<'list'>['format'];
 }
 
 const ListButton = ({ block, format }: ListButtonProps) => {
-  const { editor, disabled } = useBlocksEditorContext('ListButton');
+  const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
 
   const isListActive = () => {
     if (!editor.selection) return false;
@@ -418,6 +353,40 @@ const ListButton = ({ block, format }: ListButtonProps) => {
     return false;
   };
 
+  const toggleList = (format: Block<'list'>['format']) => {
+    let currentListEntry;
+    if (editor.selection)
+      currentListEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'list',
+      });
+    else {
+      // If no selection, toggle last inserted node
+      const [_, lastNodePath] = Editor.last(editor, []);
+      currentListEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'list',
+        at: lastNodePath,
+      });
+    }
+
+    // If selection is already a list then toggle format
+    if (currentListEntry) {
+      const [currentList, currentListPath] = currentListEntry;
+
+      if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+        if (currentList.format !== format) {
+          // Format is different, toggle list format
+          Transforms.setNodes(editor, { format }, { at: currentListPath });
+        } else {
+          // Format is same, convert selected list-item to paragraph
+          blocks['paragraph'].handleConvert?.(editor);
+        }
+      }
+    } else {
+      // If selection is not a list then convert it to list
+      blocks[`list-${format}`].handleConvert?.(editor);
+    }
+  };
+
   return (
     <ToolbarButton
       icon={block.icon}
@@ -425,7 +394,7 @@ const ListButton = ({ block, format }: ListButtonProps) => {
       label={block.label}
       isActive={isListActive()}
       disabled={disabled}
-      handleClick={() => toggleList(editor, format)}
+      handleClick={() => toggleList(format)}
     />
   );
 };

@@ -332,10 +332,10 @@ const baseRenderElement = ({
 
 interface BlocksContentProps {
   placeholder?: string;
-  ariaLabel: string;
+  ariaLabelId: string;
 }
 
-const BlocksContent = ({ placeholder, ariaLabel }: BlocksContentProps) => {
+const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
@@ -574,7 +574,7 @@ const BlocksContent = ({ placeholder, ariaLabel }: BlocksContentProps) => {
       paddingBottom={3}
     >
       <StyledEditable
-        aria-labelledby={ariaLabel}
+        aria-labelledby={ariaLabelId}
         readOnly={disabled}
         placeholder={placeholder}
         isExpandedMode={isExpandedMode}

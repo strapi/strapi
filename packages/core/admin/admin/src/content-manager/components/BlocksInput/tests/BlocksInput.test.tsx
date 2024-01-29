@@ -31,7 +31,7 @@ const setup = (props: Partial<BlocksEditorProps>) =>
       placeholder={{ id: 'blocksPlaceholder', defaultMessage: 'blocks placeholder' }}
       onChange={jest.fn()}
       disabled={false}
-      ariaLabel="blocks-label"
+      ariaLabelId="blocks-label"
       {...props}
     />,
     {

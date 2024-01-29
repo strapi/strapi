@@ -71,7 +71,7 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             error={error}
             ref={forwardedRef}
             {...editorProps}
-            ariaLabel={uniqueId}
+            ariaLabelId={uniqueId}
             placeholder={formattedPlaceholder}
           />
           <Hint hint={hint} name={name} error={error} />
