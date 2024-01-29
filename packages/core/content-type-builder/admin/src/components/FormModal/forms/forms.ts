@@ -12,6 +12,7 @@ import { createContentTypeSchema } from '../contentType/createContentTypeSchema'
 import { dynamiczoneForm } from '../dynamiczoneForm';
 
 import { addItemsToFormSection, FormTypeOptions } from './utils/addItemsToFormSection';
+import { createComponentCollectionName } from './utils/createCollectionName';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
 import type { Common } from '@strapi/types';
@@ -308,13 +309,33 @@ export const forms = {
         models: any;
       },
       isEditing = false,
+      components: Record<string, any>,
+      componentDisplayName: string,
       compoUid: Common.UID.Component | null = null
     ) {
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter((uid: Common.UID.Component) => uid !== compoUid)
         : alreadyTakenAttributes;
+      const collectionNames = Object.values(components).map((component: any) => {
+        return component?.schema?.collectionName;
+      });
 
-      return createComponentSchema(takenNames, reservedNames.models, componentCategory);
+      const currentCollectionName = createComponentCollectionName(
+        componentDisplayName,
+        componentCategory
+      );
+
+      const takenCollectionNames = isEditing
+        ? collectionNames.filter((collectionName) => collectionName !== currentCollectionName)
+        : collectionNames;
+
+      return createComponentSchema(
+        takenNames,
+        reservedNames.models,
+        componentCategory,
+        takenCollectionNames,
+        currentCollectionName
+      );
     },
     form: {
       advanced() {
