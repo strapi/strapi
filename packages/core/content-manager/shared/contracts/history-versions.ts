@@ -1,8 +1,9 @@
 import type { Entity, UID } from '@strapi/types';
 
 /**
- * Unlike other Content Manager contracts, history versions can't be created via the API,
- * but only by the history service. That's why we export the create type directly here.
+ * Unlike other Content Manager contracts, history versions can't be created via
+ * a dedicated API endpoint, but only by the history service listening to other actions.
+ * That's why we directly export the create type here.
  */
 export interface CreateHistoryVersion {
   contentType: UID.ContentType;
