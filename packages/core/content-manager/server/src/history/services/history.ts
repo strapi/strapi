@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Entity } from '@strapi/types';
+import type { LoadedStrapi } from '@strapi/types';
 import { omit } from 'lodash/fp';
 import { HISTORY_VERSION_UID } from '../constants';
 
@@ -22,7 +22,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       }
 
       // TODO: replace by strapi.documents.use once it supports multiple actions at once
-      strapi.documents?.middlewares.add('_all', '_all', (context, next) => {
+      strapi.documents?.middlewares.add('_all', '_all', async (context, next) => {
         // Ignore actions that don't mutate documents
         if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
           return next(context);
@@ -45,18 +45,28 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           'strapi_assignee',
         ];
 
-        // Don't await the creation of the history version to not slow down the request
-        this.createVersion({
-          contentType: context.uid,
-          relatedDocumentId: (context.options as { id: Entity.ID }).id,
-          locale: context.params.locale,
-          // TODO: check if drafts should should be "modified" once D&P is ready
-          status: context.params.status,
-          data: omit(fieldsToIgnore, context.params.data),
-          schema: omit(fieldsToIgnore, strapi.contentType(context.uid).attributes),
+        /**
+         * Await the middleware stack because for create actions,
+         * the document ID only exists after the creation, which is later in the stack.
+         */
+        const result = await next(context);
+
+        // Prevent creating a history version for an action that wasn't actually executed
+        await strapi.db.transaction(async ({ onCommit }) => {
+          onCommit(() => {
+            this.createVersion({
+              contentType: context.uid,
+              relatedDocumentId: result.documentId,
+              locale: context.params.locale,
+              // TODO: check if drafts should should be "modified" once D&P is ready
+              status: context.params.status,
+              data: omit(fieldsToIgnore, context.params.data),
+              schema: omit(fieldsToIgnore, strapi.contentType(context.uid).attributes),
+            });
+          });
         });
 
-        return next(context);
+        return result;
       });
 
       isInitialized = true;

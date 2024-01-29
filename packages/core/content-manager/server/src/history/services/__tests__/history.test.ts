@@ -25,6 +25,14 @@ const mockStrapi = {
         };
       }
     },
+    transaction(cb: any) {
+      const opt = {
+        onCommit(func: any) {
+          return func();
+        },
+      };
+      return cb(opt);
+    },
   },
   requestContext: {
     get: mockGetRequestContext,
@@ -65,15 +73,12 @@ describe('history-version service', () => {
     const context = {
       action: 'create',
       uid: 'api::article.article',
-      options: {
-        id: 'document-id',
-      },
       params: {
         locale: 'fr',
       },
     };
 
-    const next = jest.fn();
+    const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
     await historyService.init();
     const historyMiddlewareFunction = mockStrapi.documents.middlewares.add.mock.calls[0][2];
 
