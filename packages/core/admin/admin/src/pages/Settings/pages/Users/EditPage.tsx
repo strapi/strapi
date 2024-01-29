@@ -190,7 +190,7 @@ const EditPage = () => {
       ...bodyRest,
       // The password should not be sent if it wasn't changed,
       // it leads to a validation error if the string is empty
-      ...(password !== '' && { password }),
+      password: password === "" ? undefined : password,
     });
 
     if ('error' in res && isBaseQueryError(res.error)) {
