@@ -1,6 +1,6 @@
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-
+import { snakeCase } from 'lodash/fp';
 import { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } from '../../services/constants';
 import { getService } from '../../utils';
 import { isValidKey, isValidCollectionName } from './common';
@@ -68,7 +68,9 @@ const isForbiddenKey = (key: string) => {
   return [
     ...FORBIDDEN_ATTRIBUTE_NAMES,
     ...getService('builder').getReservedNames().attributes,
-  ].includes(key);
+  ].some((reserved) => {
+    return snakeCase(reserved) === snakeCase(key as string);
+  });
 };
 
 const forbiddenValidator = () => {
