@@ -24,6 +24,7 @@ const categoryModel = {
   attributes: {
     name: {
       type: 'string',
+      unique: true,
       pluginOptions: {
         i18n: {
           localized: true,
@@ -87,8 +88,10 @@ describe('i18n - Content API', () => {
         method: 'POST',
         url: '/content-manager/collection-types/api::category.category',
         body: {
-          locale: 'ko',
           name: 'category in korean',
+        },
+        qs: {
+          locale: 'ko',
         },
       });
 
@@ -113,17 +116,29 @@ describe('i18n - Content API', () => {
           url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
           body: {
             name: `category in ${locale}`,
-            locale: locale,
+            locale,
           },
         });
+
         expect(res.statusCode).toBe(200);
         expect(res.body.locale).toBe(locale);
       }
-
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      data.categories.push(res.body);
+      data.categories.push(body);
+    });
+
+    test.skip('should not be able to duplicate unique field values within the same locale', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::category.category`,
+        body: {
+          name: `category in english`,
+        },
+      });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toEqual('This attribute must be unique');
     });
   });
 

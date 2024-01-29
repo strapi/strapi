@@ -39,7 +39,9 @@ export declare namespace Find {
 export declare namespace FindOne {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -101,7 +103,9 @@ export declare namespace AutoClone {
 export declare namespace Clone {
   export interface Request {
     body: Schema.Attributes;
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -121,7 +125,9 @@ export declare namespace Clone {
 export declare namespace Update {
   export interface Request {
     body: Entity;
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -142,7 +148,9 @@ export declare namespace Update {
 export declare namespace Delete {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -162,7 +170,9 @@ export declare namespace Delete {
 export declare namespace Publish {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -183,7 +193,9 @@ export declare namespace Publish {
 export declare namespace Unpublish {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -271,7 +283,9 @@ export declare namespace BulkUnpublish {
 export declare namespace CountDraftRelations {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {

@@ -69,7 +69,7 @@ module.exports = {
     params.push(...targetFieldParams);
 
     // If the options property is defined, transform it to
-    // a type literral node and add it to the params list
+    // a type literal node and add it to the params list
     if (_.isObject(options)) {
       params.push(toTypeLiteral(options));
     }
@@ -93,25 +93,18 @@ module.exports = {
   media() {
     return [withAttributeNamespace('Media')];
   },
-  relation({ uid, attribute }) {
+  relation({ attribute }) {
     const { relation, target } = attribute;
 
     const isMorphRelation = relation.toLowerCase().includes('morph');
 
     if (isMorphRelation) {
-      return [
-        withAttributeNamespace('Relation'),
-        [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
-      ];
+      return [withAttributeNamespace('Relation'), [factory.createStringLiteral(relation, true)]];
     }
 
     return [
       withAttributeNamespace('Relation'),
-      [
-        factory.createStringLiteral(uid, true),
-        factory.createStringLiteral(relation, true),
-        factory.createStringLiteral(target, true),
-      ],
+      [factory.createStringLiteral(relation, true), factory.createStringLiteral(target, true)],
     ];
   },
   component({ attribute }) {

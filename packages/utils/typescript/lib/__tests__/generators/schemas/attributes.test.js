@@ -256,16 +256,13 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
+          expect(typeNode.typeArguments[0].text).toBe('oneToOne');
 
           expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('oneToOne');
-
-          expect(typeNode.typeArguments[2].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[2].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[1].text).toBe('api::bar.bar');
         });
 
         test('Polymorphic relation', () => {
@@ -274,13 +271,10 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('morphMany');
+          expect(typeNode.typeArguments[0].text).toBe('morphMany');
         });
       });
 

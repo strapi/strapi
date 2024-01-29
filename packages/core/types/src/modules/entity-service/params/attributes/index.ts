@@ -64,8 +64,7 @@ export type GetValue<
       // Relation
       [
         Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
+        TAttribute extends Attribute.Relation<infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,
               RelationInputValue<TRelationKind>
