@@ -87,6 +87,14 @@ describe('history-version service', () => {
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(2);
 
+    // Publish and unpublish actions should be saved in history
+    createMock.mockClear();
+    context.action = 'publish';
+    await historyMiddlewareFunction(context, next);
+    context.action = 'unpublish';
+    await historyMiddlewareFunction(context, next);
+    expect(createMock).toHaveBeenCalledTimes(2);
+
     // Other actions should be ignored
     createMock.mockClear();
     context.action = 'findOne';

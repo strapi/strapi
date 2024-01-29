@@ -24,7 +24,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       // TODO: replace by strapi.documents.use once it supports multiple actions at once
       strapi.documents?.middlewares.add('_all', '_all', (context, next) => {
         // Ignore actions that don't mutate documents
-        if (!['create', 'update'].includes(context.action)) {
+        if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
           return next(context);
         }
 
