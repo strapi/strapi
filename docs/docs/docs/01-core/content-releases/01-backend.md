@@ -199,4 +199,4 @@ When a Content Type is deleted, delete all actions containing entries from that 
 
 ## Subscribing to Lifecycles Events
 
-We also make sure to subscribe the delete events on the database. So we can remove actions with entries just deleted.
+When an entry is deleted delete all actions containing that entry.
