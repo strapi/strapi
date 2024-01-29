@@ -26,7 +26,7 @@ import type {
 import type { Entity, UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
 
-interface Locale extends Entity {
+export interface Locale extends Entity {
   name: string;
   code: string;
 }
@@ -52,7 +52,15 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
     const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
 
-    await getService('release-validation', { strapi }).validatePendingReleasesLimit();
+    const { validatePendingReleasesLimit, validateUniqueNameForPendingRelease } = getService(
+      'release-validation',
+      { strapi }
+    );
+
+    await Promise.all([
+      validatePendingReleasesLimit(),
+      validateUniqueNameForPendingRelease(releaseWithCreatorFields.name),
+    ]);
 
     return strapi.entityService.create(RELEASE_MODEL_UID, {
       data: releaseWithCreatorFields,
