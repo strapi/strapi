@@ -100,7 +100,20 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       strapi.get('policies').add(namespace, rawModule.policies);
       strapi.get('middlewares').add(namespace, rawModule.middlewares);
       strapi.get('controllers').add(namespace, rawModule.controllers);
-      strapi.get('config').set(uidToPath(namespace), rawModule.config);
+
+      // We need to move user apis to a custom namespace to avoid conflicts with Strapi api
+      // For example, an api named "rest" will be found in config.get('api.custom.rest')
+      const normalizedNamespace = namespace.toLowerCase();
+      if (normalizedNamespace.startsWith('api::')) {
+        // insert 'custom' after api::
+        const safeNamespace = `${namespace.substring(
+          0,
+          namespace.indexOf('::') + 2
+        )}custom.${namespace.substring(namespace.indexOf('::') + 2)}`;
+        strapi.container.get('config').set(uidToPath(safeNamespace), rawModule.config);
+      } else {
+        strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
+      }
     },
     get routes() {
       return rawModule.routes ?? {};
