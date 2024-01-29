@@ -378,12 +378,12 @@ const ListButton = ({ block, format }: ListButtonProps) => {
           Transforms.setNodes(editor, { format }, { at: currentListPath });
         } else {
           // Format is same, convert selected list-item to paragraph
-          blocks['paragraph'].handleConvert?.(editor);
+          blocks['paragraph'].handleConvert!(editor);
         }
       }
     } else {
       // If selection is not a list then convert it to list
-      blocks[`list-${format}`].handleConvert?.(editor);
+      blocks[`list-${format}`].handleConvert!(editor);
     }
   };
 
