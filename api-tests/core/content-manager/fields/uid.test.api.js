@@ -127,7 +127,7 @@ describe('Test type UID', () => {
       await builder.cleanup();
     });
 
-    test('Values should only be unique within the same locale', async () => {
+    test('Values should not have to be unique across different locales', async () => {
       const value = 'valid-uid';
 
       const endpoint = '/content-manager/collection-types/api::withuid.withuid';
