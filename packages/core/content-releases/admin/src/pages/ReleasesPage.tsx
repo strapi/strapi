@@ -74,15 +74,19 @@ export const ReleasesLayout = ({
           defaultMessage: 'Releases',
         })}
         subtitle={
-          !isLoading &&
-          formatMessage(
-            {
-              id: 'content-releases.pages.Releases.header-subtitle',
-              defaultMessage:
-                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-            },
-            { number: totalReleases }
-          )
+          !isLoading
+            ? formatMessage(
+                {
+                  id: 'content-releases.pages.Releases.header-subtitle',
+                  defaultMessage:
+                    '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+                },
+                { number: totalReleases }
+              )
+            : formatMessage({
+                id: 'content-releases.pages.Releases.header-subtitle-default',
+                defaultMessage: 'No releases',
+              })
         }
         primaryAction={
           <CheckPermissions permissions={PERMISSIONS.create}>
