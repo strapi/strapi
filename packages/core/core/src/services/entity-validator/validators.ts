@@ -10,7 +10,6 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
   model: Schema.ContentType;
   updatedAttribute: { name: string; value: unknown };
   entity: Record<string, unknown> | null;
-  locale?: string;
 }
 
 interface ValidatorOptions {

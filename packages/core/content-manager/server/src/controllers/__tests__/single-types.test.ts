@@ -150,7 +150,9 @@ describe('Single Types', () => {
               assocCreatorRoles(entity: any) {
                 return entity;
               },
-              exists: jest.fn(() => false),
+              exists() {
+                return false;
+              },
               create: createFn,
             },
             'document-metadata': {
