@@ -1,5 +1,4 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import get from 'lodash/get';
 
 import {
   CreateReleaseAction,
@@ -209,7 +208,8 @@ const releaseApi = createApi({
 
           const patchResult = dispatch(
             releaseApi.util.updateQueryData('getReleaseActions', paramsWithoutActionId, (draft) => {
-              const action = get(draft.data, actionPath);
+              const [key, index] = actionPath;
+              const action = draft.data[key][index];
 
               if (action) {
                 action.type = body.type;
