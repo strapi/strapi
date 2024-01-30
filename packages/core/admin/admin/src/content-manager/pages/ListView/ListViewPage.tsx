@@ -6,7 +6,6 @@ import {
   Button,
   ContentLayout,
   HeaderLayout,
-  useNotifyAT,
   Flex,
   Td,
   Tr,
@@ -15,66 +14,48 @@ import {
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import {
-  findMatchingPermissions,
-  NoPermissions,
   SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
-  useRBACProvider,
   useTracking,
-  Link,
   useAPIErrorHandler,
-  useCollator,
   useStrapiApp,
-  Table as HelperPluginTable,
   PaginationURLQuery,
   PageSizeURLQuery,
-  Permission,
   LoadingIndicatorPage,
-  useRBAC,
-  FilterData,
+  AnErrorOccurred,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate, Link as ReactRouterLink, useParams, Navigate } from 'react-router-dom';
+import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
-import { useTypedSelector } from '../../../core/store/hooks';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { useAdminUsers } from '../../../services/users';
-import { isBaseQueryError } from '../../../utils/baseQuery';
-import { CREATOR_FIELDS } from '../../constants/attributes';
+import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
+import { useDoc } from '../../hooks/useDocument';
 import {
-  useAutoCloneDocumentMutation,
-  useDeleteDocumentMutation,
-  useDeleteManyDocumentsMutation,
-  useGetAllDocumentsQuery,
-  useUnpublishManyDocumentsMutation,
-} from '../../services/documents';
-import { buildValidGetParams } from '../../utils/api';
-import { FormattedLayouts, ListLayoutRow } from '../../utils/layouts';
-import { generatePermissionsObject } from '../../utils/permissions';
+  ListFieldLayout,
+  convertListLayoutToFieldLayouts,
+  useDocumentLayout,
+} from '../../hooks/useDocumentLayout';
+import { useSyncRbac } from '../../hooks/useSyncRbac';
+import { useDeleteDocumentMutation, useGetAllDocumentsQuery } from '../../services/documents';
+import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
 
-import { AdminUsersFilter } from './components/AdminUsersFilter';
-import {
-  AutoCloneFailureModal,
-  type ProhibitedCloningField,
-} from './components/AutoCloneFailureModal';
-import { BulkActionButtons } from './components/BulkActions/Buttons';
-import { Filter } from './components/Filter';
+import { Filters } from './components/Filters';
 import { Table } from './components/Table';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
-import { useAllowedAttributes } from './hooks/useAllowedAttributes';
 
-import type { Entity } from '@strapi/types';
+import type { Documents } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
@@ -82,270 +63,57 @@ const REVIEW_WORKFLOW_COLUMNS_CELL_CE = {
   ReviewWorkflowsStageEE: () => null,
   ReviewWorkflowsAssigneeEE: () => null,
 };
-const REVIEW_WORKFLOW_FILTER_CE: FilterData[] = [];
-const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableHeader extends Omit<ListLayoutRow, 'metadatas'> {
-  metadatas: ListLayoutRow['metadatas'] & {
-    label: string;
-  };
-  cellFormatter?: (
-    data: Contracts.CollectionTypes.Find.Response['results'][number],
-    header: Omit<TableHeader, 'cellFormatter'>
-  ) => React.ReactNode;
-}
-
-interface ListViewPageProps {
-  canCreate?: boolean;
-  canDelete?: boolean;
-  canRead?: boolean;
-  canPublish?: boolean;
-  layout: FormattedLayouts;
-  slug: string;
-}
-
-const ListViewPage = ({
-  canCreate,
-  canDelete,
-  canRead,
-  canPublish,
-  layout,
-  slug,
-}: ListViewPageProps) => {
-  const { contentType } = layout;
-  const {
-    info,
-    options,
-    metadatas,
-    settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-  } = contentType;
-  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
-  const toggleNotification = useNotification();
+const ListViewPage = () => {
   const { trackUsage } = useTracking();
-  const { allPermissions } = useRBACProvider();
-  const { notifyStatus } = useNotifyAT();
+  const navigate = useNavigate();
+  const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  useFocusWhenNavigate();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
-  const allowedAttributes = useAllowedAttributes(contentType, slug);
+
+  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
+
+  const { model, schema } = useDoc();
+  const { list } = useDocumentLayout(model);
+  const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
+
+  React.useEffect(() => {
+    setDisplayedHeaders(list.layout);
+  }, [list.layout]);
+
+  const handleSetHeaders = (headers: string[]) => {
+    setDisplayedHeaders(
+      convertListLayoutToFieldLayouts(headers, schema!.attributes, list.metadatas)
+    );
+  };
+
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
-    filters?: {
-      $and: Array<{
-        [key: string]: {
-          id?: {
-            $eq?: string;
-            $ne?: string;
-          };
-        };
-      }>;
-    };
-  }>();
-  const navigate = useNavigate();
-  const { formatMessage, locale } = useIntl();
-  const formatter = useCollator(locale, {
-    sensitivity: 'base',
+    page?: string;
+    pageSize?: string;
+    sort?: string;
+  }>({
+    page: '1',
+    pageSize: list.settings.pageSize.toString(),
+    sort: list.settings.defaultSortBy
+      ? `${list.settings.defaultSortBy}:${list.settings.defaultSortOrder}`
+      : '',
   });
 
-  const selectedUserIds =
-    query?.filters?.$and?.reduce<Entity.ID[]>((acc, filter) => {
-      const [key, value] = Object.entries(filter)[0];
-      const id = value.id?.$eq || value.id?.$ne;
-
-      // TODO: strapi_assignee should not be in here and rather defined
-      // in the ee directory.
-      if (id && USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
-        acc.push(id);
-      }
-
-      return acc;
-    }, []) ?? [];
-
-  const { data: userData, isLoading: isLoadingAdminUsers } = useAdminUsers(
-    { filters: { id: { $in: selectedUserIds } } },
-    {
-      // fetch the list of admin users only if the filter contains users and the
-      // current user has permissions to display users
-      skip:
-        selectedUserIds.length === 0 ||
-        findMatchingPermissions(allPermissions, [
-          {
-            action: 'admin::users.read',
-            subject: null,
-          },
-        ]).length === 0,
-    }
-  );
-
-  const { users = [] } = userData ?? {};
-
-  useFocusWhenNavigate();
-
-  const params = React.useMemo(() => buildValidGetParams(query), [query]);
-  const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
-
-  const displayedAttributeFilters = allowedAttributes.map((name) => {
-    const attribute = contentType.attributes[name];
-
-    const trackedEvent = {
-      name: 'didFilterEntries',
-      properties: { useRelation: attribute.type === 'relation' },
-    } as const;
-
-    const { mainField, label } = metadatas[name].list;
-
-    const filter: FilterData = {
-      name,
-      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
-      fieldSchema: {
-        type: attribute.type,
-        options: 'enum' in attribute ? attribute.enum : [],
-        mainField,
-      },
-      trackedEvent,
-    };
-
-    if (
-      attribute.type === 'relation' &&
-      'target' in attribute &&
-      attribute.target === 'admin::user'
-    ) {
-      filter.metadatas = {
-        ...filter.metadatas,
-        customOperators: [
-          {
-            intlLabel: {
-              id: 'components.FilterOptions.FILTER_TYPES.$eq',
-              defaultMessage: 'is',
-            },
-            value: '$eq',
-          },
-          {
-            intlLabel: {
-              id: 'components.FilterOptions.FILTER_TYPES.$ne',
-              defaultMessage: 'is not',
-            },
-            value: '$ne',
-          },
-        ],
-        customInput: AdminUsersFilter,
-        options: users.map((user) => ({
-          label: getDisplayName(user, formatMessage),
-          customValue: user.id.toString(),
-        })),
-      };
-
-      filter.fieldSchema.mainField = {
-        ...mainField,
-        name: 'id',
-      };
-    }
-
-    return filter;
+  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const { data, error, isLoading } = useGetAllDocumentsQuery({
+    model,
+    params,
   });
 
-  const hasReviewWorkflows = options?.reviewWorkflows ?? false;
-
-  const reviewWorkflowColumns = useEnterprise(
-    REVIEW_WORKFLOW_COLUMNS_CE,
-    async () =>
-      (await import('../../../../../ee/admin/src/content-manager/pages/ListView/constants'))
-        .REVIEW_WORKFLOW_COLUMNS_EE,
-    {
-      enabled: !!options?.reviewWorkflows,
-    }
-  );
-
-  const ReviewWorkflowsColumns = useEnterprise(
-    REVIEW_WORKFLOW_COLUMNS_CELL_CE,
-    async () => {
-      const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
-        '../../../../../ee/admin/src/content-manager/pages/ListView/components/ReviewWorkflowsColumn'
-      );
-
-      return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
-    },
-    {
-      enabled: hasReviewWorkflows,
-    }
-  );
-
-  const reviewWorkflowFilter = useEnterprise(
-    REVIEW_WORKFLOW_FILTER_CE,
-    async () =>
-      (await import('../../../../../ee/admin/src/content-manager/pages/ListView/constants'))
-        .REVIEW_WORKFLOW_FILTERS,
-    {
-      combine(ceFilters, eeFilters) {
-        return [
-          ...ceFilters,
-          ...eeFilters
-            .filter((eeFilter) => {
-              // do not display the filter at all, if the current user does
-              // not have permissions to read admin users
-              if (eeFilter.name === 'strapi_assignee') {
-                return (
-                  findMatchingPermissions(allPermissions, [
-                    {
-                      action: 'admin::users.read',
-                      subject: null,
-                    },
-                  ]).length > 0
-                );
-              }
-
-              return true;
-            })
-            .map((eeFilter) => ({
-              ...eeFilter,
-              metadatas: {
-                ...eeFilter.metadatas,
-                // the stage filter needs the current content-type uid to fetch
-                // the list of stages that can be assigned to this content-type
-                ...(eeFilter.name === 'strapi_stage' ? { uid: contentType.uid } : {}),
-
-                // translate the filter label
-                label: formatMessage(eeFilter.metadatas.label),
-
-                // `options` allows the filter-tag to render the displayname
-                // of a user over a plain id
-                options:
-                  eeFilter.name === 'strapi_assignee'
-                    ? users.map((user) => ({
-                        label: getDisplayName(user, formatMessage),
-                        customValue: user.id.toString(),
-                      }))
-                    : undefined,
-              },
-            })),
-        ];
-      },
-
-      defaultValue: [],
-
-      // we have to wait for admin users to be fully loaded, because otherwise
-      // combine is called to early and does not contain the latest state of
-      // the users array
-      enabled: hasReviewWorkflows && !isLoadingAdminUsers,
-    }
-    /**
-     * this is cast because the data returns MessageDescriptor
-     * as `metadatas.label` _then_ we turn it to a string.
-     */
-  ) as FilterData[];
-
-  const { data, error, isLoading, refetch } = useGetAllDocumentsQuery(
-    {
-      model: slug,
-      query: params,
-    },
-    {
-      skip: !canRead,
-    }
-  );
-
+  /**
+   * If the API returns an error, display a notification
+   */
   React.useEffect(() => {
     if (error) {
       toggleNotification({
@@ -355,84 +123,100 @@ const ListViewPage = ({
     }
   }, [error, formatAPIError, toggleNotification]);
 
+  const { results = [], pagination } = data ?? {};
+
   React.useEffect(() => {
-    if (data?.pagination) {
-      const { pagination } = data;
-
-      if (pagination.page && pagination.page > pagination.pageCount && pagination.pageCount > 0) {
-        const query = {
-          ...params,
-          page: pagination.pageCount,
-        };
-
-        navigate({
-          search: stringify(query),
-        });
-
-        return;
-      }
-
-      notifyStatus(
-        formatMessage(
-          {
-            id: getTranslation('utils.data-loaded'),
-            defaultMessage:
-              '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
-          },
-          // Using the plural form
-          { number: pagination.pageSize }
-        )
+    if (pagination && pagination.pageCount > 0 && pagination.page > pagination.pageCount) {
+      navigate(
+        {
+          search: stringify({
+            ...query,
+            page: pagination.pageCount,
+          }),
+        },
+        { replace: true }
       );
     }
-  }, [data, formatMessage, notifyStatus, params, navigate]);
+  }, [pagination, formatMessage, query, navigate]);
 
-  const [deleteManyDocuments] = useDeleteManyDocumentsMutation();
-  const handleConfirmDeleteAllData = React.useCallback(
-    async (ids: Contracts.CollectionTypes.BulkDelete.Request['body']['ids']) => {
-      try {
-        const res = await deleteManyDocuments({
-          model: slug,
-          ids,
-        });
+  const { canCreate } = useDocumentRBAC('ListViewPage', ({ canCreate }) => ({
+    canCreate,
+  }));
 
-        if ('error' in res) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(res.error),
-          });
-
-          return;
-        }
-
-        trackUsage('didBulkDeleteEntries');
-
-        /**
-         * TODO: add a success message?
-         */
-      } catch (err) {
-        toggleNotification({
-          type: 'warning',
-          message: {
-            id: 'notification.error',
-            defaultMessage: "Couldn't delete documents, an error occurred.",
-          },
-        });
-      }
-    },
-    [deleteManyDocuments, slug, trackUsage, toggleNotification, formatAPIError]
+  /* -------------------------------------------------------------------------------------------------
+   * Create all our table headers and run the hook for plugins to inject.
+   * -----------------------------------------------------------------------------------------------*/
+  const reviewWorkflowColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (await import('../../../../../ee/admin/src/content-manager/pages/ListView/constants'))
+        .REVIEW_WORKFLOW_COLUMNS_EE,
+    {
+      enabled: schema?.options?.reviewWorkflows,
+    }
   );
+  const ReviewWorkflowsColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CELL_CE,
+    async () => {
+      const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
+        '../../../../../ee/admin/src/content-manager/pages/ListView/components/ReviewWorkflowsColumn'
+      );
+      return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
+    },
+    {
+      enabled: schema?.options?.reviewWorkflows,
+    }
+  );
+
+  const { runHookWaterfall } = useStrapiApp();
+  /**
+   * Run the waterfall and then inject our additional table headers.
+   */
+  const tableHeaders = React.useMemo(() => {
+    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
+      displayedHeaders,
+      layout: list,
+    });
+
+    const formattedHeaders = headers.displayedHeaders.map<ListFieldLayout>((header) => {
+      return {
+        ...header,
+        name: `${header.name}${header.mainField ? `.${header.mainField}` : ''}`,
+      };
+    });
+
+    formattedHeaders.push({
+      attribute: {
+        type: 'custom',
+      },
+      name: 'publishedAt',
+      label: {
+        id: getTranslation(`containers.ListPage.table-headers.publishedAt`),
+        defaultMessage: 'publishedAt',
+      },
+      searchable: false,
+      sortable: true,
+    } satisfies ListFieldLayout);
+
+    if (reviewWorkflowColumns) {
+      formattedHeaders.push(...reviewWorkflowColumns);
+    }
+    return formattedHeaders;
+  }, [displayedHeaders, list, reviewWorkflowColumns, runHookWaterfall]);
+
+  /* -------------------------------------------------------------------------------------------------
+   * Methods
+   * -----------------------------------------------------------------------------------------------*/
 
   const [deleteDocument] = useDeleteDocumentMutation();
   const handleConfirmDeleteData = React.useCallback(
-    async (idToDelete: Entity.ID) => {
+    async (idToDelete: Documents.ID) => {
       try {
         const res = await deleteDocument({
-          model: slug,
+          model,
           collectionType: 'collection-types',
           id: idToDelete,
-          params,
         });
-
         if ('error' in res) {
           toggleNotification({
             type: 'warning',
@@ -440,7 +224,6 @@ const ListViewPage = ({
           });
           return;
         }
-
         toggleNotification({
           type: 'success',
           message: {
@@ -458,236 +241,55 @@ const ListViewPage = ({
         });
       }
     },
-    [deleteDocument, slug, toggleNotification, formatAPIError]
+    [deleteDocument, model, toggleNotification, formatAPIError]
   );
 
-  const [unpublishManyDocuments] = useUnpublishManyDocumentsMutation();
+  if (isLoading) {
+    return (
+      <Main aria-busy={true}>
+        <LoadingIndicatorPage />
+      </Main>
+    );
+  }
 
-  const handleConfirmUnpublishAllData = async (
-    selectedEntries: Contracts.CollectionTypes.BulkUnpublish.Request['body']['ids']
-  ) => {
-    try {
-      const res = await unpublishManyDocuments({
-        model: slug,
-        ids: selectedEntries,
-      });
+  if (error) {
+    return (
+      <Main height="100%">
+        <Flex alignItems="center" height="100%" justifyContent="center">
+          <AnErrorOccurred />
+        </Flex>
+      </Main>
+    );
+  }
 
-      if ('error' in res) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(res.error),
-        });
-        return;
-      }
+  const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
 
-      toggleNotification({
-        type: 'success',
-        message: {
-          id: 'content-manager.success.record.unpublish',
-          defaultMessage: 'Unpublished',
-        },
-      });
-    } catch (err) {
-      toggleNotification({
-        type: 'warning',
-        message: {
-          id: 'notification.error',
-          defaultMessage: "Couldn't unpublish documents, an error occurred.",
-        },
-      });
-    }
-  };
-
-  const headerLayoutTitle = formatMessage({
-    id: info.displayName,
-    defaultMessage:
-      info.displayName ||
-      formatMessage({
-        id: getTranslation('header.name'),
-        defaultMessage: 'Content',
-      }),
-  });
-
-  const { runHookWaterfall } = useStrapiApp();
-
-  const displayedHeaders = useTypedSelector(
-    (state) => state['content-manager_listView'].displayedHeaders
-  );
-
-  const tableHeaders: TableHeader[] = React.useMemo(() => {
-    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
-      displayedHeaders,
-      layout,
-    });
-
-    const formattedHeaders = headers.displayedHeaders.map((header) => {
-      if (header.fieldSchema.type === 'relation') {
-        return {
-          ...header,
-          metadatas: {
-            ...header.metadatas,
-            label: formatMessage({
-              id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
-              defaultMessage: header.metadatas.label,
-            }),
-          },
-          name: `${header.name}.${header.metadatas.mainField?.name ?? ''}`,
-        } satisfies TableHeader;
-      }
-
-      return {
-        ...header,
-        metadatas: {
-          ...header.metadatas,
-          label: formatMessage({
-            id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
-            defaultMessage: header.metadatas.label,
-          }),
-        },
-      } satisfies TableHeader;
-    });
-
-    formattedHeaders.push({
-      key: '__published_at_temp_key__',
-      name: 'publishedAt',
-      fieldSchema: {
-        type: 'custom',
-      },
-      metadatas: {
-        label: formatMessage({
-          id: getTranslation(`containers.ListPage.table-headers.publishedAt`),
-          defaultMessage: 'publishedAt',
-        }),
-        searchable: false,
-        sortable: true,
-      },
-    } satisfies TableHeader);
-
-    if (reviewWorkflowColumns) {
-      formattedHeaders.push(
-        ...reviewWorkflowColumns.map((column) => {
-          return {
-            ...column,
-            metadatas: {
-              ...column.metadatas,
-              label: formatMessage(column.metadatas.label),
-            },
-          } satisfies TableHeader;
-        })
-      );
-    }
-
-    return formattedHeaders;
-  }, [runHookWaterfall, displayedHeaders, layout, reviewWorkflowColumns, formatMessage]);
-
-  const handleRowClick = (id: Entity.ID) => () => {
+  const handleRowClick = (id: Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
     navigate({
       pathname: id.toString(),
-      search: pluginsQueryParams,
+      search: stringify({ plugins: query.plugins }),
     });
   };
 
-  const [autoCloneDocument] = useAutoCloneDocumentMutation();
-  const [clonedEntryId, setClonedEntryId] = React.useState<Entity.ID | null>(null);
-  const [prohibitedCloningFields, setProhibitedCloningFields] = React.useState<
-    ProhibitedCloningField[]
-  >([]);
-
-  const handleCloneClick =
-    (id: Contracts.CollectionTypes.AutoClone.Params['sourceId']) => async () => {
-      try {
-        // const { data } = await post<Contracts.CollectionTypes.AutoClone.Response>(
-        //   `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
-        // );
-
-        const res = await autoCloneDocument({
-          model: contentType.uid,
-          sourceId: id,
-          query: pluginsQueryParams,
-        });
-
-        if ('data' in res) {
-          navigate({
-            pathname: res.data.id.toString(),
-            search: pluginsQueryParams,
-          });
-        } else {
-          if (
-            isBaseQueryError(res.error) &&
-            (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
-          ) {
-            // @ts-expect-error – TODO: fix this type assertion to know that we have the prohibitedFields
-            const { prohibitedFields } = res.error.details;
-            setClonedEntryId(id);
-            setProhibitedCloningFields(prohibitedFields);
-          } else {
-            toggleNotification({
-              type: 'warning',
-              message: formatAPIError(res.error),
-            });
-          }
-        }
-      } catch (err) {
-        /**
-         * If something odd happens, redirect to the clone route and
-         * display a much more generic error message.
-         */
-        navigate(
-          {
-            pathname: `create/clone/${id}`,
-            search: pluginsQueryParams,
-          },
-          {
-            state: {
-              error: formatMessage({
-                id: 'notification.error',
-                defaultMessage: "Couldn't clone entry, an error occurred.",
-              }),
-            },
-          }
-        );
-      }
-    };
-
-  // Add 1 column for the checkbox and 1 for the actions
-  const colCount = tableHeaders.length + 2;
-
-  // Block rendering until the review stage component is fully loaded in EE
-  if (!ReviewWorkflowsColumns) {
-    return null;
-  }
-
-  const { results = [], pagination } = data ?? {};
-
   return (
-    <Main aria-busy={isLoading}>
+    <Main>
       <HeaderLayout
-        primaryAction={
-          canCreate ? <CreateButton params={query.plugins ? pluginsQueryParams : ''} /> : null
-        }
-        subtitle={
-          canRead
-            ? formatMessage(
-                {
-                  id: getTranslation('pages.ListView.header-subtitle'),
-                  defaultMessage:
-                    '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-                },
-                { number: pagination?.total }
-              )
-            : undefined
-        }
-        title={headerLayoutTitle}
+        primaryAction={canCreate ? <CreateButton /> : null}
+        subtitle={formatMessage(
+          {
+            id: getTranslation('pages.ListView.header-subtitle'),
+            defaultMessage:
+              '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+          },
+          { number: pagination?.total }
+        )}
+        title={contentTypeTitle}
         navigationAction={
-          <Link
-            startIcon={<ArrowLeft />}
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
-            to=""
-          >
+          /**
+           * TODO: sort out back link behaviour, part of https://strapi-inc.atlassian.net/browse/CONTENT-2173
+           */
+          <Link startIcon={<ArrowLeft />}>
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',
@@ -695,245 +297,181 @@ const ListViewPage = ({
           </Link>
         }
       />
-      {!canRead && (
-        <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
-      )}
-      {canRead && (
-        <ActionLayout
-          endActions={
-            <>
-              <InjectionZone area="contentManager.listView.actions" />
-              <ViewSettingsMenu slug={slug} />
-            </>
-          }
-          startActions={
-            <>
-              {isSearchable && (
-                <SearchURLQuery
-                  label={formatMessage(
-                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                    { target: headerLayoutTitle }
-                  )}
-                  placeholder={formatMessage({
-                    id: 'global.search',
-                    defaultMessage: 'Search',
-                  })}
-                  trackedEvent="didSearch"
-                />
-              )}
-              {isFilterable && !isLoadingAdminUsers && (
-                <Filter
-                  displayedFilters={[...displayedAttributeFilters, ...reviewWorkflowFilter].sort(
-                    (a, b) => formatter.compare(a.metadatas.label, b.metadatas.label)
-                  )}
-                />
-              )}
-            </>
-          }
-        />
-      )}
+      <ActionLayout
+        endActions={
+          <>
+            <InjectionZone area="contentManager.listView.actions" />
+            <ViewSettingsMenu
+              setHeaders={handleSetHeaders}
+              resetHeaders={() => setDisplayedHeaders(list.layout)}
+              headers={displayedHeaders.map((header) => header.name)}
+            />
+          </>
+        }
+        startActions={
+          <>
+            {list.settings.searchable && (
+              <SearchURLQuery
+                disabled={results.length === 0}
+                label={formatMessage(
+                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                  { target: contentTypeTitle }
+                )}
+                placeholder={formatMessage({
+                  id: 'global.search',
+                  defaultMessage: 'Search',
+                })}
+                trackedEvent="didSearch"
+              />
+            )}
+            {list.settings.filterable && schema ? (
+              <Filters disabled={results.length === 0} schema={schema} />
+            ) : null}
+          </>
+        }
+      />
       <ContentLayout>
-        {canRead ? (
-          <Flex gap={4} direction="column" alignItems="stretch">
-            <HelperPluginTable.Root rows={results} isLoading={isLoading} colCount={colCount}>
-              <HelperPluginTable.ActionBar>
-                <BulkActionButtons
-                  data={data?.results}
-                  refetchData={async () => {
-                    await refetch();
-                  }}
-                  showPublish={canPublish}
-                  showDelete={canDelete}
-                  onConfirmDeleteAll={handleConfirmDeleteAllData}
-                  onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-                />
-              </HelperPluginTable.ActionBar>
-              <HelperPluginTable.Content>
-                <HelperPluginTable.Head>
-                  {/* Bulk action select all checkbox */}
-                  <HelperPluginTable.HeaderCheckboxCell />
-                  {/* Dynamic headers based on fields */}
-                  {tableHeaders.map(({ fieldSchema, key, name, metadatas }) => (
-                    <HelperPluginTable.HeaderCell
-                      key={key}
-                      name={name}
-                      fieldSchemaType={fieldSchema.type}
-                      relationFieldName={metadatas.mainField?.name}
-                      isSortable={metadatas.sortable}
-                      label={metadatas.label}
-                    />
-                  ))}
-                  {/* Visually hidden header for actions */}
-                  <HelperPluginTable.HeaderHiddenActionsCell />
-                </HelperPluginTable.Head>
-                {/* Loading content */}
-                <HelperPluginTable.LoadingBody />
-                {/* Empty content */}
-                <HelperPluginTable.EmptyBody
-                  contentType={headerLayoutTitle}
-                  action={
-                    canCreate ? (
-                      <CreateButton
-                        variant="secondary"
-                        params={query.plugins ? pluginsQueryParams : ''}
-                      />
-                    ) : null
-                  }
-                />
-                <AutoCloneFailureModal
-                  entryId={clonedEntryId}
-                  onClose={() => setClonedEntryId(null)}
-                  prohibitedFields={prohibitedCloningFields}
-                  pluginQueryParams={pluginsQueryParams}
-                />
-                {/* Content */}
-                <Table.Root
-                  onConfirmDelete={handleConfirmDeleteData}
-                  isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
-                  setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
-                >
-                  {results.map((rowData, index) => {
-                    return (
-                      <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
-                        {/* Bulk action row checkbox */}
-                        <Td>
-                          <Table.CheckboxDataCell rowId={rowData.id} index={index} />
-                        </Td>
-                        {/* Field data */}
-                        {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
-                          if (name === 'publishedAt') {
-                            return (
-                              <Td key={key}>
-                                <Status
-                                  width="min-content"
-                                  showBullet={false}
-                                  variant={rowData.publishedAt ? 'success' : 'secondary'}
-                                  size="S"
-                                >
-                                  <Typography
-                                    fontWeight="bold"
-                                    textColor={`${
-                                      rowData.publishedAt ? 'success' : 'secondary'
-                                    }700`}
-                                  >
-                                    {formatMessage({
-                                      id: getTranslation(
-                                        `containers.List.${
-                                          rowData.publishedAt ? 'published' : 'draft'
-                                        }`
-                                      ),
-                                      defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
-                                    })}
-                                  </Typography>
-                                </Status>
-                              </Td>
-                            );
-                          }
-
-                          if (hasReviewWorkflows) {
-                            if (name === 'strapi_stage') {
-                              return (
-                                <Td key={key}>
-                                  {rowData.strapi_stage ? (
-                                    <ReviewWorkflowsColumns.ReviewWorkflowsStageEE
-                                      color={
-                                        rowData.strapi_stage.color ?? lightTheme.colors.primary600
-                                      }
-                                      name={rowData.strapi_stage.name}
-                                    />
-                                  ) : (
-                                    <Typography textColor="neutral800">-</Typography>
-                                  )}
-                                </Td>
-                              );
-                            }
-                            if (name === 'strapi_assignee') {
-                              return (
-                                <Td key={key}>
-                                  {rowData.strapi_assignee ? (
-                                    <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
-                                      user={rowData.strapi_assignee}
-                                    />
-                                  ) : (
-                                    <Typography textColor="neutral800">-</Typography>
-                                  )}
-                                </Td>
-                              );
-                            }
-                          }
-
-                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
-                            // Display the users full name
-                            // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
-                            // In this case, we display a dash
-                            return (
-                              <Td key={key}>
-                                <Typography textColor="neutral800">
-                                  {rowData[name.split('.')[0]]
-                                    ? getDisplayName(rowData[name.split('.')[0]], formatMessage)
-                                    : '-'}
-                                </Typography>
-                              </Td>
-                            );
-                          }
-
-                          if (typeof cellFormatter === 'function') {
-                            return (
-                              <Td key={key}>{cellFormatter(rowData, { key, name, ...rest })}</Td>
-                            );
-                          }
-
+        <Flex gap={4} direction="column" alignItems="stretch">
+          <Table.Root rows={results} isLoading={isLoading} colCount={tableHeaders.length + 2}>
+            <Table.ActionBar />
+            <Table.Content>
+              <Table.Head>
+                {/* Bulk action select all checkbox */}
+                <Table.HeaderCheckboxCell />
+                {/* Dynamic headers based on fields */}
+                {results.length > 0 &&
+                  tableHeaders.map((header) => <Table.HeaderCell key={header.name} {...header} />)}
+              </Table.Head>
+              {/* Loading content */}
+              <Table.LoadingBody />
+              {/* Empty content */}
+              <Table.EmptyBody
+                contentType={contentTypeTitle}
+                action={canCreate ? <CreateButton variant="secondary" /> : null}
+              />
+              {/* Content */}
+              <Table.Body
+                onConfirmDelete={handleConfirmDeleteData}
+                isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
+                setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+              >
+                {results.map((rowData, index) => {
+                  return (
+                    // @ts-expect-error – TODO: fix this with V5 typing
+                    <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
+                      <Td>
+                        <Table.CheckboxDataCell rowId={rowData.id} index={index} />
+                      </Td>
+                      {tableHeaders.map(({ cellFormatter, ...header }) => {
+                        if (header.name === 'publishedAt') {
                           return (
-                            <Td key={key}>
-                              <CellContent
-                                content={rowData[name.split('.')[0]]}
-                                name={name}
-                                contentType={layout.contentType}
-                                rowId={rowData.id}
-                                {...rest}
-                              />
+                            <Td key={header.name}>
+                              <Status
+                                width="min-content"
+                                showBullet={false}
+                                variant={rowData.publishedAt ? 'success' : 'secondary'}
+                                size="S"
+                              >
+                                <Typography
+                                  fontWeight="bold"
+                                  textColor={`${rowData.publishedAt ? 'success' : 'secondary'}700`}
+                                >
+                                  {formatMessage({
+                                    id: getTranslation(
+                                      `containers.List.${
+                                        rowData.publishedAt ? 'published' : 'draft'
+                                      }`
+                                    ),
+                                    defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
+                                  })}
+                                </Typography>
+                              </Status>
                             </Td>
                           );
-                        })}
-                        {/* Actions: edit, duplicate, delete */}
-                        {(canDelete || canPublish) && isBulkable && (
-                          <Td>
-                            <Table.EntityActionsDataCell
+                        }
+                        if (schema?.options?.reviewWorkflows) {
+                          if (header.name === 'strapi_stage') {
+                            return (
+                              <Td key={header.name}>
+                                {rowData.strapi_stage ? (
+                                  <ReviewWorkflowsColumns.ReviewWorkflowsStageEE
+                                    color={
+                                      rowData.strapi_stage.color ?? lightTheme.colors.primary600
+                                    }
+                                    name={rowData.strapi_stage.name}
+                                  />
+                                ) : (
+                                  <Typography textColor="neutral800">-</Typography>
+                                )}
+                              </Td>
+                            );
+                          }
+                          if (header.name === 'strapi_assignee') {
+                            return (
+                              <Td key={header.name}>
+                                {rowData.strapi_assignee ? (
+                                  <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
+                                    user={rowData.strapi_assignee}
+                                  />
+                                ) : (
+                                  <Typography textColor="neutral800">-</Typography>
+                                )}
+                              </Td>
+                            );
+                          }
+                        }
+                        if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
+                          // Display the users full name
+                          // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                          // In this case, we display a dash
+                          return (
+                            <Td key={header.name}>
+                              <Typography textColor="neutral800">
+                                {rowData[header.name.split('.')[0]]
+                                  ? getDisplayName(
+                                      rowData[header.name.split('.')[0]],
+                                      formatMessage
+                                    )
+                                  : '-'}
+                              </Typography>
+                            </Td>
+                          );
+                        }
+                        if (typeof cellFormatter === 'function') {
+                          return <Td key={header.name}>{cellFormatter(rowData, header)}</Td>;
+                        }
+                        return (
+                          <Td key={header.name}>
+                            <CellContent
+                              content={rowData[header.name.split('.')[0]]}
                               rowId={rowData.id}
-                              index={index}
-                              setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
-                              canCreate={canCreate}
-                              canDelete={canDelete}
-                              handleCloneClick={handleCloneClick}
+                              {...header}
                             />
                           </Td>
-                        )}
-                      </Tr>
-                    );
-                  })}
-                </Table.Root>
-              </HelperPluginTable.Content>
-            </HelperPluginTable.Root>
-            <Flex alignItems="flex-end" justifyContent="space-between">
-              <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
-              <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
-            </Flex>
+                        );
+                      })}
+                    </Tr>
+                  );
+                })}
+              </Table.Body>
+            </Table.Content>
+          </Table.Root>
+          <Flex alignItems="flex-end" justifyContent="space-between">
+            <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
+            <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
           </Flex>
-        ) : (
-          <NoPermissions />
-        )}
+        </Flex>
       </ContentLayout>
     </Main>
   );
 };
 
-interface CreateButtonProps extends Pick<ButtonProps, 'variant'> {
-  params?: string;
-}
+interface CreateButtonProps extends Pick<ButtonProps, 'variant'> {}
 
-const CreateButton = ({ params = '', variant }: CreateButtonProps) => {
+const CreateButton = ({ variant }: CreateButtonProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const [{ rawQuery }] = useQueryParams();
 
   return (
     <Button
@@ -947,7 +485,7 @@ const CreateButton = ({ params = '', variant }: CreateButtonProps) => {
       // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
         pathname: 'create',
-        search: params,
+        search: rawQuery,
       }}
     >
       {formatMessage({
@@ -962,26 +500,36 @@ const CreateButton = ({ params = '', variant }: CreateButtonProps) => {
  * ProtectedListViewPage
  * -----------------------------------------------------------------------------------------------*/
 
-interface ProtectedListViewPageProps extends Omit<ListViewPageProps, 'slug'> {
-  permissions?: Permission[] | null;
-}
-
-const ProtectedListViewPage = ({ permissions, ...restProps }: ProtectedListViewPageProps) => {
-  const { slug } = useParams<{ slug: string }>();
-  const viewPermissions = React.useMemo(() => generatePermissionsObject(slug), [slug]);
-
-  const { isLoading, allowedActions } = useRBAC(viewPermissions, permissions ?? []);
+const ProtectedListViewPage = () => {
+  const { model } = useDoc();
+  const [{ query }] = useQueryParams();
+  const { permissions = [], isLoading, isError } = useSyncRbac(model, query, 'editView');
 
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return (
+      <Main aria-busy={true}>
+        <LoadingIndicatorPage />
+      </Main>
+    );
   }
 
-  if (!slug) {
-    return <Navigate to="no-content-type" />;
+  if (!isLoading && isError) {
+    return (
+      <Main height="100%">
+        <Flex alignItems="center" height="100%" justifyContent="center">
+          <AnErrorOccurred />
+        </Flex>
+      </Main>
+    );
   }
 
-  return <ListViewPage slug={slug} {...restProps} {...allowedActions} />;
+  return (
+    <CheckPagePermissions permissions={permissions}>
+      <DocumentRBAC permissions={permissions}>
+        <ListViewPage />
+      </DocumentRBAC>
+    </CheckPagePermissions>
+  );
 };
 
 export { ListViewPage, ProtectedListViewPage };
-export type { ListViewPageProps, ProtectedListViewPageProps, TableHeader };

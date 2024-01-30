@@ -46,6 +46,11 @@ describe('ADMIN | new StrapiApp', () => {
             "currentTheme": "system",
           },
         },
+        "content-manager": {
+          "rbac": {
+            "permissions": undefined,
+          },
+        },
         "content-manager_app": {
           "collectionTypeLinks": [],
           "components": [],
@@ -53,29 +58,6 @@ describe('ADMIN | new StrapiApp', () => {
           "isLoading": true,
           "models": [],
           "singleTypeLinks": [],
-        },
-        "content-manager_editViewCrudReducer": {
-          "componentsDataStructure": {},
-          "contentTypeDataStructure": {},
-          "data": null,
-          "isLoading": true,
-          "setModifiedDataOnly": false,
-          "status": "resolved",
-        },
-        "content-manager_editViewLayoutManager": {
-          "currentLayout": {
-            "components": {},
-            "contentType": null,
-          },
-        },
-        "content-manager_listView": {
-          "components": {},
-          "contentType": null,
-          "displayedHeaders": [],
-          "initialDisplayedHeaders": [],
-        },
-        "content-manager_rbacManager": {
-          "permissions": null,
         },
         "contentManagerApi": {
           "config": {

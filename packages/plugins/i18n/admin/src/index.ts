@@ -28,76 +28,74 @@ import { mutateCTBContentTypeSchema } from './utils/schemas';
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    app.addMiddlewares([
-      addCommonFieldsToInitialDataMiddleware,
-      extendCTBAttributeInitialDataMiddleware,
-      extendCTBInitialDataMiddleware,
-      localePermissionMiddleware,
-    ]);
-
-    /**
-     * TODO: this should use the `useInjectReducer` hook when it's exported from the `@strapi/admin` package.
-     */
-    app.addReducers(reducers);
-
-    app.registerPlugin({
-      id: pluginId,
-      initializer: Initializer,
-      isReady: false,
-      name: pluginId,
-    });
+    // app.addMiddlewares([
+    //   addCommonFieldsToInitialDataMiddleware,
+    //   extendCTBAttributeInitialDataMiddleware,
+    //   extendCTBInitialDataMiddleware,
+    //   localePermissionMiddleware,
+    // ]);
+    // /**
+    //  * TODO: this should use the `useInjectReducer` hook when it's exported from the `@strapi/admin` package.
+    //  */
+    // app.addReducers(reducers);
+    // app.registerPlugin({
+    //   id: pluginId,
+    //   initializer: Initializer,
+    //   isReady: false,
+    //   name: pluginId,
+    // });
   },
   bootstrap(app: any) {
-    // Hooks that mutate the collection types links in order to add the locale filter
-    app.registerHook(
-      'Admin/CM/pages/App/mutate-collection-types-links',
-      addLocaleToLinksHook('collection-types')
-    );
-    app.registerHook(
-      'Admin/CM/pages/App/mutate-single-types-links',
-      addLocaleToLinksHook('single-types')
-    );
-    // Hook that adds a column into the CM's LV table
-    app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
-    // Hooks that mutates the edit view layout
-    app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
-    // Add the settings link
-    app.addSettingsLink('global', {
-      intlLabel: {
-        id: getTranslation('plugin.name'),
-        defaultMessage: 'Internationalization',
-      },
-      id: 'internationalization',
-      to: 'internationalization',
-      Component: () =>
-        import('./pages/SettingsPage').then((mod) => ({ default: mod.ProtectedSettingsPage })),
-      permissions: PERMISSIONS.accessMain,
-    });
+    // // Hooks that mutate the collection types links in order to add the locale filter
+    // app.registerHook(
+    //   'Admin/CM/pages/App/mutate-collection-types-links',
+    //   addLocaleToLinksHook('collection-types')
+    // );
+    // app.registerHook(
+    //   'Admin/CM/pages/App/mutate-single-types-links',
+    //   addLocaleToLinksHook('single-types')
+    // );
+    // // Hook that adds a column into the CM's LV table
+    // app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+    // // Hooks that mutates the edit view layout
+    // app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
+    // // Add the settings link
+    // app.addSettingsLink('global', {
+    //   intlLabel: {
+    //     id: getTranslation('plugin.name'),
+    //     defaultMessage: 'Internationalization',
+    //   },
+    //   id: 'internationalization',
+    //   to: 'internationalization',
+    //   Component: () =>
+    //     import('./pages/SettingsPage').then((mod) => ({ default: mod.ProtectedSettingsPage })),
+    //   permissions: PERMISSIONS.accessMain,
+    // });
 
-    app.injectContentManagerComponent('editView', 'informations', {
-      name: 'i18n-locale-filter-edit-view',
-      Component: CMEditViewInjectedComponents,
-    });
+    // app.injectContentManagerComponent('editView', 'informations', {
+    //   name: 'i18n-locale-filter-edit-view',
+    //   Component: CMEditViewInjectedComponents,
+    // });
 
-    app.injectContentManagerComponent('listView', 'actions', {
-      name: 'i18n-locale-filter',
-      Component: LocalePicker,
-    });
+    // app.injectContentManagerComponent('listView', 'actions', {
+    //   name: 'i18n-locale-filter',
+    //   Component: LocalePicker,
+    // });
 
-    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-      name: 'i18n-delete-bullets-in-modal',
-      Component: DeleteModalAdditionalInfo,
-    });
+    // app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+    //   name: 'i18n-delete-bullets-in-modal',
+    //   Component: DeleteModalAdditionalInfo,
+    // });
 
-    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
-      name: 'i18n-publish-bullets-in-modal',
-      Component: PublishModalAdditionalInfo,
-    });
+    // app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+    //   name: 'i18n-publish-bullets-in-modal',
+    //   Component: PublishModalAdditionalInfo,
+    // });
 
-    app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
-      name: 'i18n-unpublish-bullets-in-modal',
-      Component: UnpublishModalAdditionalInfo,
-    });
+    // app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
+    //   name: 'i18n-unpublish-bullets-in-modal',
+    //   Component: UnpublishModalAdditionalInfo,
+    // });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
 

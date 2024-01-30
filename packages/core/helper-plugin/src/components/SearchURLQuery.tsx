@@ -8,6 +8,7 @@ import { TrackingEvent, useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 export interface SearchURLQueryProps {
+  disabled?: boolean;
   label: string;
   placeholder?: string;
   trackedEvent?: TrackingEvent['name'] | null;
@@ -15,6 +16,7 @@ export interface SearchURLQueryProps {
 }
 
 const SearchURLQuery = ({
+  disabled,
   label,
   placeholder,
   trackedEvent,
@@ -81,6 +83,7 @@ const SearchURLQuery = ({
   return (
     <IconButton
       ref={iconButtonRef}
+      disabled={disabled}
       icon={<Icon as={SearchIcon} color="neutral800" />}
       label={formatMessage({ id: 'global.search', defaultMessage: 'Search' })}
       onClick={handleToggle}

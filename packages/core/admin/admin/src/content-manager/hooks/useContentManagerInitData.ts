@@ -15,7 +15,7 @@ import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
-import { ContentManagerAppState, SET_INIT_DATA } from '../pages/App';
+import { ContentManagerAppState, SET_INIT_DATA } from '../layout';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
 import { getTranslation } from '../utils/translations';

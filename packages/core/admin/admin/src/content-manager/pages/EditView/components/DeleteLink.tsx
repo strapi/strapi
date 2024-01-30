@@ -13,10 +13,8 @@ import { useIntl } from 'react-intl';
 
 import { getTranslation } from '../../../utils/translations';
 
-import type { RenderChildProps } from '../../../components/ContentTypeFormWrapper';
-
 interface DeleteLinkProps {
-  onDelete: RenderChildProps['onDelete'];
+  onDelete: (args: unknown) => unknown;
 }
 
 const DeleteLink = ({ onDelete }: DeleteLinkProps) => {
