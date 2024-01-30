@@ -10,36 +10,51 @@ const uidApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({
     getDefaultUID: builder.query<
       Contracts.UID.GenerateUID.Response['data'],
-      Contracts.UID.GenerateUID.Request['body']
+      Contracts.UID.GenerateUID.Request['body'] & {
+        params: Contracts.UID.GenerateUID.Request['query'];
+      }
     >({
-      query: (data) => {
+      query: ({ params, ...data }) => {
         return {
           url: '/content-manager/uid/generate',
           method: 'POST',
           data,
+          config: {
+            params,
+          },
         };
       },
       transformResponse: (response: Contracts.UID.GenerateUID.Response) => response.data,
     }),
     generateUID: builder.mutation<
       Contracts.UID.GenerateUID.Response['data'],
-      Contracts.UID.GenerateUID.Request['body']
+      Contracts.UID.GenerateUID.Request['body'] & {
+        params: Contracts.UID.GenerateUID.Request['query'];
+      }
     >({
-      query: (data) => ({
+      query: ({ params, ...data }) => ({
         url: '/content-manager/uid/generate',
         method: 'POST',
         data,
+        config: {
+          params,
+        },
       }),
       transformResponse: (response: Contracts.UID.GenerateUID.Response) => response.data,
     }),
     getAvailability: builder.query<
       Contracts.UID.CheckUIDAvailability.Response,
-      Contracts.UID.CheckUIDAvailability.Request['body']
+      Contracts.UID.CheckUIDAvailability.Request['body'] & {
+        params: Contracts.UID.CheckUIDAvailability.Request['query'];
+      }
     >({
-      query: (data) => ({
+      query: ({ params, ...data }) => ({
         url: '/content-manager/uid/check-availability',
         method: 'POST',
         data,
+        config: {
+          params,
+        },
       }),
     }),
   }),

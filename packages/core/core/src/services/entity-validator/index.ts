@@ -30,7 +30,8 @@ interface ValidatorMeta<TAttribute = Attribute.Any> {
 }
 
 interface ValidatorContext {
-  isDraft: boolean;
+  isDraft?: boolean;
+  locale?: string | null;
 }
 
 interface AttributeValidatorMetas {
@@ -302,7 +303,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   >(
     model: Shared.ContentTypes[TUID],
     data: TData | Partial<TData> | undefined,
-    options?: { isDraft?: boolean },
+    options?: ValidatorContext,
     entity?: Entity
   ): Promise<TData> => {
     if (!isObject(data)) {
@@ -315,7 +316,10 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
 
     const validator = createModelValidator(createOrUpdate)(
       { model, data, entity },
-      { isDraft: options?.isDraft ?? false }
+      {
+        isDraft: options?.isDraft ?? false,
+        locale: options?.locale ?? null,
+      }
     )
       .test('relations-test', 'check that all relations exist', async function (data) {
         try {

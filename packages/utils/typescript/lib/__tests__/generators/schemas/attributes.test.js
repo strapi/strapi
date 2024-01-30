@@ -249,16 +249,13 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
+          expect(typeNode.typeArguments[0].text).toBe('oneToOne');
 
           expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('oneToOne');
-
-          expect(typeNode.typeArguments[2].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[2].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[1].text).toBe('api::bar.bar');
         });
 
         test('Polymorphic relation', () => {
@@ -267,13 +264,10 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('morphMany');
+          expect(typeNode.typeArguments[0].text).toBe('morphMany');
         });
       });
 
@@ -796,6 +790,16 @@ describe('Attributes', () => {
           expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
             ts.SyntaxKind.TrueKeyword
           );
+        });
+
+        test('Default: <function>', () => {
+          const anyFunction = jest.fn();
+          const attribute = { default: anyFunction };
+
+          const modifiers = getAttributeModifiers(attribute);
+
+          // The default modifier shouldn't be processed when encountering a function
+          expect(modifiers).toHaveLength(0);
         });
       });
     });

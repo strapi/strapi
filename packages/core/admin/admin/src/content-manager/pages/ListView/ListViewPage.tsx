@@ -430,6 +430,7 @@ const ListViewPage = ({
           model: slug,
           collectionType: 'collection-types',
           id: idToDelete,
+          params,
         });
 
         if ('error' in res) {

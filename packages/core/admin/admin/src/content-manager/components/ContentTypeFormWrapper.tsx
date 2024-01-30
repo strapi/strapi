@@ -213,6 +213,7 @@ const ContentTypeFormWrapper = ({
           collectionType,
           model: slug,
           id,
+          params,
         });
 
         if ('error' in res) {
@@ -275,7 +276,7 @@ const ContentTypeFormWrapper = ({
             model: slug,
             sourceId: origin,
             data: restBody,
-            params: query,
+            params,
           });
 
           if ('error' in res) {
@@ -314,7 +315,7 @@ const ContentTypeFormWrapper = ({
           const res = await createDocument({
             model: slug,
             data: body,
-            params: query,
+            params,
           });
 
           if ('error' in res) {
@@ -444,6 +445,7 @@ const ContentTypeFormWrapper = ({
         collectionType,
         model: slug,
         id,
+        params,
       });
 
       if ('error' in res) {
@@ -496,7 +498,7 @@ const ContentTypeFormWrapper = ({
           model: slug,
           id,
           data: body,
-          params: query,
+          params,
         });
 
         if ('error' in res) {
@@ -557,6 +559,7 @@ const ContentTypeFormWrapper = ({
         collectionType,
         model: slug,
         id,
+        params,
       });
 
       if ('error' in res) {

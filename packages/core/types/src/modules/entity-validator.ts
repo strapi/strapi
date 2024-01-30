@@ -8,16 +8,18 @@ type Entity = {
 
 type ID = { id: string | number };
 
+type Options = { isDraft?: boolean; locale?: string };
+
 export interface EntityValidator {
   validateEntityCreation: <TUID extends Common.UID.ContentType>(
     model: Shared.ContentTypes[TUID],
     data: Types.Params.Data.Input<TUID>,
-    options?: { isDraft?: boolean }
+    options?: Options
   ) => Promise<Types.Params.Data.Input<TUID>>;
   validateEntityUpdate: <TUID extends Common.UID.ContentType>(
     model: Shared.ContentTypes[TUID],
     data: Partial<Types.Params.Data.Input<TUID>> | undefined,
-    options?: { isDraft?: boolean },
+    options?: Options,
     entity?: Entity
   ) => Promise<Types.Params.Data.Input<TUID>>;
 }
