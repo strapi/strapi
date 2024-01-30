@@ -171,6 +171,36 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
           yield link;
         }
       }
+
+      if (attribute.morphColumn) {
+        const { typeColumn, idColumn } = attribute.morphColumn;
+
+        const qb = connection
+          .queryBuilder()
+          .select('id', typeColumn.name, idColumn.name)
+          .from(addSchema(metadata.tableName))
+          .whereNotNull(typeColumn.name)
+          .whereNotNull(idColumn.name);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        const entries = await qb;
+
+        for (const entry of entries) {
+          const ref = entry[idColumn.name];
+
+          if (ref !== null) {
+            yield {
+              kind,
+              relation,
+              left: { type: uid, ref: entry.id, field: fieldName },
+              right: { type: entry[typeColumn.name], ref },
+            };
+          }
+        }
+      }
     }
 
     async function* generateAll(uid: string): AsyncGenerator<ILink> {
@@ -270,6 +300,23 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
             await qb.transacting(nestedTrx);
           });
         }
+      }
+
+      if ('morphColumn' in attribute && attribute.morphColumn) {
+        const { morphColumn } = attribute;
+
+        const qb = connection(addSchema(metadata.tableName))
+          .where('id', left.ref)
+          .update({
+            [morphColumn.idColumn.name]: right.ref,
+            [morphColumn.typeColumn.name]: right.type,
+          });
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        await qb;
       }
     };
 
