@@ -55,7 +55,7 @@ describe.skip('Content Manager single types', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: expect.anything(),
       title: 'Title',
     });
@@ -68,7 +68,7 @@ describe.skip('Content Manager single types', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: expect.anything(),
       title: 'Title',
     });

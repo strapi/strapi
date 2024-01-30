@@ -167,6 +167,7 @@ export declare namespace Delete {
 
   export interface Response {
     data: Document;
+    // TODO: Should we return metadata here? It is not returned atm
     meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
