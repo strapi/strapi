@@ -47,12 +47,16 @@ const iconByTypes: Record<Attribute.Kind, React.ReactElement> = {
 };
 
 interface FieldTypeIconProps {
-  type: keyof typeof iconByTypes;
+  type?: keyof typeof iconByTypes;
   customFieldUid?: string;
 }
 
 const FieldTypeIcon = ({ type, customFieldUid }: FieldTypeIconProps) => {
   const customFieldsRegistry = useCustomFields();
+
+  if (!type) {
+    return null;
+  }
 
   let Compo = iconByTypes[type];
 

@@ -1,8 +1,9 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
-import { ListSettingsView } from '../ListSettingsView';
+import { mockData } from '../../../../../tests/mockData';
+import { ListConfiguration } from '../ListConfigurationPage';
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -11,35 +12,31 @@ const LocationDisplay = () => {
 };
 
 const render = ({
-  initialEntries = ['/content-manager/collection-types/api::category.category/configurations/list'],
+  initialEntries = [
+    `/content-manager/collection-types/${mockData.contentManager.contentType}/configurations/list`,
+  ],
 } = {}) => ({
-  ...renderRTL(
-    <Routes>
-      <Route
-        path="/content-manager/:collectionType/:slug/configurations/list"
-        element={<ListSettingsView />}
-      />
-    </Routes>,
-    {
-      initialEntries,
-      renderOptions: {
-        wrapper({ children }) {
-          return (
-            <>
-              {children}
-              <LocationDisplay />
-            </>
-          );
-        },
+  ...renderRTL(<ListConfiguration />, {
+    initialEntries,
+    renderOptions: {
+      wrapper({ children }) {
+        return (
+          <>
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug/configurations/list"
+                element={children}
+              />
+            </Routes>
+            <LocationDisplay />
+          </>
+        );
       },
-    }
-  ),
+    },
+  }),
 });
 
-/**
- * TODO: reimplement this once the ListViewSettings component is fixed
- */
-describe.skip('Configure the List View', () => {
+describe('Configure the List View', () => {
   it('renders and matches the snapshot', async () => {
     render();
 
@@ -60,7 +57,7 @@ describe.skip('Configure the List View', () => {
     /**
      * For each attribute it should have the following
      */
-    ['id', 'json', 'postal_code'].forEach((attribute) => {
+    mockData.contentManager.configuration.contentType.layouts.list.forEach((attribute) => {
       expect(screen.getByRole('button', { name: `Edit ${attribute}` })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: `Delete ${attribute}` })).toBeInTheDocument();
     });
@@ -71,7 +68,7 @@ describe.skip('Configure the List View', () => {
   it('should keep plugins query params when arriving on the page and going back', async () => {
     const { getByRole, user, findByRole, getByText } = render({
       initialEntries: [
-        '/content-manager/collection-types/api::category.category/configurations/list?plugins[i18n][locale]=fr',
+        '/content-manager/collection-types/api::address.address/configurations/list?plugins[i18n][locale]=fr',
       ],
     });
 
@@ -81,9 +78,7 @@ describe.skip('Configure the List View', () => {
 
     await user.click(getByRole('link', { name: 'Back' }));
 
-    expect(
-      getByText('?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr')
-    ).toBeInTheDocument();
+    expect(getByText('?plugins[i18n][locale]=fr')).toBeInTheDocument();
   });
 
   it('should add field', async () => {
@@ -118,7 +113,9 @@ describe.skip('Configure the List View', () => {
 
       fireEvent.click(getByRole('button', { name: 'Finish' }));
 
-      expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
+      );
     });
 
     it('should close edit modal when pressing cancel', async () => {
@@ -132,7 +129,9 @@ describe.skip('Configure the List View', () => {
 
       await user.click(getByRole('button', { name: 'Cancel' }));
 
-      expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument()
+      );
     });
   });
 });

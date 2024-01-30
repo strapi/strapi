@@ -103,18 +103,18 @@ const routes: RouteObject[] = [
           };
         },
       },
-      // {
-      //   path: ':collectionType/:slug/configurations/list',
-      //   lazy: async () => {
-      //     const { ProtectedListSettingsView } = await import(
-      //       './pages/ListSettingsView/ListSettingsView'
-      //     );
+      {
+        path: ':collectionType/:slug/configurations/list',
+        lazy: async () => {
+          const { ProtectedListConfiguration } = await import(
+            './pages/ListConfiguration/ListConfigurationPage'
+          );
 
-      //     return {
-      //       Component: ProtectedListSettingsView,
-      //     };
-      //   },
-      // },
+          return {
+            Component: ProtectedListConfiguration,
+          };
+        },
+      },
       // {
       //   path: ':collectionType/:slug/configurations/edit',
       //   lazy: async () => {

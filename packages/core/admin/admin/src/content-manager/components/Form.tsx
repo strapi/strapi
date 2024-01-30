@@ -8,12 +8,13 @@ import isEqual from 'lodash/isEqual';
 import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
 
-import type { InputProps } from './FormInputs/types';
+import type { InputProps as InputPropsImpl, EnumerationProps } from './FormInputs/types';
 import type * as Yup from 'yup';
 
 /* -------------------------------------------------------------------------------------------------
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
+type InputProps = InputPropsImpl | EnumerationProps;
 
 interface FormValues {
   [field: string]: any;
@@ -47,7 +48,7 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form');
  * -----------------------------------------------------------------------------------------------*/
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue, 'disabled' | 'initialValues'>> {
+  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
   children: React.ReactNode;
   method: 'POST' | 'PUT';
   onSubmit?: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
@@ -87,49 +88,49 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     /**
      * Uses the provided validation schema
      */
-    const validate: FormContextValue['validate'] = React.useCallback(
-      async (setErrors = false) => {
-        if (!props.validationSchema) {
-          return null;
-        }
+    const validate: FormContextValue['validate'] = React.useCallback(async () => {
+      if (!props.validationSchema) {
+        return null;
+      }
 
-        try {
-          await props.validationSchema.validate(state.values, { abortEarly: false });
+      try {
+        await props.validationSchema.validate(state.values, { abortEarly: false });
 
-          return null;
-        } catch (err) {
-          if (isErrorYupValidationError(err)) {
-            let errors: FormErrors = {};
+        return null;
+      } catch (err) {
+        if (isErrorYupValidationError(err)) {
+          let errors: FormErrors = {};
 
-            if (err.inner) {
-              if (err.inner.length === 0) {
-                return setIn(errors, err.path!, err.message);
-              }
-              for (const error of err.inner) {
-                if (!getIn(errors, error.path!)) {
-                  errors = setIn(errors, error.path!, err.message);
-                }
+          if (err.inner) {
+            if (err.inner.length === 0) {
+              return setIn(errors, err.path!, err.message);
+            }
+            for (const error of err.inner) {
+              if (!getIn(errors, error.path!)) {
+                errors = setIn(errors, error.path!, err.message);
               }
             }
-
-            return errors;
-          } else {
-            // We throw any other errors
-            if (process.env.NODE_ENV !== 'production') {
-              console.warn(
-                `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
-                err
-              );
-            }
-
-            throw err;
           }
+
+          return errors;
+        } else {
+          // We throw any other errors
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+              err
+            );
+          }
+
+          throw err;
         }
-      },
-      [props, state.values]
-    );
+      }
+    }, [props, state.values]);
 
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
       if (!onSubmit) {
         return;
       }
@@ -137,7 +138,6 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       dispatch({
         type: 'SUBMIT_ATTEMPT',
       });
-      e.preventDefault();
 
       try {
         const errors = await validate();
@@ -294,7 +294,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       </form>
     );
   }
-);
+) as <TFormValues extends FormValues>(
+  p: FormProps<TFormValues> & { ref?: React.Ref<HTMLFormElement> }
+) => React.ReactElement; // we've cast this because we need the generic to infer the type of the form values.
 
 /**
  * @internal

@@ -1972,7 +1972,65 @@ const CM_LAYOUT_MOCK_DATA = {
         list: {
           label: 'postal_code',
           searchable: true,
+          sortable: true,
+        },
+      },
+      categories: {
+        edit: {
+          label: 'categories',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+          mainField: 'name',
+        },
+        list: {
+          label: 'categories',
+          searchable: false,
           sortable: false,
+          mainField: 'name',
+        },
+      },
+      cover: {
+        edit: {
+          label: 'cover',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'cover',
+          searchable: false,
+          sortable: false,
+        },
+      },
+      images: {
+        edit: {
+          label: 'images',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'images',
+          searchable: false,
+          sortable: false,
+        },
+      },
+      city: {
+        edit: {
+          label: 'city',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'city',
+          searchable: true,
+          sortable: true,
         },
       },
       json: {
@@ -2001,6 +2059,34 @@ const CM_LAYOUT_MOCK_DATA = {
           label: 'slug',
           searchable: true,
           sortable: true,
+        },
+      },
+      notrepeat_req: {
+        edit: {
+          label: 'notrepeat_req',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'notrepeat_req',
+          searchable: false,
+          sortable: false,
+        },
+      },
+      repeat_req: {
+        edit: {
+          label: 'repeat_req',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'repeat_req',
+          searchable: false,
+          sortable: false,
         },
       },
       repeat_req_min: {
@@ -2045,14 +2131,58 @@ const CM_LAYOUT_MOCK_DATA = {
           sortable: true,
         },
       },
+      createdBy: {
+        edit: {
+          label: 'createdBy',
+          description: '',
+          placeholder: '',
+          visible: false,
+          editable: true,
+          mainField: 'firstname',
+        },
+        list: {
+          label: 'createdBy',
+          searchable: true,
+          sortable: true,
+          mainField: 'firstname',
+        },
+      },
+      updatedBy: {
+        edit: {
+          label: 'updatedBy',
+          description: '',
+          placeholder: '',
+          visible: false,
+          editable: true,
+          mainField: 'firstname',
+        },
+        list: {
+          label: 'updatedBy',
+          searchable: true,
+          sortable: true,
+          mainField: 'firstname',
+        },
+      },
     },
     layouts: {
-      list: ['id', 'json', 'postal_code'],
+      list: ['id', 'categories', 'cover', 'postal_code'],
       edit: [
         [
           {
             name: 'slug',
             size: 6,
+          },
+        ],
+        [
+          {
+            name: 'notrepeat_req',
+            size: 12,
+          },
+        ],
+        [
+          {
+            name: 'repeat_req',
+            size: 12,
           },
         ],
         [
@@ -2063,8 +2193,36 @@ const CM_LAYOUT_MOCK_DATA = {
         ],
         [
           {
+            name: 'categories',
+            size: 6,
+          },
+        ],
+        [
+          {
+            name: 'cover',
+            size: 6,
+          },
+          {
+            name: 'images',
+            size: 6,
+          },
+        ],
+        [
+          {
+            name: 'city',
+            size: 6,
+          },
+        ],
+        [
+          {
             name: 'json',
             size: 12,
+          },
+        ],
+        [
+          {
+            name: 'postal_code',
+            size: 6,
           },
         ],
       ],
