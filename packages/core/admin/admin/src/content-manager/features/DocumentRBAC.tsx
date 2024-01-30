@@ -98,12 +98,20 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
   const contentTypePermissions = useTypedSelector((state) =>
     selectContentTypePermissionsOrganisedByAction(state, slug)
   );
-
-  const canCreateFields = extractAndDedupeFields(contentTypePermissions.create);
-  const canReadFields = extractAndDedupeFields(contentTypePermissions.read);
-  const canUpdateFields = extractAndDedupeFields(contentTypePermissions.update);
-
   const { isLoading, allowedActions } = useRBAC(contentTypePermissions, permissions ?? []);
+
+  const canCreateFields =
+    !isLoading && allowedActions.canCreate
+      ? extractAndDedupeFields(contentTypePermissions.create)
+      : [];
+
+  const canReadFields =
+    !isLoading && allowedActions.canRead ? extractAndDedupeFields(contentTypePermissions.read) : [];
+
+  const canUpdateFields =
+    !isLoading && allowedActions.canUpdate
+      ? extractAndDedupeFields(contentTypePermissions.update)
+      : [];
 
   /**
    * @description Checks if the user can perform an action on a field based on the field names
