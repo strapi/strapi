@@ -23,7 +23,7 @@ const getRelations = async (modelName, field, id) => {
     url: `/content-manager/relations/api::${modelName}.${modelName}/${id}/${field}`,
   });
 
-  return res.body;
+  return res.body.data;
 };
 
 const deleteFixtures = async () => {
@@ -88,19 +88,19 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.tags.push(body);
+      data.tags.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe('tag1');
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe('tag1');
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
     });
 
     test('Create tag2', async () => {
@@ -112,19 +112,19 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.tags.push(body);
+      data.tags.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe('tag2');
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe('tag2');
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
     });
 
     test('Create tag3', async () => {
@@ -136,19 +136,19 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.tags.push(body);
+      data.tags.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe('tag3');
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe('tag3');
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
     });
 
     test('Create article1 without relation', async () => {
@@ -164,22 +164,22 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles.push(body);
+      data.articles.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(0);
     });
 
@@ -196,22 +196,22 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles.push(body);
+      data.articles.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(1);
       expect(tags[0].id).toBe(data.tags[0].id);
     });
@@ -227,22 +227,22 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles[0] = body;
+      data.articles[0] = body.data;
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(1);
       expect(tags[0].id).toBe(data.tags[1].id);
     });
@@ -256,20 +256,20 @@ describe.skip('Relations', () => {
         },
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(data.articles[0].title);
-      expect(body.content).toBe(data.articles[0].content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(data.articles[0].title);
+      expect(body.data.content).toBe(data.articles[0].content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(3);
     });
 
@@ -282,20 +282,20 @@ describe.skip('Relations', () => {
         },
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(data.articles[0].title);
-      expect(body.content).toBe(data.articles[0].content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(data.articles[0].title);
+      expect(body.data.content).toBe(data.articles[0].content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(2);
     });
 
@@ -310,27 +310,29 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles[0] = body;
+      data.articles[0] = body.data;
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(0);
     });
 
     test('Delete all articles should remove the association in each tags related to them', async () => {
-      const { body: createdTag } = await rq({
+      const {
+        body: { data: createdTag },
+      } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -338,7 +340,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: article12 } = await rq({
+      const {
+        body: { data: article12 },
+      } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: {
@@ -348,12 +352,16 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: updatedTag } = await rq({
+      const {
+        body: { data: updatedTag },
+      } = await rq({
         url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
 
-      const { body: article13 } = await rq({
+      const {
+        body: { data: article13 },
+      } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: {
@@ -363,7 +371,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: foundTag } = await rq({
+      const {
+        body: { data: foundTag },
+      } = await rq({
         url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
@@ -378,7 +388,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: foundTag2 } = await rq({
+      const {
+        body: { data: foundTag2 },
+      } = await rq({
         url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
@@ -414,7 +426,9 @@ describe.skip('Relations', () => {
     });
 
     test('Creating an article with some many way tags', async () => {
-      const { body: createdTag } = await rq({
+      const {
+        body: { data: createdTag },
+      } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -434,19 +448,19 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articlesWithTag.push(body);
+      data.articlesWithTag.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const tags = (await getRelations('articlewithtag', 'tags', body.id)).results;
+      const tags = (await getRelations('articlewithtag', 'tags', body.data.id)).results;
       expect(tags.length).toBe(1);
       expect(tags[0].id).toBe(data.tags[0].id);
     });
@@ -473,21 +487,21 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.categories.push(body);
+      data.categories.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe('cat1');
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe('cat1');
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const articles = (await getRelations('category', 'articles', body.id)).results;
+      const articles = (await getRelations('category', 'articles', body.data.id)).results;
       expect(articles.length).toBe(0);
     });
 
@@ -500,20 +514,20 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.categories.push(body);
+      data.categories.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe('cat2');
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe('cat2');
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
-      const articles = (await getRelations('category', 'articles', body.id)).results;
+      expect(body.data.publishedAt).toBeDefined();
+      const articles = (await getRelations('category', 'articles', body.data.id)).results;
       expect(articles.length).toBe(0);
     });
 
@@ -530,25 +544,25 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles.push(body);
+      data.articles.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(0);
 
-      const category = (await getRelations('article', 'category', body.id)).data;
+      const category = (await getRelations('article', 'category', body.data.id)).data;
       expect(category.name).toBe(data.categories[0].name);
     });
 
@@ -561,24 +575,24 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.articles[0] = body;
+      data.articles[0] = body.data;
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(data.articles[0].title);
-      expect(body.content).toBe(data.articles[0].content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(data.articles[0].title);
+      expect(body.data.content).toBe(data.articles[0].content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(0);
 
-      const category = (await getRelations('article', 'category', body.id)).data;
+      const category = (await getRelations('article', 'category', body.data.id)).data;
       expect(category.name).toBe(data.categories[1].name);
     });
 
@@ -594,21 +608,21 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles.push(body);
+      data.articles.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(0);
     });
 
@@ -621,24 +635,24 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.articles[1] = body;
+      data.articles[1] = body.data;
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(data.articles[1].title);
-      expect(body.content).toBe(data.articles[1].content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(data.articles[1].title);
+      expect(body.data.content).toBe(data.articles[1].content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const tags = (await getRelations('article', 'tags', body.id)).results;
+      const tags = (await getRelations('article', 'tags', body.data.id)).results;
       expect(tags.length).toBe(0);
 
-      const category = (await getRelations('article', 'category', body.id)).data;
+      const category = (await getRelations('article', 'category', body.data.id)).data;
       expect(category.name).toBe(data.categories[1].name);
     });
 
@@ -651,20 +665,20 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.categories[0] = body;
+      data.categories[0] = body.data;
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe(data.categories[0].name);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe(data.categories[0].name);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const articles = (await getRelations('category', 'articles', body.id)).results;
+      const articles = (await getRelations('category', 'articles', body.data.id)).results;
       expect(articles.length).toBe(1);
     });
 
@@ -680,20 +694,20 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.categories.push(body);
+      data.categories.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe(entry.name);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe(entry.name);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const articles = (await getRelations('category', 'articles', body.id)).results;
+      const articles = (await getRelations('category', 'articles', body.data.id)).results;
       expect(articles.length).toBe(1);
     });
 
@@ -703,7 +717,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body).toMatchObject({ data: { name: 'cat3' } });
+      expect(body.data).toMatchObject({ data: { name: 'cat3' } });
     });
 
     test('Get article2 with cat2', async () => {
@@ -712,7 +726,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body).toMatchObject({ data: { name: 'cat2' } });
+      expect(body.data).toMatchObject({ data: { name: 'cat2' } });
     });
 
     test('Get cat1 without relations', async () => {
@@ -721,7 +735,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         results: [],
         pagination: {
           total: 0,
@@ -738,7 +752,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
         results: [{ title: 'Article 2' }],
       });
@@ -750,7 +764,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
         results: [{ title: 'Article 1' }],
       });
@@ -778,15 +792,15 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.references.push(body);
+      data.references.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.name).toBe('ref1');
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.name).toBe('ref1');
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
@@ -804,20 +818,20 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles.push(body);
+      data.articles.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.publishedAt).toBeDefined();
+      expect(body.data.publishedAt).toBeDefined();
     });
 
     test('Update article1 with ref1', async () => {
@@ -829,21 +843,21 @@ describe.skip('Relations', () => {
         },
       });
 
-      data.articles[0] = body;
+      data.articles[0] = body.data;
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(data.articles[0].title);
-      expect(body.content).toBe(data.articles[0].content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(data.articles[0].title);
+      expect(body.data.content).toBe(data.articles[0].content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
 
-      const reference = (await getRelations('article', 'reference', body.id)).data;
+      const reference = (await getRelations('article', 'reference', body.data.id)).data;
       expect(reference.id).toBe(data.references[0].id);
     });
 
@@ -860,20 +874,20 @@ describe.skip('Relations', () => {
         body: entry,
       });
 
-      data.articles.push(body);
+      data.articles.push(body.data);
 
-      expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.createdBy).toMatchObject({
         id: 1,
         username: null,
       });
-      expect(body.updatedBy).toMatchObject({
+      expect(body.data.updatedBy).toMatchObject({
         id: 1,
         username: null,
       });
-      const reference = (await getRelations('article', 'reference', body.id)).data;
+      const reference = (await getRelations('article', 'reference', body.data.id)).data;
       expect(reference.id).toBe(data.references[0].id);
     });
   });
@@ -904,7 +918,9 @@ describe.skip('Relations', () => {
     });
 
     test('Detach Tag to a Reference', async () => {
-      const { body: createdTag } = await rq({
+      const {
+        body: { data: createdTag },
+      } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -912,7 +928,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: createdReference } = await rq({
+      const {
+        body: { data: createdReference },
+      } = await rq({
         url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
@@ -924,7 +942,9 @@ describe.skip('Relations', () => {
       let tag = (await getRelations('reference', 'tag', createdReference.id)).data;
       expect(tag.id).toBe(createdTag.id);
 
-      const { body: referenceToUpdate } = await rq({
+      const {
+        body: { data: referenceToUpdate },
+      } = await rq({
         url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
         method: 'PUT',
         body: {
@@ -937,7 +957,9 @@ describe.skip('Relations', () => {
     });
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {
-      const { body: createdTag } = await rq({
+      const {
+        body: { data: createdTag },
+      } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -945,7 +967,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: createdReference } = await rq({
+      const {
+        body: { data: createdReference },
+      } = await rq({
         url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
@@ -959,7 +983,9 @@ describe.skip('Relations', () => {
         method: 'DELETE',
       });
 
-      const { body: foundReference } = await rq({
+      const {
+        body: { data: foundReference },
+      } = await rq({
         url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
         method: 'GET',
       });
