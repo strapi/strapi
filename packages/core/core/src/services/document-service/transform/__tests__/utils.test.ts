@@ -13,7 +13,7 @@ const findManyQueries = {
 } as Record<string, jest.Mock>;
 
 describe('Transformation utils', () => {
-  describe.only('transformFiltersOrPopulate', () => {
+  describe('transformFiltersOrPopulate', () => {
     global.strapi = {
       getModel: (uid: string) => models[uid],
       db: {
@@ -30,6 +30,24 @@ describe('Transformation utils', () => {
       expect(
         transformFiltersOrPopulate(idMap, input, { uid: CATEGORY_UID, isDraft: true })
       ).toEqual(expected);
+    });
+
+    it('should not modify other fields', () => {
+      const input = { otherField: 'value', id: 'test' };
+      const expected = { otherField: 'value', documentId: 'test' };
+
+      expect(transformFiltersOrPopulate(idMap, input, { uid: PRODUCT_UID, isDraft: true })).toEqual(
+        expected
+      );
+    });
+
+    it('should handle empty objects', () => {
+      const input = {};
+      const expected = {};
+
+      expect(transformFiltersOrPopulate(idMap, input, { uid: PRODUCT_UID, isDraft: true })).toEqual(
+        expected
+      );
     });
 
     it('should handle nested relational filters', () => {
@@ -68,76 +86,68 @@ describe('Transformation utils', () => {
       );
     });
 
-    // it('should handle complex nested structures', () => {
-    //   const input = {
-    //     outerField: {
-    //       innerField: [{ id: 'complex1' }, { someKey: { id: 'complex2' } }],
-    //     },
-    //   };
-    //   const expected = {
-    //     outerField: {
-    //       innerField: [{ documentId: 'complex1' }, { someKey: { documentId: 'complex2' } }],
-    //     },
-    //   };
+    it('should handle complex nested structures, ignoring nested non relational keys', () => {
+      const input = {
+        relatedProducts: {
+          categories: [{ id: 'complex1' }, { someKey: { id: 'complex2' } }],
+        },
+      };
+      const expected = {
+        relatedProducts: {
+          categories: [{ documentId: 'complex1' }, { someKey: { id: 'complex2' } }],
+        },
+      };
 
-    //   expect(transformFiltersOrPopulate(input)).toEqual(expected);
-    // });
+      expect(transformFiltersOrPopulate(idMap, input, { uid: PRODUCT_UID, isDraft: true })).toEqual(
+        expected
+      );
+    });
 
-    // it('should not modify other fields', () => {
-    //   const input = { otherField: 'value', id: 'test' };
-    //   const expected = { otherField: 'value', documentId: 'test' };
+    it('should handle filters objects', () => {
+      const inputs = [
+        {
+          input: { id: 'documentId' },
+          expected: { documentId: 'documentId' },
+        },
+        {
+          input: { id: { $eq: 'documentId' } },
+          expected: { documentId: { $eq: 'documentId' } },
+        },
+        {
+          input: { id: { $in: ['documentId'] } },
+          expected: { documentId: { $in: ['documentId'] } },
+        },
+        {
+          input: { category: { id: 'documentId' } },
+          expected: { category: { documentId: 'documentId' } },
+        },
+      ];
 
-    //   expect(transformFiltersOrPopulate(input)).toEqual(expected);
-    // });
+      inputs.forEach(({ input, expected }) => {
+        expect(
+          transformFiltersOrPopulate(idMap, input, { uid: PRODUCT_UID, isDraft: true })
+        ).toEqual(expected);
+      });
+    });
 
-    // it('should handle empty objects', () => {
-    //   const input = {};
-    //   const expected = {};
+    it('should handle populate objects', () => {
+      const inputs = [
+        {
+          input: { category: { fields: ['id'] } },
+          expected: { category: { fields: ['documentId'] } },
+        },
+        {
+          input: { category: { filters: { id: 'documentId' } } },
+          expected: { category: { filters: { documentId: 'documentId' } } },
+        },
+      ];
 
-    //   expect(transformFiltersOrPopulate(input)).toEqual(expected);
-    // });
-
-    // it('should handle filters objects', () => {
-    //   const inputs = [
-    //     {
-    //       input: { filters: { id: 'documentId' } },
-    //       expected: { filters: { documentId: 'documentId' } },
-    //     },
-    //     {
-    //       input: { filters: { id: { $eq: 'documentId' } } },
-    //       expected: { filters: { documentId: { $eq: 'documentId' } } },
-    //     },
-    //     {
-    //       input: { filters: { id: { $in: ['documentId'] } } },
-    //       expected: { filters: { documentId: { $in: ['documentId'] } } },
-    //     },
-    //     {
-    //       input: { filters: { category: { id: 'documentId' } } },
-    //       expected: { filters: { category: { documentId: 'documentId' } } },
-    //     },
-    //   ];
-
-    //   inputs.forEach(({ input, expected }) => {
-    //     expect(transformFiltersOrPopulate(input)).toEqual(expected);
-    //   });
-    // });
-
-    // it('should handle populate objects', () => {
-    //   const inputs = [
-    //     {
-    //       input: { populate: { category: { fields: ['id'] } } },
-    //       expected: { populate: { category: { fields: ['documentId'] } } },
-    //     },
-    //     {
-    //       input: { populate: { category: { filters: { id: 'documentId' } } } },
-    //       expected: { populate: { category: { filters: { documentId: 'documentId' } } } },
-    //     },
-    //   ];
-
-    //   inputs.forEach(({ input, expected }) => {
-    //     expect(transformFiltersOrPopulate(input)).toEqual(expected);
-    //   });
-    // });
+      inputs.forEach(({ input, expected }) => {
+        expect(
+          transformFiltersOrPopulate(idMap, input, { uid: PRODUCT_UID, isDraft: true })
+        ).toEqual(expected);
+      });
+    });
   });
 
   describe('transformFields', () => {

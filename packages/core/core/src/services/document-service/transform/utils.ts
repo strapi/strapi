@@ -30,6 +30,10 @@ export const transformFiltersOrPopulate = (
   for (const key of Object.keys(obj)) {
     if (key === 'id') {
       transformedObj.documentId = obj[key];
+    } else if (['filters', 'populate'].includes(key)) {
+      transformedObj[key] = transformFiltersOrPopulate(idMap, obj[key], opts);
+    } else if (key === 'fields') {
+      transformedObj[key] = transformFields(obj[key]);
     } else {
       const attribute = strapi.getModel(opts.uid).attributes[key];
 
