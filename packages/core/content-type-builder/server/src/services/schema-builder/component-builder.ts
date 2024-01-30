@@ -37,9 +37,17 @@ export default function createComponentBuilder() {
         filename: `${nameToSlug(infos.displayName)}.json`,
       });
 
+      // TODO: create a utility for this
+      // Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
       const collectionName = `components_${nameToCollectionName(
         infos.category
       )}_${nameToCollectionName(pluralize(infos.displayName))}`;
+
+      this.components.forEach((compo: any) => {
+        if (compo.schema.collectionName === collectionName) {
+          throw new ApplicationError('component.alreadyExists');
+        }
+      });
 
       handler
         .setUID(uid)
