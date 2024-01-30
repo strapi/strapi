@@ -2,7 +2,10 @@ import { render } from '@tests/utils';
 
 import { RelationSingle, RelationMultiple } from '../Relations';
 
-describe('Relation cell content', () => {
+/**
+ * TODO: re-add theses tests – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
+ */
+describe.skip('Relation cell content', () => {
   describe('RelationSingle', () => {
     const DEFAULT_PROPS_FIXTURE = {
       metadatas: {

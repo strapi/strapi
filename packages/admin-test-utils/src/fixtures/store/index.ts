@@ -9,17 +9,6 @@ const reducers = {
     collectionTypeLinks: [],
     singleTypeLinks: [],
   })),
-  'content-manager_listView': jest.fn(() => ({
-    data: [],
-    isLoading: true,
-    components: [],
-    contentType: {},
-    initialDisplayedHeaders: [],
-    displayedHeaders: [],
-    pagination: {
-      total: 0,
-    },
-  })),
   'content-manager_rbacManager': jest.fn(() => ({ permissions: null })),
   'content-manager_editViewLayoutManager': jest.fn(() => ({ currentLayout: null })),
   'content-manager_editViewCrudReducer': jest.fn(() => ({

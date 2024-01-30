@@ -30,6 +30,7 @@ interface MutateEditViewLayoutHookArgs {
 
 const mutateEditViewLayoutHook = ({ layout, query }: MutateEditViewLayoutHookArgs) => {
   const { contentType, components } = layout;
+
   const hasI18nEnabled = doesPluginOptionsHaveI18nLocalized(contentType.pluginOptions)
     ? contentType.pluginOptions.i18n.localized
     : false;

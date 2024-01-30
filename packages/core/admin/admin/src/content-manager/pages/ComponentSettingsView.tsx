@@ -9,10 +9,10 @@ import {
 import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../core/store/hooks';
+import { selectSchemas } from '../layout';
 import { useGetComponentConfigurationQuery } from '../services/components';
 import { mergeMetasWithSchema } from '../utils/schemas';
 
-import { selectSchemas } from './App';
 import { SettingsForm } from './EditSettingsView/components/SettingsForm/SettingsForm';
 
 const ComponentSettingsView = () => {
