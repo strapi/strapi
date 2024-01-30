@@ -31,6 +31,7 @@ import {
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -157,6 +158,8 @@ const ReleasesPage = () => {
   const { maximumNumberOfPendingReleases = 3 } = getFeature('cms-content-releases') as {
     maximumNumberOfPendingReleases: number;
   };
+  const { trackUsage } = useTracking();
+
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
@@ -228,6 +231,8 @@ const ReleasesPage = () => {
           defaultMessage: 'Release created.',
         }),
       });
+
+      trackUsage('didCreateRelease');
 
       push(`/plugins/content-releases/${response.data.data.id}`);
     } else if (isAxiosError(response.error)) {

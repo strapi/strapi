@@ -158,8 +158,28 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.publish(id, { user });
 
+    const [countPublishActions, countUnpublishActions] = await Promise.all([
+      releaseService.countActions({
+        filters: {
+          release: id,
+          type: 'publish',
+        },
+      }),
+      releaseService.countActions({
+        filters: {
+          release: id,
+          type: 'unpublish',
+        },
+      }),
+    ]);
+
     ctx.body = {
       data: release,
+      meta: {
+        totalEntries: countPublishActions + countUnpublishActions,
+        totalPublishedEntries: countPublishActions,
+        totalUnpublishedEntries: countUnpublishActions,
+      },
     };
   },
 };
