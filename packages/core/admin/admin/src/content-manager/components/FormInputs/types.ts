@@ -25,7 +25,6 @@ interface InputProps {
     | 'richtext'
     | 'uid'
     | 'dynamiczone'
-    | 'uid'
     | 'component'
     | 'relation'
   >;
