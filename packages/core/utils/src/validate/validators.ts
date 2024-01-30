@@ -3,7 +3,12 @@ import { curry, isEmpty, isNil } from 'lodash/fp';
 import { pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
-import { traverseQueryFilters, traverseQuerySort, traverseQueryFields } from '../traverse';
+import {
+  traverseQueryFilters,
+  traverseQuerySort,
+  traverseQueryFields,
+  traverseQueryPopulate,
+} from '../traverse';
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 import { throwInvalidParam } from './utils';
@@ -126,4 +131,39 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
   )(fields);
 });
 
-export { throwPasswords, defaultValidateFilters, defaultValidateSort, defaultValidateFields };
+const defaultValidatePopulate = curry((schema: Model, populate: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultValidatePopulate');
+  }
+  return pipeAsync(
+    traverseQueryPopulate(
+      async ({ key, value, schema, attribute }, { set }) => {
+        if (attribute) {
+          return;
+        }
+
+        if (key === 'sort') {
+          set(key, await defaultValidateSort(schema, value));
+        }
+
+        if (key === 'filters') {
+          set(key, await defaultValidateFilters(schema, value));
+        }
+
+        if (key === 'fields') {
+          set(key, await defaultValidateFields(schema, value));
+        }
+      },
+      { schema }
+    ),
+    // Remove private fields
+    traverseQueryPopulate(throwPrivate, { schema })
+  )(populate);
+});
+export {
+  throwPasswords,
+  defaultValidateFilters,
+  defaultValidateSort,
+  defaultValidateFields,
+  defaultValidatePopulate,
+};

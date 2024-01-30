@@ -83,6 +83,13 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQueryFields(throwPassword, { schema })
     );
 
+    const validatePopulate = pipeAsync(
+      traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryPopulate(throwHiddenFields, { schema }),
+      traverse.traverseQueryPopulate(throwPassword, { schema })
+    );
+
     return async (query: any) => {
       if (query.filters) {
         await validateFilters(query.filters);
@@ -96,6 +103,9 @@ export default ({ action, ability, model }: any) => {
         await validateFields(query.fields);
       }
 
+      if (query.populate) {
+        await validatePopulate(query.populate);
+      }
       return true;
     };
   };
@@ -109,7 +119,7 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      // @ts-expect-error lodash types
+      // @ts-ignore-error lodash types
       traverseEntity(throwDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
