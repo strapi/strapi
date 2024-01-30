@@ -39,10 +39,25 @@ async function transformParamsDocumentId(
     data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
   }
 
-  const fields = input.fields ? transformFields(input.fields) : input.fields;
-  const filters = input.filters ? transformFiltersOrPopulate(input.filters) : input.filters;
-  const populate = input.populate ? transformFiltersOrPopulate(input.populate) : input.populate;
-  const sort = input.sort ? transformSort(input.sort) : input.sort;
+  let fields = input.fields;
+  if (input.fields) {
+    fields = transformFields(input.fields);
+  }
+
+  let filters = input.filters;
+  if (input.filters) {
+    filters = transformFiltersOrPopulate(idMap, input.filters, { ...opts, uid });
+  }
+
+  let populate = input.populate;
+  if (input.populate) {
+    populate = transformFiltersOrPopulate(idMap, input.populate, { ...opts, uid });
+  }
+
+  let sort = input.sort;
+  if (input.sort) {
+    sort = transformSort(input.sort);
+  }
 
   return {
     ...input,
