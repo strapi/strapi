@@ -82,7 +82,12 @@ const CMEditViewLocalePicker = ({
       return;
     }
 
-    if (status === 'did-not-create-locale') {
+    /**
+     * TODO: if D&P is not enabled, then the status will always say there's no locale so
+     * we also should check there's no ID incase. This logic will be removed in V5 when
+     * we _always_ have D&P.
+     */
+    if (status === 'did-not-create-locale' && !id) {
       navigate({
         pathname: `/content-manager/collection-types/${slug}/create`,
         search: stringify(defaultParams, { encode: false }),

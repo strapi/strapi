@@ -498,7 +498,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   const handleChangeType = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    actionId: ReleaseAction['id']
+    actionId: ReleaseAction['id'],
+    actionPath: [string, number]
   ) => {
     const response = await updateReleaseAction({
       params: {
@@ -508,6 +509,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
       body: {
         type: e.target.value as ReleaseAction['type'],
       },
+      query, // We are passing the query params to make optimistic updates
+      actionPath, // We are passing the action path to found the position in the cache of the action for optimistic updates
     });
 
     if ('error' in response) {
@@ -691,73 +694,75 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, contentType, locale, type, entry }) => (
-                    <Tr key={id}>
-                      <Td width="25%" maxWidth="200px">
-                        <Typography ellipsis>{`${
-                          contentType.mainFieldValue || entry.id
-                        }`}</Typography>
-                      </Td>
-                      <Td width="10%">
-                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                      </Td>
-                      <Td width="10%">
-                        <Typography>{contentType.displayName || ''}</Typography>
-                      </Td>
-                      <Td width="20%">
-                        {release.releasedAt ? (
-                          <Typography>
-                            {formatMessage(
-                              {
-                                id: 'content-releases.page.ReleaseDetails.table.action-published',
-                                defaultMessage:
-                                  'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
-                              },
-                              {
-                                isPublish: type === 'publish',
-                                b: (children: React.ReactNode) => (
-                                  <Typography fontWeight="bold">{children}</Typography>
-                                ),
-                              }
-                            )}
-                          </Typography>
-                        ) : (
-                          <ReleaseActionOptions
-                            selected={type}
-                            handleChange={(e) => handleChangeType(e, id)}
-                            name={`release-action-${id}-type`}
-                          />
-                        )}
-                      </Td>
-                      {!release.releasedAt && (
-                        <>
-                          <Td width="20%" minWidth="200px">
-                            <EntryValidationText
-                              action={type}
-                              schema={contentTypes?.[contentType.uid]}
-                              components={components}
-                              entry={entry}
+                  {releaseActions[key].map(
+                    ({ id, contentType, locale, type, entry }, actionIndex) => (
+                      <Tr key={id}>
+                        <Td width="25%" maxWidth="200px">
+                          <Typography ellipsis>{`${
+                            contentType.mainFieldValue || entry.id
+                          }`}</Typography>
+                        </Td>
+                        <Td width="10%">
+                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                        </Td>
+                        <Td width="10%">
+                          <Typography>{contentType.displayName || ''}</Typography>
+                        </Td>
+                        <Td width="20%">
+                          {release.releasedAt ? (
+                            <Typography>
+                              {formatMessage(
+                                {
+                                  id: 'content-releases.page.ReleaseDetails.table.action-published',
+                                  defaultMessage:
+                                    'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
+                                },
+                                {
+                                  isPublish: type === 'publish',
+                                  b: (children: React.ReactNode) => (
+                                    <Typography fontWeight="bold">{children}</Typography>
+                                  ),
+                                }
+                              )}
+                            </Typography>
+                          ) : (
+                            <ReleaseActionOptions
+                              selected={type}
+                              handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
+                              name={`release-action-${id}-type`}
                             />
-                          </Td>
-                          <Td>
-                            <Flex justifyContent="flex-end">
-                              <ReleaseActionMenu.Root>
-                                <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                  contentTypeUid={contentType.uid}
-                                  entryId={entry.id}
-                                  locale={locale?.code}
-                                />
-                                <ReleaseActionMenu.DeleteReleaseActionItem
-                                  releaseId={release.id}
-                                  actionId={id}
-                                />
-                              </ReleaseActionMenu.Root>
-                            </Flex>
-                          </Td>
-                        </>
-                      )}
-                    </Tr>
-                  ))}
+                          )}
+                        </Td>
+                        {!release.releasedAt && (
+                          <>
+                            <Td width="20%" minWidth="200px">
+                              <EntryValidationText
+                                action={type}
+                                schema={contentTypes?.[contentType.uid]}
+                                components={components}
+                                entry={entry}
+                              />
+                            </Td>
+                            <Td>
+                              <Flex justifyContent="flex-end">
+                                <ReleaseActionMenu.Root>
+                                  <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                    contentTypeUid={contentType.uid}
+                                    entryId={entry.id}
+                                    locale={locale?.code}
+                                  />
+                                  <ReleaseActionMenu.DeleteReleaseActionItem
+                                    releaseId={release.id}
+                                    actionId={id}
+                                  />
+                                </ReleaseActionMenu.Root>
+                              </Flex>
+                            </Td>
+                          </>
+                        )}
+                      </Tr>
+                    )
+                  )}
                 </Table.Body>
               </Table.Content>
             </Table.Root>
