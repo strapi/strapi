@@ -2,7 +2,7 @@ import { LoadedStrapi } from '@strapi/types';
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
 
 import { createIdMap } from '../id-map';
-import { transformFiltersOrPopulate, transformFields, transformSort } from '../utils';
+import { transformFiltersOrPopulate, transformFieldsOrSort } from '../utils';
 
 const findProducts = jest.fn(() => ({}));
 const findCategories = jest.fn(() => ({}));
@@ -150,63 +150,49 @@ describe('Transformation utils', () => {
     });
   });
 
-  describe('transformFields', () => {
-    it('should transform a single field', () => {
-      const fields = ['id'];
-      const expected = ['documentId'];
-      expect(transformFields(fields)).toEqual(expected);
-    });
-
-    it('should transform multiple fields', () => {
-      const fields = ['id', 'name', 'id'];
-      const expected = ['documentId', 'name', 'documentId'];
-      expect(transformFields(fields)).toEqual(expected);
-    });
-
-    it('should not modify other fields', () => {
-      const fields = ['name', 'description'];
-      const expected = ['name', 'description'];
-      expect(transformFields(fields)).toEqual(expected);
-    });
-
-    it('should handle empty fields array', () => {
-      const fields: string[] = [];
-      const expected: string[] = [];
-      expect(transformFields(fields)).toEqual(expected);
-    });
-  });
-
-  describe('transformSort', () => {
-    it('should transform a single sort field', () => {
-      const sort = 'id';
+  describe('transformFieldsOrSort', () => {
+    it('should transform a single input', () => {
+      const input = 'id';
       const expected = 'documentId';
-      expect(transformSort(sort)).toEqual(expected);
+      expect(transformFieldsOrSort(input)).toEqual(expected);
     });
 
-    it('should transform an array of sort fields', () => {
-      // TODO what if a key is repeated?
-      //   const sort = ['id', 'name', 'id'];
-      const sort = ['id', 'name'];
-      const expected = ['documentId', 'name'];
-      expect(transformSort(sort)).toEqual(expected);
-    });
-
-    it('should not modify other sort fields', () => {
-      const sort = ['name', 'createdAt'];
-      const expected = ['name', 'createdAt'];
-      expect(transformSort(sort)).toEqual(expected);
-    });
-
-    it('should handle empty sort array', () => {
-      const sort: string[] = [];
-      const expected: string[] = [];
-      expect(transformSort(sort)).toEqual(expected);
-    });
-
-    it('should handle non-array sort fields', () => {
-      const sort = 'createdAt';
+    it('should handle non-array inputs', () => {
+      const input = 'createdAt';
       const expected = 'createdAt';
-      expect(transformSort(sort)).toEqual(expected);
+      expect(transformFieldsOrSort(input)).toEqual(expected);
+    });
+
+    it('should transform a single input', () => {
+      const input = ['id'];
+      const expected = ['documentId'];
+      expect(transformFieldsOrSort(input)).toEqual(expected);
+    });
+
+    it('should transform an array of inputs', () => {
+      const input = ['id', 'name'];
+      const expected = ['documentId', 'name'];
+      expect(transformFieldsOrSort(input)).toEqual(expected);
+    });
+
+    it('should transform multiple inputs', () => {
+      // TODO what if a key is repeated?
+      // Do we handle this?
+      const input = ['id', 'name', 'id'];
+      const expected = ['documentId', 'name', 'documentId'];
+      expect(transformFieldsOrSort(input)).toEqual(expected);
+    });
+
+    it('should not modify other inputs', () => {
+      const input = ['name', 'description'];
+      const expected = ['name', 'description'];
+      expect(transformFieldsOrSort(input)).toEqual(expected);
+    });
+
+    it('should handle empty array', () => {
+      const input: string[] = [];
+      const expected: string[] = [];
+      expect(transformFieldsOrSort(input)).toEqual(expected);
     });
   });
 });

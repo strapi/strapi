@@ -9,15 +9,11 @@ export const switchIdForDocumentId = (output: Record<string, any>) => {
   return output;
 };
 
-export const transformFields = (fields: string[]): string[] => {
-  return fields.map((field) => (field === 'id' ? 'documentId' : field));
-};
-
-export const transformSort = (sort: string[] | string): string[] | string => {
-  if (Array.isArray(sort)) {
-    return sort.map((item) => (item === 'id' ? 'documentId' : item));
+export const transformFieldsOrSort = (input: string[] | string): string[] | string => {
+  if (Array.isArray(input)) {
+    return input.map((item) => (item === 'id' ? 'documentId' : item));
   }
-  return sort.replace('id', 'documentId');
+  return input.replace('id', 'documentId');
 };
 
 export const transformFiltersOrPopulate = (
@@ -33,7 +29,7 @@ export const transformFiltersOrPopulate = (
     } else if (['filters', 'populate'].includes(key)) {
       transformedObj[key] = transformFiltersOrPopulate(idMap, obj[key], opts);
     } else if (key === 'fields') {
-      transformedObj[key] = transformFields(obj[key]);
+      transformedObj[key] = transformFieldsOrSort(obj[key]);
     } else {
       const attribute = strapi.getModel(opts.uid).attributes[key];
 
