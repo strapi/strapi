@@ -186,27 +186,23 @@ describe('Attributes', () => {
           defaultAssertions(typeNode, 'Attribute.UID');
 
           expect(typeNode.typeArguments).not.toBeUndefined();
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::bar.bar');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('bar');
+          expect(typeNode.typeArguments[0].text).toBe('bar');
         });
 
         test('UID with partial options and no target field', () => {
           const attribute = { type: 'uid', options: { separator: '_' } };
-          const typeNode = getAttributeType('foo', attribute);
+          const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
           defaultAssertions(typeNode, 'Attribute.UID');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
 
-          const optionsLiteralNode = typeNode.typeArguments[2];
+          const optionsLiteralNode = typeNode.typeArguments[1];
 
           expect(optionsLiteralNode.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(optionsLiteralNode.members).toHaveLength(1);
@@ -226,15 +222,12 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.UID');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[0].text).toBe('bar');
 
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('bar');
-
-          const optionsLiteralNode = typeNode.typeArguments[2];
+          const optionsLiteralNode = typeNode.typeArguments[1];
 
           expect(optionsLiteralNode.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(optionsLiteralNode.members).toHaveLength(1);
