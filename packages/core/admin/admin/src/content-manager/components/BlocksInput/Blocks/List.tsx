@@ -222,10 +222,10 @@ const handleEnterKeyOnList = (editor: Editor) => {
       });
 
       if (parentListNodeEntry) {
+        // Get the parent list path and add 1 to it to exit from the current list
         const modifiedPath = currentListItemPath.slice(0, -1);
-
         if (modifiedPath.length > 0) {
-          modifiedPath[modifiedPath.length - 1] += 1; // Add 1 to the previous path
+          modifiedPath[modifiedPath.length - 1] += 1;
         }
 
         // Shift list-item under parent list
