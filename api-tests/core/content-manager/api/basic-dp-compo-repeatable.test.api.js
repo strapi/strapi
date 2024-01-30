@@ -81,9 +81,9 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithCompoAndDP.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithCompoAndDP.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
@@ -93,8 +93,8 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
-    expect(res.body.publishedAt).toBeNull();
+    expect(res.body.data).toMatchObject(data.productsWithCompoAndDP[0]);
+    expect(res.body.data.publishedAt).toBeNull();
   });
 
   test('Update product with compo', async () => {
@@ -115,10 +115,10 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithCompoAndDP[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.id).toEqual(data.productsWithCompoAndDP[0].id);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithCompoAndDP[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {
@@ -145,8 +145,8 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body.data);
     });
 
     test('Can create product with compo - minLength', async () => {
@@ -167,8 +167,8 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body.data);
     });
 
     test('Cannot create product with compo - maxLength', async () => {
@@ -225,8 +225,8 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body.data);
     });
   });
 });

@@ -72,9 +72,9 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDP.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDP.push(res.body.data);
   });
 
   test('Create a product + cannot overwrite publishedAt', async () => {
@@ -90,9 +90,9 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, 'publishedAt'));
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDP.push(res.body);
+    expect(res.body.data).toMatchObject(_.omit(product, 'publishedAt'));
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDP.push(res.body.data);
   });
 
   test('Read all products', async () => {
@@ -129,10 +129,10 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, 'publishedAt'));
-    expect(res.body.id).toEqual(data.productsWithDP[0].id);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDP[0] = res.body;
+    expect(res.body.data).toMatchObject(_.omit(product, 'publishedAt'));
+    expect(res.body.data.id).toEqual(data.productsWithDP[0].id);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDP[0] = res.body.data;
   });
 
   test('Update product + cannot overwrite publishedAt', async () => {
@@ -148,10 +148,10 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, ['publishedAt']));
-    expect(res.body.publishedAt).toBeNull();
-    expect(res.body.id).toEqual(data.productsWithDP[0].id);
-    data.productsWithDP[0] = res.body;
+    expect(res.body.data).toMatchObject(_.omit(product, ['publishedAt']));
+    expect(res.body.data.publishedAt).toBeNull();
+    expect(res.body.data.id).toEqual(data.productsWithDP[0].id);
+    data.productsWithDP[0] = res.body.data;
   });
 
   test('Publish a product, expect publishedAt to be defined', async () => {
@@ -162,9 +162,9 @@ describe('CM API - Basic', () => {
       method: 'POST',
     });
 
-    data.productsWithDP[0] = body;
+    data.productsWithDP[0] = body.data;
 
-    expect(body.publishedAt).toBeISODate();
+    expect(body.data.publishedAt).toBeISODate();
   });
 
   // FIX
@@ -247,8 +247,8 @@ describe('CM API - Basic', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithDP.push(res.body.data);
     });
 
     test('Can create a product - required', async () => {
@@ -262,11 +262,11 @@ describe('CM API - Basic', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         ...product,
       });
-      expect(_.isNil(res.body.name)).toBe(true);
-      data.productsWithDP.push(res.body);
+      expect(_.isNil(res.body.data.name)).toBe(true);
+      data.productsWithDP.push(res.body.data);
     });
 
     test('Cannot create a product - maxLength', async () => {
