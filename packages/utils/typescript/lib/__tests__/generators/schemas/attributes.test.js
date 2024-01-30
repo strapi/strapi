@@ -798,6 +798,16 @@ describe('Attributes', () => {
             ts.SyntaxKind.TrueKeyword
           );
         });
+
+        test('Default: <function>', () => {
+          const anyFunction = jest.fn();
+          const attribute = { default: anyFunction };
+
+          const modifiers = getAttributeModifiers(attribute);
+
+          // The default modifier shouldn't be processed when encountering a function
+          expect(modifiers).toHaveLength(0);
+        });
       });
     });
   });
