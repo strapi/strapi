@@ -355,11 +355,11 @@ const ListButton = ({ block, format }: ListButtonProps) => {
 
   const toggleList = (format: Block<'list'>['format']) => {
     let currentListEntry;
-    if (editor.selection)
+    if (editor.selection) {
       currentListEntry = Editor.above(editor, {
         match: (node) => !Editor.isEditor(node) && node.type === 'list',
       });
-    else {
+    } else {
       // If no selection, toggle last inserted node
       const [_, lastNodePath] = Editor.last(editor, []);
       currentListEntry = Editor.above(editor, {
@@ -368,22 +368,23 @@ const ListButton = ({ block, format }: ListButtonProps) => {
       });
     }
 
-    // If selection is already a list then toggle format
-    if (currentListEntry) {
-      const [currentList, currentListPath] = currentListEntry;
-
-      if (!Editor.isEditor(currentList) && isListNode(currentList)) {
-        if (currentList.format !== format) {
-          // Format is different, toggle list format
-          Transforms.setNodes(editor, { format }, { at: currentListPath });
-        } else {
-          // Format is same, convert selected list-item to paragraph
-          blocks['paragraph'].handleConvert!(editor);
-        }
-      }
-    } else {
+    if (!currentListEntry) {
       // If selection is not a list then convert it to list
       blocks[`list-${format}`].handleConvert!(editor);
+      return;
+    }
+
+    // If selection is already a list then toggle format
+    const [currentList, currentListPath] = currentListEntry;
+
+    if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+      if (currentList.format !== format) {
+        // Format is different, toggle list format
+        Transforms.setNodes(editor, { format }, { at: currentListPath });
+      } else {
+        // Format is same, convert selected list-item to paragraph
+        blocks['paragraph'].handleConvert!(editor);
+      }
     }
   };
 

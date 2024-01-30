@@ -322,6 +322,7 @@ describe('BlocksToolbar', () => {
       },
     ]);
 
+    // Select first sub item and toggle it
     await select({
       anchor: { path: [0, 1, 0, 0], offset: 0 },
       focus: { path: [0, 1, 0, 0], offset: 0 },
@@ -336,6 +337,7 @@ describe('BlocksToolbar', () => {
     expect(unorderedListButton).toHaveAttribute('data-state', 'on');
     expect(orderedListButton).toHaveAttribute('data-state', 'off');
 
+    // Selected sub list format should toggle to "unordered"
     expect(baseEditor.children).toEqual([
       {
         type: 'list',

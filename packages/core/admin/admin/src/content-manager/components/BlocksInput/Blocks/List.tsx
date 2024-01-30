@@ -128,40 +128,34 @@ const handleBackspaceKeyOnList = (editor: Editor, event: React.KeyboardEvent<HTM
     const previousEntry = Editor.previous(editor, {
       at: currentListItemPath,
     });
-
     const nextEntry = Editor.next(editor, {
       at: currentListItemPath,
     });
 
     if (previousEntry && nextEntry) {
-      const [previousNode] = previousEntry;
-      const [nextNode] = nextEntry;
+      // If previous and next nodes are lists or list-items, delete empty list item
       event.preventDefault();
       Transforms.removeNodes(editor, {
         at: currentListItemPath,
       });
 
+      // If previous and next nodes are lists with same format and indent Levels, then merge the nodes
+      const [previousList] = previousEntry;
+      const [nextList] = nextEntry;
       if (
-        !Editor.isEditor(previousNode) &&
-        !isText(previousNode) &&
-        isListNode(previousNode) &&
-        !Editor.isEditor(nextNode) &&
-        !isText(nextNode) &&
-        isListNode(nextNode)
+        !Editor.isEditor(previousList) &&
+        !isText(previousList) &&
+        isListNode(previousList) &&
+        !Editor.isEditor(nextList) &&
+        !isText(nextList) &&
+        isListNode(nextList)
       ) {
-        const {
-          type: previousType,
-          format: previousFormat,
-          indentLevel: previousIndent,
-        } = previousNode;
-        const { type: nextType, format: nextFormat, indentLevel: nextIndent } = nextNode;
         if (
-          previousType === 'list' &&
-          nextType === 'list' &&
-          previousFormat === nextFormat &&
-          previousIndent === nextIndent
+          previousList.type === 'list' &&
+          nextList.type === 'list' &&
+          previousList.format === nextList.format &&
+          previousList.indentLevel === nextList.indentLevel
         ) {
-          // If previous node and next node are lists with same format and indent Levels, then merge the nodes
           Transforms.mergeNodes(editor, {
             at: currentListItemPath,
           });
