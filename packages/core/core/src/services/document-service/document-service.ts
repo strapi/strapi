@@ -137,16 +137,34 @@ export const createDocumentService = (
         })(uid);
       },
 
-      use(action, cb, opts) {
-        middlewareManager.add(uid, action, cb, opts);
+      use(...args: Parameters<Documents.ServiceInstance['use']>) {
+        if (typeof args[0] === 'string') {
+          const [action, cb, opts] = args;
+          middlewareManager.add(uid, action, cb, opts);
+        } else {
+          // cb: () => any, opts?: any
+          const [cb, opts] = args;
+          middlewareManager.add(uid, '_all', cb, opts);
+        }
         return this;
       },
     };
   }
 
   Object.assign(create, {
-    use(action: any, cb: any, opts?: any) {
-      middlewareManager.add('_all', action, cb, opts);
+    // use(action: any, cb: any, opts?: any) {
+    use(...args: Parameters<Documents.Service['use']>) {
+      // middlewareManager.add('_all', action, cb, opts);
+      if (typeof args[0] === 'string') {
+        const [action, cb, opts] = args;
+        // Add middleware for all uids for a given action
+        middlewareManager.add('_all', action, cb, opts);
+      } else {
+        // cb: () => any, opts?: any
+        const [cb, opts] = args;
+        // Add middleware for all actions for all uids
+        middlewareManager.add('_all', '_all', cb, opts);
+      }
       return create;
     },
     middlewares: middlewareManager,

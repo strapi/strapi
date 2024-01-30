@@ -74,15 +74,20 @@ export type ServiceInstance<
    *    return result;
    *  })
    */
-  use: <TAction extends keyof DocumentEngine>(
-    action: TAction,
-    // QUESTION: How do we type the result type of next?
-    //           Should we send params + document id attribute?
-    cb:
-      | Middleware.Middleware<Common.UID.ContentType, TAction>
-      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
-    opts?: Middleware.Options
-  ) => ThisType<ServiceInstance<TContentTypeUID>>;
+  use:
+    | (<TAction extends keyof DocumentEngine>(
+        action: TAction,
+        // QUESTION: How do we type the result type of next?
+        //           Should we send params + document id attribute?
+        cb:
+          | Middleware.Middleware<Common.UID.ContentType, TAction>
+          | Middleware.Middleware<Common.UID.ContentType, TAction>[],
+        opts?: Middleware.Options
+      ) => ThisType<ServiceInstance<TContentTypeUID>>)
+    | ((
+        cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
+        opts?: Middleware.Options
+      ) => ThisType<ServiceInstance<TContentTypeUID>>);
 
   /**
    * `.with()` instantiates a new document repository with default parameters
@@ -107,20 +112,32 @@ export type Service = {
     uid: TContentTypeUID
   ): ServiceInstance<TContentTypeUID>;
 
-  /** Add a middleware for all uid's and a specific action
+  /** Add a middleware for all uid's and a specific action, or also all actions
    *  @example - Add a default locale
-   *  strapi.documents.use('findMany', (ctx, next) => {
-   *    if (!params.locale) params.locale = 'en'
-   *    return next(ctx)
-   *  })
+   *    strapi.documents.use('findMany', (ctx, next) => {
+   *      if (!params.locale) params.locale = 'en'
+   *      return next(ctx)
+   *    })
+   *
+   *  @example - Filter private fields
+   *   strapi.documents.use(async (ctx, next) => {
+   *    // Filter private fields
+   *    const { privateField, ...result } = await next(ctx)
+   *    return result;
+   *   })
    */
-  use: <TAction extends keyof DocumentEngine>(
-    action: TAction,
-    cb:
-      | Middleware.Middleware<Common.UID.ContentType, TAction>
-      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
-    opts?: Middleware.Options
-  ) => Service;
+  use:
+    | (<TAction extends keyof DocumentEngine>(
+        action: TAction,
+        cb:
+          | Middleware.Middleware<Common.UID.ContentType, TAction>
+          | Middleware.Middleware<Common.UID.ContentType, TAction>[],
+        opts?: Middleware.Options
+      ) => Service)
+    | ((
+        cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
+        opts?: Middleware.Options
+      ) => Service);
 
   middlewares: Middleware.Manager;
 } & DocumentEngine;
