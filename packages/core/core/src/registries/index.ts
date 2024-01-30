@@ -12,3 +12,4 @@ export { default as config } from './config';
 export { default as apis } from './apis';
 export { default as sanitizers } from './sanitizers';
 export { default as validators } from './validators';
+export { registry as models } from './models';
