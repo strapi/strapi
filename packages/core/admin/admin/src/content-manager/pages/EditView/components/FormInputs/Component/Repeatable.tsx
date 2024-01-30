@@ -16,7 +16,6 @@ import {
 } from '@strapi/design-system';
 import { useNotification, useQuery } from '@strapi/helper-plugin';
 import { Plus, Drag, Trash } from '@strapi/icons';
-import { Attribute } from '@strapi/types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -36,6 +35,7 @@ import { InputRenderer } from '../../InputRenderer';
 import { Initializer } from './Initializer';
 
 import type { ComponentInputProps } from './Input';
+import type { Attribute } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
@@ -68,7 +68,7 @@ const RepeatableComponent = ({
   /**
    * Get the temp key of the component that has the field that is currently focussed
    * as defined by the `field` query param. We can then force this specific component
-   * to be in it's "open" state.
+   * to be in its "open" state.
    */
   const componentTmpKeyWithFocussedField = React.useMemo(() => {
     if (search.has('field')) {

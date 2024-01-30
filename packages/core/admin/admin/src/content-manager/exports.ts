@@ -1,6 +1,6 @@
 /**
  * This file keeps track of the exports from the CM plugin admin side.
- * When we move the CM plugin back to it's package, we won't need this
+ * When we move the CM plugin back to its package, we won't need this
  * but should still export the same things.
  */
 

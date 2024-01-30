@@ -8,7 +8,7 @@ tags:
   - list-view
 ---
 
-Layouts are fundamental to how the CM renders it's list & edit views. The edit view's layout can be manipulated via plugins using the `'Admin/CM/pages/EditView/mutate-edit-view-layout'` hook. Meanwhile the list view can currently only have table columns injected.
+Layouts are fundamental to how the CM renders its list & edit views. The edit view's layout can be manipulated via plugins using the `'Admin/CM/pages/EditView/mutate-edit-view-layout'` hook. Meanwhile the list view can currently only have table columns injected.
 
 ## What is a layout?
 
@@ -30,11 +30,11 @@ interface EditLayout {
 }
 ```
 
-The above types have been simplified for the purpose of explanation, but you can see from the `components` property of the `EditLayout` that it's essentially the same as it's parent, just a nested and organised per component. This consistency allows us to easily iterate over the layouts and render the views using the same components for the general layout & component layouts.
+The above types have been simplified for the purpose of explanation, but you can see from the `components` property of the `EditLayout` that it's essentially the same as its parent, just a nested and organised per component. This consistency allows us to easily iterate over the layouts and render the views using the same components for the general layout & component layouts.
 
 ## How are they made?
 
-The layout is a combination of a content-types's schema & it's configuration file, while their data-structures are similar they differ at the very root interface.
+The layout is a combination of a content-types's schema & its configuration file, while their data-structures are similar they differ at the very root interface.
 
 ### EditView
 
@@ -98,11 +98,11 @@ export const StringInput = forwardRef<HTMLInputElement, InputProps>(
 );
 ```
 
-To handle the CM specific inputs, the EditView domain has it's own `InputRenderer` component which follows the same principle but this will additionally handle attributes like custom-fields etc. The EditView them "simply" renders over it's layout, passing props to the `InputRenderer`, if there's a dynamic-zone or component we recursively render the layout by utilising the `components` property of the `EditLayout` data-structure, as previously said, because this follows the same structure as it's parent, we can iterate over it the exact same way rendering _any fields_ required, incl. deeply nested components and dynamic-zones.
+To handle the CM specific inputs, the EditView domain has its own `InputRenderer` component which follows the same principle but this will additionally handle attributes like custom-fields etc. The EditView them "simply" renders over its layout, passing props to the `InputRenderer`, if there's a dynamic-zone or component we recursively render the layout by utilising the `components` property of the `EditLayout` data-structure, as previously said, because this follows the same structure as its parent, we can iterate over it the exact same way rendering _any fields_ required, incl. deeply nested components and dynamic-zones.
 
 ### ListView
 
-Because the list view is essentailly a giant table, it's data-structure is considerably simpler than the edit view:
+Because the list view is essentailly a giant table, its data-structure is considerably simpler than the edit view:
 
 ```ts
 interface ListFieldLayout {

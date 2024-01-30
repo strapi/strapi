@@ -66,7 +66,7 @@ type UseDocument = (
  * @alpha
  * @public
  * @description Returns a document based on the model, collection type & id passed as arguments.
- * Also extracts it's schema from the redux cache to be used for creating a validation schema.
+ * Also extracts its schema from the redux cache to be used for creating a validation schema.
  * @example
  * ```tsx
  * const { id, model, collectionType } = useParams<{ id: string; model: string; collectionType: string }>();
@@ -224,7 +224,7 @@ const extractContentTypeComponents = (
     return attributes.reduce<string[]>((acc, attribute) => {
       /**
        * If the attribute is a component or dynamiczone, we need to recursively
-       * extract the component UIDs from it's attributes.
+       * extract the component UIDs from its attributes.
        */
       if (attribute.type === 'component') {
         const componentAttributes = Object.values(

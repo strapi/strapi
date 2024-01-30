@@ -80,8 +80,6 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
     query?.filters?.$and?.reduce<string[]>((acc, filter) => {
       const [key, value] = Object.entries(filter)[0];
       const id = value.id?.$eq || value.id?.$ne;
-      // TODO: strapi_assignee should not be in here and rather defined
-      // in the ee directory.
       if (id && USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
         acc.push(id);
       }
@@ -229,6 +227,8 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
                 // `options` allows the filter-tag to render the displayname
                 // of a user over a plain id
                 options:
+                  // TODO: strapi_assignee should not be in here and rather defined
+                  // in the ee directory.
                   eeFilter.name === 'strapi_assignee'
                     ? users.map((user) => ({
                         label: getDisplayName(user, formatMessage),

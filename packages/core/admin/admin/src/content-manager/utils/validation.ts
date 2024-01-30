@@ -1,5 +1,4 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import { Attribute } from '@strapi/types';
 import isBoolean from 'lodash/isBoolean';
 import isEmpty from 'lodash/isEmpty';
 import isNaN from 'lodash/isNaN';
@@ -10,6 +9,7 @@ import { isFieldTypeNumber } from './fields';
 
 import type { ComponentsDictionary } from '../hooks/useDocument';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { Attribute } from '@strapi/types';
 import type Lazy from 'yup/lib/Lazy';
 import type { MixedSchema } from 'yup/lib/mixed';
 

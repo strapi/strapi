@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { CarretDown } from '@strapi/icons';
-import { useField } from '@strapi/strapi/admin';
+import { useField, type InputProps } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -75,17 +75,8 @@ const ColorPickerPopover = styled(Popover)`
   min-height: 270px;
 `;
 
-/**
- * TODO: A lot of these props should extend `FieldProps`
- */
-interface ColorPickerInputProps {
-  label: string;
-  name: string;
-  hint?: string;
-  disabled?: boolean;
+interface ColorPickerInputProps extends InputProps {
   labelAction?: React.ReactNode;
-  required?: boolean;
-  type: string;
 }
 
 export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerInputProps>(

@@ -8,6 +8,8 @@ import isEqual from 'lodash/isEqual';
 import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
 
+import type { InputProps } from './FormInputs/types';
+
 /* -------------------------------------------------------------------------------------------------
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
@@ -97,14 +99,6 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
       return;
     }
 
-    /**
-     * If we can, persist the event:
-     * @see https://reactjs.org/docs/events.html#event-pooling
-     */
-    if (eventOrPath.persist) {
-      eventOrPath.persist();
-    }
-
     const target = eventOrPath.target ? eventOrPath.target : eventOrPath.currentTarget;
 
     const { type, name, id, value, options, multiple } = target;
@@ -118,16 +112,27 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
        */
     }
 
-    let parsed;
-    const val = /number|range/.test(type)
-      ? ((parsed = parseFloat(value)), isNaN(parsed) ? '' : parsed)
-      : /checkbox/.test(type) // checkboxes
-      ? !getIn(state.values, field)
-      : options && multiple // <select multiple>
-      ? Array.from<HTMLOptionElement>(options)
-          .filter((el) => el.selected)
-          .map((el) => el.value)
-      : value;
+    /**
+     * Because we handle any field from this function, we run through a series
+     * of checks to understand how to use the value.
+     */
+    let val;
+
+    if (/number|range/.test(type)) {
+      const parsed = parseFloat(value);
+      // If the value isn't a number for whatever reason, don't let it through because that will break the API.
+      val = isNaN(parsed) ? '' : parsed;
+    } else if (/checkbox/.test(type)) {
+      // Get & invert the current value of the checkbox.
+      val = !getIn(state.values, field);
+    } else if (options && multiple) {
+      // This will handle native select elements incl. ones with mulitple options.
+      val = Array.from<HTMLOptionElement>(options)
+        .filter((el) => el.selected)
+        .map((el) => el.value);
+    } else {
+      val = value;
+    }
 
     if (field) {
       dispatch({
@@ -358,4 +363,4 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 };
 
 export { Form, useField, useForm };
-export type { FormProps, FormValues, FormContextValue, FormState, FieldValue };
+export type { FormProps, FormValues, FormContextValue, FormState, FieldValue, InputProps };

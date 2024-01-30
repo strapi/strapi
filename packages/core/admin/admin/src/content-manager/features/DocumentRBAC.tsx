@@ -13,7 +13,7 @@ import type { Attribute } from '@strapi/types';
 /**
  * The boolean values indicate the global actions a user can perform on the document.
  * The `string[]` values tell us specifically which fields the actions can be performed on,
- * for exampele, if the `canReadFields` array is empty, than no fields can be read by the user.
+ * for example, if the `canReadFields` array is empty, than no fields can be read by the user.
  * This can happen even if the user can read the document.
  */
 interface DocumentRBACContextValue {
@@ -82,7 +82,7 @@ const selectContentTypePermissionsOrganisedByAction = createSelector(
 
 /**
  * @internal This component is not meant to be used outside of the Content Manager plugin.
- * It depends on knowing the slug/model of the contnet-type using the params of the URL.
+ * It depends on knowing the slug/model of the content-type using the params of the URL.
  * If you do use the hook outside of the context, we default to `false` for all actions.
  *
  * It then creates an list of `can{Action}` that are passed to the context for consumption

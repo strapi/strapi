@@ -39,8 +39,13 @@ export const MediaLibraryInput = forwardRef(
       }
     }, [step]);
 
-    // eslint-disable-next-line no-nested-ternary
-    const selectedAssets = Array.isArray(value) ? value : value ? [value] : [];
+    let selectedAssets = [];
+
+    if (Array.isArray(value)) {
+      selectedAssets = value;
+    } else if (value) {
+      selectedAssets = [value];
+    }
 
     const handleValidation = (nextSelectedAssets) => {
       onChange({

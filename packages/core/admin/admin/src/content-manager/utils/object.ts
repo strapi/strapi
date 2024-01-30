@@ -25,7 +25,7 @@ const isObject = (obj: any): obj is object => obj !== null && typeof obj === 'ob
 export const isInteger = (obj: any): boolean => String(Math.floor(Number(obj))) === obj;
 
 /**
- * Deeply set a value from in object via it's path. If the value at `path`
+ * Deeply set a value from in object via its path. If the value at `path`
  * has changed, return a shallow copy of obj with `value` set at `path`.
  * If `value` has not changed, return the original `obj`.
  *
