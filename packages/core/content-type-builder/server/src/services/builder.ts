@@ -2,28 +2,30 @@
 
 export const getReservedNames = () => {
   return {
+    // use kebab case everywhere since singularName and pluralName are validated that way
     models: [
       'boolean',
       'date',
-      'dateTime',
+      'date-time',
       'time',
       'upload',
       'then', // https://github.com/strapi/strapi/issues/15557
     ],
+    // attributes are compared with snake_case(name), so use only one of snake_case or camelCase here
     attributes: [
       // TODO V5: these need to come from a centralized place so we don't break things accidentally in the future
       'id',
-      'createdAt',
-      'updatedAt',
-      'publishedAt',
-      'createdById',
-      'updatedById',
+      'created_at',
+      'updated_at',
+      'published_at',
+      'created_by_id',
+      'updated_by_id',
 
       // TODO v5: restricting 'locale' would be a breaking change in v4 but we will need it if this is not resolved: https://github.com/strapi/strapi/issues/10181
 
       // not actually breaking but we'll leave it to avoid confusion
-      'createdBy',
-      'updatedBy',
+      'created_by',
+      'updated_by',
     ],
   };
   // strapi.db.getReservedNames();
