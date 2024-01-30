@@ -151,8 +151,8 @@ const getAttributeModifiers = (attribute) => {
     );
   }
 
-  // Default
-  if (!_.isNil(attribute.default)) {
+  // Default (ignore if default is a function)
+  if (!_.isNil(attribute.default) && !_.isFunction(attribute.default)) {
     const defaultLiteral = toTypeLiteral(attribute.default);
 
     modifiers.push(

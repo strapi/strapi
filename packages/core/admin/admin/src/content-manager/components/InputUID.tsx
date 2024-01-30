@@ -7,6 +7,7 @@ import {
   useAPIErrorHandler,
   useCMEditViewDataManager,
   useNotification,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -19,6 +20,7 @@ import {
   useGetAvailabilityQuery,
   useGetDefaultUIDQuery,
 } from '../services/uid';
+import { buildValidGetParams } from '../utils/api';
 
 /* -------------------------------------------------------------------------------------------------
  * InputUID
@@ -70,6 +72,8 @@ const InputUID = React.forwardRef<
     const toggleNotification = useNotification();
     const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
     const { formatMessage } = useIntl();
+    const [{ query }] = useQueryParams();
+    const params = React.useMemo(() => buildValidGetParams(query), [query]);
 
     const label = intlLabel.id
       ? formatMessage(
@@ -124,8 +128,13 @@ const InputUID = React.forwardRef<
 
     const handleRegenerateClick = async () => {
       try {
-        // @ts-expect-error – TODO: modified data is too vague for the type the API expects.
-        const res = await generateUID({ contentTypeUID, field: name, data: modifiedData });
+        const res = await generateUID({
+          contentTypeUID,
+          field: name,
+          // @ts-expect-error – TODO: modified data is too vague for the type the API expects.
+          data: modifiedData,
+          params,
+        });
 
         if ('data' in res) {
           onChange({ target: { name, value: res.data, type: 'text' } });
@@ -152,6 +161,7 @@ const InputUID = React.forwardRef<
         contentTypeUID,
         field: name,
         value: debouncedValue ? debouncedValue.trim() : '',
+        params,
       },
       {
         skip: !Boolean(

@@ -104,6 +104,8 @@
   "form.attribute.item.text.regex.description": "The text of the regular expression",
   "form.attribute.item.uniqueField": "Unique field",
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
+  "form.attribute.item.uniqueField.v5.willBeDisabled'": "Currently unique fields don't work correctly in components. If you disable this feature, the field will be disabled until this is fixed.",
+  "form.attribute.item.uniqueField.v5.disabled": "Currently unique fields don't work correctly in components. This field has been disabled until it's fixed.",
   "form.attribute.media.allowed-types": "Select allowed types of media",
   "form.attribute.media.allowed-types.option-files": "Files",
   "form.attribute.media.allowed-types.option-images": "Images",
