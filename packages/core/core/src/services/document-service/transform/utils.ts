@@ -57,13 +57,7 @@ export const transformFiltersOrPopulate = (
             transformedObj[key] = entryId;
           }
         }
-      }
-      // TODO:
-      // else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      // transformedObj[key] = transformFiltersOrPopulate(idMap, obj[key], opts);
-      // }
-      // Non-relational attributes are handled normally
-      else {
+      } else {
         transformedObj[key] = obj[key];
       }
     }
