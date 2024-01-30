@@ -34,6 +34,7 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -243,6 +244,7 @@ export const ReleaseDetailsLayout = ({
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
   const dispatch = useTypedDispatch();
+  const { trackUsage } = useTracking();
 
   const release = data?.data;
 
@@ -266,6 +268,14 @@ export const ReleaseDetailsLayout = ({
           id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
           defaultMessage: 'Release was published successfully.',
         }),
+      });
+
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+
+      trackUsage('didPublishRelease', {
+        totalEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
       });
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
