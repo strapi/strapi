@@ -59,11 +59,6 @@ runs:
   using: 'composite'
 
   steps:
-    - name: ⚙️ With Node 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
     - name: ⚙️ Enable Corepack
       if: inputs.enable-corepack == 'true'
       shell: bash
