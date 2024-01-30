@@ -74,12 +74,12 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         locale: 'en',
         localizations: [],
         name: 'category in english',
       });
-      data.categories.push(res.body);
+      data.categories.push(res.body.data);
     });
 
     test('non-default locale', async () => {
@@ -97,11 +97,11 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         locale: 'ko',
         name: 'category in korean',
       });
-      data.categories.push(res.body);
+      data.categories.push(body.data);
     });
 
     // This tests is sensible to foreign keys deadlocks
@@ -124,12 +124,12 @@ describe('i18n - Content API', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.locale).toBe(locale);
+        expect(res.body.data.locale).toBe(locale);
       }
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      data.categories.push(body);
+      data.categories.push(body.data);
     });
 
     test.skip('should not be able to duplicate unique field values within the same locale', async () => {
@@ -159,7 +159,7 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({ count: 1 });
+      expect(body.data).toMatchObject({ count: 1 });
       data.categories.shift();
     });
 
@@ -175,7 +175,7 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({ count: 1 });
+      expect(body.data).toMatchObject({ count: 1 });
       data.categories.shift();
     });
   });

@@ -40,7 +40,7 @@ describe('Test type password', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.field).toBeUndefined();
+    expect(res.body.data.field).toBeUndefined();
   });
 
   test.todo('Should be private by default');
@@ -53,7 +53,7 @@ describe('Test type password', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.field).toBeUndefined();
+    expect(res.body.data.field).toBeUndefined();
   });
 
   test('Reading entry returns correct value', async () => {
@@ -74,7 +74,7 @@ describe('Test type password', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withpassword.withpassword/${res.body.id}`,
+      `/content-manager/collection-types/api::withpassword.withpassword/${res.body.data.id}`,
       {
         body: {
           field: 'otherPwd',
@@ -83,9 +83,9 @@ describe('Test type password', () => {
     );
 
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      id: res.body.data.id,
     });
-    expect(res.body.field).toBeUndefined();
+    expect(res.body.data.field).toBeUndefined();
   });
 });
