@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -135,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18]
+        node: [20]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -187,6 +188,29 @@ jobs:
           name: playwright-trace
           path: test-apps/e2e/**/test-results/**/trace.zip
           retention-days: 1
+
+  cli:
+    timeout-minutes: 60
+    needs: [changes, build, typescript]
+    name: 'CLI Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run CLI tests
+        run: yarn test:cli
 
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'

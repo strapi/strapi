@@ -14,7 +14,11 @@ const data = {};
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createAuthRequest({
+      strapi,
+      // header required for multipart requests
+      state: { headers: { 'x-apollo-operation-name': 'graphql-upload' } },
+    });
   });
 
   afterAll(async () => {
@@ -424,5 +428,47 @@ describe('Upload plugin end to end tests', () => {
         },
       },
     });
+  });
+
+  test('Returns an error when required headers for csrf protection are missing', async () => {
+    const formData = {
+      operations: JSON.stringify({
+        query: /* GraphQL */ `
+          mutation uploadFile($file: Upload!) {
+            upload(file: $file) {
+              data {
+                id
+                attributes {
+                  name
+                  mime
+                  url
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          file: null,
+        },
+      }),
+      map: JSON.stringify({
+        nFile1: ['variables.file'],
+      }),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+    };
+
+    const res = await rq({ method: 'POST', url: '/graphql', formData, headers: {} });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: expect.stringContaining('x-apollo-operation-name'),
+          extensions: expect.objectContaining({
+            code: 'BAD_REQUEST',
+          }),
+        }),
+      ])
+    );
   });
 });

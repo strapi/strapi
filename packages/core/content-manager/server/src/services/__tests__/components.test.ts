@@ -13,12 +13,13 @@ jest.mock('../configuration', () =>
 
 describe('componentService', () => {
   test('findComponent', async () => {
-    const { findConfiguration } = componentsService({});
+    const { findConfiguration } = componentsService({} as any);
 
     const component = {
       uid: 'blog.test-compo',
       category: 'blog',
-    };
+    } as any;
+
     const result = await findConfiguration(component);
 
     expect(result).toEqual({ ...component, ...configuration });

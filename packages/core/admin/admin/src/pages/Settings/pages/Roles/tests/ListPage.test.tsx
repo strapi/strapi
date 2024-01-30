@@ -3,11 +3,10 @@ import { fixtures } from '@strapi/admin-test-utils';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 import { ListPage } from '../ListPage';
@@ -26,7 +25,6 @@ jest.mock('../../../../../hooks/useAdminRoles');
 const setup = () =>
   render(<ListPage />, {
     wrapper({ children }) {
-      const history = createMemoryHistory();
       const client = new QueryClient({
         defaultOptions: {
           queries: {
@@ -47,7 +45,7 @@ const setup = () =>
           >
             <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
               <ThemeProvider theme={lightTheme}>
-                <Router history={history}>{children}</Router>
+                <MemoryRouter>{children}</MemoryRouter>
               </ThemeProvider>
             </IntlProvider>
           </Provider>

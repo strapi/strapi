@@ -1,28 +1,26 @@
+import * as React from 'react';
+
 import { ReducersMapObject } from '@reduxjs/toolkit';
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from '@strapi/helper-plugin';
+import {
+  LoadingIndicatorPage,
+  MenuItem,
+  StrapiAppSetting,
+  StrapiAppSettingLink,
+} from '@strapi/helper-plugin';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { DefaultTheme } from 'styled-components';
+
+import { getEERoutes as getBaseEERoutes } from '../../ee/admin/src/constants';
+import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/SettingsPage/constants';
 
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
-import { LANGUAGE_LOCAL_STORAGE_KEY } from './components/LanguageProvider';
-import { Providers } from './components/Providers';
-import { HOOKS } from './constants';
-import { Components, Component } from './core/apis/Components';
-import { CustomFields } from './core/apis/CustomFields';
-import { Field, Fields } from './core/apis/Fields';
-import { Middleware, Middlewares } from './core/apis/Middlewares';
-import { Plugin, PluginConfig } from './core/apis/Plugin';
-import { Reducers } from './core/apis/Reducers';
-import { Store, configureStore } from './core/store/configure';
-import { getBasename } from './core/utils/basename';
-import { Handler, createHook } from './core/utils/createHook';
 import {
   INJECTION_ZONES,
   InjectionZoneBlock,
@@ -30,7 +28,23 @@ import {
   InjectionZoneContainer,
   InjectionZoneModule,
   InjectionZones,
-} from './shared/components/InjectionZone';
+} from './components/InjectionZone';
+import { Providers } from './components/Providers';
+import { HOOKS } from './constants';
+import { routes as cmRoutes } from './content-manager/routes';
+import { Components, Component } from './core/apis/Components';
+import { CustomFields } from './core/apis/CustomFields';
+import { Field, Fields } from './core/apis/Fields';
+import { Middleware, Middlewares } from './core/apis/Middlewares';
+import { Plugin, PluginConfig } from './core/apis/Plugin';
+import { Reducers } from './core/apis/Reducers';
+import { PreloadState, Store, configureStore } from './core/store/configure';
+import { getBasename } from './core/utils/basename';
+import { Handler, createHook } from './core/utils/createHook';
+import { AuthPage } from './pages/Auth/AuthPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { ROUTES_CE } from './pages/Settings/constants';
+import { THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY, ThemeName } from './reducer';
 import { languageNativeNames } from './translations/languageNativeNames';
 
 const {
@@ -63,6 +77,10 @@ interface StrapiAppPlugin {
   registerTrads: (args: {
     locales: string[];
   }) => Promise<{ data: Record<string, string>; locale: string }[]>;
+}
+
+interface UnloadedSettingsLink extends Omit<StrapiAppSettingLink, 'Component'> {
+  Component: () => Promise<{ default: React.ComponentType }>;
 }
 
 class StrapiApp {
@@ -152,26 +170,6 @@ class StrapiApp {
     }
   };
 
-  addCorePluginMenuLink = (link: MenuItem) => {
-    const stringifiedLink = JSON.stringify(link);
-
-    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
-    invariant(
-      typeof link.to === 'string',
-      `Expected link.to to be a string instead received ${typeof link.to}`
-    );
-    invariant(
-      ['/plugins/content-type-builder', '/plugins/upload'].includes(link.to),
-      'This method is not available for your plugin'
-    );
-    invariant(
-      link.intlLabel?.id && link.intlLabel?.defaultMessage,
-      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
-    );
-
-    this.menu.push(link);
-  };
-
   addFields = (fields: Field | Field[]) => {
     if (Array.isArray(fields)) {
       fields.map((field) => this.library.fields.add(field));
@@ -180,28 +178,63 @@ class StrapiApp {
     }
   };
 
-  addMenuLink = (link: MenuItem) => {
-    const stringifiedLink = JSON.stringify(link);
-
-    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
+  addMenuLink = (
+    link: Omit<MenuItem, 'Component'> & {
+      Component: () => Promise<{ default: React.ComponentType }>;
+    }
+  ) => {
+    invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
     invariant(
       typeof link.to === 'string',
-      `Expected link.to to be a string instead received ${typeof link.to}`
+      `[${
+        link.intlLabel.defaultMessage
+      }]: Expected link.to to be a string instead received ${typeof link.to}`
     );
     invariant(
       link.intlLabel?.id && link.intlLabel?.defaultMessage,
-      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
+      `[${link.intlLabel.defaultMessage}]: link.intlLabel.id & link.intlLabel.defaultMessage should be defined`
     );
     invariant(
       link.Component && typeof link.Component === 'function',
-      `link.Component should be a valid React Component`
+      `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise that returns a default component. Please use: \`Component: () => import(path)\` instead.`
     );
     invariant(
       link.icon && typeof link.icon === 'function',
-      `link.Icon should be a valid React Component`
+      `[${link.intlLabel.defaultMessage}]: link.Icon should be a valid React Component`
     );
 
-    this.menu.push(link);
+    if (
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
+    ) {
+      console.warn(`
+      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
+        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `);
+    }
+
+    if (link.to.startsWith('/')) {
+      console.warn(
+        `[${link.intlLabel.defaultMessage}]: the \`to\` property of your menu link is an absolute path, it should be relative to the root of the application. This has been corrected for you but will be removed in a future version of Strapi.`
+      );
+
+      link.to = link.to.slice(1);
+    }
+
+    this.menu.push({
+      ...link,
+      Component: React.lazy(async () => {
+        const mod = await link.Component();
+
+        if ('default' in mod) {
+          return mod;
+        } else {
+          return { default: mod };
+        }
+      }),
+    });
   };
 
   addMiddlewares = (middlewares: Middleware[]) => {
@@ -216,26 +249,66 @@ class StrapiApp {
     });
   };
 
-  addSettingsLink = (sectionId: keyof StrapiApp['settings'], link: StrapiAppSettingLink) => {
+  addSettingsLink = (sectionId: keyof StrapiApp['settings'], link: UnloadedSettingsLink) => {
     invariant(this.settings[sectionId], 'The section does not exist');
 
-    const stringifiedLink = JSON.stringify(link);
-
-    invariant(link.id, `link.id should be defined for ${stringifiedLink}`);
+    invariant(link.id, `[${link.intlLabel.defaultMessage}]: link.id should be defined`);
     invariant(
       link.intlLabel?.id && link.intlLabel?.defaultMessage,
-      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
+      `[${link.intlLabel.defaultMessage}]: link.intlLabel.id & link.intlLabel.defaultMessage`
     );
-    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
+    invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
     invariant(
       link.Component && typeof link.Component === 'function',
-      `link.Component should be a valid React Component`
+      `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise. Please use: \`Component: () => import(path)\` instead.`
     );
 
-    this.settings[sectionId].links.push(link);
+    if (
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
+    ) {
+      console.warn(`
+      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
+        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `);
+    }
+
+    if (link.to.startsWith('/')) {
+      console.warn(
+        `[${link.intlLabel.defaultMessage}]: the \`to\` property of your settings link is an absolute path. It should be relative to \`/settings\`. This has been corrected for you but will be removed in a future version of Strapi.`
+      );
+
+      link.to = link.to.slice(1);
+    }
+
+    if (link.to.split('/')[0] === 'settings') {
+      console.warn(
+        `[${link.intlLabel.defaultMessage}]: the \`to\` property of your settings link has \`settings\` as the first part of it's path. It should be relative to \`settings\` and therefore, not include it. This has been corrected for you but will be removed in a future version of Strapi.`
+      );
+
+      link.to = link.to.split('/').slice(1).join('/');
+    }
+
+    this.settings[sectionId].links.push({
+      ...link,
+      Component: React.lazy(async () => {
+        const mod = await link.Component();
+
+        if ('default' in mod) {
+          return mod;
+        } else {
+          return { default: mod };
+        }
+      }),
+    });
   };
 
-  addSettingsLinks = (sectionId: keyof StrapiApp['settings'], links: StrapiAppSettingLink[]) => {
+  addSettingsLinks = (
+    sectionId: Parameters<typeof this.addSettingsLink>[0],
+    links: UnloadedSettingsLink[]
+  ) => {
     invariant(this.settings[sectionId], 'The section does not exist');
     invariant(Array.isArray(links), 'TypeError expected links to be an array');
 
@@ -336,7 +409,7 @@ class StrapiApp {
     this.hooksDict[name] = createHook();
   };
 
-  createSettingSection = (section: StrapiAppSetting, links: StrapiAppSettingLink[]) => {
+  createSettingSection = (section: StrapiAppSetting, links: UnloadedSettingsLink[]) => {
     invariant(section.id, 'section.id should be defined');
     invariant(
       section.intlLabel?.id && section.intlLabel?.defaultMessage,
@@ -353,8 +426,12 @@ class StrapiApp {
     });
   };
 
-  createStore = () => {
-    const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
+  createStore = (preloadedState?: PreloadState) => {
+    const store = configureStore(
+      preloadedState,
+      this.middlewares.middlewares,
+      this.reducers.reducers
+    );
 
     return store as Store;
   };
@@ -521,12 +598,7 @@ class StrapiApp {
   runHookSeries = (name: string, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (
-    name: string,
-    initialValue: unknown,
-    asynchronous = false,
-    store?: unknown
-  ) => {
+  runHookWaterfall = <T,>(name: string, initialValue: T, asynchronous = false, store?: Store) => {
     return asynchronous
       ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
       : this.hooksDict[name].runWaterfall(initialValue, store);
@@ -535,48 +607,206 @@ class StrapiApp {
   runHookParallel = (name: string) => this.hooksDict[name].runParallel();
 
   render() {
-    const store = this.createStore();
     const localeNames = pick(languageNativeNames, this.configurations.locales || []);
+    const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
+      'en') as keyof typeof localeNames;
 
-    const {
-      components: { components },
-      fields: { fields },
-    } = this.library;
+    const store = this.createStore({
+      admin_app: {
+        permissions: {},
+        theme: {
+          availableThemes: [],
+          currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
+        },
+        language: {
+          locale: localeNames[locale] ? locale : 'en',
+          localeNames,
+        },
+      },
+    });
 
-    return (
-      <Providers
-        components={components}
-        fields={fields}
-        customFields={this.customFields}
-        localeNames={localeNames}
-        getAdminInjectedComponents={this.getAdminInjectedComponents}
-        getPlugin={this.getPlugin}
-        messages={this.configurations.translations}
-        menu={this.menu}
-        plugins={this.plugins}
-        runHookParallel={this.runHookParallel}
-        runHookWaterfall={(name, initialValue, async = false) => {
-          return this.runHookWaterfall(name, initialValue, async, store);
-        }}
-        runHookSeries={this.runHookSeries}
-        themes={this.configurations.themes}
-        settings={this.settings}
-        store={store}
-      >
-        <Helmet
-          htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
-        />
-        <BrowserRouter basename={getBasename()}>
-          <App
-            authLogo={this.configurations.authLogo}
-            menuLogo={this.configurations.menuLogo}
-            showTutorials={this.configurations.tutorials}
-            showReleaseNotification={this.configurations.notifications.releases}
-          />
-        </BrowserRouter>
-      </Providers>
+    const settingsRoutes = [...getSettingsEERoutes(), ...ROUTES_CE].filter(
+      (route, index, refArray) => refArray.findIndex((obj) => obj.path === route.path) === index
     );
+
+    const router = createBrowserRouter(
+      [
+        {
+          path: '/*',
+          element: <Root strapi={this} localeNames={localeNames} store={store} />,
+          children: [
+            {
+              path: 'usecase',
+              lazy: async () => {
+                const { PrivateUseCasePage } = await import('./pages/UseCasePage');
+
+                return {
+                  Component: PrivateUseCasePage,
+                };
+              },
+            },
+            {
+              path: 'auth/:authType',
+              element: <AuthPage />,
+            },
+            {
+              path: '/*',
+              lazy: async () => {
+                const { PrivateAdminLayout } = await import('./pages/Layout');
+
+                return {
+                  Component: PrivateAdminLayout,
+                };
+              },
+              children: [
+                {
+                  index: true,
+                  lazy: async () => {
+                    const { HomePage } = await import('./pages/HomePage');
+
+                    return {
+                      Component: HomePage,
+                    };
+                  },
+                },
+                {
+                  path: 'me',
+                  lazy: async () => {
+                    const { ProfilePage } = await import('./pages/ProfilePage');
+
+                    return {
+                      Component: ProfilePage,
+                    };
+                  },
+                },
+                {
+                  path: 'list-plugins',
+                  lazy: async () => {
+                    const { ProtectedInstalledPluginsPage } = await import(
+                      './pages/InstalledPluginsPage'
+                    );
+
+                    return {
+                      Component: ProtectedInstalledPluginsPage,
+                    };
+                  },
+                },
+                {
+                  path: 'marketplace',
+                  lazy: async () => {
+                    const { ProtectedMarketplacePage } = await import(
+                      './pages/Marketplace/MarketplacePage'
+                    );
+
+                    return {
+                      Component: ProtectedMarketplacePage,
+                    };
+                  },
+                },
+                {
+                  path: 'settings/*',
+                  lazy: async () => {
+                    const { Layout } = await import('./pages/Settings/Layout');
+
+                    return {
+                      Component: Layout,
+                    };
+                  },
+                  children: [
+                    {
+                      path: 'application-infos',
+                      lazy: async () => {
+                        const { ApplicationInfoPage } = await import(
+                          './pages/Settings/pages/ApplicationInfo/ApplicationInfoPage'
+                        );
+
+                        return {
+                          Component: ApplicationInfoPage,
+                        };
+                      },
+                    },
+                    ...Object.values(this.settings).flatMap(({ links }) =>
+                      links.map(({ to, Component }) => ({
+                        path: `${to}/*`,
+                        element: (
+                          <React.Suspense fallback={<LoadingIndicatorPage />}>
+                            <Component />
+                          </React.Suspense>
+                        ),
+                      }))
+                    ),
+                    ...settingsRoutes,
+                  ],
+                },
+                ...this.menu.map(({ to, Component }) => ({
+                  path: `${to}/*`,
+                  element: (
+                    <React.Suspense fallback={<LoadingIndicatorPage />}>
+                      <Component />
+                    </React.Suspense>
+                  ),
+                })),
+                ...getBaseEERoutes(),
+                ...cmRoutes,
+              ],
+            },
+            {
+              path: '*',
+              element: <NotFoundPage />,
+            },
+          ],
+        },
+      ],
+      {
+        basename: getBasename(),
+      }
+    );
+
+    return <RouterProvider router={router} />;
   }
 }
+
+interface RootProps {
+  localeNames: Record<string, string>;
+  strapi: StrapiApp;
+  store: Store;
+}
+/**
+ * The Root component sets up all the context providers which _do not_
+ * require data-fetching to perform their duties i.e. Notifications or
+ * CustomFields or the Store.
+ */
+const Root = ({ strapi, store, localeNames }: RootProps) => {
+  return (
+    <Providers
+      components={strapi.library.components.components}
+      fields={strapi.library.fields.fields}
+      customFields={strapi.customFields}
+      localeNames={localeNames}
+      getAdminInjectedComponents={strapi.getAdminInjectedComponents}
+      getPlugin={strapi.getPlugin}
+      messages={strapi.configurations.translations}
+      menu={strapi.menu}
+      plugins={strapi.plugins}
+      runHookParallel={strapi.runHookParallel}
+      runHookWaterfall={(name, initialValue, async = false) => {
+        return strapi.runHookWaterfall(name, initialValue, async, store);
+      }}
+      // @ts-expect-error – context issue. TODO: fix this.
+      runHookSeries={strapi.runHookSeries}
+      themes={strapi.configurations.themes}
+      settings={strapi.settings}
+      store={store}
+    >
+      <Helmet htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }} />
+      <App
+        authLogo={strapi.configurations.authLogo}
+        menuLogo={strapi.configurations.menuLogo}
+        showTutorials={strapi.configurations.tutorials}
+        showReleaseNotification={strapi.configurations.notifications.releases}
+      />
+    </Providers>
+  );
+};
 
 export { StrapiApp, StrapiAppConstructorArgs };

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-i18n",
-  "version": "4.15.5",
+  "version": "4.19.0",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -38,14 +38,13 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
     "build": "strapi plugin:build --force",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
@@ -55,10 +54,10 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "1.13.2",
-    "@strapi/helper-plugin": "4.15.5",
-    "@strapi/icons": "1.13.2",
-    "@strapi/utils": "4.15.5",
+    "@strapi/design-system": "1.14.1",
+    "@strapi/helper-plugin": "4.19.0",
+    "@strapi/icons": "1.14.1",
+    "@strapi/utils": "4.19.0",
     "axios": "1.6.0",
     "formik": "2.4.0",
     "immer": "9.0.19",
@@ -71,22 +70,24 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "4.15.5",
-    "@strapi/strapi": "4.15.5",
-    "@strapi/types": "4.15.5",
+    "@strapi/admin-test-utils": "4.19.0",
+    "@strapi/pack-up": "4.19.0",
+    "@strapi/strapi": "4.19.0",
+    "@strapi/types": "4.19.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "koa": "2.13.4",
     "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
+    "react-router-dom": "6.21.1",
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "^6.0.0",
     "styled-components": "^5.2.1"
   },
   "engines": {

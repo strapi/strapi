@@ -17,7 +17,6 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
   useAPIErrorHandler,
-  useFetchClient,
   useFocusWhenNavigate,
   useGuidedTour,
   useNotification,
@@ -27,16 +26,18 @@ import {
   translatedErrors,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { AxiosError, AxiosResponse } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { selectAdminPermissions } from '../../../../selectors';
-import { formatAPIErrors } from '../../../../utils/formatAPIErrors';
+import { useTypedSelector } from '../../../../core/store/hooks';
+import {
+  useCreateTransferTokenMutation,
+  useGetTransferTokenQuery,
+  useUpdateTransferTokenMutation,
+} from '../../../../services/transferTokens';
+import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { FormHead } from '../../components/Tokens/FormHead';
 import { LifeSpanInput } from '../../components/Tokens/LifeSpanInput';
@@ -46,10 +47,7 @@ import { TokenName } from '../../components/Tokens/TokenName';
 import { TokenTypeSelect } from '../../components/Tokens/TokenTypeSelect';
 
 import type {
-  TokenCreate,
-  TokenGetById,
   TransferToken,
-  TokenUpdate,
   SanitizedTransferToken,
 } from '../../../../../../shared/contracts/transfer';
 
@@ -60,8 +58,6 @@ const schema = yup.object().shape({
   permissions: yup.string().required(translatedErrors.required),
 });
 
-const MSG_ERROR_NAME_TAKEN = 'Name already taken';
-
 /* -------------------------------------------------------------------------------------------------
  * EditView
  * -----------------------------------------------------------------------------------------------*/
@@ -71,8 +67,8 @@ const EditView = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
-  const history = useHistory();
-  const { state: locationState } = useLocation<{ transferToken: TransferToken }>();
+  const navigate = useNavigate();
+  const { state: locationState } = useLocation();
   const [transferToken, setTransferToken] = React.useState<
     TransferToken | SanitizedTransferToken | null
   >(
@@ -84,18 +80,21 @@ const EditView = () => {
   );
   const { trackUsage } = useTracking();
   const { setCurrentStep } = useGuidedTour();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['transfer-tokens']
+  );
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-    // @ts-expect-error this is fine
-  } = useRBAC(permissions.settings['transfer-tokens']);
-  const match = useRouteMatch<{ id: string }>('/settings/transfer-tokens/:id');
-  const { get, post, put } = useFetchClient();
+  } = useRBAC(permissions);
+  const match = useMatch('/settings/transfer-tokens/:id');
 
   const id = match?.params?.id;
   const isCreating = id === 'create';
 
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
 
   React.useEffect(() => {
     trackUsage(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
@@ -103,45 +102,29 @@ const EditView = () => {
     });
   }, [isCreating, trackUsage]);
 
-  useQuery(
-    ['transfer-token', id],
-    async () => {
-      const {
-        data: { data },
-      } = await get<TokenGetById.Response>(`/admin/transfer/tokens/${id}`);
+  const { data, error } = useGetTransferTokenQuery(id!, {
+    skip: isCreating || transferToken !== null || !id,
+  });
 
-      setTransferToken({
-        ...data,
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
       });
-
-      return data;
-    },
-    {
-      enabled: !isCreating && !transferToken,
-      onError(err) {
-        if (err instanceof AxiosError) {
-          // @ts-expect-error this is fine
-          if (err.response.data.error.details?.code === 'INVALID_TOKEN_SALT') {
-            toggleNotification({
-              type: 'warning',
-              message: {
-                id: 'notification.error.invalid.configuration',
-                defaultMessage:
-                  'You have an invalid configuration, check your server log for more information.',
-              },
-            });
-          } else {
-            toggleNotification({
-              type: 'warning',
-              message: formatAPIError(err),
-            });
-          }
-        }
-      },
     }
-  );
+  }, [error, formatAPIError, toggleNotification]);
 
-  const handleSubmit = async (body: FormValues, actions: FormikHelpers<FormValues>) => {
+  React.useEffect(() => {
+    if (data) {
+      setTransferToken(data);
+    }
+  }, [data]);
+
+  const [createToken] = useCreateTransferTokenMutation();
+  const [updateToken] = useUpdateTransferTokenMutation();
+
+  const handleSubmit = async (body: FormValues, formik: FormikHelpers<FormValues>) => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
@@ -164,90 +147,90 @@ const EditView = () => {
     // because String.split returns stringp[]
     if (isPermissionsTransferPermission(permissions)) {
       try {
-        let response: TransferToken | SanitizedTransferToken;
-
         if (isCreating) {
-          const { data } = await post<
-            TokenCreate.Response,
-            AxiosResponse<TokenCreate.Response>,
-            TokenCreate.Request['body']
-          >(`/admin/transfer/tokens`, {
+          const res = await createToken({
             ...body,
             permissions,
           });
 
-          response = data.data;
+          if ('error' in res) {
+            if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+              formik.setErrors(formatValidationErrors(res.error));
+            } else {
+              toggleNotification({
+                type: 'warning',
+                message: formatAPIError(res.error),
+              });
+            }
+
+            return;
+          }
+
+          setTransferToken(res.data);
+
+          toggleNotification({
+            type: 'success',
+            message: formatMessage({
+              id: 'notification.success.transfertokencreated',
+              defaultMessage: 'Transfer Token successfully created',
+            }),
+          });
+
+          trackUsage('didCreateToken', {
+            type: transferToken?.permissions,
+            tokenType: TRANSFER_TOKEN_TYPE,
+          });
+
+          navigate(res.data.id.toString(), {
+            replace: true,
+            state: { transferToken: res.data },
+          });
+          setCurrentStep('transferTokens.success');
         } else {
-          const { data } = await put<
-            TokenUpdate.Response,
-            AxiosResponse<TokenUpdate.Response>,
-            TokenUpdate.Request['body']
-          >(`/admin/transfer/tokens/${id}`, {
+          const res = await updateToken({
+            id: id!,
             name: body.name,
             description: body.description,
             permissions,
           });
 
-          response = data.data;
-        }
+          if ('error' in res) {
+            if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+              formik.setErrors(formatValidationErrors(res.error));
+            } else {
+              toggleNotification({
+                type: 'warning',
+                message: formatAPIError(res.error),
+              });
+            }
 
-        // @ts-expect-error context assertation
-        unlockApp();
-
-        if (isCreating) {
-          history.replace(`/settings/transfer-tokens/${response.id}`, { transferToken: response });
-          setCurrentStep('transferTokens.success');
-        }
-
-        setTransferToken({
-          ...response,
-        });
-
-        toggleNotification({
-          type: 'success',
-          message: isCreating
-            ? formatMessage({
-                id: 'notification.success.transfertokencreated',
-                defaultMessage: 'Transfer Token successfully created',
-              })
-            : formatMessage({
-                id: 'notification.success.transfertokenedited',
-                defaultMessage: 'Transfer Token successfully edited',
-              }),
-        });
-
-        trackUsage(isCreating ? 'didCreateToken' : 'didEditToken', {
-          type: transferToken?.permissions,
-          tokenType: TRANSFER_TOKEN_TYPE,
-        });
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          // @ts-expect-error this is fine
-          const errors = formatAPIErrors(err.response.data);
-          actions.setErrors(errors);
-
-          if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
-            toggleNotification({
-              type: 'warning',
-              message: err.response.data.message || 'notification.error.tokennamenotunique',
-            });
-          } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-            toggleNotification({
-              type: 'warning',
-              message: {
-                id: 'notification.error.invalid.configuration',
-                defaultMessage:
-                  'You have an invalid configuration, check your server log for more information.',
-              },
-            });
-          } else {
-            toggleNotification({
-              type: 'warning',
-              message: err?.response?.data?.message || 'notification.error',
-            });
+            return;
           }
-        }
 
+          setTransferToken(res.data);
+
+          toggleNotification({
+            type: 'success',
+            message: formatMessage({
+              id: 'notification.success.transfertokenedited',
+              defaultMessage: 'Transfer Token successfully edited',
+            }),
+          });
+
+          trackUsage('didEditToken', {
+            type: transferToken?.permissions,
+            tokenType: TRANSFER_TOKEN_TYPE,
+          });
+        }
+      } catch (err) {
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error',
+            defaultMessage: 'Something went wrong',
+          },
+        });
+      } finally {
         // @ts-expect-error context assertation
         unlockApp();
       }
@@ -260,26 +243,6 @@ const EditView = () => {
   if (isLoading) {
     return <LoadingView />;
   }
-
-  const handleErrorRegenerate = (err: unknown) => {
-    if (err instanceof AxiosError) {
-      if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
-        toggleNotification({
-          type: 'warning',
-          message: {
-            id: 'notification.error.invalid.configuration',
-            defaultMessage:
-              'You have an invalid configuration, check your server log for more information.',
-          },
-        });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(err),
-        });
-      }
-    }
-  };
 
   return (
     <Main>
@@ -318,7 +281,6 @@ const EditView = () => {
                 canRegenerate={canRegenerate}
                 isSubmitting={isSubmitting}
                 regenerateUrl="/admin/transfer/tokens/"
-                onErrorRegenerate={handleErrorRegenerate}
               />
               <ContentLayout>
                 <Flex direction="column" alignItems="stretch" gap={6}>
@@ -350,10 +312,12 @@ const EditView = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedEditView = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['transfer-tokens'].read
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.['transfer-tokens'].read}>
+    <CheckPagePermissions permissions={permissions}>
       <EditView />
     </CheckPagePermissions>
   );

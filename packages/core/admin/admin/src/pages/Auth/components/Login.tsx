@@ -2,19 +2,17 @@ import * as React from 'react';
 
 import { Box, Button, Checkbox, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { Form, auth, translatedErrors, useFetchClient, useQuery } from '@strapi/helper-plugin';
+import { Form, translatedErrors, useQuery } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
-import { Login } from '../../../../../shared/contracts/authentication';
-import { useLocales } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/UnauthenticatedLogo';
+import { useAuth } from '../../../features/Auth';
 import {
   UnauthenticatedLayout,
   Column,
@@ -23,7 +21,7 @@ import {
 
 import { FieldActionWrapper } from './FieldActionWrapper';
 
-import type { AxiosError } from 'axios';
+import type { Login } from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
   children?: React.ReactNode;
@@ -39,49 +37,32 @@ const Login = ({ children }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const [passwordShown, setPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { post } = useFetchClient();
-  const { changeLocale } = useLocales();
   const query = useQuery();
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
-  const mutation = useMutation(
-    async (body: Login.Request['body'] & { rememberMe: boolean }) => {
-      const {
-        data: { data },
-      } = await post<Login.Response>('/admin/login', body);
+  const login = useAuth('Login', (state) => state.login);
 
-      return { ...data, rememberMe: body.rememberMe };
-    },
-    {
-      onSuccess(data) {
-        if (data) {
-          const { token, user } = data;
+  const handleLogin = async (body: Parameters<typeof login>[0]) => {
+    setApiError(undefined);
 
-          if (user.preferedLanguage) {
-            changeLocale(user.preferedLanguage);
-          }
+    const res = await login(body);
 
-          auth.setToken(token, data.rememberMe);
-          auth.setUserInfo(user, data.rememberMe);
+    if ('error' in res) {
+      const message = res.error.message ?? 'Something went wrong';
 
-          const redirectTo = query.get('redirectTo');
-          const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
+      if (camelCase(message).toLowerCase() === 'usernotactive') {
+        navigate('/auth/oops');
+        return;
+      }
 
-          push(redirectUrl);
-        }
-      },
-      onError(err: AxiosError<{ error: Login.Response['errors'] }>) {
-        const message = err.response?.data?.error?.message ?? 'Something went wrong';
+      setApiError(message);
+    } else {
+      const redirectTo = query.get('redirectTo');
+      const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
 
-        if (camelCase(message).toLowerCase() === 'usernotactive') {
-          push('/auth/oops');
-          return;
-        }
-
-        setApiError(message);
-      },
+      navigate(redirectUrl);
     }
-  );
+  };
 
   return (
     <UnauthenticatedLayout>
@@ -105,7 +86,7 @@ const Login = ({ children }: LoginProps) => {
                 })}
               </Typography>
             </Box>
-            {mutation.isError && apiError ? (
+            {apiError ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
                 {apiError}
               </Typography>
@@ -119,7 +100,7 @@ const Login = ({ children }: LoginProps) => {
               rememberMe: false,
             }}
             onSubmit={(values) => {
-              mutation.mutate(values);
+              handleLogin(values);
             }}
             validationSchema={LOGIN_SCHEMA}
             validateOnChange={false}

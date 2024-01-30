@@ -1,9 +1,3 @@
-// NOTE TO PLUGINS DEVELOPERS:
-// If you modify this file by adding new options to the plugin entry point
-// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
-// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
-// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
-// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { Information } from '@strapi/icons';
 
@@ -17,18 +11,14 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addMenuLink({
-      to: `/plugins/${pluginId}`,
+      to: `plugins/${pluginId}`,
       icon: Information,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Documentation',
       },
       permissions: PERMISSIONS.main,
-      async Component() {
-        const component = await import('./pages/PluginPage');
-
-        return component;
-      },
+      Component: () => import('./pages/PluginPage'),
     });
 
     app.registerPlugin({
@@ -43,12 +33,8 @@ export default {
         defaultMessage: 'Documentation',
       },
       id: 'documentation',
-      to: `/settings/${pluginId}`,
-      async Component() {
-        const component = await import('./pages/SettingsPage');
-
-        return component;
-      },
+      to: pluginId,
+      Component: () => import('./pages/SettingsPage'),
       permissions: PERMISSIONS.main,
     });
   },

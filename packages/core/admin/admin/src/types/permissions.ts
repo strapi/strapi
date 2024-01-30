@@ -4,23 +4,30 @@ type SettingsPermissions =
   | 'api-tokens'
   | 'project-settings'
   | 'roles'
-  | 'sso'
   | 'transfer-tokens'
   | 'users'
   | 'webhooks';
 
-interface CRUDPermissions {
-  main: Permission[];
+type EESettingsPermissions = 'auditLogs' | 'review-workflows' | 'sso';
+
+type CRUDPermissions = {
+  main?: Permission[];
   read: Permission[];
-  create: Permission[];
+  create?: Permission[];
   update: Permission[];
-  delete: Permission[];
-  [key: string]: Permission[];
-}
+  delete?: Permission[];
+} & { [key: string]: Permission[] };
 
 interface PermissionMap {
-  marketplace: CRUDPermissions;
-  settings: Record<SettingsPermissions, CRUDPermissions>;
+  contentManager: {
+    main: Permission[];
+    collectionTypesConfigurations: Permission[];
+    singleTypesConfigurations: Permission[];
+    componentsConfigurations: Permission[];
+  };
+  marketplace: Pick<CRUDPermissions, 'main' | 'read'>;
+  settings: Record<SettingsPermissions, CRUDPermissions> &
+    Partial<Record<EESettingsPermissions, CRUDPermissions>>;
 }
 
 export { PermissionMap };

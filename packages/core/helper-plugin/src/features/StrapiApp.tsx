@@ -1,17 +1,10 @@
 import * as React from 'react';
 
-import { LinkProps } from 'react-router-dom';
-
 import { TranslationMessage } from '../types';
 
 import type { Permission } from './RBAC';
 
-type ComponentModule = () =>
-  | Promise<{ default?: React.ComponentType } | React.ComponentType>
-  | { default?: React.ComponentType }
-  | React.ComponentType;
-
-interface MenuItem extends Pick<LinkProps, 'to'> {
+interface MenuItem {
   to: string;
   icon: React.ElementType;
   intlLabel: TranslationMessage;
@@ -21,13 +14,30 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
    */
   permissions: Permission[];
   notificationsCount?: number;
-  Component?: ComponentModule;
-  exact?: boolean;
+  Component: React.LazyExoticComponent<React.ComponentType>;
 }
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
+
+type InjectionZoneArea =
+  | 'admin.tutorials.links'
+  | 'contentManager.editView.informations'
+  | 'contentManager.editView.right-links'
+  | 'contentManager.listView.actions'
+  | 'contentManager.listView.unpublishModalAdditionalInfos'
+  | 'contentManager.listView.deleteModalAdditionalInfos'
+  | 'contentManager.listView.publishModalAdditionalInfos'
+  | 'contentManager.listView.deleteModalAdditionalInfos';
+
+type InjectionZoneModule = InjectionZoneArea extends `${infer Word}.${string}` ? Word : never;
+type InjectionZoneContainer = InjectionZoneArea extends `${string}.${infer Word}.${string}`
+  ? Word
+  : never;
+type InjectionZoneBlock = InjectionZoneArea extends `${string}.${string}.${infer Word}`
+  ? Word
+  : never;
 
 // TODO: this should come from `core/admin/src/core/apis/Plugins`
 interface Plugin {
@@ -46,13 +56,8 @@ interface Plugin {
   pluginId: string;
 }
 
-interface StrapiAppSettingLink {
+interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {
   id: string;
-  to: string;
-  intlLabel: TranslationMessage;
-  Component: ComponentModule;
-  permissions: Permission[];
-  exact?: boolean;
 }
 
 interface StrapiAppSetting {
@@ -61,20 +66,36 @@ interface StrapiAppSetting {
   links: StrapiAppSettingLink[];
 }
 
-type RunHookSeries = (hookName: string, async?: boolean) => unknown | Promise<unknown>;
+interface RunHookSeries {
+  (hookName: string, async: true): Promise<any[]>;
+  (hookName: string, async?: false): any[];
+}
 
-type RunHookWaterfall = <InitialValue, Store>(
-  hookName: string,
-  initialValue: InitialValue,
-  asynchronous: false | undefined,
-  store: Store
-) => unknown | Promise<unknown>;
+interface RunHookWaterfall {
+  <InitialValue, Store>(
+    hookName: string,
+    initialValue: InitialValue,
+    asynchronous: true,
+    store?: Store
+  ): Promise<InitialValue>;
+  <InitialValue, Store>(
+    hookName: string,
+    initialValue: InitialValue,
+    asynchronous?: false,
+    store?: Store
+  ): InitialValue;
+}
 
 interface StrapiAppContextValue {
   menu: MenuItem[];
   plugins: Record<string, Plugin>;
   settings: Record<string, StrapiAppSetting>;
   getPlugin: (pluginId: string) => Plugin | undefined;
+  getAdminInjectedComponents: (
+    moduleName: InjectionZoneModule,
+    containerName: InjectionZoneContainer,
+    blockName: InjectionZoneBlock
+  ) => Array<{ Component: React.ComponentType; name: string }>;
   runHookParallel: (hookName: string) => Promise<unknown>;
   runHookWaterfall: RunHookWaterfall;
   runHookSeries: RunHookSeries;
@@ -82,12 +103,14 @@ interface StrapiAppContextValue {
 
 const StrapiAppContext = React.createContext<StrapiAppContextValue>({
   getPlugin: () => undefined,
+  getAdminInjectedComponents: () => [],
   menu: [],
   plugins: {},
   settings: {},
   // These functions are required but should not resolve to undefined as they do here
   runHookParallel: () => Promise.resolve(),
   runHookWaterfall: () => Promise.resolve(),
+  // @ts-expect-error – TODO: fix this.
   runHookSeries: () => Promise.resolve(),
 });
 
@@ -102,6 +125,7 @@ interface StrapiAppProviderProps extends StrapiAppContextValue {
 const StrapiAppProvider = ({
   children,
   getPlugin,
+  getAdminInjectedComponents,
   menu,
   plugins,
   runHookParallel,
@@ -112,6 +136,7 @@ const StrapiAppProvider = ({
   const contextValue = React.useMemo(
     () => ({
       getPlugin,
+      getAdminInjectedComponents,
       menu,
       plugins,
       runHookParallel,
@@ -119,7 +144,16 @@ const StrapiAppProvider = ({
       runHookWaterfall,
       settings,
     }),
-    [getPlugin, menu, plugins, runHookParallel, runHookSeries, runHookWaterfall, settings]
+    [
+      getPlugin,
+      getAdminInjectedComponents,
+      menu,
+      plugins,
+      runHookParallel,
+      runHookSeries,
+      runHookWaterfall,
+      settings,
+    ]
   );
 
   return <StrapiAppContext.Provider value={contextValue}>{children}</StrapiAppContext.Provider>;
@@ -141,5 +175,4 @@ export type {
   StrapiAppSetting,
   RunHookSeries,
   RunHookWaterfall,
-  ComponentModule,
 };

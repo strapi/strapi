@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18]
+        node: [20]
     steps:
       - run: echo "Skipped"
 
@@ -63,6 +63,13 @@ jobs:
     strategy:
       matrix:
         node: [18, 20]
+    steps:
+      - run: echo "Skipped"
+
+  cli:
+    name: 'CLI Tests'
+    needs: [changes, build, typescript]
+    runs-on: ubuntu-latest
     steps:
       - run: echo "Skipped"
 

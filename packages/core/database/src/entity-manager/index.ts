@@ -469,12 +469,12 @@ export const createEntityManager = (db: Database): EntityManager => {
       const trx = await strapi.db.transaction();
       try {
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
-          // TODO: handle components in the db layer
+          // TODO: select attrs to clone outside the DB layer so components can be unknown
           if (
             types.isRelationalAttribute(attr) &&
             'joinTable' in attr &&
             attr.joinTable &&
-            !('component' in attr)
+            !attr.joinTable.name.endsWith('_components')
           ) {
             acc.push(attrName);
           }

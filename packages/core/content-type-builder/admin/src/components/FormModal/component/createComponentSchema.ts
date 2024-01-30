@@ -8,7 +8,9 @@ import { createComponentUid } from '../utils/createUid';
 export const createComponentSchema = (
   usedComponentNames: Array<string>,
   reservedNames: Array<string>,
-  category: string
+  category: string,
+  takenCollectionNames: Array<string>,
+  currentCollectionName: string
 ) => {
   const shape = {
     displayName: yup
@@ -23,7 +25,10 @@ export const createComponentSchema = (
 
           const name = createComponentUid(value, category);
 
-          return !usedComponentNames.includes(name);
+          return (
+            !usedComponentNames.includes(name) &&
+            !takenCollectionNames.includes(currentCollectionName)
+          );
         },
       })
       .test({

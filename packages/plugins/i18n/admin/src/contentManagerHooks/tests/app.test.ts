@@ -6,7 +6,7 @@ import type { RootState } from '../../store/reducers';
 
 describe('app', () => {
   describe('addLocaleToSingleTypesLinks', () => {
-    const addLocaleToSingleTypesLinks = addLocaleToLinksHook('singleType');
+    const addLocaleToSingleTypesLinks = addLocaleToLinksHook('single-types');
 
     let store: Pick<RootState, 'i18n_locales' | 'rbacProvider'> & {
       getState(): Pick<RootState, 'i18n_locales' | 'rbacProvider'>;
@@ -46,7 +46,7 @@ describe('app', () => {
 
     it('should not add the search key to a single type link when i18n is not enabled on the single type', () => {
       const data = {
-        stLinks: [{ to: 'cm/singleType/test' }],
+        stLinks: [{ to: 'cm/single-types/test' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
       };
 
@@ -65,7 +65,7 @@ describe('app', () => {
       ] = [{ properties: { locales: ['en'] } }];
 
       const data = {
-        stLinks: [{ to: 'cm/singleType/test' }],
+        stLinks: [{ to: 'cm/single-types/test' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -73,7 +73,7 @@ describe('app', () => {
       const results = addLocaleToSingleTypesLinks(data, store);
 
       const expected = {
-        stLinks: [{ to: 'cm/singleType/test', search: 'plugins[i18n][locale]=en' }],
+        stLinks: [{ to: 'cm/single-types/test', search: 'plugins[i18n][locale]=en' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -89,14 +89,14 @@ describe('app', () => {
       ] = [{ properties: { locales: [] } }];
 
       const data = {
-        stLinks: [{ to: 'cm/singleType/test' }],
+        stLinks: [{ to: 'cm/single-types/test' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
       // @ts-expect-error – test purpose
       const results = addLocaleToSingleTypesLinks(data, store);
 
       const expected = {
-        stLinks: [{ to: 'cm/singleType/test', isDisplayed: false }],
+        stLinks: [{ to: 'cm/single-types/test', isDisplayed: false }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -112,7 +112,7 @@ describe('app', () => {
       ] = [{ properties: { locales: ['en'] } }];
 
       const data = {
-        stLinks: [{ to: 'cm/singleType/test', search: 'plugins[plugin][test]=test' }],
+        stLinks: [{ to: 'cm/single-types/test', search: 'plugins[plugin][test]=test' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -122,7 +122,7 @@ describe('app', () => {
       const expected = {
         stLinks: [
           {
-            to: 'cm/singleType/test',
+            to: 'cm/single-types/test',
             search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
           },
         ],
@@ -134,7 +134,7 @@ describe('app', () => {
   });
 
   describe('addLocaleToCollectionTypesLinksHook', () => {
-    const addLocaleToCollectionTypesLinksHook = addLocaleToLinksHook('collectionType');
+    const addLocaleToCollectionTypesLinksHook = addLocaleToLinksHook('collection-types');
 
     let store: Pick<RootState, 'i18n_locales' | 'rbacProvider'> & {
       getState(): Pick<RootState, 'i18n_locales' | 'rbacProvider'>;
@@ -174,7 +174,7 @@ describe('app', () => {
 
     it('should not add the search key to a collection type link when i18n is not enabled on the single type', () => {
       const data = {
-        ctLinks: [{ to: 'cm/collectionType/test' }],
+        ctLinks: [{ to: 'cm/collection-types/test' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
       };
 
@@ -193,7 +193,7 @@ describe('app', () => {
       ] = [{ properties: { locales: ['en'] } }];
 
       const data = {
-        ctLinks: [{ to: 'cm/collectionType/test', search: null }],
+        ctLinks: [{ to: 'cm/collection-types/test', search: null }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -201,7 +201,7 @@ describe('app', () => {
       const results = addLocaleToCollectionTypesLinksHook(data, store);
 
       const expected = {
-        ctLinks: [{ to: 'cm/collectionType/test', search: 'plugins[i18n][locale]=en' }],
+        ctLinks: [{ to: 'cm/collection-types/test', search: 'plugins[i18n][locale]=en' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -217,7 +217,7 @@ describe('app', () => {
       ] = [{ properties: { locales: [] } }];
 
       const data = {
-        ctLinks: [{ to: 'cm/collectionType/test', search: 'page=1&pageSize=10' }],
+        ctLinks: [{ to: 'cm/collection-types/test', search: 'page=1&pageSize=10' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -227,7 +227,7 @@ describe('app', () => {
       const expected = {
         ctLinks: [
           {
-            to: 'cm/collectionType/test',
+            to: 'cm/collection-types/test',
             isDisplayed: false,
             search: 'page=1&pageSize=10',
           },
@@ -247,7 +247,7 @@ describe('app', () => {
       ] = [{ properties: { locales: ['en'] } }];
 
       const data = {
-        ctLinks: [{ to: 'cm/collectionType/test', search: 'plugins[plugin][test]=test' }],
+        ctLinks: [{ to: 'cm/collection-types/test', search: 'plugins[plugin][test]=test' }],
         models: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       };
 
@@ -257,7 +257,7 @@ describe('app', () => {
       const expected = {
         ctLinks: [
           {
-            to: 'cm/collectionType/test',
+            to: 'cm/collection-types/test',
             search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
           },
         ],

@@ -1,226 +1,53 @@
-import { darkTheme, lightTheme } from '@strapi/design-system';
-import {
-  AppInfosContext,
-  StrapiAppProvider,
-  StrapiAppProviderProps,
-  TrackingProvider,
-} from '@strapi/helper-plugin';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { History, createMemoryHistory } from 'history';
-import { Route, Router } from 'react-router-dom';
+import { AppInfoContext, StrapiAppProvider, StrapiAppProviderProps } from '@strapi/helper-plugin';
+import { render as baseRender, screen } from '@tests/utils';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
-import { Theme } from '../../../components/Theme';
-import { ThemeToggleProvider } from '../../../components/ThemeToggleProvider';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
-import { SettingsPage } from '../SettingsPage';
+import { Layout } from '../Layout';
 
 jest.mock('../../../hooks/useSettingsMenu');
 
-jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }: { id: string }) => id,
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
-}));
+const LocationDisplay = () => {
+  const location = useLocation();
 
-jest.mock('../pages/ApplicationInfo/ApplicationInfoPage', () => ({
-  ApplicationInfoPage: () => <h1>App infos</h1>,
-}));
+  return <span data-testid="location-display">{location.pathname}</span>;
+};
 
-const makeApp = (history: History, settings: StrapiAppProviderProps['settings']) => (
-  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-    <TrackingProvider>
-      <Theme>
-        <AppInfosContext.Provider
-          value={{ shouldUpdateStrapi: false, setUserDisplayName: () => {}, userDisplayName: '' }}
-        >
-          <StrapiAppProvider
-            settings={settings}
-            plugins={{}}
-            getPlugin={jest.fn()}
-            runHookParallel={jest.fn()}
-            runHookWaterfall={jest.fn()}
-            runHookSeries={jest.fn()}
-            menu={[]}
+const render = (settings: StrapiAppProviderProps['settings']) =>
+  baseRender(<Route path="/settings?/:settingId" element={<Layout />} />, {
+    initialEntries: ['/settings'],
+    renderOptions: {
+      wrapper({ children }) {
+        return (
+          <AppInfoContext.Provider
+            value={{
+              shouldUpdateStrapi: false,
+              setUserDisplayName: () => {},
+              userDisplayName: '',
+            }}
           >
-            <Router history={history}>
-              <Route path="/settings/:settingId" component={SettingsPage} />
-              <Route path="/settings" component={SettingsPage} />
-            </Router>
-          </StrapiAppProvider>
-        </AppInfosContext.Provider>
-      </Theme>
-    </TrackingProvider>
-  </ThemeToggleProvider>
-);
-
-describe('ADMIN | pages | SettingsPage', () => {
-  it('should not crash', () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history, {
-      global: {
-        id: 'global',
-        intlLabel: {
-          id: 'Settings.global',
-          defaultMessage: 'Global Settings',
-        },
-        links: [],
+            <StrapiAppProvider
+              settings={settings}
+              plugins={{}}
+              getPlugin={jest.fn()}
+              getAdminInjectedComponents={jest.fn()}
+              runHookParallel={jest.fn()}
+              runHookWaterfall={jest.fn()}
+              runHookSeries={jest.fn()}
+              menu={[]}
+            >
+              <Routes>{children}</Routes>
+              <LocationDisplay />
+            </StrapiAppProvider>
+          </AppInfoContext.Provider>
+        );
       },
-    });
-    const route = '/settings/application-infos';
-    act(() => history.push(route));
-
-    const { container } = render(App);
-
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(container.firstChild).toMatchInlineSnapshot(`
-      .c4 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
-      }
-
-      .c2 {
-        padding-top: 24px;
-        padding-right: 16px;
-        padding-bottom: 8px;
-        padding-left: 24px;
-      }
-
-      .c5 {
-        padding-top: 16px;
-      }
-
-      .c6 {
-        background: #eaeaef;
-      }
-
-      .c9 {
-        padding-top: 8px;
-        padding-bottom: 16px;
-      }
-
-      .c11 {
-        padding-bottom: 56px;
-      }
-
-      .c3 {
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c10 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .c7 {
-        height: 1px;
-        border: none;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-        margin: 0;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c12 {
-        overflow-x: hidden;
-      }
-
-      .c1 {
-        width: 14.5rem;
-        background: #f6f6f9;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 1px solid #dcdce4;
-        z-index: 1;
-      }
-
-      .c8 {
-        width: 1.5rem;
-        background-color: #dcdce4;
-      }
-
-      <div
-        class="c0"
-      >
-        <nav
-          aria-label="global.settings"
-          class="c1"
-        >
-          <div
-            class="c2"
-          >
-            <div
-              class="c3"
-            >
-              <h2
-                class="c4"
-              >
-                global.settings
-              </h2>
-            </div>
-            <div
-              class="c5"
-            >
-              <hr
-                class="c6 c7 c8"
-              />
-            </div>
-          </div>
-          <div
-            class="c9"
-          >
-            <ol
-              class="c10"
-            />
-          </div>
-        </nav>
-        <div
-          class="c11 c12"
-        >
-          <h1>
-            App infos
-          </h1>
-        </div>
-      </div>
-    `);
+    },
   });
 
+describe('ADMIN | pages | SettingsPage', () => {
   it('should redirect to the application-infos', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history, {
+    render({
       global: {
         id: 'global',
         intlLabel: {
@@ -230,14 +57,8 @@ describe('ADMIN | pages | SettingsPage', () => {
         links: [],
       },
     });
-    const route = '/settings';
-    act(() => history.push(route));
 
-    render(App);
-
-    await screen.findByText('App infos');
-
-    expect(screen.getByText(/App infos/)).toBeInTheDocument();
+    await screen.findByText('/settings/application-infos');
   });
 
   it('should create the plugins routes correctly', async () => {
@@ -279,8 +100,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       ],
     }));
 
-    const history = createMemoryHistory();
-    const App = makeApp(history, {
+    const { user } = render({
       global: {
         id: 'global',
         intlLabel: {
@@ -293,7 +113,8 @@ describe('ADMIN | pages | SettingsPage', () => {
             intlLabel: { id: 'i18n.plugin.name', defaultMessage: 'Internationalization' },
             permissions: [],
             to: '/settings/internationalization',
-            Component: () => ({ default: () => <div>i18n settings</div> }),
+            // @ts-expect-error – this expects lazy components, but we're not doing it in the test
+            Component: () => <div>i18n settings</div>,
           },
         ],
       },
@@ -306,29 +127,21 @@ describe('ADMIN | pages | SettingsPage', () => {
             intlLabel: { id: 'email', defaultMessage: 'email' },
             permissions: [],
             to: '/settings/email-settings',
-            Component: () => ({ default: () => <div>email settings</div> }),
+            // @ts-expect-error – this expects lazy components, but we're not doing it in the test
+            Component: () => <div>email settings</div>,
           },
         ],
       },
     });
-    const route = '/settings/application-infos';
-    const user = userEvent.setup();
-    act(() => history.push(route));
 
-    render(App);
+    await screen.findByText('/settings/application-infos');
 
-    expect(screen.getByText(/App infos/)).toBeInTheDocument();
+    await user.click(screen.getByText('Internationalization'));
 
-    await user.click(screen.getByText('i18n.plugin.name'));
-
-    await waitFor(() => {
-      expect(screen.getByText(/i18n settings/)).toBeInTheDocument();
-    });
+    await screen.findByText('/settings/internationalization');
 
     await user.click(screen.getByText('email'));
 
-    await waitFor(() => {
-      expect(screen.getByText(/email settings/)).toBeInTheDocument();
-    });
+    await screen.findByText('/settings/email-settings');
   });
 });

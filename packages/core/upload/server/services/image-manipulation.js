@@ -174,15 +174,6 @@ const breakpointSmallerThan = (breakpoint, { width, height }) => {
   return breakpoint < width || breakpoint < height;
 };
 
-// TODO V5: remove isSupportedImage
-const isSupportedImage = (...args) => {
-  process.emitWarning(
-    '[deprecated] In future versions, `isSupportedImage` will be removed. Replace it with `isImage` or `isOptimizableImage` instead.'
-  );
-
-  return isOptimizableImage(...args);
-};
-
 /**
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
@@ -234,7 +225,6 @@ const isImage = async (file) => {
 };
 
 module.exports = () => ({
-  isSupportedImage,
   isFaultyImage,
   isOptimizableImage,
   isResizableImage,

@@ -398,7 +398,6 @@ describe('Transfer Token', () => {
             transfer: {
               utils: {
                 hasValidTokenSalt: jest.fn(() => true),
-                isDisabledFromEnv: jest.fn(() => false),
               },
             },
           },

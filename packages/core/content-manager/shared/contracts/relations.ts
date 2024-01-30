@@ -1,12 +1,19 @@
-import { EntityService, Schema } from '@strapi/types';
+import { Entity, EntityService } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 
-type RelationResult = Schema.Attributes & {
-  id: number;
+export interface RelationResult {
+  id: Entity.ID;
   publishedAt: string | null;
-};
+}
+
+export interface Pagination {
+  page: NonNullable<PaginationQuery['page']>;
+  pageSize: NonNullable<PaginationQuery['pageSize']>;
+  pageCount: number;
+  total: number;
+}
 
 /**
  * GET /relations/:model/:targetField
@@ -14,10 +21,7 @@ type RelationResult = Schema.Attributes & {
 export declare namespace FindAvailable {
   export interface Request {
     body: {};
-    query: {
-      pageSize: PaginationQuery['pageSize'];
-      page: PaginationQuery['page'];
-    };
+    query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & { _q?: string; _filter?: string };
   }
 
   export interface Params {
@@ -25,18 +29,17 @@ export declare namespace FindAvailable {
     targetField: string;
   }
 
-  export interface Response {
-    data: {
-      results: RelationResult[];
-      pagination: {
-        page: PaginationQuery['page'];
-        pageSize: PaginationQuery['pageSize'];
-        pageCount: number;
-        total: number;
+  export type Response =
+    | {
+        results: RelationResult[];
+        pagination: Pagination;
+        error?: never;
+      }
+    | {
+        results?: never;
+        pagination?: never;
+        error?: errors.ApplicationError | errors.YupValidationError;
       };
-    };
-    error?: errors.ApplicationError | errors.YupValidationError;
-  }
 }
 
 /**
@@ -45,19 +48,27 @@ export declare namespace FindAvailable {
 export declare namespace FindExisting {
   export interface Request {
     body: {};
-    query: {};
+    query: Partial<Pick<Pagination, 'pageSize' | 'page'>>;
   }
 
   export interface Params {
     model: string;
     targetField: string;
-    id: number;
+    id: string;
   }
 
-  export interface Response {
-    data: {
-      data: RelationResult;
-    };
-    error?: errors.ApplicationError | errors.YupValidationError;
-  }
+  export type Response =
+    | {
+        results: RelationResult[];
+        pagination: Pagination;
+        error?: never;
+      }
+    | {
+        data: RelationResult;
+        error?: never;
+      }
+    | {
+        data?: never;
+        error: errors.ApplicationError | errors.YupValidationError;
+      };
 }

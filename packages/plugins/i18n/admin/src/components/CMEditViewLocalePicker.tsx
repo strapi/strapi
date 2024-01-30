@@ -7,7 +7,7 @@ import {
 } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { I18nBaseQuery } from '../types';
@@ -45,7 +45,7 @@ const CMEditViewLocalePicker = ({
     plugins: { i18n: { locale: currentLocale } },
   });
 
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const handleChange: SingleSelectProps['onChange'] = (v) => {
     /**
@@ -82,14 +82,19 @@ const CMEditViewLocalePicker = ({
       return;
     }
 
-    if (status === 'did-not-create-locale') {
-      push({
-        pathname: `/content-manager/collectionType/${slug}/create`,
+    /**
+     * TODO: if D&P is not enabled, then the status will always say there's no locale so
+     * we also should check there's no ID incase. This logic will be removed in V5 when
+     * we _always_ have D&P.
+     */
+    if (status === 'did-not-create-locale' && !id) {
+      navigate({
+        pathname: `/content-manager/collection-types/${slug}/create`,
         search: stringify(defaultParams, { encode: false }),
       });
     } else {
-      push({
-        pathname: `/content-manager/collectionType/${slug}/${id}`,
+      navigate({
+        pathname: `/content-manager/collection-types/${slug}/${id}`,
         search: stringify(defaultParams, { encode: false }),
       });
     }
@@ -101,7 +106,7 @@ const CMEditViewLocalePicker = ({
 
       let status: BulletProps['status'] = 'did-not-create-locale';
 
-      if (matchingLocaleInData) {
+      if (matchingLocaleInData && matchingLocaleInData.publishedAt !== undefined) {
         status = matchingLocaleInData.publishedAt === null ? 'draft' : 'published';
       }
 

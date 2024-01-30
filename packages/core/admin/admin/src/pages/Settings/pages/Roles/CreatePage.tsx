@@ -19,28 +19,30 @@ import {
   Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
-  useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
   translatedErrors,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
-import { Formik } from 'formik';
-import isEmpty from 'lodash/isEmpty';
+import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
-import { NavLink, useHistory, useRouteMatch } from 'react-router-dom';
+import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
-import * as PermissonContracts from '../../../../../../shared/contracts/permissions';
-import { selectAdminPermissions } from '../../../../selectors';
+import { useTypedSelector } from '../../../../core/store/hooks';
+import {
+  useCreateRoleMutation,
+  useGetRolePermissionLayoutQuery,
+  useGetRolePermissionsQuery,
+  useUpdateRolePermissionsMutation,
+} from '../../../../services/users';
+import { isBaseQueryError } from '../../../../utils/baseQuery';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
-import { useAdminRolePermissions } from './hooks/useAdminRolePermissions';
 
 /* -------------------------------------------------------------------------------------------------
  * CreatePage
@@ -52,110 +54,144 @@ const CREATE_SCHEMA = yup.object().shape({
 });
 
 /**
+ * TODO: be nice if we could just infer this from the schema
+ */
+interface CreateRoleFormValues {
+  name: string;
+  description: string;
+}
+
+/**
  * TODO: this whole section of the app needs refactoring. Using a ref to
  * manage the state of the child is nonsensical.
  */
 const CreatePage = () => {
-  const match = useRouteMatch<{ id: string }>('/settings/roles/duplicate/:id');
+  const match = useMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
-  const [isSubmitting, setIsSubmiting] = React.useState(false);
-  const { replace } = useHistory();
+  const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
   const { trackUsage } = useTracking();
-  const { post, put, get } = useFetchClient();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
 
   const id = match?.params.id ?? null;
 
-  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } = useQuery(
-    ['permissions', id],
-    async () => {
-      const {
-        data: { data },
-      } = await get<PermissonContracts.GetAll.Response>('/admin/permissions', {
-        // TODO: check with BE why we deviate from our usual admin API format here
-        params: { role: id },
-      });
+  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
+    useGetRolePermissionLayoutQuery({
+      /**
+       * Role here is a query param so if there's no role we pass an empty string
+       * which returns us a default layout.
+       */
+      role: id ?? '',
+    });
 
-      return data;
+  /**
+   * We need this so if we're cloning a role, we can fetch
+   * the current permissions that role has.
+   */
+  const { data: rolePermissions, isLoading: isLoadingRole } = useGetRolePermissionsQuery(
+    {
+      id: id!,
     },
     {
-      cacheTime: 0,
+      skip: !id,
+      refetchOnMountOrArgChange: true,
     }
   );
 
-  const { permissions: rolePermissions, isLoading: isLoadingRole } = useAdminRolePermissions(
-    { id },
-    {
-      cacheTime: 0,
-      // only fetch permissions if a role is cloned
-      enabled: !!id,
-    }
-  );
+  const [createRole] = useCreateRoleMutation();
+  const [updateRolePermissions] = useUpdateRolePermissionsMutation();
 
-  const handleCreateRoleSubmit = (data: { name: string; description: string }) => {
-    lockApp?.();
-    setIsSubmiting(true);
+  const handleCreateRoleSubmit = async (
+    data: CreateRoleFormValues,
+    formik: FormikHelpers<CreateRoleFormValues>
+  ) => {
+    try {
+      // @ts-expect-error – fixed in V5
+      lockApp();
 
-    if (id) {
-      trackUsage('willDuplicateRole');
-    } else {
-      trackUsage('willCreateNewRole');
-    }
+      if (id) {
+        trackUsage('willDuplicateRole');
+      } else {
+        trackUsage('willCreateNewRole');
+      }
 
-    Promise.resolve(post('/admin/roles', data))
-      .then(async ({ data: res }) => {
-        const { permissionsToSend } = permissionsRef.current?.getPermissions() ?? {};
+      const res = await createRole(data);
 
-        if (id) {
-          trackUsage('didDuplicateRole');
+      if ('error' in res) {
+        if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          formik.setErrors(formatValidationErrors(res.error));
         } else {
-          trackUsage('didCreateNewRole');
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(res.error),
+          });
         }
 
-        if (res.data.id && !isEmpty(permissionsToSend)) {
-          await put(`/admin/roles/${res.data.id}/permissions`, { permissions: permissionsToSend });
-        }
+        return;
+      }
 
-        return res;
-      })
-      .then((res) => {
-        setIsSubmiting(false);
-        toggleNotification({
-          type: 'success',
-          message: { id: 'Settings.roles.created', defaultMessage: 'created' },
+      const { permissionsToSend } = permissionsRef.current?.getPermissions() ?? {};
+
+      if (res.data.id && Array.isArray(permissionsToSend) && permissionsToSend.length > 0) {
+        const updateRes = await updateRolePermissions({
+          id: res.data.id,
+          permissions: permissionsToSend,
         });
-        replace(`/settings/roles/${res.data.id}`);
-      })
-      .catch((err) => {
-        console.error(err);
-        setIsSubmiting(false);
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      })
-      .finally(() => {
-        unlockApp?.();
+
+        if ('error' in updateRes) {
+          if (isBaseQueryError(updateRes.error) && updateRes.error.name === 'ValidationError') {
+            formik.setErrors(formatValidationErrors(updateRes.error));
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(updateRes.error),
+            });
+          }
+
+          return;
+        }
+      }
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'Settings.roles.created', defaultMessage: 'created' },
       });
-  };
 
-  const defaultDescription = `${formatMessage({
-    id: 'Settings.roles.form.created',
-    defaultMessage: 'Created',
-  })} ${format(new Date(), 'PPP')}`;
+      navigate(res.data.id.toString(), { replace: true });
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    } finally {
+      // @ts-expect-error – fixed in V5
+      unlockApp();
+    }
+  };
 
   return (
     <Main>
       <SettingsPageTitle name="Roles" />
       <Formik
-        initialValues={{ name: '', description: defaultDescription }}
+        initialValues={
+          {
+            name: '',
+            description: `${formatMessage({
+              id: 'Settings.roles.form.created',
+              defaultMessage: 'Created',
+            })} ${format(new Date(), 'PPP')}`,
+          } satisfies CreateRoleFormValues
+        }
         onSubmit={handleCreateRoleSubmit}
         validationSchema={CREATE_SCHEMA}
         validateOnChange={false}
       >
-        {({ handleSubmit, values, errors, handleReset, handleChange }) => (
+        {({ values, errors, handleReset, handleChange, isSubmitting }) => (
           <Form>
             <>
               <HeaderLayout
@@ -174,8 +210,7 @@ const CreatePage = () => {
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    {/* @ts-expect-error Incompatibility between forimk and our DS */}
-                    <Button onClick={handleSubmit} loading={isSubmitting} size="L">
+                    <Button type="submit" loading={isSubmitting} size="L">
                       {formatMessage({
                         id: 'global.save',
                         defaultMessage: 'Save',
@@ -304,10 +339,12 @@ const UsersRoleNumber = styled.div`
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedCreatePage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.roles.create
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.roles.create}>
+    <CheckPagePermissions permissions={permissions}>
       <CreatePage />
     </CheckPagePermissions>
   );

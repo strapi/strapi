@@ -19,10 +19,11 @@ export declare namespace Find {
     model: string;
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -40,10 +41,11 @@ export declare namespace CreateOrUpdate {
     };
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -57,10 +59,11 @@ export declare namespace Delete {
     };
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -74,10 +77,11 @@ export declare namespace Publish {
     };
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -90,10 +94,11 @@ export declare namespace UnPublish {
       locale: string;
     };
   }
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -106,9 +111,7 @@ export declare namespace CountDraftRelations {
   }
 
   export interface Response {
-    data: {
-      data: number;
-    };
+    data: number;
     error?: errors.ApplicationError;
   }
 }

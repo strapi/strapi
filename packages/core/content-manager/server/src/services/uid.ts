@@ -1,12 +1,25 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-export default ({ strapi }: any) => ({
-  async generateUIDField({ contentTypeUID, field, data }: any) {
+import { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
+
+export default ({ strapi }: { strapi: Strapi }) => ({
+  async generateUIDField({
+    contentTypeUID,
+    field,
+    data,
+    locale,
+  }: {
+    contentTypeUID: UID.ContentType;
+    field: string;
+    data: Record<string, any>;
+    locale: string;
+  }) {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 
-    const { targetField, default: defaultValue, options } = attributes[field];
+    const { targetField, default: defaultValue, options } = attributes[field] as Attribute.UID;
+    // @ts-expect-error targetField can be undefined
     const targetValue = _.get(data, targetField);
 
     if (!_.isEmpty(targetValue)) {
@@ -14,22 +27,43 @@ export default ({ strapi }: any) => ({
         contentTypeUID,
         field,
         value: slugify(targetValue, options),
+        locale,
       });
     }
 
     return this.findUniqueUID({
       contentTypeUID,
       field,
-      value: slugify(defaultValue || contentType.modelName, options),
+      value: slugify(
+        _.isFunction(defaultValue) ? defaultValue() : defaultValue || contentType.modelName,
+        options
+      ),
+      locale,
     });
   },
 
-  async findUniqueUID({ contentTypeUID, field, value }: any) {
+  async findUniqueUID({
+    contentTypeUID,
+    field,
+    value,
+    locale,
+  }: {
+    contentTypeUID: UID.ContentType;
+    field: string;
+    value: string;
+    locale: string;
+  }) {
     const query = strapi.db.query(contentTypeUID);
 
-    const possibleColisions = await query
+    const possibleColisions: string[] = await query
       .findMany({
-        where: { [field]: { $contains: value } },
+        where: {
+          [field]: { $contains: value },
+          locale,
+          // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+          // However, when publishing this "available" UID might collide with another published entry
+          published_at: null,
+        },
       })
       .then((results: any) => results.map((result: any) => result[field]));
 
@@ -47,14 +81,33 @@ export default ({ strapi }: any) => ({
     return tmpUId;
   },
 
-  async checkUIDAvailability({ contentTypeUID, field, value }: any) {
+  async checkUIDAvailability({
+    contentTypeUID,
+    field,
+    value,
+    locale,
+  }: {
+    contentTypeUID: UID.ContentType;
+    field: string;
+    value: string;
+    locale: string;
+  }) {
     const query = strapi.db.query(contentTypeUID);
 
-    const count = await query.count({
-      where: { [field]: value },
+    const count: number = await query.count({
+      where: {
+        [field]: value,
+        locale,
+        // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+        // However, when publishing this "available" UID might collide with another published entry
+        published_at: null,
+      },
     });
 
-    if (count > 0) return false;
+    if (count > 0) {
+      return false;
+    }
+
     return true;
   },
 });

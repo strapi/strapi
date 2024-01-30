@@ -1,5 +1,4 @@
 import { Config, defineConfig } from '@strapi/pack-up';
-import { transformWithEsbuild } from 'vite';
 
 const config: Config = defineConfig({
   bundles: [
@@ -13,9 +12,10 @@ const config: Config = defineConfig({
     },
     {
       source: './_internal/index.ts',
-      import: './dist/cli.mjs',
-      require: './dist/cli.js',
-      runtime: 'node',
+      import: './dist/_internal.mjs',
+      require: './dist/_internal.js',
+      types: './dist/_internal/index.d.ts',
+      runtime: 'web',
     },
     {
       source: './server/src/index.ts',
@@ -39,26 +39,8 @@ const config: Config = defineConfig({
    * what they look like in the package.json
    */
   exports: {},
-  plugins: [
-    {
-      name: 'treat-js-files-as-jsx',
-      async transform(code, id) {
-        /**
-         * Matches all files in src/ and ee/ that end with .js
-         */
-        if (!id.match(/src\/.*\.js$/) && !id.match(/ee\/.*\.js$/)) {
-          return null;
-        }
-
-        // Use the exposed transform from vite, instead of directly
-        // transforming with esbuild
-        return transformWithEsbuild(code, id, {
-          loader: 'tsx',
-          jsx: 'automatic',
-        });
-      },
-    },
-  ],
+  // If you don't include this, it seems to think vite needs to be bundled, which isn't true.
+  externals: ['vite'],
 });
 
 export default config;

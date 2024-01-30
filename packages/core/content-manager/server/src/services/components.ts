@@ -1,5 +1,9 @@
 import { has, isNil, mapValues } from 'lodash/fp';
 
+import { Strapi, UID, Schema } from '@strapi/types';
+import type { Configuration } from '../../../shared/contracts/content-types';
+import type { ConfigurationUpdate } from './configuration';
+
 import { getService } from '../utils';
 import storeUtils from './utils/store';
 import createConfigurationService from './configuration';
@@ -17,14 +21,14 @@ const configurationService = createConfigurationService({
   },
 });
 
-export default ({ strapi }: any) => ({
+export default ({ strapi }: { strapi: Strapi }) => ({
   findAllComponents() {
     const { toContentManagerModel } = getService('data-mapper');
 
     return Object.values(strapi.components).map(toContentManagerModel);
   },
 
-  findComponent(uid: any) {
+  findComponent(uid: UID.Component) {
     const { toContentManagerModel } = getService('data-mapper');
 
     const component = strapi.components[uid];
@@ -32,10 +36,8 @@ export default ({ strapi }: any) => ({
     return isNil(component) ? component : toContentManagerModel(component);
   },
 
-  // configuration
-
-  async findConfiguration(component: any) {
-    const configuration = await configurationService.getConfiguration(component.uid);
+  async findConfiguration(component: Schema.Component) {
+    const configuration: Configuration = await configurationService.getConfiguration(component.uid);
 
     return {
       uid: component.uid,
@@ -44,19 +46,24 @@ export default ({ strapi }: any) => ({
     };
   },
 
-  async updateConfiguration(component: any, newConfiguration: any) {
+  async updateConfiguration(component: Schema.Component, newConfiguration: ConfigurationUpdate) {
     await configurationService.setConfiguration(component.uid, newConfiguration);
 
     return this.findConfiguration(component);
   },
 
-  async findComponentsConfigurations(model: any) {
-    const componentsMap = {};
+  async findComponentsConfigurations(model: Schema.Component) {
+    const componentsMap: Record<
+      string,
+      Configuration & { category: string; isComponent: boolean }
+    > = {};
 
-    const getComponentConfigurations = async (uid: any) => {
+    const getComponentConfigurations = async (uid: UID.Component) => {
       const component = this.findComponent(uid);
 
-      if (has(uid, componentsMap)) return;
+      if (has(uid, componentsMap)) {
+        return;
+      }
 
       const componentConfiguration = await this.findConfiguration(component);
       const componentsConfigurations = await this.findComponentsConfigurations(component);

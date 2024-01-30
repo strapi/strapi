@@ -11,13 +11,15 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { auth, pxToRem, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { pxToRem, useNotification } from '@strapi/helper-plugin';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { PrivateRoute } from '../components/PrivateRoute';
 import { Logo } from '../components/UnauthenticatedLogo';
+import { useAuth } from '../features/Auth';
 import { LayoutContent, UnauthenticatedLayout } from '../layouts/UnauthenticatedLayout';
 
 export const options = [
@@ -69,29 +71,35 @@ const TypographyCenter = styled(Typography)`
   text-align: center;
 `;
 
-export const UseCasePage = () => {
+const UseCasePage = () => {
   const toggleNotification = useNotification();
-  const { push, location } = useHistory();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const [role, setRole] = React.useState<string | number | null>(null);
   const [otherRole, setOtherRole] = React.useState('');
-  const { post } = useFetchClient();
 
-  const { firstname, email } = auth.get('userInfo') ?? {};
-  const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
+  const { firstname, email } = useAuth('UseCasePage', (state) => state.user) ?? {};
+  const { hasAdmin } = parse(location.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 
   const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
     event.preventDefault();
     try {
-      await post('https://analytics.strapi.io/register', {
-        email,
-        username: firstname,
-        firstAdmin: Boolean(!hasAdmin),
-        persona: {
-          role: skipPersona ? undefined : role,
-          otherRole: skipPersona ? undefined : otherRole,
+      await fetch('https://analytics.strapi.io/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email,
+          username: firstname,
+          firstAdmin: Boolean(!hasAdmin),
+          persona: {
+            role: skipPersona ? undefined : role,
+            otherRole: skipPersona ? undefined : otherRole,
+          },
+        }),
       });
 
       toggleNotification({
@@ -101,7 +109,7 @@ export const UseCasePage = () => {
           defaultMessage: 'Project has been successfully created',
         },
       });
-      push('/');
+      navigate('/');
     } catch (err) {
       // Silent
     }
@@ -171,3 +179,13 @@ export const UseCasePage = () => {
     </UnauthenticatedLayout>
   );
 };
+
+const PrivateUseCasePage = () => {
+  return (
+    <PrivateRoute>
+      <UseCasePage />
+    </PrivateRoute>
+  );
+};
+
+export { PrivateUseCasePage, UseCasePage };

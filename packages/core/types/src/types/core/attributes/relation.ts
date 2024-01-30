@@ -3,12 +3,6 @@ import type { Attribute, Common } from '..';
 import type { Utils } from '../..';
 
 export type Relation<
-  // TODO: TOrigin was originally needed to infer precise attribute literal types by doing a reverse lookup
-  // on TTarget -> TOrigin relations. Due to errors because of Attribute.Any [relation] very generic
-  // representation, type mismatches were encountered and mappedBy/inversedBy are now regular strings.
-  // It is kept to allow for future iterations without breaking the current type API
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
   TTarget extends Common.UID.ContentType = Common.UID.ContentType
 > = Attribute.OfType<'relation'> &
@@ -56,30 +50,42 @@ type BiDirectionalProperties<
   TRelationKind extends RelationKind.BiDirectional,
   TTarget extends Common.UID.Schema
 > = {
-  relation: TRelationKind;
-  target: TTarget;
-} & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>;
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.BiDirectional]: {
+    relation: TKind;
+    target: TTarget;
+  } & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>;
+}[TRelationKind];
 
 type XWayProperties<TRelationKind extends RelationKind.XWay, TTarget extends Common.UID.Schema> = {
-  relation: TRelationKind;
-  target: TTarget;
-};
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.XWay]: {
+    relation: TKind;
+    target: TTarget;
+  };
+}[TRelationKind];
 
 type MorphReferenceProperties<
   TRelationKind extends RelationKind.MorphReference,
   TTarget extends Common.UID.Schema
 > = {
-  relation: TRelationKind;
-  target: TTarget;
-  morphBy?: Utils.Guard.Never<
-    Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
-    string
-  >;
-};
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.MorphReference]: {
+    relation: TKind;
+    target: TTarget;
+    morphBy?: Utils.Guard.Never<
+      Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
+      string
+    >;
+  };
+}[TRelationKind];
 
 type MorphOwnerProperties<TRelationKind extends RelationKind.MorphOwner> = {
-  relation: TRelationKind;
-};
+  // Make sure we correctly infer each specific subtype by creating a mapped type
+  [TKind in RelationKind.MorphOwner]: {
+    relation: TKind;
+  };
+}[TRelationKind];
 
 export type RelationsKeysFromTo<
   TTarget extends Common.UID.Schema,
@@ -94,7 +100,12 @@ export type PickRelationsFromTo<
 export type RelationPluralityModifier<
   TRelationKind extends RelationKind.Any,
   TValue
-> = TRelationKind extends Utils.String.Suffix<string, 'Many'> ? TValue[] : TValue;
+> = Utils.Expression.If<IsManyRelation<TRelationKind>, TValue[], TValue>;
+
+export type IsManyRelation<TRelationKind extends RelationKind.Any> = Utils.Expression.Extends<
+  TRelationKind,
+  Utils.String.Suffix<string, 'Many'>
+>;
 
 export type RelationValue<
   TRelationKind extends RelationKind.Any,
@@ -102,8 +113,6 @@ export type RelationValue<
 > = RelationPluralityModifier<TRelationKind, Attribute.GetValues<TTarget>>;
 
 export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TOrigin,
   infer TRelationKind,
   infer TTarget
 >
@@ -111,8 +120,6 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribut
   : never;
 
 export type GetRelationTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TOrigin,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   infer _TRelationKind,
   infer TTarget

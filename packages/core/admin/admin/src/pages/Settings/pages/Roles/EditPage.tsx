@@ -6,7 +6,6 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
   useAPIErrorHandler,
-  useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -14,27 +13,33 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
-import { AxiosError } from 'axios';
-import { Formik } from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
-import { NavLink, Redirect, useRouteMatch } from 'react-router-dom';
+import { NavLink, Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
-import * as PermissonContracts from '../../../../../../shared/contracts/permissions';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
-import { selectAdminPermissions } from '../../../../selectors';
+import {
+  useGetRolePermissionLayoutQuery,
+  useGetRolePermissionsQuery,
+  useUpdateRoleMutation,
+  useUpdateRolePermissionsMutation,
+} from '../../../../services/users';
+import { isBaseQueryError } from '../../../../utils/baseQuery';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
-import { useAdminRolePermissions } from './hooks/useAdminRolePermissions';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required),
+  description: yup.string().optional(),
 });
 
-interface EditPageFormValues {
+/**
+ * TODO: be nice if we could just infer this from the schema
+ */
+interface EditRoleFormValues {
   name: string;
   description: string;
 }
@@ -42,31 +47,24 @@ interface EditPageFormValues {
 const EditPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const match = useRouteMatch<{ id: string }>('/settings/roles/:id');
+  const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
-  const { put, get } = useFetchClient();
-  const [isSubmitting, setIsSubmiting] = React.useState(false);
   const permissionsRef = React.useRef<PermissionsAPI>(null);
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
-  const { formatAPIError } = useAPIErrorHandler();
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
 
-  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } = useQuery(
-    ['permissions', id],
-    async () => {
-      const {
-        data: { data },
-      } = await get<PermissonContracts.GetAll.Response>('/admin/permissions', {
-        // TODO: check with BE why we deviate from our usual admin API format here
-        params: { role: id },
-      });
-
-      return data;
-    },
-    {
-      cacheTime: 0,
-    }
-  );
+  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
+    useGetRolePermissionLayoutQuery({
+      /**
+       * Role here is a query param so if there's no role we pass an empty string
+       * which returns us a default layout.
+       */
+      role: id ?? '',
+    });
 
   const {
     roles,
@@ -75,34 +73,76 @@ const EditPage = () => {
   } = useAdminRoles(
     { id },
     {
-      cacheTime: 0,
+      refetchOnMountOrArgChange: true,
     }
   );
 
   const role = roles[0] ?? {};
 
-  const { permissions, isLoading: isLoadingPermissions } = useAdminRolePermissions(
-    { id: id ?? null },
+  const { data: permissions, isLoading: isLoadingPermissions } = useGetRolePermissionsQuery(
     {
-      cacheTime: 0,
+      id: id!,
+    },
+    {
+      skip: !id,
+      refetchOnMountOrArgChange: true,
     }
   );
 
-  // TODO: this should use a react-query mutation
-  const handleEditRoleSubmit = async (data: { name: string; description: string }) => {
+  const [updateRole] = useUpdateRoleMutation();
+  const [updateRolePermissions] = useUpdateRolePermissionsMutation();
+
+  if (!id) {
+    return <Navigate to="/settings/roles" />;
+  }
+
+  const handleEditRoleSubmit = async (
+    data: EditRoleFormValues,
+    formik: FormikHelpers<EditRoleFormValues>
+  ) => {
     try {
-      lockApp?.();
-      setIsSubmiting(true);
+      // @ts-expect-error – This will be fixed in V5
+      lockApp();
 
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
 
-      await put(`/admin/roles/${id}`, data);
+      const res = await updateRole({
+        id,
+        ...data,
+      });
 
-      if (role.code !== 'strapi-super-admin') {
-        await put(`/admin/roles/${id}/permissions`, {
+      if ('error' in res) {
+        if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          formik.setErrors(formatValidationErrors(res.error));
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(res.error),
+          });
+        }
+
+        return;
+      }
+
+      if (role.code !== 'strapi-super-admin' && permissionsToSend) {
+        const updateRes = await updateRolePermissions({
+          id: res.data.id,
           permissions: permissionsToSend,
         });
+
+        if ('error' in updateRes) {
+          if (isBaseQueryError(updateRes.error) && updateRes.error.name === 'ValidationError') {
+            formik.setErrors(formatValidationErrors(updateRes.error));
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(updateRes.error),
+            });
+          }
+
+          return;
+        }
 
         if (didUpdateConditions) {
           trackUsage('didUpdateConditions');
@@ -118,15 +158,13 @@ const EditPage = () => {
         message: { id: 'notification.success.saved' },
       });
     } catch (error) {
-      if (error instanceof AxiosError) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      }
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
-      setIsSubmiting(false);
-      unlockApp?.();
+      // @ts-expect-error – This will be fixed in V5
+      unlockApp();
     }
   };
 
@@ -137,15 +175,17 @@ const EditPage = () => {
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
-        initialValues={{
-          name: role.name ?? '',
-          description: role.description ?? '',
-        }}
+        initialValues={
+          {
+            name: role.name ?? '',
+            description: role.description ?? '',
+          } satisfies EditRoleFormValues
+        }
         onSubmit={handleEditRoleSubmit}
         validationSchema={EDIT_ROLE_SCHEMA}
         validateOnChange={false}
       >
-        {({ handleSubmit, values, errors, handleChange, handleBlur }) => (
+        {({ handleSubmit, values, errors, handleChange, handleBlur, isSubmitting }) => (
           <form onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
@@ -153,8 +193,6 @@ const EditPage = () => {
                   <Button
                     type="submit"
                     disabled={role.code === 'strapi-super-admin'}
-                    // @ts-expect-error –  Incompatibility between forimk and our DS
-                    onClick={handleSubmit}
                     loading={isSubmitting}
                     size="L"
                   >
@@ -220,23 +258,23 @@ const EditPage = () => {
 };
 
 const ProtectedEditPage = () => {
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.roles);
 
   const {
     isLoading,
     allowedActions: { canRead, canUpdate },
-  } = useRBAC(permissions.settings?.roles);
+  } = useRBAC(permissions);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
   if (!canRead && !canUpdate) {
-    return <Redirect to="/" />;
+    return <Navigate to=".." />;
   }
 
   return <EditPage />;
 };
 
 export { EditPage, ProtectedEditPage };
-export type { EditPageFormValues };
+export type { EditRoleFormValues };

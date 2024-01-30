@@ -4,11 +4,13 @@ import type { Config } from './types';
 
 interface ServerConfig {
   url: string;
+  host: string;
+  port: number | string;
 }
 
 export const getConfigUrls = (config: Config, forAdminBuild = false) => {
-  const serverConfig = config.get<ServerConfig>('server');
-  const adminConfig = config.get('admin');
+  const serverConfig = config.server as ServerConfig;
+  const adminConfig = config.admin;
 
   // Defines serverUrl value
   let serverUrl = _.get(serverConfig, 'url', '');
@@ -16,6 +18,7 @@ export const getConfigUrls = (config: Config, forAdminBuild = false) => {
   if (typeof serverUrl !== 'string') {
     throw new Error('Invalid server url config. Make sure the url is a string.');
   }
+
   if (serverUrl.startsWith('http')) {
     try {
       serverUrl = _.trim(new URL(serverConfig.url).toString(), '/');
@@ -75,13 +78,13 @@ const getAbsoluteUrl =
       return url;
     }
 
+    const serverConfig = config.server as ServerConfig;
     const hostname =
-      config.get('environment') === 'development' &&
-      ['127.0.0.1', '0.0.0.0'].includes(config.get('server.host'))
+      config.environment === 'development' && ['127.0.0.1', '0.0.0.0'].includes(serverConfig.host)
         ? 'localhost'
-        : config.get('server.host');
+        : serverConfig.host;
 
-    return `http://${hostname}:${config.get('server.port')}${url}`;
+    return `http://${hostname}:${serverConfig.port}${url}`;
   };
 
 export const getAbsoluteAdminUrl = getAbsoluteUrl('admin');

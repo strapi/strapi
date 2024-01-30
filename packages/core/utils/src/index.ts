@@ -44,8 +44,11 @@ import * as file from './file';
 import * as traverse from './traverse';
 import webhook from './webhook';
 import { isOperator, isOperatorOfType } from './operators';
+import * as packageManager from './package-manager';
+import machineID from './machine-id';
 
 export {
+  machineID,
   parseMultipartData,
   parseType,
   policy,
@@ -95,4 +98,5 @@ export {
   webhook,
   isOperator,
   isOperatorOfType,
+  packageManager,
 };

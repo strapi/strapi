@@ -5,7 +5,7 @@ import {
   CheckPagePermissions,
   Form,
   SettingsPageTitle,
-  useFetchClient,
+  useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
   useNotification,
@@ -13,47 +13,45 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { AxiosError, AxiosResponse } from 'axios';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
-import { useLocation, useHistory, useRouteMatch } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
+import { useTypedSelector } from '../../../../../core/store/hooks';
 import {
-  ApiTokenPermissionsContextValue,
-  ApiTokenPermissionsProvider,
-} from '../../../../../contexts/apiTokenPermissions';
-import { selectAdminPermissions } from '../../../../../selectors';
-import { formatAPIErrors } from '../../../../../utils/formatAPIErrors';
+  useCreateAPITokenMutation,
+  useGetAPITokenQuery,
+  useUpdateAPITokenMutation,
+} from '../../../../../services/apiTokens';
+import { useGetPermissionsQuery, useGetRoutesQuery } from '../../../../../services/contentApi';
+import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import { FormHead } from '../../../components/Tokens/FormHead';
 import { TokenBox } from '../../../components/Tokens/TokenBox';
 
+import {
+  ApiTokenPermissionsContextValue,
+  ApiTokenPermissionsProvider,
+} from './apiTokenPermissions';
 import { FormApiTokenContainer } from './components/FormApiTokenContainer';
 import { LoadingView } from './components/LoadingView';
 import { Permissions } from './components/Permissions';
 import { schema } from './constants';
 import { initialState, reducer } from './reducer';
 
-import type {
-  Get,
-  Update,
-  Create,
-  ApiToken,
-} from '../../../../../../../shared/contracts/api-token';
-import type { List as ListContentApiPermissions } from '../../../../../../../shared/contracts/content-api/permissions';
-import type { List as ListContentApiRoutes } from '../../../../../../../shared/contracts/content-api/routes';
+import type { Get, ApiToken } from '../../../../../../../shared/contracts/api-token';
 
-const MSG_ERROR_NAME_TAKEN = 'Name already taken';
-
+/**
+ * TODO: this could definitely be refactored to avoid using redux and instead just use the
+ * server response as the source of the truth for the data.
+ */
 export const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
-  const { state: locationState } = useLocation<{ apiToken: ApiToken }>();
-  const permissions = useSelector(selectAdminPermissions);
+  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { state: locationState } = useLocation();
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [apiToken, setApiToken] = React.useState<ApiToken | null>(
     locationState?.apiToken?.accessKey
       ? {
@@ -67,72 +65,79 @@ export const EditView = () => {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions.settings?.['api-tokens']);
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const match = useRouteMatch<{ id: string }>('/settings/api-tokens/:id');
+  const match = useMatch('/settings/api-tokens/:id');
   const id = match?.params?.id;
-  const { get, post, put } = useFetchClient();
-  const history = useHistory();
-
   const isCreating = id === 'create';
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidtionErrors,
+  } = useAPIErrorHandler();
 
-  useQuery(
-    'content-api-permissions',
-    async () => {
-      await Promise.all(
-        ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
-          if (url === '/admin/content-api/permissions') {
-            const {
-              data: { data },
-            } = await get<ListContentApiPermissions.Response>(url);
+  const navigate = useNavigate();
 
-            dispatch({
-              type: 'UPDATE_PERMISSIONS_LAYOUT',
-              value: data,
-            });
+  const contentAPIPermissionsQuery = useGetPermissionsQuery();
+  const contentAPIRoutesQuery = useGetRoutesQuery();
 
-            return data;
-          } else if (url === '/admin/content-api/routes') {
-            const {
-              data: { data },
-            } = await get<ListContentApiRoutes.Response>(url);
-
-            dispatch({
-              type: 'UPDATE_ROUTES',
-              value: data,
-            });
-
-            return data;
-          }
-        })
-      );
-
-      if (apiToken) {
-        if (apiToken?.type === 'read-only') {
-          dispatch({
-            type: 'ON_CHANGE_READ_ONLY',
-          });
-        }
-        if (apiToken?.type === 'full-access') {
-          dispatch({
-            type: 'SELECT_ALL_ACTIONS',
-          });
-        }
-        if (apiToken?.type === 'custom') {
-          dispatch({
-            type: 'UPDATE_PERMISSIONS',
-            value: apiToken?.permissions,
-          });
-        }
-      }
-    },
-    {
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
+  /**
+   * Separate effects otherwise we could end
+   * up duplicating the same notification.
+   */
+  React.useEffect(() => {
+    if (contentAPIPermissionsQuery.error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(contentAPIPermissionsQuery.error),
+      });
     }
-  );
+  }, [contentAPIPermissionsQuery.error, formatAPIError, toggleNotification]);
+
+  React.useEffect(() => {
+    if (contentAPIRoutesQuery.error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(contentAPIRoutesQuery.error),
+      });
+    }
+  }, [contentAPIRoutesQuery.error, formatAPIError, toggleNotification]);
+
+  React.useEffect(() => {
+    if (contentAPIPermissionsQuery.data) {
+      dispatch({
+        type: 'UPDATE_PERMISSIONS_LAYOUT',
+        value: contentAPIPermissionsQuery.data,
+      });
+    }
+  }, [contentAPIPermissionsQuery.data]);
+
+  React.useEffect(() => {
+    if (contentAPIRoutesQuery.data) {
+      dispatch({
+        type: 'UPDATE_ROUTES',
+        value: contentAPIRoutesQuery.data,
+      });
+    }
+  }, [contentAPIRoutesQuery.data]);
+
+  React.useEffect(() => {
+    if (apiToken) {
+      if (apiToken.type === 'read-only') {
+        dispatch({
+          type: 'ON_CHANGE_READ_ONLY',
+        });
+      }
+      if (apiToken.type === 'full-access') {
+        dispatch({
+          type: 'SELECT_ALL_ACTIONS',
+        });
+      }
+      if (apiToken.type === 'custom') {
+        dispatch({
+          type: 'UPDATE_PERMISSIONS',
+          value: apiToken?.permissions,
+        });
+      }
+    }
+  }, [apiToken]);
 
   React.useEffect(() => {
     trackUsage(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
@@ -140,59 +145,51 @@ export const EditView = () => {
     });
   }, [isCreating, trackUsage]);
 
-  const { status } = useQuery(
-    ['api-token', id],
-    async () => {
-      const {
-        data: { data },
-      } = await get<Get.Response>(`/admin/api-tokens/${id}`);
+  const { data, error, isLoading } = useGetAPITokenQuery(id!, {
+    skip: !id || isCreating || !!apiToken,
+  });
 
-      setApiToken({
-        ...data,
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
       });
+    }
+  }, [error, formatAPIError, toggleNotification]);
 
-      if (data?.type === 'read-only') {
+  React.useEffect(() => {
+    if (data) {
+      setApiToken(data);
+
+      if (data.type === 'read-only') {
         dispatch({
           type: 'ON_CHANGE_READ_ONLY',
         });
       }
-      if (data?.type === 'full-access') {
+      if (data.type === 'full-access') {
         dispatch({
           type: 'SELECT_ALL_ACTIONS',
         });
       }
-      if (data?.type === 'custom') {
+      if (data.type === 'custom') {
         dispatch({
           type: 'UPDATE_PERMISSIONS',
           value: data?.permissions,
         });
       }
-
-      return data;
-    },
-    {
-      enabled: !isCreating && !apiToken,
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
     }
-  );
+  }, [data]);
 
-  const handleSubmit = async (
-    body: Pick<Get.Response['data'], 'name' | 'description'> & {
-      lifespan: Get.Response['data']['lifespan'] | undefined;
-      type: Get.Response['data']['type'] | undefined;
-    },
-    actions: FormikHelpers<
-      Pick<Get.Response['data'], 'name' | 'description'> & {
-        lifespan: Get.Response['data']['lifespan'] | undefined;
-        type: Get.Response['data']['type'] | undefined;
-      }
-    >
-  ) => {
+  const [createToken] = useCreateAPITokenMutation();
+  const [updateToken] = useUpdateAPITokenMutation();
+
+  interface FormValues extends Pick<Get.Response['data'], 'name' | 'description'> {
+    lifespan: Get.Response['data']['lifespan'] | undefined;
+    type: Get.Response['data']['type'] | undefined;
+  }
+
+  const handleSubmit = async (body: FormValues, formik: FormikHelpers<FormValues>) => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: API_TOKEN_TYPE,
     });
@@ -201,77 +198,89 @@ export const EditView = () => {
     lockApp();
 
     try {
-      const {
-        data: { data: response },
-      } = isCreating
-        ? await post<Create.Response, AxiosResponse<Create.Response>, Create.Request['body']>(
-            `/admin/api-tokens`,
-            {
-              ...body,
-              // in case a token has a lifespan of "unlimited" the API only accepts zero as a number
-              lifespan: body.lifespan === '0' ? parseInt(body.lifespan) : null,
-              permissions: body.type === 'custom' ? state.selectedActions : null,
-            }
-          )
-        : await put<Update.Response, AxiosResponse<Update.Response>, Update.Request['body']>(
-            `/admin/api-tokens/${id}`,
-            {
-              name: body.name,
-              description: body.description,
-              type: body.type,
-              permissions: body.type === 'custom' ? state.selectedActions : null,
-            }
-          );
-
       if (isCreating) {
-        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        const res = await createToken({
+          ...body,
+          // in case a token has a lifespan of "unlimited" the API only accepts zero as a number
+          lifespan: body.lifespan === '0' ? parseInt(body.lifespan) : null,
+          permissions: body.type === 'custom' ? state.selectedActions : null,
+        });
+
+        if ('error' in res) {
+          if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+            formik.setErrors(formatValidtionErrors(res.error));
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(res.error),
+            });
+          }
+
+          return;
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'notification.success.apitokencreated',
+            defaultMessage: 'API Token successfully created',
+          }),
+        });
+
+        trackUsage('didCreateToken', {
+          type: res.data.type,
+          tokenType: API_TOKEN_TYPE,
+        });
+
+        navigate(res.data.id.toString(), {
+          state: { apiToken: res.data },
+          replace: true,
+        });
         setCurrentStep('apiTokens.success');
-      }
+      } else {
+        const res = await updateToken({
+          id: id!,
+          name: body.name,
+          description: body.description,
+          type: body.type,
+          permissions: body.type === 'custom' ? state.selectedActions : null,
+        });
 
-      // @ts-expect-error context assertation
-      unlockApp();
+        if ('error' in res) {
+          if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+            formik.setErrors(formatValidtionErrors(res.error));
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(res.error),
+            });
+          }
 
-      setApiToken({
-        ...response,
-      });
+          return;
+        }
 
-      toggleNotification({
-        type: 'success',
-        message: isCreating
-          ? formatMessage({
-              id: 'notification.success.apitokencreated',
-              defaultMessage: 'API Token successfully created',
-            })
-          : formatMessage({
-              id: 'notification.success.apitokenedited',
-              defaultMessage: 'API Token successfully edited',
-            }),
-      });
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'notification.success.apitokenedited',
+            defaultMessage: 'API Token successfully edited',
+          }),
+        });
 
-      if (apiToken?.type) {
-        trackUsage(isCreating ? 'didCreateToken' : 'didEditToken', {
-          type: apiToken.type,
+        trackUsage('didEditToken', {
+          type: res.data.type,
           tokenType: API_TOKEN_TYPE,
         });
       }
-    } catch (err) {
-      if (err instanceof AxiosError && err.response) {
-        const errors = formatAPIErrors(err.response.data);
-        actions.setErrors(errors);
-
-        if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
-          toggleNotification({
-            type: 'warning',
-            message: err.response.data.message || 'notification.error.tokennamenotunique',
-          });
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: err?.response?.data?.message || 'notification.error',
-          });
-        }
-      }
-
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'Something went wrong',
+        },
+      });
+    } finally {
       // @ts-expect-error context assertation
       unlockApp();
     }
@@ -316,10 +325,8 @@ export const EditView = () => {
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
-  const isLoading = !isCreating && !apiToken && status !== 'success';
 
   if (isLoading) {
-    // @ts-expect-error this is probably fine for now
     return <LoadingView apiTokenName={apiToken?.name} />;
   }
 
@@ -394,10 +401,12 @@ export const EditView = () => {
 };
 
 export const ProtectedEditView = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['api-tokens'].read
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.['api-tokens'].read}>
+    <CheckPagePermissions permissions={permissions}>
       <EditView />
     </CheckPagePermissions>
   );

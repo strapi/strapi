@@ -3,7 +3,6 @@ import { renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import { useLicenseLimitNotification } from '../useLicenseLimitNotification';
-// @ts-expect-error - no types, yet.
 import { useLicenseLimits } from '../useLicenseLimits';
 
 const baseLicenseInfo = {
@@ -54,6 +53,7 @@ describe('useLicenseLimitNotification', () => {
   });
 
   it('should return if no license info is available', () => {
+    // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {},
     }));
@@ -63,6 +63,7 @@ describe('useLicenseLimitNotification', () => {
   });
 
   it('should not display notification if permittedSeat info is missing', () => {
+    // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
         ...baseLicenseInfo,
@@ -75,6 +76,7 @@ describe('useLicenseLimitNotification', () => {
   });
 
   it('should not display notification if status is not AT_LIMIT or OVER_LIMIT', () => {
+    // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
         ...baseLicenseInfo,
@@ -109,6 +111,7 @@ describe('useLicenseLimitNotification', () => {
   });
 
   it('should display a warning notification when license limit is at limit', () => {
+    // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
         ...baseLicenseInfo,
@@ -133,6 +136,7 @@ describe('useLicenseLimitNotification', () => {
   });
 
   it('should have cloud billing url if is hosted on strapi cloud', () => {
+    // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
         ...baseLicenseInfo,

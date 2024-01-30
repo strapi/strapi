@@ -6,25 +6,19 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
   useAPIErrorHandler,
-  useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import { Webhook } from '@strapi/types';
-import { AxiosError, AxiosResponse } from 'axios';
-import { useMutation, useQuery } from 'react-query';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { FormikHelpers } from 'formik';
+import { useNavigate, useMatch } from 'react-router-dom';
 
-import {
-  CreateWebhook,
-  GetWebhook,
-  TriggerWebhook,
-  UpdateWebhook,
-} from '../../../../../../shared/contracts/webhooks';
+import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
 import { useTypedSelector } from '../../../../core/store/hooks';
-import { useContentTypes } from '../../../../hooks/useContentTypes';
 import { selectAdminPermissions } from '../../../../selectors';
+import { isBaseQueryError } from '../../../../utils/baseQuery';
 
 import { WebhookForm, WebhookFormValues } from './components/WebhookForm';
+import { useWebhooks } from './hooks/useWebhooks';
 
 /* -------------------------------------------------------------------------------------------------
  * EditView
@@ -44,126 +38,136 @@ const cleanData = (
 });
 
 const EditPage = () => {
-  const match = useRouteMatch<{ id: string }>('/settings/webhooks/:id');
+  const match = useMatch('/settings/webhooks/:id');
   const id = match?.params.id;
   const isCreating = id === 'create';
 
-  const { replace } = useHistory();
+  const navigate = useNavigate();
   const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
-  const { isLoading: isLoadingForModels } = useContentTypes();
-  const { put, get, post } = useFetchClient();
-
   const {
-    isLoading,
-    data: webhookData,
-    error: webhookError,
-    refetch: refetchWebhook,
-  } = useQuery<
-    GetWebhook.Response['data'],
-    AxiosError<Required<Pick<GetWebhook.Response, 'error'>>>
-  >(
-    ['webhooks', id],
-    async () => {
-      const {
-        data: { data },
-      } = await get<GetWebhook.Response>(`/admin/webhooks/${id}`);
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
+  const [isTriggering, setIsTriggering] = React.useState(false);
+  const [triggerResponse, setTriggerResponse] = React.useState<TriggerWebhook.Response['data']>();
 
-      return data;
-    },
+  const { isLoading, webhooks, error, createWebhook, updateWebhook, triggerWebhook } = useWebhooks(
+    { id: id! },
     {
-      enabled: !isCreating,
+      skip: isCreating,
     }
   );
 
   React.useEffect(() => {
-    if (webhookError) {
+    if (error) {
       toggleNotification({
         type: 'warning',
-        message: formatAPIError(webhookError),
+        message: formatAPIError(error),
       });
     }
-  }, [webhookError, toggleNotification, formatAPIError]);
+  }, [error, toggleNotification, formatAPIError]);
 
-  const {
-    isLoading: isTriggering,
-    data: triggerResponse,
-    mutate,
-  } = useMutation<
-    TriggerWebhook.Response['data'],
-    AxiosError<Required<Pick<TriggerWebhook.Response, 'error'>>>
-  >(
-    () =>
-      post<TriggerWebhook.Response>(`/admin/webhooks/${id}/trigger`).then((res) => res.data.data),
-    {
-      onError(error) {
+  const handleTriggerWebhook = async () => {
+    try {
+      setIsTriggering(true);
+
+      const res = await triggerWebhook(id!);
+
+      if ('error' in res) {
         toggleNotification({
           type: 'warning',
-          message: formatAPIError(error),
+          message: formatAPIError(res.error),
         });
-      },
-    }
-  );
 
-  const createWebhookMutation = useMutation<
-    AxiosResponse<CreateWebhook.Response>,
-    AxiosError<Required<Pick<CreateWebhook.Response, 'error'>>>,
-    Omit<CreateWebhook.Request['body'], 'id' | 'isEnabled'>
-  >((body) => post('/admin/webhooks', body), {
-    onSuccess({ data: result }) {
-      toggleNotification({
-        type: 'success',
-        message: { id: 'Settings.webhooks.created' },
-      });
-      replace(`/settings/webhooks/${result.data.id}`);
-    },
-    onError(error) {
+        return;
+      }
+
+      setTriggerResponse(res.data);
+    } catch {
       toggleNotification({
         type: 'warning',
-        message: formatAPIError(error),
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
       });
-    },
-  });
-
-  const updateWebhookMutation = useMutation<
-    AxiosResponse<UpdateWebhook.Response>,
-    AxiosError<Required<Pick<UpdateWebhook.Response, 'error'>>>,
-    { id: UpdateWebhook.Request['body']['id']; body: Omit<UpdateWebhook.Request['body'], 'id'> }
-  >(({ id, body }) => put(`/admin/webhooks/${id}`, body), {
-    onSuccess() {
-      refetchWebhook();
-      toggleNotification({
-        type: 'success',
-        message: { id: 'notification.form.success.fields' },
-      });
-    },
-    onError(error) {
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(error),
-      });
-    },
-  });
-
-  const handleSubmit = async (data: WebhookFormValues) => {
-    if (isCreating) {
-      createWebhookMutation.mutate(cleanData(data));
-      return;
+    } finally {
+      setIsTriggering(false);
     }
-    updateWebhookMutation.mutate({ id, body: cleanData(data) });
   };
 
-  if (isLoading || isLoadingForModels) {
+  const handleSubmit = async (
+    data: WebhookFormValues,
+    formik: FormikHelpers<WebhookFormValues>
+  ) => {
+    try {
+      if (isCreating) {
+        const res = await createWebhook(cleanData(data));
+
+        if ('error' in res) {
+          if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+            formik.setErrors(formatValidationErrors(res.error));
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(res.error),
+            });
+          }
+
+          return;
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: { id: 'Settings.webhooks.created' },
+        });
+
+        navigate(res.data.id, { replace: true });
+      } else {
+        const res = await updateWebhook({ id: id!, ...cleanData(data) });
+
+        if ('error' in res) {
+          if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+            formik.setErrors(formatValidationErrors(res.error));
+          } else {
+            toggleNotification({
+              type: 'warning',
+              message: formatAPIError(res.error),
+            });
+          }
+
+          return;
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.form.success.fields' },
+        });
+      }
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    }
+  };
+
+  if (isLoading) {
     return <LoadingIndicatorPage />;
   }
+
+  const [webhook] = webhooks ?? [];
 
   return (
     <Main>
       <SettingsPageTitle name="Webhooks" />
       <WebhookForm
-        data={webhookData}
+        data={webhook}
         handleSubmit={handleSubmit}
-        triggerWebhook={mutate}
+        triggerWebhook={handleTriggerWebhook}
         isCreating={isCreating}
         isTriggering={isTriggering}
         triggerResponse={triggerResponse}

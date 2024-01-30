@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "4.15.5",
+  "version": "4.19.0",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
@@ -32,26 +32,27 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.15.5",
-    "fs-extra": "10.0.0"
+    "@strapi/utils": "4.19.0",
+    "fs-extra": "10.1.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.15.5",
+    "@strapi/pack-up": "4.19.0",
+    "@strapi/types": "4.19.0",
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "4.15.5",
-    "tsconfig": "4.15.5"
+    "eslint-config-custom": "4.19.0",
+    "memfs": "4.6.0",
+    "tsconfig": "4.19.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

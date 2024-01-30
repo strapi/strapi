@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable vars-on-top */
 /* eslint-disable no-var */
+
+// TODO v5: change all 'any' to 'unknown' or a real type
 
 import type { Database } from '@strapi/database';
 import type { Logger } from '@strapi/logger';
@@ -26,8 +29,12 @@ import type { SanitizersRegistry } from './modules/sanitizers';
 import type { ValidatorsRegistry } from './modules/validators';
 
 import type { Container } from './container';
+import type { FeaturesService, FeaturesConfig } from './modules/features';
 
 export type * from './types';
+
+// TODO add this to ./types/core when the ts-lint (Multiple import/export error with same name) issue is fixed
+export type * as Config from './types/core/config';
 
 export {
   Container,
@@ -44,6 +51,8 @@ export {
   TelemetryService,
   RequestContext,
   CustomFields,
+  FeaturesService,
+  FeaturesConfig,
   Fetch,
   AuthenticationService,
   ContentApi,
@@ -52,11 +61,9 @@ export {
 };
 
 declare global {
-  // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
   var strapi: LoadedStrapi;
   namespace NodeJS {
     interface Global {
-      // @ts-expect-error - global strapi variable is also defined in the index.d.ts file
       strapi: LoadedStrapi;
     }
   }
@@ -101,7 +108,7 @@ export interface Strapi extends Container {
   store?: CoreStore;
   entityValidator?: EntityValidator;
   entityService?: EntityService.EntityService;
-  documents?: Documents.Repository;
+  documents?: Documents.Service;
   telemetry: TelemetryService;
   requestContext: RequestContext;
   customFields: CustomFields.CustomFields;
@@ -121,6 +128,7 @@ export interface Strapi extends Container {
       get: (feature: string) => { name: string; [key: string]: any };
     };
   };
+  features: FeaturesService;
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;

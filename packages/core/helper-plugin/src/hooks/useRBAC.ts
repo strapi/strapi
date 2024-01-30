@@ -8,7 +8,7 @@ import { useFetchClient } from './useFetchClient';
 
 import type { AxiosResponse } from 'axios';
 
-type AllowedActions = Record<string, boolean>;
+export type AllowedActions = Record<string, boolean>;
 
 export const useRBAC = (
   permissionsToCheck: Record<string, Permission[]> = {},
@@ -37,7 +37,7 @@ export const useRBAC = (
 
   const queryResults = useQueries(
     permissionsToCheckEntries.map(([name, permissions]) => ({
-      queryKey: ['useRBAC', name, permissions, userPermissions],
+      queryKey: ['useRBAC', name, ...permissions, userPermissions],
       async queryFn() {
         if (!permissions || !permissions.length) {
           return { name, hasPermission: true };

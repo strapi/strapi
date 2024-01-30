@@ -19,4 +19,6 @@ if [[ -z "$distTag" ]]; then
 fi
 
 # publish packages
+./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
+./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
 ./node_modules/.bin/lerna publish --no-push --no-git-tag-version --force-publish --exact "$version" --dist-tag "$distTag" $@

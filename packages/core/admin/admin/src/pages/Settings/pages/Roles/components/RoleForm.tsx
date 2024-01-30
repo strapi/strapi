@@ -12,11 +12,11 @@ import { FormikProps } from 'formik';
 import { useIntl } from 'react-intl';
 
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
-import type { EditPageFormValues } from '../EditPage';
+import type { EditRoleFormValues } from '../EditPage';
 
-interface RoleFormProps extends Pick<FormikProps<EditPageFormValues>, 'values' | 'errors'> {
-  onBlur: FormikProps<EditPageFormValues>['handleBlur'];
-  onChange: FormikProps<EditPageFormValues>['handleChange'];
+interface RoleFormProps extends Pick<FormikProps<EditRoleFormValues>, 'values' | 'errors'> {
+  onBlur: FormikProps<EditRoleFormValues>['handleBlur'];
+  onChange: FormikProps<EditRoleFormValues>['handleChange'];
   disabled?: boolean;
   role: AdminRole;
 }

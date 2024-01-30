@@ -18,35 +18,36 @@ import {
   getYupInnerErrors,
   translatedErrors,
   useAPIErrorHandler,
-  useFetchClient,
   useGuidedTour,
   useNotification,
   useQuery,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import omit from 'lodash/omit';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { useQuery as useReactQuery, useMutation } from 'react-query';
-import { NavLink, Redirect, useHistory, useRouteMatch } from 'react-router-dom';
+import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
 
 import {
-  Register,
+  Register as RegisterUser,
   RegisterAdmin,
-  RegistrationInfo,
 } from '../../../../../shared/contracts/authentication';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
+import { useAuth } from '../../../features/Auth';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
-import { AuthType } from '../constants';
+import {
+  useGetRegistrationInfoQuery,
+  useRegisterAdminMutation,
+  useRegisterUserMutation,
+} from '../../../services/auth';
+import { isBaseQueryError } from '../../../utils/baseQuery';
 
 import { FieldActionWrapper } from './FieldActionWrapper';
-
-import type { AxiosError } from 'axios';
 
 const REGISTER_USER_SCHEMA = yup.object().shape({
   firstname: yup.string().trim().required(translatedErrors.required),
@@ -91,9 +92,19 @@ interface RegisterProps {
   hasAdmin?: boolean;
 }
 
+interface RegisterFormValues {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  registrationToken: string | undefined;
+  news: boolean;
+}
+
 const Register = ({ hasAdmin }: RegisterProps) => {
   const toggleNotification = useNotification();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = React.useState(false);
   const [submitCount, setSubmitCount] = React.useState(0);
@@ -102,129 +113,121 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const { formatMessage } = useIntl();
   const { setSkipped } = useGuidedTour();
   const query = useQuery();
-  const match = useRouteMatch<{ authType: Extract<AuthType, `register${string}`> }>(
-    '/auth/:authType'
-  );
-  const { formatAPIError } = useAPIErrorHandler();
-  const { get, post } = useFetchClient();
+  const match = useMatch('/auth/:authType');
+  const {
+    _unstableFormatAPIError: formatAPIError,
+    _unstableFormatValidationErrors: formatValidationErrors,
+  } = useAPIErrorHandler();
   const { setNpsSurveySettings } = useNpsSurveySettings();
 
   const registrationToken = query.get('registrationToken');
 
-  const { data: userInfo } = useReactQuery({
-    queryKey: ['admin', 'registration-info', registrationToken],
-    async queryFn() {
-      const {
-        data: { data },
-      } = await get<RegistrationInfo.Response>(`/admin/registration-info`, {
-        params: {
-          registrationToken,
-        },
-      });
+  const { data: userInfo, error } = useGetRegistrationInfoQuery(registrationToken as string, {
+    skip: !registrationToken,
+  });
 
-      return data;
-    },
-    enabled: !!registrationToken,
-    initialData: {},
-    onError(err: AxiosError<{ error: Exclude<RegistrationInfo.Response['errors'], undefined> }>) {
-      const message = formatAPIError(err);
+  React.useEffect(() => {
+    if (error) {
+      const message: string = isBaseQueryError(error) ? formatAPIError(error) : error.message ?? '';
 
       toggleNotification({
         type: 'warning',
         message,
       });
 
-      push(`/auth/oops?info=${encodeURIComponent(message)}`);
-    },
-  });
+      navigate(`/auth/oops?info=${encodeURIComponent(message)}`);
+    }
+  }, [error, formatAPIError, navigate, toggleNotification]);
 
-  const registerAdminMutation = useMutation(
-    async (body: RegisterAdmin.Request['body'] & { news: boolean }) => {
-      const { news, ...restBody } = body;
-      const { data } = await post<RegisterAdmin.Response>('/admin/register-admin', restBody);
+  const [registerAdmin] = useRegisterAdminMutation();
+  const [registerUser] = useRegisterUserMutation();
+  const setToken = useAuth('Register', (state) => state.setToken);
 
-      return { ...data.data, news };
-    },
-    {
-      onSuccess(data) {
-        const { token, user, news } = data;
+  const handleRegisterAdmin = async (
+    { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
+    setFormErrors: FormikHelpers<RegisterFormValues>['setErrors']
+  ) => {
+    const res = await registerAdmin(body);
 
-        auth.setToken(token, false);
-        auth.setUserInfo(user, false);
+    if ('data' in res) {
+      setToken(res.data.token);
 
-        const { roles } = user;
+      const { roles } = res.data.user;
 
-        if (roles) {
-          const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
+      if (roles) {
+        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
-          if (isUserSuperAdmin) {
-            auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
-            setSkipped(false);
-            trackUsage('didLaunchGuidedtour');
-          }
+        if (isUserSuperAdmin) {
+          auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
+          setSkipped(false);
+          trackUsage('didLaunchGuidedtour');
         }
+      }
 
-        if (news) {
-          // Only enable EE survey if user accepted the newsletter
-          setNpsSurveySettings((s) => ({ ...s, enabled: true }));
+      if (news) {
+        // Only enable EE survey if user accepted the newsletter
+        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
-          push({
-            pathname: '/usecase',
-            search: `?hasAdmin=${true}`,
-          });
-        } else {
-          push('/');
-        }
-      },
-      onError(err: AxiosError<{ error: Exclude<RegisterAdmin.Response['errors'], undefined> }>) {
+        navigate({
+          pathname: '/usecase',
+          search: `?hasAdmin=${true}`,
+        });
+      } else {
+        navigate('/');
+      }
+    } else {
+      if (isBaseQueryError(res.error)) {
         trackUsage('didNotCreateFirstAdmin');
 
-        const error = formatAPIError(err);
-        setApiError(error);
-      },
-    }
-  );
-
-  const registerUserMutation = useMutation(
-    async (body: Register.Request['body'] & { news: boolean }) => {
-      const { news, ...restBody } = body;
-      const { data } = await post<Register.Response>('/admin/register', restBody);
-
-      return { ...data.data, news };
-    },
-    {
-      onSuccess(data) {
-        const { token, user, news } = data;
-
-        auth.setToken(token, false);
-        auth.setUserInfo(user, false);
-
-        if (news) {
-          // Only enable EE survey if user accepted the newsletter
-          setNpsSurveySettings((s) => ({ ...s, enabled: true }));
-
-          push({
-            pathname: '/usecase',
-            search: `?hasAdmin=${hasAdmin}`,
-          });
-        } else {
-          push('/');
+        if (res.error.name === 'ValidationError') {
+          setFormErrors(formatValidationErrors(res.error));
+          return;
         }
-      },
-      onError(err: AxiosError<{ error: Exclude<RegisterAdmin.Response['errors'], undefined> }>) {
+
+        setApiError(formatAPIError(res.error));
+      }
+    }
+  };
+
+  const handleRegisterUser = async (
+    { news, ...body }: RegisterUser.Request['body'] & { news: boolean },
+    setFormErrors: FormikHelpers<RegisterFormValues>['setErrors']
+  ) => {
+    const res = await registerUser(body);
+
+    if ('data' in res) {
+      setToken(res.data.token);
+
+      if (news) {
+        // Only enable EE survey if user accepted the newsletter
+        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
+
+        navigate({
+          pathname: '/usecase',
+          search: `?hasAdmin=${hasAdmin}`,
+        });
+      } else {
+        navigate('/');
+      }
+    } else {
+      if (isBaseQueryError(res.error)) {
         trackUsage('didNotCreateFirstAdmin');
 
-        const error = formatAPIError(err);
-        setApiError(error);
-      },
+        if (res.error.name === 'ValidationError') {
+          setFormErrors(formatValidationErrors(res.error));
+          return;
+        }
+
+        setApiError(formatAPIError(res.error));
+      }
     }
-  );
+  };
 
   if (
     !match ||
     (match.params.authType !== 'register' && match.params.authType !== 'register-admin')
   ) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   const isAdminRegistration = match.params.authType === 'register-admin';
@@ -258,15 +261,17 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         </Flex>
         <Formik
           enableReinitialize
-          initialValues={{
-            firstname: userInfo?.firstname || '',
-            lastname: userInfo?.lastname || '',
-            email: userInfo?.email || '',
-            password: '',
-            confirmPassword: '',
-            registrationToken: registrationToken || undefined,
-            news: false,
-          }}
+          initialValues={
+            {
+              firstname: userInfo?.firstname || '',
+              lastname: userInfo?.lastname || '',
+              email: userInfo?.email || '',
+              password: '',
+              confirmPassword: '',
+              registrationToken: registrationToken || undefined,
+              news: false,
+            } satisfies RegisterFormValues
+          }
           onSubmit={async (data, formik) => {
             const normalizedData = normalizeData(data);
 
@@ -278,19 +283,23 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
 
               if (normalizedData.registrationToken) {
-                registerUserMutation.mutate({
-                  userInfo: omit(normalizedData, [
-                    'registrationToken',
-                    'confirmPassword',
-                    'email',
-                    'news',
-                  ]),
-                  registrationToken: normalizedData.registrationToken,
-                  news: normalizedData.news,
-                });
+                handleRegisterUser(
+                  {
+                    userInfo: omit(normalizedData, [
+                      'registrationToken',
+                      'confirmPassword',
+                      'email',
+                      'news',
+                    ]),
+                    registrationToken: normalizedData.registrationToken,
+                    news: normalizedData.news,
+                  },
+                  formik.setErrors
+                );
               } else {
-                registerAdminMutation.mutate(
-                  omit(normalizedData, ['registrationToken', 'confirmPassword'])
+                await handleRegisterAdmin(
+                  omit(normalizedData, ['registrationToken', 'confirmPassword']),
+                  formik.setErrors
                 );
               }
             } catch (err) {

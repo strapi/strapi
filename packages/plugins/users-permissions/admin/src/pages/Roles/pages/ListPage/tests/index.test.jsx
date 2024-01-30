@@ -7,7 +7,7 @@ import { render as renderRTL, waitForElementToBeRemoved } from '@testing-library
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 
 import { RolesListPage } from '../index';
 
@@ -27,7 +27,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   CheckPermissions: jest.fn(({ children }) => children),
 }));
 
-let testLocation;
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span data-testid="location-display">{location.pathname}</span>;
+};
 
 const render = () => ({
   ...renderRTL(<RolesListPage />, {
@@ -46,17 +50,10 @@ const render = () => ({
             <QueryClientProvider client={client}>
               <IntlProvider locale="en" messages={{}} textComponent="span">
                 {children}
+                <LocationDisplay />
               </IntlProvider>
             </QueryClientProvider>
           </ThemeProvider>
-          <Route
-            path="*"
-            render={({ location }) => {
-              testLocation = location;
-
-              return null;
-            }}
-          />
         </MemoryRouter>
       );
     },
@@ -87,20 +84,20 @@ describe('Roles – ListPage', () => {
   });
 
   it('should direct me to the new user page when I press the add a new role button', async () => {
-    const { getByRole } = render();
+    const { getByRole, getByTestId } = render();
 
     await userEvent.click(getByRole('link', { name: 'Add new role' }));
 
-    expect(testLocation.pathname).toBe('/settings/users-permissions/roles/new');
+    expect(getByTestId('location-display')).toHaveTextContent('/new');
   });
 
   it('should direct me to the edit view of a selected role if I click the edit role button', async () => {
-    const { getByRole, queryByText } = render();
+    const { getByRole, queryByText, getByTestId } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
     await userEvent.click(getByRole('link', { name: 'Edit Authenticated', hidden: true }));
 
-    expect(testLocation.pathname).toBe('/settings/users-permissions/roles/1');
+    expect(getByTestId('location-display')).toHaveTextContent('/1');
   });
 });

@@ -6,7 +6,8 @@
     "publishedAt": null,
     "password": "$2a$10$4EP.Y8crWYRpfk2rVmmoce8raDqGYVwMlcI//GDQdO6z06bO50igu",
     "private": "private",
-    "locale": "en"
+    "locale": "en",
+    "categories": [1]
   },
   {
     "id": 2,
@@ -15,7 +16,8 @@
     "publishedAt": null,
     "password": null,
     "private": "private",
-    "locale": "en"
+    "locale": "en",
+    "categories": []
   },
   {
     "id": 3,
@@ -24,7 +26,8 @@
     "publishedAt": null,
     "password": null,
     "private": "private",
-    "locale": "fr"
+    "locale": "fr",
+    "categories": [2]
   },
   {
     "id": 4,
@@ -33,7 +36,8 @@
     "publishedAt": null,
     "password": null,
     "private": "private",
-    "locale": "it"
+    "locale": "it",
+    "categories": [3]
   },
   {
     "id": 25,
@@ -42,6 +46,7 @@
     "publishedAt": "2019-01-01T00:00:00.000Z",
     "password": null,
     "private": "private",
-    "locale": "en"
+    "locale": "en",
+    "categories": []
   }
 ]

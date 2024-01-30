@@ -169,6 +169,14 @@ export interface AuditLogsFeature {
 
 export interface ReviewWorkflowsFeature {
   name: 'review-workflows';
+  options?: { numberOfWorkflows: number | null; stagesPerWorkflow: number | null };
+}
+
+export interface ContentReleasesFeature {
+  name: 'cms-content-releases';
+  options?: {
+    maximumReleases: number;
+  };
 }
 
 /**
@@ -184,7 +192,7 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature)[];
+      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature | ContentReleasesFeature)[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
       permittedSeats: number;

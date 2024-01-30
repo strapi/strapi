@@ -186,27 +186,23 @@ describe('Attributes', () => {
           defaultAssertions(typeNode, 'Attribute.UID');
 
           expect(typeNode.typeArguments).not.toBeUndefined();
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::bar.bar');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('bar');
+          expect(typeNode.typeArguments[0].text).toBe('bar');
         });
 
         test('UID with partial options and no target field', () => {
           const attribute = { type: 'uid', options: { separator: '_' } };
-          const typeNode = getAttributeType('foo', attribute);
+          const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
           defaultAssertions(typeNode, 'Attribute.UID');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
 
-          const optionsLiteralNode = typeNode.typeArguments[2];
+          const optionsLiteralNode = typeNode.typeArguments[1];
 
           expect(optionsLiteralNode.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(optionsLiteralNode.members).toHaveLength(1);
@@ -226,15 +222,12 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.UID');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[0].text).toBe('bar');
 
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('bar');
-
-          const optionsLiteralNode = typeNode.typeArguments[2];
+          const optionsLiteralNode = typeNode.typeArguments[1];
 
           expect(optionsLiteralNode.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(optionsLiteralNode.members).toHaveLength(1);
@@ -256,16 +249,13 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
+          expect(typeNode.typeArguments[0].text).toBe('oneToOne');
 
           expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('oneToOne');
-
-          expect(typeNode.typeArguments[2].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[2].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[1].text).toBe('api::bar.bar');
         });
 
         test('Polymorphic relation', () => {
@@ -274,13 +264,10 @@ describe('Attributes', () => {
 
           defaultAssertions(typeNode, 'Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('morphMany');
+          expect(typeNode.typeArguments[0].text).toBe('morphMany');
         });
       });
 
@@ -548,19 +535,27 @@ describe('Attributes', () => {
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
-          expect(modifiers[0].typeArguments).toHaveLength(1);
-          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
-          expect(modifiers[0].typeArguments[0].members).toHaveLength(1);
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
+
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
 
           // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('min');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('2');
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [min] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('2');
+
+          // Check for number keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
         });
 
         test('No Min, Max: 3', () => {
@@ -572,19 +567,27 @@ describe('Attributes', () => {
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
-          expect(modifiers[0].typeArguments).toHaveLength(1);
-          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
-          expect(modifiers[0].typeArguments[0].members).toHaveLength(1);
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
 
-          // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('max');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('3');
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [max] = definition.members;
+
+          expect(max.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(max.name.escapedText).toBe('max');
+          expect(max.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(max.type.text).toBe('3');
+
+          // Check for number keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
         });
 
         test('Min: 4, Max: 12', () => {
@@ -596,28 +599,64 @@ describe('Attributes', () => {
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
           expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
 
-          expect(modifiers[0].typeArguments).toHaveLength(1);
-          expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
-          expect(modifiers[0].typeArguments[0].members).toHaveLength(2);
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
 
-          // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('min');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('4');
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
 
-          expect(modifiers[0].typeArguments[0].members[1].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[1].name.escapedText).toBe('max');
-          expect(modifiers[0].typeArguments[0].members[1].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[1].type.text).toBe('12');
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Min/Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(2);
+
+          const [min, max] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('4');
+
+          expect(max.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(max.name.escapedText).toBe('max');
+          expect(max.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(max.type.text).toBe('12');
+
+          // Check for number keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
+        });
+
+        test('Min: "1"', () => {
+          const attribute = { min: '1' };
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(1);
+
+          expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
+
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Min/Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [min] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.StringLiteral);
+          expect(min.type.text).toBe('1');
+
+          // Check for string keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.StringKeyword);
         });
       });
 
@@ -751,6 +790,16 @@ describe('Attributes', () => {
           expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
             ts.SyntaxKind.TrueKeyword
           );
+        });
+
+        test('Default: <function>', () => {
+          const anyFunction = jest.fn();
+          const attribute = { default: anyFunction };
+
+          const modifiers = getAttributeModifiers(attribute);
+
+          // The default modifier shouldn't be processed when encountering a function
+          expect(modifiers).toHaveLength(0);
         });
       });
     });

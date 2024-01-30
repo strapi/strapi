@@ -15,8 +15,11 @@ import {
 } from '@strapi/helper-plugin';
 import { Eye, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { ApiToken } from '../../../../../../shared/contracts/api-token';
+import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
 
 import type { Entity } from '@strapi/types';
 
@@ -42,13 +45,7 @@ interface TableProps
     canDelete: boolean;
     canUpdate: boolean;
   };
-  tokens: Array<{
-    id: string | number;
-    name: string;
-    description: string;
-    createdAt: string;
-    lastUsedAt: string | null;
-  }>;
+  tokens: SanitizedTransferToken[] | ApiToken[];
   tokenType: 'api-token' | 'transfer-token';
 }
 
@@ -111,13 +108,10 @@ const TableRows = ({
   const [{ query }] = useQueryParams<{ sort?: string }>();
   const { formatMessage } = useIntl();
   const [, sortOrder] = query && query.sort ? query.sort.split(':') : [undefined, 'ASC'];
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
+  const navigate = useNavigate();
   const { trackUsage } = useTracking();
 
-  const sortedTokens = rows.sort((a, b) => {
+  const sortedTokens = [...rows].sort((a, b) => {
     const comparison = a.name.localeCompare(b.name);
 
     return sortOrder === 'DESC' ? -comparison : comparison;
@@ -134,7 +128,7 @@ const TableRows = ({
                 trackUsage('willEditTokenFromList', {
                   tokenType,
                 });
-                push(`${pathname}/${token.id}`);
+                navigate(token.id.toString());
               },
               condition: canUpdate,
             })}
@@ -227,14 +221,11 @@ const DefaultButton = ({
   children,
 }: DefaultButtonProps) => {
   const { formatMessage } = useIntl();
-  const {
-    location: { pathname },
-  } = useHistory();
 
   return (
     <LinkStyled
       forwardedAs={NavLink}
-      to={`${pathname}/${tokenId}`}
+      to={tokenId.toString()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >
       {children}
@@ -317,7 +308,7 @@ const ReadButton = ({ tokenName, tokenId }: ButtonProps) => {
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {
   return (
     <DefaultButton tokenName={tokenName} tokenId={tokenId}>
-      <Pencil />
+      <Pencil width={12} />
     </DefaultButton>
   );
 };

@@ -2,12 +2,11 @@ import * as sift from 'sift';
 import qs from 'qs';
 import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick, isNil, isObject } from 'lodash/fp';
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
-import { Permissions as PermissionsTypes } from '@strapi/types';
+import type { ParametrizedAction, PermissionRule } from '../../types';
 
 export interface CustomAbilityBuilder {
-  can(permission: PermissionsTypes.PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;
-  buildParametrizedAction: (parametrizedAction: PermissionsTypes.ParametrizedAction) => string;
+  can(permission: PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;
+  buildParametrizedAction: (parametrizedAction: ParametrizedAction) => string;
   build(): Ability;
 }
 
@@ -32,7 +31,7 @@ const conditionsMatcher = (conditions: unknown) => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-const buildParametrizedAction = ({ name, params }: PermissionsTypes.ParametrizedAction) => {
+const buildParametrizedAction = ({ name, params }: ParametrizedAction) => {
   return `${name}?${qs.stringify(params)}`;
 };
 
@@ -43,7 +42,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
   const { can, build, ...rest } = new AbilityBuilder(Ability);
 
   return {
-    can(permission: PermissionsTypes.PermissionRule) {
+    can(permission: PermissionRule) {
       const { action, subject, properties = {}, condition } = permission;
       const { fields } = properties;
 
@@ -57,7 +56,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       );
     },
 
-    buildParametrizedAction({ name, params }: PermissionsTypes.ParametrizedAction) {
+    buildParametrizedAction({ name, params }: ParametrizedAction) {
       return `${name}?${qs.stringify(params)}`;
     },
 
