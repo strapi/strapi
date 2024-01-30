@@ -6,27 +6,27 @@ import styled from 'styled-components';
 import { CellContentProps } from './CellContent';
 import { CellValue } from './CellValue';
 
+import type { ComponentsDictionary } from '../../../../hooks/useDocument';
 import type { Attribute } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * SingleComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface SingleComponentProps extends Pick<CellContentProps, 'metadatas'> {
+interface SingleComponentProps extends Pick<CellContentProps, 'mainField'> {
   content: Attribute.GetValue<Attribute.Component>;
+  schema: ComponentsDictionary[string];
 }
 
-const SingleComponent = ({ content, metadatas }: SingleComponentProps) => {
-  const { mainField } = metadatas;
-
+const SingleComponent = ({ content, mainField, schema }: SingleComponentProps) => {
   if (!mainField) {
     return null;
   }
 
   return (
-    <Tooltip label={content[mainField.name]}>
+    <Tooltip label={content[mainField]}>
       <SingleComponentTypography textColor="neutral800" ellipsis>
-        <CellValue type={mainField?.type} value={content[mainField.name]} />
+        <CellValue type={schema.attributes[mainField].type} value={content[mainField]} />
       </SingleComponentTypography>
     </Tooltip>
   );
@@ -40,13 +40,13 @@ const SingleComponentTypography = styled(Typography)`
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface RepeatableComponentProps extends Pick<CellContentProps, 'metadatas'> {
+interface RepeatableComponentProps extends Pick<CellContentProps, 'mainField'> {
   content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, true>>;
+  schema: ComponentsDictionary[string];
 }
 
-const RepeatableComponent = ({ content, metadatas }: RepeatableComponentProps) => {
+const RepeatableComponent = ({ content, mainField, schema }: RepeatableComponentProps) => {
   const { formatMessage } = useIntl();
-  const { mainField } = metadatas;
 
   if (!mainField) {
     return null;
@@ -68,7 +68,7 @@ const RepeatableComponent = ({ content, metadatas }: RepeatableComponentProps) =
         {content.map((item) => (
           <Menu.Item key={item.id} disabled>
             <RepeatableComponentTypography ellipsis>
-              <CellValue type={mainField.type} value={item[mainField.name]} />
+              <CellValue type={schema.attributes[mainField].type} value={item[mainField]} />
             </RepeatableComponentTypography>
           </Menu.Item>
         ))}

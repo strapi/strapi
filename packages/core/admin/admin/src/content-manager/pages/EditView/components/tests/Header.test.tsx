@@ -2,35 +2,37 @@ import { render, screen } from '@tests/utils';
 
 import { Header } from '../Header';
 
-import ct from './data/ct-schema.json';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn(() => ({
-    initialData: {},
-    isCreatingEntry: true,
-    isSingleType: false,
-    layout: ct,
-    modifiedData: {},
-    onPublish: jest.fn(),
-    onPublishPromptDismissal: jest.fn(),
-    onUnpublish: jest.fn(),
-    status: 'resolved',
-    publishConfirmation: {
-      show: false,
-      draftCount: 0,
-    },
-  })),
-}));
-
-describe('CONTENT MANAGER | EditView | Header', () => {
-  it('renders and matches the snapshot', () => {
-    render(<Header allowedActions={{ canUpdate: true, canCreate: true, canPublish: true }} />);
-
-    expect(screen.getByRole('link', { name: 'Back' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+describe('Header', () => {
+  it('should render the create entry title when isCreating is true', () => {
+    render(<Header isCreating />);
 
     expect(screen.getByRole('heading', { name: 'Create an entry' })).toBeInTheDocument();
-    expect(screen.getByText('API ID: restaurant')).toBeInTheDocument();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
   });
+
+  it('should display the status of the document', () => {
+    const { rerender } = render(<Header status="draft" />);
+
+    expect(screen.getByText('Draft')).toBeInTheDocument();
+
+    rerender(<Header status="published" />);
+
+    expect(screen.getByText('Published')).toBeInTheDocument();
+
+    rerender(<Header status="modified" />);
+
+    expect(screen.getByText('Modified')).toBeInTheDocument();
+  });
+
+  it.todo(
+    'should display the title of the document when we are not creating a document and the id is not the main field'
+  );
+
+  it.todo(
+    "should display 'Unitled' when we are not creating a document and the id is the main field"
+  );
+
+  it.todo('should display a back button');
+
+  it.todo('should have a menu of document actions');
 });

@@ -1,38 +1,34 @@
 import * as React from 'react';
 
 import { AnErrorOccurred, CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
-import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
+import { useDocLayout } from '../../hooks/useDocumentLayout';
 import { type SettingsViewComponentLayout, formatLayoutForSettingsView } from '../../utils/layouts';
 
 import { SettingsForm } from './components/SettingsForm/SettingsForm';
 
 const EditSettingsView = () => {
-  const { slug } = useParams();
-  const { isLoading, layout } = useContentTypeLayout(slug);
+  const {
+    isLoading,
+    edit: { layout, components },
+  } = useDocLayout();
 
   const { rawContentTypeLayout, rawComponentsLayouts } = React.useMemo(() => {
-    let rawContentTypeLayout = null;
-    let rawComponentsLayouts = null;
+    // @ts-expect-error – TODO: remove this & fix the page
+    const rawContentTypeLayout = formatLayoutForSettingsView(layout);
 
-    if (layout?.contentType) {
-      rawContentTypeLayout = formatLayoutForSettingsView(layout.contentType);
-    }
+    const rawComponentsLayouts = Object.keys(components).reduce<
+      Record<string, SettingsViewComponentLayout>
+    >((acc, current) => {
+      // @ts-expect-error – TODO: remove this & fix the page
+      acc[current] = formatLayoutForSettingsView(components[current]);
 
-    if (layout?.components) {
-      rawComponentsLayouts = Object.keys(layout.components).reduce<
-        Record<string, SettingsViewComponentLayout>
-      >((acc, current) => {
-        acc[current] = formatLayoutForSettingsView(layout.components[current]);
-
-        return acc;
-      }, {});
-    }
+      return acc;
+    }, {});
 
     return { rawContentTypeLayout, rawComponentsLayouts };
-  }, [layout]);
+  }, [components, layout]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;

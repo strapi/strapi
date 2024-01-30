@@ -19,7 +19,7 @@ import {
   TableProps as DSTableProps,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 import { SortIcon } from '../icons/SortIcon';
@@ -61,7 +61,7 @@ const useTableContext = <TRow extends { id: Entity.ID }>() => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface ActionBarProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const ActionBar = ({ children }: ActionBarProps) => {
@@ -215,21 +215,37 @@ const HeaderHiddenActionsCell = () => {
  * HeaderCell
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * This is a straight up copy of the ListFieldLayout component from the
+ * admin, when we deprecate the helper-plugin this will be tightened up.
+ */
 interface HeaderCellProps {
-  fieldSchemaType: Attribute.Kind | 'custom';
+  /**
+   * The attribute data from the content-type's schema for the field
+   */
+  attribute: Attribute.Any | { type: 'custom' };
+  /**
+   * Typically used by plugins to render a custom cell
+   */
+  cellFormatter?: (
+    data: {
+      [key: string]: any;
+    },
+    header: Omit<HeaderCellProps, 'cellFormatter'>
+  ) => React.ReactNode;
+  label: string | MessageDescriptor;
+  /**
+   * the name of the attribute we use to display the actual name e.g. relations
+   * are just ids, so we use the mainField to display something meaninginful by
+   * looking at the target's schema
+   */
+  mainField?: string;
   name: string;
-  relationFieldName?: string;
-  isSortable?: boolean;
-  label: string;
+  searchable?: boolean;
+  sortable?: boolean;
 }
 
-const HeaderCell = ({
-  fieldSchemaType,
-  name,
-  relationFieldName,
-  isSortable,
-  label,
-}: HeaderCellProps) => {
+const HeaderCell = ({ attribute, mainField, name, label, sortable }: HeaderCellProps) => {
   const [{ query }, setQuery] = useQueryParams<{ sort: `${string}:${'ASC' | 'DESC'}` }>();
   const sort = typeof query?.sort === 'string' ? query.sort : '';
   const [sortBy, sortOrder] = sort.split(':');
@@ -240,23 +256,25 @@ const HeaderCell = ({
 
   // relations always have to be sorted by their main field instead of only the
   // attribute name; sortBy e.g. looks like: &sortBy=attributeName[mainField]:ASC
-  if (fieldSchemaType === 'relation' && relationFieldName) {
-    isSorted = sortBy === `${name.split('.')[0]}[${relationFieldName}]`;
+  if (attribute.type === 'relation' && mainField) {
+    isSorted = sortBy === `${name.split('.')[0]}[${mainField}]`;
   }
+
+  const cellLabel = typeof label === 'string' ? label : formatMessage(label);
 
   const sortLabel = formatMessage(
     { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
-    { label }
+    { label: cellLabel }
   );
 
   const handleClickSort = (shouldAllowClick = true) => {
-    if (isSortable && shouldAllowClick) {
+    if (sortable && shouldAllowClick) {
       let nextSort = name;
 
       // relations always have to be sorted by their main field instead of only the
       // attribute name; nextSort e.g. looks like: &nextSort=attributeName[mainField]:ASC
-      if (fieldSchemaType === 'relation' && relationFieldName) {
-        nextSort = `${name.split('.')[0]}[${relationFieldName}]`;
+      if (attribute.type === 'relation' && mainField) {
+        nextSort = `${name.split('.')[0]}[${mainField}]`;
       }
 
       setQuery({
@@ -270,7 +288,7 @@ const HeaderCell = ({
       key={name}
       action={
         isSorted &&
-        isSortable && (
+        sortable && (
           <IconButton
             label={sortLabel}
             onClick={() => handleClickSort(true)}
@@ -280,14 +298,14 @@ const HeaderCell = ({
         )
       }
     >
-      <Tooltip label={isSortable ? sortLabel : label}>
+      <Tooltip label={sortable ? sortLabel : cellLabel}>
         <Typography
           textColor="neutral600"
-          as={!isSorted && isSortable ? 'button' : 'span'}
+          as={!isSorted && sortable ? 'button' : 'span'}
           onClick={() => handleClickSort()}
           variant="sigma"
         >
-          {label}
+          {cellLabel}
         </Typography>
       </Tooltip>
     </Th>
@@ -300,7 +318,7 @@ const HeaderCell = ({
 
 interface RootProps
   extends Partial<Pick<TableContextValue, 'colCount' | 'rows' | 'isLoading' | 'isFetching'>> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   defaultSelectedEntries?: Entity.ID[];
 }
 
@@ -461,3 +479,15 @@ const Table = {
 };
 
 export { Table, useTableContext };
+
+export type {
+  ActionBarProps,
+  BodyProps,
+  BulkDeleteButtonProps,
+  ContentProps,
+  EmptyBodyProps,
+  HeaderCellProps,
+  HeadProps,
+  RootProps,
+  TableContextValue,
+};

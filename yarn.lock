@@ -9283,7 +9283,6 @@ __metadata:
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
     pluralize: "npm:8.0.0"
-    prop-types: "npm:^15.8.1"
     qs: "npm:6.11.1"
     react: "npm:^18.2.0"
     react-dnd: "npm:16.0.1"
@@ -9753,7 +9752,6 @@ __metadata:
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
     "@types/styled-components": "npm:5.1.32"
-    prop-types: "npm:^15.8.1"
     react: "npm:^18.2.0"
     react-colorful: "npm:5.6.1"
     react-dom: "npm:^18.2.0"
@@ -9809,7 +9807,6 @@ __metadata:
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     pluralize: "npm:8.0.0"
-    prop-types: "npm:^15.8.1"
     qs: "npm:6.11.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
@@ -9886,7 +9883,6 @@ __metadata:
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
-    prop-types: "npm:^15.8.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-intl: "npm:6.4.1"
@@ -9971,7 +9967,6 @@ __metadata:
     koa: "npm:2.13.4"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
-    prop-types: "npm:^15.8.1"
     qs: "npm:6.11.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
@@ -10017,6 +10012,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
+    "@strapi/admin": "npm:4.19.0"
     "@strapi/design-system": "npm:1.14.1"
     "@strapi/helper-plugin": "npm:4.19.1"
     "@strapi/icons": "npm:1.14.1"
@@ -10053,6 +10049,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/admin": ^4.19.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0

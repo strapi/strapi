@@ -1,4 +1,4 @@
-import { buildValidGetParams } from '../api';
+import { buildValidParams } from '../api';
 
 describe('api', () => {
   describe('buildValidQueryParams', () => {
@@ -12,7 +12,7 @@ describe('api', () => {
         },
       };
 
-      const params = buildValidGetParams(queryParams);
+      const params = buildValidParams(queryParams);
 
       expect(params).toMatchInlineSnapshot(`
         {
@@ -33,7 +33,7 @@ describe('api', () => {
         _q,
       };
 
-      const params = buildValidGetParams(queryParams);
+      const params = buildValidParams(queryParams);
 
       expect(params).toMatchInlineSnapshot(`
         {

@@ -29,84 +29,87 @@ const addCommonFieldsToInitialDataMiddleware: () => Middleware<object, RootState
       return next(action);
     }
 
-    const search = action.rawQuery.substring(1);
-    const query = parse(search);
-    const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', undefined);
-    const locale = get(query, 'plugins.i18n.locale', undefined);
-    const isSingleType = action.isSingleType;
+    return next(action);
 
-    if (!relatedEntityId && !isSingleType) {
-      return next(action);
-    }
+    // TODO: re-add this back in with full i18n support
+    // const search = action.rawQuery.substring(1);
+    // const query = parse(search);
+    // const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', undefined);
+    // const locale = get(query, 'plugins.i18n.locale', undefined);
+    // const isSingleType = action.isSingleType;
 
-    const store = getState();
-    const cmDataStore = store['content-manager_editViewCrudReducer'];
-    const cmLayoutStore = store['content-manager_editViewLayoutManager'];
-    const { contentTypeDataStructure } = cmDataStore;
-    const { currentLayout } = cmLayoutStore as {
-      currentLayout: {
-        contentType: Schema.ContentType;
-        components: Record<string, Schema.Component>;
-      };
-    };
+    // if (!relatedEntityId && !isSingleType) {
+    //   return next(action);
+    // }
 
-    const getData = async () => {
-      if (
-        !isParsedParamUndefinedOrString(relatedEntityId) ||
-        !isParsedParamUndefinedOrString(locale)
-      ) {
-        return;
-      }
+    // const store = getState();
+    // const cmDataStore = store['content-manager_editViewCrudReducer'];
+    // const cmLayoutStore = store['content-manager_editViewLayoutManager'];
+    // const { contentTypeDataStructure } = cmDataStore;
+    // const { currentLayout } = cmLayoutStore as {
+    //   currentLayout: {
+    //     contentType: Schema.ContentType;
+    //     components: Record<string, Schema.Component>;
+    //   };
+    // };
 
-      // Show a loader
-      dispatch({ type: 'ContentManager/CrudReducer/GET_DATA' });
-      const defaultDataStructure = cloneDeep(contentTypeDataStructure);
+    // const getData = async () => {
+    //   if (
+    //     !isParsedParamUndefinedOrString(relatedEntityId) ||
+    //     !isParsedParamUndefinedOrString(locale)
+    //   ) {
+    //     return;
+    //   }
 
-      try {
-        const { data } = await getFetchClient().post<
-          GetNonLocalizedFields.Response,
-          AxiosResponse<GetNonLocalizedFields.Response>,
-          GetNonLocalizedFields.Request['body']
-        >(`/${pluginId}/content-manager/actions/get-non-localized-fields`, {
-          model: currentLayout.contentType.uid,
-          id: relatedEntityId,
-          locale,
-        });
+    //   // Show a loader
+    //   dispatch({ type: 'ContentManager/CrudReducer/GET_DATA' });
+    //   const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
-        const { nonLocalizedFields, localizations } = data;
+    //   try {
+    //     const { data } = await getFetchClient().post<
+    //       GetNonLocalizedFields.Response,
+    //       AxiosResponse<GetNonLocalizedFields.Response>,
+    //       GetNonLocalizedFields.Request['body']
+    //     >(`/${pluginId}/content-manager/actions/get-non-localized-fields`, {
+    //       model: currentLayout.contentType.uid,
+    //       id: relatedEntityId,
+    //       locale,
+    //     });
 
-        const merged = merge(defaultDataStructure, nonLocalizedFields);
+    //     const { nonLocalizedFields, localizations } = data;
 
-        const fieldsToRemove = [
-          'createdBy',
-          'updatedBy',
-          'publishedAt',
-          'id',
-          '_id',
-          'updatedAt',
-          'createdAt',
-        ];
-        const cleanedMerged = contentManagementUtilRemoveFieldsFromData(
-          merged,
-          currentLayout.contentType,
-          currentLayout.components,
-          fieldsToRemove
-        );
-        cleanedMerged.localizations = localizations;
+    //     const merged = merge(defaultDataStructure, nonLocalizedFields);
 
-        action.data = formatContentTypeData(
-          cleanedMerged,
-          currentLayout.contentType,
-          currentLayout.components
-        );
-      } catch (err) {
-        // Silent
-      }
+    //     const fieldsToRemove = [
+    //       'createdBy',
+    //       'updatedBy',
+    //       'publishedAt',
+    //       'id',
+    //       '_id',
+    //       'updatedAt',
+    //       'createdAt',
+    //     ];
+    //     const cleanedMerged = contentManagementUtilRemoveFieldsFromData(
+    //       merged,
+    //       currentLayout.contentType,
+    //       currentLayout.components,
+    //       fieldsToRemove
+    //     );
+    //     cleanedMerged.localizations = localizations;
 
-      return next(action);
-    };
+    //     action.data = formatContentTypeData(
+    //       cleanedMerged,
+    //       currentLayout.contentType,
+    //       currentLayout.components
+    //     );
+    //   } catch (err) {
+    //     // Silent
+    //   }
 
-    return getData();
+    //   return next(action);
+    // };
+
+    // return getData();
   };
 
 const isParsedParamUndefinedOrString = (param: ParsedQs[string]): param is undefined | string =>

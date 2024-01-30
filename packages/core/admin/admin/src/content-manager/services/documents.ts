@@ -9,7 +9,7 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 const documentApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({
     autoCloneDocument: builder.mutation<
-      Contracts.CollectionTypes.Clone.Response['data'],
+      Contracts.CollectionTypes.Clone.Response,
       Contracts.CollectionTypes.Clone.Params & { query?: string }
     >({
       query: ({ model, sourceId: id, query }) => ({
@@ -19,14 +19,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params: query,
         },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.Clone.Response) => res.data,
       invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     cloneDocument: builder.mutation<
       Contracts.CollectionTypes.Clone.Response,
       Contracts.CollectionTypes.Clone.Params & {
         data: Contracts.CollectionTypes.Clone.Request['body'];
-        params: Contracts.CollectionTypes.Clone.Request['query'];
+        params?: Contracts.CollectionTypes.Clone.Request['query'];
       }
     >({
       query: ({ model, sourceId: id, data, params }) => ({
@@ -47,7 +46,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       Contracts.CollectionTypes.Create.Response,
       Contracts.CollectionTypes.Create.Params & {
         data: Contracts.CollectionTypes.Create.Request['body'];
-        params: Contracts.CollectionTypes.Create.Request['query'];
+        params?: Contracts.CollectionTypes.Create.Request['query'];
       }
     >({
       query: ({ model, data, params }) => ({
@@ -61,24 +60,25 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     deleteDocument: builder.mutation<
-      Contracts.CollectionTypes.Delete.Response['data'],
+      Contracts.CollectionTypes.Delete.Response,
       Contracts.CollectionTypes.Delete.Params & {
         collectionType: string;
-        params: Contracts.CollectionTypes.Delete.Request['query'];
+        params?: Contracts.CollectionTypes.Delete.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, params }) => ({
         url: `/content-manager/${collectionType}/${model}/${id}`,
         method: 'DELETE',
-        params,
+        config: {
+          params,
+        },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.Delete.Response) => res.data,
       invalidatesTags: (_result, _error, { model, id }) => [
         { type: 'Document', id: `${model}_${id}` },
       ],
     }),
     deleteManyDocuments: builder.mutation<
-      Contracts.CollectionTypes.BulkDelete.Response['data'],
+      Contracts.CollectionTypes.BulkDelete.Response,
       Contracts.CollectionTypes.BulkDelete.Params &
         Contracts.CollectionTypes.BulkDelete.Request['body']
     >({
@@ -96,13 +96,17 @@ const documentApi = contentManagerApi.injectEndpoints({
      */
     getAllDocuments: builder.query<
       Contracts.CollectionTypes.Find.Response,
-      Contracts.CollectionTypes.Find.Params & Pick<Contracts.CollectionTypes.Find.Request, 'query'>
+      Contracts.CollectionTypes.Find.Params & {
+        params?: Contracts.CollectionTypes.Find.Request['query'] & {
+          [key: string]: any;
+        };
+      }
     >({
-      query: (data) => ({
-        url: `/content-manager/collection-types/${data.model}`,
+      query: ({ model, params }) => ({
+        url: `/content-manager/collection-types/${model}`,
         method: 'GET',
         config: {
-          params: data.query,
+          params,
         },
       }),
       providesTags: (result, _error, arg) => {
@@ -116,7 +120,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       },
     }),
     getDraftRelationCount: builder.query<
-      Contracts.CollectionTypes.CountDraftRelations.Response['data'],
+      Contracts.CollectionTypes.CountDraftRelations.Response,
       {
         collectionType: string;
         model: string;
@@ -136,7 +140,6 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.CountDraftRelations.Response) => res.data,
     }),
     getDocument: builder.query<
       Contracts.CollectionTypes.FindOne.Response,
@@ -172,8 +175,9 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response) =>
-        res.data,
+      transformResponse: (
+        response: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response
+      ) => response.data,
     }),
     publishDocument: builder.mutation<
       Contracts.CollectionTypes.Publish.Response,
@@ -225,7 +229,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         model: string;
         id?: string;
         data: Contracts.CollectionTypes.Update.Request['body'];
-        params: Contracts.CollectionTypes.Update.Request['query'];
+        params?: Contracts.CollectionTypes.Update.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, data, params }) => ({
@@ -249,7 +253,7 @@ const documentApi = contentManagerApi.injectEndpoints({
          * You don't pass the ID if the document is a single-type
          */
         id?: string;
-        params: Contracts.CollectionTypes.Unpublish.Request['query'];
+        params?: Contracts.CollectionTypes.Unpublish.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, params }) => ({
@@ -271,7 +275,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       },
     }),
     unpublishManyDocuments: builder.mutation<
-      Contracts.CollectionTypes.BulkUnpublish.Response['data'],
+      Contracts.CollectionTypes.BulkUnpublish.Response,
       Contracts.CollectionTypes.BulkUnpublish.Params &
         Contracts.CollectionTypes.BulkUnpublish.Request['body']
     >({
@@ -293,6 +297,7 @@ const {
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
   useGetAllDocumentsQuery,
+  useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
@@ -310,6 +315,7 @@ export {
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
   useGetAllDocumentsQuery,
+  useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
