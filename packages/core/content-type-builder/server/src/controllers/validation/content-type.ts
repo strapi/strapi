@@ -144,7 +144,7 @@ const forbiddenContentTypeNameValidator = () => {
         return true;
       }
       // compare snake case to check the actual column names that will be used in the database
-      return !reservedNames.some((reservedName) => snakeCase(reservedName) === snakeCase(value));
+      return reservedNames.every((reservedName) => snakeCase(reservedName) !== snakeCase(value));
     },
   };
 };
@@ -168,7 +168,7 @@ const nameIsAvailable = (isEdition: boolean) => {
       }
 
       // compare snake case to check the actual column names that will be used in the database
-      return !usedNames.some((usedName) => snakeCase(usedName) === snakeCase(value));
+      return usedNames.every((usedName) => snakeCase(usedName) !== snakeCase(value));
     },
   };
 };
@@ -191,7 +191,7 @@ const nameIsNotExistingCollectionName = (isEdition: boolean) => {
       }
 
       // compare snake case to check the actual column names that will be used in the database
-      return !usedNames.some((usedName) => snakeCase(usedName) === snakeCase(value));
+      return usedNames.every((usedName) => snakeCase(usedName) !== snakeCase(value));
     },
   };
 };
