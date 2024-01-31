@@ -1,5 +1,3 @@
-// NOTE: All these reserved names MUST be in camelCase, because they will also be converted to snake_case and compared against incoming values
-
 export const getReservedNames = () => {
   return {
     // use kebab case everywhere since singularName and pluralName are validated that way
@@ -11,7 +9,7 @@ export const getReservedNames = () => {
       'upload',
       'then', // https://github.com/strapi/strapi/issues/15557
     ],
-    // attributes are compared with snake_case(name), so use only one of snake_case or camelCase here
+    // attributes are compared with snake_case(name), so only snake_case is needed here and camelCase + UPPER_CASE matches will still be caught
     attributes: [
       // TODO V5: these need to come from a centralized place so we don't break things accidentally in the future
       'id',
