@@ -83,7 +83,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     },
 
     async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
-      return query.findPage({
+      const { results, pagination } = await query.findPage({
         page: 1,
         pageSize: 10,
         where: {
@@ -95,7 +95,20 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
             },
           ],
         },
+        populate: ['createdBy'],
       });
+
+      const sanitizedResults = results.map((result) => ({
+        ...result,
+        createdBy: result.createdBy
+          ? strapi.admin.services.user.sanitizeUser(result.createdBy)
+          : null,
+      }));
+
+      return {
+        results: sanitizedResults,
+        pagination,
+      };
     },
   };
 };
