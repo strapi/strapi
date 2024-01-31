@@ -76,7 +76,7 @@ const createContentAPIValidators = () => {
       await validateFields(fields, schema);
     }
 
-    if (fields) {
+    if (populate) {
       await validatePopulate(populate, schema);
     }
   };

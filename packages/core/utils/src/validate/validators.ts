@@ -135,6 +135,7 @@ const defaultValidatePopulate = curry((schema: Model, populate: unknown) => {
   if (!schema) {
     throw new Error('Missing schema in defaultValidatePopulate');
   }
+
   return pipeAsync(
     traverseQueryPopulate(
       async ({ key, value, schema, attribute }, { set }) => {
