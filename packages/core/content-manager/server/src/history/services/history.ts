@@ -81,6 +81,22 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         },
       });
     },
+
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
+      return query.findPage({
+        page: 1,
+        pageSize: 10,
+        where: {
+          $and: [
+            {
+              contentType: params.contentType,
+              relatedDocumentId: params.documentId,
+              locale: params.locale || null,
+            },
+          ],
+        },
+      });
+    },
   };
 };
 

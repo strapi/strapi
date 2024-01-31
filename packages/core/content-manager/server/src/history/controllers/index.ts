@@ -1,7 +1,10 @@
 import type { Plugin } from '@strapi/types';
+import { createHistoryVersionController } from './history-version';
 
-/**
- * The controllers will me merged with the other Content Manager controllers,
- * so we need to avoid conficts in the controller names.
- */
-export const controllers: Plugin.LoadedPlugin['controllers'] = {};
+export const controllers = {
+  'history-version': createHistoryVersionController,
+  /**
+   * Casting is needed because the types aren't aware that Strapi supports
+   * passing a controller factory as the value, instead of a controller object directly
+   */
+} as Plugin.LoadedPlugin['controllers'];
