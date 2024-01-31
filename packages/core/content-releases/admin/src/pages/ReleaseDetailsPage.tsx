@@ -89,16 +89,16 @@ const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
 `;
 
 const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.danger600};
   }
