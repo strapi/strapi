@@ -163,6 +163,17 @@ describe('Relations', () => {
 
   describe('findExisting', () => {
     test('Query mainField when mainField is listable', async () => {
+      global.strapi.plugins['content-manager'].services[
+        'permission-checker'
+      ].create.mockReturnValue({
+        cannot: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        sanitizedQuery: {
+          read: jest.fn((queryParams) => queryParams),
+        },
+      });
+
       const ctx = createContext(
         {
           params: {
