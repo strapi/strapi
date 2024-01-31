@@ -191,14 +191,12 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
         for (const entry of entries) {
           const ref = entry[idColumn.name];
 
-          if (ref !== null) {
-            yield {
-              kind,
-              relation,
-              left: { type: uid, ref: entry.id, field: fieldName },
-              right: { type: entry[typeColumn.name], ref },
-            };
-          }
+          yield {
+            kind,
+            relation,
+            left: { type: uid, ref: entry.id, field: fieldName },
+            right: { type: entry[typeColumn.name], ref },
+          };
         }
       }
     }
