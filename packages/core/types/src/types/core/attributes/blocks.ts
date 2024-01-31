@@ -56,6 +56,7 @@ export interface ListBlockNode extends BaseNode {
   type: 'list';
   format: 'ordered' | 'unordered';
   children: (ListItemInlineNode | ListBlockNode)[];
+  indentLevel?: number;
 }
 
 interface ImageBlockNode extends BaseNode {

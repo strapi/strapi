@@ -161,6 +161,8 @@ const ContentTypeFormWrapper = ({
     };
   }, [dispatch]);
 
+  const validParams = React.useMemo(() => buildValidGetParams(query), [query]);
+
   React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
@@ -175,7 +177,7 @@ const ContentTypeFormWrapper = ({
       try {
         const { data } = await fetchClient.get(requestURL, {
           cancelToken: source.token,
-          params: buildValidGetParams(query),
+          params: validParams,
         });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
@@ -235,7 +237,7 @@ const ContentTypeFormWrapper = ({
     redirectionLink,
     toggleNotification,
     isSingleType,
-    query,
+    validParams,
   ]);
 
   const displayErrors = React.useCallback(
@@ -316,7 +318,7 @@ const ContentTypeFormWrapper = ({
             : `/content-manager/${collectionType}/${slug}`,
           isCloning ? restBody : body,
           {
-            params: query,
+            params: validParams,
           }
         );
 
@@ -360,7 +362,7 @@ const ContentTypeFormWrapper = ({
       put,
       post,
       slug,
-      query,
+      validParams,
       trackUsage,
       toggleNotification,
       setCurrentStep,
@@ -411,7 +413,11 @@ const ContentTypeFormWrapper = ({
       const { data } = await post<Contracts.CollectionTypes.Publish.Response>(
         isSingleType
           ? `/content-manager/${collectionType}/${slug}/actions/publish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`,
+        undefined,
+        {
+          params: validParams,
+        }
       );
 
       trackUsage('didPublishEntry');
@@ -442,6 +448,7 @@ const ContentTypeFormWrapper = ({
     collectionType,
     slug,
     id,
+    validParams,
     cleanReceivedData,
     toggleNotification,
     displayErrors,
@@ -459,7 +466,7 @@ const ContentTypeFormWrapper = ({
           AxiosResponse<Contracts.CollectionTypes.Update.Response>,
           Contracts.CollectionTypes.Update.Request['body']
         >(`/content-manager/${collectionType}/${slug}/${id}`, body, {
-          params: query,
+          params: validParams,
         });
 
         trackUsage('didEditEntry', trackerProperty);
@@ -495,6 +502,7 @@ const ContentTypeFormWrapper = ({
       collectionType,
       slug,
       id,
+      validParams,
       toggleNotification,
       queryClient,
       cleanReceivedData,
@@ -511,7 +519,11 @@ const ContentTypeFormWrapper = ({
       const { data } = await post<Contracts.CollectionTypes.Unpublish.Response>(
         isSingleType
           ? `/content-manager/${collectionType}/${slug}/actions/unpublish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`,
+        undefined,
+        {
+          params: validParams,
+        }
       );
 
       trackUsage('didUnpublishEntry');
@@ -539,6 +551,7 @@ const ContentTypeFormWrapper = ({
     collectionType,
     slug,
     id,
+    validParams,
     toggleNotification,
     cleanReceivedData,
     displayErrors,
