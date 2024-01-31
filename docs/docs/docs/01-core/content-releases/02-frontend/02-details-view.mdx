@@ -1,0 +1,42 @@
+---
+title: Release details view
+tags:
+  - content-releases
+  - tech design
+---
+
+### Overview:
+
+The details-view offers a comprehensive presentation of all entries linked to the release. These entries are meticulously organized into tables based on various options. Each entry's status is clearly indicated, providing the ability to edit or remove entries from the release.
+
+On this page, users with the appropriate permissions can perform key actions such as publishing the release, editing its details, or deleting it.
+
+#### Grouping entries:
+
+Entries associated with a release can be systematically organized in tables using various grouping options:
+
+- <strong>by Content-Types</strong>: Organize entries by collections.
+- <strong>by Locales</strong>: Group entries based on locale.
+- <strong>by Actions</strong>: Categorize entries by action to perform, making it easier to discern
+  between entries to publish and entries to unpublish.
+
+#### Edit a release:
+
+Users have the flexibility to change the name of a release, by simply clicking on the "More" button, the Edit button is revealed (enabled if the user role has `plugin::content-releases.update` permission).
+The Edit button opens a modal, enabling users to modify the release name. To save the changes, the new name must be unique, non-empty, and distinctly modified.
+
+#### Delete a release:
+
+Deleting a release is a straightforward process for users. By clicking on the "More" button, the "Delete" button is exposed (enabled if the user role has `plugin::content-releases.delete` permission).
+
+Upon activation, the "Delete" button triggers a confirmation modal, prompting the user to confirm the deletion.
+
+#### Managing Entry Status in a Release:
+
+Each entry within a release is assigned a status, indicating its readiness for actions such as Publish/Unpublish or any validation errors present. In cases where errors are detected, users can navigate to the "Three dots" menu and select the "Edit entry" button to access the CM edit view.
+
+Within the CM edit view, users can resolve any identified errors. Upon completion, clicking the "Refresh" button updates the status of every individual entry, reflecting the changes made.
+
+#### Publish a release:
+
+To execute the release of a content release, users can simply click on the "Publish" button (shown if you have the "plugin::content-releases.publish" permission). If any of the entries exhibit validation errors, the "Publish" action triggers a notification to alert users of the errors.
