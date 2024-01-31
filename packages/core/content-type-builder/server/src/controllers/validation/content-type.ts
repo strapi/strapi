@@ -140,13 +140,11 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test(value: unknown) {
-      return !(
-        value &&
-        reservedNames.some((reserved) => {
-          // we compare snake case to check the actual column names that will be used in the database
-          return snakeCase(reserved) === snakeCase(value as string);
-        })
-      );
+      if (typeof value !== 'string') {
+        return true;
+      }
+      // compare snake case to check the actual column names that will be used in the database
+      return !reservedNames.some((reservedName) => snakeCase(reservedName) === snakeCase(value));
     },
   };
 };
@@ -164,10 +162,13 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.some((reserved) => {
-        // we compare snake case to check the actual column names that will be used in the database
-        return snakeCase(reserved) === snakeCase(value as string);
-      });
+      // ignore if not a string (will be caught in another validator)
+      if (typeof value !== 'string') {
+        return true;
+      }
+
+      // compare snake case to check the actual column names that will be used in the database
+      return !usedNames.some((usedName) => snakeCase(usedName) === snakeCase(value));
     },
   };
 };
@@ -184,10 +185,13 @@ const nameIsNotExistingCollectionName = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.some((reserved) => {
-        // we compare snake case to check the actual column names that will be used in the database
-        return snakeCase(reserved as string) === snakeCase(value as string);
-      });
+      // ignore if not a string (will be caught in another validator)
+      if (typeof value !== 'string') {
+        return true;
+      }
+
+      // compare snake case to check the actual column names that will be used in the database
+      return !usedNames.some((usedName) => snakeCase(usedName) === snakeCase(value));
     },
   };
 };
