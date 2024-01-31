@@ -2,6 +2,7 @@
 
 module.exports = ({ schema, key, attribute }, { remove }) => {
   if (
+    attribute &&
     attribute.type === 'relation' &&
     attribute.target === 'plugin::users-permissions.user' &&
     schema.uid === 'plugin::users-permissions.role'
