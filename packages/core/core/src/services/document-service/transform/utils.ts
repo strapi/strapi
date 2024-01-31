@@ -1,4 +1,6 @@
 import { Common } from '@strapi/types';
+import { traverse } from '@strapi/utils';
+
 import { IdMap } from './id-map';
 
 export const switchIdForDocumentId = (output: Record<string, any>) => {
@@ -16,52 +18,55 @@ export const transformFieldsOrSort = (input: string[] | string): string[] | stri
   return input.replace('id', 'documentId');
 };
 
-export const transformFiltersOrPopulate = (
+// TODO what if UID is undefined? throw?
+export const transformFilters = async (
   idMap: IdMap,
-  obj: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft: boolean }
-): Record<string, any> => {
-  const transformedObj: Record<string, any> = {};
-
-  for (const key of Object.keys(obj)) {
-    if (key === 'id') {
-      transformedObj.documentId = obj[key];
-    } else if (['filters', 'populate'].includes(key)) {
-      transformedObj[key] = transformFiltersOrPopulate(idMap, obj[key], opts);
-    } else if (key === 'fields') {
-      transformedObj[key] = transformFieldsOrSort(obj[key]);
-    } else {
-      const attribute = strapi.getModel(opts.uid).attributes[key];
-
-      if (attribute && attribute.type === 'relation') {
-        // For relational attributes, use idMap to transform the ids
-        if (Array.isArray(obj[key])) {
-          // @ts-expect-error TODO ensure that entry is an object ??
-          transformedObj[key] = obj[key].map((entry) =>
-            transformFiltersOrPopulate(idMap, entry, {
-              ...opts,
-              // @ts-expect-error TODO TS
-              uid: attribute.target,
-            })
-          );
-        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-          transformedObj[key] = transformFiltersOrPopulate(idMap, obj[key], {
-            ...opts,
-            // @ts-expect-error TODO TS
-            uid: attribute.target,
-          });
-        } else if (typeof obj[key] === 'string') {
-          // @ts-expect-error TODO TS
-          const entryId = idMap.get(attribute.target, obj[key], opts.locale);
-          if (entryId) {
-            transformedObj[key] = entryId;
-          }
-        }
-      } else {
-        transformedObj[key] = obj[key];
-      }
-    }
+  data: Record<string, any>,
+  opts: {
+    uid: Common.UID.Schema;
+    locale?: string | null;
   }
+) => {
+  return traverse.traverseQueryFilters(
+    async ({ attribute, key, value, path, schema }, { set, remove }) => {
+      if (!attribute) {
+        return;
+      }
 
-  return transformedObj;
+      // In order to correctly ignore nested keys that are not relations
+      // we keep track of the parent key within the path
+      // Ensuring that the parentKey is a relation of the current schema
+      // or the current schema itself
+      let parentKey: string | undefined;
+      if (typeof path.raw === 'string') {
+        const keys = path.raw.split('.');
+        parentKey = keys?.[keys.length - 2];
+
+        // Check if parentKey is an array and remove the indexing to get the real parentKey
+        if (parentKey && parentKey.endsWith(']')) {
+          parentKey = parentKey.slice(0, parentKey.lastIndexOf('['));
+        }
+      }
+
+      if (
+        parentKey &&
+        // TODO Can we rely on this match?
+        ![schema?.info?.singularName, schema?.info?.pluralName].includes(parentKey) &&
+        schema.attributes[parentKey]?.type !== 'relation'
+      ) {
+        return;
+      }
+
+      if (key === 'id') {
+        remove(key);
+        set('documentId', value as any);
+      } else if (key === 'filters') {
+        set(key, await transformFilters(idMap, value as any, opts));
+      } else if (key === 'fields') {
+        set(key, transformFieldsOrSort(value as any) as any);
+      }
+    },
+    { schema: strapi.getModel(opts.uid) },
+    data
+  );
 };

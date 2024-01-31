@@ -36,13 +36,13 @@ async function transformParamsDocumentId(
 
   let filters = input.filters;
   if (input.filters) {
-    filters = transformFiltersOrPopulate(idMap, input.filters, { ...opts, uid });
+    filters = await transformFiltersOrPopulate(idMap, input.filters, { ...opts, uid });
   }
 
-  let populate = input.populate;
-  if (input.populate) {
-    populate = transformFiltersOrPopulate(idMap, input.populate, { ...opts, uid });
-  }
+  // let populate = input.populate;
+  // if (input.populate) {
+  //   populate = await transformFiltersOrPopulate(idMap, input.populate, { ...opts, uid });
+  // }
 
   let fields = input.fields;
   if (input.fields) {
