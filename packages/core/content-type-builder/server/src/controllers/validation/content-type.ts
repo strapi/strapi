@@ -176,7 +176,7 @@ const nameIsAvailable = (isEdition: boolean) => {
 const nameIsNotExistingCollectionName = (isEdition: boolean) => {
   const usedNames = Object.keys(strapi.contentTypes).map(
     (key) => strapi.contentTypes[key as UID.ContentType].collectionName
-  );
+  ) as string[];
 
   return {
     name: 'nameAlreadyUsed',
