@@ -1,0 +1,47 @@
+---
+title: unstable_useDocument
+description: API reference for the useDocument hook
+tags:
+  - admin
+  - hooks
+  - document
+  - validations
+---
+
+:::caution
+This hook is not stable and **likely to change**. Use at your own risk.
+:::
+
+A hook that returns utilities to work with documents.
+
+## Usage
+
+```
+function Component() {
+  const { validate } = unstable_useDocument();
+}
+```
+
+At the moment, useDocument only returns a validate function.
+
+### `validate()`
+
+```ts
+const validate(
+  entry: Entity,
+  {
+    contentType: Schema.ContentType,
+    components: {
+      [key: Schema.Component['uid']]: Schema.Component;
+    },
+    isCreatingEntry?: boolean;
+  }
+): {
+  errors: { [key: string]: TranslationMessage }
+}
+```
+
+With this function, you can apply the same validations we use in the admin. Please be aware that for this function to work, you need to ensure the following:
+
+1. If you are validating an entry with relations/components/dynamic zones then it **MUST** be populated. Otherwise, the validations will pass even if there is an error on one populated field.
+2. The correct schema for the contentType and the schemas for any components related to that content type are mandatory for this hook to function correctly.

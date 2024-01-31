@@ -234,6 +234,17 @@ describe('transactions', () => {
       expect(count).toEqual(1);
     });
 
+    test('onCommit hook works with nested transactions', async () => {
+      let count = 0;
+      await strapi.db.transaction(({ onCommit, onRollback }) => {
+        onCommit(() => count++);
+        return strapi.db.transaction(({ onCommit, onRollback }) => {
+          onCommit(() => count++);
+        });
+      });
+      expect(count).toEqual(2);
+    });
+
     test('onRollback hook works', async () => {
       let count = 0;
       try {
@@ -245,6 +256,22 @@ describe('transactions', () => {
         // do nothing
       }
       expect(count).toEqual(1);
+    });
+
+    test('onRollback hook works with nested transactions', async () => {
+      let count = 0;
+      try {
+        await strapi.db.transaction(({ onRollback }) => {
+          onRollback(() => count++);
+          return strapi.db.transaction(({ onRollback }) => {
+            onRollback(() => count++);
+            throw new Error('test');
+          });
+        });
+      } catch (e) {
+        // do nothing
+      }
+      expect(count).toEqual(2);
     });
   });
 

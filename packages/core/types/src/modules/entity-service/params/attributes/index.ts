@@ -29,7 +29,7 @@ export type ScalarValues = GetValue<
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
-  | Attribute.UID<Common.UID.Schema>
+  | Attribute.UID
   // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
   //      The member below has been commented on purpose to avoid adding it back without noticing.
   // | Attribute.Password
