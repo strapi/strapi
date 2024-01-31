@@ -90,7 +90,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
           return;
         }
 
-        if (!isScalarAttribute(attribute) && isEmpty(value)) {
+        if ((!attribute || !isScalarAttribute(attribute)) && isEmpty(value)) {
           throwInvalidParam({ key });
         }
       },

@@ -76,7 +76,7 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQuerySort(removePassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
-          if (!isScalarAttribute(attribute) && isEmpty(value)) {
+          if ((!attribute || !isScalarAttribute(attribute)) && isEmpty(value)) {
             remove(key);
           }
         },

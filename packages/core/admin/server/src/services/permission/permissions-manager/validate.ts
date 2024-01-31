@@ -69,7 +69,7 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQuerySort(throwPassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }) => {
-          if (!isScalarAttribute(attribute) && isEmpty(value)) {
+          if ((!attribute || !isScalarAttribute(attribute)) && isEmpty(value)) {
             throwInvalidParam({ key });
           }
         },
