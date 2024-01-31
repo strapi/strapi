@@ -24,7 +24,7 @@ export interface VisitorOptions {
   value: unknown;
   schema: Model;
   key: string;
-  attribute: AnyAttribute;
+  attribute: AnyAttribute | undefined;
   path: Path;
 }
 

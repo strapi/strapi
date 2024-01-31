@@ -1,6 +1,5 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 import type { AnyAttribute, Model, Data } from './types';
-import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
 
@@ -9,7 +8,7 @@ export interface VisitorOptions {
   schema: Model;
   key: string;
   value: Data[keyof Data];
-  attribute: AnyAttribute;
+  attribute: AnyAttribute | undefined;
   path: Path;
 }
 
@@ -24,6 +23,8 @@ export interface TraverseOptions {
   path?: Path;
   schema: Model;
 }
+
+const isIDAttribute = (str: string): str is 'id' => str === 'id';
 
 const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
   const targetSchema = strapi.getModel(entry.__type);
@@ -78,10 +79,11 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     // Retrieve the attribute definition associated to the key from the schema
-    const attribute = schema.attributes[key];
+    const attribute = schema.attributes[key] as AnyAttribute | undefined;
 
     // If the attribute doesn't exist within the schema, ignore it
-    if (isNil(attribute)) {
+    // An exception is made for 'id' since it's not an attribute per se, but we still want to run visitors on it
+    if (isNil(attribute) && !isIDAttribute(key)) {
       continue;
     }
 
@@ -89,7 +91,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
 
     newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
 
-    if (!isNil(attribute)) {
+    // If key is 'id', then adds it to the attribute path anyway
+    if (!isNil(attribute) || isIDAttribute(key)) {
       newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
     }
 
@@ -113,7 +116,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (isRelationalAttribute(attribute)) {
+    if (attribute?.type === 'relation') {
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
       const method = isMorphRelation
@@ -133,7 +136,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (isMediaAttribute(attribute)) {
+    if (attribute?.type === 'media') {
       // need to update copy
       if (isArray(value)) {
         const res = new Array(value.length);
@@ -148,7 +151,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (attribute.type === 'component') {
+    if (attribute?.type === 'component') {
       const targetSchema = strapi.getModel(attribute.component);
 
       if (isArray(value)) {
@@ -164,7 +167,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (attribute.type === 'dynamiczone' && isArray(value)) {
+    if (attribute?.type === 'dynamiczone' && isArray(value)) {
       const res = new Array(value.length);
       for (let i = 0; i < value.length; i += 1) {
         res[i] = await visitDynamicZoneEntry(visitor, newPath, value[i]);

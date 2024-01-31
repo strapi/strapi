@@ -34,7 +34,7 @@ const createContentAPISanitizers = () => {
     const nonWritableAttributes = getNonWritableAttributes(schema);
 
     const transforms = [
-      // Remove non writable attributes
+      // Remove non-writable attributes
       traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema }),
     ];
 
