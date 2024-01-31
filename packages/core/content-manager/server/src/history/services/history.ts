@@ -88,14 +88,13 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         pageSize: 10,
         where: {
           $and: [
-            {
-              contentType: params.contentType,
-              relatedDocumentId: params.documentId,
-              locale: params.locale || null,
-            },
+            { contentType: params.contentType },
+            { relatedDocumentId: params.documentId },
+            { locale: params.locale || null },
           ],
         },
         populate: ['createdBy'],
+        orderBy: [{ createdAt: 'desc' }],
       });
 
       const sanitizedResults = results.map((result) => ({

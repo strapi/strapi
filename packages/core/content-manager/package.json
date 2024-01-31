@@ -56,14 +56,10 @@
     "qs": "6.11.1"
   },
   "devDependencies": {
-    "@strapi/admin": "4.19.0",
     "@strapi/pack-up": "workspace:*",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "koa-body": "4.2.0"
-  },
-  "peerDependencies": {
-    "@strapi/admin": "4.19.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
