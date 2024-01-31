@@ -5,7 +5,10 @@ import { createIdMap } from './id-map';
 import { extractDataIds as extractDataRelationIds } from './relations/extract/data-ids';
 import { transformDataIdsVisitor as transformRelationDataIds } from './relations/transform/data-ids';
 import { transformOutputIds as transformRelationOutputIds } from './relations/transform/output-ids';
-import { switchIdForDocumentId, transformFieldsOrSort, transformFiltersOrPopulate } from './utils';
+import { switchIdForDocumentId } from './utils';
+import { transformFilters } from './filters';
+import { transformSort } from './sort';
+import { transformFields } from './fields';
 
 /**
  * Transform input of a query to map document ids to entity ids.
@@ -36,22 +39,22 @@ async function transformParamsDocumentId(
 
   let filters = input.filters;
   if (input.filters) {
-    filters = await transformFiltersOrPopulate(idMap, input.filters, { ...opts, uid });
+    filters = await transformFilters(input.filters, { ...opts, uid });
   }
 
-  // let populate = input.populate;
+  const populate = input.populate;
   // if (input.populate) {
   //   populate = await transformFiltersOrPopulate(idMap, input.populate, { ...opts, uid });
   // }
 
   let fields = input.fields;
   if (input.fields) {
-    fields = transformFieldsOrSort(input.fields);
+    fields = transformFields(input.fields);
   }
 
   let sort = input.sort;
   if (input.sort) {
-    sort = transformFieldsOrSort(input.sort);
+    sort = transformSort(input.sort);
   }
 
   return {
