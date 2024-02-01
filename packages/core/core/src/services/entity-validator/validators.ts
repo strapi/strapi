@@ -180,7 +180,7 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
       status: options.isDraft ? 'draft' : 'published',
       filters: {
         [updatedAttribute.name]: valueToCheck,
-        ...(isPublish && entity?.id ? { id: { $ne: entity.id } } : {}),
+        ...(entity?.id ? { id: { $ne: entity.id } } : {}),
       },
     });
 
