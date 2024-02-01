@@ -73,7 +73,7 @@ export type Any =
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
-  | Attribute.UID<Common.UID.Schema>;
+  | Attribute.UID;
 
 export type PopulatableKind = Extract<
   Attribute.Kind,

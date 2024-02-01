@@ -69,7 +69,10 @@ const createDocumentEngine = ({
     )(params || {});
 
     if (kind === 'singleType') {
-      return db.query(uid).findOne(query);
+      return db
+        .query(uid)
+        .findOne(query)
+        .then((doc) => transformOutputDocumentId(uid, doc));
     }
 
     return db
