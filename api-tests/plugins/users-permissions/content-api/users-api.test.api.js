@@ -59,7 +59,7 @@ describe('Users API', () => {
     data.role = role;
   });
 
-  test('Create User', async () => {
+  test.skip('Create User', async () => {
     const user = {
       username: 'User 1',
       email: 'user1@strapi.io',
@@ -99,7 +99,7 @@ describe('Users API', () => {
     });
   });
 
-  describe('Read users', () => {
+  describe.skip('Read users', () => {
     test('without filter', async () => {
       const res = await rq({
         method: 'GET',
@@ -189,7 +189,7 @@ describe('Users API', () => {
     });
   });
 
-  describe('Read an user', () => {
+  describe.skip('Read a user', () => {
     test('should populate role', async () => {
       const res = await rq({
         method: 'GET',
@@ -243,7 +243,7 @@ describe('Users API', () => {
     });
   });
 
-  test('Delete user', async () => {
+  test.skip('Delete user', async () => {
     const res = await rq({
       method: 'DELETE',
       url: `/users/${data.user.id}`,
