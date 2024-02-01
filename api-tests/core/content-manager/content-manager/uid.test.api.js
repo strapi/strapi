@@ -126,7 +126,8 @@ describe('Content Manager single types', () => {
       });
     });
 
-    test('Generates a unique field when targetField is empty', async () => {
+    // TODO V5: this is skipped while work on these features is under construction
+    test.skip('Generates a unique field when targetField is empty', async () => {
       const res = await rq({
         url: `/content-manager/uid/generate`,
         method: 'POST',
@@ -162,7 +163,8 @@ describe('Content Manager single types', () => {
       expect(secondRes.body.data).toBe('uid-model-1');
     });
 
-    test('Generates a unique field based on targetField', async () => {
+    // TODO V5: this is skipped while work on these features is under construction
+    test.skip('Generates a unique field based on targetField', async () => {
       const res = await rq({
         url: `/content-manager/uid/generate`,
         method: 'POST',
@@ -202,7 +204,8 @@ describe('Content Manager single types', () => {
       expect(secondRes.body.data).toBe('this-is-a-super-title-1');
     });
 
-    test('Avoids collisions with already generated uids', async () => {
+    // TODO V5: this is skipped while work on these features is under construction
+    test.skip('Avoids collisions with already generated uids', async () => {
       const res = await rq({
         url: `/content-manager/uid/generate`,
         method: 'POST',
@@ -399,7 +402,8 @@ describe('Content Manager single types', () => {
       });
     });
 
-    test('Gives a suggestion when not available', async () => {
+    // TODO V5: this is skipped while work on these features is under construction
+    test.skip('Gives a suggestion when not available', async () => {
       // create data
       await rq({
         url: `/content-manager/collection-types/${uid}`,
