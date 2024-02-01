@@ -471,7 +471,7 @@ interface CreateButtonProps extends Pick<ButtonProps, 'variant'> {}
 const CreateButton = ({ variant }: CreateButtonProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [{ rawQuery }] = useQueryParams();
+  const [{ query }] = useQueryParams<{ plugins: object }>();
 
   return (
     <Button
@@ -485,7 +485,7 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
       // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
         pathname: 'create',
-        search: rawQuery,
+        search: stringify({ plugins: query.plugins }),
       }}
     >
       {formatMessage({

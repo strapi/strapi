@@ -10013,7 +10013,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
-    "@strapi/admin": "npm:4.19.0"
+    "@strapi/admin": "npm:4.20.0"
     "@strapi/design-system": "npm:1.14.1"
     "@strapi/helper-plugin": "npm:4.20.0"
     "@strapi/icons": "npm:1.14.1"

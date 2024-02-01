@@ -1,5 +1,7 @@
 export * from './render';
 
+export { useInjectReducer } from './hooks/useInjectReducer';
+
 export type { Store } from './core/store/configure';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
 

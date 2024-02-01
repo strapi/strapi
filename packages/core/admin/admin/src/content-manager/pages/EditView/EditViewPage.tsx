@@ -20,21 +20,21 @@ import {
   useQueryParams,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useEnterprise } from '../../../hooks/useEnterprise';
 import { useOnce } from '../../../hooks/useOnce';
 import { Form } from '../../components/Form';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
 
 import { Header } from './components/Header';
-import { InformationBoxCE } from './components/InformationBoxCE';
 import { InputRenderer } from './components/InputRenderer';
+import { Panels } from './components/Panels';
 import { transformDocument } from './utils/data';
 import { createDefaultForm } from './utils/forms';
 
@@ -47,17 +47,9 @@ import { createDefaultForm } from './utils/forms';
 
 const EditViewPage = () => {
   const location = useLocation();
+  const { state = 'draft' } = useParams<{ state: 'draft' | 'published' }>();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const Information = useEnterprise(
-    InformationBoxCE,
-    async () =>
-      (
-        await import(
-          '../../../../../ee/admin/src/content-manager/pages/EditView/components/InformationBoxEE'
-        )
-      ).InformationBoxEE
-  );
 
   useOnce(() => {
     /**
@@ -94,11 +86,14 @@ const EditViewPage = () => {
    */
   const isCreatingDocument = !id && !isSingleType;
 
-  const isLoading = isLoadingActionsRBAC || isLoadingDocument;
-
   const {
+    isLoading: isLoadingLayout,
     edit: { layout },
   } = useDocumentLayout(model);
+
+  const { isLazyLoading } = useLazyComponents([]);
+
+  const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   /**
    * Here we prepare the form for editing, we need to:
@@ -119,8 +114,7 @@ const EditViewPage = () => {
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, schema, components]);
 
-  // wait until the EE component is fully loaded before rendering, to prevent flickering
-  if (/*isLazyLoading ||*/ !Information || isLoading) {
+  if (isLoading) {
     return (
       <Main aria-busy={true}>
         <LoadingIndicatorPage />
@@ -213,6 +207,9 @@ const EditViewPage = () => {
                       );
                     })}
                   </Flex>
+                </GridItem>
+                <GridItem col={3} s={12}>
+                  <Panels activeTab={state} />
                 </GridItem>
               </Grid>
             </Form>
