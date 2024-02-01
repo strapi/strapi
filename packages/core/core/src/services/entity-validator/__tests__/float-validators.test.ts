@@ -178,7 +178,12 @@ describe('Float validator', () => {
       await validator(5);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrFloatUnique: 5 },
+        filters: {
+          attrFloatUnique: 5,
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });
