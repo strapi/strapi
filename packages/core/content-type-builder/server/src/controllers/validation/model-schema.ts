@@ -47,6 +47,10 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
             return forbiddenValidator();
           }
 
+          if (isConflictingKey(key, attributes)) {
+            return conflictingKeysValidator(key);
+          }
+
           if (attribute.type === 'relation') {
             return getRelationValidator(attribute, relations).test(isValidKey(key));
           }
@@ -64,12 +68,23 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
   });
 };
 
+const isConflictingKey = (key: string, attributes: Record<string, any>) => {
+  const snakeCaseKey = snakeCase(key);
+
+  return Object.keys(attributes).some((existingKey) => {
+    return snakeCase(existingKey) === snakeCaseKey;
+  });
+};
+
 const isForbiddenKey = (key: string) => {
-  return [
+  const snakeCaseKey = snakeCase(key);
+  const reservedNames = [
     ...FORBIDDEN_ATTRIBUTE_NAMES,
     ...getService('builder').getReservedNames().attributes,
-  ].some((reserved) => {
-    return snakeCase(reserved) === snakeCase(key as string);
+  ];
+
+  return reservedNames.some((reserved) => {
+    return snakeCase(reserved) === snakeCaseKey;
   });
 };
 
@@ -82,6 +97,14 @@ const forbiddenValidator = () => {
   return yup.mixed().test({
     name: 'forbiddenKeys',
     message: `Attribute keys cannot be one of ${reservedNames.join(', ')}`,
+    test: () => false,
+  });
+};
+
+const conflictingKeysValidator = (key: string) => {
+  return yup.mixed().test({
+    name: 'conflictingKeys',
+    message: `Attribue ${key} conflicts with an existing key`,
     test: () => false,
   });
 };
