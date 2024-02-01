@@ -182,7 +182,7 @@ jobs:
       - name: Run E2E tests
         run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-trace
@@ -260,7 +260,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
