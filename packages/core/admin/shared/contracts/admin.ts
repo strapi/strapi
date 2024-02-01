@@ -172,6 +172,13 @@ export interface ReviewWorkflowsFeature {
   options?: { numberOfWorkflows: number | null; stagesPerWorkflow: number | null };
 }
 
+export interface ContentReleasesFeature {
+  name: 'cms-content-releases';
+  options?: {
+    maximumReleases: number;
+  };
+}
+
 /**
  * TODO: this response needs refactoring because we're mixing the admin seat limit info with
  * regular EE feature info.
@@ -185,7 +192,7 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature)[];
+      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature | ContentReleasesFeature)[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
       permittedSeats: number;
