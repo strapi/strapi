@@ -72,6 +72,7 @@ const isConflictingKey = (key: string, attributes: Record<string, any>) => {
   const snakeCaseKey = snakeCase(key);
 
   return Object.keys(attributes).some((existingKey) => {
+    if (existingKey === key) return false; // don't compare against itself
     return snakeCase(existingKey) === snakeCaseKey;
   });
 };
