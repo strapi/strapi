@@ -14,7 +14,7 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
 
 interface ValidatorOptions {
   isDraft: boolean;
-  locale: string;
+  locale?: string;
 }
 
 /* Validator utils */
