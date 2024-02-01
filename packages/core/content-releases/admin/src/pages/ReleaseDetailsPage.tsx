@@ -9,7 +9,6 @@ import {
   IconButton,
   Link,
   Main,
-  Popover,
   Tr,
   Td,
   Typography,
@@ -19,7 +18,7 @@ import {
   Icon,
   Tooltip,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   LoadingIndicatorPage,
@@ -108,13 +107,13 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-interface PopoverButtonProps {
+interface MenuButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   disabled?: boolean;
   children: React.ReactNode;
 }
 
-const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
+const MenuButton = ({ onClick, disabled, children }: MenuButtonProps) => {
   return (
     <StyledFlex
       paddingTop={2}
@@ -229,8 +228,6 @@ export const ReleaseDetailsLayout = ({
 }: ReleaseDetailsLayoutProps) => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
-  const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
-  const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const {
     data,
     isLoading: isLoadingDetails,
@@ -247,15 +244,6 @@ export const ReleaseDetailsLayout = ({
   const { trackUsage } = useTracking();
 
   const release = data?.data;
-
-  const handleTogglePopover = () => {
-    setIsPopoverVisible((prev) => !prev);
-  };
-
-  const openReleaseModal = () => {
-    toggleEditReleaseModal();
-    handleTogglePopover();
-  };
 
   const handlePublishRelease = async () => {
     const response = await publishRelease({ id: releaseId });
@@ -290,11 +278,6 @@ export const ReleaseDetailsLayout = ({
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-  };
-
-  const openWarningConfirmDialog = () => {
-    toggleWarningSubmit();
-    handleTogglePopover();
   };
 
   const handleRefresh = () => {
@@ -353,26 +336,31 @@ export const ReleaseDetailsLayout = ({
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <IconButton
-                label={formatMessage({
-                  id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release actions',
-                })}
-                ref={moreButtonRef}
-                onClick={handleTogglePopover}
-              >
-                <More />
-              </IconButton>
-              {isPopoverVisible && (
-                <Popover
-                  source={moreButtonRef}
-                  placement="bottom-end"
-                  onDismiss={handleTogglePopover}
-                  spacing={4}
-                  minWidth="242px"
-                >
+              <Menu.Root>
+                {/* 
+                  TODO Fix in the DS
+                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
+                */}
+                <Menu.Trigger
+                  as={IconButton}
+                  paddingLeft={2}
+                  paddingRight={2}
+                  aria-label={formatMessage({
+                    id: 'content-releases.header.actions.open-release-actions',
+                    defaultMessage: 'Release actions',
+                  })}
+                  // @ts-expect-error See above
+                  icon={<More />}
+                  variant="tertiary"
+                />
+                {/*
+                  TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
+                  Refactor this once fixed in the DS
+                */}
+                <Menu.Content top={1} popoverPlacement="bottom-end">
                   <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                    <PopoverButton disabled={!canUpdate} onClick={openReleaseModal}>
+                    <MenuButton disabled={!canUpdate} onClick={toggleEditReleaseModal}>
                       <PencilIcon />
                       <Typography ellipsis>
                         {formatMessage({
@@ -380,8 +368,8 @@ export const ReleaseDetailsLayout = ({
                           defaultMessage: 'Edit',
                         })}
                       </Typography>
-                    </PopoverButton>
-                    <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
+                    </MenuButton>
+                    <MenuButton disabled={!canDelete} onClick={toggleWarningSubmit}>
                       <TrashIcon />
                       <Typography ellipsis textColor="danger600">
                         {formatMessage({
@@ -389,7 +377,7 @@ export const ReleaseDetailsLayout = ({
                           defaultMessage: 'Delete',
                         })}
                       </Typography>
-                    </PopoverButton>
+                    </MenuButton>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
@@ -415,8 +403,8 @@ export const ReleaseDetailsLayout = ({
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
-                </Popover>
-              )}
+                </Menu.Content>
+              </Menu.Root>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',
