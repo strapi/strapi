@@ -3,6 +3,9 @@ import { setupServer } from 'msw/node';
 
 import pluginId from '../pluginId';
 
+// Jest seems to ignore testTimeouts set in config in projects: https://github.com/jestjs/jest/issues/9696
+jest.setTimeout(60000);
+
 const handlers = [
   // Mock get role route
   rest.get(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
