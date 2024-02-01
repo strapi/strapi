@@ -46,7 +46,7 @@ interface Plugin {
     string,
     Record<string, Array<{ name: string; Component: React.ComponentType }>>
   >;
-  initializer: React.ComponentType<{ setPlugin(pluginId: string): void }>;
+  initializer: React.ComponentType<{ setPlugin(pluginId: string): void }> | null;
   getInjectedComponents: (
     containerName: string,
     blockName: string

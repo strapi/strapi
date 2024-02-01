@@ -747,6 +747,7 @@
   "content-manager.components.uid.unavailable": "Unavailable",
   "content-manager.containers.edit.tabs.draft": "draft",
   "content-manager.containers.edit.tabs.published": "published",
+  "content-manager.containers.edit.panels.default.title": "Entry",
   "content-manager.containers.Edit.Link.Layout": "Configure the layout",
   "content-manager.containers.Edit.Link.Model": "Edit the Collection-Type",
   "content-manager.containers.Edit.addAnItem": "Add an item...",
