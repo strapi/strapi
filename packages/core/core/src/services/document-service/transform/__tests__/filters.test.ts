@@ -89,12 +89,20 @@ describe('transformFilters', () => {
   it('should handle complex nested structures, ignoring nested non relational keys', async () => {
     const input = {
       relatedProducts: {
-        categories: [{ id: 'complex1' }, { someKey: { id: 'complex2' } }],
+        categories: [
+          { id: 'complex1' },
+          { someKey: { id: 'complex2' } },
+          { documentId: 'complex3' },
+        ],
       },
     };
     const expected = {
       relatedProducts: {
-        categories: [{ documentId: 'complex1' }, { someKey: { id: 'complex2' } }],
+        categories: [
+          { documentId: 'complex1' },
+          { someKey: { id: 'complex2' } },
+          { documentId: 'complex3' },
+        ],
       },
     };
 

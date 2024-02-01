@@ -1,47 +1,57 @@
 import { Common } from '@strapi/types';
 import { traverse } from '@strapi/utils';
+import { type ID } from './relations/utils/types';
 import { transformFields } from './fields';
 
-export const transformFilters = async (
-  data: Record<string, any>,
-  opts: {
-    uid: Common.UID.Schema;
-    locale?: string | null;
+interface Data {
+  id?: ID | object;
+  documentId?: ID | object;
+  [key: string]: any;
+}
+
+interface Options {
+  uid: Common.UID.Schema;
+  locale?: string | null;
+}
+
+export const transformFilters = async (data: Data, opts: Options) => {
+  // Before doing the filters traversal change any top level 'id' properties to 'documentId'
+  if ('id' in data) {
+    data.documentId = data.id;
+    delete data.id;
   }
-) => {
+
   return traverse.traverseQueryFilters(
-    async ({ attribute, key, value, path, schema }, { set, remove }) => {
-      if (!attribute) {
+    async ({ attribute, key, value }, { set }) => {
+      if (!attribute || !value) {
         return;
       }
 
-      // In order to correctly ignore nested keys that are not relations
-      // we keep track of the parent key within the path
-      // Ensuring that the parentKey is a relation of the current schema
-      // or the current schema itself
-      let parentKey: string | undefined;
-      if (typeof path.raw === 'string') {
-        const keys = path.raw.split('.');
-        parentKey = keys?.[keys.length - 2];
-
-        // Check if parentKey is an array and remove the indexing to get the real parentKey
-        if (parentKey && parentKey.endsWith(']')) {
-          parentKey = parentKey.slice(0, parentKey.lastIndexOf('['));
+      if (attribute.type === 'relation') {
+        /*
+          If the attribute is a relation
+          and the value is an object
+          and the object contains an id field
+          then we replace the value with the documentId
+  
+          If the value is an array of objects
+          we apply the same logic to each object in the array
+        */
+        if (typeof value === 'object' && 'id' in value) {
+          const valueWithId = value as Data;
+          valueWithId.documentId = valueWithId.id;
+          delete valueWithId.id;
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => {
+            if (typeof item === 'object' && 'id' in item) {
+              const itemWithId = item as Data;
+              itemWithId.documentId = itemWithId.id;
+              delete itemWithId.id;
+            }
+          });
         }
-      }
 
-      if (
-        parentKey &&
-        // TODO Can we rely on this match?
-        ![schema?.info?.singularName, schema?.info?.pluralName].includes(parentKey) &&
-        schema.attributes[parentKey]?.type !== 'relation'
-      ) {
-        return;
-      }
-
-      if (key === 'id') {
-        remove(key);
-        set('documentId', value as any);
+        set(key, value);
       } else if (key === 'filters') {
         set(key, await transformFilters(value as any, opts));
       } else if (key === 'fields') {
