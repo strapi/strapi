@@ -180,7 +180,12 @@ describe('Integer validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrIntegerUnique: valueToCheck },
+        filters: {
+          attrIntegerUnique: valueToCheck,
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });
