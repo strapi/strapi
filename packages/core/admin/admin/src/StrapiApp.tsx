@@ -472,7 +472,9 @@ class StrapiApp {
     invariant(component, 'A Component must be provided');
 
     if (containerName === 'editView' && blockName === 'right-links') {
-      console.warn('Injecting components into editView.right-links is deprecated. Please use the ');
+      console.warn(
+        `Injecting components into editView.right-links is deprecated. Please use the \`addEditViewSidePanel\` API instead.`
+      );
     }
 
     // @ts-expect-error – we've alredy checked above that the block exists.

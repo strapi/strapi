@@ -17,6 +17,23 @@ interface DescriptionComponent<Props, Description> {
  * DescriptionComponentRenderer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * A collection lets us compositionally render components that can inject data into "slots"
+ * that are sent to a Context Provider meaning we can access this data via `useCollection`.
+ *
+ * A common use case could be if you're creating a select component, you could render your options
+ * like:
+ * ```tsx
+ * return (
+ *  <Select>
+ *    <Option>option 1</Option>
+ *    <Option>option 2</Option>
+ *  </Select>
+ * )
+ * ```
+ * and the parent `Select` component would be able to access the Option data. In this case,
+ * we render the descriptions and access them above to then pass to UI to render these data objects.
+ */
 const [Collection, useCollection] = createCollection<never, any>('DescriptionData');
 
 interface DescriptionComponentRendererProps<Props = any, Description = any> {

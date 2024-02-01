@@ -8,11 +8,7 @@ import type { FeaturesService } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: {
-    /**
-     * TODO: correctly type the bootstrap function.
-     */
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    bootstrap?: Function;
+    bootstrap?: (app: StrapiApp) => Promise<void> | void;
     config?: StrapiAppConstructorArgs['config'];
   };
   plugins: StrapiAppConstructorArgs['appPlugins'];

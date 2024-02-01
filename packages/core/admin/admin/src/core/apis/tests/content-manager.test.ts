@@ -38,10 +38,13 @@ describe('content-manager', () => {
     it('should let users add a panel description as an array', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.editViewSidePanels).toMatchInlineSnapshot(`
+      expect(plugin.editViewSidePanels).toHaveLength(2);
+
+      // ensure we have our default options
+      expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          [Function],
-          [Function],
+          "actions",
+          "review-workflows",
         ]
       `);
 
@@ -52,11 +55,13 @@ describe('content-manager', () => {
         }),
       ]);
 
-      expect(plugin.editViewSidePanels).toMatchInlineSnapshot(`
+      expect(plugin.editViewSidePanels).toHaveLength(3);
+      // ensure we have our default options, with the new option, which will not have a type
+      expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          [Function],
-          [Function],
-          [Function],
+          "actions",
+          "review-workflows",
+          undefined,
         ]
       `);
     });
@@ -64,32 +69,38 @@ describe('content-manager', () => {
     it('should let you mutate the existing array of panels with a reducer function', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.editViewSidePanels).toMatchInlineSnapshot(`
+      expect(plugin.editViewSidePanels).toHaveLength(2);
+
+      // ensure we have our default options
+      expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          [Function],
-          [Function],
+          "actions",
+          "review-workflows",
         ]
       `);
 
-      const actionsPanel: PanelComponent = () => ({ title: 'test', content: null });
+      const panel: PanelComponent = () => ({ title: 'test', content: null });
 
-      plugin.addEditViewSidePanel((prev) => [...prev, actionsPanel]);
+      plugin.addEditViewSidePanel((prev) => [...prev, panel]);
 
-      expect(plugin.editViewSidePanels).toMatchInlineSnapshot(`
+      expect(plugin.editViewSidePanels).toHaveLength(3);
+      // ensure we have our default options, with the new option, which will not have a type. The defaults should still be at the front.
+      expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          [Function],
-          [Function],
-          [Function],
+          "actions",
+          "review-workflows",
+          undefined,
         ]
       `);
-      expect(plugin.editViewSidePanels[0].type).toMatchInlineSnapshot(`"actions"`);
 
       plugin.addEditViewSidePanel((prev) => prev.filter((panel) => panel.type !== 'actions'));
 
-      expect(plugin.editViewSidePanels).toMatchInlineSnapshot(`
+      expect(plugin.editViewSidePanels).toHaveLength(2);
+      // We should be missing our "1st" panel, the actions panel
+      expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          [Function],
-          [Function],
+          "review-workflows",
+          undefined,
         ]
       `);
     });

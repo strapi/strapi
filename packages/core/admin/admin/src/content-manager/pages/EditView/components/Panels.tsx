@@ -76,7 +76,6 @@ const ActionsPanelContent = () => {
 
   return (
     <Flex direction="column" gap={2}>
-      {/* <Flex gap={2}></Flex> */}
       <InjectionZone area="contentManager.editView.right-links" slug={model} />
     </Flex>
   );
