@@ -90,7 +90,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           $and: [
             { contentType: params.contentType },
             { relatedDocumentId: params.documentId },
-            { locale: params.locale || null },
+            ...(params.locale ? [{ locale: params.locale }] : []),
           ],
         },
         populate: ['createdBy'],

@@ -1,4 +1,5 @@
 import type { Entity, UID } from '@strapi/types';
+import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -17,21 +18,16 @@ export interface CreateHistoryVersion {
 
 export interface HistoryVersionDataResponse extends CreateHistoryVersion {
   id: Entity.ID;
-  createdAt: Date;
-  createdBy: {
-    id: Entity.ID;
-    firstname: string;
-    lastname: string;
-    username?: string;
-  };
+  createdAt: string;
+  createdBy?: SanitizedAdminUser;
 }
 
-type Pagination = {
+interface Pagination {
   page: number;
   pageSize: number;
   pageCount: number;
   total: number;
-};
+}
 
 /**
  * GET /content-manager/history-versions
