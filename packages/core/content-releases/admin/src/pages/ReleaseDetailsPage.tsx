@@ -296,6 +296,10 @@ export const ReleaseDetailsLayout = ({
       return null;
     }
 
+    if (release.createdBy.username) {
+      return release.createdBy.username;
+    }
+
     if (release.createdBy.lastname) {
       return `${release.createdBy.firstname} ${release.createdBy.lastname}`;
     }
