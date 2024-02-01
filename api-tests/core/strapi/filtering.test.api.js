@@ -6,6 +6,8 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 const { createContentAPIRequest, transformToRESTResource } = require('api-tests/request');
 
+// TEST
+
 const builder = createTestBuilder();
 let strapi;
 let rq;
