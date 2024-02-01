@@ -172,6 +172,12 @@ const setup = ({ roles, ...props }: Setup = {}) => {
               },
             },
           },
+          middleware: (getDefaultMiddleware: any) =>
+            getDefaultMiddleware({
+              // Disable timing checks for test env
+              immutableCheck: false,
+              serializableCheck: false,
+            }),
         });
 
         return (
