@@ -359,8 +359,8 @@ describe('Test uid service', () => {
       expect(count).toHaveBeenCalledWith({
         filters: {
           slug: 'my-test-model',
+          locale: 'en',
         },
-        locale: 'en',
         status: 'draft',
       });
       expect(isAvailable).toBe(true);
