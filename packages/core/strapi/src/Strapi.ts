@@ -75,6 +75,8 @@ import sanitizersRegistry from './core/registries/sanitizers';
 import validatorsRegistry from './core/registries/validators';
 import convertCustomFieldType from './utils/convert-custom-field-type';
 
+// This is a test commit for testing the Github CI
+
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
 import { FeaturesService, createFeaturesService } from './services/features';

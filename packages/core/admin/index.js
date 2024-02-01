@@ -9,6 +9,8 @@ const ts = require('typescript');
 const strapi = require('@strapi/strapi');
 const { build: nodeBuild, develop: nodeDevelop } = require('./dist/cli');
 
+// This is a test commit for testing the Github CI
+
 /**
  * @typedef {Object} BuildArgs
  * @property {boolean} optimize
