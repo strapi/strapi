@@ -9,6 +9,7 @@ import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { buildValidGetParams } from '../../utils/api';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
 import type { Entity, UID } from '@strapi/types';
@@ -177,8 +178,9 @@ const VersionsList = ({ contentType, documentId }: VersionsListProps) => {
     id?: number;
     plugins?: Record<string, unknown>;
   }>();
-  const page = query.page ? Number(query.page) : 1;
-  const locale = (query.plugins?.i18n as { locale: string } | null)?.locale;
+  const validQueryParams = buildValidGetParams(query);
+  const page = validQueryParams.page ? Number(validQueryParams.page) : 1;
+  const locale = validQueryParams.locale;
 
   const response = useGetHistoryVersionsQuery({
     contentType,
