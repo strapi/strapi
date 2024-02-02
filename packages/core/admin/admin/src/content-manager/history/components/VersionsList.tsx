@@ -87,8 +87,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
 
   const distanceToNow = formatDistanceToNowStrict(new Date(version.createdAt), {
     addSuffix: true,
-    // @ts-expect-error - I don't know how to fix this
-    locale: locales[locale],
+    locale: locales[locale as keyof typeof locales],
   });
 
   const author =
@@ -180,12 +179,11 @@ const VersionsList = ({ contentType, documentId }: VersionsListProps) => {
   }>();
   const validQueryParams = buildValidGetParams(query);
   const page = validQueryParams.page ? Number(validQueryParams.page) : 1;
-  const locale = validQueryParams.locale;
 
   const response = useGetHistoryVersionsQuery({
     contentType,
     ...(documentId ? { documentId } : {}),
-    ...(locale ? { locale } : {}),
+    ...validQueryParams,
   });
 
   // Make sure the user lands on a selected history version
