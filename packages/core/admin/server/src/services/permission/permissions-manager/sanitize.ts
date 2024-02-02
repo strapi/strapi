@@ -217,7 +217,7 @@ export default ({ action, ability, model }: any) => {
   const pickAllowedAdminUserFields = ({ attribute, key, value }: any, { set }: any) => {
     const pickAllowedFields = pick(ADMIN_USER_ALLOWED_FIELDS);
 
-    if (attribute.type === 'relation' && attribute.target === 'admin::user' && value) {
+    if (attribute?.type === 'relation' && attribute?.target === 'admin::user' && value) {
       if (Array.isArray(value)) {
         set(key, value.map(pickAllowedFields));
       } else {
