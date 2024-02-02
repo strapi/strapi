@@ -14,7 +14,7 @@ interface ValidatorMetas<TAttribute extends Attribute.Any> {
 
 interface ValidatorOptions {
   isDraft: boolean;
-  locale: string;
+  locale?: string;
 }
 
 /* Validator utils */
@@ -161,24 +161,27 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
     }
 
     /**
-     * If the attribute is unchanged we skip the unique verification. This will
+     * If we are updating a draft and the value is unchanged we skip the unique verification. This will
      * prevent the validator to be triggered in case the user activated the
      * unique constraint after already creating multiple entries with
      * the same attribute value for that field.
      */
-    if (!isPublish && entity && valueToCheck === entity[updatedAttribute.name]) {
+    if (!isPublish && valueToCheck === entity?.[updatedAttribute.name]) {
       return true;
     }
 
     /**
-     * At this point we know that we are creating a new entry or that the unique field value has changed
-     * We check if there is an entry of this content type in the same locale with the same unique field value
+     * At this point we know that we are creating a new entry, publishing an entry or that the unique field value has changed
+     * We check if there is an entry of this content type in the same locale, publication state and with the same unique field value
      */
 
     const record = await strapi.documents(model.uid).findFirst({
-      filters: { [updatedAttribute.name]: valueToCheck },
       locale: options.locale,
       status: options.isDraft ? 'draft' : 'published',
+      filters: {
+        [updatedAttribute.name]: valueToCheck,
+        ...(entity?.id ? { id: { $ne: entity.id } } : {}),
+      },
     });
 
     return !record;

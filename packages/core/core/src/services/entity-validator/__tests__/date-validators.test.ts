@@ -177,7 +177,12 @@ describe('Date validator', () => {
       await validator('2021-11-29');
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrDateUnique: '2021-11-29' },
+        filters: {
+          attrDateUnique: '2021-11-29',
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });
