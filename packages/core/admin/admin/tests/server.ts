@@ -2,6 +2,8 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import * as qs from 'qs';
 
+import { historyHandlers } from '../src/content-manager/history/tests/server';
+
 import { MockData, mockData } from './mockData';
 
 export const server = setupServer(
@@ -461,9 +463,14 @@ export const server = setupServer(
       return res(ctx.status(200));
     }),
     rest.get('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
+      const layout =
+        req.params.contentType === 'api::homepage.homepage'
+          ? mockData.contentManager.singleTypeLayout
+          : mockData.contentManager.collectionTypeLayout;
+
       return res(
         ctx.json({
-          data: mockData.contentManager.layout,
+          data: layout,
         })
       );
     }),
@@ -986,5 +993,9 @@ export const server = setupServer(
         })
       );
     }),
+    /**
+     * Content History
+     */
+    ...historyHandlers,
   ]
 );

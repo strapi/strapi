@@ -18,7 +18,7 @@ export interface CreateHistoryVersion {
 export interface HistoryVersionDataResponse extends CreateHistoryVersion {
   id: Entity.ID;
   createdAt: Date;
-  createdBy: {
+  createdBy?: {
     id: Entity.ID;
     firstname: string;
     lastname: string;
@@ -43,7 +43,7 @@ export declare namespace GetHistoryVersions {
     };
     query: {
       contentType: UID.ContentType;
-      documentId: Entity.ID;
+      documentId?: Entity.ID;
       locale?: string;
     };
   }

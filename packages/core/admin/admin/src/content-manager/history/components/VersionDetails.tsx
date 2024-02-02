@@ -4,11 +4,10 @@ import { ContentLayout, HeaderLayout, Main, Typography } from '@strapi/design-sy
 import { Link } from '@strapi/design-system/v2';
 import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const VersionDetails = () => {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
   const headerId = React.useId();
 
   return (
@@ -19,13 +18,9 @@ const VersionDetails = () => {
         navigationAction={
           <Link
             startIcon={<ArrowLeft />}
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
             as={NavLink}
             // @ts-expect-error - types are not inferred correctly through the as prop.
-            to=""
+            to=".."
           >
             {formatMessage({
               id: 'global.back',

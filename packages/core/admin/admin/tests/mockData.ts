@@ -1410,7 +1410,142 @@ const PROVIDERS_MOCK_DATA = {
  * CM_LAYOUT_MOCK_DATA
  * -----------------------------------------------------------------------------------------------*/
 
-const CM_LAYOUT_MOCK_DATA = {
+const CM_SINGLE_TYPE_LAYOUT_MOCK_DATA = {
+  contentType: {
+    uid: 'api::homepage.homepage',
+    settings: {
+      bulkable: true,
+      filterable: true,
+      searchable: true,
+      pageSize: 10,
+      mainField: 'title',
+      defaultSortBy: 'title',
+      defaultSortOrder: 'ASC',
+    },
+    metadatas: {
+      id: {
+        edit: {},
+        list: {
+          label: 'id',
+          searchable: true,
+          sortable: true,
+        },
+      },
+      title: {
+        edit: {
+          label: 'title',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'title',
+          searchable: true,
+          sortable: true,
+        },
+      },
+      slug: {
+        edit: {
+          label: 'slug',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'slug',
+          searchable: true,
+          sortable: true,
+        },
+      },
+      single: {
+        edit: {
+          label: 'single',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'single',
+          searchable: false,
+          sortable: false,
+        },
+      },
+      multiple: {
+        edit: {
+          label: 'multiple',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'multiple',
+          searchable: false,
+          sortable: false,
+        },
+      },
+      createdAt: {
+        edit: {
+          label: 'createdAt',
+          description: '',
+          placeholder: '',
+          visible: false,
+          editable: true,
+        },
+        list: {
+          label: 'createdAt',
+          searchable: true,
+          sortable: true,
+        },
+      },
+      updatedAt: {
+        edit: {
+          label: 'updatedAt',
+          description: '',
+          placeholder: '',
+          visible: false,
+          editable: true,
+        },
+        list: {
+          label: 'updatedAt',
+          searchable: true,
+          sortable: true,
+        },
+      },
+    },
+    layouts: {
+      list: ['id', 'title', 'slug', 'single'],
+      edit: [
+        [
+          {
+            name: 'title',
+            size: 6,
+          },
+          {
+            name: 'slug',
+            size: 6,
+          },
+        ],
+        [
+          {
+            name: 'single',
+            size: 6,
+          },
+          {
+            name: 'multiple',
+            size: 6,
+          },
+        ],
+      ],
+    },
+  },
+  components: {},
+};
+
+const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
   contentType: {
     uid: 'api::address.address',
     settings: {
@@ -1599,7 +1734,8 @@ const CM_LAYOUT_MOCK_DATA = {
 
 const mockData = {
   contentManager: {
-    layout: CM_LAYOUT_MOCK_DATA,
+    singleTypeLayout: CM_SINGLE_TYPE_LAYOUT_MOCK_DATA,
+    collectionTypeLayout: CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA,
   },
   marketplace: {
     plugins: PLUGINS_MOCK_DATA,

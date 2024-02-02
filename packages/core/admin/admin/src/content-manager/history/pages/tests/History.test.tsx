@@ -10,14 +10,14 @@ describe('History page', () => {
         <Route path="/content-manager/:singleType/:slug/history" element={<HistoryPage />} />
       </Routes>,
       {
-        initialEntries: ['/content-manager/single-types/api::address.address/history'],
+        initialEntries: ['/content-manager/single-types/api::homepage.homepage/history'],
       }
     );
 
     await waitFor(() => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
-    expect(document.title).toBe('Address history');
+    expect(document.title).toBe('Homepage history');
   });
 
   it('renders collection type correctly', async () => {

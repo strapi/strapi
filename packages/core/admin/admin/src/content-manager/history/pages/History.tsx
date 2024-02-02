@@ -1,22 +1,28 @@
 import { Flex } from '@strapi/design-system';
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { VersionDetails } from '../components/VersionDetails';
 import { VersionsList } from '../components/VersionsList';
 
+import type { UID } from '@strapi/types';
+
 const HistoryPage = () => {
   const { formatMessage } = useIntl();
-  const { slug } = useParams<{
-    collectionType: string;
-    singleType: string;
-    slug: string;
+  const { slug, id: documentId } = useParams<{
+    slug: UID.ContentType;
+    id: string;
   }>();
+  const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
 
   const { isLoading, layout } = useContentTypeLayout(slug);
+
+  if (!slug || (!documentId && layout?.contentType.kind === 'collectionType')) {
+    return <Navigate to="/content-manager" />;
+  }
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -37,7 +43,11 @@ const HistoryPage = () => {
       />
       <Flex direction="row" alignItems="flex-start">
         <VersionDetails />
-        <VersionsList />
+        <VersionsList
+          contentType={slug}
+          documentId={documentId}
+          locale={(query?.plugins?.i18n as { locale: string } | null)?.locale}
+        />
       </Flex>
     </>
   );

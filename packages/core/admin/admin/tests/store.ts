@@ -89,6 +89,88 @@ const initialState = {
           },
         },
       },
+      {
+        uid: 'api::homepage.homepage',
+        isDisplayed: true,
+        apiID: 'homepage',
+        kind: 'singleType',
+        info: {
+          displayName: 'Homepage',
+          singularName: 'homepage',
+          pluralName: 'homepages',
+        },
+        options: {},
+        pluginOptions: {
+          i18n: {
+            localized: true,
+          },
+        },
+        attributes: {
+          id: {
+            type: 'integer',
+          },
+          title: {
+            type: 'string',
+            required: true,
+            pluginOptions: {
+              i18n: {
+                localized: true,
+              },
+            },
+          },
+          slug: {
+            type: 'uid',
+            targetField: 'title',
+            required: true,
+            pluginOptions: {
+              i18n: {
+                localized: true,
+              },
+            },
+          },
+          single: {
+            type: 'media',
+            allowedTypes: ['images', 'files', 'videos'],
+            required: false,
+          },
+          multiple: {
+            type: 'media',
+            multiple: true,
+            allowedTypes: ['images', 'videos'],
+            required: false,
+          },
+          createdAt: {
+            type: 'datetime',
+          },
+          updatedAt: {
+            type: 'datetime',
+          },
+          createdBy: {
+            type: 'relation',
+            relation: 'oneToOne',
+            target: 'admin::user',
+            configurable: false,
+            writable: false,
+            visible: false,
+            useJoinTable: false,
+            private: true,
+            targetModel: 'admin::user',
+            relationType: 'oneToOne',
+          },
+          updatedBy: {
+            type: 'relation',
+            relation: 'oneToOne',
+            target: 'admin::user',
+            configurable: false,
+            writable: false,
+            visible: false,
+            useJoinTable: false,
+            private: true,
+            targetModel: 'admin::user',
+            relationType: 'oneToOne',
+          },
+        },
+      },
     ],
     singleTypeLinks: [],
     isLoading: true,
