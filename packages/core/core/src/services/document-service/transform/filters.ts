@@ -1,25 +1,12 @@
-import { Common } from '@strapi/types';
 import { traverse } from '@strapi/utils';
-import { type ID } from './relations/utils/types';
 import { transformFields } from './fields';
 
-interface Data {
-  id?: ID | object;
-  documentId?: ID | object;
-  [key: string]: any;
-}
-
-interface Options {
-  uid: Common.UID.Schema;
-  locale?: string | null;
-}
+import { type Data, type Options } from './types';
+import { switchDocumentIdForId } from './utils';
 
 export const transformFilters = async (data: Data, opts: Options) => {
   // Before doing the filters traversal change any top level 'id' properties to 'documentId'
-  if ('id' in data) {
-    data.documentId = data.id;
-    delete data.id;
-  }
+  switchDocumentIdForId(data);
 
   return traverse.traverseQueryFilters(
     async ({ attribute, key, value }, { set }) => {
