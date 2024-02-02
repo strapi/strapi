@@ -9,7 +9,9 @@ import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { getDateFnsLocaleName } from '../../../utils/locales';
 import { buildValidGetParams } from '../../utils/api';
+import { getDisplayName } from '../../utils/users';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
 import type { Entity, UID } from '@strapi/types';
@@ -87,11 +89,10 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
 
   const distanceToNow = formatDistanceToNowStrict(new Date(version.createdAt), {
     addSuffix: true,
-    locale: locales[locale as keyof typeof locales],
+    locale: locales[getDateFnsLocaleName(locale)],
   });
 
-  const author =
-    version.createdBy?.username || `${version.createdBy?.firstname} ${version.createdBy?.lastname}`;
+  const author = version.createdBy && getDisplayName(version.createdBy, formatMessage);
 
   return (
     <Flex

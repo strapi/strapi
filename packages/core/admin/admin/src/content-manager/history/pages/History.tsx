@@ -1,5 +1,5 @@
 import { Flex } from '@strapi/design-system';
-import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, useParams } from 'react-router-dom';
