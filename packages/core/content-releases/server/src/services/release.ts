@@ -52,19 +52,32 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
     const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
 
-    const { validatePendingReleasesLimit, validateUniqueNameForPendingRelease } = getService(
-      'release-validation',
-      { strapi }
-    );
+    const {
+      validatePendingReleasesLimit,
+      validateUniqueNameForPendingRelease,
+      validateScheduledAtIsLaterThanNow,
+    } = getService('release-validation', { strapi });
 
     await Promise.all([
       validatePendingReleasesLimit(),
       validateUniqueNameForPendingRelease(releaseWithCreatorFields.name),
+      validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
     ]);
 
-    return strapi.entityService.create(RELEASE_MODEL_UID, {
+    const release = await strapi.entityService.create(RELEASE_MODEL_UID, {
       data: releaseWithCreatorFields,
     });
+
+    if (
+      strapi.features.future.isEnabled('contentReleasesScheduling') &&
+      releaseWithCreatorFields.scheduledAt
+    ) {
+      const schedulingService = getService('scheduling', { strapi });
+
+      await schedulingService.set(release.id, release.scheduledAt);
+    }
+
+    return release;
   },
 
   async findOne(id: GetRelease.Request['params']['id'], query = {}) {
