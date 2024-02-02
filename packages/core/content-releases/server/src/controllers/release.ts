@@ -82,8 +82,11 @@ const releaseController = {
     });
     const sanitizedRelease = {
       ...release,
-      createdBy: strapi.admin.services.user.sanitizeUser(release.createdBy),
+      createdBy: release.createdBy
+        ? strapi.admin.services.user.sanitizeUser(release.createdBy)
+        : null,
     };
+
     // Format the data object
     const data = {
       ...sanitizedRelease,
