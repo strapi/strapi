@@ -44,12 +44,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async getAvailableStatus(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
-    if (!document.locale) return null;
-
     // Find if the other status of the document is available
     const otherStatus = document.status === 'published' ? 'draft' : 'published';
 
     return strapi.documents(uid).findOne(document.id, {
+      // TODO: Do not filter by locale if i18n is disabled
       locale: document.locale,
       status: otherStatus,
       fields: ['id', 'updatedAt', 'createdAt', 'publishedAt'],
@@ -97,7 +96,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     // TODO: Sanitize output of metadata
     return {
-      data: document,
+      data: { ...document, status: await this.getStatus(uid, document) },
       meta: await this.getMetadata(uid, document, opts),
     };
   },
