@@ -200,7 +200,12 @@ describe('Time validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrTimestampUnique: valueToCheck },
+        filters: {
+          attrTimestampUnique: valueToCheck,
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });
