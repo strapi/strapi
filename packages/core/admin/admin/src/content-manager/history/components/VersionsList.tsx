@@ -165,16 +165,20 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
 interface VersionsListProps {
   contentType: UID.ContentType;
   documentId?: Entity.ID;
-  locale?: string;
 }
 
-const VersionsList = ({ contentType, documentId, locale }: VersionsListProps) => {
+const VersionsList = ({ contentType, documentId }: VersionsListProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
 
   // Parse state from query params
-  const [{ query }] = useQueryParams<{ page?: number; id?: number }>();
+  const [{ query }] = useQueryParams<{
+    page?: number;
+    id?: number;
+    plugins?: Record<string, unknown>;
+  }>();
   const page = query.page ? Number(query.page) : 1;
+  const locale = (query.plugins?.i18n as { locale: string } | null)?.locale;
 
   const response = useGetHistoryVersionsQuery({
     contentType,

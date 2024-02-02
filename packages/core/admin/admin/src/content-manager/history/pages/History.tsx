@@ -16,7 +16,6 @@ const HistoryPage = () => {
     slug: UID.ContentType;
     id: string;
   }>();
-  const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
 
   const { isLoading, layout } = useContentTypeLayout(slug);
 
@@ -43,11 +42,7 @@ const HistoryPage = () => {
       />
       <Flex direction="row" alignItems="flex-start">
         <VersionDetails />
-        <VersionsList
-          contentType={slug}
-          documentId={documentId}
-          locale={(query?.plugins?.i18n as { locale: string } | null)?.locale}
-        />
+        <VersionsList contentType={slug} documentId={documentId} />
       </Flex>
     </>
   );
