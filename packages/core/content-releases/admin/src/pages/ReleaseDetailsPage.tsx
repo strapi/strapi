@@ -483,6 +483,9 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+  const {
+    allowedActions: { canPublish, canUpdate },
+  } = useRBAC(PERMISSIONS);
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -736,6 +739,7 @@ const ReleaseDetailsBody = () => {
                               selected={type}
                               handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
                               name={`release-action-${id}-type`}
+                              disabled={!canPublish || !canUpdate}
                             />
                           )}
                         </Td>
