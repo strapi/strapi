@@ -9,6 +9,7 @@ import { switchIdForDocumentId } from './utils';
 import { transformFilters } from './filters';
 import { transformSort } from './sort';
 import { transformFields } from './fields';
+import { transformPopulate } from './populate';
 
 /**
  * Transform input of a query to map document ids to entity ids.
@@ -42,10 +43,10 @@ async function transformParamsDocumentId(
     filters = await transformFilters(input.filters, { ...opts, uid });
   }
 
-  const populate = input.populate;
-  // if (input.populate) {
-  //   populate = await transformFiltersOrPopulate(idMap, input.populate, { ...opts, uid });
-  // }
+  let populate = input.populate;
+  if (input.populate) {
+    populate = await transformPopulate(input.populate, { ...opts, uid });
+  }
 
   let fields = input.fields;
   if (input.fields) {
