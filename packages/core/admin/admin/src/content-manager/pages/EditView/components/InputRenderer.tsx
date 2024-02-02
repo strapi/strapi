@@ -1,5 +1,6 @@
 import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 
+import { useForm } from '../../../components/Form';
 import { InputRenderer as FormInputRenderer } from '../../../components/FormInputs/Renderer';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
@@ -26,6 +27,7 @@ type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : nev
  */
 const InputRenderer = ({ visible, ...props }: DistributiveOmit<EditFieldLayout, 'size'>) => {
   const { id } = useDoc();
+  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
@@ -65,7 +67,8 @@ const InputRenderer = ({ visible, ...props }: DistributiveOmit<EditFieldLayout, 
     );
   }
 
-  const fieldIsDisabled = (!canUserEditField && !isInDynamicZone) || props.disabled;
+  const fieldIsDisabled =
+    (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
 
   /**
    * Because a custom field has a unique prop but the type could be confused with either

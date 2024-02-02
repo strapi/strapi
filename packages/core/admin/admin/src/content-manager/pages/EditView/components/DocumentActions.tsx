@@ -81,6 +81,8 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     return null;
   }
 
+  const isMenuDisabled = restActions.every((action) => action.disabled);
+
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <Flex gap={2}>
@@ -96,6 +98,7 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
         {restActions.length > 0 ? (
           <Menu.Root>
             <Menu.Trigger
+              disabled={isMenuDisabled}
               size="S"
               endIcon={null}
               paddingTop="7px"
@@ -133,16 +136,17 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: DocumentActionComponent = () => {
+const PublishAction: DocumentActionComponent = ({ activeTab }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', (state) => state.canPublish);
   const { model, collectionType, id } = useDoc();
   const { publish } = useDocumentActions();
+  const modified = useForm('UpdateAction', ({ modified }) => modified);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
 
   return {
-    disabled: !canPublish || isSubmitting,
+    disabled: !canPublish || isSubmitting || activeTab === 'published' || modified,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -165,7 +169,7 @@ const PublishAction: DocumentActionComponent = () => {
 
 PublishAction.type = 'publish';
 
-const UpdateAction: DocumentActionComponent = () => {
+const UpdateAction: DocumentActionComponent = ({ activeTab }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { canCreate, canUpdate } = useDocumentRBAC('PublishAction', ({ canCreate, canUpdate }) => ({
@@ -181,7 +185,11 @@ const UpdateAction: DocumentActionComponent = () => {
   const document = useForm('UpdateAction', ({ values }) => values);
 
   return {
-    disabled: Boolean((!id && !canCreate) || (id && !canUpdate)) || isSubmitting || !modified,
+    disabled:
+      Boolean((!id && !canCreate) || (id && !canUpdate)) ||
+      isSubmitting ||
+      !modified ||
+      activeTab === 'published',
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',

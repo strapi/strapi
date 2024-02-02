@@ -7,7 +7,10 @@
 
 import * as React from 'react';
 
-import { createCollection } from '@strapi/ui-primitives';
+import isEqual from 'lodash/isEqual';
+
+import { useForceUpdate } from '../hooks/useForceUpdate';
+import { useThrottledCallback } from '../hooks/useThrottledCallback';
 
 interface DescriptionComponent<Props, Description> {
   (props: Props): Description | null;
@@ -17,73 +20,75 @@ interface DescriptionComponent<Props, Description> {
  * DescriptionComponentRenderer
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * A collection lets us compositionally render components that can inject data into "slots"
- * that are sent to a Context Provider meaning we can access this data via `useCollection`.
- *
- * A common use case could be if you're creating a select component, you could render your options
- * like:
- * ```tsx
- * return (
- *  <Select>
- *    <Option>option 1</Option>
- *    <Option>option 2</Option>
- *  </Select>
- * )
- * ```
- * and the parent `Select` component would be able to access the Option data. In this case,
- * we render the descriptions and access them above to then pass to UI to render these data objects.
- */
-const [Collection, useCollection] = createCollection<never, any>('DescriptionData');
-
 interface DescriptionComponentRendererProps<Props = any, Description = any> {
-  children: (descriptions: Description[]) => React.ReactNode;
+  children: (descriptions: Array<Description & { id: string }>) => React.ReactNode;
   descriptions: DescriptionComponent<Props, Description>[];
   props: Props;
 }
 
-const DescriptionComponentRendererImpl = <Props, Description>({
+const DescriptionComponentRenderer = <Props, Description>({
   children,
   props,
   descriptions,
 }: DescriptionComponentRendererProps<Props, Description>) => {
-  const [items, setItems] = React.useState<Description[]>([]);
-  const { subscribe } = useCollection(undefined);
+  const statesRef = React.useRef<Record<string, { value: Description & { id: string } }>>({});
+  const [tick, forceUpdate] = useForceUpdate();
 
-  React.useEffect(() => {
-    const unsub = subscribe((state) => {
-      setItems(state);
+  const requestHandle = React.useRef<number | null>(null);
+  const requestUpdate = React.useCallback(() => {
+    if (requestHandle.current) {
+      cancelIdleCallback(requestHandle.current);
+    }
+
+    requestHandle.current = requestIdleCallback(() => {
+      requestHandle.current = null;
+
+      forceUpdate();
     });
+  }, [forceUpdate]);
 
-    return () => {
-      unsub();
-    };
-  }, [subscribe]);
+  const throttledRequestUpdate = useThrottledCallback(requestUpdate, 60, { trailing: true });
+
+  const update = React.useCallback<DescriptionProps<Props, Description>['update']>(
+    (id, description) => {
+      if (description === null) {
+        delete statesRef.current[id];
+      } else {
+        const current = statesRef.current[id];
+        statesRef.current[id] = { ...current, value: { ...description, id } };
+      }
+
+      throttledRequestUpdate();
+    },
+    [throttledRequestUpdate]
+  );
+
+  const ids = React.useMemo(
+    () => descriptions.map((description) => getCompId(description)),
+    [descriptions]
+  );
+
+  const states = React.useMemo(
+    () =>
+      ids
+        .map((id) => statesRef.current[id]?.value)
+        .filter((state) => state !== null && state !== undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we leave tick in the deps to ensure the memo is recalculated
+    [ids, tick]
+  );
 
   return (
     <>
       {descriptions.map((description) => {
         const key = getCompId(description);
-        return <Description key={key} id={key} description={description} props={props} />;
+        return (
+          <Description key={key} id={key} description={description} props={props} update={update} />
+        );
       })}
-      {children(items)}
+      {children(states)}
     </>
   );
 };
-
-const withCollection = <Props,>(
-  WrappedComponent: React.ComponentType<DescriptionComponentRendererProps<Props, any>>
-) => {
-  return function (props: DescriptionComponentRendererProps<Props, any>) {
-    return (
-      <Collection.Provider scope={undefined}>
-        <WrappedComponent {...props} />
-      </Collection.Provider>
-    );
-  };
-};
-
-const DescriptionComponentRenderer = withCollection(DescriptionComponentRendererImpl);
 
 /* -------------------------------------------------------------------------------------------------
  * Description
@@ -93,6 +98,7 @@ interface DescriptionProps<Props, Description> {
   description: DescriptionComponent<Props, Description>;
   id: string;
   props: Props;
+  update: (id: string, value: Description | null) => void;
 }
 
 /**
@@ -102,20 +108,24 @@ interface DescriptionProps<Props, Description> {
  * to the react tree, instead we push it back out to the parent.
  */
 const Description = React.memo(
-  ({ description, id, props }: DescriptionProps<any, any>) => {
+  ({ description, id, props, update }: DescriptionProps<any, any>) => {
     const comp = description(props);
 
-    if (!comp) {
-      return null;
-    }
+    useShallowCompareEffect(() => {
+      update(id, comp);
 
-    return <Collection.ItemSlot id={id} {...comp} />;
+      return () => {
+        update(id, null);
+      };
+    }, comp);
+
+    return null;
   },
-  (prev, next) => prev.props === next.props
+  (prev, next) => isEqual(prev.props, next.props)
 );
 
 /* -------------------------------------------------------------------------------------------------
- * getId
+ * Helpers
  * -----------------------------------------------------------------------------------------------*/
 
 const ids = new WeakMap<DescriptionComponent<any, any>, string>();
@@ -133,6 +143,21 @@ function getCompId<T, K>(comp: DescriptionComponent<T, K>): string {
 
   return id;
 }
+
+const useShallowCompareMemoize = <T,>(value: T): Array<T | undefined> => {
+  const ref = React.useRef<T | undefined>(undefined);
+
+  if (!isEqual(value, ref.current)) {
+    ref.current = value;
+  }
+
+  return [ref.current];
+};
+
+const useShallowCompareEffect = (callback: React.EffectCallback, dependencies: any) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the linter isn't able to see that deps are properly handled here
+  React.useEffect(callback, useShallowCompareMemoize(dependencies));
+};
 
 export { DescriptionComponentRenderer };
 export type { DescriptionComponentRendererProps, DescriptionComponent };

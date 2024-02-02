@@ -1,9 +1,8 @@
 import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
-import { useStrapiApp } from '@strapi/helper-plugin';
+import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { InjectionZone } from '../../../../components/InjectionZone';
@@ -14,7 +13,6 @@ import { DocumentActions } from './DocumentActions';
 import type {
   ContentManagerPlugin,
   DocumentActionProps,
-  EditViewContext,
   PanelComponent,
   PanelComponentProps,
 } from '../../../../core/apis/content-manager';
@@ -28,23 +26,28 @@ interface PanelDescription {
  * Panels
  * -----------------------------------------------------------------------------------------------*/
 
-interface PanelsProps extends Pick<EditViewContext, 'activeTab'> {}
-
-const Panels = ({ activeTab }: PanelsProps) => {
+const Panels = () => {
+  const [
+    {
+      query: { status = 'draft' },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { model, id, document, meta } = useDoc();
   const { plugins } = useStrapiApp();
 
-  const props = { activeTab, model, id, document, meta } satisfies PanelComponentProps;
+  const props = { activeTab: status, model, id, document, meta } satisfies PanelComponentProps;
+
+  const descriptions = React.useMemo(
+    () =>
+      (
+        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+      ).getEditViewSidePanels(),
+    []
+  );
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <DescriptionComponentRenderer
-        props={props}
-        // @ts-expect-error – TODO: fix TS error
-        descriptions={(
-          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getEditViewSidePanels()}
-      >
+      <DescriptionComponentRenderer props={props} descriptions={descriptions}>
         {(panels) =>
           panels.map(({ content, id, ...description }) => (
             <Panel key={id} {...description}>
@@ -76,7 +79,11 @@ const ActionsPanel: PanelComponent = () => {
 ActionsPanel.type = 'actions';
 
 const ActionsPanelContent = () => {
-  const { status = 'draft' } = useParams<{ status: 'draft' | 'published' }>();
+  const [
+    {
+      query: { status = 'draft' },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { model, id, document, meta } = useDoc();
   const { plugins } = useStrapiApp();
 
@@ -86,7 +93,6 @@ const ActionsPanelContent = () => {
     <Flex direction="column" gap={2} width="100%">
       <DescriptionComponentRenderer
         props={props}
-        // @ts-expect-error – TODO: fix TS error
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getDocumentActions()}
@@ -134,4 +140,4 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
 });
 
 export { Panels, ActionsPanel };
-export type { PanelsProps, PanelDescription };
+export type { PanelDescription };

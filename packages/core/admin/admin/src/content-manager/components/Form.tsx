@@ -21,6 +21,7 @@ interface FormValues {
 
 interface FormContextValue<TFormValues extends FormValues = FormValues>
   extends FormState<TFormValues> {
+  disabled: boolean;
   initialValues: TFormValues;
   modified: boolean;
   /**
@@ -46,10 +47,10 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form');
  * -----------------------------------------------------------------------------------------------*/
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue, 'initialValues'>> {
+  extends Partial<Pick<FormContextValue, 'disabled' | 'initialValues'>> {
   children: React.ReactNode;
   method: 'POST' | 'PUT';
-  onSubmit: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
+  onSubmit?: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
 }
@@ -60,219 +61,240 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * It can additionally handle nested fields and arrays. To access the data you can either
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
-const Form = React.forwardRef<HTMLFormElement, FormProps>(({ method, onSubmit, ...props }, ref) => {
-  const initialValues = React.useRef(props.initialValues ?? {});
-  const [state, dispatch] = React.useReducer(reducer, {
-    errors: {},
-    isSubmitting: false,
-    values: props.initialValues ?? {},
-  });
-
-  /**
-   * Uses the provided validation schema
-   */
-  const validate: FormContextValue['validate'] = React.useCallback(
-    async (setErrors = false) => {
-      if (!props.validationSchema) {
-        return null;
-      }
-
-      try {
-        await props.validationSchema.validate(state.values, { abortEarly: false });
-
-        return null;
-      } catch (err) {
-        if (isErrorYupValidationError(err)) {
-          let errors: FormErrors = {};
-
-          if (err.inner) {
-            if (err.inner.length === 0) {
-              return setIn(errors, err.path!, err.message);
-            }
-            for (const error of err.inner) {
-              if (!getIn(errors, error.path!)) {
-                errors = setIn(errors, error.path!, err.message);
-              }
-            }
-          }
-
-          return errors;
-        } else {
-          // We throw any other errors
-          if (process.env.NODE_ENV !== 'production') {
-            console.warn(
-              `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
-              err
-            );
-          }
-
-          throw err;
-        }
-      }
-    },
-    [props, state.values]
-  );
-
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    dispatch({
-      type: 'SUBMIT_ATTEMPT',
+const Form = React.forwardRef<HTMLFormElement, FormProps>(
+  ({ disabled = false, method, onSubmit, ...props }, ref) => {
+    const initialValues = React.useRef(props.initialValues ?? {});
+    const [state, dispatch] = React.useReducer(reducer, {
+      errors: {},
+      isSubmitting: false,
+      values: props.initialValues ?? {},
     });
-    e.preventDefault();
 
-    try {
-      const errors = await validate();
+    React.useEffect(() => {
+      /**
+       * ONLY update the initialValues if the prop has changed.
+       */
+      if (!isEqual(initialValues.current, props.initialValues)) {
+        initialValues.current = props.initialValues ?? {};
 
-      if (errors !== null) {
         dispatch({
-          type: 'SET_ERRORS',
-          payload: errors,
+          type: 'SET_INITIAL_VALUES',
+          payload: props.initialValues ?? {},
         });
-
-        throw new Error('Submition failed');
       }
-
-      await onSubmit(state.values, e);
-
-      dispatch({
-        type: 'SUBMIT_SUCCESS',
-      });
-    } catch (err) {
-      dispatch({
-        type: 'SUBMIT_FAILURE',
-      });
-
-      if (err instanceof Error && err.message === 'Submition failed') {
-        return;
-      }
-    }
-  };
-
-  const modified = React.useMemo(
-    () => !isEqual(initialValues.current, state.values),
-    [state.values]
-  );
-
-  const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
-    if (typeof eventOrPath === 'string') {
-      dispatch({
-        type: 'SET_FIELD_VALUE',
-        payload: {
-          field: eventOrPath,
-          value: v,
-        },
-      });
-
-      return;
-    }
-
-    const target = eventOrPath.target ? eventOrPath.target : eventOrPath.currentTarget;
-
-    const { type, name, id, value, options, multiple } = target;
-
-    const field = name || id;
-
-    if (!field && process.env.NODE_ENV !== 'production') {
-      console.warn(
-        `\`onChange\` was called with an event, but you forgot to pass a \`name\` or \`id'\` attribute to your input. The field to update cannot be determined`
-      );
-    }
+    }, [props.initialValues]);
 
     /**
-     * Because we handle any field from this function, we run through a series
-     * of checks to understand how to use the value.
+     * Uses the provided validation schema
      */
-    let val;
+    const validate: FormContextValue['validate'] = React.useCallback(
+      async (setErrors = false) => {
+        if (!props.validationSchema) {
+          return null;
+        }
 
-    if (/number|range/.test(type)) {
-      const parsed = parseFloat(value);
-      // If the value isn't a number for whatever reason, don't let it through because that will break the API.
-      val = isNaN(parsed) ? '' : parsed;
-    } else if (/checkbox/.test(type)) {
-      // Get & invert the current value of the checkbox.
-      val = !getIn(state.values, field);
-    } else if (options && multiple) {
-      // This will handle native select elements incl. ones with mulitple options.
-      val = Array.from<HTMLOptionElement>(options)
-        .filter((el) => el.selected)
-        .map((el) => el.value);
-    } else {
-      val = value;
-    }
+        try {
+          await props.validationSchema.validate(state.values, { abortEarly: false });
 
-    if (field) {
+          return null;
+        } catch (err) {
+          if (isErrorYupValidationError(err)) {
+            let errors: FormErrors = {};
+
+            if (err.inner) {
+              if (err.inner.length === 0) {
+                return setIn(errors, err.path!, err.message);
+              }
+              for (const error of err.inner) {
+                if (!getIn(errors, error.path!)) {
+                  errors = setIn(errors, error.path!, err.message);
+                }
+              }
+            }
+
+            return errors;
+          } else {
+            // We throw any other errors
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(
+                `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+                err
+              );
+            }
+
+            throw err;
+          }
+        }
+      },
+      [props, state.values]
+    );
+
+    const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+      if (!onSubmit) {
+        return;
+      }
+
       dispatch({
-        type: 'SET_FIELD_VALUE',
-        payload: {
-          field,
-          value: val,
-        },
+        type: 'SUBMIT_ATTEMPT',
       });
-    }
-  });
+      e.preventDefault();
 
-  const addFieldRow: FormContextValue['addFieldRow'] = React.useCallback(
-    (field, value, addAtIndex) => {
-      dispatch({
-        type: 'ADD_FIELD_ROW',
-        payload: {
-          field,
-          value,
-          addAtIndex,
-        },
-      });
-    },
-    []
-  );
+      try {
+        const errors = await validate();
 
-  const removeFieldRow: FormContextValue['removeFieldRow'] = React.useCallback(
-    (field, removeAtIndex) => {
-      dispatch({
-        type: 'REMOVE_FIELD_ROW',
-        payload: {
-          field,
-          removeAtIndex,
-        },
-      });
-    },
-    []
-  );
+        if (errors !== null) {
+          dispatch({
+            type: 'SET_ERRORS',
+            payload: errors,
+          });
 
-  const moveFieldRow: FormContextValue['moveFieldRow'] = React.useCallback(
-    (field, fromIndex, toIndex) => {
-      dispatch({
-        type: 'MOVE_FIELD_ROW',
-        payload: {
-          field,
-          fromIndex,
-          toIndex,
-        },
-      });
-    },
-    []
-  );
+          throw new Error('Submition failed');
+        }
 
-  const setSubmitting = React.useCallback((isSubmitting: boolean) => {
-    dispatch({ type: 'SET_ISSUBMITTING', payload: isSubmitting });
-  }, []);
+        await onSubmit(state.values, e);
 
-  return (
-    <form ref={ref} method={method} noValidate onSubmit={handleSubmit}>
-      <FormProvider
-        onChange={handleChange}
-        initialValues={initialValues}
-        modified={modified}
-        addFieldRow={addFieldRow}
-        moveFieldRow={moveFieldRow}
-        removeFieldRow={removeFieldRow}
-        setSubmitting={setSubmitting}
-        validate={validate}
-        {...state}
-      >
-        {props.children}
-      </FormProvider>
-    </form>
-  );
-});
+        dispatch({
+          type: 'SUBMIT_SUCCESS',
+        });
+      } catch (err) {
+        dispatch({
+          type: 'SUBMIT_FAILURE',
+        });
+
+        if (err instanceof Error && err.message === 'Submition failed') {
+          return;
+        }
+      }
+    };
+
+    const modified = React.useMemo(
+      () => !isEqual(initialValues.current, state.values),
+      [state.values]
+    );
+
+    const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
+      if (typeof eventOrPath === 'string') {
+        dispatch({
+          type: 'SET_FIELD_VALUE',
+          payload: {
+            field: eventOrPath,
+            value: v,
+          },
+        });
+
+        return;
+      }
+
+      const target = eventOrPath.target ? eventOrPath.target : eventOrPath.currentTarget;
+
+      const { type, name, id, value, options, multiple } = target;
+
+      const field = name || id;
+
+      if (!field && process.env.NODE_ENV !== 'production') {
+        console.warn(
+          `\`onChange\` was called with an event, but you forgot to pass a \`name\` or \`id'\` attribute to your input. The field to update cannot be determined`
+        );
+      }
+
+      /**
+       * Because we handle any field from this function, we run through a series
+       * of checks to understand how to use the value.
+       */
+      let val;
+
+      if (/number|range/.test(type)) {
+        const parsed = parseFloat(value);
+        // If the value isn't a number for whatever reason, don't let it through because that will break the API.
+        val = isNaN(parsed) ? '' : parsed;
+      } else if (/checkbox/.test(type)) {
+        // Get & invert the current value of the checkbox.
+        val = !getIn(state.values, field);
+      } else if (options && multiple) {
+        // This will handle native select elements incl. ones with mulitple options.
+        val = Array.from<HTMLOptionElement>(options)
+          .filter((el) => el.selected)
+          .map((el) => el.value);
+      } else {
+        val = value;
+      }
+
+      if (field) {
+        dispatch({
+          type: 'SET_FIELD_VALUE',
+          payload: {
+            field,
+            value: val,
+          },
+        });
+      }
+    });
+
+    const addFieldRow: FormContextValue['addFieldRow'] = React.useCallback(
+      (field, value, addAtIndex) => {
+        dispatch({
+          type: 'ADD_FIELD_ROW',
+          payload: {
+            field,
+            value,
+            addAtIndex,
+          },
+        });
+      },
+      []
+    );
+
+    const removeFieldRow: FormContextValue['removeFieldRow'] = React.useCallback(
+      (field, removeAtIndex) => {
+        dispatch({
+          type: 'REMOVE_FIELD_ROW',
+          payload: {
+            field,
+            removeAtIndex,
+          },
+        });
+      },
+      []
+    );
+
+    const moveFieldRow: FormContextValue['moveFieldRow'] = React.useCallback(
+      (field, fromIndex, toIndex) => {
+        dispatch({
+          type: 'MOVE_FIELD_ROW',
+          payload: {
+            field,
+            fromIndex,
+            toIndex,
+          },
+        });
+      },
+      []
+    );
+
+    const setSubmitting = React.useCallback((isSubmitting: boolean) => {
+      dispatch({ type: 'SET_ISSUBMITTING', payload: isSubmitting });
+    }, []);
+
+    return (
+      <form ref={ref} method={method} noValidate onSubmit={handleSubmit}>
+        <FormProvider
+          disabled={disabled}
+          onChange={handleChange}
+          initialValues={initialValues}
+          modified={modified}
+          addFieldRow={addFieldRow}
+          moveFieldRow={moveFieldRow}
+          removeFieldRow={removeFieldRow}
+          setSubmitting={setSubmitting}
+          validate={validate}
+          {...state}
+        >
+          {props.children}
+        </FormProvider>
+      </form>
+    );
+  }
+);
 
 /**
  * @internal
@@ -310,7 +332,7 @@ interface FormState<TFormValues extends FormValues = FormValues> {
   values: TFormValues;
 }
 
-type FormActions<TFormValues extends FormValues> =
+type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'SUBMIT_ATTEMPT' }
   | { type: 'SUBMIT_FAILURE' }
   | { type: 'SUBMIT_SUCCESS' }
@@ -319,7 +341,8 @@ type FormActions<TFormValues extends FormValues> =
   | { type: 'REMOVE_FIELD_ROW'; payload: { field: string; removeAtIndex?: number } }
   | { type: 'MOVE_FIELD_ROW'; payload: { field: string; fromIndex: number; toIndex: number } }
   | { type: 'SET_ERRORS'; payload: FormErrors<TFormValues> }
-  | { type: 'SET_ISSUBMITTING'; payload: boolean };
+  | { type: 'SET_ISSUBMITTING'; payload: boolean }
+  | { type: 'SET_INITIAL_VALUES'; payload: TFormValues };
 
 const reducer = <TFormValues extends FormValues = FormValues>(
   state: FormState<TFormValues>,
@@ -327,6 +350,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
 ) =>
   produce(state, (draft) => {
     switch (action.type) {
+      case 'SET_INITIAL_VALUES':
+        // @ts-expect-error – TODO: figure out why this fails ts.
+        draft.values = action.payload;
+        break;
       case 'SUBMIT_ATTEMPT':
         draft.isSubmitting = true;
         break;
@@ -427,7 +454,6 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         if (!isEqual(state.errors, action.payload)) {
           state.errors = action.payload;
         }
-
         break;
       case 'SET_ISSUBMITTING':
         draft.isSubmitting = action.payload;
