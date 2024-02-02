@@ -2,6 +2,7 @@ import type { Plugin } from '@strapi/types';
 import { controllers } from './controllers';
 import { services } from './services';
 import { contentTypes } from './content-types';
+import { routes } from './routes';
 import { getService } from './utils';
 
 /**
@@ -19,6 +20,7 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
       controllers,
       services,
       contentTypes,
+      routes,
     };
   }
 

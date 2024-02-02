@@ -1,5 +1,5 @@
 import type { LoadedStrapi } from '@strapi/types';
-import { omit } from 'lodash/fp';
+import { omit, pick } from 'lodash/fp';
 import { HISTORY_VERSION_UID } from '../constants';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -80,6 +80,34 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           createdBy: strapi.requestContext.get()?.state?.user.id,
         },
       });
+    },
+
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
+      const { results, pagination } = await query.findPage({
+        page: 1,
+        pageSize: 10,
+        where: {
+          $and: [
+            { contentType: params.contentType },
+            { relatedDocumentId: params.documentId },
+            ...(params.locale ? [{ locale: params.locale }] : []),
+          ],
+        },
+        populate: ['createdBy'],
+        orderBy: [{ createdAt: 'desc' }],
+      });
+
+      const sanitizedResults = results.map((result) => ({
+        ...result,
+        createdBy: result.createdBy
+          ? pick(['id', 'firstname', 'lastname', 'username'], result.createdBy)
+          : null,
+      }));
+
+      return {
+        results: sanitizedResults,
+        pagination,
+      };
     },
   };
 };

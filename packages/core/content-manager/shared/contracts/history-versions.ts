@@ -1,4 +1,5 @@
 import type { Entity, UID } from '@strapi/types';
+import { type errors } from '@strapi/utils';
 
 /**
  * Unlike other Content Manager contracts, history versions can't be created via
@@ -12,4 +13,46 @@ export interface CreateHistoryVersion {
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
   schema: Record<string, unknown>;
+}
+
+export interface HistoryVersionDataResponse extends CreateHistoryVersion {
+  id: Entity.ID;
+  createdAt: string;
+  createdBy?: {
+    id: Entity.ID;
+    firstname?: string;
+    lastname?: string;
+    username?: string;
+  };
+}
+
+interface Pagination {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
+
+/**
+ * GET /content-manager/history-versions
+ */
+export declare namespace GetHistoryVersions {
+  export interface Request {
+    state: {
+      userAbility: {};
+    };
+    query: {
+      contentType: UID.ContentType;
+      documentId: Entity.ID;
+      locale?: string;
+    };
+  }
+
+  export interface Response {
+    data: HistoryVersionDataResponse[];
+    meta: {
+      pagination?: Pagination;
+    };
+    error?: errors.ApplicationError;
+  }
 }
