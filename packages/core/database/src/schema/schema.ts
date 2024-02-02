@@ -134,7 +134,6 @@ const getColumnType = (attribute: Attribute) => {
     case 'uid': {
       return {
         type: 'string',
-        unique: true,
       };
     }
     case 'richtext':

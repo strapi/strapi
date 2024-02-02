@@ -83,6 +83,86 @@ describe('Test type UID', () => {
     });
   });
 
+  describe('Value validation', () => {
+    const model = {
+      displayName: 'With uid',
+      singularName: 'withuid',
+      pluralName: 'withuids',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+      attributes: {
+        slug: {
+          type: 'uid',
+        },
+      },
+    };
+
+    const builder = createTestBuilder();
+
+    const locales = ['en', 'fr'];
+    beforeAll(async () => {
+      await builder.addContentType(model).build();
+
+      strapi = await createStrapiInstance();
+      rq = await createAuthRequest({ strapi });
+
+      for (const locale of locales) {
+        await rq({
+          method: 'POST',
+          url: '/i18n/locales',
+          body: {
+            code: locale,
+            name: `${locale}`,
+            isDefault: false,
+          },
+        });
+      }
+    });
+
+    afterAll(async () => {
+      await strapi.destroy();
+      await builder.cleanup();
+    });
+
+    test('Values should not have to be unique across different locales', async () => {
+      const value = 'valid-uid';
+
+      const endpoint = '/content-manager/collection-types/api::withuid.withuid';
+      const englishEndpoint = `${endpoint}?locale=${locales[0]}`;
+      const frenchEndpoint = `${endpoint}?locale=${locales[1]}`;
+
+      const res = await rq.post(englishEndpoint, {
+        body: {
+          slug: value,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        slug: value,
+      });
+
+      // Test that we cannot create a new entry with the same value in the same locale
+      const sameLocaleResult = await rq.post(englishEndpoint, {
+        body: {
+          slug: value,
+        },
+      });
+      expect(sameLocaleResult.statusCode).toBe(400);
+
+      // Test that we can create a new entry with the same value in a different locale
+      const newLocaleResult = await rq.post(frenchEndpoint, {
+        body: {
+          slug: value,
+        },
+      });
+      expect(newLocaleResult.statusCode).toBe(200);
+    });
+  });
+
   describe('No targetField, required, no length limits', () => {
     const model = {
       displayName: 'withrequireduid',

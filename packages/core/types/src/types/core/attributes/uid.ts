@@ -1,4 +1,4 @@
-import type { Attribute, Common } from '..';
+import type { Attribute } from '..';
 
 export interface UIDOptions {
   separator?: string;
@@ -17,11 +17,6 @@ export interface UIDProperties<
 }
 
 export type UID<
-  // TODO: V5:
-  // The TOrigin was used to narrow down the list of possible target attribute for a
-  // UID, but was removed due to circular dependency issues and will be removed in V5
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _TOrigin extends Common.UID.Schema = never,
   TTargetAttribute extends string = string,
   TOptions extends UIDOptions = UIDOptions
 > = Attribute.OfType<'uid'> &

@@ -1,4 +1,5 @@
-import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
+import { setCreatorFields, pipeAsync } from '@strapi/utils';
+import { getDocumentDimensions } from './utils/dimensions';
 
 import { getService } from '../utils';
 
@@ -13,24 +14,6 @@ const findDocument = async (query: any, model: any, opts: any = {}) => {
     .build();
 
   return entityManager.find(query, model, { ...opts, populate });
-};
-
-/**
- * From a request object, validates and returns the locale and status of the document
- */
-const getDocumentDimensions = (request: any) => {
-  const { locale, status, ...rest } = request || {};
-  // Sanitize locale and status
-  // Check locale format is a valid locale identifier
-  if (locale && !/^[a-z]{2}(-[A-Z]{2})?$/.test(locale)) {
-    throw new errors.ValidationError(`Invalid locale format: ${locale}`);
-  }
-
-  if (status && !['draft', 'published'].includes(status)) {
-    throw new errors.ValidationError(`Invalid status: ${status}`);
-  }
-
-  return { locale, status, ...rest };
 };
 
 export default {

@@ -14,7 +14,9 @@ export declare namespace GenerateUID {
       data: Entity;
       field: string;
     };
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
   export interface Response {
     data: string;
@@ -32,7 +34,9 @@ export declare namespace CheckUIDAvailability {
       field: string;
       value: string;
     };
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
   export type Response =
     | {

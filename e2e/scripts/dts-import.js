@@ -16,10 +16,11 @@ const {
  * This function ensures we keep all admin user's and roles in the DB
  * see: https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html
  * @param {String} filePath the path to a DTS backup
+ * @param {Array<String>} contentTypesToWipe remove all entries of these content types before importing
  */
-export const resetDatabaseAndImportDataFromPath = async (filePath) => {
+export const resetDatabaseAndImportDataFromPath = async (filePath, contentTypesToWipe = []) => {
   const source = createSourceProvider(filePath);
-  const destination = createDestinationProvider();
+  const destination = createDestinationProvider(contentTypesToWipe);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
@@ -63,7 +64,7 @@ const createSourceProvider = (filePath) =>
     compression: { enabled: false },
   });
 
-const createDestinationProvider = () => {
+const createDestinationProvider = (contentTypesToWipe = []) => {
   return createRemoteStrapiDestinationProvider({
     url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
@@ -71,7 +72,7 @@ const createDestinationProvider = () => {
     restore: {
       assets: true,
       entities: {
-        include: ALLOWED_CONTENT_TYPES,
+        include: [...ALLOWED_CONTENT_TYPES, ...contentTypesToWipe],
       },
       configuration: {
         coreStore: false,
