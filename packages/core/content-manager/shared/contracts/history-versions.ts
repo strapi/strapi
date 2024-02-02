@@ -17,21 +17,21 @@ export interface CreateHistoryVersion {
 
 export interface HistoryVersionDataResponse extends CreateHistoryVersion {
   id: Entity.ID;
-  createdAt: Date;
+  createdAt: string;
   createdBy?: {
     id: Entity.ID;
-    firstname: string;
-    lastname: string;
+    firstname?: string;
+    lastname?: string;
     username?: string;
   };
 }
 
-type Pagination = {
+interface Pagination {
   page: number;
   pageSize: number;
   pageCount: number;
   total: number;
-};
+}
 
 /**
  * GET /content-manager/history-versions

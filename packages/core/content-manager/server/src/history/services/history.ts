@@ -1,5 +1,5 @@
 import type { LoadedStrapi } from '@strapi/types';
-import { omit } from 'lodash/fp';
+import { omit, pick } from 'lodash/fp';
 import { HISTORY_VERSION_UID } from '../constants';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -90,7 +90,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           $and: [
             { contentType: params.contentType },
             { relatedDocumentId: params.documentId },
-            { locale: params.locale || null },
+            ...(params.locale ? [{ locale: params.locale }] : []),
           ],
         },
         populate: ['createdBy'],
@@ -100,7 +100,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       const sanitizedResults = results.map((result) => ({
         ...result,
         createdBy: result.createdBy
-          ? strapi.admin.services.user.sanitizeUser(result.createdBy)
+          ? pick(['id', 'firstname', 'lastname', 'username'], result.createdBy)
           : null,
       }));
 
