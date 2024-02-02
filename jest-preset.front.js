@@ -27,9 +27,9 @@ module.exports = {
   modulePathIgnorePatterns: ['.*__mocks__.*'],
   testPathIgnorePatterns: ['node_modules/', 'dist/'],
   globalSetup: '@strapi/admin-test-utils/global-setup',
-  setupFiles: ['@strapi/admin-test-utils/environment'],
+  setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
-  testEnvironment: 'jsdom',
+  testEnvironment: '@strapi/admin-test-utils/environment',
   transform: {
     '^.+\\.js(x)?$': [
       '@swc/jest',

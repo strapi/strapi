@@ -9194,12 +9194,14 @@ __metadata:
     "@strapi/pack-up": "workspace:*"
     "@testing-library/jest-dom": "npm:5.16.5"
     eslint-config-custom: "npm:4.19.0"
+    jest-environment-jsdom: "npm:29.6.1"
     jest-styled-components: "npm:7.1.1"
     tsconfig: "npm:4.19.0"
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
     "@testing-library/jest-dom": ^5.16.5
+    jest-environment-jsdom: ^29.0.0
   languageName: unknown
   linkType: soft
 

@@ -4,27 +4,20 @@ import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { capitalise } from '../../../../utils/strings';
-import { useDoc } from '../../../hooks/useDocument';
-import { useDocLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';
 
 interface HeaderProps {
   isCreating?: boolean;
   status?: 'draft' | 'published' | 'modified';
+  title?: string;
 }
 
-const Header = ({ isCreating, status = 'draft' }: HeaderProps) => {
+const Header = ({
+  isCreating,
+  status = 'draft',
+  title: documentTitle = 'Untitled',
+}: HeaderProps) => {
   const { formatMessage } = useIntl();
-
-  const { document } = useDoc();
-  const {
-    edit: {
-      settings: { mainField },
-    },
-  } = useDocLayout();
-
-  const documentTitle =
-    mainField !== 'id' && document && document[mainField] ? document[mainField] : 'Unitled';
 
   const title = isCreating
     ? formatMessage({

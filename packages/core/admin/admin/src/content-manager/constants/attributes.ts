@@ -1,12 +1,12 @@
-const CREATED_BY_ATTRIBUTE_NAME = 'created_by';
-const UPDATED_BY_ATTRIBUTE_NAME = 'updated_by';
+const CREATED_BY_ATTRIBUTE_NAME = 'createdBy';
+const UPDATED_BY_ATTRIBUTE_NAME = 'updatedBy';
 
 const CREATOR_FIELDS = [CREATED_BY_ATTRIBUTE_NAME, UPDATED_BY_ATTRIBUTE_NAME];
 
-const PUBLISHED_BY_ATTRIBUTE_NAME = 'published_by';
-const CREATED_AT_ATTRIBUTE_NAME = 'created_at';
-const UPDATED_AT_ATTRIBUTE_NAME = 'updated_at';
-const PUBLISHED_AT_ATTRIBUTE_NAME = 'published_at';
+const PUBLISHED_BY_ATTRIBUTE_NAME = 'publishedBy';
+const CREATED_AT_ATTRIBUTE_NAME = 'createdAt';
+const UPDATED_AT_ATTRIBUTE_NAME = 'updatedAt';
+const PUBLISHED_AT_ATTRIBUTE_NAME = 'publishedAt';
 
 const DOCUMENT_META_FIELDS = [
   ...CREATOR_FIELDS,

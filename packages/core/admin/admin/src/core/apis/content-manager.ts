@@ -112,7 +112,7 @@ class ContentManagerPlugin {
       this.documentActions = actions(this.documentActions);
     } else {
       throw new Error(
-        `Expected the \`actions\` passed to \`addEditViewSidePanel\` to be an array or a function, but received ${getPrintableType(
+        `Expected the \`actions\` passed to \`addDocumentAction\` to be an array or a function, but received ${getPrintableType(
           actions
         )}`
       );

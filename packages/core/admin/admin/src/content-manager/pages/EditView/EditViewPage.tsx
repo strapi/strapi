@@ -63,7 +63,7 @@ const EditViewPage = () => {
 
   React.useEffect(() => {
     if (tabApi.current) {
-      tabApi.current._handlers.setSelectedTabIndex(status === 'draft' ? 0 : 1);
+      tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
     }
   }, [status]);
 
@@ -105,7 +105,10 @@ const EditViewPage = () => {
 
   const {
     isLoading: isLoadingLayout,
-    edit: { layout },
+    edit: {
+      layout,
+      settings: { mainField },
+    },
   } = useDocumentLayout(model);
 
   const { isLazyLoading } = useLazyComponents([]);
@@ -157,14 +160,21 @@ const EditViewPage = () => {
     }
   };
 
+  const documentTitle =
+    mainField !== 'id' && document && document[mainField] ? document[mainField] : 'Unitled';
+
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Header isCreating={isCreatingDocument} status={getDocumentStatus(document, meta)} />
+      <Header
+        isCreating={isCreatingDocument}
+        status={getDocumentStatus(document, meta)}
+        title={documentTitle}
+      />
       <TabGroup
         ref={tabApi}
         variant="simple"
         label="Document version"
-        initialSelectedTabIndex={status === 'draft' ? 0 : 1}
+        initialSelectedTabIndex={!status || status === 'draft' ? 0 : 1}
         onTabChange={handleTabChange}
       >
         <Tabs>
