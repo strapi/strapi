@@ -7,7 +7,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import * as locales from 'date-fns/locale';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 import { getDateFnsLocaleName } from '../../../utils/locales';
 import { buildValidGetParams } from '../../utils/api';

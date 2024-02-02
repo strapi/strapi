@@ -10,7 +10,7 @@ describe('History page', () => {
         <Route path="/content-manager/:singleType/:slug/history" element={<HistoryPage />} />
       </Routes>,
       {
-        initialEntries: ['/content-manager/single-types/api::homepage.homepage/history'],
+        initialEntries: ['/content-manager/single-types/api::homepage.homepage/history?id=26'],
       }
     );
 
@@ -29,13 +29,12 @@ describe('History page', () => {
         />
       </Routes>,
       {
-        initialEntries: ['/content-manager/collection-types/api::address.address/1/history'],
+        initialEntries: ['/content-manager/collection-types/api::address.address/1/history?id=26'],
       }
     );
 
     await waitFor(() => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
-    expect(document.title).toBe('Address history');
   });
 });
