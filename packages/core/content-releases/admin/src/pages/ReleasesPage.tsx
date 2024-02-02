@@ -1,6 +1,9 @@
 import * as React from 'react';
 
+// TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
+import { useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
+  Alert,
   Box,
   Button,
   ContentLayout,
@@ -28,6 +31,7 @@ import {
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -43,57 +47,6 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
-
-/* -------------------------------------------------------------------------------------------------
- * ReleasesLayout
- * -----------------------------------------------------------------------------------------------*/
-interface ReleasesLayoutProps {
-  isLoading?: boolean;
-  totalReleases?: number;
-  onClickAddRelease: () => void;
-  children: React.ReactNode;
-}
-
-export const ReleasesLayout = ({
-  isLoading,
-  totalReleases,
-  onClickAddRelease,
-  children,
-}: ReleasesLayoutProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Main aria-busy={isLoading}>
-      <HeaderLayout
-        title={formatMessage({
-          id: 'content-releases.pages.Releases.title',
-          defaultMessage: 'Releases',
-        })}
-        subtitle={
-          !isLoading &&
-          formatMessage(
-            {
-              id: 'content-releases.pages.Releases.header-subtitle',
-              defaultMessage:
-                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-            },
-            { number: totalReleases }
-          )
-        }
-        primaryAction={
-          <CheckPermissions permissions={PERMISSIONS.create}>
-            <Button startIcon={<Plus />} onClick={onClickAddRelease}>
-              {formatMessage({
-                id: 'content-releases.header.actions.add-release',
-                defaultMessage: 'New release',
-              })}
-            </Button>
-          </CheckPermissions>
-        }
-      />
-      {children}
-    </Main>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
@@ -177,6 +130,15 @@ interface CustomLocationState {
   errors?: Record<'code', string>[];
 }
 
+const StyledAlert = styled(Alert)`
+  button {
+    display: none;
+  }
+  p + div {
+    margin-left: auto;
+  }
+`;
+
 const INITIAL_FORM_VALUES = {
   name: '',
 } satisfies FormValues;
@@ -192,6 +154,11 @@ const ReleasesPage = () => {
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
+  const { getFeature } = useLicenseLimits();
+  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumReleases: number;
+  };
+  const { trackUsage } = useTracking();
 
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
@@ -229,15 +196,14 @@ const ReleasesPage = () => {
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </ReleasesLayout>
+      <Main aria-busy={isLoading}>
+        <LoadingIndicatorPage />
+      </Main>
     );
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
+  const hasReachedMaximumPendingReleases = totalReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -266,6 +232,8 @@ const ReleasesPage = () => {
         }),
       });
 
+      trackUsage('didCreateRelease');
+
       push(`/plugins/content-releases/${response.data.data.id}`);
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
@@ -283,9 +251,64 @@ const ReleasesPage = () => {
   };
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
+    <Main aria-busy={isLoading}>
+      <HeaderLayout
+        title={formatMessage({
+          id: 'content-releases.pages.Releases.title',
+          defaultMessage: 'Releases',
+        })}
+        subtitle={formatMessage(
+          {
+            id: 'content-releases.pages.Releases.header-subtitle',
+            defaultMessage: '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+          },
+          { number: totalReleases }
+        )}
+        primaryAction={
+          <CheckPermissions permissions={PERMISSIONS.create}>
+            <Button
+              startIcon={<Plus />}
+              onClick={toggleAddReleaseModal}
+              disabled={hasReachedMaximumPendingReleases}
+            >
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          </CheckPermissions>
+        }
+      />
       <ContentLayout>
         <>
+          {activeTab === 'pending' && hasReachedMaximumPendingReleases && (
+            <StyledAlert
+              marginBottom={6}
+              action={
+                <Link href="https://strapi.io/pricing-cloud" isExternal>
+                  {formatMessage({
+                    id: 'content-releases.pages.Releases.max-limit-reached.action',
+                    defaultMessage: 'Explore plans',
+                  })}
+                </Link>
+              }
+              title={formatMessage(
+                {
+                  id: 'content-releases.pages.Releases.max-limit-reached.title',
+                  defaultMessage:
+                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
+                },
+                { number: maximumReleases }
+              )}
+              onClose={() => {}}
+              closeLabel=""
+            >
+              {formatMessage({
+                id: 'content-releases.pages.Releases.max-limit-reached.message',
+                defaultMessage: 'Upgrade to manage an unlimited number of releases.',
+              })}
+            </StyledAlert>
+          )}
           <TabGroup
             label={formatMessage({
               id: 'content-releases.pages.Releases.tab-group.label',
@@ -355,7 +378,7 @@ const ReleasesPage = () => {
           initialValues={INITIAL_FORM_VALUES}
         />
       )}
-    </ReleasesLayout>
+    </Main>
   );
 };
 

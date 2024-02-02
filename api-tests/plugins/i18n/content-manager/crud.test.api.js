@@ -86,9 +86,12 @@ describe('i18n - Content API', () => {
     test('non-default locale', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/api::category.category?plugins[i18n][locale]=ko',
+        url: '/content-manager/collection-types/api::category.category',
         body: {
           name: 'category in korean',
+        },
+        qs: {
+          locale: 'ko',
         },
       });
 
@@ -112,7 +115,8 @@ describe('i18n - Content API', () => {
           method: 'POST',
           url: `/content-manager/collection-types/api::category.category`,
           qs: {
-            plugins: { i18n: { locale, relatedEntityId: data.categories[0].id } },
+            plugins: { i18n: { relatedEntityId: data.categories[0].id } },
+            locale,
           },
           body: {
             name: `category in ${locale}`,

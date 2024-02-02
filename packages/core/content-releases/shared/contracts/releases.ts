@@ -161,6 +161,11 @@ export declare namespace PublishRelease {
 
   export interface Response {
     data: ReleaseDataResponse;
+    meta: {
+      totalEntries: number;
+      totalPublishedEntries: number;
+      totalUnpublishedEntries: number;
+    };
     error?: errors.ApplicationError | errors.ValidationError;
   }
 }
