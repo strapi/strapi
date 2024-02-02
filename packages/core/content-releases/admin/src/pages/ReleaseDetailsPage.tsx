@@ -296,15 +296,18 @@ export const ReleaseDetailsLayout = ({
       return null;
     }
 
+    // Favor the username
     if (release.createdBy.username) {
       return release.createdBy.username;
     }
 
-    if (release.createdBy.lastname) {
-      return `${release.createdBy.firstname} ${release.createdBy.lastname}`;
+    // Firstname may not exist if created with SSO
+    if (release.createdBy.firstname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname || ''}`.trim();
     }
 
-    return release.createdBy.firstname;
+    // All users must have at least an email
+    return release.createdBy.email;
   };
 
   if (isLoadingDetails) {
