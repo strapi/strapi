@@ -19,6 +19,11 @@ const baseStrapiMock = {
       set: mockSchedulingSet,
     }),
   }),
+  features: {
+    future: {
+      isEnabled: jest.fn().mockReturnValue(true),
+    },
+  },
 };
 
 const mockUser = {
