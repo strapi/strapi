@@ -6,6 +6,7 @@ import {
   Grid,
   GridItem,
   Main,
+  SetSelectedTabIndexHandler,
   Tab,
   TabGroup,
   TabPanel,
@@ -47,9 +48,25 @@ import { createDefaultForm } from './utils/forms';
 
 const EditViewPage = () => {
   const location = useLocation();
-  const { state = 'draft' } = useParams<{ state: 'draft' | 'published' }>();
+  const [
+    {
+      query: { status },
+    },
+    setQuery,
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const tabApi = React.useRef<{
+    _handlers: {
+      setSelectedTabIndex: SetSelectedTabIndexHandler;
+    };
+  }>(null);
+
+  React.useEffect(() => {
+    if (tabApi.current) {
+      tabApi.current._handlers.setSelectedTabIndex(status === 'draft' ? 0 : 1);
+    }
+  }, [status]);
 
   useOnce(() => {
     /**
@@ -69,6 +86,7 @@ const EditViewPage = () => {
   const isLoadingActionsRBAC = useDocumentRBAC('EditViewPage', (state) => state.isLoading);
   const {
     document,
+    meta,
     isLoading: isLoadingDocument,
     schema,
     components,
@@ -134,12 +152,26 @@ const EditViewPage = () => {
 
   const handleSubmit = async () => {};
 
-  const status = document?.status ?? 'draft';
+  const handleTabChange = (index: number) => {
+    if (index === 0) {
+      setQuery({ status: 'draft' });
+    } else {
+      setQuery({ status: 'published' });
+    }
+  };
+
+  const docStatus = document?.status ?? 'draft';
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Header isCreating={isCreatingDocument} status={status} />
-      <TabGroup variant="simple" label="Document version">
+      <Header isCreating={isCreatingDocument} status={docStatus} />
+      <TabGroup
+        ref={tabApi}
+        variant="simple"
+        label="Document version"
+        initialSelectedTabIndex={status === 'draft' ? 0 : 1}
+        onTabChange={handleTabChange}
+      >
         <Tabs>
           <StatusTab>
             {formatMessage({
@@ -147,7 +179,7 @@ const EditViewPage = () => {
               defaultMessage: 'draft',
             })}
           </StatusTab>
-          <StatusTab>
+          <StatusTab disabled={meta?.availableStatus.length === 0}>
             {formatMessage({
               id: getTranslation('containers.edit.tabs.published'),
               defaultMessage: 'published',
@@ -209,10 +241,13 @@ const EditViewPage = () => {
                   </Flex>
                 </GridItem>
                 <GridItem col={3} s={12}>
-                  <Panels activeTab={state} />
+                  <Panels activeTab={status} />
                 </GridItem>
               </Grid>
             </Form>
+          </TabPanel>
+          <TabPanel>
+            <h1>fuck off</h1>
           </TabPanel>
         </TabPanels>
       </TabGroup>

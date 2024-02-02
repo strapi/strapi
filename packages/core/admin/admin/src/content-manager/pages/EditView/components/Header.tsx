@@ -4,6 +4,8 @@ import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { capitalise } from '../../../../utils/strings';
+import { useDoc } from '../../../hooks/useDocument';
+import { useDocLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';
 
 interface HeaderProps {
@@ -14,15 +16,22 @@ interface HeaderProps {
 const Header = ({ isCreating, status = 'draft' }: HeaderProps) => {
   const { formatMessage } = useIntl();
 
+  const { document } = useDoc();
+  const {
+    edit: {
+      settings: { mainField },
+    },
+  } = useDocLayout();
+
+  const documentTitle =
+    mainField !== 'id' && document && document[mainField] ? document[mainField] : 'Unitled';
+
   const title = isCreating
     ? formatMessage({
         id: getTranslation('containers.Edit.pluginHeader.title.new'),
         defaultMessage: 'Create an entry',
       })
-    : /**
-       * TODO: check if the main field is NOT id and use that, otherwise use "Untitled"
-       */
-      'Unitled';
+    : documentTitle;
 
   const statusVariant =
     status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';

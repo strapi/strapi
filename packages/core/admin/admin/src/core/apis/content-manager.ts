@@ -7,6 +7,10 @@
 
 import { ReviewWorkflowsPanel } from '../../../../ee/admin/src/content-manager/pages/EditView/components/ReviewWorkflowsPanel';
 import {
+  DEFAULT_ACTIONS,
+  type DocumentActionDescription,
+} from '../../content-manager/pages/EditView/components/DocumentActions';
+import {
   ActionsPanel,
   type PanelDescription,
 } from '../../content-manager/pages/EditView/components/Panels';
@@ -58,6 +62,13 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
   type?: 'actions' | 'review-workflows' | 'releases';
 }
 
+interface DocumentActionProps extends EditViewContext {}
+
+interface DocumentActionComponent
+  extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
+  type?: 'publish' | 'update';
+}
+
 /* -------------------------------------------------------------------------------------------------
  * ContentManager plugin
  * -----------------------------------------------------------------------------------------------*/
@@ -69,6 +80,7 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
+  documentActions: DocumentActionComponent[] = DEFAULT_ACTIONS;
   editViewSidePanels: PanelComponent[] = [ActionsPanel, ReviewWorkflowsPanel];
 
   constructor() {}
@@ -89,12 +101,32 @@ class ContentManagerPlugin {
     }
   }
 
+  addDocumentAction(actions: DescriptionReducer<DocumentActionComponent>): void;
+  addDocumentAction(actions: DocumentActionComponent[]): void;
+  addDocumentAction(
+    actions: DescriptionReducer<DocumentActionComponent> | DocumentActionComponent[]
+  ) {
+    if (Array.isArray(actions)) {
+      this.documentActions = [...this.documentActions, ...actions];
+    } else if (typeof actions === 'function') {
+      this.documentActions = actions(this.documentActions);
+    } else {
+      throw new Error(
+        `Expected the \`actions\` passed to \`addEditViewSidePanel\` to be an array or a function, but received ${getPrintableType(
+          actions
+        )}`
+      );
+    }
+  }
+
   get config() {
     return {
       id: 'content-manager',
       name: 'Content Manager',
       apis: {
+        addDocumentAction: this.addDocumentAction,
         addEditViewSidePanel: this.addEditViewSidePanel,
+        getDocumentActions: () => this.documentActions,
         getEditViewSidePanels: () => this.editViewSidePanels,
       },
     } satisfies PluginConfig;
@@ -132,4 +164,7 @@ export type {
   DescriptionReducer,
   EditViewContext,
   PanelComponentProps,
+  DocumentActionComponent,
+  DocumentActionDescription,
+  DocumentActionProps,
 };

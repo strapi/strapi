@@ -60,33 +60,33 @@ const Layout = () => {
     );
   }
 
-  // Array of models that are displayed in the content manager
-  const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);
+  // // Array of models that are displayed in the content manager
+  // const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);
 
-  // Redirect the user to the 403 page
-  if (
-    authorisedModels.length === 0 &&
-    supportedModelsToDisplay.length > 0 &&
-    pathname !== '/content-manager/403'
-  ) {
-    return <Navigate to="/403" />;
-  }
+  // // Redirect the user to the 403 page
+  // if (
+  //   authorisedModels.length === 0 &&
+  //   supportedModelsToDisplay.length > 0 &&
+  //   pathname !== '/content-manager/403'
+  // ) {
+  //   return <Navigate to="/403" />;
+  // }
 
-  // Redirect the user to the create content type page
-  if (supportedModelsToDisplay.length === 0 && pathname !== '/no-content-types') {
-    return <Navigate to="/no-content-types" />;
-  }
+  // // Redirect the user to the create content type page
+  // if (supportedModelsToDisplay.length === 0 && pathname !== '/no-content-types') {
+  //   return <Navigate to="/no-content-types" />;
+  // }
 
-  if (!contentTypeMatch && authorisedModels.length > 0) {
-    return (
-      <Navigate
-        to={{
-          pathname: authorisedModels[0].to,
-          search: authorisedModels[0].search ?? '',
-        }}
-      />
-    );
-  }
+  // if (!contentTypeMatch && authorisedModels.length > 0) {
+  //   return (
+  //     <Navigate
+  //       to={{
+  //         pathname: authorisedModels[0].to,
+  //         search: authorisedModels[0].search ?? '',
+  //       }}
+  //     />
+  //   );
+  // }
 
   return (
     <>

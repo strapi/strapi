@@ -9,6 +9,7 @@ import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
 
 import type { InputProps } from './FormInputs/types';
+import type * as Yup from 'yup';
 
 /* -------------------------------------------------------------------------------------------------
  * FormContext
@@ -28,12 +29,14 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    */
   addFieldRow: (field: string, value: any, addAtIndex?: number) => void;
   moveFieldRow: (field: string, fromIndex: number, toIndex: number) => void;
-  /**
+  onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: any) => void;
+  /*
    * The default behaviour is to remove the last row, if you want to remove a specific index you can
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
-  onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: any) => void;
+  setSubmitting: (isSubmitting: boolean) => void;
+  validate: (setErrors?: boolean) => Promise<FormErrors<TFormValues> | null>;
 }
 
 const [FormProvider, useForm] = createContext<FormContextValue>('Form');
@@ -47,7 +50,8 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   children: React.ReactNode;
   method: 'POST' | 'PUT';
   onSubmit: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
-  validate?: (values: TFormValues) => object | null | Promise<object | null>;
+  // TODO: type the return value for a validation schema func from Yup.
+  validationSchema?: Yup.AnySchema;
 }
 
 /**
@@ -56,13 +60,58 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * It can additionally handle nested fields and arrays. To access the data you can either
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
-const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
+const Form = React.forwardRef<HTMLFormElement, FormProps>(({ method, onSubmit, ...props }, ref) => {
   const initialValues = React.useRef(props.initialValues ?? {});
   const [state, dispatch] = React.useReducer(reducer, {
     errors: {},
     isSubmitting: false,
     values: props.initialValues ?? {},
   });
+
+  /**
+   * Uses the provided validation schema
+   */
+  const validate: FormContextValue['validate'] = React.useCallback(
+    async (setErrors = false) => {
+      if (!props.validationSchema) {
+        return null;
+      }
+
+      try {
+        await props.validationSchema.validate(state.values, { abortEarly: false });
+
+        return null;
+      } catch (err) {
+        if (isErrorYupValidationError(err)) {
+          let errors: FormErrors = {};
+
+          if (err.inner) {
+            if (err.inner.length === 0) {
+              return setIn(errors, err.path!, err.message);
+            }
+            for (const error of err.inner) {
+              if (!getIn(errors, error.path!)) {
+                errors = setIn(errors, error.path!, err.message);
+              }
+            }
+          }
+
+          return errors;
+        } else {
+          // We throw any other errors
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+              err
+            );
+          }
+
+          throw err;
+        }
+      }
+    },
+    [props, state.values]
+  );
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     dispatch({
@@ -71,13 +120,30 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
     e.preventDefault();
 
     try {
+      const errors = await validate();
+
+      if (errors !== null) {
+        dispatch({
+          type: 'SET_ERRORS',
+          payload: errors,
+        });
+
+        throw new Error('Submition failed');
+      }
+
+      await onSubmit(state.values, e);
+
       dispatch({
         type: 'SUBMIT_SUCCESS',
       });
-    } catch {
+    } catch (err) {
       dispatch({
         type: 'SUBMIT_FAILURE',
       });
+
+      if (err instanceof Error && err.message === 'Submition failed') {
+        return;
+      }
     }
   };
 
@@ -105,11 +171,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
 
     const field = name || id;
 
-    // TODO: make the error DEV only.
-    if (!field /*&& __DEV__*/) {
-      /**
-       * TODO: add warning that there is no field
-       */
+    if (!field && process.env.NODE_ENV !== 'production') {
+      console.warn(
+        `\`onChange\` was called with an event, but you forgot to pass a \`name\` or \`id'\` attribute to your input. The field to update cannot be determined`
+      );
     }
 
     /**
@@ -186,8 +251,12 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
     []
   );
 
+  const setSubmitting = React.useCallback((isSubmitting: boolean) => {
+    dispatch({ type: 'SET_ISSUBMITTING', payload: isSubmitting });
+  }, []);
+
   return (
-    <form ref={ref} method={props.method} noValidate onSubmit={handleSubmit}>
+    <form ref={ref} method={method} noValidate onSubmit={handleSubmit}>
       <FormProvider
         onChange={handleChange}
         initialValues={initialValues}
@@ -195,6 +264,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
         addFieldRow={addFieldRow}
         moveFieldRow={moveFieldRow}
         removeFieldRow={removeFieldRow}
+        setSubmitting={setSubmitting}
+        validate={validate}
         {...state}
       >
         {props.children}
@@ -203,30 +274,57 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>((props, ref) => {
   );
 });
 
+/**
+ * @internal
+ * @description Checks if the error is a Yup validation error.
+ */
+const isErrorYupValidationError = (err: any): err is Yup.ValidationError =>
+  typeof err === 'object' &&
+  err !== null &&
+  'name' in err &&
+  typeof err.name === 'string' &&
+  err.name === 'ValidationError';
+
 /* -------------------------------------------------------------------------------------------------
  * reducer
  * -----------------------------------------------------------------------------------------------*/
+
+type FormErrors<TFormValues extends FormValues = FormValues> = {
+  // is it a repeatable component or dynamic zone?
+  [Key in keyof TFormValues]?: TFormValues[Key] extends any[]
+    ? TFormValues[Key][number] extends object
+      ? FormErrors<TFormValues[Key][number]>[] | string | string[]
+      : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
+    : TFormValues[Key] extends object // is it a regular component?
+    ? FormErrors<TFormValues[Key]> // handles nested components
+    : string; // otherwise its just a field.
+};
 
 interface FormState<TFormValues extends FormValues = FormValues> {
   /**
    * TODO: make this a better type explaining errors could be nested because it follows the same
    * structure as the values.
    */
-  errors: object;
+  errors: FormErrors<TFormValues>;
   isSubmitting: boolean;
   values: TFormValues;
 }
 
-type FormActions =
+type FormActions<TFormValues extends FormValues> =
   | { type: 'SUBMIT_ATTEMPT' }
   | { type: 'SUBMIT_FAILURE' }
   | { type: 'SUBMIT_SUCCESS' }
   | { type: 'SET_FIELD_VALUE'; payload: { field: string; value: any } }
   | { type: 'ADD_FIELD_ROW'; payload: { field: string; value: any; addAtIndex?: number } }
   | { type: 'REMOVE_FIELD_ROW'; payload: { field: string; removeAtIndex?: number } }
-  | { type: 'MOVE_FIELD_ROW'; payload: { field: string; fromIndex: number; toIndex: number } };
+  | { type: 'MOVE_FIELD_ROW'; payload: { field: string; fromIndex: number; toIndex: number } }
+  | { type: 'SET_ERRORS'; payload: FormErrors<TFormValues> }
+  | { type: 'SET_ISSUBMITTING'; payload: boolean };
 
-const reducer: React.Reducer<FormState, FormActions> = (state, action) =>
+const reducer = <TFormValues extends FormValues = FormValues>(
+  state: FormState<TFormValues>,
+  action: FormActions<TFormValues>
+) =>
   produce(state, (draft) => {
     switch (action.type) {
       case 'SUBMIT_ATTEMPT':
@@ -322,7 +420,18 @@ const reducer: React.Reducer<FormState, FormActions> = (state, action) =>
           action.payload.field,
           newValue.length > 0 ? newValue : undefined
         );
+
+        break;
       }
+      case 'SET_ERRORS':
+        if (!isEqual(state.errors, action.payload)) {
+          state.errors = action.payload;
+        }
+
+        break;
+      case 'SET_ISSUBMITTING':
+        draft.isSubmitting = action.payload;
+        break;
       default:
         break;
     }

@@ -78,7 +78,7 @@ interface EditLayout {
     };
   };
   metadatas?: never;
-  settings?: never;
+  settings: Contracts.ContentTypes.Settings;
 }
 
 type UseDocumentLayout = (model: string) => {
@@ -94,6 +94,17 @@ type UseDocumentLayout = (model: string) => {
 /* -------------------------------------------------------------------------------------------------
  * useDocumentLayout
  * -----------------------------------------------------------------------------------------------*/
+
+const DEFAULT_SETTINGS = {
+  bulkable: false,
+  filterable: false,
+  searchable: false,
+  pagination: false,
+  defaultSortBy: '',
+  defaultSortOrder: 'asc',
+  mainField: 'id',
+  pageSize: 10,
+};
 
 /**
  * @alpha
@@ -138,6 +149,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
         : ({
             layout: [],
             components: {},
+            settings: DEFAULT_SETTINGS,
           } as EditLayout),
     [data, schema, components]
   );
@@ -149,16 +161,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
         : ({
             layout: [],
             metadatas: {},
-            settings: {
-              bulkable: false,
-              filterable: false,
-              searchable: false,
-              pagination: false,
-              defaultSortBy: '',
-              defaultSortOrder: 'asc',
-              mainField: 'id',
-              pageSize: 10,
-            },
+            settings: DEFAULT_SETTINGS,
           } as ListLayout),
     [data, schema]
   );
@@ -245,7 +248,11 @@ const formatEditLayout = (
     {}
   );
 
-  return { layout: panelledEditAttributes, components: componentEditAttributes };
+  return {
+    layout: panelledEditAttributes,
+    components: componentEditAttributes,
+    settings: data.contentType.settings,
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------

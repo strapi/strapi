@@ -1,5 +1,7 @@
 import pipe from 'lodash/fp/pipe';
 
+import { DOCUMENT_META_FIELDS } from '../../../constants/attributes';
+
 import type { ComponentsDictionary, Document } from '../../../hooks/useDocument';
 import type { Schema, Attribute, Common } from '@strapi/types';
 
@@ -120,6 +122,48 @@ const prepareTempKeys = traverseData(
 );
 
 /* -------------------------------------------------------------------------------------------------
+ * removeFieldsThatDontExistOnSchema
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description Fields that don't exist in the schema like createdAt etc. are only on the first level (not nested),
+ * as such we don't need to traverse the components to remove them.
+ */
+const removeFieldsThatDontExistOnSchema = (schema: Schema.Schema) => (data: AnyData) => {
+  const schemaKeys = Object.keys(schema.attributes);
+  const dataKeys = Object.keys(data);
+
+  const keysToRemove = dataKeys.filter((key) => !schemaKeys.includes(key));
+
+  const revisedData = [...keysToRemove, ...DOCUMENT_META_FIELDS].reduce((acc, key) => {
+    delete acc[key];
+
+    return acc;
+  }, structuredClone(data));
+
+  return revisedData;
+};
+
+/**
+ * @internal
+ * @description We need to remove null fields from the data-structure because it will pass it
+ * to the specific inputs breaking them as most would prefer empty strings or `undefined` if
+ * they're controlled / uncontrolled.
+ */
+const removeNullValues = (data: AnyData) => {
+  return Object.entries(data).reduce<AnyData>((acc, [key, value]) => {
+    if (value === null) {
+      return acc;
+    }
+
+    acc[key] = value;
+
+    return acc;
+  }, {});
+};
+
+/* -------------------------------------------------------------------------------------------------
  * transformDocuments
  * -----------------------------------------------------------------------------------------------*/
 
@@ -133,7 +177,9 @@ const transformDocument =
   (schema: Schema.Schema, components: ComponentsDictionary = {}) =>
   (document: AnyData) => {
     const transformations = pipe(
+      removeFieldsThatDontExistOnSchema(schema),
       removeProhibitedFields(['password'])(schema, components),
+      removeNullValues,
       prepareRelations(schema, components),
       prepareTempKeys(schema, components)
     );

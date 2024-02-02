@@ -3,13 +3,17 @@ import * as React from 'react';
 import { Flex, Typography } from '@strapi/design-system';
 import { useStrapiApp } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import { useParams } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { InjectionZone } from '../../../../components/InjectionZone';
 import { useDoc } from '../../../hooks/useDocument';
 
+import { DocumentActions } from './DocumentActions';
+
 import type {
   ContentManagerPlugin,
+  DocumentActionProps,
   EditViewContext,
   PanelComponent,
   PanelComponentProps,
@@ -41,8 +45,8 @@ const Panels = ({ activeTab }: PanelsProps) => {
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getEditViewSidePanels()}
       >
-        {(descriptions) =>
-          descriptions.map(({ content, id, ...description }) => (
+        {(panels) =>
+          panels.map(({ content, id, ...description }) => (
             <Panel key={id} {...description}>
               {content}
             </Panel>
@@ -72,10 +76,23 @@ const ActionsPanel: PanelComponent = () => {
 ActionsPanel.type = 'actions';
 
 const ActionsPanelContent = () => {
-  const { model } = useDoc();
+  const { status = 'draft' } = useParams<{ status: 'draft' | 'published' }>();
+  const { model, id, document, meta } = useDoc();
+  const { plugins } = useStrapiApp();
+
+  const props = { activeTab: status, model, id, document, meta } satisfies DocumentActionProps;
 
   return (
-    <Flex direction="column" gap={2}>
+    <Flex direction="column" gap={2} width="100%">
+      <DescriptionComponentRenderer
+        props={props}
+        // @ts-expect-error – TODO: fix TS error
+        descriptions={(
+          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+        ).getDocumentActions()}
+      >
+        {(actions) => <DocumentActions actions={actions} />}
+      </DescriptionComponentRenderer>
       <InjectionZone area="contentManager.editView.right-links" slug={model} />
     </Flex>
   );
