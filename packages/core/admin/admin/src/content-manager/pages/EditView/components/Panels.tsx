@@ -29,13 +29,22 @@ interface PanelDescription {
 const Panels = () => {
   const [
     {
-      query: { status = 'draft' },
+      query: { status },
     },
-  ] = useQueryParams<{ status: 'draft' | 'published' }>();
-  const { model, id, document, meta } = useDoc();
+  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+    status: 'draft',
+  });
+  const { model, id, document, meta, collectionType } = useDoc();
   const { plugins } = useStrapiApp();
 
-  const props = { activeTab: status, model, id, document, meta } satisfies PanelComponentProps;
+  const props = {
+    activeTab: status,
+    model,
+    id,
+    document,
+    meta,
+    collectionType,
+  } satisfies PanelComponentProps;
 
   const descriptions = React.useMemo(
     () =>
@@ -84,10 +93,17 @@ const ActionsPanelContent = () => {
       query: { status = 'draft' },
     },
   ] = useQueryParams<{ status: 'draft' | 'published' }>();
-  const { model, id, document, meta } = useDoc();
+  const { model, id, document, meta, collectionType } = useDoc();
   const { plugins } = useStrapiApp();
 
-  const props = { activeTab: status, model, id, document, meta } satisfies DocumentActionProps;
+  const props = {
+    activeTab: status,
+    model,
+    id,
+    document,
+    meta,
+    collectionType,
+  } satisfies DocumentActionProps;
 
   return (
     <Flex direction="column" gap={2} width="100%">
@@ -131,7 +147,7 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
       justifyContent="stretch"
       alignItems="flex-start"
     >
-      <Typography variant="sigma" textTransform="uppercase">
+      <Typography as="h2" variant="sigma" textTransform="uppercase">
         {title}
       </Typography>
       {children}

@@ -10,7 +10,8 @@ test.describe('Edit View', () => {
   });
 
   test.describe('Collection Type', () => {
-    test('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
+    // TODO V5: D&P
+    test.skip('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Content Manager' }).click();

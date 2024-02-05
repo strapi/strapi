@@ -20,6 +20,15 @@ window.IntersectionObserver = mockIntersectionObserver;
 window.ResizeObserver = ResizeObserver;
 
 /* -------------------------------------------------------------------------------------------------
+ * requestIdleCallback
+ * -----------------------------------------------------------------------------------------------*/
+
+// @ts-expect-error – mocking for testing
+window.requestIdleCallback = setImmediate;
+// @ts-expect-error – mocking for testing
+window.cancelIdleCallback = clearImmediate;
+
+/* -------------------------------------------------------------------------------------------------
  * ResizeObserver
  * -----------------------------------------------------------------------------------------------*/
 

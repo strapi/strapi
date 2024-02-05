@@ -33,6 +33,10 @@ interface EditViewContext {
    */
   activeTab: 'draft' | 'published' | null;
   /**
+   * Will be either 'single-types' | 'collection-types'
+   */
+  collectionType: string;
+  /**
    * this will be undefined if someone is creating an entry.
    */
   document?: {

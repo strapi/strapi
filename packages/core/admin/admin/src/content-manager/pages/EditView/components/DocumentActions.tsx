@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { useForm } from '../../../components/Form';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 
 /* -------------------------------------------------------------------------------------------------
@@ -136,11 +135,10 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: DocumentActionComponent = ({ activeTab }) => {
+const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', (state) => state.canPublish);
-  const { model, collectionType, id } = useDoc();
   const { publish } = useDocumentActions();
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
@@ -169,14 +167,13 @@ const PublishAction: DocumentActionComponent = ({ activeTab }) => {
 
 PublishAction.type = 'publish';
 
-const UpdateAction: DocumentActionComponent = ({ activeTab }) => {
+const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { canCreate, canUpdate } = useDocumentRBAC('PublishAction', ({ canCreate, canUpdate }) => ({
     canCreate,
     canUpdate,
   }));
-  const { model, collectionType, id } = useDoc();
   const { create, update } = useDocumentActions();
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
