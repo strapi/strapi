@@ -333,7 +333,8 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
   const listAttributes = convertListLayoutToFieldLayouts(
     data.contentType.layouts.list,
     schema?.attributes,
-    listMetadatas
+    listMetadatas,
+    data.components
   );
 
   return { layout: listAttributes, settings: data.contentType.settings, metadatas: listMetadatas };
@@ -353,7 +354,8 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
 const convertListLayoutToFieldLayouts = (
   columns: LayoutData['contentType']['layouts']['list'],
   attributes: Schema['attributes'] = {},
-  metadatas: ListLayout['metadatas']
+  metadatas: ListLayout['metadatas'],
+  components: Record<string, Contracts.Components.ComponentConfiguration> = {}
 ) => {
   return columns
     .map((name) => {
@@ -368,7 +370,10 @@ const convertListLayoutToFieldLayouts = (
       return {
         attribute,
         label: metadata.label ?? '',
-        mainField: metadata.mainField,
+        mainField:
+          'component' in attribute
+            ? components[attribute.component].settings.mainField
+            : metadata.mainField,
         name: name,
         searchable: metadata.searchable ?? true,
         sortable: metadata.sortable ?? true,
