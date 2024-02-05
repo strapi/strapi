@@ -83,11 +83,11 @@ export type ServiceInstance<
           | Middleware.Middleware<Common.UID.ContentType, TAction>
           | Middleware.Middleware<Common.UID.ContentType, TAction>[],
         opts?: Middleware.Options
-      ) => ThisType<ServiceInstance<TContentTypeUID>>)
-    | ((
-        cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
-        opts?: Middleware.Options
-      ) => ThisType<ServiceInstance<TContentTypeUID>>);
+      ) => ThisType<ServiceInstance<TContentTypeUID>>) &
+        ((
+          cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
+          opts?: Middleware.Options
+        ) => ThisType<ServiceInstance<TContentTypeUID>>);
 
   /**
    * `.with()` instantiates a new document repository with default parameters
@@ -133,11 +133,11 @@ export type Service = {
           | Middleware.Middleware<Common.UID.ContentType, TAction>
           | Middleware.Middleware<Common.UID.ContentType, TAction>[],
         opts?: Middleware.Options
-      ) => Service)
-    | ((
-        cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
-        opts?: Middleware.Options
-      ) => Service);
+      ) => Service) &
+        ((
+          cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
+          opts?: Middleware.Options
+        ) => Service);
 
   middlewares: Middleware.Manager;
 } & DocumentEngine;
