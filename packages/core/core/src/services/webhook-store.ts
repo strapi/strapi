@@ -8,7 +8,7 @@ import type { Model, Database } from '@strapi/database';
 const { ValidationError } = errors;
 
 const webhookModel: Model = {
-  uid: 'webhook',
+  uid: 'strapi::webhook',
   singularName: 'strapi_webhooks',
   tableName: 'strapi_webhooks',
   attributes: {
@@ -106,7 +106,7 @@ export interface WebhookStore {
 }
 
 const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
-  const webhookQueries = db.query('webhook');
+  const webhookQueries = db.query('strapi::webhook');
 
   return {
     allowedEvents: new Map([]),
