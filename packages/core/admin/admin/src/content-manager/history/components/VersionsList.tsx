@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography, type BoxProps } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -13,23 +13,21 @@ import { getDateFnsLocaleName } from '../../../utils/locales';
 import { getDisplayName } from '../../utils/users';
 
 /* -------------------------------------------------------------------------------------------------
- * BlueChunks
+ * BlueText
  * -----------------------------------------------------------------------------------------------*/
 
-const BlueChunks = (chunks: React.ReactNode) => (
-  <Typography textColor="primary600">{chunks}</Typography>
+const BlueText = (children: React.ReactNode) => (
+  <Typography textColor="primary600">{children}</Typography>
 );
 
 /* -------------------------------------------------------------------------------------------------
  * VersionCard
  * -----------------------------------------------------------------------------------------------*/
 
-type Color = React.ComponentProps<typeof Box>['color'];
-
 interface StatusData {
-  background: Color;
-  border: Color;
-  text: Color;
+  background: BoxProps['background'];
+  border: BoxProps['borderColor'];
+  text: BoxProps['color'];
   message: MessageDescriptor;
 }
 
@@ -42,9 +40,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
   const { formatDate, formatMessage, locale } = useIntl();
   const [{ query }] = useQueryParams<{ id?: string }>();
 
-  const isActive = query.id === version.id.toString();
-
-  const getStatusData = (): StatusData => {
+  const statusData = ((): StatusData => {
     switch (version.status) {
       case 'draft':
         return {
@@ -79,15 +75,12 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
           },
         };
     }
-  };
-
-  const statusData = getStatusData();
-
+  })();
+  const isActive = query.id === version.id.toString();
   const distanceToNow = formatDistanceToNowStrict(new Date(version.createdAt), {
     addSuffix: true,
     locale: locales[getDateFnsLocaleName(locale)],
   });
-
   const author = version.createdBy && getDisplayName(version.createdBy, formatMessage);
 
   return (
@@ -120,16 +113,16 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
         <Typography as="p" textColor="neutral600">
           {formatMessage(
             {
-              id: 'todo',
+              id: 'content-manager.history.sidebar.versionDescription',
               defaultMessage:
                 '{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}',
             },
             {
               distanceToNow,
               author,
-              isAnonymous: version.createdBy ? 'false' : 'true',
-              isCurrent: isCurrent ? 'true' : 'false',
-              b: BlueChunks,
+              isAnonymous: !Boolean(version.createdBy),
+              isCurrent,
+              b: BlueText,
             }
           )}
         </Typography>
@@ -173,7 +166,6 @@ const VersionsList = ({ versions, page }: VersionsListProps) => {
       direction="column"
       alignItems="stretch"
       width="320px"
-      minHeight="100vh"
       height="100vh"
       background="neutral0"
       borderColor="neutral200"
