@@ -28,6 +28,17 @@ export const defaultToDraft: Middleware = async (ctx, next) => {
 };
 
 /**
+ * In mutating actions we don't want user to set the publishedAt attribute.
+ */
+export const filterDataPublishedAt: Middleware = async (ctx, next) => {
+  if (ctx.params?.data.publishedAt) {
+    ctx.params.data.publishedAt = null;
+  }
+
+  return next(ctx);
+};
+
+/**
  * Add status lookup query to the params
  */
 export const statusToLookup: Middleware = async (ctx, next) => {
@@ -74,11 +85,4 @@ export const statusToData: Middleware = async (ctx, next) => {
   ctx.params.data = data;
 
   return next(ctx);
-};
-
-export default {
-  setStatusToDraft,
-  defaultToDraft,
-  statusToLookup,
-  statusToData,
 };

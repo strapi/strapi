@@ -4,12 +4,12 @@ import { createIdMap } from '../id-map';
 const ARTICLE_UID = 'api::article.article';
 const CATEGORY_UID = 'api::category.category';
 
-const expectedQuery = (documentId: string, locale: string) => ({
-  select: ['id', 'documentId', 'locale'],
+const expectedQuery = (documentId: string, locale: string, isDraft = false) => ({
+  select: ['id', 'documentId', 'locale', 'publishedAt'],
   where: {
     documentId: { $in: [documentId] },
     locale,
-    publishedAt: null,
+    publishedAt: isDraft ? null : { $ne: null },
   },
 });
 
@@ -35,15 +35,32 @@ describe('Extract document ids from relation data', () => {
 
     const documentId = 'Article1';
     const locale = 'en';
+    const isDraft = false;
+
     findArticles.mockReturnValueOnce([{ id: 1, documentId, locale }]);
 
     // Add 1 document to load
-    idMap.add(ARTICLE_UID, documentId, locale);
+    idMap.add({ uid: ARTICLE_UID, documentId, locale, isDraft });
     await idMap.load();
 
     // Check that the id is loaded
-    expect(idMap.get(ARTICLE_UID, documentId, locale)).toEqual(1);
-    expect(findArticles).toHaveBeenCalledWith(expectedQuery(documentId, locale));
+    expect(idMap.get({ uid: ARTICLE_UID, documentId, locale, isDraft })).toEqual(1);
+    expect(findArticles).toHaveBeenCalledWith(expectedQuery(documentId, locale, isDraft));
+  });
+
+  it('Load with no locale', async () => {
+    const idMap = createIdMap({ strapi: global.strapi });
+
+    const documentId = 'Article1';
+    const keyFields = { uid: ARTICLE_UID, documentId, isDraft: false, locale: null };
+    findArticles.mockReturnValueOnce([{ id: 1, documentId, locale: null, publishedAt: undefined }]);
+
+    // Add 1 document to load
+    idMap.add(keyFields);
+    await idMap.load();
+
+    // Check that the id is loaded
+    expect(idMap.get(keyFields)).toEqual(1);
   });
 
   it('Load multiple document ids from different UIDs', async () => {
@@ -56,14 +73,14 @@ describe('Extract document ids from relation data', () => {
     findCategories.mockReturnValueOnce([{ id: 2, documentId: categoryDocumentId, locale }]);
 
     // Add 2 documents to load
-    idMap.add(ARTICLE_UID, articleDocumentId, locale);
-    idMap.add(CATEGORY_UID, categoryDocumentId, locale);
+    idMap.add({ uid: ARTICLE_UID, documentId: articleDocumentId, locale });
+    idMap.add({ uid: CATEGORY_UID, documentId: categoryDocumentId, locale });
     // Should load articles and categories separately
     await idMap.load();
 
     // Check that the ids are loaded
-    expect(idMap.get(ARTICLE_UID, articleDocumentId, locale)).toEqual(1);
-    expect(idMap.get(CATEGORY_UID, categoryDocumentId, locale)).toEqual(2);
+    expect(idMap.get({ uid: ARTICLE_UID, documentId: articleDocumentId, locale })).toEqual(1);
+    expect(idMap.get({ uid: CATEGORY_UID, documentId: categoryDocumentId, locale })).toEqual(2);
 
     expect(findArticles).toHaveBeenCalledWith(expectedQuery(articleDocumentId, locale));
     expect(findCategories).toHaveBeenCalledWith(expectedQuery(categoryDocumentId, locale));
@@ -80,13 +97,13 @@ describe('Extract document ids from relation data', () => {
       .mockReturnValueOnce([{ id: 2, documentId, locale: frLocale }]);
 
     // Add 2 documents to load
-    idMap.add(ARTICLE_UID, documentId, enLocale);
-    idMap.add(ARTICLE_UID, documentId, frLocale);
+    idMap.add({ uid: ARTICLE_UID, documentId, locale: enLocale });
+    idMap.add({ uid: ARTICLE_UID, documentId, locale: frLocale });
     await idMap.load();
 
     // Check that the ids are loaded
-    expect(idMap.get(ARTICLE_UID, documentId, enLocale)).toEqual(1);
-    expect(idMap.get(ARTICLE_UID, documentId, frLocale)).toEqual(2);
+    expect(idMap.get({ uid: ARTICLE_UID, documentId, locale: enLocale })).toEqual(1);
+    expect(idMap.get({ uid: ARTICLE_UID, documentId, locale: frLocale })).toEqual(2);
 
     expect(findArticles).toHaveBeenCalledWith(expectedQuery(documentId, enLocale));
     expect(findArticles).toHaveBeenCalledWith(expectedQuery(documentId, frLocale));

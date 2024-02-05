@@ -1,6 +1,6 @@
 import { Documents } from '@strapi/types';
-import DP from './draft-and-publish';
-import i18n from './locales';
+import * as DP from './draft-and-publish';
+import * as i18n from './locales';
 
 export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) => {
   // Find Many
@@ -50,6 +50,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
       // Only create drafts
       DP.setStatusToDraft,
       DP.statusToData,
+      DP.filterDataPublishedAt,
       i18n.defaultLocale,
       i18n.localeToData,
     ],
@@ -65,6 +66,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
       DP.setStatusToDraft,
       DP.statusToLookup,
       DP.statusToData,
+      DP.filterDataPublishedAt,
       // Default locale will be set if not provided
       i18n.defaultLocale,
       i18n.localeToLookup,
@@ -102,7 +104,7 @@ export const loadDefaultMiddlewares = (manager: Documents.Middleware.Manager) =>
   manager.add('_all', 'count', [DP.defaultToDraft, i18n.defaultLocale], {});
 
   // Clone
-  manager.add('_all', 'clone', [i18n.localeToLookup], {});
+  manager.add('_all', 'clone', [DP.filterDataPublishedAt, i18n.localeToLookup], {});
 
   // Publish
   manager.add('_all', 'publish', [i18n.localeToLookup], {});

@@ -1,11 +1,9 @@
 import { Common } from '@strapi/types';
 import { mapAsync, pipeAsync } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
-import { createIdMap } from './id-map';
-import { extractDataIds as extractDataRelationIds } from './relations/extract/data-ids';
-import { transformDataIdsVisitor as transformRelationDataIds } from './relations/transform/data-ids';
 import { transformOutputIds as transformRelationOutputIds } from './relations/transform/output-ids';
 import { switchIdForDocumentId } from './utils';
+import { transformData } from './data';
 
 /**
  * Transform input of a query to map document ids to entity ids.
@@ -18,20 +16,10 @@ async function transformParamsDocumentId(
     isDraft: boolean;
   }
 ) {
-  const idMap = createIdMap({ strapi });
-
-  // Extract any relation ids from the input
-  if (input.data) {
-    await extractDataRelationIds(idMap, input.data, { ...opts, uid });
-  }
-
-  // Load any relation the extract methods found
-  await idMap.load();
-
   // Transform any relation ids to entity ids
   let data = input.data;
   if (input.data) {
-    data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
+    data = await transformData(input.data, { ...opts, uid });
   }
 
   // TODO: Transform fields

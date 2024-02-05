@@ -1,16 +1,36 @@
 import { Strapi } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 
-const encodeKey = (...values: string[]) => {
-  return values.join(':::');
+/**
+ * TODO: Find a better way to encode keys than this
+ * This converts an object into a string by joining its keys and values,
+ * so it can be used as a key in a Map.
+ *
+ * @example
+ * const obj = { a: 1, b: 2 };
+ * const key = encodeKey(obj);
+ *      ^ "a:::1&&b:::2"
+ */
+const encodeKey = (obj: any) => {
+  // Sort keys to always keep the same order when encoding
+  const keys = Object.keys(obj).sort();
+  return keys.map((key) => `${key}:::${obj[key]}`).join('&&');
 };
+
+interface KeyFields {
+  uid: string;
+  documentId: string;
+  locale?: string | null;
+  isDraft?: boolean;
+}
 
 export interface IdMap {
   loadedIds: Map<string, string>;
-  toLoadIds: Map<string, { uid: string; documentId: string; locale?: string | null }>;
-  add(uid: string, documentId: string, locale?: string | null): void;
+  toLoadIds: Map<string, KeyFields>;
+  // Make the Keys type to be the params of add
+  add(keys: KeyFields): void;
   load(): Promise<void>;
-  get(uid: string, documentId: string, locale?: string | null): string | undefined;
+  get(keys: KeyFields): string | undefined;
   clear(): void;
 }
 
@@ -27,8 +47,8 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
     /**
      * Register a new document id and its corresponding entity id.
      */
-    add(uid: string, documentId: string, locale?: string | null) {
-      const key = encodeKey(uid, documentId, locale || '');
+    add(keyFields: KeyFields) {
+      const key = encodeKey({ isDraft: false, locale: null, ...keyFields });
 
       // If the id is already loaded, do nothing
       if (loadedIds.has(key)) return;
@@ -36,7 +56,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
       if (toLoadIds.has(key)) return;
 
       // Add the id to the toLoadIds
-      toLoadIds.set(key, { uid, documentId, locale });
+      toLoadIds.set(key, keyFields);
     },
 
     /**
@@ -48,9 +68,9 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
       const loadIdValues = Array.from(toLoadIds.values());
 
       // 1. Group ids to query together
-      const idsByUidAndLocale = loadIdValues.reduce((acc, { uid, documentId, locale }) => {
-        const key = encodeKey(uid, locale || '');
-        const ids = acc[key] || { uid, locale, documentIds: [] };
+      const idsByUidAndLocale = loadIdValues.reduce((acc, { documentId, ...rest }) => {
+        const key = encodeKey(rest);
+        const ids = acc[key] || { ...rest, documentIds: [] };
         ids.documentIds.push(documentId);
         return { ...acc, [key]: ids };
       }, {});
@@ -58,21 +78,19 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
       // 2. Query ids
       await mapAsync(
         Object.values(idsByUidAndLocale),
-        async ({ uid, locale, documentIds }: any) => {
+        async ({ uid, locale, documentIds, isDraft }: any) => {
           const result = await strapi?.db?.query(uid).findMany({
-            select: ['id', 'documentId', 'locale'],
+            select: ['id', 'documentId', 'locale', 'publishedAt'],
             where: {
               documentId: { $in: documentIds },
               locale,
-              publishedAt: null,
-              // TODO: Fix this
-              // publishedAt: isDraft ? null : { $ne: null },
+              publishedAt: isDraft ? null : { $ne: null },
             },
           });
 
           // 3. Store result in loadedIds
-          result?.forEach(({ documentId, id, locale }) => {
-            const key = encodeKey(uid, documentId, locale || '');
+          result?.forEach(({ documentId, id, locale, publishedAt }: any) => {
+            const key = encodeKey({ documentId, uid, locale, isDraft: !publishedAt });
             loadedIds.set(key, id);
           });
         }
@@ -85,8 +103,8 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
     /**
      * Get the entity id for a given document id.
      */
-    get(uid: string, documentId: string, locale?: string | null) {
-      const key = encodeKey(uid, documentId, locale || '');
+    get(keys: KeyFields) {
+      const key = encodeKey({ isDraft: false, locale: null, ...keys });
       return loadedIds.get(key);
     },
 

@@ -54,9 +54,3 @@ export const localeToData: Middleware = async (ctx, next) => {
 
   return next(ctx);
 };
-
-export default {
-  defaultLocale,
-  localeToLookup,
-  localeToData,
-};

@@ -4,4 +4,4 @@ export type ID = string | number;
 export type ShortHand = ID;
 export type LongHand = { id: ID };
 
-export type GetIdOrThrow = (relation: ID) => ID | never;
+export type GetId = (relation: ID) => ID | null;
