@@ -49,10 +49,6 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  if (!slug || (!documentId && layout?.contentType.kind === 'collectionType')) {
-    return <Navigate to="/content-manager" />;
-  }
-
   if (isLoadingLayout || versionsResponse.isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -60,6 +56,10 @@ const HistoryPage = () => {
   const selectedVersion = versionsResponse.data?.data.find(
     (version) => version.id.toString() === query.id
   );
+
+  if (!slug || !selectedVersion || (!documentId && layout?.contentType.kind === 'collectionType')) {
+    return <Navigate to="/content-manager" />;
+  }
 
   return (
     <>
@@ -75,7 +75,7 @@ const HistoryPage = () => {
         )}
       />
       <Flex direction="row" alignItems="flex-start">
-        <VersionDetails version={selectedVersion!} />
+        <VersionDetails version={selectedVersion} />
         <VersionsList versions={versionsResponse.data!} page={page} />
       </Flex>
     </>
