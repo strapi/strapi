@@ -152,7 +152,7 @@ jobs:
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
-  e2e:
+  e2e_ce:
     timeout-minutes: 60
     needs: [changes, build, typescript, unit_front]
     name: '[CE] e2e (browser: ${{ matrix.project }})'
@@ -180,7 +180,10 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run [CE] E2E tests
-        run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          jestOptions: --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
