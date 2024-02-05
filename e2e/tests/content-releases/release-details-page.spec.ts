@@ -63,7 +63,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('button', { name: 'Publish' }).click();
     expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Publish' })).not.toBeVisible();
-    await expect(page.getByRole('button', { name: 'Release actions' })).not.toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Release edit and delete menu' })
+    ).not.toBeVisible();
     await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
     await expect(
       page.getByRole('gridcell', { name: 'This entry was published.' }).first()
@@ -72,7 +74,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
   test('A user should be able to edit and delete a release', async ({ page }) => {
     // Edit the release
-    await page.getByRole('button', { name: 'Release actions' }).click();
+    await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
     await page.getByRole('button', { name: 'Edit' }).click();
     await expect(page.getByRole('dialog', { name: 'Edit release' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -83,7 +85,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await expect(page.getByRole('heading', { name: editedEntryName })).toBeVisible();
 
     // Delete the release
-    await page.getByRole('button', { name: 'Release actions' }).click();
+    await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
     await page.getByRole('button', { name: 'Delete' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
     // Wait for client side redirect to the releases page
