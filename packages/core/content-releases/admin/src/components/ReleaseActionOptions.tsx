@@ -54,7 +54,7 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
     border-right: ${({ actionType }) => actionType === 'publish' && 'none'};
   }
 
-  &:hover {
+  &[data-checked='false']:hover {
     color: ${({ theme }) => theme.colors.neutral700};
     background-color: ${({ theme }) => theme.colors.neutral100};
     border-color: ${({ theme }) => theme.colors.neutral200};
