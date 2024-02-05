@@ -158,7 +158,7 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
         });
 
         if ('data' in res) {
-          navigate({ search: `?state=published` });
+          navigate({ search: `?status=published` });
         }
       }
     },
