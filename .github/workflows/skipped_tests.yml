@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
       # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: .github/filters.yaml
