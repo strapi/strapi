@@ -1,20 +1,16 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { formatDistanceToNowStrict } from 'date-fns';
 import * as locales from 'date-fns/locale';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { getDateFnsLocaleName } from '../../../utils/locales';
-import { buildValidGetParams } from '../../utils/api';
 import { getDisplayName } from '../../utils/users';
-import { useGetHistoryVersionsQuery } from '../services/historyVersion';
-
-import type { Entity, UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * BlueChunks
@@ -164,41 +160,12 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface VersionsListProps {
-  contentType: UID.ContentType;
-  documentId?: Entity.ID;
+  versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
+  page: number;
 }
 
-const VersionsList = ({ contentType, documentId }: VersionsListProps) => {
+const VersionsList = ({ versions, page }: VersionsListProps) => {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
-
-  // Parse state from query params
-  const [{ query }] = useQueryParams<{
-    page?: number;
-    id?: number;
-    plugins?: Record<string, unknown>;
-  }>();
-  const validQueryParams = buildValidGetParams(query);
-  const page = validQueryParams.page ? Number(validQueryParams.page) : 1;
-
-  const response = useGetHistoryVersionsQuery({
-    contentType,
-    ...(documentId ? { documentId } : {}),
-    ...validQueryParams,
-  });
-
-  // Make sure the user lands on a selected history version
-  React.useEffect(() => {
-    const versions = response.data?.data;
-
-    if (!response.isLoading && !query.id && versions?.[0]) {
-      navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
-    }
-  }, [response.isLoading, navigate, query.id, response.data?.data, query]);
-
-  if (response.isLoading) {
-    return <LoadingIndicatorPage />;
-  }
 
   return (
     <Flex
@@ -230,7 +197,7 @@ const VersionsList = ({ contentType, documentId }: VersionsListProps) => {
         </Typography>
         <Box background="neutral150" hasRadius padding={1}>
           <Typography variant="sigma" textColor="neutral600">
-            {response.data?.meta.pagination?.total}
+            {versions.meta.pagination?.total}
           </Typography>
         </Box>
       </Flex>
@@ -246,7 +213,7 @@ const VersionsList = ({ contentType, documentId }: VersionsListProps) => {
         flex={1}
         overflow="scroll"
       >
-        {response.data?.data.map((version, index) => (
+        {versions.data.map((version, index) => (
           <li key={version.id}>
             <VersionCard version={version} isCurrent={page === 1 && index === 0} />
           </li>

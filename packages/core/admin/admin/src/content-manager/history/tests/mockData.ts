@@ -1,3 +1,5 @@
+import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+
 const HISTORY_VERSIONS_MOCK_DATA = {
   data: [
     {
@@ -427,19 +429,11 @@ const HISTORY_VERSIONS_MOCK_DATA = {
       updatedAt: '2024-02-01T13:13:40.157Z',
       publishedAt: '2024-02-01T13:13:40.159Z',
       createdBy: {
-        id: 1,
-        firstname: 'Rémi',
-        lastname: 'Devp',
-        username: 'remidej',
-        email: 'remi@hey.com',
-        isActive: true,
-        blocked: false,
-        preferedLanguage: null,
-        createdAt: '2023-10-12T17:46:45.759Z',
-        updatedAt: '2023-11-14T12:37:43.818Z',
-        documentId: null,
-        publishedAt: null,
-        locale: null,
+        id: 2,
+        firstname: 'John',
+        lastname: 'Doe',
+        username: 'johndoe',
+        email: 'johndoe@test.com',
       },
     },
     {
@@ -863,6 +857,7 @@ const HISTORY_VERSIONS_MOCK_DATA = {
         id: 1,
         firstname: 'Kai',
         lastname: 'Doe',
+        email: 'kaidoe@test.com',
       },
     },
   ],
@@ -878,6 +873,6 @@ const HISTORY_VERSIONS_MOCK_DATA = {
 
 const mockHistoryVersionsData = {
   historyVersions: HISTORY_VERSIONS_MOCK_DATA,
-} as const;
+} satisfies Record<string, Contracts.HistoryVersions.GetHistoryVersions.Response>;
 
 export { mockHistoryVersionsData };

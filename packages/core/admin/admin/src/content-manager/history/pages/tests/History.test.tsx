@@ -1,40 +1,61 @@
-import { render, screen, waitFor } from '@tests/utils';
-import { Route, Routes } from 'react-router-dom';
+import * as React from 'react';
+
+import { act, waitForElementToBeRemoved } from '@testing-library/react';
+import { render as renderRTL, screen, waitFor } from '@tests/utils';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { HistoryPage } from '../History';
 
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span data-testid="location">{location.search}</span>;
+};
+
+const render = ({ path, initialEntries }: { path: string; initialEntries: string[] }) =>
+  renderRTL(
+    <Routes>
+      <Route path={path} element={<HistoryPage />} />
+    </Routes>,
+    {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
+      initialEntries,
+    }
+  );
+
 describe('History page', () => {
   it('renders single type correctly', async () => {
-    render(
-      <Routes>
-        <Route path="/content-manager/:singleType/:slug/history" element={<HistoryPage />} />
-      </Routes>,
-      {
-        initialEntries: ['/content-manager/single-types/api::homepage.homepage/history?id=26'],
-      }
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
+    render({
+      path: '/content-manager/:singleType/:slug/history',
+      initialEntries: ['/content-manager/single-types/api::homepage.homepage/history'],
     });
+
+    // Redirects to the first version when it's loaded
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+    expect(await screen.findByText('?id=26')).toBeInTheDocument();
+
     expect(document.title).toBe('Homepage history');
   });
 
   it('renders collection type correctly', async () => {
-    render(
-      <Routes>
-        <Route
-          path="/content-manager/:collectionType/:slug/:id/history"
-          element={<HistoryPage />}
-        />
-      </Routes>,
-      {
-        initialEntries: ['/content-manager/collection-types/api::address.address/1/history?id=26'],
-      }
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
+    render({
+      path: '/content-manager/:collectionType/:slug/:id/history',
+      initialEntries: ['/content-manager/collection-types/api::address.address/1/history'],
     });
+
+    // Redirects to the first version when it's loaded
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
+    expect(await screen.findByText('?id=26')).toBeInTheDocument();
+
+    expect(document.title).toBe('Address history');
   });
 });

@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
+import { mockHistoryVersionsData } from '../../tests/mockData';
 import { VersionsList } from '../VersionsList';
 
 const user = userEvent.setup();
@@ -31,14 +32,11 @@ const render = (props: React.ComponentProps<typeof VersionsList>) =>
 
 describe('VersionsList', () => {
   it('renders a list of history versions', async () => {
-    render({ contentType: 'api::article.article', documentId: 'document-id' });
+    render({ page: 1, versions: mockHistoryVersionsData.historyVersions });
 
     await waitFor(() => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
-
-    // Redirects to the first version
-    expect(screen.getByText('?id=26')).toBeInTheDocument();
 
     // Shows sidebar header and total count
     const header = screen.getByRole('banner');

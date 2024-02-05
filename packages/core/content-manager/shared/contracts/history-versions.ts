@@ -23,6 +23,7 @@ export interface HistoryVersionDataResponse extends CreateHistoryVersion {
     firstname?: string;
     lastname?: string;
     username?: string;
+    email: string;
   };
 }
 
