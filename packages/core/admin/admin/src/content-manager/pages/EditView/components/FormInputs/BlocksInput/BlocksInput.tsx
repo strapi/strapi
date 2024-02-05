@@ -15,13 +15,15 @@ interface BlocksInputProps extends Omit<InputProps, 'type'> {
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   ({ label, name, required = false, hint, ...editorProps }, forwardedRef) => {
+    const id = React.useId();
     const field = useField(name);
 
     return (
-      <Field name={name} hint={hint} error={field.error} required={required}>
+      <Field id={id} name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
           <FieldLabel>{label}</FieldLabel>
           <BlocksEditor
+            ariaLabelId={id}
             name={name}
             error={field.error}
             ref={forwardedRef}
