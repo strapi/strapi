@@ -7,7 +7,7 @@ import { getService } from '../utils';
 import { RELEASE_MODEL_UID } from '../constants';
 
 const createSchedulingService = ({ strapi }: { strapi: LoadedStrapi }) => {
-  const scheduleJobs = new Map<Release['id'], Job>();
+  const scheduledJobs = new Map<Release['id'], Job>();
 
   return {
     async set(releaseId: Release['id'], scheduleDate: Date) {
@@ -30,22 +30,22 @@ const createSchedulingService = ({ strapi }: { strapi: LoadedStrapi }) => {
         this.cancel(releaseId);
       });
 
-      if (scheduleJobs.has(releaseId)) {
+      if (scheduledJobs.has(releaseId)) {
         this.cancel(releaseId);
       }
 
-      scheduleJobs.set(releaseId, job);
+      scheduledJobs.set(releaseId, job);
 
-      return scheduleJobs;
+      return scheduledJobs;
     },
 
     cancel(releaseId: Release['id']) {
-      if (scheduleJobs.has(releaseId)) {
-        scheduleJobs.get(releaseId)!.cancel();
-        scheduleJobs.delete(releaseId);
+      if (scheduledJobs.has(releaseId)) {
+        scheduledJobs.get(releaseId)!.cancel();
+        scheduledJobs.delete(releaseId);
       }
 
-      return scheduleJobs;
+      return scheduledJobs;
     },
   };
 };
