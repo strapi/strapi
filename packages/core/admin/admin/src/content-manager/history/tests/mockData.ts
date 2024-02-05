@@ -873,6 +873,6 @@ const HISTORY_VERSIONS_MOCK_DATA = {
 
 const mockHistoryVersionsData = {
   historyVersions: HISTORY_VERSIONS_MOCK_DATA,
-} satisfies Record<string, Contracts.HistoryVersions.GetHistoryVersions.Response>;
+} as const;
 
 export { mockHistoryVersionsData };

@@ -169,6 +169,7 @@ const VersionsList = ({ versions, page }: VersionsListProps) => {
 
   return (
     <Flex
+      shrink={0}
       direction="column"
       alignItems="stretch"
       width="320px"

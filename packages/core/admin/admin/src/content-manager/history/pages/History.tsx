@@ -28,7 +28,7 @@ const HistoryPage = () => {
   // Parse state from query params
   const [{ query }] = useQueryParams<{
     page?: number;
-    id?: number;
+    id?: string;
     plugins?: Record<string, unknown>;
   }>();
   const validQueryParams = buildValidGetParams(query);
@@ -57,6 +57,10 @@ const HistoryPage = () => {
     return <LoadingIndicatorPage />;
   }
 
+  const selectedVersion = versionsResponse.data?.data.find(
+    (version) => version.id.toString() === query.id
+  );
+
   return (
     <>
       <Helmet
@@ -71,7 +75,7 @@ const HistoryPage = () => {
         )}
       />
       <Flex direction="row" alignItems="flex-start">
-        <VersionDetails />
+        <VersionDetails version={selectedVersion!} />
         <VersionsList versions={versionsResponse.data!} page={page} />
       </Flex>
     </>
