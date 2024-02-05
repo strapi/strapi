@@ -35,9 +35,7 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: i18n - Move logic to i18n package
  * TODO: Webhooks
  * TODO: Audit logs
- * TODO: Entity Validation - Uniqueness across same locale and publication status
  * TODO: File upload
- * TODO: replace 'any'
  * TODO: availableLocales
  *
  */
