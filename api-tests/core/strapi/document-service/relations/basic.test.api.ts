@@ -120,4 +120,35 @@ describe('Document Service relations', () => {
       })
     );
   });
+
+  describe('Discard', () => {
+    it('Discarding draft brings back relations from the published version', async () => {
+      // Create article in draft with a relation
+      const draftArticle = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'Article with author', categories: ['Cat1'] },
+      });
+
+      const id = draftArticle.id as string;
+
+      // Publish documents
+      await strapi.documents(CATEGORY_UID).publish('Cat1');
+      await strapi.documents(ARTICLE_UID).publish(id);
+
+      // Update the draft article
+      await strapi
+        .documents(ARTICLE_UID)
+        .update(id, { data: { title: 'Updated Article with author', categories: [] } });
+
+      // Discard the draft
+      const newDraftArticles = await strapi
+        .documents(ARTICLE_UID)
+        .discardDraft(id, { populate: ['categories'] });
+
+      // Validate the draft is discarded
+      const newDraftArticle = newDraftArticles.versions[0];
+
+      expect(newDraftArticle.title).toBe('Article with author');
+      expect(newDraftArticle.categories.length).toBe(1);
+    });
+  });
 });

@@ -340,6 +340,9 @@ const createDocumentEngine = ({
    * Steps:
    * - Delete the matching draft versions (publishedAt = null)
    * - Clone the matching published versions into draft versions
+   *
+   * If the document has a published version, the draft version will be created from the published version.
+   * If the document has no published version, the version will be removed.
    */
   async discardDraft(uid, documentId, params) {
     // Delete draft versions, clone published versions into draft versions
@@ -349,16 +352,36 @@ const createDocumentEngine = ({
       lookup: { ...params?.lookup, publishedAt: null },
     });
 
-    // Clone published versions into draft versions
-    const clonedDocuments = (await this.clone(uid, documentId, {
-      ...(params || {}),
-      // Clone only published versions
-      lookup: { ...params?.lookup, publishedAt: { $ne: null } },
-      // @ts-expect-error - Generic type does not have publishedAt attribute by default
-      data: { documentId, publishedAt: null },
-    })) as any;
+    // Get deep populate of published versions
+    const entriesToClone = await strapi.db?.query(uid).findMany({
+      where: {
+        ...params?.lookup,
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      populate: getDeepPopulate(uid),
+    });
 
-    return { versions: clonedDocuments?.versions || [] };
+    // Transform published entry data and create draft versions
+    const clonedEntries = await mapAsync(
+      entriesToClone,
+      pipeAsync(
+        set('publishedAt', null),
+        set('documentId', documentId),
+        omit('id'),
+        // published entryId -> document
+        (entry) => transformOutputIds(uid, entry),
+        // documentId -> draft entryId
+        (entry) => {
+          const opts = { uid, locale: entry.locale, isDraft: true, throwOnMissingId: false };
+          return transformData(entry, opts);
+        },
+        // Create the draft entry
+        ({ locale, ...data }) => this.create(uid, { data, locale, ...params })
+      )
+    );
+
+    return { versions: clonedEntries };
   },
 });
 
