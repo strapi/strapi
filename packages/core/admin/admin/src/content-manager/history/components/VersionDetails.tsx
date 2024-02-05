@@ -61,11 +61,16 @@ const VersionContent = ({ version }: VersionContentProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface VersionDetailsProps {
-  version: Contracts.HistoryVersions.HistoryVersionDataResponse;
+  version: Contracts.HistoryVersions.HistoryVersionDataResponse | undefined;
 }
 
 const VersionDetails = ({ version }: VersionDetailsProps) => {
   const headerId = React.useId();
+
+  if (!version) {
+    // TODO: handle selected version not found when the designs are ready
+    return <Main grow={1} />;
+  }
 
   return (
     <Main grow={1} labelledBy={headerId}>
