@@ -1,15 +1,12 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, type BoxProps } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { RelativeTime, useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { formatDistanceToNowStrict } from 'date-fns';
-import * as locales from 'date-fns/locale';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { getDateFnsLocaleName } from '../../../utils/locales';
 import { getDisplayName } from '../../utils/users';
 
 /* -------------------------------------------------------------------------------------------------
@@ -37,7 +34,7 @@ interface VersionCardProps {
 }
 
 const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
-  const { formatDate, formatMessage, locale } = useIntl();
+  const { formatDate, formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ id?: string }>();
 
   const statusData = ((): StatusData => {
@@ -77,10 +74,6 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
     }
   })();
   const isActive = query.id === version.id.toString();
-  const distanceToNow = formatDistanceToNowStrict(new Date(version.createdAt), {
-    addSuffix: true,
-    locale: locales[getDateFnsLocaleName(locale)],
-  });
   const author = version.createdBy && getDisplayName(version.createdBy, formatMessage);
 
   return (
@@ -118,7 +111,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
                 '{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}',
             },
             {
-              distanceToNow,
+              distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
               author,
               isAnonymous: !Boolean(version.createdBy),
               isCurrent,
