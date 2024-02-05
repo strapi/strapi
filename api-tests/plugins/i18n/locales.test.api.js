@@ -398,7 +398,7 @@ describe('CRUD locales', () => {
       const { body: frenchProduct } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
-        qs: { plugins: { i18n: { locale: 'fr-FR' } } },
+        qs: { locale: 'fr-FR' },
         body: { name: 'product name' },
       });
 

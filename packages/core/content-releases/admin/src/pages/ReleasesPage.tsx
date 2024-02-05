@@ -155,8 +155,8 @@ const ReleasesPage = () => {
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
-  const { maximumNumberOfPendingReleases = 3 } = getFeature('cms-content-releases') as {
-    maximumNumberOfPendingReleases: number;
+  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumReleases: number;
   };
   const { trackUsage } = useTracking();
 
@@ -203,7 +203,7 @@ const ReleasesPage = () => {
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
-  const hasReachedMaximumPendingReleases = totalReleases >= maximumNumberOfPendingReleases;
+  const hasReachedMaximumPendingReleases = totalReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -298,7 +298,7 @@ const ReleasesPage = () => {
                   defaultMessage:
                     'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
                 },
-                { number: maximumNumberOfPendingReleases }
+                { number: maximumReleases }
               )}
               onClose={() => {}}
               closeLabel=""
