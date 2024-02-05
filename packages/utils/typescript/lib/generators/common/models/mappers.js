@@ -47,7 +47,7 @@ module.exports = {
   decimal() {
     return [withAttributeNamespace('Decimal')];
   },
-  uid({ attribute, uid }) {
+  uid({ attribute }) {
     const { targetField, options } = attribute;
 
     // If there are no params to compute, then return the attribute type alone
@@ -58,15 +58,12 @@ module.exports = {
     const params = [];
 
     // If the targetField property is defined, then reference it,
-    // otherwise, put `undefined` keyword type nodes as placeholders
-    const targetFieldParams = _.isUndefined(targetField)
-      ? [
-          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-        ]
-      : [factory.createStringLiteral(uid), factory.createStringLiteral(targetField)];
+    // otherwise, put `undefined` keyword type node as placeholder
+    const targetFieldParam = _.isUndefined(targetField)
+      ? factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
+      : factory.createStringLiteral(targetField);
 
-    params.push(...targetFieldParams);
+    params.push(targetFieldParam);
 
     // If the options property is defined, transform it to
     // a type literal node and add it to the params list

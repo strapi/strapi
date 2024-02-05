@@ -20,7 +20,7 @@ export const createConfigurationStream = (strapi: LoadedStrapi): Readable => {
 
       // Webhook
       const webhooksStream = chain([
-        strapi.db.queryBuilder('webhook').stream(),
+        strapi.db.queryBuilder('strapi::webhook').stream(),
         wrapConfigurationItem('webhook'),
       ]);
 
