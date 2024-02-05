@@ -95,7 +95,7 @@ const hasContent = (
     // Repeatable fields show the ID as fallback, in case the mainField
     // doesn't have any content
     if (attribute.repeatable || !mainField) {
-      return content.length > 0;
+      return content?.length > 0;
     }
 
     const value = content?.[mainField];
