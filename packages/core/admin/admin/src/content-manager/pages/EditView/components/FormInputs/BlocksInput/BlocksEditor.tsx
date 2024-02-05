@@ -21,7 +21,7 @@ import { linkBlocks } from './Blocks/Link';
 import { listBlocks } from './Blocks/List';
 import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
-import { BlocksContent } from './BlocksContent';
+import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
@@ -39,6 +39,7 @@ interface BaseBlock {
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+  handleTab?: (editor: Editor) => void;
   snippets?: string[];
   dragHandleTopMargin?: CSSProperties['marginTop'];
 }
@@ -161,15 +162,15 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-interface BlocksEditorProps extends Pick<FieldValue<Attribute.BlocksValue>, 'onChange' | 'value'> {
-  name: string;
+interface BlocksEditorProps
+  extends Pick<FieldValue<Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
+    BlocksContentProps {
   disabled?: boolean;
-  placeholder?: string;
-  error?: string;
+  name: string;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
+  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
@@ -250,7 +251,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent placeholder={placeholder} />
+              <BlocksContent {...contentProps} />
               {!isExpandedMode && (
                 <ExpandIconButton
                   aria-label={formatMessage({

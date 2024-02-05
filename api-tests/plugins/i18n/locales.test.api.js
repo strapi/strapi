@@ -400,7 +400,8 @@ describe('CRUD locales', () => {
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
-        body: { name: 'product name', locale: 'fr-FR' },
+        qs: { locale: 'fr-FR' },
+        body: { name: 'product name' },
       });
 
       await rq({

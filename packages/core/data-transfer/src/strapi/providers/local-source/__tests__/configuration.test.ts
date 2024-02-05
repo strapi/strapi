@@ -15,7 +15,7 @@ describe('Configuration', () => {
         { id: 1, key: 'foo', value: '{}' },
         { id: 2, key: 'bar', value: '{}' },
       ],
-      webhook: [
+      'strapi::webhook': [
         { id: 1, url: '/foo', headers: {}, events: [], enabled: false },
         { id: 2, url: '/bar', headers: {}, events: [], enabled: true },
         { id: 3, url: '/foobar', headers: {}, events: [], enabled: true },

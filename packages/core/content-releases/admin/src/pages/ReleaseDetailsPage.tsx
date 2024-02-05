@@ -34,6 +34,7 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -88,16 +89,16 @@ const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
 `;
 
 const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.danger600};
   }
@@ -252,6 +253,7 @@ const ReleaseDetailsLayout = ({
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
   const dispatch = useTypedDispatch();
+  const { trackUsage } = useTracking();
 
   const release = data?.data;
 
@@ -275,6 +277,14 @@ const ReleaseDetailsLayout = ({
           id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
           defaultMessage: 'Release was published successfully.',
         }),
+      });
+
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+
+      trackUsage('didPublishRelease', {
+        totalEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
       });
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error

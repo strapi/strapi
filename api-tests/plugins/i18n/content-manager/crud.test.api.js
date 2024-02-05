@@ -111,8 +111,12 @@ describe('i18n - Content API', () => {
 
       for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
         res = await rq({
-          method: 'PUT',
-          url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
+          method: 'POST',
+          url: `/content-manager/collection-types/api::category.category`,
+          qs: {
+            plugins: { i18n: { relatedEntityId: data.categories[0].id } },
+            locale,
+          },
           body: {
             name: `category in ${locale}`,
             locale,

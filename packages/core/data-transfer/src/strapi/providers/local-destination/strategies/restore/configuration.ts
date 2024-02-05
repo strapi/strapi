@@ -19,7 +19,7 @@ const restoreCoreStore = async <T extends { value: unknown }>(strapi: LoadedStra
 
 const restoreWebhooks = async <T extends { value: unknown }>(strapi: LoadedStrapi, values: T) => {
   const data = omitInvalidCreationAttributes(values);
-  return strapi.db.query('webhook').create({ data });
+  return strapi.db.query('strapi::webhook').create({ data });
 };
 
 export const restoreConfigs = async (strapi: LoadedStrapi, config: IConfiguration) => {

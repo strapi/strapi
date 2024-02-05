@@ -41,6 +41,12 @@ const setup = () =>
               preloadedState: {
                 admin_app: { permissions: fixtures.permissions.app },
               },
+              middleware: (getDefaultMiddleware: any) =>
+                getDefaultMiddleware({
+                  // Disable timing checks for test env
+                  immutableCheck: false,
+                  serializableCheck: false,
+                }),
             })}
           >
             <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
