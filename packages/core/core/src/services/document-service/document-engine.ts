@@ -353,7 +353,7 @@ const createDocumentEngine = ({
     });
 
     // Get deep populate of published versions
-    const entriesToClone = await strapi.db?.query(uid).findMany({
+    const entriesToDraft = await strapi.db?.query(uid).findMany({
       where: {
         ...params?.lookup,
         documentId,
@@ -363,8 +363,8 @@ const createDocumentEngine = ({
     });
 
     // Transform published entry data and create draft versions
-    const clonedEntries = await mapAsync(
-      entriesToClone,
+    const draftEntries = await mapAsync(
+      entriesToDraft,
       pipeAsync(
         set('publishedAt', null),
         set('documentId', documentId),
@@ -381,7 +381,7 @@ const createDocumentEngine = ({
       )
     );
 
-    return { versions: clonedEntries };
+    return { versions: draftEntries };
   },
 });
 
