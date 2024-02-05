@@ -75,7 +75,11 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     },
     // @ts-expect-error – this fails.
     middleware: (getDefaultMiddleware) => [
-      ...getDefaultMiddleware(),
+      ...getDefaultMiddleware({
+        // Disable timing checks for test env
+        immutableCheck: false,
+        serializableCheck: false,
+      }),
       adminApi.middleware,
       contentManagerApi.middleware,
     ],

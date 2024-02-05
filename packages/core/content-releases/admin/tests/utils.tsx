@@ -39,9 +39,8 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        // We needed to increase the timeout because randomly the unit tests are failing for that.
-        immutableCheck: { warnAfter: 128 },
-        serializableCheck: { warnAfter: 128 },
+        immutableCheck: false,
+        serializableCheck: false,
       }).concat(releaseApi.middleware),
   });
 

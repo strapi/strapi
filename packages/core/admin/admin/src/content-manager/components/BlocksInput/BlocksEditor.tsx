@@ -20,7 +20,7 @@ import { linkBlocks } from './Blocks/Link';
 import { listBlocks } from './Blocks/List';
 import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
-import { BlocksContent } from './BlocksContent';
+import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
@@ -38,6 +38,7 @@ interface BaseBlock {
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+  handleTab?: (editor: Editor) => void;
   snippets?: string[];
   dragHandleTopMargin?: CSSProperties['marginTop'];
 }
@@ -160,19 +161,18 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-interface BlocksEditorProps {
+interface BlocksEditorProps extends BlocksContentProps {
   name: string;
   onChange: (event: {
     target: { name: string; value: Attribute.BlocksValue; type: 'blocks' };
   }) => void;
   disabled?: boolean;
   value?: Attribute.BlocksValue;
-  placeholder?: MessageDescriptor;
   error?: string;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
+  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
@@ -180,10 +180,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
     const [isExpandedMode, setIsExpandedMode] = React.useState(false);
-
-    const formattedPlaceholder =
-      placeholder &&
-      formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
 
     const handleToggleExpand = () => {
       setIsExpandedMode((prev) => !prev);
@@ -261,7 +257,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent placeholder={formattedPlaceholder} />
+              <BlocksContent {...contentProps} />
               {!isExpandedMode && (
                 <ExpandIconButton
                   aria-label={formatMessage({

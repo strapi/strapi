@@ -6,7 +6,7 @@ runs:
 
   steps:
     - name: ♻️ Restore build cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: yarn-build-cache
       with:
         path: packages/**/dist
