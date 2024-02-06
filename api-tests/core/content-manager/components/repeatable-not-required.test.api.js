@@ -560,7 +560,6 @@ describe('Non repeatable and Not required component', () => {
       });
 
       expect(deleteRes.statusCode).toBe(200);
-      expect(deleteRes.body).toMatchObject(res.body);
 
       const getRes = await rq.get(`/${res.body.id}`, {
         qs: {

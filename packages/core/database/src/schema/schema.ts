@@ -53,10 +53,16 @@ const createTable = (meta: Meta): Table => {
       ) {
         // NOTE: we could pass uniquness for oneToOne to avoid creating more than one to one
 
-        const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
+        const {
+          name: columnName,
+          referencedColumn,
+          referencedTable,
+          columnType = 'integer',
+        } = attribute.joinColumn;
 
         const column = createColumn(columnName, {
-          type: 'integer',
+          // TODO: find the column type automatically, or allow passing all the column params
+          type: columnType,
           column: {
             unsigned: true,
           },
@@ -128,7 +134,6 @@ const getColumnType = (attribute: Attribute) => {
     case 'uid': {
       return {
         type: 'string',
-        unique: true,
       };
     }
     case 'richtext':

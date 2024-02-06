@@ -3,14 +3,18 @@
  */
 
 import { errors } from '@strapi/utils';
-import type { Database } from '@strapi/database';
+import type { Model, Database } from '@strapi/database';
 
 const { ValidationError } = errors;
 
-const webhookModel = {
-  uid: 'webhook',
-  collectionName: 'strapi_webhooks',
+const webhookModel: Model = {
+  uid: 'strapi::webhook',
+  singularName: 'strapi_webhooks',
+  tableName: 'strapi_webhooks',
   attributes: {
+    id: {
+      type: 'increments',
+    },
     name: {
       type: 'string',
     },
@@ -102,7 +106,7 @@ export interface WebhookStore {
 }
 
 const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
-  const webhookQueries = db.query('webhook');
+  const webhookQueries = db.query('strapi::webhook');
 
   return {
     allowedEvents: new Map([]),

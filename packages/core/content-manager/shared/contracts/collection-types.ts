@@ -1,11 +1,12 @@
 import { errors } from '@strapi/utils';
-import { Schema, Common, EntityService } from '@strapi/types';
+import { Schema, Common, EntityService, Entity as SEntity } from '@strapi/types';
 
 // Admin entity response follows the same format as the entity service
 type Entity = EntityService.Result<Common.UID.Schema>;
 type PaginatedEntities = EntityService.PaginatedResult<Common.UID.Schema>;
 
 type PaginationQuery = EntityService.Params.Pagination.PageNotation;
+type Filters = EntityService.Params.Pick<Common.UID.Schema, 'filters'>;
 type SortQuery = EntityService.Params.Sort.StringNotation<Common.UID.Schema> & string;
 
 /**
@@ -14,11 +15,11 @@ type SortQuery = EntityService.Params.Sort.StringNotation<Common.UID.Schema> & s
 export declare namespace Find {
   export interface Request {
     body: {};
-    query: {
-      page: PaginationQuery['page'];
-      pageSize: PaginationQuery['pageSize'];
-      sort: SortQuery;
-    };
+    query: PaginationQuery &
+      Filters & {
+        sort?: SortQuery;
+        [key: string]: unknown;
+      };
   }
 
   export interface Params {
@@ -38,7 +39,9 @@ export declare namespace Find {
 export declare namespace FindOne {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -46,10 +49,11 @@ export declare namespace FindOne {
     id: number;
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -65,10 +69,11 @@ export declare namespace Create {
     model: string;
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -98,12 +103,14 @@ export declare namespace AutoClone {
 export declare namespace Clone {
   export interface Request {
     body: Schema.Attributes;
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
     model: string;
-    sourceId: number;
+    sourceId: SEntity.ID;
   }
 
   export interface Response {
@@ -118,7 +125,9 @@ export declare namespace Clone {
 export declare namespace Update {
   export interface Request {
     body: Entity;
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -126,10 +135,11 @@ export declare namespace Update {
     id: number;
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -138,7 +148,9 @@ export declare namespace Update {
 export declare namespace Delete {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -158,7 +170,9 @@ export declare namespace Delete {
 export declare namespace Publish {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -166,10 +180,11 @@ export declare namespace Publish {
     id: number;
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -178,7 +193,9 @@ export declare namespace Publish {
 export declare namespace Unpublish {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -186,10 +203,11 @@ export declare namespace Unpublish {
     id: Entity['id'];
   }
 
-  export interface Response {
-    data: Entity;
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | Entity
+    | {
+        error?: errors.ApplicationError;
+      };
 }
 
 /**
@@ -265,7 +283,9 @@ export declare namespace BulkUnpublish {
 export declare namespace CountDraftRelations {
   export interface Request {
     body: {};
-    query: {};
+    query: {
+      locale?: string | null;
+    };
   }
 
   export interface Params {
@@ -283,10 +303,11 @@ export declare namespace CountDraftRelations {
  */
 export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
-    body: {
-      ids: number[];
+    body: {};
+    query: {
+      ids: Entity['id'][];
+      [key: string]: unknown;
     };
-    query: {};
   }
 
   export interface Params {

@@ -6,19 +6,15 @@ import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/h
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import { useSelector, TypedUseSelectorHook } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
+import { useTypedSelector } from '../store/hooks';
 
-import type { Store } from '@strapi/admin/strapi-admin';
 import type { Permission } from '@strapi/helper-plugin';
-
-type RootState = ReturnType<Store['getState']>;
-const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   &:hover {
@@ -108,7 +104,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
     <CheckPermissions permissions={PERMISSIONS.deleteAction}>
       <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
         <Flex gap={2}>
-          <Icon as={Cross} padding={1} />
+          <Icon as={Cross} width={3} height={3} />
           <Typography textColor="danger600" variant="omega">
             {formatMessage({
               id: 'content-releases.content-manager-edit-view.remove-from-release',
@@ -168,7 +164,7 @@ const ReleaseActionEntryLinkItem = ({
               pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
               search: locale && `?plugins[i18n][locale]=${locale}`,
             }}
-            startIcon={<Icon as={Pencil} padding={1} />}
+            startIcon={<Icon as={Pencil} width={3} height={3} />}
           >
             <Typography variant="omega">
               {formatMessage({

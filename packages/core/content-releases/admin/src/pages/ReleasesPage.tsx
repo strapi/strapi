@@ -1,6 +1,9 @@
 import * as React from 'react';
 
+// TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
+import { useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
+  Alert,
   Box,
   Button,
   ContentLayout,
@@ -28,6 +31,7 @@ import {
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -43,57 +47,6 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
-
-/* -------------------------------------------------------------------------------------------------
- * ReleasesLayout
- * -----------------------------------------------------------------------------------------------*/
-interface ReleasesLayoutProps {
-  isLoading?: boolean;
-  totalReleases?: number;
-  onClickAddRelease: () => void;
-  children: React.ReactNode;
-}
-
-export const ReleasesLayout = ({
-  isLoading,
-  totalReleases,
-  onClickAddRelease,
-  children,
-}: ReleasesLayoutProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Main aria-busy={isLoading}>
-      <HeaderLayout
-        title={formatMessage({
-          id: 'content-releases.pages.Releases.title',
-          defaultMessage: 'Releases',
-        })}
-        subtitle={
-          !isLoading &&
-          formatMessage(
-            {
-              id: 'content-releases.pages.Releases.header-subtitle',
-              defaultMessage:
-                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-            },
-            { number: totalReleases }
-          )
-        }
-        primaryAction={
-          <CheckPermissions permissions={PERMISSIONS.create}>
-            <Button startIcon={<Plus />} onClick={onClickAddRelease}>
-              {formatMessage({
-                id: 'content-releases.header.actions.add-release',
-                defaultMessage: 'New release',
-              })}
-            </Button>
-          </CheckPermissions>
-        }
-      />
-      {children}
-    </Main>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
@@ -174,11 +127,21 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
 
+const StyledAlert = styled(Alert)`
+  button {
+    display: none;
+  }
+  p + div {
+    margin-left: auto;
+  }
+`;
+
 const INITIAL_FORM_VALUES = {
   name: '',
 } satisfies FormValues;
 
 const ReleasesPage = () => {
+  const tabRef = React.useRef<any>(null);
   const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const toggleNotification = useNotification();
@@ -188,8 +151,15 @@ const ReleasesPage = () => {
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
+  const { getFeature } = useLicenseLimits();
+  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumReleases: number;
+  };
+  const { trackUsage } = useTracking();
 
   const { isLoading, isSuccess, isError } = response;
+  const activeTab = response?.currentData?.meta?.activeTab || 'pending';
+  const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {
@@ -209,21 +179,28 @@ const ReleasesPage = () => {
     }
   }, [formatMessage, location?.state?.errors, navigate, toggleNotification]);
 
+  // TODO: Replace this solution with v2 of the Design System
+  // Check if the active tab index changes and call the handler of the ref to update the tab group component
+  React.useEffect(() => {
+    if (tabRef.current) {
+      tabRef.current._handlers.setSelectedTabIndex(activeTabIndex);
+    }
+  }, [activeTabIndex]);
+
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </ReleasesLayout>
+      <Main aria-busy={isLoading}>
+        <LoadingIndicatorPage />
+      </Main>
     );
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
+  const hasReachedMaximumPendingReleases = totalReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -238,8 +215,6 @@ const ReleasesPage = () => {
     });
   };
 
-  const activeTab = response?.currentData?.meta?.activeTab || 'pending';
-
   const handleAddRelease = async (values: FormValues) => {
     const response = await createRelease({
       name: values.name,
@@ -253,6 +228,8 @@ const ReleasesPage = () => {
           defaultMessage: 'Release created.',
         }),
       });
+
+      trackUsage('didCreateRelease');
 
       navigate(response.data.data.id.toString());
     } else if (isAxiosError(response.error)) {
@@ -271,17 +248,73 @@ const ReleasesPage = () => {
   };
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
+    <Main aria-busy={isLoading}>
+      <HeaderLayout
+        title={formatMessage({
+          id: 'content-releases.pages.Releases.title',
+          defaultMessage: 'Releases',
+        })}
+        subtitle={formatMessage(
+          {
+            id: 'content-releases.pages.Releases.header-subtitle',
+            defaultMessage: '{number, plural, =0 {No releases} one {# release} other {# releases}}',
+          },
+          { number: totalReleases }
+        )}
+        primaryAction={
+          <CheckPermissions permissions={PERMISSIONS.create}>
+            <Button
+              startIcon={<Plus />}
+              onClick={toggleAddReleaseModal}
+              disabled={hasReachedMaximumPendingReleases}
+            >
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          </CheckPermissions>
+        }
+      />
       <ContentLayout>
         <>
+          {activeTab === 'pending' && hasReachedMaximumPendingReleases && (
+            <StyledAlert
+              marginBottom={6}
+              action={
+                <Link href="https://strapi.io/pricing-cloud" isExternal>
+                  {formatMessage({
+                    id: 'content-releases.pages.Releases.max-limit-reached.action',
+                    defaultMessage: 'Explore plans',
+                  })}
+                </Link>
+              }
+              title={formatMessage(
+                {
+                  id: 'content-releases.pages.Releases.max-limit-reached.title',
+                  defaultMessage:
+                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
+                },
+                { number: maximumReleases }
+              )}
+              onClose={() => {}}
+              closeLabel=""
+            >
+              {formatMessage({
+                id: 'content-releases.pages.Releases.max-limit-reached.message',
+                defaultMessage: 'Upgrade to manage an unlimited number of releases.',
+              })}
+            </StyledAlert>
+          )}
           <TabGroup
             label={formatMessage({
               id: 'content-releases.pages.Releases.tab-group.label',
               defaultMessage: 'Releases list',
             })}
             variant="simple"
-            initialSelectedTabIndex={['pending', 'done'].indexOf(activeTab)}
+            initialSelectedTabIndex={activeTabIndex}
             onTabChange={handleTabChange}
+            ref={tabRef}
           >
             <Box paddingBottom={8}>
               <Tabs>
@@ -342,7 +375,7 @@ const ReleasesPage = () => {
           initialValues={INITIAL_FORM_VALUES}
         />
       )}
-    </ReleasesLayout>
+    </Main>
   );
 };
 

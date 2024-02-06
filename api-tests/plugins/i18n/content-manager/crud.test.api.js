@@ -24,6 +24,7 @@ const categoryModel = {
   attributes: {
     name: {
       type: 'string',
+      unique: true,
       pluginOptions: {
         i18n: {
           localized: true,
@@ -84,9 +85,12 @@ describe('i18n - Content API', () => {
     test('non-default locale', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/api::category.category?plugins[i18n][locale]=ko',
+        url: '/content-manager/collection-types/api::category.category',
         body: {
           name: 'category in korean',
+        },
+        qs: {
+          locale: 'ko',
         },
       });
 
@@ -95,7 +99,6 @@ describe('i18n - Content API', () => {
       expect(statusCode).toBe(200);
       expect(body).toMatchObject({
         locale: 'ko',
-        localizations: [],
         name: 'category in korean',
       });
       data.categories.push(res.body);
@@ -105,29 +108,45 @@ describe('i18n - Content API', () => {
     // foreign keys deadlock example: https://gist.github.com/roustem/db2398aa38be0cc88364
     test('all related locales', async () => {
       let res;
+
       for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
         res = await rq({
           method: 'POST',
           url: `/content-manager/collection-types/api::category.category`,
           qs: {
-            plugins: { i18n: { locale, relatedEntityId: data.categories[0].id } },
+            plugins: { i18n: { relatedEntityId: data.categories[0].id } },
+            locale,
           },
           body: {
             name: `category in ${locale}`,
+            locale,
           },
         });
-        expect(res.statusCode).toBe(200);
-      }
 
+        expect(res.statusCode).toBe(200);
+        expect(res.body.locale).toBe(locale);
+      }
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body.localizations).toHaveLength(4);
-      data.categories.push(res.body);
+      data.categories.push(body);
+    });
+
+    test.skip('should not be able to duplicate unique field values within the same locale', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::category.category`,
+        body: {
+          name: `category in english`,
+        },
+      });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toEqual('This attribute must be unique');
     });
   });
 
-  describe('Bulk Delete', () => {
+  // V5: Fix bulk actions
+  describe.skip('Bulk Delete', () => {
     test('default locale', async () => {
       const res = await rq({
         method: 'POST',

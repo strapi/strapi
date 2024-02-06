@@ -40,9 +40,9 @@ const releaseController = {
       const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
         typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
 
-      const data = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
-        hasEntryAttached,
-      });
+      const data = hasEntryAttached
+        ? await releaseService.findManyWithContentTypeEntryAttached(contentTypeUid, entryId)
+        : await releaseService.findManyWithoutContentTypeEntryAttached(contentTypeUid, entryId);
 
       ctx.body = { data };
     } else {
@@ -103,7 +103,7 @@ const releaseController = {
 
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
-    const releaseArgs: CreateRelease.Request['body'] = ctx.request.body;
+    const releaseArgs = ctx.request.body as CreateRelease.Request['body'];
 
     await validateRelease(releaseArgs);
 
@@ -122,7 +122,7 @@ const releaseController = {
 
   async update(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
-    const releaseArgs: UpdateRelease.Request['body'] = ctx.request.body;
+    const releaseArgs = ctx.request.body as UpdateRelease.Request['body'];
     const id: UpdateRelease.Request['params']['id'] = ctx.params.id;
 
     await validateRelease(releaseArgs);
@@ -158,8 +158,28 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.publish(id, { user });
 
+    const [countPublishActions, countUnpublishActions] = await Promise.all([
+      releaseService.countActions({
+        filters: {
+          release: id,
+          type: 'publish',
+        },
+      }),
+      releaseService.countActions({
+        filters: {
+          release: id,
+          type: 'unpublish',
+        },
+      }),
+    ]);
+
     ctx.body = {
       data: release,
+      meta: {
+        totalEntries: countPublishActions + countUnpublishActions,
+        totalPublishedEntries: countPublishActions,
+        totalUnpublishedEntries: countUnpublishActions,
+      },
     };
   },
 };

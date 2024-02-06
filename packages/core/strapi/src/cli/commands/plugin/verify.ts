@@ -2,18 +2,13 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import { CheckOptions, check } from '@strapi/pack-up';
 
-import { runAction, notifyExperimentalCommand } from '../../utils/helpers';
+import { runAction } from '../../utils/helpers';
 import type { StrapiCommand, CLIContext } from '../../types';
 
 interface ActionOptions extends CheckOptions {}
 
 const action = async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {
-    /**
-     * Notify users this is an experimental command.
-     */
-    await notifyExperimentalCommand('plugin:verify', { force: true });
-
     await check({
       cwd,
       ...opts,

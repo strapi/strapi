@@ -4,10 +4,12 @@ const ALLOWED_CONTENT_TYPES = [
   'admin::user',
   'admin::role',
   'admin::permission',
+  'plugin::i18n.locale',
   'api::article.article',
   'api::author.author',
   'api::homepage.homepage',
   'api::upcoming-match.upcoming-match',
+  'api::unique.unique',
   /**
    * UPLOADS
    */

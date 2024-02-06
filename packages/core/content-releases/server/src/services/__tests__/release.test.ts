@@ -234,9 +234,25 @@ describe('release service', () => {
       expect(() => releaseService.publish(1)).rejects.toThrow('No entries to publish');
     });
 
-    it('calls publishMany for each contentType with the right actions', async () => {
+    it('calls publishMany for each collectionType with the right actions and publish for singleTypes', async () => {
       const mockPublishMany = jest.fn();
       const mockUnpublishMany = jest.fn();
+      const mockPublish = jest.fn();
+      const mockUnpublish = jest.fn();
+
+      const servicesMock = {
+        'entity-manager': {
+          publishMany: mockPublishMany,
+          unpublishMany: mockUnpublishMany,
+          publish: mockPublish,
+          unpublish: mockUnpublish,
+        },
+        'populate-builder': () => ({
+          default: jest.fn().mockReturnThis(),
+          populateDeep: jest.fn().mockReturnThis(),
+          build: jest.fn().mockReturnThis(),
+        }),
+      };
 
       const strapiMock = {
         ...baseStrapiMock,
@@ -244,43 +260,88 @@ describe('release service', () => {
           transaction: jest.fn().mockImplementation((cb) => cb()),
         },
         plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({
-            publishMany: mockPublishMany,
-            unpublishMany: mockUnpublishMany,
-          }),
+          service: jest
+            .fn()
+            .mockImplementation((service: 'entity-manager' | 'populate-builder') => {
+              return servicesMock[service];
+            }),
         }),
         entityService: {
-          findOne: jest.fn().mockReturnValue({
-            releasedAt: null,
-            actions: [
-              {
-                contentType: 'contentType',
-                type: 'publish',
-                entry: { id: 1 },
-              },
-              {
-                contentType: 'contentType',
-                type: 'unpublish',
-                entry: { id: 2 },
-              },
-            ],
-          }),
+          findOne: jest.fn(),
+          findMany: jest.fn(),
           update: jest.fn().mockReturnValue({}),
+        },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+          singleType: {
+            kind: 'singleType',
+          },
         },
       };
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
+      // We mock the first call to findOne to get the release info
+      strapiMock.entityService.findOne.mockReturnValueOnce({
+        releasedAt: null,
+        actions: [
+          {
+            contentType: 'collectionType',
+            type: 'publish',
+            entry: { id: 1 },
+          },
+          {
+            contentType: 'collectionType',
+            type: 'unpublish',
+            entry: { id: 2 },
+          },
+          {
+            contentType: 'singleType',
+            type: 'publish',
+            entry: { id: 3 },
+          },
+          {
+            contentType: 'singleType',
+            type: 'unbpublish',
+            entry: { id: 4 },
+          },
+        ],
+      });
+
+      // We mock the calls to findOne to get singleType entries info
+      strapiMock.entityService.findOne.mockReturnValueOnce({
+        id: 3,
+      });
+
+      strapiMock.entityService.findOne.mockReturnValueOnce({
+        id: 4,
+      });
+
+      strapiMock.entityService.findMany.mockReturnValueOnce([
+        {
+          id: 1,
+        },
+      ]);
+      strapiMock.entityService.findMany.mockReturnValueOnce([
+        {
+          id: 2,
+        },
+      ]);
+
       await releaseService.publish(1);
 
-      expect(mockPublishMany).toHaveBeenCalledWith([{ id: 1 }], 'contentType');
-      expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'contentType');
+      expect(mockPublish).toHaveBeenCalledWith({ id: 3 }, 'singleType');
+      expect(mockUnpublish).toHaveBeenCalledWith({ id: 4 }, 'singleType');
+      expect(mockPublishMany).toHaveBeenCalledWith([{ id: 1 }], 'collectionType');
+      expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'collectionType');
     });
   });
 
-  describe('findManyForContentTypeEntry', () => {
-    it('should format the return value correctly when hasEntryAttached is true', async () => {
+  describe('findManyWithContentTypeEntryAttached', () => {
+    it('should format the return value correctly', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -294,12 +355,9 @@ describe('release service', () => {
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
-      const releases = await releaseService.findManyForContentTypeEntry(
+      const releases = await releaseService.findManyWithContentTypeEntryAttached(
         'api::contentType.contentType',
-        1,
-        {
-          hasEntryAttached: true,
-        }
+        1
       );
 
       expect(releases).toEqual([{ name: 'test release', action: { type: 'publish' } }]);
@@ -407,38 +465,38 @@ describe('release service', () => {
         contentTypeA: [
           {
             id: 1,
-            locale: 'en',
-            contentType: 'api::contentTypeA.contentTypeA',
+            contentType: {
+              displayName: 'contentTypeA',
+              mainFieldValue: 'test 1',
+              uid: 'api::contentTypeA.contentTypeA',
+            },
+            locale: {
+              code: 'en',
+              name: 'English (en)',
+            },
             entry: {
               id: 1,
-              contentType: {
-                displayName: 'contentTypeA',
-                mainFieldValue: 'test 1',
-              },
-              locale: {
-                code: 'en',
-                name: 'English (en)',
-              },
-              status: 'published',
+              name: 'test 1',
+              publishedAt: '2021-01-01',
             },
           },
         ],
         contentTypeB: [
           {
             id: 2,
-            locale: 'fr',
-            contentType: 'api::contentTypeB.contentTypeB',
+            contentType: {
+              displayName: 'contentTypeB',
+              mainFieldValue: 'test 2',
+              uid: 'api::contentTypeB.contentTypeB',
+            },
+            locale: {
+              code: 'fr',
+              name: 'French (fr)',
+            },
             entry: {
               id: 2,
-              contentType: {
-                displayName: 'contentTypeB',
-                mainFieldValue: 'test 2',
-              },
-              locale: {
-                code: 'fr',
-                name: 'French (fr)',
-              },
-              status: 'draft',
+              name: 'test 2',
+              publishedAt: null,
             },
           },
         ],

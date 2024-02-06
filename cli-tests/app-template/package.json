@@ -15,9 +15,9 @@
     "@strapi/plugin-users-permissions": "latest",
     "@strapi/strapi": "latest",
     "better-sqlite3": "9.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-router-dom": "5.3.4",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
     "styled-components": "5.3.3"
   },
   "engines": {

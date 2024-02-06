@@ -8,7 +8,7 @@ tags:
 
 # Remote Provider Websocket
 
-When the data transfer feature is enabled for a Strapi server (an `admin.transfer.token.salt` config value has been set and `STRAPI_DISABLE_REMOTE_DATA_TRANSFER` is not set to true), Strapi will create websocket servers available on the routes `/admin/transfer/runner/pull` and `/admin/transfer/runner/push`.
+When the data transfer feature is enabled for a Strapi server (an `admin.transfer.token.salt` config value has been set and `server.transfer.remote.enabled` is not set to false), Strapi will create websocket servers available on the routes `/admin/transfer/runner/pull` and `/admin/transfer/runner/push`.
 
 Opening a websocket connection on those routes requires a valid transfer token as a bearer token in the Authorization header.
 

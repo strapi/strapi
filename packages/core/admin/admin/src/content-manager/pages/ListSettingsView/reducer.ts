@@ -58,8 +58,8 @@ export interface SubmitFieldFormAction {
 }
 
 export interface SetDataAction {
-  data: SettingsViewContentTypeLayout | null;
   type: 'SET_DATA';
+  data: SettingsViewContentTypeLayout | null;
 }
 
 type Action =

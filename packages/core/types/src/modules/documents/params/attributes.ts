@@ -57,7 +57,7 @@ export type ScalarValues = GetValue<
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
-  | Attribute.UID<Common.UID.Schema>
+  | Attribute.UID
 >;
 
 /**
@@ -91,8 +91,7 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
       // Relation
       [
         Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
+        TAttribute extends Attribute.Relation<infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,
               Attribute.RelationPluralityModifier<TRelationKind, ID>

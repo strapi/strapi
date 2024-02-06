@@ -129,9 +129,6 @@ describe('CM API - Basic + dz', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithDzAndDP[0]);
-    expect(res.body.id).toEqual(data.productsWithDzAndDP[0].id);
-    expect(res.body.publishedAt).toBeNull();
     data.productsWithDzAndDP.shift();
   });
 

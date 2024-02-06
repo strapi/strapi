@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
-const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = require('@strapi/utils');
+const { sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
@@ -112,9 +112,13 @@ module.exports = ({ strapi }) => ({
 
     try {
       settings.message = await userPermissionService.template(settings.message, {
-        URL: urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, '/auth/email-confirmation'),
-        SERVER_URL: getAbsoluteServerUrl(strapi.config),
-        ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
+        URL: urlJoin(
+          strapi.config.get('server.absoluteUrl'),
+          apiPrefix,
+          '/auth/email-confirmation'
+        ),
+        SERVER_URL: strapi.config.get('server.absoluteUrl'),
+        ADMIN_URL: strapi.config.get('admin.absoluteUrl'),
         USER: sanitizedUserInfo,
         CODE: confirmationToken,
       });
