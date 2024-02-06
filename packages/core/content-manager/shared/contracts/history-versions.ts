@@ -9,7 +9,7 @@ import { type errors } from '@strapi/utils';
 export interface CreateHistoryVersion {
   contentType: UID.ContentType;
   relatedDocumentId: Entity.ID;
-  locale: string;
+  locale: string | null;
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
   schema: Record<string, unknown>;
@@ -23,6 +23,7 @@ export interface HistoryVersionDataResponse extends CreateHistoryVersion {
     firstname?: string;
     lastname?: string;
     username?: string;
+    email: string;
   };
 }
 
@@ -43,7 +44,7 @@ export declare namespace GetHistoryVersions {
     };
     query: {
       contentType: UID.ContentType;
-      documentId: Entity.ID;
+      documentId?: Entity.ID;
       locale?: string;
     };
   }

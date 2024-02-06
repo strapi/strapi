@@ -100,7 +100,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       const sanitizedResults = results.map((result) => ({
         ...result,
         createdBy: result.createdBy
-          ? pick(['id', 'firstname', 'lastname', 'username'], result.createdBy)
+          ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
           : null,
       }));
 
