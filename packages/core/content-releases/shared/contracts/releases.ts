@@ -6,8 +6,8 @@ import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 
 export interface Release extends Entity {
   name: string;
-  releasedAt: string;
-  scheduledAt: string;
+  releasedAt: string | null;
+  scheduledAt: string | null;
   actions: ReleaseAction[];
 }
 
