@@ -70,23 +70,22 @@ const releaseController = {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
-
     const release = await releaseService.findOne(id, { populate: ['createdBy'] });
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
-      ability: ctx.state.userAbility,
-      model: RELEASE_MODEL_UID,
-    });
-    const sanitizedRelease = await permissionsManager.sanitizeOutput(release);
+    if (!release) {
+      throw new errors.NotFoundError(`Release not found for id: ${id}`);
+    }
 
     const count = await releaseService.countActions({
       filters: {
         release: id,
       },
     });
-
-    if (!release) {
-      throw new errors.NotFoundError(`Release not found for id: ${id}`);
-    }
+    const sanitizedRelease = {
+      ...release,
+      createdBy: release.createdBy
+        ? strapi.admin.services.user.sanitizeUser(release.createdBy)
+        : null,
+    };
 
     // Format the data object
     const data = {

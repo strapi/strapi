@@ -20,7 +20,7 @@ export type Pagination = {
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: { meta: { count: number } };
-  createdBy: Pick<SanitizedAdminUser, 'id' | 'firstname' | 'lastname' | 'username'>;
+  createdBy: SanitizedAdminUser;
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {

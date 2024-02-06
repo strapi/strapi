@@ -52,7 +52,7 @@ describe('Releases details page', () => {
     const releaseSubtitle = await screen.findAllByText('No entries');
     expect(releaseSubtitle[0]).toBeInTheDocument();
 
-    const moreButton = screen.getByRole('button', { name: 'Release actions' });
+    const moreButton = screen.getByRole('button', { name: 'Release edit and delete menu' });
     expect(moreButton).toBeInTheDocument();
 
     const publishButton = screen.getByRole('button', { name: 'Publish' });
@@ -188,7 +188,7 @@ describe('Releases details page', () => {
 
     await screen.findByText(mockReleaseDetailsPageData.noActionsHeaderData.data.name);
 
-    const moreButton = screen.getByRole('button', { name: 'Release actions' });
+    const moreButton = screen.getByRole('button', { name: 'Release edit and delete menu' });
     expect(moreButton).toBeInTheDocument();
 
     await user.click(moreButton);

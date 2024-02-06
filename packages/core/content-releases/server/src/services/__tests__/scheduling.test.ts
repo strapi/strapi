@@ -51,11 +51,11 @@ describe('Scheduling service', () => {
 
       // @ts-expect-error Ignore missing properties
       const schedulingService = createSchedulingService({ strapi: strapiMock });
-      const scheduleJobs = await schedulingService.set('1', oldJobDate);
-      expect(scheduleJobs.size).toBe(1);
+      const scheduledJobs = await schedulingService.set('1', oldJobDate);
+      expect(scheduledJobs.size).toBe(1);
       expect(mockScheduleJob).toHaveBeenCalledWith(oldJobDate, expect.any(Function));
 
-      const oldJob = scheduleJobs.get('1')!;
+      const oldJob = scheduledJobs.get('1')!;
 
       await schedulingService.set('1', newJobDate);
 
@@ -81,8 +81,8 @@ describe('Scheduling service', () => {
 
       // @ts-expect-error Ignore missing properties
       const schedulingService = createSchedulingService({ strapi: strapiMock });
-      const scheduleJobs = await schedulingService.set('1', date);
-      expect(scheduleJobs.size).toBe(1);
+      const scheduledJobs = await schedulingService.set('1', date);
+      expect(scheduledJobs.size).toBe(1);
       expect(mockScheduleJob).toHaveBeenCalledWith(date, expect.any(Function));
     });
   });
@@ -106,12 +106,12 @@ describe('Scheduling service', () => {
 
       // @ts-expect-error Ignore missing properties
       const schedulingService = createSchedulingService({ strapi: strapiMock });
-      const scheduleJobs = await schedulingService.set('1', date);
-      expect(scheduleJobs.size).toBe(1);
+      const scheduledJobs = await schedulingService.set('1', date);
+      expect(scheduledJobs.size).toBe(1);
       expect(mockScheduleJob).toHaveBeenCalledWith(date, expect.any(Function));
 
       schedulingService.cancel('1');
-      expect(scheduleJobs.size).toBe(0);
+      expect(scheduledJobs.size).toBe(0);
     });
   });
 });
