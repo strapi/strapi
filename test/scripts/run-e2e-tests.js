@@ -184,6 +184,7 @@ module.exports = config
                   env: {
                     PORT: port,
                     HOST: '127.0.0.1',
+                    STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
                   },
                 }
               );
