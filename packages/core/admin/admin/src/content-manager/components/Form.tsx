@@ -148,7 +148,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             payload: errors,
           });
 
-          throw new Error('Submition failed');
+          throw new Error('Submission failed');
         }
 
         await onSubmit(state.values, e);
@@ -161,7 +161,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           type: 'SUBMIT_FAILURE',
         });
 
-        if (err instanceof Error && err.message === 'Submition failed') {
+        if (err instanceof Error && err.message === 'Submission failed') {
           return;
         }
       }
@@ -185,7 +185,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         return;
       }
 
-      const target = eventOrPath.target ? eventOrPath.target : eventOrPath.currentTarget;
+      const target = eventOrPath.target || eventOrPath.currentTarget;
 
       const { type, name, id, value, options, multiple } = target;
 

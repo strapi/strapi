@@ -161,7 +161,7 @@ const EditViewPage = () => {
   };
 
   const documentTitle =
-    mainField !== 'id' && document && document[mainField] ? document[mainField] : 'Untitled';
+    mainField !== 'id' && document?.[mainField] ? document[mainField] : 'Untitled';
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
@@ -177,7 +177,7 @@ const EditViewPage = () => {
           id: getTranslation('containers.edit.tabs.label'),
           defaultMessage: 'Document status',
         })}
-        initialSelectedTabIndex={!status || status === 'draft' ? 0 : 1}
+        initialSelectedTabIndex={status === 'published' ? 1 : 0}
         onTabChange={handleTabChange}
       >
         <Tabs>
