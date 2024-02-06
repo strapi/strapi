@@ -15,7 +15,7 @@ This document looks particularly at the `@strapi/data-transfer` package framed a
 
 Each test should be isolated and contained e.g. if you edit an entity in one test, the next test shouldn't know or care about it otherwise your tests need to run in a specific order and become flakey quite quickly.
 
-So to solve this, you could use custom API endpoints of the application and whilst this isn't a poor solution it would _most likely_ require some code writing to set up the data for the schema entries. However, in `4.6.0` Strapi released the `DTS` feature, DTS – Data Transfer System. This means any member of Strapi can export the data of their instance producing a `.tar` that we can then import programatically restoring the database to this point in time and ensuring a "pure" test environment.
+So to solve this, you could use custom API endpoints of the application and whilst this isn't a poor solution it would _most likely_ require some code writing to set up the data for the schema entries. However, in `4.6.0` Strapi released the `DTS` feature (DTS – Data Transfer System). This means any member of Strapi can export the data of their instance producing a `.tar` that we can then import programatically restoring the database to this point in time and ensuring a "pure" test environment.
 
 ## Using Data Transfer
 

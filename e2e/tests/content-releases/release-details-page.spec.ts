@@ -104,11 +104,23 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await expect(page.getByRole('separator', { name: 'publish', exact: true })).toBeVisible();
     await expect(page.getByRole('separator', { name: 'unpublish' })).toBeVisible();
 
+    // Change the entry grouping
     const row = await page.getByRole('row').filter({ hasText: 'West Ham post match analysis' });
+    // The first row after the header is NOT the one we will update
+    await expect(
+      page
+        .getByRole('row')
+        .nth(1)
+        .getByRole('gridcell', { name: 'Analyse post-match contre West Ham' })
+    ).toBeVisible();
     // Update a given row's action
     await expect(row.getByRole('radio').first()).not.toBeChecked();
     row.locator('label').first().click();
     await expect(row.getByRole('radio').first()).toBeChecked();
+    // The updated is now the first row after the header
+    await expect(
+      page.getByRole('row').nth(1).getByRole('gridcell', { name: 'West Ham post match analysis' })
+    ).toBeVisible();
 
     // Navigate to a given row's entry in the content-manager
     await row.getByRole('button', { name: 'Release action options' }).click();
