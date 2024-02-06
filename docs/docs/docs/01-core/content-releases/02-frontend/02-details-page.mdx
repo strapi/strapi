@@ -1,0 +1,42 @@
+---
+title: Release details view
+tags:
+  - content-releases
+  - tech design
+---
+
+### Overview:
+
+The details-view offers a comprehensive presentation of all entries linked to the release. The entries are grouped into sections of tables displaying useful information about each entry such as its locale, the action to take (publish/unpublish), the status of the entry (published, unpublished, or validation errors).
+
+On this page, users with the appropriate permissions can do the following:
+
+#### Group entries:
+
+Entries associated with a release can be systematically organized in tables using various grouping options:
+
+- <strong>by Content-Types</strong>: Organize entries by category.
+- <strong>by Locales</strong>: Group entries based on locale.
+- <strong>by Actions</strong>: Categorize entries by action to perform, making it easier to discern
+  between entries to publish and entries to unpublish.
+
+#### Edit a release:
+
+If the user has the `plugin::content-releases.update` permissions, a "three dot" button will appear in the header giving access to a menu with an "Edit" option.
+The Edit button opens a modal, enabling users to modify the release name. To save the changes, the new name must be unique, non-empty, and distinctly modified.
+
+#### Delete a release:
+
+If the user has the `plugin::content-releases.delete` permissions, a "three dot" button will appear in the header giving access to a menu with a "Delete" option.
+
+Upon activation, the "Delete" button triggers a confirmation modal, prompting the user to confirm the deletion.
+
+#### View Entry Status
+
+Each entry within a release is assigned a status, indicating its readiness for actions such as Publish/Unpublish or any validation errors present. If the entry has a validation errors. A user can use the entry's "Three dots" menu to access a "Edit entry" link to the CM edit view.
+
+Within the CM edit view, users can resolve any identified errors. Upon completion, clicking the "Refresh" button on the release details page updates the status of each entry to reflect any changes made.
+
+#### Publish a release:
+
+To execute the release of a content release, users can simply click on the "Publish" button (shown if you have the "plugin::content-releases.publish" permission). If any of the entries exhibit validation errors, the "Publish" action triggers a notification to alert users of the errors.
