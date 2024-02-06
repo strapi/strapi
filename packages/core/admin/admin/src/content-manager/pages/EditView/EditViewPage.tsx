@@ -26,7 +26,7 @@ import styled from 'styled-components';
 import { useOnce } from '../../../hooks/useOnce';
 import { Form } from '../../components/Form';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { UseDocument, useDoc } from '../../hooks/useDocument';
+import { type UseDocument, useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
@@ -161,7 +161,7 @@ const EditViewPage = () => {
   };
 
   const documentTitle =
-    mainField !== 'id' && document && document[mainField] ? document[mainField] : 'Unitled';
+    mainField !== 'id' && document && document[mainField] ? document[mainField] : 'Untitled';
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
@@ -173,7 +173,10 @@ const EditViewPage = () => {
       <TabGroup
         ref={tabApi}
         variant="simple"
-        label="Document version"
+        label={formatMessage({
+          id: getTranslation('containers.edit.tabs.label'),
+          defaultMessage: 'Document status',
+        })}
         initialSelectedTabIndex={!status || status === 'draft' ? 0 : 1}
         onTabChange={handleTabChange}
       >

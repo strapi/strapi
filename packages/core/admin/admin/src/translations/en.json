@@ -745,6 +745,7 @@
   "content-manager.components.uid.regenerate": "Regenerate",
   "content-manager.components.uid.suggested": "suggested",
   "content-manager.components.uid.unavailable": "Unavailable",
+  "content-manager.containers.edit.tabs.label": "Document status",
   "content-manager.containers.edit.tabs.draft": "draft",
   "content-manager.containers.edit.tabs.published": "published",
   "content-manager.containers.edit.panels.default.title": "Entry",

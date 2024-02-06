@@ -26,6 +26,17 @@ interface DescriptionComponentRendererProps<Props = any, Description = any> {
   props: Props;
 }
 
+/**
+ * @internal
+ *
+ * @description This component takes an array of DescriptionComponents, which are react components that return objects as opposed to JSX.
+ * We render these in their own isolated memoized component and use an update function to push the data back out to the parent.
+ * Saving it in a ref, and then "forcing" an update of the parent component to render the children of this component with the new data.
+ *
+ * The DescriptionCompoonents can take props and use react hooks hence why we render them as if they were a component. The update
+ * function is throttled and managed to avoid erroneous updates where we could wait a single tick to update the entire UI, which
+ * creates less "popping" from functions being called in rapid succession.
+ */
 const DescriptionComponentRenderer = <Props, Description>({
   children,
   props,
@@ -47,6 +58,9 @@ const DescriptionComponentRenderer = <Props, Description>({
     });
   }, [forceUpdate]);
 
+  /**
+   * This will avoid us calling too many react updates in a short space of time.
+   */
   const throttledRequestUpdate = useThrottledCallback(requestUpdate, 60, { trailing: true });
 
   const update = React.useCallback<DescriptionProps<Props, Description>['update']>(
@@ -73,7 +87,12 @@ const DescriptionComponentRenderer = <Props, Description>({
       ids
         .map((id) => statesRef.current[id]?.value)
         .filter((state) => state !== null && state !== undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we leave tick in the deps to ensure the memo is recalculated
+    /**
+     * we leave tick in the deps to ensure the memo is recalculated when the `update` function  is called.
+     * the `ids` will most likely be stable unless we get new actions, but we can't respond to the Description
+     * Component changing the ref data in any other way.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ids, tick]
   );
 
@@ -154,7 +173,7 @@ const useShallowCompareMemoize = <T,>(value: T): Array<T | undefined> => {
   return [ref.current];
 };
 
-const useShallowCompareEffect = (callback: React.EffectCallback, dependencies: any) => {
+const useShallowCompareEffect = (callback: React.EffectCallback, dependencies?: unknown) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- the linter isn't able to see that deps are properly handled here
   React.useEffect(callback, useShallowCompareMemoize(dependencies));
 };
