@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "4.17.0",
+  "version": "4.17.1",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -44,7 +44,6 @@
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
@@ -57,10 +56,10 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.14.1",
-    "@strapi/helper-plugin": "4.17.0",
+    "@strapi/helper-plugin": "4.17.1",
     "@strapi/icons": "1.14.1",
     "@strapi/types": "workspace:*",
-    "@strapi/utils": "4.17.0",
+    "@strapi/utils": "4.17.1",
     "axios": "1.6.0",
     "formik": "2.4.0",
     "lodash": "4.17.21",
@@ -69,9 +68,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "4.17.0",
+    "@strapi/admin-test-utils": "4.17.1",
     "@strapi/pack-up": "workspace:*",
-    "@strapi/strapi": "4.17.0",
+    "@strapi/strapi": "4.17.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/koa": "2.13.4",
@@ -80,7 +79,7 @@
     "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
+    "react-router-dom": "6.21.1",
     "styled-components": "5.3.3",
     "typescript": "5.2.2"
   },
@@ -88,7 +87,7 @@
     "@strapi/strapi": "^4.15.1",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
+    "react-router-dom": "^6.0.0",
     "styled-components": "5.3.3"
   },
   "engines": {

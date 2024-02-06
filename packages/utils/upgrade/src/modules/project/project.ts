@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fse from 'fs-extra';
 import semver from 'semver';
 
-import { semVerFactory, isLiteralSemVer } from '../version';
+import { semVerFactory, isLiteralSemVer, isValidSemVer } from '../version';
 import { fileScannerFactory } from '../file-scanner';
 import { codeRunnerFactory } from '../runner/code';
 import { jsonRunnerFactory } from '../runner/json';
@@ -166,9 +166,8 @@ export class Project implements ProjectInterface {
     }
 
     const strapiVersion = strapiPackageJSON.version;
-    const isValidSemVer = isLiteralSemVer(strapiVersion);
 
-    if (!isValidSemVer) {
+    if (!isValidSemVer(strapiVersion)) {
       throw new Error(
         `Invalid ${constants.STRAPI_DEPENDENCY_NAME} version found in ${strapiPackageJSONPath} (${strapiVersion})`
       );

@@ -1,7 +1,7 @@
 import semver from 'semver';
 
 import * as Version from './types';
-import { isSemVer, isSemVerReleaseType } from './semver';
+import { isSemverInstance, isSemVerReleaseType } from './semver';
 
 export const rangeFactory = (range: string): Version.Range => {
   return new semver.Range(range);
@@ -37,7 +37,7 @@ export const rangeFromVersions = (
   currentVersion: Version.SemVer,
   target: Version.ReleaseType | Version.SemVer
 ) => {
-  if (isSemVer(target)) {
+  if (isSemverInstance(target)) {
     return rangeFactory(`>${currentVersion.raw} <=${target.raw}`);
   }
 

@@ -31,10 +31,11 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
+import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
@@ -179,7 +180,7 @@ interface ReleaseDetailsLayoutProps {
   children: React.ReactNode;
 }
 
-export const ReleaseDetailsLayout = ({
+const ReleaseDetailsLayout = ({
   toggleEditReleaseModal,
   toggleWarningSubmit,
   children,
@@ -193,7 +194,12 @@ export const ReleaseDetailsLayout = ({
     isLoading: isLoadingDetails,
     isError,
     error,
-  } = useGetReleaseQuery({ id: releaseId });
+  } = useGetReleaseQuery(
+    { id: releaseId! },
+    {
+      skip: !releaseId,
+    }
+  );
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -212,8 +218,8 @@ export const ReleaseDetailsLayout = ({
     handleTogglePopover();
   };
 
-  const handlePublishRelease = async () => {
-    const response = await publishRelease({ id: releaseId });
+  const handlePublishRelease = (id: string) => async () => {
+    const response = await publishRelease({ id });
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -254,16 +260,14 @@ export const ReleaseDetailsLayout = ({
 
   if (isError || !release) {
     return (
-      <Redirect
-        to={{
-          pathname: '/plugins/content-releases',
-          state: {
-            errors: [
-              {
-                code: error?.code,
-              },
-            ],
-          },
+      <Navigate
+        to=".."
+        state={{
+          errors: [
+            {
+              code: error?.code,
+            },
+          ],
         }}
       />
     );
@@ -364,7 +368,7 @@ export const ReleaseDetailsLayout = ({
                 <Button
                   size="S"
                   variant="default"
-                  onClick={handlePublishRelease}
+                  onClick={handlePublishRelease(release.id.toString())}
                   loading={isPublishing}
                   disabled={release.actions.meta.count === 0}
                 >
@@ -408,9 +412,12 @@ const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   };
 };
 
-const ReleaseDetailsBody = () => {
+interface ReleaseDetailsBodyProps {
+  releaseId: string;
+}
+
+const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const { formatMessage } = useIntl();
-  const { releaseId } = useParams<{ releaseId: string }>();
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -479,7 +486,7 @@ const ReleaseDetailsBody = () => {
   const releaseActions = data?.data;
   const releaseMeta = data?.meta;
 
-  if (isError || isReleaseError || !release || !releaseActions) {
+  if (isReleaseError || !release) {
     const errorsArray = [];
     if (releaseError) {
       errorsArray.push({
@@ -492,14 +499,20 @@ const ReleaseDetailsBody = () => {
       });
     }
     return (
-      <Redirect
-        to={{
-          pathname: '/plugins/content-releases',
-          state: {
-            errors: errorsArray,
-          },
+      <Navigate
+        to=".."
+        state={{
+          errors: errorsArray,
         }}
       />
+    );
+  }
+
+  if (isError || !releaseActions) {
+    return (
+      <ContentLayout>
+        <AnErrorOccurred />
+      </ContentLayout>
     );
   }
 
@@ -624,22 +637,22 @@ const ReleaseDetailsBody = () => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, type, entry }) => (
+                  {releaseActions[key].map(({ id, type, entry, contentType, locale }) => (
                     <Tr key={id}>
-                      <Td width={'25%'}>
+                      <Td width="25%" maxWidth="200px">
                         <Typography ellipsis>{`${
                           entry.contentType.mainFieldValue || entry.id
                         }`}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="10%">
                         <Typography>{`${
                           entry?.locale?.name ? entry.locale.name : '-'
                         }`}</Typography>
                       </Td>
-                      <Td>
-                        <Typography>{entry.contentType.displayName || ''}</Typography>
+                      <Td width="10%">
+                        <Typography ellipsis>{entry.contentType.displayName || ''}</Typography>
                       </Td>
-                      <Td>
+                      <Td width="20%">
                         {release.releasedAt ? (
                           <Typography>
                             {formatMessage(
@@ -665,15 +678,27 @@ const ReleaseDetailsBody = () => {
                         )}
                       </Td>
                       {!release.releasedAt && (
-                        <Td>
-                          <EntryValidationText status={entry.status} action={type} />
-                        </Td>
+                        <>
+                          <Td width="20%" minWidth="200px">
+                            <EntryValidationText status={entry.status} action={type} />
+                          </Td>
+                          <Td>
+                            <Flex justifyContent="flex-end">
+                              <ReleaseActionMenu.Root>
+                                <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                  contentTypeUid={contentType}
+                                  entryId={entry.id}
+                                  locale={locale}
+                                />
+                                <ReleaseActionMenu.DeleteReleaseActionItem
+                                  releaseId={release.id}
+                                  actionId={id}
+                                />
+                              </ReleaseActionMenu.Root>
+                            </Flex>
+                          </Td>
+                        </>
                       )}
-                      <Td>
-                        <Flex justifyContent="flex-end">
-                          <ReleaseActionMenu releaseId={releaseId} actionId={id} />
-                        </Flex>
-                      </Td>
                     </Tr>
                   ))}
                 </Table.Body>
@@ -702,7 +727,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -710,7 +735,12 @@ const ReleaseDetailsPage = () => {
     isLoading: isLoadingDetails,
     data,
     isSuccess: isSuccessDetails,
-  } = useGetReleaseQuery({ id: releaseId });
+  } = useGetReleaseQuery(
+    { id: releaseId! },
+    {
+      skip: !releaseId,
+    }
+  );
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
 
@@ -731,6 +761,10 @@ const ReleaseDetailsPage = () => {
         </ContentLayout>
       </ReleaseDetailsLayout>
     );
+  }
+
+  if (!releaseId) {
+    return <Navigate to=".." />;
   }
 
   const title = (isSuccessDetails && data?.data?.name) || '';
@@ -773,7 +807,7 @@ const ReleaseDetailsPage = () => {
     });
 
     if ('data' in response) {
-      push('/plugins/content-releases');
+      navigate('..');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -794,7 +828,7 @@ const ReleaseDetailsPage = () => {
       toggleEditReleaseModal={toggleEditReleaseModal}
       toggleWarningSubmit={toggleWarningSubmit}
     >
-      <ReleaseDetailsBody />
+      <ReleaseDetailsBody releaseId={releaseId} />
       {releaseModalShown && (
         <ReleaseModal
           handleClose={toggleEditReleaseModal}

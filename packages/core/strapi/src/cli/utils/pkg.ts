@@ -15,6 +15,7 @@ interface Export {
 }
 
 const packageJsonSchema = yup.object({
+  name: yup.string().required(),
   exports: yup.lazy((value) =>
     yup
       .object(

@@ -2,6 +2,7 @@ import { useRBAC } from '@strapi/helper-plugin';
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
+import { Route, Routes } from 'react-router-dom';
 
 import { ReleaseDetailsPage } from '../ReleaseDetailsPage';
 
@@ -31,9 +32,14 @@ describe('Releases details page', () => {
       )
     );
 
-    const { user } = render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
-    });
+    const { user } = render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/1` }],
+      }
+    );
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.noActionsHeaderData.data.name
@@ -82,9 +88,14 @@ describe('Releases details page', () => {
       )
     );
 
-    render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
-    });
+    render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/1` }],
+      }
+    );
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.withActionsHeaderData.data.name
@@ -134,9 +145,14 @@ describe('Releases details page', () => {
       )
     );
 
-    render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
-    });
+    render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/1` }],
+      }
+    );
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.withActionsHeaderData.data.name
@@ -170,12 +186,17 @@ describe('Releases details page', () => {
       )
     );
 
-    const { user } = render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
-      userEventOptions: {
-        skipHover: true,
-      },
-    });
+    const { user } = render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/1` }],
+        userEventOptions: {
+          skipHover: true,
+        },
+      }
+    );
 
     await screen.findByText(mockReleaseDetailsPageData.noActionsHeaderData.data.name);
 
@@ -205,9 +226,14 @@ describe('Releases details page', () => {
       )
     );
 
-    render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
-    });
+    render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/1` }],
+      }
+    );
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.withActionsHeaderData.data.name
@@ -232,9 +258,14 @@ describe('Releases details page', () => {
       )
     );
 
-    render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
-    });
+    render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/1` }],
+      }
+    );
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.withActionsHeaderData.data.name

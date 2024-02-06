@@ -1,6 +1,5 @@
-import { render, waitFor, screen, fireEvent } from '@tests/utils';
-import { Location } from 'history';
-import { Route } from 'react-router-dom';
+import { render, screen, fireEvent } from '@tests/utils';
+import { useLocation } from 'react-router-dom';
 
 import { ViewSettingsMenu } from '../ViewSettingsMenu';
 
@@ -107,7 +106,11 @@ describe('ViewSettingsMenu', () => {
   });
 
   it('should navigate to the configuration page when I click on the configure the view button', async () => {
-    let testLocation: Location = null!;
+    const LocationDisplay = () => {
+      const location = useLocation();
+
+      return <span>{location.pathname}</span>;
+    };
 
     const { user } = render(<ViewSettingsMenu slug="api::temp.temp" />, {
       renderOptions: {
@@ -115,14 +118,7 @@ describe('ViewSettingsMenu', () => {
           return (
             <>
               {children}
-              <Route
-                path="*"
-                render={({ location }) => {
-                  testLocation = location;
-
-                  return null;
-                }}
-              />
+              <LocationDisplay />
             </>
           );
         },
@@ -141,8 +137,6 @@ describe('ViewSettingsMenu', () => {
       })
     );
 
-    await waitFor(() => {
-      expect(testLocation.pathname).toBe('/api::temp.temp/configurations/list');
-    });
+    await screen.findByText('/configurations/list');
   });
 });

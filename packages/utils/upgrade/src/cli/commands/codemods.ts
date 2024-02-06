@@ -1,12 +1,13 @@
 import prompts from 'prompts';
 import { loggerFactory } from '../../modules/logger';
+import { Version } from '../../modules/version';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 
-import type { Command } from '../types';
+import type { CodemodsCommand } from '../types';
 import type { Codemod } from '../../modules/codemod';
 
-export const codemods: Command = async (options) => {
+export const codemods: CodemodsCommand = async (options) => {
   try {
     const { silent, debug } = options;
     const logger = loggerFactory({ silent, debug });
@@ -66,9 +67,9 @@ export const codemods: Command = async (options) => {
       selectCodemods,
       dry: options.dry,
       cwd: options.projectPath,
-      target: options.target,
+      target: Version.ReleaseType.Major,
     });
   } catch (err) {
-    handleError(err);
+    handleError(err, options.silent);
   }
 };

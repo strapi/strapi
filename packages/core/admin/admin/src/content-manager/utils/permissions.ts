@@ -1,6 +1,6 @@
 import { Permission, findMatchingPermissions } from '@strapi/helper-plugin';
 
-const generatePermissionsObject = (uid: string) => {
+const generatePermissionsObject = (uid: string = '') => {
   // TODO: Why are the content-manager permissions hardcoded here?
   const permissions = {
     create: [{ action: 'plugin::content-manager.explorer.create', subject: null }],

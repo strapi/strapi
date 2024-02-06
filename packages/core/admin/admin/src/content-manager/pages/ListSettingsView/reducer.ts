@@ -12,8 +12,8 @@ export interface ListSettingsViewState {
     sortable?: boolean;
   };
   fieldToEdit: string;
-  initialData: SettingsViewContentTypeLayout;
-  modifiedData: SettingsViewContentTypeLayout;
+  initialData: SettingsViewContentTypeLayout | null;
+  modifiedData: SettingsViewContentTypeLayout | null;
 }
 
 export interface AddFieldAction {
@@ -57,6 +57,11 @@ export interface SubmitFieldFormAction {
   type: 'SUBMIT_FIELD_FORM';
 }
 
+export interface SetDataAction {
+  data: SettingsViewContentTypeLayout | null;
+  type: 'SET_DATA';
+}
+
 type Action =
   | AddFieldAction
   | MoveFieldAction
@@ -65,18 +70,19 @@ type Action =
   | RemoveFieldAction
   | SetFieldToEditAction
   | UnsetFieldToEditAction
-  | SubmitFieldFormAction;
+  | SubmitFieldFormAction
+  | SetDataAction;
 
 const initialState = {
   fieldForm: {},
   fieldToEdit: '',
-  initialData: {},
-  modifiedData: {},
-};
+  initialData: null,
+  modifiedData: null,
+} satisfies ListSettingsViewState;
 
 const reducer = (state: ListSettingsViewState, action: Action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, (draftState: ListSettingsViewState) => {
+  produce(state, (draftState) => {
     const layoutFieldListPath = ['modifiedData', 'layouts', 'list'];
     switch (action.type) {
       case 'ADD_FIELD': {
@@ -103,7 +109,7 @@ const reducer = (state: ListSettingsViewState, action: Action) =>
         break;
       }
       case 'REMOVE_FIELD': {
-        const layoutFieldList: ListSettingsViewState['modifiedData']['layouts']['list'] = get(
+        const layoutFieldList: SettingsViewContentTypeLayout['layouts']['list'] = get(
           state,
           layoutFieldListPath,
           []
@@ -139,6 +145,14 @@ const reducer = (state: ListSettingsViewState, action: Action) =>
         const fieldMetadataPath = ['modifiedData', 'metadatas', state.fieldToEdit, 'list'];
         set(draftState, [...fieldMetadataPath, 'label'], state.fieldForm.label);
         set(draftState, [...fieldMetadataPath, 'sortable'], state.fieldForm.sortable);
+        break;
+      }
+      /**
+       * TODO: refactor this so we don't need to do it, do we actually need a reducer?
+       */
+      case 'SET_DATA': {
+        draftState.initialData = action.data;
+        draftState.modifiedData = action.data;
         break;
       }
       default:

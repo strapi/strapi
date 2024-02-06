@@ -22,7 +22,6 @@ interface ActionOptions extends Pick<InitOptions, 'silent' | 'debug'> {}
 export default async (
   packagePath: string,
   { silent, debug }: ActionOptions,
-  _cmd: unknown,
   { logger, cwd }: CLIContext
 ) => {
   try {
@@ -240,6 +239,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         scripts: {
           build: 'strapi plugin:build',
           watch: 'strapi plugin:watch',
+          'watch:link': 'strapi plugin:watch:link',
           verify: 'strapi plugin:verify',
         },
         dependencies: {},
@@ -296,7 +296,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
             case 'client-code': {
               if (answer) {
                 pkgJson.exports['./strapi-admin'] = {
-                  source: './src/admin/index.js',
+                  source: './admin/src/index.js',
                   import: './dist/admin/index.mjs',
                   require: './dist/admin/index.js',
                   default: './dist/admin/index.js',
@@ -310,10 +310,10 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                 };
 
                 pkgJson.devDependencies = {
-                  ...pkgJson.dependencies,
+                  ...pkgJson.devDependencies,
                   react: '*',
                   'react-dom': '*',
-                  'react-router-dom': '5.3.4',
+                  'react-router-dom': '*',
                   'styled-components': '5.3.3',
                 };
 
@@ -321,8 +321,8 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                   ...pkgJson.peerDependencies,
                   react: '^17.0.0 || ^18.0.0',
                   'react-dom': '^17.0.0 || ^18.0.0',
-                  'react-router-dom': '5.2.0',
-                  'styled-components': '5.2.1',
+                  'react-router-dom': '^6.0.0',
+                  'styled-components': '^5.2.1',
                 };
               }
 
@@ -331,7 +331,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
             case 'server-code': {
               if (answer) {
                 pkgJson.exports['./strapi-server'] = {
-                  source: './src/server/index.js',
+                  source: './server/src/index.js',
                   import: './dist/server/index.mjs',
                   require: './dist/server/index.js',
                   default: './dist/server/index.js',
@@ -356,7 +356,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
 
               if (isTypescript) {
                 if (isRecord(pkgJson.exports['./strapi-admin'])) {
-                  pkgJson.exports['./strapi-admin'].source = './src/admin/index.ts';
+                  pkgJson.exports['./strapi-admin'].source = './admin/src/index.ts';
 
                   pkgJson.exports['./strapi-admin'] = {
                     types: './dist/admin/src/index.d.ts',
@@ -372,7 +372,6 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                     ...pkgJson.devDependencies,
                     '@types/react': '*',
                     '@types/react-dom': '*',
-                    '@types/react-router-dom': '5.3.3',
                     '@types/styled-components': '5.1.26',
                   };
 
@@ -382,7 +381,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                 }
 
                 if (isRecord(pkgJson.exports['./strapi-server'])) {
-                  pkgJson.exports['./strapi-server'].source = './src/server/index.ts';
+                  pkgJson.exports['./strapi-server'].source = './server/src/index.ts';
 
                   pkgJson.exports['./strapi-server'] = {
                     types: './dist/server/src/index.d.ts',

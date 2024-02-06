@@ -97,7 +97,6 @@
     "@types/react": "18.2.39",
     "@types/react-dom": "18.2.17",
     "@types/react-helmet": "6.1.8",
-    "@types/react-router-dom": "^5.3.3",
     "@types/styled-components": "5.1.32",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",

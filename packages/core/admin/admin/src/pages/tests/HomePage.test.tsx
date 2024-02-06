@@ -1,9 +1,8 @@
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useAppInfo } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import { useContentTypes } from '../../hooks/useContentTypes';
 import { HomePage } from '../HomePage';
@@ -32,14 +31,12 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.mock('../../hooks/useContentTypes');
 
-const history = createMemoryHistory();
-
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <Router history={history}>
+      <MemoryRouter>
         <HomePage />
-      </Router>
+      </MemoryRouter>
     </IntlProvider>
   </ThemeProvider>
 );

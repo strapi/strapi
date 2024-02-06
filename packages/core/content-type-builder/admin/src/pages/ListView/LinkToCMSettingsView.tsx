@@ -4,7 +4,7 @@ import { Button } from '@strapi/design-system';
 import { CheckPermissions } from '@strapi/helper-plugin';
 import { Layer } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const cmPermissions = {
   collectionTypesConfigurations: [
@@ -44,7 +44,7 @@ export const LinkToCMSettingsView = memo(
     targetUid = '',
   }: LinkToCMSettingsViewProps) => {
     const { formatMessage } = useIntl();
-    const { push } = useHistory();
+    const navigate = useNavigate();
     const { collectionTypesConfigurations, componentsConfigurations, singleTypesConfigurations } =
       cmPermissions;
     const label = formatMessage({
@@ -59,9 +59,9 @@ export const LinkToCMSettingsView = memo(
       }
 
       if (isInContentTypeView) {
-        push(`/content-manager/collection-types/${targetUid}/configurations/edit`);
+        navigate(`/content-manager/collection-types/${targetUid}/configurations/edit`);
       } else {
-        push(`/content-manager/components/${targetUid}/configurations/edit`);
+        navigate(`/content-manager/components/${targetUid}/configurations/edit`);
       }
 
       return false;

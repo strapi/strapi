@@ -7,7 +7,7 @@ import { Eye, EyeStriked } from '@strapi/icons';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
@@ -38,7 +38,7 @@ const Login = ({ children }: LoginProps) => {
   const [passwordShown, setPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
   const query = useQuery();
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   const login = useAuth('Login', (state) => state.login);
 
@@ -51,7 +51,7 @@ const Login = ({ children }: LoginProps) => {
       const message = res.error.message ?? 'Something went wrong';
 
       if (camelCase(message).toLowerCase() === 'usernotactive') {
-        push('/auth/oops');
+        navigate('/auth/oops');
         return;
       }
 
@@ -60,7 +60,7 @@ const Login = ({ children }: LoginProps) => {
       const redirectTo = query.get('redirectTo');
       const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
 
-      push(redirectUrl);
+      navigate(redirectUrl);
     }
   };
 

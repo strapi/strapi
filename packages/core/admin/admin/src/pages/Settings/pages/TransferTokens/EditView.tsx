@@ -28,7 +28,7 @@ import {
 import { Check } from '@strapi/icons';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -67,8 +67,8 @@ const EditView = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
-  const history = useHistory();
-  const { state: locationState } = useLocation<{ transferToken: TransferToken }>();
+  const navigate = useNavigate();
+  const { state: locationState } = useLocation();
   const [transferToken, setTransferToken] = React.useState<
     TransferToken | SanitizedTransferToken | null
   >(
@@ -86,7 +86,7 @@ const EditView = () => {
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions);
-  const match = useRouteMatch<{ id: string }>('/settings/transfer-tokens/:id');
+  const match = useMatch('/settings/transfer-tokens/:id');
 
   const id = match?.params?.id;
   const isCreating = id === 'create';
@@ -181,7 +181,10 @@ const EditView = () => {
             tokenType: TRANSFER_TOKEN_TYPE,
           });
 
-          history.push(`/settings/transfer-tokens/${res.data.id}`, { transferToken: res.data });
+          navigate(res.data.id.toString(), {
+            replace: true,
+            state: { transferToken: res.data },
+          });
           setCurrentStep('transferTokens.success');
         } else {
           const res = await updateToken({

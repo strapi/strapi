@@ -6,9 +6,9 @@ import { useQuery } from 'react-query';
 
 import { useTypedSelector } from '../../core/store/hooks';
 import { selectSchemas } from '../pages/App';
-import { formatLayouts } from '../utils/layouts';
+import { type FormattedLayouts, formatLayouts } from '../utils/layouts';
 
-const useContentTypeLayout = (contentTypeUID: string) => {
+const useContentTypeLayout = (contentTypeUID: string = '') => {
   const schemas = useTypedSelector(selectSchemas);
   const { get } = useFetchClient();
 
@@ -25,7 +25,10 @@ const useContentTypeLayout = (contentTypeUID: string) => {
     }
   );
 
-  const layout = React.useMemo(() => (data ? formatLayouts(data, schemas) : null), [data, schemas]);
+  const layout: FormattedLayouts | null = React.useMemo(
+    () => (data ? formatLayouts(data, schemas) : null),
+    [data, schemas]
+  );
 
   return {
     isLoading,

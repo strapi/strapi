@@ -27,7 +27,7 @@ import { Eye, EyeStriked } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
 import omit from 'lodash/omit';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { NavLink, Redirect, useHistory, useRouteMatch } from 'react-router-dom';
+import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
@@ -46,7 +46,6 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
-import { AuthType } from '../constants';
 
 import { FieldActionWrapper } from './FieldActionWrapper';
 
@@ -105,7 +104,7 @@ interface RegisterFormValues {
 
 const Register = ({ hasAdmin }: RegisterProps) => {
   const toggleNotification = useNotification();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = React.useState(false);
   const [submitCount, setSubmitCount] = React.useState(0);
@@ -114,9 +113,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const { formatMessage } = useIntl();
   const { setSkipped } = useGuidedTour();
   const query = useQuery();
-  const match = useRouteMatch<{ authType: Extract<AuthType, `register${string}`> }>(
-    '/auth/:authType'
-  );
+  const match = useMatch('/auth/:authType');
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -138,9 +135,9 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         message,
       });
 
-      push(`/auth/oops?info=${encodeURIComponent(message)}`);
+      navigate(`/auth/oops?info=${encodeURIComponent(message)}`);
     }
-  }, [error, formatAPIError, push, toggleNotification]);
+  }, [error, formatAPIError, navigate, toggleNotification]);
 
   const [registerAdmin] = useRegisterAdminMutation();
   const [registerUser] = useRegisterUserMutation();
@@ -171,12 +168,12 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         // Only enable EE survey if user accepted the newsletter
         setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
-        push({
+        navigate({
           pathname: '/usecase',
           search: `?hasAdmin=${true}`,
         });
       } else {
-        push('/');
+        navigate('/');
       }
     } else {
       if (isBaseQueryError(res.error)) {
@@ -205,12 +202,12 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         // Only enable EE survey if user accepted the newsletter
         setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
-        push({
+        navigate({
           pathname: '/usecase',
           search: `?hasAdmin=${hasAdmin}`,
         });
       } else {
-        push('/');
+        navigate('/');
       }
     } else {
       if (isBaseQueryError(res.error)) {
@@ -230,7 +227,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     !match ||
     (match.params.authType !== 'register' && match.params.authType !== 'register-admin')
   ) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   const isAdminRegistration = match.params.authType === 'register-admin';

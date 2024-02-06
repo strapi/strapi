@@ -63,14 +63,12 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
             printDiagnostic(diagnostic, { logger: ctx.logger, cwd: ctx.cwd });
           }
 
-          if (emitResult.emitSkipped) {
-            const errors = allDiagnostics.filter(
-              (diag) => diag.category === ts.DiagnosticCategory.Error
-            );
+          const errors = allDiagnostics.filter(
+            (diag) => diag.category === ts.DiagnosticCategory.Error
+          );
 
-            if (errors.length) {
-              throw new Error('Failed to compile TypeScript definitions');
-            }
+          if (errors.length) {
+            throw new Error('Failed to compile TypeScript definitions');
           }
         })
       )
@@ -99,8 +97,6 @@ const dtsBuildTask: TaskHandler<DtsBuildTask> = {
     if (isError(err)) {
       ctx.logger.error(err.message);
     }
-
-    process.exit(1);
   },
 };
 

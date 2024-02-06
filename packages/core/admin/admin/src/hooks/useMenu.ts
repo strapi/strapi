@@ -18,7 +18,7 @@ import { selectAdminPermissions } from '../selectors';
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
 
-type MenuItem = StrapiAppContextValue['menu'][number];
+type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
 
 export interface Menu {
   generalSectionLinks: MenuItem[];
@@ -26,9 +26,7 @@ export interface Menu {
   isLoading: boolean;
 }
 
-const useMenu = () => {
-  const { allPermissions: userPermissions } = useRBACProvider();
-  const { shouldUpdateStrapi } = useAppInfo();
+const useMenu = (shouldUpdateStrapi: boolean, userPermissions: Permission[]) => {
   const { menu } = useStrapiApp();
   const permissions = useSelector(selectAdminPermissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({

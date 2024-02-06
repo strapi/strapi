@@ -15,7 +15,7 @@ import { getPackageManager } from './managers';
 const PEER_DEPS = {
   react: '^18.0.0',
   'react-dom': '^18.0.0',
-  'react-router-dom': '^5.2.0',
+  'react-router-dom': '^6.0.0',
   'styled-components': '^5.2.1',
 };
 

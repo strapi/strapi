@@ -4,7 +4,7 @@ import { SingleSelect, SingleSelectOption, SingleSelectProps } from '@strapi/des
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { useContentTypeHasI18n } from '../hooks/useContentTypeHasI18n';
 import { useContentTypePermissions } from '../hooks/useContentTypePermissions';
@@ -23,7 +23,7 @@ const LocalePicker = () => {
   }
 
   const [{ query }, setQuery] = useQueryParams<Query>();
-  const match = useRouteMatch<{ slug: string }>('/content-manager/:collectiontype/:slug');
+  const match = useMatch('/content-manager/:collectiontype/:slug');
   const isContentTypeLocalized = useContentTypeHasI18n();
   const { createPermissions, readPermissions } = useContentTypePermissions(match?.params.slug);
 

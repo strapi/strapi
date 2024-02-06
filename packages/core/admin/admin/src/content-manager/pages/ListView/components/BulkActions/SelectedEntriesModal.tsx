@@ -32,7 +32,7 @@ import { Entity } from '@strapi/types';
 import { AxiosError, AxiosResponse } from 'axios';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { UseQueryResult, useMutation, useQuery } from 'react-query';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
@@ -128,9 +128,7 @@ const SelectedEntriesTableContent = ({
   entriesToPublish = [],
   validationErrors = {},
 }: SelectedEntriesTableContentProps) => {
-  const {
-    location: { pathname },
-  } = useHistory();
+  const { pathname } = useLocation();
   const { formatMessage } = useIntl();
 
   const contentTypeSettings = useTypedSelector(

@@ -15,7 +15,7 @@ import {
 import { ArrowLeft } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { NavLink, Redirect, useRouteMatch } from 'react-router-dom';
+import { NavLink, Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -47,7 +47,7 @@ interface EditRoleFormValues {
 const EditPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const match = useRouteMatch<{ id: string }>('/settings/roles/:id');
+  const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -93,7 +93,7 @@ const EditPage = () => {
   const [updateRolePermissions] = useUpdateRolePermissionsMutation();
 
   if (!id) {
-    return <Redirect to="/settings/roles" />;
+    return <Navigate to="/settings/roles" />;
   }
 
   const handleEditRoleSubmit = async (
@@ -270,7 +270,7 @@ const ProtectedEditPage = () => {
   }
 
   if (!canRead && !canUpdate) {
-    return <Redirect to="/" />;
+    return <Navigate to=".." />;
   }
 
   return <EditPage />;

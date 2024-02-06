@@ -17,7 +17,7 @@ import set from 'lodash/set';
 import size from 'lodash/size';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
-import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
+import { Navigate, useLocation, useMatch } from 'react-router-dom';
 
 import { DataManagerContext } from '../../contexts/DataManagerContext';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
@@ -94,10 +94,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const { refetchPermissions } = useRBACProvider();
   const { pathname } = useLocation();
   const { onCloseModal } = useFormModalNavigation();
-  const contentTypeMatch = useRouteMatch<{ uid: string }>(
-    `/plugins/${pluginId}/content-types/:uid`
-  );
-  const componentMatch = useRouteMatch<{ categoryUid: string; componentUid: string }>(
+  const contentTypeMatch = useMatch(`/plugins/${pluginId}/content-types/:uid`);
+  const componentMatch = useMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
   const fetchClient = useFetchClient();
@@ -486,7 +484,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   }, [contentTypes]);
 
   if (shouldRedirect) {
-    return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
+    return <Navigate to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
   const submitData = async (additionalContentTypeData?: Record<string, any>) => {

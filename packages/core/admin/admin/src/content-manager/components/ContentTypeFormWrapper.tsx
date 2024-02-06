@@ -14,7 +14,7 @@ import {
 import axios, { AxiosError, AxiosResponse, CancelTokenSource } from 'axios';
 import get from 'lodash/get';
 import { useQueryClient } from 'react-query';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
 import { useFindRedirectionLink } from '../hooks/useFindRedirectionLink';
@@ -27,6 +27,7 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
+import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
@@ -86,7 +87,7 @@ const ContentTypeFormWrapper = ({
   const toggleNotification = useNotification();
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
-  const { push, replace } = useHistory();
+  const navigate = useNavigate();
   const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useTypedDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
@@ -100,7 +101,7 @@ const ContentTypeFormWrapper = ({
   const { put, post, del } = fetchClient;
 
   const isSingleType = collectionType === 'single-types';
-  const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
+  const isCreatingEntry = !isSingleType && id === 'create';
 
   const requestURL =
     isCreatingEntry && !origin
@@ -172,7 +173,10 @@ const ContentTypeFormWrapper = ({
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, {
+          cancelToken: source.token,
+          params: buildValidGetParams(query),
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
@@ -182,12 +186,11 @@ const ContentTypeFormWrapper = ({
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404 && !isSingleType) {
-          push(redirectionLink);
+          navigate(redirectionLink);
 
           return;
         } else if (resStatus === 404 && isSingleType) {
           // Creating a single type
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         }
 
@@ -198,7 +201,7 @@ const ContentTypeFormWrapper = ({
             message: { id: getTranslation('permissions.not-allowed.update') },
           });
 
-          push(redirectionLink);
+          navigate(redirectionLink);
         }
       }
     };
@@ -225,13 +228,14 @@ const ContentTypeFormWrapper = ({
   }, [
     fetchClient,
     cleanReceivedData,
-    push,
+    navigate,
     requestURL,
     dispatch,
     rawQuery,
     redirectionLink,
     toggleNotification,
     isSingleType,
+    query,
   ]);
 
   const displayErrors = React.useCallback(
@@ -258,10 +262,9 @@ const ContentTypeFormWrapper = ({
         trackUsage('didDeleteEntry', trackerProperty);
 
         if (isSingleType) {
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         } else {
-          replace(redirectionLink);
+          navigate(redirectionLink, { replace: true });
         }
 
         return Promise.resolve(data);
@@ -281,7 +284,7 @@ const ContentTypeFormWrapper = ({
       isSingleType,
       dispatch,
       rawQuery,
-      replace,
+      navigate,
       redirectionLink,
     ]
   );
@@ -327,7 +330,6 @@ const ContentTypeFormWrapper = ({
 
         // TODO: need to find a better place, or a better abstraction
         queryClient.invalidateQueries(['relation']);
-        setIsCreatingEntry(false);
 
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
@@ -336,7 +338,9 @@ const ContentTypeFormWrapper = ({
 
         if (!isSingleType) {
           // @ts-expect-error – TODO: look into this, the type is probably wrong.
-          replace(`/content-manager/${collectionType}/${slug}/${data.id}${rawQuery}`);
+          navigate(`/content-manager/${collectionType}/${slug}/${data.id}${rawQuery}`, {
+            replace: true,
+          });
         }
 
         return Promise.resolve(data);
@@ -365,7 +369,7 @@ const ContentTypeFormWrapper = ({
       queryClient,
       cleanReceivedData,
       isSingleType,
-      replace,
+      navigate,
       rawQuery,
       displayErrors,
     ]
@@ -456,7 +460,9 @@ const ContentTypeFormWrapper = ({
           Contracts.CollectionTypes.Update.Response,
           AxiosResponse<Contracts.CollectionTypes.Update.Response>,
           Contracts.CollectionTypes.Update.Request['body']
-        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
+        >(`/content-manager/${collectionType}/${slug}/${id}`, body, {
+          params: query,
+        });
 
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
