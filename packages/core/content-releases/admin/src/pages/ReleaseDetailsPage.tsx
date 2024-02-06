@@ -88,16 +88,16 @@ const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
 `;
 
 const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.danger600};
   }
@@ -284,6 +284,25 @@ export const ReleaseDetailsLayout = ({
     dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
   };
 
+  const getCreatedByUser = () => {
+    if (!release?.createdBy) {
+      return null;
+    }
+
+    // Favor the username
+    if (release.createdBy.username) {
+      return release.createdBy.username;
+    }
+
+    // Firstname may not exist if created with SSO
+    if (release.createdBy.firstname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname || ''}`.trim();
+    }
+
+    // All users must have at least an email
+    return release.createdBy.email;
+  };
+
   if (isLoadingDetails) {
     return (
       <Main aria-busy={isLoadingDetails}>
@@ -310,9 +329,7 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = release.createdBy.lastname
-    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
-    : `${release.createdBy.firstname}`;
+  const hasCreatedByUser = Boolean(getCreatedByUser());
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -348,7 +365,7 @@ export const ReleaseDetailsLayout = ({
                   paddingRight={2}
                   aria-label={formatMessage({
                     id: 'content-releases.header.actions.open-release-actions',
-                    defaultMessage: 'Release actions',
+                    defaultMessage: 'Release edit and delete menu',
                   })}
                   // @ts-expect-error See above
                   icon={<More />}
@@ -397,9 +414,10 @@ export const ReleaseDetailsLayout = ({
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage: ' by {createdBy}',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
                         },
-                        { createdBy }
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
