@@ -199,7 +199,12 @@ describe('BigInteger validator', () => {
       await validator(5);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrBigIntegerUnique: 5 },
+        filters: {
+          attrBigIntegerUnique: 5,
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });

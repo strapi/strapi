@@ -53,6 +53,12 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       admin_app: (state = initialState) => state,
       rbacProvider: (state = initialState) => state,
     }),
+    middleware: (getDefaultMiddleware: any) =>
+      getDefaultMiddleware({
+        // Disable timing checks for test env
+        immutableCheck: false,
+        serializableCheck: false,
+      }),
   });
 
   const i18nPermissions = Object.values(PERMISSIONS).flat();

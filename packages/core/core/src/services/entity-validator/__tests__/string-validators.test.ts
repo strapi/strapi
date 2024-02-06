@@ -201,7 +201,12 @@ describe('String validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrStringUnique: valueToCheck },
+        filters: {
+          attrStringUnique: valueToCheck,
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });
