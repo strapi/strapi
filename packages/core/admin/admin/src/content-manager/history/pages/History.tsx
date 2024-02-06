@@ -44,7 +44,7 @@ const HistoryPage = () => {
   React.useEffect(() => {
     const versions = versionsResponse.data?.data;
 
-    if (!versionsResponse.isLoading && !query.id && versions?.[0]) {
+    if (!query.id && versions?.[0]) {
       navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
