@@ -13,6 +13,16 @@ describe('useDocumentLayout', () => {
       {
         "components": {},
         "layout": [],
+        "settings": {
+          "bulkable": false,
+          "defaultSortBy": "",
+          "defaultSortOrder": "asc",
+          "filterable": false,
+          "mainField": "id",
+          "pageSize": 10,
+          "pagination": false,
+          "searchable": false,
+        },
       }
     `);
 

@@ -78,7 +78,7 @@ interface EditLayout {
     };
   };
   metadatas?: never;
-  settings?: never;
+  settings: Contracts.ContentTypes.Settings;
 }
 
 type UseDocumentLayout = (model: string) => {
@@ -94,6 +94,17 @@ type UseDocumentLayout = (model: string) => {
 /* -------------------------------------------------------------------------------------------------
  * useDocumentLayout
  * -----------------------------------------------------------------------------------------------*/
+
+const DEFAULT_SETTINGS = {
+  bulkable: false,
+  filterable: false,
+  searchable: false,
+  pagination: false,
+  defaultSortBy: '',
+  defaultSortOrder: 'asc',
+  mainField: 'id',
+  pageSize: 10,
+};
 
 /**
  * @alpha
@@ -138,6 +149,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
         : ({
             layout: [],
             components: {},
+            settings: DEFAULT_SETTINGS,
           } as EditLayout),
     [data, schema, components]
   );
@@ -149,16 +161,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
         : ({
             layout: [],
             metadatas: {},
-            settings: {
-              bulkable: false,
-              filterable: false,
-              searchable: false,
-              pagination: false,
-              defaultSortBy: '',
-              defaultSortOrder: 'asc',
-              mainField: 'id',
-              pageSize: 10,
-            },
+            settings: DEFAULT_SETTINGS,
           } as ListLayout),
     [data, schema]
   );
@@ -245,7 +248,11 @@ const formatEditLayout = (
     {}
   );
 
-  return { layout: panelledEditAttributes, components: componentEditAttributes };
+  return {
+    layout: panelledEditAttributes,
+    components: componentEditAttributes,
+    settings: data.contentType.settings,
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -326,7 +333,8 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
   const listAttributes = convertListLayoutToFieldLayouts(
     data.contentType.layouts.list,
     schema?.attributes,
-    listMetadatas
+    listMetadatas,
+    data.components
   );
 
   return { layout: listAttributes, settings: data.contentType.settings, metadatas: listMetadatas };
@@ -346,7 +354,8 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
 const convertListLayoutToFieldLayouts = (
   columns: LayoutData['contentType']['layouts']['list'],
   attributes: Schema['attributes'] = {},
-  metadatas: ListLayout['metadatas']
+  metadatas: ListLayout['metadatas'],
+  components: Record<string, Contracts.Components.ComponentConfiguration> = {}
 ) => {
   return columns
     .map((name) => {
@@ -361,7 +370,10 @@ const convertListLayoutToFieldLayouts = (
       return {
         attribute,
         label: metadata.label ?? '',
-        mainField: metadata.mainField,
+        mainField:
+          'component' in attribute
+            ? components[attribute.component].settings.mainField
+            : metadata.mainField,
         name: name,
         searchable: metadata.searchable ?? true,
         sortable: metadata.sortable ?? true,

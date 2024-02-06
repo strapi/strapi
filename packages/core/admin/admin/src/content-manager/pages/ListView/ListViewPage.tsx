@@ -189,13 +189,13 @@ const ListViewPage = () => {
       attribute: {
         type: 'custom',
       },
-      name: 'publishedAt',
+      name: 'status',
       label: {
-        id: getTranslation(`containers.ListPage.table-headers.publishedAt`),
-        defaultMessage: 'publishedAt',
+        id: getTranslation(`containers.ListPage.table-headers.status`),
+        defaultMessage: 'status',
       },
       searchable: false,
-      sortable: true,
+      sortable: false,
     } satisfies ListFieldLayout);
 
     if (reviewWorkflowColumns) {
@@ -363,7 +363,7 @@ const ListViewPage = () => {
                         <Table.CheckboxDataCell rowId={rowData.id} index={index} />
                       </Td>
                       {tableHeaders.map(({ cellFormatter, ...header }) => {
-                        if (header.name === 'publishedAt') {
+                        if (header.name === 'status') {
                           return (
                             <Td key={header.name}>
                               <Status

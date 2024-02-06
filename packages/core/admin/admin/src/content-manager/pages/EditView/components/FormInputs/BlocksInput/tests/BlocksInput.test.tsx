@@ -28,7 +28,6 @@ const setup = ({
       hint="blocks description"
       placeholder="blocks placeholder"
       disabled={false}
-      ariaLabelId="blocks-label"
       type="blocks"
       {...props}
     />,
