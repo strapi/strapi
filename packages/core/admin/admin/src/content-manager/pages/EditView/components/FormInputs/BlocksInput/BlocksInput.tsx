@@ -23,12 +23,12 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
         <Flex direction="column" alignItems="stretch" gap={1}>
           <FieldLabel>{label}</FieldLabel>
           <BlocksEditor
-            ariaLabelId={id}
             name={name}
             error={field.error}
             ref={forwardedRef}
             value={field.value}
             onChange={field.onChange}
+            ariaLabelId={id}
             {...editorProps}
           />
           <FieldHint />

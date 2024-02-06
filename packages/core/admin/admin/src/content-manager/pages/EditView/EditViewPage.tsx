@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import {
-  Box,
   Flex,
   Grid,
   GridItem,
   Main,
+  SetSelectedTabIndexHandler,
   Tab,
   TabGroup,
   TabPanel,
@@ -20,20 +20,20 @@ import {
   useQueryParams,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useOnce } from '../../../hooks/useOnce';
 import { Form } from '../../components/Form';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { useDoc } from '../../hooks/useDocument';
+import { type UseDocument, useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
 
+import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
-import { InputRenderer } from './components/InputRenderer';
 import { Panels } from './components/Panels';
 import { transformDocument } from './utils/data';
 import { createDefaultForm } from './utils/forms';
@@ -47,9 +47,25 @@ import { createDefaultForm } from './utils/forms';
 
 const EditViewPage = () => {
   const location = useLocation();
-  const { state = 'draft' } = useParams<{ state: 'draft' | 'published' }>();
+  const [
+    {
+      query: { status },
+    },
+    setQuery,
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const tabApi = React.useRef<{
+    _handlers: {
+      setSelectedTabIndex: SetSelectedTabIndexHandler;
+    };
+  }>(null);
+
+  React.useEffect(() => {
+    if (tabApi.current) {
+      tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
+    }
+  }, [status]);
 
   useOnce(() => {
     /**
@@ -69,6 +85,7 @@ const EditViewPage = () => {
   const isLoadingActionsRBAC = useDocumentRBAC('EditViewPage', (state) => state.isLoading);
   const {
     document,
+    meta,
     isLoading: isLoadingDocument,
     schema,
     components,
@@ -88,7 +105,10 @@ const EditViewPage = () => {
 
   const {
     isLoading: isLoadingLayout,
-    edit: { layout },
+    edit: {
+      layout,
+      settings: { mainField },
+    },
   } = useDocumentLayout(model);
 
   const { isLazyLoading } = useLazyComponents([]);
@@ -132,14 +152,34 @@ const EditViewPage = () => {
     );
   }
 
-  const handleSubmit = async () => {};
+  const handleTabChange = (index: number) => {
+    if (index === 0) {
+      setQuery({ status: 'draft' });
+    } else {
+      setQuery({ status: 'published' });
+    }
+  };
 
-  const status = document?.status ?? 'draft';
+  const documentTitle =
+    mainField !== 'id' && document?.[mainField] ? document[mainField] : 'Untitled';
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Header isCreating={isCreatingDocument} status={status} />
-      <TabGroup variant="simple" label="Document version">
+      <Header
+        isCreating={isCreatingDocument}
+        status={getDocumentStatus(document, meta)}
+        title={documentTitle}
+      />
+      <TabGroup
+        ref={tabApi}
+        variant="simple"
+        label={formatMessage({
+          id: getTranslation('containers.edit.tabs.label'),
+          defaultMessage: 'Document status',
+        })}
+        initialSelectedTabIndex={status === 'published' ? 1 : 0}
+        onTabChange={handleTabChange}
+      >
         <Tabs>
           <StatusTab>
             {formatMessage({
@@ -147,74 +187,34 @@ const EditViewPage = () => {
               defaultMessage: 'draft',
             })}
           </StatusTab>
-          <StatusTab>
+          <StatusTab disabled={meta?.availableStatus.length === 0}>
             {formatMessage({
               id: getTranslation('containers.edit.tabs.published'),
               defaultMessage: 'published',
             })}
           </StatusTab>
         </Tabs>
-        <TabPanels>
-          <TabPanel>
-            <Form
-              initialValues={initialValues}
-              onSubmit={handleSubmit}
-              method={isCreatingDocument ? 'POST' : 'PUT'}
-              // validate={validate}
-            >
-              <Grid paddingTop={8} gap={4}>
-                <GridItem col={9} s={12}>
-                  <Flex direction="column" alignItems="stretch" gap={6}>
-                    {layout.map((panel, index) => {
-                      if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
-                        const [row] = panel;
-                        const [field] = row;
-                        return (
-                          <Grid key={field.name} gap={4}>
-                            <GridItem col={12} s={12} xs={12}>
-                              <InputRenderer {...field} />
-                            </GridItem>
-                          </Grid>
-                        );
-                      }
-
-                      return (
-                        <Box
-                          key={index}
-                          hasRadius
-                          background="neutral0"
-                          shadow="tableShadow"
-                          paddingLeft={6}
-                          paddingRight={6}
-                          paddingTop={6}
-                          paddingBottom={6}
-                          borderColor="neutral150"
-                        >
-                          <Flex direction="column" alignItems="stretch" gap={6}>
-                            {panel.map((row, gridRowIndex) => (
-                              <Grid key={gridRowIndex} gap={4}>
-                                {row.map(({ size, ...field }) => {
-                                  return (
-                                    <GridItem col={size} key={field.name} s={12} xs={12}>
-                                      <InputRenderer {...field} />
-                                    </GridItem>
-                                  );
-                                })}
-                              </Grid>
-                            ))}
-                          </Flex>
-                        </Box>
-                      );
-                    })}
-                  </Flex>
-                </GridItem>
-                <GridItem col={3} s={12}>
-                  <Panels activeTab={state} />
-                </GridItem>
-              </Grid>
-            </Form>
-          </TabPanel>
-        </TabPanels>
+        <Form
+          disabled={status === 'published'}
+          initialValues={initialValues}
+          method={isCreatingDocument ? 'POST' : 'PUT'}
+        >
+          <Grid paddingTop={8} gap={4}>
+            <GridItem col={9} s={12}>
+              <TabPanels>
+                <TabPanel>
+                  <FormLayout layout={layout} />
+                </TabPanel>
+                <TabPanel>
+                  <FormLayout layout={layout} />
+                </TabPanel>
+              </TabPanels>
+            </GridItem>
+            <GridItem col={3} s={12}>
+              <Panels />
+            </GridItem>
+          </Grid>
+        </Form>
       </TabGroup>
     </Main>
   );
@@ -223,6 +223,36 @@ const EditViewPage = () => {
 const StatusTab = styled(Tab)`
   text-transform: uppercase;
 `;
+
+/**
+ * @internal
+ * @description Returns the status of the document where it's latest state takes priority,
+ * this typically will be "published" unless a user has edited their draft in which we should
+ * display "modified".
+ */
+const getDocumentStatus = (
+  document: ReturnType<UseDocument>['document'],
+  meta: ReturnType<UseDocument>['meta']
+): 'draft' | 'published' => {
+  const docStatus = document?.status;
+  const statuses = meta?.availableStatus ?? [];
+
+  /**
+   * Creating an entry
+   */
+  if (!docStatus) {
+    return 'draft';
+  }
+
+  /**
+   * We're viewing a draft, but the document could have a published version
+   */
+  if (docStatus === 'draft' && statuses.find((doc) => doc.publishedAt !== null)) {
+    return 'published';
+  }
+
+  return docStatus;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * ProtectedEditViewPage

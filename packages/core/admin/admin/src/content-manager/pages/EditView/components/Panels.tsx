@@ -1,16 +1,18 @@
 import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
-import { useStrapiApp } from '@strapi/helper-plugin';
+import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { InjectionZone } from '../../../../components/InjectionZone';
 import { useDoc } from '../../../hooks/useDocument';
 
+import { DocumentActions } from './DocumentActions';
+
 import type {
   ContentManagerPlugin,
-  EditViewContext,
+  DocumentActionProps,
   PanelComponent,
   PanelComponentProps,
 } from '../../../../core/apis/content-manager';
@@ -24,25 +26,39 @@ interface PanelDescription {
  * Panels
  * -----------------------------------------------------------------------------------------------*/
 
-interface PanelsProps extends Pick<EditViewContext, 'activeTab'> {}
-
-const Panels = ({ activeTab }: PanelsProps) => {
-  const { model, id, document, meta } = useDoc();
+const Panels = () => {
+  const [
+    {
+      query: { status },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+    status: 'draft',
+  });
+  const { model, id, document, meta, collectionType } = useDoc();
   const { plugins } = useStrapiApp();
 
-  const props = { activeTab, model, id, document, meta } satisfies PanelComponentProps;
+  const props = {
+    activeTab: status,
+    model,
+    id,
+    document,
+    meta,
+    collectionType,
+  } satisfies PanelComponentProps;
+
+  const descriptions = React.useMemo(
+    () =>
+      (
+        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+      ).getEditViewSidePanels(),
+    []
+  );
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <DescriptionComponentRenderer
-        props={props}
-        // @ts-expect-error – TODO: fix TS error
-        descriptions={(
-          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getEditViewSidePanels()}
-      >
-        {(descriptions) =>
-          descriptions.map(({ content, id, ...description }) => (
+      <DescriptionComponentRenderer props={props} descriptions={descriptions}>
+        {(panels) =>
+          panels.map(({ content, id, ...description }) => (
             <Panel key={id} {...description}>
               {content}
             </Panel>
@@ -72,10 +88,33 @@ const ActionsPanel: PanelComponent = () => {
 ActionsPanel.type = 'actions';
 
 const ActionsPanelContent = () => {
-  const { model } = useDoc();
+  const [
+    {
+      query: { status = 'draft' },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
+  const { model, id, document, meta, collectionType } = useDoc();
+  const { plugins } = useStrapiApp();
+
+  const props = {
+    activeTab: status,
+    model,
+    id,
+    document,
+    meta,
+    collectionType,
+  } satisfies DocumentActionProps;
 
   return (
-    <Flex direction="column" gap={2}>
+    <Flex direction="column" gap={2} width="100%">
+      <DescriptionComponentRenderer
+        props={props}
+        descriptions={(
+          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+        ).getDocumentActions()}
+      >
+        {(actions) => <DocumentActions actions={actions} />}
+      </DescriptionComponentRenderer>
       <InjectionZone area="contentManager.editView.right-links" slug={model} />
     </Flex>
   );
@@ -108,7 +147,7 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
       justifyContent="stretch"
       alignItems="flex-start"
     >
-      <Typography variant="sigma" textTransform="uppercase">
+      <Typography as="h2" variant="sigma" textTransform="uppercase">
         {title}
       </Typography>
       {children}
@@ -117,4 +156,4 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
 });
 
 export { Panels, ActionsPanel };
-export type { PanelsProps, PanelDescription };
+export type { PanelDescription };

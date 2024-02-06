@@ -4,10 +4,20 @@ import { Header } from '../Header';
 
 describe('Header', () => {
   it('should render the create entry title when isCreating is true', () => {
-    render(<Header isCreating />);
+    const { rerender } = render(<Header isCreating />);
 
     expect(screen.getByRole('heading', { name: 'Create an entry' })).toBeInTheDocument();
     expect(screen.getByText('Draft')).toBeInTheDocument();
+
+    rerender(<Header />);
+
+    expect(screen.getByRole('heading', { name: 'Untitled' })).toBeInTheDocument();
+
+    rerender(<Header title="Richmond AFC appoint new manager" />);
+
+    expect(
+      screen.getByRole('heading', { name: 'Richmond AFC appoint new manager' })
+    ).toBeInTheDocument();
   });
 
   it('should display the status of the document', () => {
@@ -23,14 +33,6 @@ describe('Header', () => {
 
     expect(screen.getByText('Modified')).toBeInTheDocument();
   });
-
-  it.todo(
-    'should display the title of the document when we are not creating a document and the id is not the main field'
-  );
-
-  it.todo(
-    "should display 'Unitled' when we are not creating a document and the id is the main field"
-  );
 
   it.todo('should display a back button');
 
