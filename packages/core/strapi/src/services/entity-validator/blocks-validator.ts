@@ -93,13 +93,27 @@ const listItemNode = yup.object().shape({
   children: yup.array().of(inlineNodeValidator).required(),
 });
 
+// Allow children to be either a listItemNode or a listNode itself
+const listChildrenValidator = yup.lazy((value: { type: string }) => {
+  switch (value.type) {
+    case 'list':
+      return listNodeValidator;
+    case 'list-item':
+      return listItemNode;
+    default:
+      return yup.mixed().test('invalid-type', 'Inline node must be list-item or list', () => {
+        return false;
+      });
+  }
+});
+
 const listNodeValidator = yup.object().shape({
   type: yup.string().equals(['list']).required(),
   format: yup.string().equals(['ordered', 'unordered']).required(),
   children: yup
     .array()
-    .of(listItemNode)
-    .min(1, 'List node children must have at least one ListItem node')
+    .of(listChildrenValidator)
+    .min(1, 'List node children must have at least one ListItem or ListNode')
     .required(),
 });
 

@@ -372,6 +372,8 @@ export const FormModal = () => {
         modifiedData.category || '',
         reservedNames,
         actionType === 'edit',
+        components,
+        modifiedData.displayName || '',
         get(allDataSchema, [...pathToSchema, 'uid'], null)
         // ctbFormsAPI
       );
@@ -394,7 +396,9 @@ export const FormModal = () => {
         Object.keys(components) as Common.UID.Component[],
         get(modifiedData, 'componentToCreate.category', ''),
         reservedNames,
-        ctbFormsAPI
+        actionType === 'edit',
+        components,
+        modifiedData.componentToCreate.displayName || ''
       );
 
       // Check form validity for creating a 'common attribute'
@@ -447,7 +451,9 @@ export const FormModal = () => {
           Object.keys(components) as Common.UID.Component[],
           get(modifiedData, 'componentToCreate.category', ''),
           reservedNames,
-          ctbFormsAPI
+          actionType === 'edit',
+          components,
+          modifiedData.componentToCreate.displayName || ''
         );
       } else {
         // The form is valid

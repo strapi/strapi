@@ -34,6 +34,7 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -88,16 +89,16 @@ const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
 `;
 
 const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.danger600};
   }
@@ -243,6 +244,7 @@ export const ReleaseDetailsLayout = ({
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
   const dispatch = useTypedDispatch();
+  const { trackUsage } = useTracking();
 
   const release = data?.data;
 
@@ -267,6 +269,14 @@ export const ReleaseDetailsLayout = ({
           defaultMessage: 'Release was published successfully.',
         }),
       });
+
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+
+      trackUsage('didPublishRelease', {
+        totalEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
+      });
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -289,6 +299,25 @@ export const ReleaseDetailsLayout = ({
 
   const handleRefresh = () => {
     dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+  };
+
+  const getCreatedByUser = () => {
+    if (!release?.createdBy) {
+      return null;
+    }
+
+    // Favor the username
+    if (release.createdBy.username) {
+      return release.createdBy.username;
+    }
+
+    // Firstname may not exist if created with SSO
+    if (release.createdBy.firstname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname || ''}`.trim();
+    }
+
+    // All users must have at least an email
+    return release.createdBy.email;
   };
 
   if (isLoadingDetails) {
@@ -317,9 +346,7 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = release.createdBy.lastname
-    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
-    : `${release.createdBy.firstname}`;
+  const hasCreatedByUser = Boolean(getCreatedByUser());
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -346,7 +373,7 @@ export const ReleaseDetailsLayout = ({
               <IconButton
                 label={formatMessage({
                   id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release actions',
+                  defaultMessage: 'Release edit and delete menu',
                 })}
                 ref={moreButtonRef}
                 onClick={handleTogglePopover}
@@ -399,9 +426,10 @@ export const ReleaseDetailsLayout = ({
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage: ' by {createdBy}',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
                         },
-                        { createdBy }
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
@@ -492,7 +520,8 @@ const ReleaseDetailsBody = () => {
 
   const handleChangeType = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    actionId: ReleaseAction['id']
+    actionId: ReleaseAction['id'],
+    actionPath: [string, number]
   ) => {
     const response = await updateReleaseAction({
       params: {
@@ -502,6 +531,8 @@ const ReleaseDetailsBody = () => {
       body: {
         type: e.target.value as ReleaseAction['type'],
       },
+      query, // We are passing the query params to make optimistic updates
+      actionPath, // We are passing the action path to found the position in the cache of the action for optimistic updates
     });
 
     if ('error' in response) {
@@ -687,73 +718,75 @@ const ReleaseDetailsBody = () => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, contentType, locale, type, entry }) => (
-                    <Tr key={id}>
-                      <Td width="25%" maxWidth="200px">
-                        <Typography ellipsis>{`${
-                          contentType.mainFieldValue || entry.id
-                        }`}</Typography>
-                      </Td>
-                      <Td width="10%">
-                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                      </Td>
-                      <Td width="10%">
-                        <Typography>{contentType.displayName || ''}</Typography>
-                      </Td>
-                      <Td width="20%">
-                        {release.releasedAt ? (
-                          <Typography>
-                            {formatMessage(
-                              {
-                                id: 'content-releases.page.ReleaseDetails.table.action-published',
-                                defaultMessage:
-                                  'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
-                              },
-                              {
-                                isPublish: type === 'publish',
-                                b: (children: React.ReactNode) => (
-                                  <Typography fontWeight="bold">{children}</Typography>
-                                ),
-                              }
-                            )}
-                          </Typography>
-                        ) : (
-                          <ReleaseActionOptions
-                            selected={type}
-                            handleChange={(e) => handleChangeType(e, id)}
-                            name={`release-action-${id}-type`}
-                          />
-                        )}
-                      </Td>
-                      {!release.releasedAt && (
-                        <>
-                          <Td width="20%" minWidth="200px">
-                            <EntryValidationText
-                              action={type}
-                              schema={contentTypes?.[contentType.uid]}
-                              components={components}
-                              entry={entry}
+                  {releaseActions[key].map(
+                    ({ id, contentType, locale, type, entry }, actionIndex) => (
+                      <Tr key={id}>
+                        <Td width="25%" maxWidth="200px">
+                          <Typography ellipsis>{`${
+                            contentType.mainFieldValue || entry.id
+                          }`}</Typography>
+                        </Td>
+                        <Td width="10%">
+                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                        </Td>
+                        <Td width="10%">
+                          <Typography>{contentType.displayName || ''}</Typography>
+                        </Td>
+                        <Td width="20%">
+                          {release.releasedAt ? (
+                            <Typography>
+                              {formatMessage(
+                                {
+                                  id: 'content-releases.page.ReleaseDetails.table.action-published',
+                                  defaultMessage:
+                                    'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
+                                },
+                                {
+                                  isPublish: type === 'publish',
+                                  b: (children: React.ReactNode) => (
+                                    <Typography fontWeight="bold">{children}</Typography>
+                                  ),
+                                }
+                              )}
+                            </Typography>
+                          ) : (
+                            <ReleaseActionOptions
+                              selected={type}
+                              handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
+                              name={`release-action-${id}-type`}
                             />
-                          </Td>
-                          <Td>
-                            <Flex justifyContent="flex-end">
-                              <ReleaseActionMenu.Root>
-                                <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                  contentTypeUid={contentType.uid}
-                                  entryId={entry.id}
-                                  locale={locale?.code}
-                                />
-                                <ReleaseActionMenu.DeleteReleaseActionItem
-                                  releaseId={release.id}
-                                  actionId={id}
-                                />
-                              </ReleaseActionMenu.Root>
-                            </Flex>
-                          </Td>
-                        </>
-                      )}
-                    </Tr>
-                  ))}
+                          )}
+                        </Td>
+                        {!release.releasedAt && (
+                          <>
+                            <Td width="20%" minWidth="200px">
+                              <EntryValidationText
+                                action={type}
+                                schema={contentTypes?.[contentType.uid]}
+                                components={components}
+                                entry={entry}
+                              />
+                            </Td>
+                            <Td>
+                              <Flex justifyContent="flex-end">
+                                <ReleaseActionMenu.Root>
+                                  <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                    contentTypeUid={contentType.uid}
+                                    entryId={entry.id}
+                                    locale={locale?.code}
+                                  />
+                                  <ReleaseActionMenu.DeleteReleaseActionItem
+                                    releaseId={release.id}
+                                    actionId={id}
+                                  />
+                                </ReleaseActionMenu.Root>
+                              </Flex>
+                            </Td>
+                          </>
+                        )}
+                      </Tr>
+                    )
+                  )}
                 </Table.Body>
               </Table.Content>
             </Table.Root>
