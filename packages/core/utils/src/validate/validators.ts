@@ -154,6 +154,10 @@ const defaultValidatePopulate = curry((schema: Model, populate: unknown) => {
         if (key === 'fields') {
           set(key, await defaultValidateFields(schema, value));
         }
+
+        if (key === 'populate') {
+          set(key, await defaultValidatePopulate(schema, value));
+        }
       },
       { schema }
     ),

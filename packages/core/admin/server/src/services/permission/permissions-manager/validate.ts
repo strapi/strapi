@@ -103,9 +103,11 @@ export default ({ action, ability, model }: any) => {
         await validateFields(query.fields);
       }
 
-      if (query.populate) {
+      // a wildcard is always valid; its conversion will be handled by the entity service and can be optimized with sanitizer
+      if (query.populate && query.populate !== '*') {
         await validatePopulate(query.populate);
       }
+
       return true;
     };
   };

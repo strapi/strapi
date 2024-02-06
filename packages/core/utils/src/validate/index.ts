@@ -76,7 +76,8 @@ const createContentAPIValidators = () => {
       await validateFields(fields, schema);
     }
 
-    if (populate) {
+    // a wildcard is always valid; its conversion will be handled by the entity service and can be optimized with sanitizer
+    if (populate && populate !== '*') {
       await validatePopulate(populate, schema);
     }
   };
