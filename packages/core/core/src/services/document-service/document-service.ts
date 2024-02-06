@@ -137,7 +137,8 @@ export const createDocumentService = (
         })(uid);
       },
 
-      use(...args: Parameters<Documents.ServiceInstance['use']>) {
+      // TODO: Handle type with function overloads
+      use(...args: any) {
         if (typeof args[0] === 'string') {
           const [action, cb, opts] = args;
           middlewareManager.add(uid, action, cb, opts);
@@ -153,8 +154,7 @@ export const createDocumentService = (
 
   Object.assign(create, {
     // use(action: any, cb: any, opts?: any) {
-    use(...args: Parameters<Documents.Service['use']>) {
-      // middlewareManager.add('_all', action, cb, opts);
+    use(...args: any) {
       if (typeof args[0] === 'string') {
         const [action, cb, opts] = args;
         // Add middleware for all uids for a given action

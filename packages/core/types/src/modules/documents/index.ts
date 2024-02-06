@@ -74,20 +74,19 @@ export type ServiceInstance<
    *    return result;
    *  })
    */
-  use:
-    | (<TAction extends keyof DocumentEngine>(
-        action: TAction,
-        // QUESTION: How do we type the result type of next?
-        //           Should we send params + document id attribute?
-        cb:
-          | Middleware.Middleware<Common.UID.ContentType, TAction>
-          | Middleware.Middleware<Common.UID.ContentType, TAction>[],
-        opts?: Middleware.Options
-      ) => ThisType<ServiceInstance<TContentTypeUID>>) &
-        ((
-          cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
-          opts?: Middleware.Options
-        ) => ThisType<ServiceInstance<TContentTypeUID>>);
+  use<TAction extends keyof DocumentEngine>(
+    action: TAction,
+    // QUESTION: How do we type the result type of next?
+    //           Should we send params + document id attribute?
+    cb:
+      | Middleware.Middleware<Common.UID.ContentType, TAction>
+      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
+    opts?: Middleware.Options
+  ): ThisType<ServiceInstance<TContentTypeUID>>;
+  use(
+    cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
+    opts?: Middleware.Options
+  ): ThisType<ServiceInstance<TContentTypeUID>>;
 
   /**
    * `.with()` instantiates a new document repository with default parameters
@@ -126,18 +125,17 @@ export type Service = {
    *    return result;
    *   })
    */
-  use:
-    | (<TAction extends keyof DocumentEngine>(
-        action: TAction,
-        cb:
-          | Middleware.Middleware<Common.UID.ContentType, TAction>
-          | Middleware.Middleware<Common.UID.ContentType, TAction>[],
-        opts?: Middleware.Options
-      ) => Service) &
-        ((
-          cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
-          opts?: Middleware.Options
-        ) => Service);
+  use<TAction extends keyof DocumentEngine>(
+    action: TAction,
+    cb:
+      | Middleware.Middleware<Common.UID.ContentType, TAction>
+      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
+    opts?: Middleware.Options
+  ): Service;
+  use(
+    cb: Middleware.Middleware<Common.UID.ContentType, keyof DocumentEngine>,
+    opts?: Middleware.Options
+  ): Service;
 
   middlewares: Middleware.Manager;
 } & DocumentEngine;

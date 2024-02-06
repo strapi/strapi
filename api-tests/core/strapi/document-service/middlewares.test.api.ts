@@ -28,8 +28,9 @@ describe('Document Service Middlewares', () => {
   describe('Middleware on ANY uid and ANY action', () => {
     it('Add filters on uid', async () => {
       strapi.documents.use(async (ctx, next) => {
-        // @ts-expect-error
-        ctx.params.limit = 1;
+        if ('limit' in ctx.params) {
+          ctx.params.limit = 1;
+        }
         return next(ctx);
       });
 
@@ -43,8 +44,9 @@ describe('Document Service Middlewares', () => {
   describe('Middleware on ANY action', () => {
     it('Add filters on uid', async () => {
       strapi.documents(ARTICLE_UID).use((ctx, next) => {
-        // @ts-expect-error
-        ctx.params.limit = 1;
+        if ('limit' in ctx.params) {
+          ctx.params.limit = 1;
+        }
         return next(ctx);
       });
 
