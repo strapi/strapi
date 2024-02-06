@@ -2,6 +2,7 @@
 import type { LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID } from './constants';
+import { getService } from './utils';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
@@ -57,5 +58,9 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         }
       },
     });
+
+    if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+      getService('scheduling', { strapi }).syncFromDatabase();
+    }
   }
 };
