@@ -52,6 +52,7 @@
   "pages.Releases.notification.error.title": "Your request could not be processed.",
   "pages.Releases.notification.error.message": "Please try again or open another release.",
   "pages.ReleaseDetails.groupBy.label": "Group by {groupBy}",
+  "pages.ReleaseDetails.groupBy.aria-label": "Group by",
   "pages.ReleaseDetails.entry-validation.already-published": "Already published",
   "pages.ReleaseDetails.entry-validation.ready-to-publish": "Ready to publish",
   "pages.ReleaseDetails.entry-validation.already-unpublished": "Already unpublished",
