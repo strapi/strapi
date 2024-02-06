@@ -85,6 +85,13 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
       throw new errors.ValidationError(`Release with name ${name} already exists`);
     }
   },
+  async validateScheduledAtIsLaterThanNow(
+    scheduledAt: CreateRelease.Request['body']['scheduledAt']
+  ) {
+    if (scheduledAt && new Date(scheduledAt) <= new Date()) {
+      throw new errors.ValidationError('Scheduled at must be later than now');
+    }
+  },
 });
 
 export default createReleaseValidationService;
