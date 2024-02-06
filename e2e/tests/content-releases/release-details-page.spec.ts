@@ -1,10 +1,31 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { describeOnCondition } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const releaseName = 'Trent Crimm: The Independent';
+
+const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseName: string }) => {
+  // Open the add to release dialog
+  await page.getByRole('button', { name: 'Add to release' }).click();
+  const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
+  await expect(addToReleaseDialog).toBeVisible();
+  await expect(
+    addToReleaseDialog.getByRole('radio', { name: 'publish', exact: true })
+  ).toBeChecked();
+  // Select a release
+  const submitReleaseButton = await page.getByRole('button', { name: 'Continue' });
+  await expect(submitReleaseButton).toBeDisabled();
+  await page.getByRole('combobox', { name: 'Select a release' }).click();
+  await page.getByRole('option', { name: releaseName }).click();
+  await expect(submitReleaseButton).toBeEnabled();
+  await submitReleaseButton.click();
+  // See the release the entry was added to
+  await expect(
+    page.getByRole('complementary', { name: 'Releases' }).getByText(releaseName)
+  ).toBeVisible();
+};
 
 describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,37 +46,14 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('link', { name: 'Author' }).click();
     await page.getByRole('gridcell', { name: 'Led Tasso' }).click();
     await page.waitForURL('**/content-manager/collection-types/api::author.author/**');
-    // Open the add to release dialog
-    await page.getByRole('button', { name: 'Add to release' }).click();
-    await expect(page.getByRole('dialog', { name: 'Add to release' })).toBeVisible();
-    // Select a release
-    const submitReleaseButton = await page.getByRole('button', { name: 'Continue' });
-    await expect(submitReleaseButton).toBeDisabled();
-    await page.getByRole('combobox', { name: 'Select a release' }).click();
-    await page.getByRole('option', { name: releaseName }).click();
-    await expect(submitReleaseButton).toBeEnabled();
-    await submitReleaseButton.click();
-    // See the release the entry was added to
-    await expect(
-      page.getByRole('complementary', { name: 'Releases' }).getByText(releaseName)
-    ).toBeVisible();
+    await addEntryToRelease({ page, releaseName });
 
     // Add a single-type entry to the release
     await page.getByRole('link', { name: 'Content Manager' }).click();
     await page.getByRole('link', { name: 'Upcoming Matches' }).click();
     await page.waitForURL('**/content-manager/single-types/api::upcoming-match.upcoming-match**');
     // Open the add to release dialog
-    await page.getByRole('button', { name: 'Add to release' }).click();
-    await expect(page.getByRole('dialog', { name: 'Add to release' })).toBeVisible();
-    await expect(submitReleaseButton).toBeDisabled();
-    await page.getByRole('combobox', { name: 'Select a release' }).click();
-    await page.getByRole('option', { name: releaseName }).click();
-    await expect(submitReleaseButton).toBeEnabled();
-    await submitReleaseButton.click();
-    // See the release the entry was added to
-    await expect(
-      page.getByRole('complementary', { name: 'Releases' }).getByText(releaseName)
-    ).toBeVisible();
+    await addEntryToRelease({ page, releaseName });
 
     // Publish the release
     await page.getByRole('link', { name: 'Releases' }).click();

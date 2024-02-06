@@ -15,7 +15,14 @@ Here you can read about what content schemas the test instance has & the API cus
 
 ## Update the app template
 
-To update the app template first run the tests to create a Strapi app based on the existing template at `test-apps/e2e/test-app-<number>`. Move into this folder and run `yarn develop`. Login using the credentials found in `e2e/constants.js`. Make any changes you need (i.e. create a content-type). Kill the server and run [[`yarn strapi templates:generate <path>`]](https://docs.strapi.io/dev-docs/cli#strapi-templatesgenerate). Replace the existing template in `e2e/app-template` with the newly generated one.
+To update the app template:
+
+- run the tests to create a Strapi app based on the existing template at `test-apps/e2e/test-app-<number>`.
+- Move into this folder and run `yarn develop`.
+- Login using the credentials found in `e2e/constants.js`.
+- Make any changes you need (i.e. create a content-type).
+- Kill the server and run [[`yarn strapi templates:generate <path>`]](https://docs.strapi.io/dev-docs/cli#strapi-templatesgenerate).
+- Replace the existing template in `e2e/app-template` with the newly generated one.
 
 ## Content Schemas
 
