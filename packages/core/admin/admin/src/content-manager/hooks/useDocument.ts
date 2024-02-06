@@ -228,7 +228,10 @@ const useDoc = () => {
 /* -------------------------------------------------------------------------------------------------
  * extractContentTypeComponents
  * -----------------------------------------------------------------------------------------------*/
-
+/**
+ * @internal
+ * @description Extracts the components used in a content type's attributes recursively.
+ */
 const extractContentTypeComponents = (
   attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
   allComponents: ComponentsDictionary = {}
@@ -279,5 +282,5 @@ const extractContentTypeComponents = (
   return componentsByKey;
 };
 
-export { useDocument, useDoc };
+export { useDocument, useDoc, extractContentTypeComponents };
 export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };

@@ -115,28 +115,28 @@ const routes: RouteObject[] = [
           };
         },
       },
-      // {
-      //   path: ':collectionType/:slug/configurations/edit',
-      //   lazy: async () => {
-      //     const { ProtectedEditSettingsView } = await import(
-      //       './pages/EditSettingsView/EditSettingsView'
-      //     );
+      {
+        path: 'components/:slug/configurations/edit',
+        lazy: async () => {
+          const { ProtectedComponentConfigurationPage } = await import(
+            './pages/ComponentConfigurationPage'
+          );
 
-      //     return {
-      //       Component: ProtectedEditSettingsView,
-      //     };
-      //   },
-      // },
-      // {
-      //   path: 'components/:uid/configurations/edit',
-      //   lazy: async () => {
-      //     const { ProtectedComponentSettingsView } = await import('./pages/ComponentSettingsView');
+          return {
+            Component: ProtectedComponentConfigurationPage,
+          };
+        },
+      },
+      {
+        path: ':collectionType/:slug/configurations/edit',
+        lazy: async () => {
+          const { ProtectedEditConfigurationPage } = await import('./pages/EditConfigurationPage');
 
-      //     return {
-      //       Component: ProtectedComponentSettingsView,
-      //     };
-      //   },
-      // },
+          return {
+            Component: ProtectedEditConfigurationPage,
+          };
+        },
+      },
       {
         path: '403',
         lazy: async () => {

@@ -175,13 +175,6 @@ const initialState = {
   isLoading: true,
 } satisfies ContentManagerAppState;
 
-const selectSchemas = createSelector(
-  (state: RootState) => state['content-manager_app'],
-  ({ components, models }) => {
-    return [...components, ...models];
-  }
-);
-
 const reducer = (state: ContentManagerAppState = initialState, action: AnyAction) =>
   produce(state, (draftState) => {
     switch (action.type) {
@@ -204,5 +197,5 @@ const reducer = (state: ContentManagerAppState = initialState, action: AnyAction
     }
   });
 
-export { Layout, reducer, selectSchemas };
+export { Layout, reducer };
 export type { ContentManagerAppState };

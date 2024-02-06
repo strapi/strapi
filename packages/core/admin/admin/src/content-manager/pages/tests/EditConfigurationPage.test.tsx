@@ -1,16 +1,8 @@
-import * as React from 'react';
-
 import { fireEvent } from '@testing-library/react';
 import { render } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { EditSettingsView } from '../EditSettingsView';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+import { EditConfigurationPage } from '../EditConfigurationPage';
 
 const EDIT_ATTRIBUTES = [
   [
@@ -20,16 +12,13 @@ const EDIT_ATTRIBUTES = [
   ],
 ];
 
-/**
- * TODO: reimplement this once the ListViewSettings component is fixed
- */
-describe.skip('EditSettingsView', () => {
+describe('EditConfigurationPage', () => {
   it('renders correctly', async () => {
     const { getByRole, findByRole } = render(
       <Routes>
         <Route
           path="/content-manager/:contentType/:slug/configuration/edit"
-          element={<EditSettingsView />}
+          element={<EditConfigurationPage />}
         />
       </Routes>,
       {
@@ -65,7 +54,7 @@ describe.skip('EditSettingsView', () => {
       <Routes>
         <Route
           path="/content-manager/:contentType/:slug/configuration/edit"
-          element={<EditSettingsView />}
+          element={<EditConfigurationPage />}
         />
       </Routes>,
       {
@@ -102,7 +91,7 @@ describe.skip('EditSettingsView', () => {
       <Routes>
         <Route
           path="/content-manager/:contentType/:slug/configuration/edit"
-          element={<EditSettingsView />}
+          element={<EditConfigurationPage />}
         />
       </Routes>,
       {

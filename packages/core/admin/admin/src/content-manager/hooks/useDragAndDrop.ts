@@ -66,7 +66,10 @@ type DropCollectedProps = {
  */
 const useDragAndDrop = <
   TIndex extends number | Array<number>,
-  TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown }
+  TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown } = {
+    index: TIndex;
+    [key: string]: unknown;
+  }
 >(
   active: boolean,
   {
@@ -137,30 +140,31 @@ const useDragAndDrop = <
         item.index = newIndex;
       } else {
         // Using numbers as indices doesn't work for nested list items with path like [1, 1, 0]
-        if (Array.isArray(dragIndex) && Array.isArray(newIndex))
+        if (Array.isArray(dragIndex) && Array.isArray(newIndex)) {
+          // Indices comparison to find item position in nested list
+          const minLength = Math.min(dragIndex.length, newIndex.length);
+          let areEqual = true;
+          let isLessThan = false;
+          let isGreaterThan = false;
+
+          for (let i = 0; i < minLength; i++) {
+            if (dragIndex[i] < newIndex[i]) {
+              isLessThan = true;
+              areEqual = false;
+              break;
+            } else if (dragIndex[i] > newIndex[i]) {
+              isGreaterThan = true;
+              areEqual = false;
+              break;
+            }
+          }
+
+          // Don't replace items with themselves
+          if (areEqual && dragIndex.length === newIndex.length) {
+            return;
+          }
+
           if (dropSensitivity === DROP_SENSITIVITY.REGULAR) {
-            // Indices comparison to find item position in nested list
-            const minLength = Math.min(dragIndex.length, newIndex.length);
-            let areEqual = true;
-            let isLessThan = false;
-            let isGreaterThan = false;
-
-            for (let i = 0; i < minLength; i++) {
-              if (dragIndex[i] < newIndex[i]) {
-                isLessThan = true;
-                areEqual = false;
-                break;
-              } else if (dragIndex[i] > newIndex[i]) {
-                isGreaterThan = true;
-                areEqual = false;
-                break;
-              }
-            }
-
-            // Don't replace items with themselves
-            if (areEqual && dragIndex.length === newIndex.length) {
-              return;
-            }
             // Dragging downwards
             if (isLessThan && !isGreaterThan && hoverClientY < hoverMiddleY) {
               return;
@@ -171,6 +175,8 @@ const useDragAndDrop = <
               return;
             }
           }
+        }
+
         onMoveItem(newIndex, dragIndex);
         item.index = newIndex;
       }
