@@ -71,18 +71,20 @@ export const ReviewWorkflowsCreatePage = () => {
     setSavePrompts({});
 
     try {
-      // @ts-expect-error – currentWorkflow will have already been validated by formik before it gets here.
-      const res = await createWorkflow(currentWorkflow);
+      const res = await createWorkflow({
+        // @ts-expect-error – currentWorkflow will have already been validated by formik before it gets here.
+        data: currentWorkflow,
+      });
 
       if ('error' in res) {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setInitialErrors(formatValidationErrors(res.error));
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(res.error),
-          });
         }
+
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
 
         return;
       }
