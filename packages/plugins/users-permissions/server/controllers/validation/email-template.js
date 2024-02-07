@@ -12,14 +12,15 @@ const invalidPatternsRegexes = [
   /\${([^{}]*)}/m,
 ];
 
+const userSchema = strapi.getModel('plugin::users-permissions.user');
+
 const authorizedKeys = [
   'URL',
   'ADMIN_URL',
   'SERVER_URL',
   'CODE',
   'USER',
-  'USER.email',
-  'USER.username',
+  ...Object.entries(userSchema.attributes).map(([key]) => `USER.${key}`),
   'TOKEN',
 ];
 
