@@ -67,7 +67,7 @@ const reviewWorkflowsApi = adminApi.injectEndpoints({
       query: ({ id, ...data }) => ({
         url: `/admin/review-workflows/workflows/${id}`,
         method: 'PUT',
-        data: data,
+        data,
       }),
       transformResponse: (res: ReviewWorkflows.Update.Response) => res.data,
       invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflow' as const, id: arg.id }],
