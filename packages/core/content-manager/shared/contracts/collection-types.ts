@@ -171,11 +171,33 @@ export declare namespace Delete {
 }
 
 /**
+ * POST /collection-types/:model/actions/publish
+ */
+export declare namespace PublishAndCreate {
+  export interface Request {
+    body: Document;
+    query: {
+      locale?: string | null;
+    };
+  }
+
+  export interface Params {
+    model: string;
+  }
+
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
  * POST /collection-types/:model/:id/actions/publish
  */
 export declare namespace Publish {
   export interface Request {
-    body: {};
+    body: Document;
     query: {
       locale?: string | null;
     };
