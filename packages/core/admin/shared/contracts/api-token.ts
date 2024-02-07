@@ -16,6 +16,7 @@ export type ApiToken = {
 };
 
 export interface ApiTokenBody extends Pick<ApiToken, 'description' | 'name'> {
+  accessKey?: ApiToken['accessKey'] | null;
   lifespan?: ApiToken['lifespan'] | null;
   permissions?: ApiToken['permissions'] | null;
   type: ApiToken['type'] | undefined;
