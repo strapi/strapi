@@ -39,7 +39,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   // TODO: Revert the creation if create permission conditions are not met
   // if (permissionChecker.cannot.create(document)) {
-  //   return ctx.forbidden();
+  //   throw new errors.ForbiddenError();
   // }
 };
 
@@ -75,11 +75,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
-    entityManager.findOne(id, model, {
-      populate,
-      locale,
-      status: 'draft',
-    }),
+    entityManager.findOne(id, model, { populate, locale, status: 'draft' }),
     entityManager.exists(model, id),
   ]);
 
@@ -337,8 +333,7 @@ export default {
   async publish(ctx: any) {
     const { userAbility, user } = ctx.state;
     // If id does not exist, the document has to be created
-    const { model } = ctx.params;
-    let id = ctx.params.id as string | undefined;
+    const { id, model } = ctx.params;
     const { body } = ctx.request;
 
     const entityManager = getService('entity-manager');
@@ -351,13 +346,6 @@ export default {
 
     const publishedDocument = await strapi.db.transaction(async () => {
       // Create or update document
-      if (id) {
-        await updateDocument(ctx, { populate: {} });
-      } else {
-        const document = await createDocument(ctx, { populate: {} });
-        id = document.id;
-      }
-
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
       // @ts-expect-error populate builder needs to be called with a UID
       const populate = await getService('populate-builder')(model)
@@ -366,18 +354,16 @@ export default {
         .countRelations()
         .build();
 
-      // TODO: Publish many locales
-      const { locale = 'en' } = getDocumentDimensions(body);
-      const document = await entityManager.findOne(id, model, { populate, locale });
-
-      if (!document) {
-        throw new errors.NotFoundError();
-      }
+      const document = id
+        ? await updateDocument(ctx, { populate })
+        : await createDocument(ctx, { populate });
 
       if (permissionChecker.cannot.publish(document)) {
         throw new errors.ForbiddenError();
       }
 
+      // TODO: Publish many locales at once
+      const { locale = 'en' } = getDocumentDimensions(body);
       return entityManager.publish(document, model, {
         locale,
         data: setCreatorFields({ user, isEdition: true })({}),
