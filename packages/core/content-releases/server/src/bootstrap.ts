@@ -60,14 +60,15 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
     });
 
     if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-      try {
-        await getService('scheduling', { strapi }).syncFromDatabase();
-      } catch (e) {
-        strapi.log.error(
-          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
-          e
-        );
-      }
+      getService('scheduling', { strapi })
+        .syncFromDatabase()
+        .catch((err: Error) => {
+          strapi.log.error(
+            'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
+          );
+
+          throw err;
+        });
     }
   }
 };

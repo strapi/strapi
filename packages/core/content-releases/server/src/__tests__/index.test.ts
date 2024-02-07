@@ -93,6 +93,7 @@ describe('bootstrap', () => {
   it('should sync scheduled jobs from the database if contentReleasesScheduling flag is enabled', async () => {
     strapi.features.future.isEnabled.mockReturnValue(true);
     features.isEnabled.mockReturnValue(true);
+    mockSyncFromDatabase.mockResolvedValue(new Map());
     await bootstrap({ strapi });
     expect(mockSyncFromDatabase).toHaveBeenCalled();
   });
@@ -102,16 +103,5 @@ describe('bootstrap', () => {
     features.isEnabled.mockReturnValue(true);
     await bootstrap({ strapi });
     expect(mockSyncFromDatabase).not.toHaveBeenCalled();
-  });
-
-  it('should throw an error if an error occurs while syncing scheduled jobs from the database', async () => {
-    strapi.features.future.isEnabled.mockReturnValue(true);
-    features.isEnabled.mockReturnValue(true);
-    mockSyncFromDatabase.mockRejectedValue(new Error('error'));
-    await bootstrap({ strapi });
-    expect(strapi.log.error).toHaveBeenCalledWith(
-      'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
-      new Error('error')
-    );
   });
 });
