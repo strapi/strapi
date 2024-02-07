@@ -109,10 +109,10 @@ const reviewWorkflowsApi = adminApi.injectEndpoints({
       Contracts.ReviewWorkflows.UpdateStage.Request['body'] &
         Contracts.ReviewWorkflows.UpdateStage.Params & { slug: string }
     >({
-      query: ({ model, slug, id, ...body }) => ({
+      query: ({ model, slug, id, ...data }) => ({
         url: `/admin/content-manager/${slug}/${model}/${id}/stage`,
         method: 'PUT',
-        body,
+        data,
       }),
       transformResponse: (res: Contracts.ReviewWorkflows.UpdateStage.Response) => res.data,
       invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflowStage' as const, id: arg.id }],
@@ -122,10 +122,10 @@ const reviewWorkflowsApi = adminApi.injectEndpoints({
       Contracts.ReviewWorkflows.UpdateAssignee.Request['body'] &
         Contracts.ReviewWorkflows.UpdateAssignee.Params & { slug: string }
     >({
-      query: ({ model, slug, id, ...body }) => ({
+      query: ({ model, slug, id, ...data }) => ({
         url: `/admin/content-manager/${slug}/${model}/${id}/assignee`,
         method: 'PUT',
-        body,
+        data,
       }),
       transformResponse: (res: Contracts.ReviewWorkflows.UpdateAssignee.Response) => res.data,
     }),
