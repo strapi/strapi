@@ -75,10 +75,7 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
-  align-self: stretch;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-
+const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
@@ -106,31 +103,6 @@ const TrashIcon = styled(Trash)`
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
-
-interface MenuButtonProps {
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}
-
-const MenuButton = ({ onClick, disabled, children }: MenuButtonProps) => {
-  return (
-    <StyledFlex
-      paddingTop={2}
-      paddingBottom={2}
-      paddingLeft={4}
-      paddingRight={4}
-      alignItems="center"
-      gap={2}
-      as="button"
-      hasRadius
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </StyledFlex>
-  );
-};
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
@@ -376,25 +348,49 @@ export const ReleaseDetailsLayout = ({
                   Refactor this once fixed in the DS
                 */}
                 <Menu.Content top={1} popoverPlacement="bottom-end">
-                  <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                    <MenuButton disabled={!canUpdate} onClick={toggleEditReleaseModal}>
-                      <PencilIcon />
-                      <Typography ellipsis>
-                        {formatMessage({
-                          id: 'content-releases.header.actions.edit',
-                          defaultMessage: 'Edit',
-                        })}
-                      </Typography>
-                    </MenuButton>
-                    <MenuButton disabled={!canDelete} onClick={toggleWarningSubmit}>
-                      <TrashIcon />
-                      <Typography ellipsis textColor="danger600">
-                        {formatMessage({
-                          id: 'content-releases.header.actions.delete',
-                          defaultMessage: 'Delete',
-                        })}
-                      </Typography>
-                    </MenuButton>
+                  <Flex
+                    alignItems="center"
+                    justifyContent="center"
+                    direction="column"
+                    padding={1}
+                    width="100%"
+                  >
+                    <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
+                      <Flex
+                        paddingTop={2}
+                        paddingBottom={2}
+                        alignItems="center"
+                        gap={2}
+                        hasRadius
+                        width="100%"
+                      >
+                        <PencilIcon />
+                        <Typography ellipsis>
+                          {formatMessage({
+                            id: 'content-releases.header.actions.edit',
+                            defaultMessage: 'Edit',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
+                    <StyledMenuItem disabled={!canDelete} onSelect={toggleWarningSubmit}>
+                      <Flex
+                        paddingTop={2}
+                        paddingBottom={2}
+                        alignItems="center"
+                        gap={2}
+                        hasRadius
+                        width="100%"
+                      >
+                        <TrashIcon />
+                        <Typography ellipsis textColor="danger600">
+                          {formatMessage({
+                            id: 'content-releases.header.actions.delete',
+                            defaultMessage: 'Delete',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
