@@ -33,8 +33,7 @@ describe('import', () => {
       .end();
   });
 
-  // TODO: Fix this test (never finishes)
-  it.skip('should import the data', async () => {
+  it('should import the data', async () => {
     await coffee
       .spawn(
         'npm',
