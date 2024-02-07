@@ -304,6 +304,21 @@ export default {
     },
     {
       method: 'POST',
+      path: '/collection-types/:model/actions/publish',
+      handler: 'collection-types.publish',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
       path: '/collection-types/:model/:id/actions/publish',
       handler: 'collection-types.publish',
       config: {

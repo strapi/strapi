@@ -127,7 +127,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     uid: Common.UID.ContentType,
     opts: Parameters<Documents.ServiceInstance['create']>[0] = {} as any
   ) {
-    const populate = await buildDeepPopulate(uid);
+    const populate = opts.populate ?? (await buildDeepPopulate(uid));
     const params = { ...opts, status: 'draft', populate };
 
     const document = await strapi
@@ -148,7 +148,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     opts: Parameters<Documents.ServiceInstance['update']>[1] = {} as any
   ) {
     const publishData = omitPublishedAtField(opts.data || {});
-    const populate = await buildDeepPopulate(uid);
+    const populate = opts.populate ?? (await buildDeepPopulate(uid));
 
     // TODO: Remove this once we change documentId to id in database
     delete publishData.id;
