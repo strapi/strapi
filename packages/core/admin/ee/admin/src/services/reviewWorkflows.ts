@@ -38,8 +38,8 @@ const reviewWorkflowsApi = adminApi.injectEndpoints({
         };
       },
       providesTags: (res, _err, arg) => {
-        if (typeof arg === 'object' && 'id' in arg) {
-          return [{ type: 'User' as const, id: arg.id }];
+        if (typeof arg === 'object' && 'id' in arg && arg.id !== '') {
+          return [{ type: 'ReviewWorkflow' as const, id: arg.id }];
         } else {
           return [
             ...(res?.workflows.map(({ id }) => ({ type: 'ReviewWorkflow' as const, id })) ?? []),
@@ -52,10 +52,10 @@ const reviewWorkflowsApi = adminApi.injectEndpoints({
       ReviewWorkflows.Create.Response['data'],
       ReviewWorkflows.Create.Request['body']
     >({
-      query: (body) => ({
+      query: (data) => ({
         url: '/admin/review-workflows/workflows',
         method: 'POST',
-        body,
+        data,
       }),
       transformResponse: (res: ReviewWorkflows.Create.Response) => res.data,
       invalidatesTags: [{ type: 'ReviewWorkflow' as const, id: 'LIST' }],
@@ -64,10 +64,10 @@ const reviewWorkflowsApi = adminApi.injectEndpoints({
       ReviewWorkflows.Update.Response['data'],
       ReviewWorkflows.Update.Request['body'] & ReviewWorkflows.Update.Params
     >({
-      query: ({ id, ...body }) => ({
+      query: ({ id, ...data }) => ({
         url: `/admin/review-workflows/workflows/${id}`,
         method: 'PUT',
-        body,
+        data,
       }),
       transformResponse: (res: ReviewWorkflows.Update.Response) => res.data,
       invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflow' as const, id: arg.id }],
