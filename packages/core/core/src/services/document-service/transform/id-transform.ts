@@ -33,6 +33,11 @@ async function transformParamsDocumentId(
   await idMap.load();
 
   // Transform any relation ids to entity ids
+  let fields = input.fields;
+  if (input.fields) {
+    fields = transformFields(input.fields);
+  }
+
   let data = input.data;
   if (input.data) {
     data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
@@ -46,11 +51,6 @@ async function transformParamsDocumentId(
   let populate = input.populate;
   if (input.populate) {
     populate = await transformPopulate(input.populate, { ...opts, uid });
-  }
-
-  let fields = input.fields;
-  if (input.fields) {
-    fields = transformFields(input.fields);
   }
 
   let sort = input.sort;
