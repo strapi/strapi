@@ -2,6 +2,7 @@ import { RELEASE_MODEL_UID } from '../../constants';
 import createReleaseService from '../release';
 
 const mockSchedulingSet = jest.fn();
+const mockSchedulingCancel = jest.fn();
 
 const baseStrapiMock = {
   utils: {
@@ -17,6 +18,7 @@ const baseStrapiMock = {
       validateUniqueNameForPendingRelease: jest.fn(),
       validateScheduledAtIsLaterThanNow: jest.fn(),
       set: mockSchedulingSet,
+      cancel: mockSchedulingCancel,
     }),
   }),
   features: {
@@ -383,6 +385,10 @@ describe('release service', () => {
   });
 
   describe('delete', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('deletes the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
@@ -429,6 +435,46 @@ describe('release service', () => {
       const releaseService = createReleaseService({ strapi: strapiMock });
 
       expect(() => releaseService.delete(1)).rejects.toThrow('Release already published');
+    });
+
+    it('remove the scheduling if the release is scheduled', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
+          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+        db: {
+          transaction: jest.fn(),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.delete(1);
+
+      expect(mockSchedulingCancel).toHaveBeenCalledWith(1);
+    });
+
+    it('does not remove the scheduling if the release is not scheduled', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+        db: {
+          transaction: jest.fn(),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.delete(1);
+
+      expect(mockSchedulingCancel).not.toHaveBeenCalled();
     });
   });
 
