@@ -310,6 +310,25 @@ const ReleaseDetailsLayout = ({
     dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
   };
 
+  const getCreatedByUser = () => {
+    if (!release?.createdBy) {
+      return null;
+    }
+
+    // Favor the username
+    if (release.createdBy.username) {
+      return release.createdBy.username;
+    }
+
+    // Firstname may not exist if created with SSO
+    if (release.createdBy.firstname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname || ''}`.trim();
+    }
+
+    // All users must have at least an email
+    return release.createdBy.email;
+  };
+
   if (isLoadingDetails) {
     return (
       <Main aria-busy={isLoadingDetails}>
@@ -334,9 +353,7 @@ const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = release.createdBy.lastname
-    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
-    : `${release.createdBy.firstname}`;
+  const hasCreatedByUser = Boolean(getCreatedByUser());
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -363,7 +380,7 @@ const ReleaseDetailsLayout = ({
               <IconButton
                 label={formatMessage({
                   id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release actions',
+                  defaultMessage: 'Release edit and delete menu',
                 })}
                 ref={moreButtonRef}
                 onClick={handleTogglePopover}
@@ -416,9 +433,10 @@ const ReleaseDetailsLayout = ({
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage: ' by {createdBy}',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
                         },
-                        { createdBy }
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
@@ -493,6 +511,9 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(PERMISSIONS);
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -623,7 +644,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         <Flex>
           <SingleSelect
             aria-label={formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.groupBy.label',
+              id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
               defaultMessage: 'Group by',
             })}
             customizeContent={(value) =>
@@ -649,7 +670,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         </Flex>
         {Object.keys(releaseActions).map((key) => (
           <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
-            <Flex>
+            <Flex role="separator" aria-label={key}>
               <Badge>{key}</Badge>
             </Flex>
             <Table.Root
@@ -744,6 +765,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                               selected={type}
                               handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
                               name={`release-action-${id}-type`}
+                              disabled={!canUpdate}
                             />
                           )}
                         </Td>

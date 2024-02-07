@@ -20,7 +20,9 @@ test.describe('Edit View', () => {
       /**
        * Now we're in the edit view.
        */
-      await page.waitForURL('**/content-manager/collection-types/api::article.article/create');
+      await page.waitForURL(
+        '**/content-manager/collection-types/api::article.article/create?plugins\\[i18n\\]\\[locale\\]=en'
+      );
 
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
 
@@ -35,7 +37,7 @@ test.describe('Edit View', () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
 
       await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article?page=1&pageSize=10&sort=title:ASC'
+        '**/content-manager/collection-types/api::article.article?page=1&pageSize=10&sort=title:ASC&plugins\\[i18n\\]\\[locale\\]=en'
       );
 
       await expect(page.getByRole('gridcell', { name: 'Being from Kansas City' })).toBeVisible();
@@ -68,7 +70,7 @@ test.describe('Edit View', () => {
 
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Published', { exact: true })).toBeVisible();
+      await expect(page.getByText('Success:Published', { exact: true })).toBeVisible();
 
       await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
 
@@ -102,7 +104,7 @@ test.describe('Edit View', () => {
        * We're back on the list view
        */
       await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article?page=1&pageSize=10&sort=title:ASC'
+        '**/content-manager/collection-types/api::article.article?page=1&pageSize=10&sort=title:ASC&plugins\\[i18n\\]\\[locale\\]=en'
       );
 
       await expect(
