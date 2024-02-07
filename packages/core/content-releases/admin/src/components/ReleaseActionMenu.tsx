@@ -104,7 +104,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
     <CheckPermissions permissions={PERMISSIONS.deleteAction}>
       <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
         <Flex gap={2}>
-          <Icon as={Cross} padding={1} />
+          <Icon as={Cross} width={3} height={3} />
           <Typography textColor="danger600" variant="omega">
             {formatMessage({
               id: 'content-releases.content-manager-edit-view.remove-from-release',
@@ -164,7 +164,7 @@ const ReleaseActionEntryLinkItem = ({
               pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
               search: locale && `?plugins[i18n][locale]=${locale}`,
             }}
-            startIcon={<Icon as={Pencil} padding={1} />}
+            startIcon={<Icon as={Pencil} width={3} height={3} />}
           >
             <Typography variant="omega">
               {formatMessage({
