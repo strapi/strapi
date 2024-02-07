@@ -373,7 +373,7 @@ const ContentTypeFormWrapper = ({
       dispatch,
       cloneDocument,
       slug,
-      query,
+      params,
       trackUsage,
       toggleNotification,
       setCurrentStep,
@@ -596,6 +596,7 @@ const ContentTypeFormWrapper = ({
     collectionType,
     slug,
     id,
+    params,
     toggleNotification,
     formatAPIError,
   ]);

@@ -6,7 +6,10 @@ test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
     // TODO: the default should be to wipe all entries, but we need to fix the import script first
-    await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar', ['api::unique.unique']);
+    await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar', [
+      'api::unique.unique',
+      'plugin::i18n.locale',
+    ]);
 
     await page.goto('/admin');
     await login({ page });

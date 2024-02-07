@@ -31,6 +31,7 @@ import {
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -151,9 +152,11 @@ const ReleasesPage = () => {
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
-  const { maximumNumberOfPendingReleases = 3 } = getFeature('cms-content-releases') as {
-    maximumNumberOfPendingReleases: number;
+  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumReleases: number;
   };
+  const { trackUsage } = useTracking();
+
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
   const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
@@ -197,7 +200,7 @@ const ReleasesPage = () => {
   }
 
   const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
-  const hasReachedMaximumPendingReleases = totalReleases >= maximumNumberOfPendingReleases;
+  const hasReachedMaximumPendingReleases = totalReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -225,6 +228,8 @@ const ReleasesPage = () => {
           defaultMessage: 'Release created.',
         }),
       });
+
+      trackUsage('didCreateRelease');
 
       navigate(response.data.data.id.toString());
     } else if (isAxiosError(response.error)) {
@@ -290,7 +295,7 @@ const ReleasesPage = () => {
                   defaultMessage:
                     'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
                 },
-                { number: maximumNumberOfPendingReleases }
+                { number: maximumReleases }
               )}
               onClose={() => {}}
               closeLabel=""

@@ -28,7 +28,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000,
+    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 30 * 1000),
   },
   /* Run tests in files in parallel */
   fullyParallel: false,

@@ -163,7 +163,7 @@ describe('Restore ', () => {
     };
     const result = await restoreConfigs(strapi, config);
     expect(strapi.db.query).toBeCalledTimes(1);
-    expect(strapi.db.query).toBeCalledWith('webhook');
+    expect(strapi.db.query).toBeCalledWith('strapi::webhook');
     expect(result.data).toMatchObject(omit(['id'])(config.value));
   });
 });
