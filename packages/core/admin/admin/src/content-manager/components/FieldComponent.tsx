@@ -66,6 +66,7 @@ const FieldComponent = ({
   }, [contentType]);
 
   const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
+  console.log({ createActionAllowedFields, updateActionAllowedFields });
 
   // Use lodash get since the name can be a nested path (e.g. "component.1.component")
   const componentValue = get(name, modifiedData) ?? null;
@@ -225,5 +226,15 @@ const LabelAction = styled(Box)`
     fill: ${({ theme }) => theme.colors.neutral500};
   }
 `;
+
+// const ProtectedFieldComponent = () => {
+//   const isNotAllowed = true;
+
+//   if (isNotAllowed) {
+//     return <NotAllowedInput />
+//   }
+
+//   return <FieldComponent />
+// }
 
 export { FieldComponent };
