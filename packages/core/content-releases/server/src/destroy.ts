@@ -8,7 +8,7 @@ export const destroy = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
     const scheduledJobs: Map<Release['id'], Job> = getService('scheduling', {
       strapi,
-    }).syncFromDatabase();
+    }).getAll();
 
     for (const [, job] of scheduledJobs) {
       job.cancel();

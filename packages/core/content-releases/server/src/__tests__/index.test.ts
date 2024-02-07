@@ -5,12 +5,19 @@ import { ACTIONS } from '../constants';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 const { register } = require('../register');
+const { bootstrap } = require('../bootstrap');
+const { getService } = require('../utils');
 
 jest.mock('@strapi/strapi/dist/utils/ee', () => ({
   features: {
     isEnabled: jest.fn(),
   },
 }));
+
+jest.mock('../utils', () => ({
+  getService: jest.fn(),
+}));
+
 describe('register', () => {
   const strapi = {
     features: {
@@ -53,5 +60,58 @@ describe('register', () => {
     features.isEnabled.mockReturnValue(false);
     register({ strapi });
     expect(strapi.admin.services.permission.actionProvider.registerMany).not.toHaveBeenCalled();
+  });
+});
+
+describe('bootstrap', () => {
+  const mockSyncFromDatabase = jest.fn();
+
+  getService.mockReturnValue({
+    syncFromDatabase: mockSyncFromDatabase,
+  });
+
+  const strapi = {
+    db: {
+      lifecycles: {
+        subscribe: jest.fn(),
+      },
+    },
+    features: {
+      future: {
+        isEnabled: jest.fn(),
+      },
+    },
+    log: {
+      error: jest.fn(),
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should sync scheduled jobs from the database if contentReleasesScheduling flag is enabled', async () => {
+    strapi.features.future.isEnabled.mockReturnValue(true);
+    features.isEnabled.mockReturnValue(true);
+    await bootstrap({ strapi });
+    expect(mockSyncFromDatabase).toHaveBeenCalled();
+  });
+
+  it('should not sync scheduled jobs from the database if contentReleasesScheduling flag is disabled', async () => {
+    strapi.features.future.isEnabled.mockReturnValue(false);
+    features.isEnabled.mockReturnValue(true);
+    await bootstrap({ strapi });
+    expect(mockSyncFromDatabase).not.toHaveBeenCalled();
+  });
+
+  it('should throw an error if an error occurs while syncing scheduled jobs from the database', async () => {
+    strapi.features.future.isEnabled.mockReturnValue(true);
+    features.isEnabled.mockReturnValue(true);
+    mockSyncFromDatabase.mockRejectedValue(new Error('error'));
+    await bootstrap({ strapi });
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.',
+      new Error('error')
+    );
   });
 });
