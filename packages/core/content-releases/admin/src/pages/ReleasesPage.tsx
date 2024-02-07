@@ -130,6 +130,10 @@ interface CustomLocationState {
   errors?: Record<'code', string>[];
 }
 
+interface SchedulingInfo {
+  scheduledAt?: string;
+}
+
 const StyledAlert = styled(Alert)`
   button {
     display: none;
@@ -141,6 +145,9 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
+  date: null,
+  time: '',
+  timezone: '',
 } satisfies FormValues;
 
 const ReleasesPage = () => {
@@ -218,10 +225,22 @@ const ReleasesPage = () => {
     });
   };
 
-  const handleAddRelease = async (values: FormValues) => {
-    const response = await createRelease({
+  const handleAddRelease = async (values: FormValues, isScheduled: boolean) => {
+    const schedulingInfo: SchedulingInfo = {};
+    const createReleasePayload = {
       name: values.name,
-    });
+    };
+
+    if (isScheduled) {
+      schedulingInfo.scheduledAt = values.scheduledAt;
+    }
+
+    const finalPayload = {
+      ...createReleasePayload,
+      ...schedulingInfo,
+    };
+
+    const response = await createRelease(finalPayload);
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
       toggleNotification({
@@ -382,4 +401,4 @@ const ReleasesPage = () => {
   );
 };
 
-export { ReleasesPage };
+export { ReleasesPage, type SchedulingInfo };

@@ -7,5 +7,4 @@ export const RELEASE_SCHEMA = yup
     // scheduledAt is a date, but we always receive strings from the client
     scheduledAt: yup.string(),
   })
-  .required()
-  .noUnknown();
+  .required();

@@ -7,7 +7,7 @@ import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 export interface Release extends Entity {
   name: string;
   releasedAt: string | null;
-  scheduledAt: string | null;
+  scheduledAt?: string;
   actions: ReleaseAction[];
 }
 
@@ -97,7 +97,7 @@ export declare namespace CreateRelease {
     };
     body: {
       name: string;
-      scheduledAt?: Date;
+      scheduledAt?: string;
     };
   }
 
@@ -120,6 +120,7 @@ export declare namespace UpdateRelease {
     };
     body: {
       name: string;
+      scheduledAt?: string;
     };
   }
 

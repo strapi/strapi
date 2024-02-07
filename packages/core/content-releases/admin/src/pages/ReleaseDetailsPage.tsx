@@ -58,6 +58,8 @@ import {
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
 
+import { type SchedulingInfo } from './ReleasesPage';
+
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
@@ -844,13 +846,32 @@ const ReleaseDetailsPage = () => {
     );
   }
 
-  const title = (isSuccessDetails && data?.data?.name) || '';
+  const releaseData = (isSuccessDetails && data?.data) || null;
 
-  const handleEditRelease = async (values: FormValues) => {
-    const response = await updateRelease({
+  const title = releaseData?.name || '';
+  const scheduledAt = releaseData?.scheduledAt || '';
+  const date = new Date(scheduledAt);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+  const handleEditRelease = async (values: FormValues, isScheduled: boolean) => {
+    const schedulingInfo: SchedulingInfo = {};
+    const editReleasePayload = {
       id: releaseId,
       name: values.name,
-    });
+    };
+
+    if (isScheduled) {
+      schedulingInfo.scheduledAt = values.scheduledAt;
+    }
+
+    const finalPayload = {
+      ...editReleasePayload,
+      ...schedulingInfo,
+    };
+
+    const response = await updateRelease(finalPayload);
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -911,7 +932,7 @@ const ReleaseDetailsPage = () => {
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
           isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{ name: title || '' }}
+          initialValues={{ name: title || '', scheduledAt, date, time }}
         />
       )}
       <ConfirmDialog

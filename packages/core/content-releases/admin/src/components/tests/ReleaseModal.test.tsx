@@ -13,7 +13,7 @@ describe('ReleaseModal', () => {
         <ReleaseModal
           handleClose={handleCloseMocked}
           handleSubmit={jest.fn()}
-          initialValues={{ name: '' }}
+          initialValues={{ name: '', date: null, time: '', timezone: '' }}
           isLoading={false}
         />
       </MemoryRouter>
