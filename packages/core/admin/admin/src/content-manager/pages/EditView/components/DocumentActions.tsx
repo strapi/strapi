@@ -1,12 +1,17 @@
 import * as React from 'react';
 
 import {
+  Box,
   Button,
   Dialog,
   DialogBody,
   DialogFooter,
   DialogProps,
   Flex,
+  ModalBody,
+  ModalHeader,
+  ModalLayout,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
@@ -14,7 +19,7 @@ import { useNotification } from '@strapi/helper-plugin';
 import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { useForm } from '../../../components/Form';
@@ -99,30 +104,87 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <Flex gap={2}>
-        <Button
-          flex={1}
-          startIcon={primaryAction.icon}
-          disabled={primaryAction.disabled}
-          onClick={primaryAction.onClick}
-          justifyContent="center"
-          variant={primaryAction.variant || 'default'}
-        >
-          {primaryAction.label}
-        </Button>
+        <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
         {restActions.length > 0 ? <DocumentActionsMenu actions={restActions} /> : null}
       </Flex>
       {secondaryAction ? (
-        <Button
-          startIcon={secondaryAction.icon}
-          disabled={secondaryAction.disabled}
-          onClick={secondaryAction.onClick}
-          justifyContent="center"
+        <DocumentActionButton
+          {...secondaryAction}
           variant={secondaryAction.variant || 'secondary'}
-        >
-          {secondaryAction.label}
-        </Button>
+        />
       ) : null}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DocumentActionButton
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DocumentActionButtonProps extends Action {}
+
+const DocumentActionButton = (action: DocumentActionButtonProps) => {
+  const [dialogId, setDialogId] = React.useState<string | null>(null);
+  const toggleNotification = useNotification();
+
+  const handleClick =
+    (action: Action): React.MouseEventHandler<HTMLButtonElement> =>
+    (e) => {
+      if (action.onClick) {
+        action.onClick(e);
+      }
+
+      if (action.dialog) {
+        switch (action.dialog.type) {
+          case 'notifcation':
+            toggleNotification({
+              title: action.dialog.title,
+              message: action.dialog.content,
+              type: action.dialog.status,
+              timeout: action.dialog.timeout,
+              onClose: action.dialog.onClose,
+            });
+            break;
+          case 'dialog':
+          case 'modal':
+            e.preventDefault();
+            setDialogId(action.id);
+        }
+      }
+    };
+
+  const handleClose = () => {
+    setDialogId(null);
+  };
+
+  return (
+    <>
+      <Button
+        flex={1}
+        startIcon={action.icon}
+        disabled={action.disabled}
+        onClick={handleClick(action)}
+        justifyContent="center"
+        variant={action.variant || 'default'}
+      >
+        {action.label}
+      </Button>
+      {action.dialog && action.dialog.type === 'dialog' ? (
+        <DocumentActionConfirmDialog
+          {...action.dialog}
+          variant={action.variant}
+          isOpen={dialogId === action.id}
+          onClose={handleClose}
+        />
+      ) : null}
+      {action.dialog && action.dialog.type === 'modal' ? (
+        <DocumentActionModal
+          {...action.dialog}
+          onModalClose={handleClose}
+          isOpen={dialogId === action.id}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -159,6 +221,7 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
             });
             break;
           case 'dialog':
+          case 'modal':
             e.preventDefault();
             setDialogId(action.id);
         }
@@ -204,6 +267,13 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
                   variant={action.variant}
                   isOpen={dialogId === action.id}
                   onClose={handleClose}
+                />
+              ) : null}
+              {action.dialog && action.dialog.type === 'modal' ? (
+                <DocumentActionModal
+                  {...action.dialog}
+                  onModalClose={handleClose}
+                  isOpen={dialogId === action.id}
                 />
               ) : null}
             </React.Fragment>
@@ -281,6 +351,68 @@ const DocumentActionConfirmDialog = ({
     </Dialog>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * DocumentActionModal
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DocumentActionModalProps extends ModalOptions {
+  onModalClose: () => void;
+  isOpen?: boolean;
+}
+
+const DocumentActionModal = ({
+  isOpen,
+  title,
+  onClose,
+  footer,
+  content,
+  onModalClose,
+}: DocumentActionModalProps) => {
+  const id = React.useId();
+
+  if (!isOpen) {
+    return null;
+  }
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    }
+
+    onModalClose();
+  };
+
+  return (
+    <ModalLayout onClose={handleClose} labelledBy={id}>
+      <ModalHeader>
+        <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+          {title}
+        </Typography>
+      </ModalHeader>
+      <ModalBody>{content}</ModalBody>
+      <ModalFooter
+        paddingTop={4}
+        paddingBottom={4}
+        paddingLeft={5}
+        paddingRight={5}
+        background="neutral100"
+      >
+        {footer}
+      </ModalFooter>
+    </ModalLayout>
+  );
+};
+
+/**
+ * The actual ModalFooter is too strict. It requires a startAction and an endAction. This is not
+ * always the case. This is a more flexible version of the ModalFooter. We should remove this
+ * when we release the DS@2.
+ */
+const ModalFooter = styled(Box)`
+  border-radius: 0 0 ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius};
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents

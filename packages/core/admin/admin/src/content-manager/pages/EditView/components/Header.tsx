@@ -1,4 +1,4 @@
-import { Flex, Status, Typography } from '@strapi/design-system';
+import { Flex, Icon, Status, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
@@ -186,7 +186,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
   const { delete: deleteAction } = useDocumentActions();
 
   return {
-    disabled: !canDelete,
+    disabled: !canDelete || !id,
     label: formatMessage({
       id: 'app.utils.delete',
       defaultMessage: 'Delete document',
@@ -199,9 +199,9 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
         defaultMessage: 'Confirmation',
       }),
       content: (
-        <Flex>
-          <ExclamationMarkCircle />
-          <Typography as="p" variant="omega">
+        <Flex direction="column" gap={2}>
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Typography as="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.delete.dialog.body',
               defaultMessage: 'Are you sure?',
@@ -209,7 +209,19 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
           </Typography>
         </Flex>
       ),
-      onConfirm: async () => {},
+      onConfirm: async () => {
+        if (!id) {
+          console.warn("You're trying to delete a document that doesn't exist, you can't do this.");
+
+          return;
+        }
+
+        const res = await deleteAction({ id, model, collectionType });
+
+        if (!('error' in res)) {
+          navigate(`../${collectionType}/${model}`);
+        }
+      },
     },
     variant: 'danger',
     position: 'header',

@@ -73,9 +73,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { model, id }) => [
-        { type: 'Document', id: `${model}_${id}` },
-      ],
+      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     deleteManyDocuments: builder.mutation<
       Contracts.CollectionTypes.BulkDelete.Response,
