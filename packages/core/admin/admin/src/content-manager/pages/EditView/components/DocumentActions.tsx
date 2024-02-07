@@ -1,10 +1,20 @@
 import * as React from 'react';
 
-import { Button, Flex, VisuallyHidden } from '@strapi/design-system';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogProps,
+  Flex,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
+import { useNotification } from '@strapi/helper-plugin';
 import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
+import { DefaultTheme } from 'styled-components';
 
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { useForm } from '../../../components/Form';
@@ -17,7 +27,7 @@ import { useDocumentActions } from '../../../hooks/useDocumentActions';
 
 interface DocumentActionDescription {
   label: string;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   icon?: React.ReactNode;
   /**
    * @default false
@@ -29,6 +39,10 @@ interface DocumentActionDescription {
    */
   position?: 'panel' | 'header';
   dialog?: DialogOptions | NotificationOptions | ModalOptions;
+  /**
+   * @default 'secondary'
+   */
+  variant?: 'default' | 'secondary' | 'danger' | 'success';
 }
 
 interface DialogOptions {
@@ -65,13 +79,15 @@ interface ModalOptions {
  * DocumentActions
  * -----------------------------------------------------------------------------------------------*/
 
+interface Action extends DocumentActionDescription {
+  id: string;
+}
+
 interface DocumentActionsProps {
-  actions: DocumentActionDescription[];
+  actions: Action[];
 }
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
-  const { formatMessage } = useIntl();
-
   const [primaryAction, secondaryAction, ...restActions] = actions.filter(
     (action) => action.position !== 'header'
   );
@@ -79,8 +95,6 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   if (!primaryAction) {
     return null;
   }
-
-  const isMenuDisabled = restActions.every((action) => action.disabled);
 
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
@@ -91,30 +105,11 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
           disabled={primaryAction.disabled}
           onClick={primaryAction.onClick}
           justifyContent="center"
+          variant={primaryAction.variant || 'default'}
         >
           {primaryAction.label}
         </Button>
-        {restActions.length > 0 ? (
-          <Menu.Root>
-            <Menu.Trigger
-              disabled={isMenuDisabled}
-              size="S"
-              endIcon={null}
-              paddingTop="7px"
-              paddingLeft="9px"
-              paddingRight="9px"
-              variant="secondary"
-            >
-              <More aria-hidden focusable={false} />
-              <VisuallyHidden as="span">
-                {formatMessage({
-                  id: 'content-manager.containers.edit.panels.default.more-actions',
-                  defaultMessage: 'More actions',
-                })}
-              </VisuallyHidden>
-            </Menu.Trigger>
-          </Menu.Root>
-        ) : null}
+        {restActions.length > 0 ? <DocumentActionsMenu actions={restActions} /> : null}
       </Flex>
       {secondaryAction ? (
         <Button
@@ -122,12 +117,168 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
           disabled={secondaryAction.disabled}
           onClick={secondaryAction.onClick}
           justifyContent="center"
-          variant="secondary"
+          variant={secondaryAction.variant || 'secondary'}
         >
           {secondaryAction.label}
         </Button>
       ) : null}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DocumentActionMenu
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DocumentActionsMenuProps {
+  actions: Action[];
+}
+
+const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
+  const [dialogId, setDialogId] = React.useState<string | null>(null);
+  const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  const isDisabled = actions.every((action) => action.disabled);
+
+  const handleClick =
+    (action: Action): React.MouseEventHandler<HTMLButtonElement> =>
+    (e) => {
+      if (action.onClick) {
+        action.onClick(e);
+      }
+
+      if (action.dialog) {
+        switch (action.dialog.type) {
+          case 'notifcation':
+            toggleNotification({
+              title: action.dialog.title,
+              message: action.dialog.content,
+              type: action.dialog.status,
+              timeout: action.dialog.timeout,
+              onClose: action.dialog.onClose,
+            });
+            break;
+          case 'dialog':
+            e.preventDefault();
+            setDialogId(action.id);
+        }
+      }
+    };
+
+  const handleClose = () => {
+    setDialogId(null);
+  };
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        disabled={isDisabled}
+        size="S"
+        endIcon={null}
+        paddingTop="7px"
+        paddingLeft="9px"
+        paddingRight="9px"
+        variant="tertiary"
+      >
+        <More aria-hidden focusable={false} />
+        <VisuallyHidden as="span">
+          {formatMessage({
+            id: 'content-manager.containers.edit.panels.default.more-actions',
+            defaultMessage: 'More actions',
+          })}
+        </VisuallyHidden>
+      </Menu.Trigger>
+      <Menu.Content popoverPlacement="bottom-end">
+        {actions.map((action) => {
+          return (
+            <React.Fragment key={action.id}>
+              <Menu.Item disabled={action.disabled} onClick={handleClick(action)}>
+                <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
+                  {action.icon}
+                  {action.label}
+                </Flex>
+              </Menu.Item>
+              {action.dialog && action.dialog.type === 'dialog' ? (
+                <DocumentActionConfirmDialog
+                  {...action.dialog}
+                  variant={action.variant}
+                  isOpen={dialogId === action.id}
+                  onClose={handleClose}
+                />
+              ) : null}
+            </React.Fragment>
+          );
+        })}
+      </Menu.Content>
+    </Menu.Root>
+  );
+};
+
+const convertActionVariantToColor = (
+  variant: DocumentActionDescription['variant'] = 'secondary'
+): keyof DefaultTheme['colors'] | undefined => {
+  switch (variant) {
+    case 'danger':
+      return 'danger600';
+    case 'secondary':
+      return undefined;
+    case 'success':
+      return 'success600';
+    default:
+      return 'primary600' as const;
+  }
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DocumentActionConfirmDialog
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DocumentActionConfirmDialogProps
+  extends DialogOptions,
+    Pick<DialogProps, 'onClose' | 'isOpen'>,
+    Pick<Action, 'variant'> {}
+
+const DocumentActionConfirmDialog = ({
+  onClose,
+  onCancel,
+  onConfirm,
+  title,
+  content,
+  isOpen,
+  variant = 'secondary',
+}: DocumentActionConfirmDialogProps) => {
+  const { formatMessage } = useIntl();
+
+  const handleClose = () => {
+    if (onCancel) {
+      onCancel();
+    }
+
+    onClose();
+  };
+
+  return (
+    <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
+      <DialogBody>{content}</DialogBody>
+      <DialogFooter
+        startAction={
+          <Button onClick={handleClose} variant="tertiary">
+            {formatMessage({
+              id: 'app.components.Button.cancel',
+              defaultMessage: 'Cancel',
+            })}
+          </Button>
+        }
+        endAction={
+          <Button onClick={onConfirm} variant={variant}>
+            {formatMessage({
+              id: 'app.components.Button.confirm',
+              defaultMessage: 'Confirm',
+            })}
+          </Button>
+        }
+      />
+    </Dialog>
   );
 };
 
@@ -232,5 +383,5 @@ UpdateAction.type = 'update';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction];
 
-export { DocumentActions, DEFAULT_ACTIONS };
+export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };

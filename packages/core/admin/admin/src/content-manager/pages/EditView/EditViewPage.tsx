@@ -165,40 +165,40 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Header
-        isCreating={isCreatingDocument}
-        status={getDocumentStatus(document, meta)}
-        title={documentTitle}
-      />
-      <TabGroup
-        ref={tabApi}
-        variant="simple"
-        label={formatMessage({
-          id: getTranslation('containers.edit.tabs.label'),
-          defaultMessage: 'Document status',
-        })}
-        initialSelectedTabIndex={status === 'published' ? 1 : 0}
-        onTabChange={handleTabChange}
+      <Form
+        disabled={status === 'published'}
+        initialValues={initialValues}
+        method={isCreatingDocument ? 'POST' : 'PUT'}
       >
-        <Tabs>
-          <StatusTab>
-            {formatMessage({
-              id: getTranslation('containers.edit.tabs.draft'),
-              defaultMessage: 'draft',
-            })}
-          </StatusTab>
-          <StatusTab disabled={meta?.availableStatus.length === 0}>
-            {formatMessage({
-              id: getTranslation('containers.edit.tabs.published'),
-              defaultMessage: 'published',
-            })}
-          </StatusTab>
-        </Tabs>
-        <Form
-          disabled={status === 'published'}
-          initialValues={initialValues}
-          method={isCreatingDocument ? 'POST' : 'PUT'}
+        <Header
+          isCreating={isCreatingDocument}
+          status={getDocumentStatus(document, meta)}
+          title={documentTitle}
+        />
+        <TabGroup
+          ref={tabApi}
+          variant="simple"
+          label={formatMessage({
+            id: getTranslation('containers.edit.tabs.label'),
+            defaultMessage: 'Document status',
+          })}
+          initialSelectedTabIndex={status === 'published' ? 1 : 0}
+          onTabChange={handleTabChange}
         >
+          <Tabs>
+            <StatusTab>
+              {formatMessage({
+                id: getTranslation('containers.edit.tabs.draft'),
+                defaultMessage: 'draft',
+              })}
+            </StatusTab>
+            <StatusTab disabled={meta?.availableStatus.length === 0}>
+              {formatMessage({
+                id: getTranslation('containers.edit.tabs.published'),
+                defaultMessage: 'published',
+              })}
+            </StatusTab>
+          </Tabs>
           <Grid paddingTop={8} gap={4}>
             <GridItem col={9} s={12}>
               <TabPanels>
@@ -214,8 +214,8 @@ const EditViewPage = () => {
               <Panels />
             </GridItem>
           </Grid>
-        </Form>
-      </TabGroup>
+        </TabGroup>
+      </Form>
     </Main>
   );
 };
