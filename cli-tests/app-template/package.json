@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/cli-test-app",
+  "name": "@strapi/e2e-test-app",
   "version": "0.1.0",
   "private": true,
   "description": "E2E template application",
@@ -15,9 +15,9 @@
     "@strapi/plugin-users-permissions": "latest",
     "@strapi/strapi": "latest",
     "better-sqlite3": "9.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "6.21.1",
     "styled-components": "5.3.3"
   },
   "engines": {

@@ -6,14 +6,12 @@ const utils = require('../../../utils');
 
 describe('import', () => {
   let appPath;
-  let currentVersion;
   const outputFilename = 'output';
 
   beforeAll(async () => {
     const testApps = utils.instances.getTestApps();
 
     appPath = testApps.at(0);
-    currentVersion = require(`${appPath}/package.json`).dependencies['@strapi/strapi'];
     await coffee
       .spawn(
         'npm',
@@ -37,10 +35,14 @@ describe('import', () => {
 
   it('should import the data', async () => {
     await coffee
-      .spawn('npm', ['run', '-s', 'strapi', '--', 'import', '-f', `${outputFilename}.tar`], {
-        cwd: appPath,
-        stdio: 'inherit',
-      })
+      .spawn(
+        'npm',
+        ['run', '-s', 'strapi', '--', 'import', '-f', `${outputFilename}.tar`, '--force'], // TODO Remove --force
+        {
+          cwd: appPath,
+          stdio: 'inherit',
+        }
+      )
       .waitForPrompt()
       .write('Y\n')
       .expect('code', 0)
