@@ -120,7 +120,7 @@ yargs
          */
         if (setup || currentTestApps.length < testAppsRequired) {
           /**
-           * this will effectively clean the entire directory before hand
+           * this will effectively clean the entire directory beforehand
            * as opposed to cleaning the ones we aim to spawn.
            */
           await Promise.all(
@@ -218,16 +218,27 @@ yargs
                 const domainDir = path.join(testsDir, domain);
                 console.log('Running jest for domain', domain, 'in', domainDir);
                 // run the command 'jest --rootDir <domainDir>'
-                await execa('jest', ['--rootDir', domainDir, '--color'], {
-                  stdio: 'inherit',
-                  cwd: domainDir, // run from the domain directory
-                  env, // pass it our custom env values
-                });
+                await execa(
+                  'jest',
+                  [
+                    '--config',
+                    '../../../jest.config.cli.js',
+                    '--rootDir',
+                    domainDir,
+                    '--color',
+                    '--verbose',
+                  ],
+                  {
+                    stdio: 'inherit',
+                    cwd: domainDir, // run from the domain directory
+                    env, // pass it our custom env values
+                    timeout: 2 * 60 * 1000, // 2 minutes
+                  }
+                );
               } catch (err) {
                 // If any tests fail
                 console.error('Test suite failed for', domain);
                 failingTests += 1;
-                // TODO: determine how to integrate this with the CI, probably ending the process and returning an error exit code
               }
 
               // make them available again for the next batch
