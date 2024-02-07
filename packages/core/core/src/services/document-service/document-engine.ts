@@ -260,6 +260,21 @@ const createDocumentEngine = ({
       data: { documentId, publishedAt: new Date() },
     })) as any;
 
+    // Validate all published versions
+    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
+    await mapAsync(clonedDocuments?.versions, async (version: any) => {
+      await entityValidator.validateEntityUpdate(
+        model,
+        // There will have been no change in the data so we pass each cloned
+        // version as the data to validate
+        version,
+        {
+          isDraft: false,
+          locale: params?.locale,
+        }
+      );
+    });
+
     // TODO: Return actual count
     return { versions: clonedDocuments?.versions || [] };
   },
