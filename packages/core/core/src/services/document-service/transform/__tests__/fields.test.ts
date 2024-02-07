@@ -29,6 +29,12 @@ describe('transformFields', () => {
 
   it('should throw if there is no id present in the fields', () => {
     const input = ['name', 'description'];
-    expect(() => transformFields(input)).toThrow();
+    const expected = ['name', 'description', 'documentId'];
+    expect(transformFields(input)).toEqual(expected);
+  });
+
+  it('should handle empty field arrays', () => {
+    const input: string[] = [];
+    expect(transformFields(input)).toEqual(input);
   });
 });
