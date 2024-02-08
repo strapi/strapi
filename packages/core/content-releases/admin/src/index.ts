@@ -43,7 +43,7 @@ const admin: Plugin.Config.AdminInput = {
         Component: CMReleasesContainer,
       });
     } else if (
-      !window.strapi.features.isEnabled('content-manager') &&
+      !window.strapi.features.isEnabled('cms-content-releases') &&
       window.strapi?.flags?.promoteEE
     ) {
       app.addMenuLink({

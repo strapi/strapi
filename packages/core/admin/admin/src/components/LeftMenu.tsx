@@ -135,7 +135,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           >
             {pluginsSectionLinks.map((link) => {
               const LinkIcon = link.icon;
-              const { lockIcon = false } = link;
 
               return (
                 <Flex key={link.to} justifyContent="space-between">
@@ -148,7 +147,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                   >
                     {formatMessage(link.intlLabel)}
                   </NavLink>
-                  {lockIcon && (
+                  {link.lockIcon && (
                     <Icon
                       width={`${15 / 16}rem`}
                       height={`${15 / 16}rem`}
