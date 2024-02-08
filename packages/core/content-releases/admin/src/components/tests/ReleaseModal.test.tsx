@@ -1,9 +1,22 @@
-import { within } from '@testing-library/react';
+import { within, fireEvent } from '@testing-library/react';
 import { render, screen } from '@tests/utils';
 import { MemoryRouter } from 'react-router-dom';
 
 import { pluginId } from '../../pluginId';
 import { ReleaseModal } from '../ReleaseModal';
+
+const mockUseTimezoneSelect = jest.fn(() => ({
+  parseTimezone: jest.fn(),
+  options: [
+    { value: 'timezone1', label: 'Timezone 1' },
+    { value: 'timezone2', label: 'Timezone 2' },
+  ],
+}));
+
+jest.mock('react-timezone-select', () => ({
+  ...jest.requireActual('react-timezone-select'),
+  useTimezoneSelect: mockUseTimezoneSelect,
+}));
 
 describe('ReleaseModal', () => {
   it('renders correctly the dialog content on create', async () => {
@@ -37,13 +50,14 @@ describe('ReleaseModal', () => {
     await user.type(inputElement, 'new release');
     expect(dialogContinueButton).toBeEnabled();
   });
+
   it('renders correctly the dialog content on update', async () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
       <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
-        initialValues={{ name: 'title' }}
+        initialValues={{ name: 'title', date: null, time: '', timezone: '' }}
         isLoading={false}
       />
     );
@@ -66,5 +80,95 @@ describe('ReleaseModal', () => {
     // change the input to an empty value and disable the submit button
     await user.clear(inputElement);
     expect(dialogSaveButton).toBeDisabled();
+  });
+
+  it('should show scheduled fields when selecting schedule release', async () => {
+    const handleCloseMocked = jest.fn();
+    render(
+      <ReleaseModal
+        handleClose={handleCloseMocked}
+        handleSubmit={jest.fn()}
+        initialValues={{ name: 'title', date: null, time: '', timezone: '' }}
+        isLoading={false}
+      />
+    );
+    const dialogContainer = screen.getByRole('dialog');
+    const scheduleReleaseCheck = within(dialogContainer).getByRole('checkbox', {
+      name: /schedule release/i,
+    });
+
+    // Schedule release checkbox is not checked and date field is not visible
+    expect(scheduleReleaseCheck).not.toBeChecked();
+    const date = within(dialogContainer).queryByRole('combobox', {
+      name: /date/i,
+    });
+    expect(date).not.toBeInTheDocument();
+
+    // Click Schedule release checkbox
+    fireEvent.click(scheduleReleaseCheck);
+    expect(scheduleReleaseCheck).toBeChecked();
+
+    // Date and other fields are visible
+    const dateField = within(dialogContainer).queryByRole('combobox', {
+      name: /date/i,
+    });
+    expect(dateField).toBeInTheDocument();
+
+    const time = within(dialogContainer).getByRole('combobox', {
+      name: 'Time',
+    });
+    expect(time).toBeInTheDocument();
+
+    const timezone = within(dialogContainer).getByRole('combobox', {
+      name: /timezone/i,
+    });
+    expect(timezone).toBeInTheDocument();
+  });
+
+  it('should update save button status when schedule release is selected', async () => {
+    const handleCloseMocked = jest.fn();
+    const { user } = render(
+      <ReleaseModal
+        handleClose={handleCloseMocked}
+        handleSubmit={jest.fn()}
+        initialValues={{ name: 'title', date: null, time: '', timezone: '' }}
+        isLoading={false}
+      />
+    );
+    const dialogContainer = screen.getByRole('dialog');
+    const scheduleReleaseCheck = within(dialogContainer).getByRole('checkbox', {
+      name: /schedule release/i,
+    });
+    // Click Schedule release checkbox
+    fireEvent.click(scheduleReleaseCheck);
+    expect(scheduleReleaseCheck).toBeChecked();
+
+    const dialogSaveButton = within(dialogContainer).getByRole('button', {
+      name: /save/i,
+    });
+    // save button is disabled initially
+    expect(dialogSaveButton).toBeDisabled();
+
+    const date = within(dialogContainer).queryByRole('combobox', {
+      name: /date/i,
+    });
+    await user.click(date);
+    await user.click(screen.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }));
+
+    const time = within(dialogContainer).getByRole('combobox', {
+      name: 'Time',
+    });
+
+    await user.click(time);
+    await user.click(screen.getByRole('option', { name: '14:00' }));
+
+    const timezone = within(dialogContainer).getByRole('combobox', {
+      name: /timezone/i,
+    });
+    await user.click(timezone);
+    await user.click(screen.getByRole('option', { name: 'One' }));
+
+    // save button is enabled after filling all scheduling fields
+    expect(dialogSaveButton).toBeEnabled();
   });
 });

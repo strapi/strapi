@@ -20,7 +20,6 @@ import formatISO from 'date-fns/formatISO';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { useTimezoneSelect, allTimezones, type ITimezoneOption } from 'react-timezone-select';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
@@ -31,12 +30,12 @@ export interface FormValues {
   date: Date | null;
   time: string;
   timezone: string;
-  scheduledAt?: string;
+  scheduledAt: Date | null;
 }
 
 interface ReleaseModalProps {
   handleClose: () => void;
-  handleSubmit: (values: FormValues, isScheduled: boolean) => void;
+  handleSubmit: (values: FormValues) => void;
   isLoading?: boolean;
   initialValues: FormValues;
 }
@@ -59,15 +58,15 @@ export const ReleaseModal = ({
 
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
-    if (!date || !time || !timezone) return '';
+    if (!date || !time || !timezone) return null;
 
     const [hours, minutes] = time.split(':').map(Number);
     const combinedDateTime = new Date(date);
     combinedDateTime.setHours(hours);
     combinedDateTime.setMinutes(minutes);
     const { offset } = parseTimezone(timezone); // Offset is in hours
-    if (!offset) {
-      return combinedDateTime.toISOString();
+    if (!offset && offset !== 0) {
+      return combinedDateTime;
     }
     // Adjust the date based on the selected timezone offset
     const combinedDate = combinedDateTime.getTime();
@@ -75,10 +74,10 @@ export const ReleaseModal = ({
 
     // Because new Date always adds local timezone offset, remove it to set the correct UTC time
     const dateObject = new Date(combinedDateWithOffset);
-    const dateWithoutOffset = new Date(
+    const scheduledDate = new Date(
       dateObject.getTime() - dateObject.getTimezoneOffset() * 60 * 1000
     );
-    return dateWithoutOffset.toISOString();
+    return scheduledDate;
   };
 
   return (
@@ -98,7 +97,7 @@ export const ReleaseModal = ({
       <Formik
         validateOnChange={false}
         onSubmit={(values) => {
-          handleSubmit({ ...values, scheduledAt: getScheduledTimestamp(values) }, isScheduled);
+          handleSubmit({ ...values, scheduledAt: getScheduledTimestamp(values) });
         }}
         initialValues={{
           ...initialValues,
@@ -143,10 +142,12 @@ export const ReleaseModal = ({
                           })}
                           name="date"
                           onChange={(date) => {
+                            // UT error: It looks like you're passing a string as representation of a Date to the DatePicker.
+                            // This is deprecated, look to passing a Date instead.
                             const isoFormatDate = date
                               ? formatISO(date, { representation: 'date' })
                               : null;
-                            setFieldValue('date', isoFormatDate);
+                            setFieldValue('date', date);
                           }}
                           clearLabel={formatMessage({
                             id: 'content-releases.modal.form.input.clearLabel',

@@ -855,23 +855,14 @@ const ReleaseDetailsPage = () => {
   const minutes = date.getMinutes();
   const time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
-  const handleEditRelease = async (values: FormValues, isScheduled: boolean) => {
-    const schedulingInfo: SchedulingInfo = {};
+  const handleEditRelease = async (values: FormValues) => {
     const editReleasePayload = {
       id: releaseId,
       name: values.name,
+      scheduledAt: values.scheduledAt,
     };
 
-    if (isScheduled) {
-      schedulingInfo.scheduledAt = values.scheduledAt;
-    }
-
-    const finalPayload = {
-      ...editReleasePayload,
-      ...schedulingInfo,
-    };
-
-    const response = await updateRelease(finalPayload);
+    const response = await updateRelease(editReleasePayload);
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success

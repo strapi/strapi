@@ -148,6 +148,7 @@ const INITIAL_FORM_VALUES = {
   date: null,
   time: '',
   timezone: '',
+  scheduledAt: null,
 } satisfies FormValues;
 
 const ReleasesPage = () => {
@@ -225,22 +226,13 @@ const ReleasesPage = () => {
     });
   };
 
-  const handleAddRelease = async (values: FormValues, isScheduled: boolean) => {
-    const schedulingInfo: SchedulingInfo = {};
+  const handleAddRelease = async (values: FormValues) => {
     const createReleasePayload = {
       name: values.name,
+      scheduledAt: values.scheduledAt,
     };
 
-    if (isScheduled) {
-      schedulingInfo.scheduledAt = values.scheduledAt;
-    }
-
-    const finalPayload = {
-      ...createReleasePayload,
-      ...schedulingInfo,
-    };
-
-    const response = await createRelease(finalPayload);
+    const response = await createRelease(createReleasePayload);
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
       toggleNotification({
