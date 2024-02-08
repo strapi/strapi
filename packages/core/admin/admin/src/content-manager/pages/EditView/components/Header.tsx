@@ -186,9 +186,10 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
   const { formatMessage } = useIntl();
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
+  const { document } = useDoc();
 
   return {
-    disabled: !canDelete || (!id && collectionType !== SINGLE_TYPES),
+    disabled: !canDelete || !document,
     label: formatMessage({
       id: 'app.utils.delete',
       defaultMessage: 'Delete document',
