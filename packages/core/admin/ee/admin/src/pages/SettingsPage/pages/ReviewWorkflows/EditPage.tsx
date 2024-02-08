@@ -94,46 +94,48 @@ export const ReviewWorkflowsEditPage = () => {
     setSaving(true);
 
     try {
-      // @ts-expect-error – issue with the redux-store set up
       const res = await updateWorkflow({
-        ...currentWorkflow,
+        id: workflowId!,
+        data: {
+          ...currentWorkflow,
 
-        // compare permissions of stages and only submit them if at least one has
-        // changed; this enables partial updates e.g. for users who don't have
-        // permissions to see roles
-        stages: currentWorkflow.stages?.map((stage) => {
-          let hasUpdatedPermissions = true;
-          const serverStage = serverState.workflow?.stages?.find(
-            (serverStage) => serverStage.id === stage?.id
-          );
+          // compare permissions of stages and only submit them if at least one has
+          // changed; this enables partial updates e.g. for users who don't have
+          // permissions to see roles
+          stages: currentWorkflow.stages?.map((stage) => {
+            let hasUpdatedPermissions = true;
+            const serverStage = serverState.workflow?.stages?.find(
+              (serverStage) => serverStage.id === stage?.id
+            );
 
-          if (serverStage) {
-            hasUpdatedPermissions =
-              serverStage.permissions?.length !== stage.permissions?.length ||
-              !serverStage.permissions?.every(
-                (serverPermission) =>
-                  !!stage.permissions?.find(
-                    (permission) => permission.role === serverPermission.role
-                  )
-              );
-          }
+            if (serverStage) {
+              hasUpdatedPermissions =
+                serverStage.permissions?.length !== stage.permissions?.length ||
+                !serverStage.permissions?.every(
+                  (serverPermission) =>
+                    !!stage.permissions?.find(
+                      (permission) => permission.role === serverPermission.role
+                    )
+                );
+            }
 
-          return {
-            ...stage,
-            permissions: hasUpdatedPermissions ? stage.permissions : undefined,
-          } satisfies Stage;
-        }),
+            return {
+              ...stage,
+              permissions: hasUpdatedPermissions ? stage.permissions : undefined,
+            } satisfies Stage;
+          }),
+        },
       });
 
       if ('error' in res) {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setInitialErrors(formatValidationErrors(res.error));
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(res.error),
-          });
         }
+
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(res.error),
+        });
 
         return;
       }
