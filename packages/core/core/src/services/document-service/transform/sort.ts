@@ -34,7 +34,7 @@ const rootIdReplacement = (sort: Sort) => {
 export const transformSort = async (sort: Sort | Sort[], opts: Options) => {
   let mappedSort;
 
-  // Replcace any top level 'id' properties to 'documentId'
+  // Replace any top level 'id' properties with 'documentId'
   if (Array.isArray(sort)) {
     mappedSort = sort.map(rootIdReplacement);
   } else {
@@ -44,7 +44,7 @@ export const transformSort = async (sort: Sort | Sort[], opts: Options) => {
   return traverse.traverseQuerySort(
     ({ attribute, value, key }, { set }) => {
       if (attribute?.type === 'relation') {
-        // Replcace any relations 'id' properties to 'documentId'
+        // Replace any relation 'id' properties with 'documentId'
         set(key, rootIdReplacement(value as any));
       }
     },
