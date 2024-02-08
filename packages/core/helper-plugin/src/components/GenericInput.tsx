@@ -49,7 +49,7 @@ interface CustomInputProps<TAttribute extends Attribute.Any>
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
 
-export interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
+interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
   attribute?: TAttribute;
   autoComplete?: string;
   customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
@@ -197,6 +197,8 @@ const GenericInput = ({
       />
     );
   }
+
+  // return <Flex height="1000px" background="danger500" />;
 
   const label = intlLabel.id
     ? formatMessage(
@@ -567,4 +569,5 @@ const GenericInput = ({
  */
 const MemoizedGenericInput = React.memo(GenericInput, isEqual);
 
+export type { GenericInputProps, CustomInputProps };
 export { MemoizedGenericInput as GenericInput };

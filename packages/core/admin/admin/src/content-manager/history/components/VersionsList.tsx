@@ -197,7 +197,7 @@ const VersionsList = ({ versions, page }: VersionsListProps) => {
         as="ul"
         alignItems="stretch"
         flex={1}
-        overflow="scroll"
+        overflow="auto"
       >
         {versions.data.map((version, index) => (
           <li key={version.id}>

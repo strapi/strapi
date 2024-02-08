@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  Box,
   ContentLayout,
   Flex,
   Grid,
@@ -11,19 +10,28 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { GenericInput, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import {
+  ContentManagerEditViewDataManagerContext,
+  GenericInput,
+  useQueryParams,
+  useStrapiApp,
+} from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
 import { HOOKS } from '../../../constants';
+import { useTypedDispatch } from '../../../core/store/hooks';
 import { DynamicZone } from '../../components/DynamicZone/Field';
 import { FieldComponent } from '../../components/FieldComponent';
 import { getInputType, useCustomInputs } from '../../components/Inputs';
 import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
+import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { isDynamicZone, splitLayoutIntoPanes } from '../../pages/EditView/EditViewPage';
+import { setLayout } from '../../pages/EditViewLayoutManager';
+import { getFieldsActionMatchingPermissions } from '../../utils/permissions';
 
 /* -------------------------------------------------------------------------------------------------
  * VersionHeader
@@ -72,21 +80,37 @@ const UNSUPPORTED_TYPES = ['media', 'relation'];
 const VersionContent = ({ version }: VersionContentProps) => {
   const [{ query }] = useQueryParams();
   const { isLoading, layout } = useContentTypeLayout(version.contentType);
+  const dispatch = useTypedDispatch();
+
   const { runHookWaterfall } = useStrapiApp();
+  const mutatedLayout = runHookWaterfall(HOOKS.MUTATE_EDIT_VIEW_LAYOUT, { layout, query });
+
+  React.useEffect(() => {
+    if (mutatedLayout.layout) {
+      dispatch(setLayout(mutatedLayout.layout, query));
+    }
+  }, [dispatch, mutatedLayout, query]);
+
+  const { permissions } = useSyncRbac(query, layout?.contentType.uid, 'editView');
+
+  const { readActionAllowedFields } = getFieldsActionMatchingPermissions(
+    permissions ?? [],
+    mutatedLayout.layout!.contentType.uid
+  );
 
   const getCustomFields = React.useCallback(() => {
-    if (!layout) {
+    if (!mutatedLayout.layout) {
       return [];
     }
 
     const customFields: string[] = [];
-    Object.values(layout.contentType.attributes).forEach((value) => {
+    Object.values(mutatedLayout.layout.contentType.attributes).forEach((value) => {
       if ('customField' in value) {
         customFields.push(value.customField as string);
       }
     });
 
-    Object.values(layout?.components).forEach((component) => {
+    Object.values(mutatedLayout.layout.components).forEach((component) => {
       Object.values(component.attributes).forEach((value) => {
         if ('customField' in value) {
           customFields.push(value.customField as string);
@@ -95,124 +119,145 @@ const VersionContent = ({ version }: VersionContentProps) => {
     });
 
     return customFields;
-  }, [layout]);
+  }, [mutatedLayout.layout]);
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(getCustomFields());
   const customInputs = useCustomInputs(lazyComponentStore);
 
   // TODO: better loading
-  if (isLoading || !layout || isLazyLoading) {
+  if (isLoading || !mutatedLayout.layout || isLazyLoading) {
     return null;
   }
 
-  const mutatedLayout = runHookWaterfall(HOOKS.MUTATE_EDIT_VIEW_LAYOUT, { layout, query });
   const layoutPanes = splitLayoutIntoPanes(mutatedLayout.layout);
 
   return (
     <ContentLayout>
-      <Flex direction="column" alignItems="stretch" gap={6}>
-        {layoutPanes.map((pane, paneIndex) => {
-          if (isDynamicZone(pane)) {
-            const [[{ name, fieldSchema, metadatas, ...restProps }]] = pane;
+      <ContentManagerEditViewDataManagerContext.Provider
+        value={{
+          isCreatingEntry: false,
+          modifiedData: version.data,
+          allLayoutData: mutatedLayout.layout,
+          readActionAllowedFields,
+          /**
+           * We're not passing create and update actions on purpose, even though we have them
+           * because not giving them disables all the nested fields, which is what we want
+           */
+          createActionAllowedFields: [],
+          updateActionAllowedFields: [],
+          formErrors: {},
+          initialData: version.data,
+          isSingleType: mutatedLayout.layout.contentType.kind === 'singleType',
+        }}
+      >
+        {/* Position relative is needed to prevent VisuallyHidden from breaking the layout */}
+        <Flex direction="column" alignItems="stretch" gap={6} position="relative" marginBottom={6}>
+          {layoutPanes.map((pane, paneIndex) => {
+            if (isDynamicZone(pane)) {
+              const [[{ name, fieldSchema, metadatas, ...restProps }]] = pane;
 
-            // TODO: fix field permission issue
+              return (
+                <DynamicZone
+                  name={name}
+                  fieldSchema={fieldSchema}
+                  metadatas={metadatas}
+                  key={paneIndex}
+                  {...restProps}
+                />
+              );
+            }
+
             return (
-              <DynamicZone
-                name={name}
-                fieldSchema={fieldSchema}
-                metadatas={metadatas}
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={4}
+                background="neutral0"
+                shadow="tableShadow"
+                paddingLeft={6}
+                paddingRight={6}
+                paddingTop={6}
+                paddingBottom={6}
+                borderColor="neutral150"
+                hasRadius
                 key={paneIndex}
-                {...restProps}
-              />
-            );
+              >
+                {pane.map((row, rowIndex) => (
+                  <Grid gap={4} key={rowIndex}>
+                    {row.map((column, columnIndex) => {
+                      const attribute = mutatedLayout.layout!.contentType.attributes[column.name];
+                      const { type } = attribute;
+                      const customFieldUid = (attribute as { customField?: string }).customField;
 
-            return <Typography key={paneIndex}>DYNAMIC ZONE</Typography>;
-          }
+                      if (UNSUPPORTED_TYPES.includes(type)) {
+                        return (
+                          <GridItem col={column.size} key={columnIndex}>
+                            <Typography>TODO {type}</Typography>
+                          </GridItem>
+                        );
+                      }
 
-          return (
-            <Box
-              hasRadius
-              background="neutral0"
-              shadow="tableShadow"
-              paddingLeft={6}
-              paddingRight={6}
-              paddingTop={6}
-              paddingBottom={6}
-              borderColor="neutral150"
-              key={paneIndex}
-            >
-              {pane.map((row, rowIndex) => (
-                <Grid gap={4} key={rowIndex}>
-                  {row.map((column, columnIndex) => {
-                    const attribute = layout.contentType.attributes[column.name];
-                    const { type } = attribute;
-                    const customFieldUid = (attribute as { customField?: string }).customField;
+                      if (type === 'component') {
+                        const {
+                          component,
+                          max,
+                          min,
+                          repeatable = false,
+                          required = false,
+                        } = attribute;
 
-                    if (UNSUPPORTED_TYPES.includes(type)) {
-                      return <Typography key={columnIndex}>TODO {type}</Typography>;
-                    }
+                        return (
+                          <GridItem col={column.size} s={12} xs={12} key={component}>
+                            <FieldComponent
+                              componentUid={component}
+                              isRepeatable={repeatable}
+                              intlLabel={{
+                                id: column.metadatas.label,
+                                defaultMessage: column.metadatas.label,
+                              }}
+                              max={max}
+                              min={min}
+                              name={column.name}
+                              required={required}
+                            />
+                          </GridItem>
+                        );
+                      }
 
-                    // TODO: fix permission issue
-                    if (type === 'component') {
-                      const {
-                        component,
-                        max,
-                        min,
-                        repeatable = false,
-                        required = false,
-                      } = attribute;
+                      const getValue = () => {
+                        switch (attribute.type) {
+                          case 'json':
+                            return JSON.stringify(version.data[column.name]);
+                          default:
+                            return version.data[column.name];
+                        }
+                      };
 
                       return (
-                        <GridItem col={column.size} s={12} xs={12} key={component}>
-                          <FieldComponent
-                            componentUid={component}
-                            isRepeatable={repeatable}
+                        <GridItem col={column.size} key={columnIndex}>
+                          <GenericInput
+                            name={column.name}
                             intlLabel={{
                               id: column.metadatas.label,
                               defaultMessage: column.metadatas.label,
                             }}
-                            max={max}
-                            min={min}
-                            name={column.name}
-                            required={required}
+                            type={customFieldUid || getInputType(type)}
+                            onChange={() => {}}
+                            disabled={true}
+                            customInputs={customInputs}
+                            value={getValue()}
+                            attribute={attribute}
                           />
                         </GridItem>
                       );
-                    }
-
-                    const getValue = () => {
-                      switch (attribute.type) {
-                        case 'json':
-                          return JSON.stringify(version.data[column.name]);
-                        default:
-                          return version.data[column.name];
-                      }
-                    };
-
-                    return (
-                      <GridItem col={column.size} key={columnIndex}>
-                        <GenericInput
-                          name={column.name}
-                          intlLabel={{
-                            id: column.metadatas.label,
-                            defaultMessage: column.metadatas.label,
-                          }}
-                          type={customFieldUid || getInputType(type)}
-                          onChange={() => {}}
-                          disabled={true}
-                          customInputs={customInputs}
-                          value={getValue()}
-                          attribute={attribute}
-                        />
-                      </GridItem>
-                    );
-                  })}
-                </Grid>
-              ))}
-            </Box>
-          );
-        })}
-      </Flex>
+                    })}
+                  </Grid>
+                ))}
+              </Flex>
+            );
+          })}
+        </Flex>
+      </ContentManagerEditViewDataManagerContext.Provider>
     </ContentLayout>
   );
 };
@@ -234,8 +279,9 @@ const VersionDetails = ({ version }: VersionDetailsProps) => {
   }
 
   return (
-    <Main grow={1} height="100vh" overflow="scroll" labelledBy={headerId}>
+    <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
       <VersionHeader version={version} headerId={headerId} />
+      {/* <Flex height="3000px" background="danger500" /> */}
       <VersionContent version={version} />
     </Main>
   );

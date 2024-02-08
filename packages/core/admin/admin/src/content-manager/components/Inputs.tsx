@@ -5,6 +5,9 @@ import {
   NotAllowedInput,
   useCMEditViewDataManager,
   useLibrary,
+  GenericInputProps,
+  // Needs to be imported to prevent the TypeScript "cannot be named" error
+  CustomInputProps as _CustomInputProps,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
@@ -52,7 +55,7 @@ const useCustomInputs = (customFieldInputs: LazyComponentStore) => {
     blocks: BlocksInput,
     ...fields,
     ...customFieldInputs,
-  } as React.ComponentProps<typeof GenericInput>['customInputs'];
+  } as GenericInputProps['customInputs'];
 };
 
 /* -------------------------------------------------------------------------------------------------
