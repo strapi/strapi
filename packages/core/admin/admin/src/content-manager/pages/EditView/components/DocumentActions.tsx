@@ -16,15 +16,17 @@ import {
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
 import { useNotification } from '@strapi/helper-plugin';
-import { More } from '@strapi/icons';
+import { CrossCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { useForm } from '../../../components/Form';
+import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
+import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 
 /* -------------------------------------------------------------------------------------------------
@@ -521,7 +523,51 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
 
 UpdateAction.type = 'update';
 
-const DEFAULT_ACTIONS = [PublishAction, UpdateAction];
+const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+  const { formatMessage } = useIntl();
+  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
+  const { document, meta } = useDoc();
+  const { unpublish } = useDocumentActions();
+
+  const isDocumentPublished =
+    document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
+    meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
+
+  return {
+    disabled: !canPublish || activeTab === 'published' || !isDocumentPublished,
+    label: formatMessage({
+      id: 'app.utils.unpublish',
+      defaultMessage: 'Unpublish',
+    }),
+    icon: <StyledCrossCircle />,
+    onClick: async () => {
+      if (!id) {
+        return;
+      }
+
+      await unpublish({
+        collectionType,
+        model,
+        id,
+      });
+    },
+    variant: 'danger',
+  };
+};
+
+UnpublishAction.type = 'unpublish';
+
+/**
+ * Because the icon system is completely broken, we have to do
+ * this to remove the fill from the cog.
+ */
+const StyledCrossCircle = styled(CrossCircle)`
+  path {
+    fill: currentColor;
+  }
+`;
+
+const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction];
 
 export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };
