@@ -72,7 +72,7 @@ const documentApi = contentManagerApi.injectEndpoints({
     >({
       query: ({ collectionType, model, id, params }) => ({
         url: `/content-manager/${collectionType}/${model}${
-          collectionType === SINGLE_TYPES && id ? `/${id}` : ''
+          collectionType !== SINGLE_TYPES && id ? `/${id}` : ''
         }`,
         method: 'DELETE',
         config: {
