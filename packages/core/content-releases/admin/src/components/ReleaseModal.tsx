@@ -97,7 +97,10 @@ export const ReleaseModal = ({
       <Formik
         validateOnChange={false}
         onSubmit={(values) => {
-          handleSubmit({ ...values, scheduledAt: getScheduledTimestamp(values) });
+          handleSubmit({
+            ...values,
+            scheduledAt: isScheduled ? getScheduledTimestamp(values) : null,
+          });
         }}
         initialValues={{
           ...initialValues,

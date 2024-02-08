@@ -4,6 +4,6 @@ export const RELEASE_SCHEMA = yup
   .object()
   .shape({
     name: yup.string().trim().required(),
-    scheduledAt: yup.date().nullable(),
+    scheduledAt: yup.string().nullable(),
   })
   .required();
