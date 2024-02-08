@@ -29,6 +29,7 @@ import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { useUpdateComponentConfigurationMutation } from '../../../../services/components';
 import { useUpdateContentTypeConfigurationMutation } from '../../../../services/contentTypes';
 import { getTranslation } from '../../../../utils/translations';
@@ -159,7 +160,7 @@ const SettingsForm = ({ layout, components }: SettingsFormProps) => {
       const { layouts, metadatas, settings } = cloneDeep(modifiedData);
 
       const mutation =
-        modelType === 'collection-types'
+        modelType === COLLECTION_TYPES
           ? updateContentTypeConfiguration
           : updateComponentConfiguration;
 

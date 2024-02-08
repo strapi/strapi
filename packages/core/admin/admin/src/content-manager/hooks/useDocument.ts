@@ -16,6 +16,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
+import { SINGLE_TYPES } from '../constants/collections';
 import { useGetDocumentQuery } from '../services/documents';
 import { useGetInitialDataQuery } from '../services/init';
 import { buildValidParams } from '../utils/api';
@@ -94,9 +95,11 @@ const useDocument: UseDocument = (args, opts) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { data, isLoading: isLoadingDocument, error } = useGetDocumentQuery(args, opts);
+
   const {
     components,
     contentType,
+    error: errorSchema,
     isLoading: isLoadingSchema,
   } = useGetInitialDataQuery(undefined, {
     selectFromResult: (res) => {
@@ -115,6 +118,7 @@ const useDocument: UseDocument = (args, opts) => {
 
       return {
         isLoading: res.isLoading,
+        error: res.error,
         components: components,
         contentType,
       };
@@ -128,7 +132,16 @@ const useDocument: UseDocument = (args, opts) => {
         message: formatAPIError(error),
       });
     }
-  }, [toggleNotification, error, formatAPIError]);
+  }, [toggleNotification, error, formatAPIError, args.collectionType]);
+
+  React.useEffect(() => {
+    if (errorSchema) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(errorSchema),
+      });
+    }
+  }, [toggleNotification, errorSchema, formatAPIError]);
 
   const validationSchema = React.useMemo(() => {
     if (!contentType) {
@@ -206,7 +219,7 @@ const useDoc = () => {
     ...useDocument(
       { id: origin || id, model: slug, collectionType, params },
       {
-        skip: id === 'create' || (!origin && !id),
+        skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
       }
     ),
   };

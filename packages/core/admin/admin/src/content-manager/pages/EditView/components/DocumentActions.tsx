@@ -23,6 +23,7 @@ import styled, { DefaultTheme } from 'styled-components';
 
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { useForm } from '../../../components/Form';
+import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 
@@ -32,7 +33,7 @@ import { useDocumentActions } from '../../../hooks/useDocumentActions';
 
 interface DocumentActionDescription {
   label: string;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onClick?: (event: React.SyntheticEvent) => void;
   icon?: React.ReactNode;
   /**
    * @default false
@@ -54,8 +55,8 @@ interface DialogOptions {
   type: 'dialog';
   title: string;
   content?: React.ReactNode;
-  onConfirm?: () => void;
-  onCancel?: () => void;
+  onConfirm?: () => void | Promise<void>;
+  onCancel?: () => void | Promise<void>;
 }
 
 interface NotificationOptions {
@@ -127,31 +128,29 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const toggleNotification = useNotification();
 
-  const handleClick =
-    (action: Action): React.MouseEventHandler<HTMLButtonElement> =>
-    (e) => {
-      if (action.onClick) {
-        action.onClick(e);
-      }
+  const handleClick = (action: Action) => (e: React.MouseEvent) => {
+    if (action.onClick) {
+      action.onClick(e);
+    }
 
-      if (action.dialog) {
-        switch (action.dialog.type) {
-          case 'notifcation':
-            toggleNotification({
-              title: action.dialog.title,
-              message: action.dialog.content,
-              type: action.dialog.status,
-              timeout: action.dialog.timeout,
-              onClose: action.dialog.onClose,
-            });
-            break;
-          case 'dialog':
-          case 'modal':
-            e.preventDefault();
-            setDialogId(action.id);
-        }
+    if (action.dialog) {
+      switch (action.dialog.type) {
+        case 'notifcation':
+          toggleNotification({
+            title: action.dialog.title,
+            message: action.dialog.content,
+            type: action.dialog.status,
+            timeout: action.dialog.timeout,
+            onClose: action.dialog.onClose,
+          });
+          break;
+        case 'dialog':
+        case 'modal':
+          e.preventDefault();
+          setDialogId(action.id);
       }
-    };
+    }
+  };
 
   const handleClose = () => {
     setDialogId(null);
@@ -202,31 +201,29 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
   const toggleNotification = useNotification();
   const isDisabled = actions.every((action) => action.disabled);
 
-  const handleClick =
-    (action: Action): React.MouseEventHandler<HTMLButtonElement> =>
-    (e) => {
-      if (action.onClick) {
-        action.onClick(e);
-      }
+  const handleClick = (action: Action) => (e: React.SyntheticEvent) => {
+    if (action.onClick) {
+      action.onClick(e);
+    }
 
-      if (action.dialog) {
-        switch (action.dialog.type) {
-          case 'notifcation':
-            toggleNotification({
-              title: action.dialog.title,
-              message: action.dialog.content,
-              type: action.dialog.status,
-              timeout: action.dialog.timeout,
-              onClose: action.dialog.onClose,
-            });
-            break;
-          case 'dialog':
-          case 'modal':
-            e.preventDefault();
-            setDialogId(action.id);
-        }
+    if (action.dialog) {
+      switch (action.dialog.type) {
+        case 'notifcation':
+          toggleNotification({
+            title: action.dialog.title,
+            message: action.dialog.content,
+            type: action.dialog.status,
+            timeout: action.dialog.timeout,
+            onClose: action.dialog.onClose,
+          });
+          break;
+        case 'dialog':
+        case 'modal':
+          e.preventDefault();
+          setDialogId(action.id);
       }
-    };
+    }
+  };
 
   const handleClose = () => {
     setDialogId(null);
@@ -255,7 +252,8 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
         {actions.map((action) => {
           return (
             <React.Fragment key={action.id}>
-              <Menu.Item disabled={action.disabled} onClick={handleClick(action)}>
+              {/* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */}
+              <Menu.Item disabled={action.disabled} onSelect={handleClick(action)}>
                 <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
                   {action.icon}
                   {action.label}
@@ -319,9 +317,17 @@ const DocumentActionConfirmDialog = ({
 }: DocumentActionConfirmDialogProps) => {
   const { formatMessage } = useIntl();
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (onCancel) {
-      onCancel();
+      await onCancel();
+    }
+
+    onClose();
+  };
+
+  const handleConfirm = async () => {
+    if (onConfirm) {
+      await onConfirm();
     }
 
     onClose();
@@ -340,7 +346,7 @@ const DocumentActionConfirmDialog = ({
           </Button>
         }
         endAction={
-          <Button onClick={onConfirm} variant={variant}>
+          <Button onClick={handleConfirm} variant={variant}>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
@@ -427,13 +433,18 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
 
   return {
-    disabled: !canPublish || isSubmitting || activeTab === 'published' || modified,
+    disabled:
+      !canPublish ||
+      isSubmitting ||
+      activeTab === 'published' ||
+      modified ||
+      (!id && collectionType !== SINGLE_TYPES),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      if (id) {
+      if (id || collectionType === SINGLE_TYPES) {
         const res = await publish({
           collectionType,
           model,
@@ -477,17 +488,14 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
     onClick: async () => {
       setSubmitting(true);
       try {
-        if (id) {
+        if (id || collectionType === SINGLE_TYPES) {
           await update(
             {
               collectionType,
               model,
               id,
             },
-            {
-              id,
-              ...document,
-            }
+            document
           );
         } else {
           const res = await create(
@@ -497,7 +505,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
             document
           );
 
-          if ('data' in res) {
+          if ('data' in res && collectionType !== SINGLE_TYPES) {
             /**
              * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
              */

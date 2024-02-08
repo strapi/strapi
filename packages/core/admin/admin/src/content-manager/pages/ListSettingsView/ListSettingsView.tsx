@@ -26,6 +26,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
+import { SINGLE_TYPES } from '../../constants/collections';
 import { useDocLayout } from '../../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
@@ -217,8 +218,8 @@ const ListSettingsView = () => {
     });
   };
 
-  if (collectionType === 'single-types') {
-    return <Navigate to={`/single-types/${slug}`} />;
+  if (collectionType === SINGLE_TYPES) {
+    return <Navigate to={`/${SINGLE_TYPES}/${slug}`} />;
   }
 
   if (isLoadingLayout) {

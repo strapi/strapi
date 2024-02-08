@@ -15,6 +15,7 @@ import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { ContentManagerAppState, SET_INIT_DATA } from '../layout';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
@@ -196,9 +197,9 @@ const generateLinks = (
         search,
         kind: link.kind,
         title: link.info.displayName,
-        to: `/content-manager/${
-          link.kind === 'collectionType' ? 'collection-types' : 'single-types'
-        }/${link.uid}`,
+        to: `/content-manager/${link.kind === 'collectionType' ? COLLECTION_TYPES : SINGLE_TYPES}/${
+          link.uid
+        }`,
         uid: link.uid,
         // Used for the list item key in the helper plugin
         name: link.uid,

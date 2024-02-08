@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { capitalise } from '../../../../utils/strings';
+import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
@@ -186,7 +187,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
   const { delete: deleteAction } = useDocumentActions();
 
   return {
-    disabled: !canDelete || !id,
+    disabled: !canDelete || (!id && collectionType !== SINGLE_TYPES),
     label: formatMessage({
       id: 'app.utils.delete',
       defaultMessage: 'Delete document',
@@ -210,7 +211,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
         </Flex>
       ),
       onConfirm: async () => {
-        if (!id) {
+        if (!id && collectionType !== SINGLE_TYPES) {
           console.warn("You're trying to delete a document that doesn't exist, you can't do this.");
 
           return;
@@ -219,7 +220,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
         const res = await deleteAction({ id, model, collectionType });
 
         if (!('error' in res)) {
-          navigate(`../${collectionType}/${model}`);
+          navigate(`../${collectionType}/${model}`, { replace: true });
         }
       },
     },
