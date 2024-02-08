@@ -47,6 +47,7 @@ const compo = {
   },
 };
 
+// TODO: V5 - Test publish with locale
 describe('CM API - Basic', () => {
   beforeAll(async () => {
     await builder.addComponent(compo).addContentType(productWithDP).build();
@@ -156,15 +157,68 @@ describe('CM API - Basic', () => {
 
   test('Publish a product, expect publishedAt to be defined', async () => {
     const entry = data.productsWithDP[0];
+    const product = {
+      name: 'Product - Updated',
+      description: 'Product description - Updated',
+    };
 
     const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
+      body: product,
     });
+
+    // Get draft and published versions
+    const [draftDocument, publishedDocument] = await Promise.all([
+      rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}`,
+        qs: { status: 'draft' },
+      }),
+      rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}`,
+        qs: { status: 'published' },
+      }),
+    ]);
 
     data.productsWithDP[0] = body.data;
 
+    // Both draft and published versions should have been updated with the new data
+    expect(draftDocument.body.data).toMatchObject(product);
+    expect(publishedDocument.body.data).toMatchObject(product);
     expect(body.data.publishedAt).toBeISODate();
+  });
+
+  test('Publish and create document, expect both draft and published versions to exist', async () => {
+    const product = {
+      name: 'Product 3',
+      description: 'Product description',
+    };
+
+    const { body } = await rq({
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/actions/publish`,
+      method: 'POST',
+      body: product,
+    });
+
+    // Get draft and published versions
+    const [draftDocument, publishedDocument] = await Promise.all([
+      rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        qs: { status: 'draft' },
+      }),
+      rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        qs: { status: 'published' },
+      }),
+    ]);
+
+    expect(draftDocument.body.data).toMatchObject(product);
+    expect(publishedDocument.body.data).toMatchObject(product);
+    expect(publishedDocument.body.data.publishedAt).toBeISODate();
   });
 
   // FIX

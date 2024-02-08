@@ -141,7 +141,7 @@ describe('Test type UID', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: value,
       });
 
@@ -234,7 +234,7 @@ describe('Test type UID', () => {
       expect(conflicting.statusCode).toBe(400);
     });
 
-    // TODO: Fix uniqueness and validations in document service
+    // TODO: Fix uniqueness and validations in document service -
     test.skip('Cannot set value to be null', async () => {
       const createRes = await rq.post(
         '/content-manager/collection-types/api::withrequireduid.withrequireduid',
