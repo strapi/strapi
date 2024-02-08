@@ -437,7 +437,7 @@ describe('release service', () => {
       expect(() => releaseService.delete(1)).rejects.toThrow('Release already published');
     });
 
-    it('remove the scheduling if the release is scheduled', async () => {
+    it('removes the scheduling if the release is scheduled', async () => {
       const strapiMock = {
         ...baseStrapiMock,
         entityService: {
