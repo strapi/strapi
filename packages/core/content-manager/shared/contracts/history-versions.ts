@@ -15,7 +15,7 @@ export interface CreateHistoryVersion {
   schema: Record<string, unknown>;
 }
 
-export interface HistoryVersionDataResponse extends CreateHistoryVersion {
+export type HistoryVersionDataResponse = CreateHistoryVersion & {
   id: Entity.ID;
   createdAt: string;
   createdBy?: {
@@ -25,7 +25,11 @@ export interface HistoryVersionDataResponse extends CreateHistoryVersion {
     username?: string;
     email: string;
   };
-}
+  locale: {
+    name: string;
+    code: string;
+  } | null;
+};
 
 interface Pagination {
   page: number;

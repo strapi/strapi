@@ -4,8 +4,11 @@ import { ContentLayout, HeaderLayout, Main, Typography } from '@strapi/design-sy
 import { Link } from '@strapi/design-system/v2';
 import { ArrowLeft } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { UID } from '@strapi/types';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
+
+import { useContentTypeLayout } from '../../../content-manager/hooks/useLayouts';
 
 /* -------------------------------------------------------------------------------------------------
  * VersionHeader
@@ -17,12 +20,35 @@ interface VersionHeaderProps {
 }
 
 const VersionHeader = ({ headerId, version }: VersionHeaderProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
+  const { slug } = useParams<{
+    slug: UID.ContentType;
+  }>();
+  const { layout } = useContentTypeLayout(slug);
+
+  // The loading state is handled by the parent component
+  if (!layout) return null;
+
+  const mainFieldValue = version.data[layout.contentType.settings.mainField || 'id'] as string;
+  const formattedSubtitle = formatMessage(
+    {
+      id: 'content-manager.history.version.subtitle',
+      defaultMessage: '{hasLocale, select, true {{subtitle}, in {locale}} other {{subtitle}}}',
+    },
+    {
+      hasLocale: Boolean(version.locale),
+      subtitle: `${mainFieldValue} (${layout.contentType.info.singularName})`,
+      locale: version.locale?.name,
+    }
+  );
 
   return (
     <HeaderLayout
       id={headerId}
-      title={`History version ${version.id}`}
+      title={`${formatDate(new Date(version.createdAt))}, ${formatTime(
+        new Date(version.createdAt)
+      )}`}
+      subtitle={<Typography variant="epsilon">{formattedSubtitle}</Typography>}
       navigationAction={
         <Link
           startIcon={<ArrowLeft />}
