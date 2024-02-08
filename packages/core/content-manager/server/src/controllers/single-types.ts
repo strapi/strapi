@@ -169,23 +169,24 @@ export default {
     if (permissionChecker.cannot.publish()) {
       return ctx.forbidden();
     }
+    const publishedDocument = await strapi.db.transaction(async () => {
+      const sanitizedQuery = await permissionChecker.sanitizedQuery.publish(query);
+      const populate = await buildPopulateFromQuery(sanitizedQuery, model);
+      const document = await createOrUpdateDocument(ctx, { populate });
 
-    const sanitizedQuery = await permissionChecker.sanitizedQuery.publish(query);
-    const populate = await buildPopulateFromQuery(sanitizedQuery, model);
-    const document = await createOrUpdateDocument(ctx, { populate });
+      if (!document) {
+        throw new errors.NotFoundError();
+      }
 
-    if (!document) {
-      return ctx.notFound();
-    }
+      if (permissionChecker.cannot.publish(document)) {
+        throw new errors.ForbiddenError();
+      }
 
-    if (permissionChecker.cannot.publish(document)) {
-      return ctx.forbidden();
-    }
+      const { locale } = getDocumentDimensions(document);
+      return entityManager.publish(document, model, { locale });
+    });
 
-    const { locale } = getDocumentDimensions(document);
-    const publishedEntity = await entityManager.publish(document, model, { locale });
-
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedEntity);
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
