@@ -128,19 +128,19 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { schema, components } = useDocument({ model, collectionType: '' }, { skip: true });
   const [{ query }] = useQueryParams();
   const { runHookWaterfall } = useStrapiApp();
-  const toggleNotifcation = useNotification();
+  const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { data, isLoading, error } = useGetContentTypeConfigurationQuery(model);
 
   React.useEffect(() => {
     if (error) {
-      toggleNotifcation({
+      toggleNotification({
         type: 'warning',
         message: formatAPIError(error),
       });
     }
-  }, [error, formatAPIError, toggleNotifcation]);
+  }, [error, formatAPIError, toggleNotification]);
 
   const editLayout = React.useMemo(
     () =>

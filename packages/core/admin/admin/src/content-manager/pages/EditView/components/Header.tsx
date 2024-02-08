@@ -191,7 +191,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
   return {
     disabled: !canDelete || !document,
     label: formatMessage({
-      id: 'app.utils.delete',
+      id: 'content-manager.actions.delete.label',
       defaultMessage: 'Delete document',
     }),
     icon: <StyledTrash />,

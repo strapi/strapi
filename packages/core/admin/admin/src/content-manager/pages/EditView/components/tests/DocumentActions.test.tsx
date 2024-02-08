@@ -68,13 +68,13 @@ describe('DocumentActions', () => {
             id: '1',
             label: 'Action 1',
             onClick: onClick1,
-            dialog: { type: 'notifcation', title: 'Action 1 pressed!' },
+            dialog: { type: 'notification', title: 'Action 1 pressed!' },
           },
           {
             id: '2',
             label: 'Action 2',
             onClick: onClick2,
-            dialog: { type: 'notifcation', title: 'Action 2 pressed!' },
+            dialog: { type: 'notification', title: 'Action 2 pressed!' },
           },
         ]}
       />
@@ -249,7 +249,7 @@ describe('DocumentActionsMenu', () => {
             id: '1',
             label: 'Action 1',
             onClick,
-            dialog: { type: 'notifcation', title: 'hello world' },
+            dialog: { type: 'notification', title: 'hello world' },
           },
         ]}
       />

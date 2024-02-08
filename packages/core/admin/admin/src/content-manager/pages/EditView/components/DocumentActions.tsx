@@ -62,7 +62,7 @@ interface DialogOptions {
 }
 
 interface NotificationOptions {
-  type: 'notifcation';
+  type: 'notification';
   title: string;
   link?: {
     label: string;
@@ -137,7 +137,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
 
     if (action.dialog) {
       switch (action.dialog.type) {
-        case 'notifcation':
+        case 'notification':
           toggleNotification({
             title: action.dialog.title,
             message: action.dialog.content,
@@ -170,7 +170,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
       >
         {action.label}
       </Button>
-      {action.dialog && action.dialog.type === 'dialog' ? (
+      {action.dialog?.type === 'dialog' ? (
         <DocumentActionConfirmDialog
           {...action.dialog}
           variant={action.variant}
@@ -178,7 +178,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
           onClose={handleClose}
         />
       ) : null}
-      {action.dialog && action.dialog.type === 'modal' ? (
+      {action.dialog?.type === 'modal' ? (
         <DocumentActionModal
           {...action.dialog}
           onModalClose={handleClose}
@@ -210,7 +210,7 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
 
     if (action.dialog) {
       switch (action.dialog.type) {
-        case 'notifcation':
+        case 'notification':
           toggleNotification({
             title: action.dialog.title,
             message: action.dialog.content,
@@ -261,7 +261,7 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
                   {action.label}
                 </Flex>
               </Menu.Item>
-              {action.dialog && action.dialog.type === 'dialog' ? (
+              {action.dialog?.type === 'dialog' ? (
                 <DocumentActionConfirmDialog
                   {...action.dialog}
                   variant={action.variant}
@@ -269,7 +269,7 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
                   onClose={handleClose}
                 />
               ) : null}
-              {action.dialog && action.dialog.type === 'modal' ? (
+              {action.dialog?.type === 'modal' ? (
                 <DocumentActionModal
                   {...action.dialog}
                   onModalClose={handleClose}
@@ -295,7 +295,7 @@ const convertActionVariantToColor = (
     case 'success':
       return 'success600';
     default:
-      return 'primary600' as const;
+      return 'primary600';
   }
 };
 
@@ -392,35 +392,28 @@ const DocumentActionModal = ({
   };
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy={id}>
+    <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
           {title}
         </Typography>
       </ModalHeader>
       <ModalBody>{content}</ModalBody>
-      <ModalFooter
+      <Box
         paddingTop={4}
         paddingBottom={4}
         paddingLeft={5}
         paddingRight={5}
+        borderWidth="1px 0 0 0"
+        borderStyle="solid"
+        borderColor="neutral150"
         background="neutral100"
       >
         {footer}
-      </ModalFooter>
+      </Box>
     </ModalLayout>
   );
 };
-
-/**
- * The actual ModalFooter is too strict. It requires a startAction and an endAction. This is not
- * always the case. This is a more flexible version of the ModalFooter. We should remove this
- * when we release the DS@2.
- */
-const ModalFooter = styled(Box)`
-  border-radius: 0 0 ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius};
-  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
