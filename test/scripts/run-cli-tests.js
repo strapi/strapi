@@ -227,6 +227,7 @@ yargs
                     domainDir,
                     '--color',
                     '--verbose',
+                    '--runInBand',
                   ],
                   {
                     stdio: 'inherit',
