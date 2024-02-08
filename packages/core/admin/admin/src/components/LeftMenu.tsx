@@ -51,10 +51,6 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
-const CustomIcon = styled(Icon)`
-  margin-right: ${({ theme }) => theme.spaces[4]};
-`;
-
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const navUserRef = React.useRef<HTMLDivElement>(null!);
   const [userLinksVisible, setUserLinksVisible] = React.useState(false);
@@ -138,7 +134,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })}
           >
             {pluginsSectionLinks.map((link) => {
-              const Icon = link.icon;
+              const LinkIcon = link.icon;
               const { lockIcon = false } = link;
 
               return (
@@ -147,13 +143,18 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     as={RouterNavLink}
                     // @ts-expect-error the props from the passed as prop are not inferred // joined together
                     to={link.to}
-                    icon={<Icon />}
+                    icon={<LinkIcon />}
                     onClick={() => handleClickOnLink(link.to)}
                   >
                     {formatMessage(link.intlLabel)}
                   </NavLink>
                   {lockIcon && (
-                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
+                    <Icon
+                      width={`${15 / 16}rem`}
+                      height={`${15 / 16}rem`}
+                      as={Lock}
+                      marginRight={4}
+                    />
                   )}
                 </Flex>
               );
