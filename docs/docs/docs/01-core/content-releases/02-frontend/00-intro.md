@@ -7,7 +7,7 @@ tags:
 
 ## Summary
 
-Two primary views, List and Details, empower users to effectively oversee content releases. Access to these views is exclusive to the enterprise mode, requiring users to hold the specific permission `plugin::content-releases.read`.
+There are two pages, ReleasesPage and ReleaseDetailsPage. To access these pages a user will need a valid Strapi license with the feature enabled and at lease `plugin::content-releases.read` permissions.
 
 Redux toolkit is used to manage content releases data (data retrieval, release creation and editing, and fetching release actions). `Formik` is used to create/edit a release and all input components are controlled components.
 
