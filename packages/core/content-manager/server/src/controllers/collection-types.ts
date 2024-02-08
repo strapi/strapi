@@ -113,6 +113,7 @@ export default {
     const { model } = ctx.params;
     const { query } = ctx.request;
 
+    const documentMetadata = getService('document-metadata');
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -131,18 +132,32 @@ export default {
 
     const { locale, status } = getDocumentDimensions(query);
 
-    const { results, pagination } = await entityManager.findPage(
+    const { results: documents, pagination } = await entityManager.findPage(
       { ...permissionQuery, populate, locale, status },
       model
     );
 
-    const sanitizedResults = await mapAsync(results, async (result: any) => {
-      const sanitizedResult = await permissionChecker.sanitizeOutput(result);
-      return sanitizedResult;
-    });
+    // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
+    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
+      model,
+      documents
+    );
+
+    const setStatus = (document: any) => {
+      // Available status of document
+      const availableStatus = documentsAvailableStatus.find((d: any) => d.id === document.id);
+      // Compute document version status
+      document.status = documentMetadata.getStatus(document, availableStatus);
+      return document;
+    };
+
+    const results = await mapAsync(
+      documents,
+      pipeAsync(permissionChecker.sanitizeOutput, setStatus)
+    );
 
     ctx.body = {
-      results: sanitizedResults,
+      results,
       pagination,
     };
   },
