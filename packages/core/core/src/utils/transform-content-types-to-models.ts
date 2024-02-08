@@ -2,13 +2,16 @@ import { type Model, utils } from '@strapi/database';
 import { Schema, Attribute } from '@strapi/types';
 import { createId } from '@paralleldrive/cuid2';
 import assert from 'node:assert';
+import _ from 'lodash/fp';
 
 const { identifiers } = utils;
 
-type ContentTypeWithCollectionName = Schema.ContentType & { collectionName: string };
-
-// Note: These helpers belong here rather than @strapi/database because components and dz are specific to Strapi
-// we are creating these wrappers to be able to easily create identifiers in the same format db uses
+/**
+ * Because strapi/database models don't know about things like components or dynamic zones, we use this file to convert them
+ * to a relations format that it recognizes
+ *
+ * Therefore we have to keep an additional set of helpers/extensions to the database naming methods
+ */
 
 export const COMPONENT_JOIN_TABLE_SUFFIX = 'components';
 export const DZ_JOIN_TABLE_SUFFIX = 'components';
@@ -29,11 +32,14 @@ const {
   ENTITY: entity,
 } = identifiers;
 
+export type LoadedContentTypeModel = Schema.ContentType &
+  Required<Pick<Schema.ContentType, 'collectionName' | 'uid' | 'modelName'>>;
+
 // Transforms an attribute (particularly for relation types) into the format that strapi/database accepts
-const transformAttribute = (
+export const transformAttribute = (
   name: string,
   attribute: Attribute.Any,
-  contentType: ContentTypeWithCollectionName
+  contentType: LoadedContentTypeModel
 ) => {
   switch (attribute.type) {
     case 'media': {
@@ -123,7 +129,7 @@ const transformAttribute = (
   }
 };
 
-const transformAttributes = (contentType: ContentTypeWithCollectionName) => {
+export const transformAttributes = (contentType: LoadedContentTypeModel) => {
   return Object.keys(contentType.attributes! || {}).reduce((attrs, attrName) => {
     return {
       ...attrs,
@@ -132,7 +138,9 @@ const transformAttributes = (contentType: ContentTypeWithCollectionName) => {
   }, {});
 };
 
-const hasComponentsOrDz = (contentType: ContentTypeWithCollectionName) => {
+export const hasComponentsOrDz = (
+  contentType: LoadedContentTypeModel
+): contentType is LoadedContentTypeModel & { type: 'dynamiczone' | 'component' } => {
   return Object.values(contentType.attributes).some(
     ({ type }) => type === 'dynamiczone' || type === 'component'
   );
@@ -141,10 +149,10 @@ const hasComponentsOrDz = (contentType: ContentTypeWithCollectionName) => {
 export const createDocumentId = createId;
 
 // Creates the
-const createCompoLinkModel = (contentType: ContentTypeWithCollectionName): Model => {
+const createCompoLinkModel = (contentType: LoadedContentTypeModel): Model => {
   const name = getComponentJoinTableName(contentType.collectionName);
 
-  const entityId = identifiers.getJoinColumnEntityIdName(); // entity_id
+  const entityId = identifiers.getJoinColumnEntityIdName();
   const componentId = identifiers.getJoinColumnAttributeIdName(COMPONENT_INVERSE_COLUMN_NAME);
   const fkIndex = identifiers.getFkIndexName([contentType.collectionName, entity]);
 
@@ -193,12 +201,12 @@ const createCompoLinkModel = (contentType: ContentTypeWithCollectionName): Model
         columns: [COMPONENT_TYPE_COLUMN],
       },
       {
-        name: fkIndex, // `${contentType.collectionName}_entity_fk`,
+        name: fkIndex,
         columns: [entityId],
       },
       {
         // NOTE: since we don't include attribute names, we need to be careful not to create another unique index
-        name: identifiers.getUniqueIndexName([contentType.collectionName]), //  `${contentType.collectionName}_unique`,
+        name: identifiers.getUniqueIndexName([contentType.collectionName]),
         columns: [entityId, componentId, field, COMPONENT_TYPE_COLUMN],
         type: 'unique',
       },
@@ -215,12 +223,14 @@ const createCompoLinkModel = (contentType: ContentTypeWithCollectionName): Model
   };
 };
 
-export const transformContentTypesToModels = (
-  contentTypes: ContentTypeWithCollectionName[]
-): Model[] => {
+export const transformContentTypesToModels = (contentTypes: LoadedContentTypeModel[]): Model[] => {
   const models: Model[] = [];
 
   contentTypes.forEach((contentType) => {
+    assert(contentType.collectionName, 'Content type "collectionName" is required');
+    assert(contentType.modelName, 'Content type "modelName" is required');
+    assert(contentType.uid, 'Content type "uid" is required');
+
     // Add document id to content types
     // as it is not documented
     const documentIdAttribute: Record<string, Attribute.Any> =
@@ -228,13 +238,14 @@ export const transformContentTypesToModels = (
         ? { documentId: { type: 'string', default: createDocumentId } }
         : {};
 
+    // TODO: this needs to be combined with getReservedNames, we should not be maintaining two lists
     // Prevent user from creating a documentId attribute
-    const reservedAttributeNames = ['documentId', 'document_id', id];
-    reservedAttributeNames.forEach((reservedAttributeName) => {
-      if (reservedAttributeName in contentType.attributes) {
+    const reservedAttributeNames = ['document_id', id];
+    Object.keys(contentType.attributes).forEach((attributeName) => {
+      const snakeCasedAttributeName = _.snakeCase(attributeName);
+      if (reservedAttributeNames.includes(snakeCasedAttributeName)) {
         throw new Error(
-          `The attribute "${reservedAttributeName}" is reserved and cannot be used in a model` +
-            `Please rename "${contentType.modelName}" attribute "${reservedAttributeName}" to something else.`
+          `The attribute "${attributeName}" is reserved and cannot be used in a model. Please rename "${contentType.modelName}" attribute "${attributeName}" to something else.`
         );
       }
     });
@@ -243,8 +254,6 @@ export const transformContentTypesToModels = (
       const compoLinkModel = createCompoLinkModel(contentType);
       models.push(compoLinkModel);
     }
-
-    assert(contentType.collectionName, 'Collection name is required');
 
     const model: Model = {
       uid: contentType.uid,
