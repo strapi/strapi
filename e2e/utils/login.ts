@@ -1,12 +1,10 @@
+import type { Page } from '@playwright/test';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
 
 /**
  * Log in to an e2e test app
- * @param {EventEmitter} page - playwright page
- * @param {Boolean} rememberMe - whether to click the 'remember me' checkbox in
- * the form
  */
-export const login = async ({ page, rememberMe = false }) => {
+export const login = async ({ page, rememberMe = false }: { page: Page; rememberMe?: boolean }) => {
   await page.getByLabel('Email').fill(ADMIN_EMAIL_ADDRESS);
   await page
     .getByLabel('Password*', {
