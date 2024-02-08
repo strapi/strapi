@@ -67,6 +67,33 @@ export default (allowedFields: string[] | null = null): Visitor =>
       return;
     }
 
+    // TODO: Please, make ID a regular attribute
+    // Handle nested IDs, allow them only if some part of the parent is allowed too. This is
+    // particularly important for content-manager's sanitizeOutput calls, where we want to keep
+    // the IDs but the RBAC permissions are not granular enough to include them
+    //
+    // In the best of worlds, this shouldn't be the responsibility of this utility, but as long as ID
+    // isn't considered as an attribute, we're making an exception to avoid handling this everywhere.
+    //
+    // /!\ This can cause issues when IDs shouldn't be present (e.g. sanitizing inputs).
+    //     For the moment, this should be handled separately. For more information,
+    //     see packages/core/admin/server/src/services/permission/permissions-manager/sanitize.ts#createSanitizeInput()
+    if (containedPaths.length > 1 && key === 'id') {
+      // This is computed, but it should always evaluate to false
+      // since the same check is done in isPathAllowed definition
+      const isParentPathAllowed = allowedFields.some((field) => containedPaths.includes(field));
+
+      // Check if any sibling (using containedPath) is allowed (present in allowedFields)
+      const hasAllowedSiblings = allowedFields.some((field) =>
+        containedPaths.some((part) => field.startsWith(`${part}.`))
+      );
+
+      // If one of the condition is met, then we can consider keeping the ID field
+      if (isParentPathAllowed || hasAllowedSiblings) {
+        return;
+      }
+    }
+
     // Remove otherwise
     remove(key);
   };

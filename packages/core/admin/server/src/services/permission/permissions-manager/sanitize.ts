@@ -150,7 +150,19 @@ export default ({ action, ability, model }: any) => {
       // @ts-expect-error lodash types
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
-      omitCreatorRoles
+      omitCreatorRoles,
+      // Prevent ID updates on the main entity
+      traverseEntity(
+        ({ key, path }, { remove }) => {
+          // it shouldn't be possible to update the entity's ID. We're using
+          // path.raw instead of the key to ensure we're looking at the root
+          // ID, since both components and relations' IDs can be updated
+          if (path.raw === 'id') {
+            remove(key);
+          }
+        },
+        { schema }
+      )
     );
   };
 
