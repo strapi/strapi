@@ -25,6 +25,7 @@ import styled from 'styled-components';
 
 import { useOnce } from '../../../hooks/useOnce';
 import { Form } from '../../components/Form';
+import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
@@ -94,7 +95,7 @@ const EditViewPage = () => {
     model,
   } = useDoc();
 
-  const isSingleType = collectionType === 'single-types';
+  const isSingleType = collectionType === SINGLE_TYPES;
 
   /**
    * single-types don't current have an id, but because they're a singleton
@@ -125,14 +126,14 @@ const EditViewPage = () => {
    * - set default values on fields
    */
   const initialValues = React.useMemo(() => {
-    if ((!document && !isCreatingDocument) || !schema) {
+    if ((!document && !isCreatingDocument && !isSingleType) || !schema) {
       return undefined;
     }
 
     const form = document ?? createDefaultForm(schema, components);
 
     return transformDocument(schema, components)(form);
-  }, [document, isCreatingDocument, schema, components]);
+  }, [document, isCreatingDocument, isSingleType, schema, components]);
 
   if (isLoading) {
     return (
@@ -160,45 +161,50 @@ const EditViewPage = () => {
     }
   };
 
+  /**
+   * We look to see what the mainField is from the configuration,
+   * if it's an id we don't use it because it's a uuid format and
+   * not very user friendly. Instead in that case, we simply write "Untitled".
+   */
   const documentTitle =
     mainField !== 'id' && document?.[mainField] ? document[mainField] : 'Untitled';
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Header
-        isCreating={isCreatingDocument}
-        status={getDocumentStatus(document, meta)}
-        title={documentTitle}
-      />
-      <TabGroup
-        ref={tabApi}
-        variant="simple"
-        label={formatMessage({
-          id: getTranslation('containers.edit.tabs.label'),
-          defaultMessage: 'Document status',
-        })}
-        initialSelectedTabIndex={status === 'published' ? 1 : 0}
-        onTabChange={handleTabChange}
+      <Form
+        disabled={status === 'published'}
+        initialValues={initialValues}
+        method={isCreatingDocument ? 'POST' : 'PUT'}
       >
-        <Tabs>
-          <StatusTab>
-            {formatMessage({
-              id: getTranslation('containers.edit.tabs.draft'),
-              defaultMessage: 'draft',
-            })}
-          </StatusTab>
-          <StatusTab disabled={meta?.availableStatus.length === 0}>
-            {formatMessage({
-              id: getTranslation('containers.edit.tabs.published'),
-              defaultMessage: 'published',
-            })}
-          </StatusTab>
-        </Tabs>
-        <Form
-          disabled={status === 'published'}
-          initialValues={initialValues}
-          method={isCreatingDocument ? 'POST' : 'PUT'}
+        <Header
+          isCreating={isCreatingDocument}
+          status={getDocumentStatus(document, meta)}
+          title={documentTitle}
+        />
+        <TabGroup
+          ref={tabApi}
+          variant="simple"
+          label={formatMessage({
+            id: getTranslation('containers.edit.tabs.label'),
+            defaultMessage: 'Document status',
+          })}
+          initialSelectedTabIndex={status === 'published' ? 1 : 0}
+          onTabChange={handleTabChange}
         >
+          <Tabs>
+            <StatusTab>
+              {formatMessage({
+                id: getTranslation('containers.edit.tabs.draft'),
+                defaultMessage: 'draft',
+              })}
+            </StatusTab>
+            <StatusTab disabled={meta?.availableStatus.length === 0}>
+              {formatMessage({
+                id: getTranslation('containers.edit.tabs.published'),
+                defaultMessage: 'published',
+              })}
+            </StatusTab>
+          </Tabs>
           <Grid paddingTop={8} gap={4}>
             <GridItem col={9} s={12}>
               <TabPanels>
@@ -214,8 +220,8 @@ const EditViewPage = () => {
               <Panels />
             </GridItem>
           </Grid>
-        </Form>
-      </TabGroup>
+        </TabGroup>
+      </Form>
     </Main>
   );
 };

@@ -37,6 +37,7 @@ import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
 import {
@@ -214,7 +215,7 @@ const ListViewPage = () => {
       try {
         const res = await deleteDocument({
           model,
-          collectionType: 'collection-types',
+          collectionType: COLLECTION_TYPES,
           id: idToDelete,
         });
         if ('error' in res) {

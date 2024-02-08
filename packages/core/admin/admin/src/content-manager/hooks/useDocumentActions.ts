@@ -61,7 +61,7 @@ type UseDocumentActions = () => {
     args: {
       collectionType: string;
       model: string;
-      id: string;
+      id?: string;
     },
     trackerProperty?: Extract<
       TrackingEvent,
@@ -81,16 +81,16 @@ type UseDocumentActions = () => {
   }: {
     collectionType: string;
     model: string;
-    id: string;
+    id?: string;
   }) => Promise<OperationResponse<Contracts.CollectionTypes.Publish.Response>>;
   update: (
     args: {
       collectionType: string;
       model: string;
-      id: string;
+      id?: string;
       params?: object;
     },
-    document: Document,
+    document: Partial<Document>,
     trackerProperty?: Extract<
       TrackingEvent,
       { name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry' }

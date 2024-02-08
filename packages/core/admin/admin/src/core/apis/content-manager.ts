@@ -10,6 +10,7 @@ import {
   DEFAULT_ACTIONS,
   type DocumentActionDescription,
 } from '../../content-manager/pages/EditView/components/DocumentActions';
+import { DEFAULT_HEADER_ACTIONS } from '../../content-manager/pages/EditView/components/Header';
 import {
   ActionsPanel,
   type PanelDescription,
@@ -70,7 +71,7 @@ interface DocumentActionProps extends EditViewContext {}
 
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
-  type?: 'publish' | 'update';
+  type?: 'configure-the-view' | 'delete' | 'edit-the-model' | 'publish' | 'unpublish' | 'update';
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -84,7 +85,7 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
-  documentActions: DocumentActionComponent[] = DEFAULT_ACTIONS;
+  documentActions: DocumentActionComponent[] = [...DEFAULT_HEADER_ACTIONS, ...DEFAULT_ACTIONS];
   editViewSidePanels: PanelComponent[] = [ActionsPanel, ReviewWorkflowsPanel];
 
   constructor() {}

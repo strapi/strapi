@@ -3,6 +3,8 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import * as qs from 'qs';
 
+import { COLLECTION_TYPES, SINGLE_TYPES } from '../src/content-manager/constants/collections';
+
 import { MockData, mockData } from './mockData';
 
 export const server = setupServer(
@@ -477,7 +479,7 @@ export const server = setupServer(
 
       if (
         id === '12345' &&
-        collectionType === 'collection-types' &&
+        collectionType === COLLECTION_TYPES &&
         uid === mockData.contentManager.contentType
       ) {
         return res(
@@ -504,7 +506,7 @@ export const server = setupServer(
 
       if (
         id === '12345' &&
-        collectionType === 'collection-types' &&
+        collectionType === COLLECTION_TYPES &&
         uid === mockData.contentManager.contentType
       ) {
         return res(
@@ -532,8 +534,8 @@ export const server = setupServer(
       const data = await req.json();
 
       if (
-        req.params.collectionType !== 'single-types' &&
-        req.params.collectionType !== 'collection-types'
+        req.params.collectionType !== SINGLE_TYPES &&
+        req.params.collectionType !== COLLECTION_TYPES
       ) {
         return;
       }

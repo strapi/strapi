@@ -129,7 +129,7 @@ export declare namespace Clone {
  */
 export declare namespace Update {
   export interface Request {
-    body: Document;
+    body: Partial<Document>;
     query: {
       locale?: string | null;
     };

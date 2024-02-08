@@ -3,6 +3,8 @@ import { lazy } from 'react';
 
 import { Navigate, RouteObject, useLoaderData, useParams } from 'react-router-dom';
 
+import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
+
 const Redirect = () => {
   const pathname = useLoaderData() as string;
 
@@ -28,11 +30,11 @@ const CollectionTypePages = () => {
   /**
    * We only support two types of collections.
    */
-  if (collectionType !== 'collection-types' && collectionType !== 'single-types') {
+  if (collectionType !== COLLECTION_TYPES && collectionType !== SINGLE_TYPES) {
     return <Navigate to="/404" />;
   }
 
-  return collectionType === 'collection-types' ? (
+  return collectionType === COLLECTION_TYPES ? (
     <ProtectedListViewPage />
   ) : (
     <ProtectedEditViewPage />
