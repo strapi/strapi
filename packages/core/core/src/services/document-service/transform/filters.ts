@@ -4,6 +4,21 @@ import { transformFields } from './fields';
 import { type Data, type Options } from './types';
 import { switchDocumentIdForId } from './utils';
 
+const relationalIdReplacement = (filter: Data, opts: Options) => {
+  // If there is an id field in the filter object, replace it with documentId
+  // and provide the filter parameters for the publishedAt and locale fields
+  if ('id' in filter) {
+    filter.documentId = filter.id;
+    delete filter.id;
+
+    filter.publishedAt = opts.isDraft ? null : { $ne: null };
+
+    if (opts.locale) {
+      filter.locale = opts.locale;
+    }
+  }
+};
+
 export const transformFilters = async (data: Data, opts: Options) => {
   // Before doing the filters traversal change any top level 'id' properties to 'documentId'
   switchDocumentIdForId(data);
@@ -24,19 +39,11 @@ export const transformFilters = async (data: Data, opts: Options) => {
           If the value is an array of objects
           we apply the same logic to each object in the array
         */
-        if (typeof value === 'object' && 'id' in value) {
-          const valueWithId = value as Data;
-          valueWithId.documentId = valueWithId.id;
-          delete valueWithId.id;
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => {
-            if (typeof item === 'object' && 'id' in item) {
-              const itemWithId = item as Data;
-              itemWithId.documentId = itemWithId.id;
-              delete itemWithId.id;
-            }
-          });
-        }
+        (Array.isArray(value) ? value : [value]).forEach((item) => {
+          if (typeof item === 'object') {
+            relationalIdReplacement(item as Data, opts);
+          }
+        });
 
         set(key, value);
       } else if (key === 'filters') {

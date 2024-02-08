@@ -55,7 +55,7 @@ async function transformParamsDocumentId(
 
   let sort = input.sort;
   if (input.sort) {
-    sort = transformSort(input.sort);
+    sort = await transformSort(input.sort, { ...opts, uid });
   }
 
   return {
