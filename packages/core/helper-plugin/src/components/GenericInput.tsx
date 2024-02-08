@@ -198,8 +198,6 @@ const GenericInput = ({
     );
   }
 
-  // return <Flex height="1000px" background="danger500" />;
-
   const label = intlLabel.id
     ? formatMessage(
         { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },

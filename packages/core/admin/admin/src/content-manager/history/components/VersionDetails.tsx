@@ -281,7 +281,6 @@ const VersionDetails = ({ version }: VersionDetailsProps) => {
   return (
     <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
       <VersionHeader version={version} headerId={headerId} />
-      {/* <Flex height="3000px" background="danger500" /> */}
       <VersionContent version={version} />
     </Main>
   );

@@ -226,14 +226,4 @@ const LabelAction = styled(Box)`
   }
 `;
 
-// const ProtectedFieldComponent = () => {
-//   const isNotAllowed = true;
-
-//   if (isNotAllowed) {
-//     return <NotAllowedInput />
-//   }
-
-//   return <FieldComponent />
-// }
-
 export { FieldComponent };
