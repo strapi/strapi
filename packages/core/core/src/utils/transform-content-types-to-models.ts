@@ -141,7 +141,7 @@ export const transformAttributes = (contentType: LoadedContentTypeModel) => {
 export const hasComponentsOrDz = (
   contentType: LoadedContentTypeModel
 ): contentType is LoadedContentTypeModel & { type: 'dynamiczone' | 'component' } => {
-  return Object.values(contentType.attributes).some(
+  return Object.values(contentType.attributes || {}).some(
     ({ type }) => type === 'dynamiczone' || type === 'component'
   );
 };
@@ -241,7 +241,7 @@ export const transformContentTypesToModels = (contentTypes: LoadedContentTypeMod
     // TODO: this needs to be combined with getReservedNames, we should not be maintaining two lists
     // Prevent user from creating a documentId attribute
     const reservedAttributeNames = ['document_id', id];
-    Object.keys(contentType.attributes).forEach((attributeName) => {
+    Object.keys(contentType.attributes || {}).forEach((attributeName) => {
       const snakeCasedAttributeName = _.snakeCase(attributeName);
       if (reservedAttributeNames.includes(snakeCasedAttributeName)) {
         throw new Error(

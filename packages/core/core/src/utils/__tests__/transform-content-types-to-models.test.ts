@@ -23,7 +23,10 @@ expect.extend({
       JSON.stringify(received) === JSON.stringify(replaceFunctionInDocumentIdDefault(expected));
 
     return {
-      message: () => `expected ${received} ${pass ? 'not ' : ''}to be equal to ${expected}`,
+      message: () =>
+        `expected \r\n ${JSON.stringify(received)} ${
+          pass ? 'not ' : ''
+        } \r\n to be equal to \r\n ${JSON.stringify(expected)}`,
       pass,
     };
   },
@@ -46,9 +49,18 @@ const contentTypes: LoadedContentTypeModel[] = [
         type: 'component',
         required: true,
       },
-      coverImage: {
+      compRepeatable: {
+        component: 'default.comp',
+        type: 'component',
+        repeatable: true,
+      },
+      singleImage: {
         type: 'media',
         multiple: false,
+      },
+      repeatableImage: {
+        type: 'media',
+        multiple: true,
       },
       dz: {
         type: 'dynamiczone',
@@ -85,6 +97,20 @@ const contentTypes: LoadedContentTypeModel[] = [
     modelName: 'category',
     globalId: 'category',
   },
+  {
+    attributes: undefined,
+    collectionName: 'empty',
+    modelType: 'component',
+    kind: 'collectionType',
+    uid: 'api::empty.empty',
+    info: {
+      displayName: 'Empty',
+      singularName: 'empty',
+      pluralName: 'empties',
+    },
+    modelName: 'empty',
+    globalId: 'empty',
+  },
 ];
 
 const expectedModels = [
@@ -93,48 +119,17 @@ const expectedModels = [
     uid: 'countries_components',
     tableName: 'countries_components',
     attributes: {
-      id: {
-        type: 'increments',
-      },
-      entity_id: {
-        type: 'integer',
-        column: {
-          unsigned: true,
-        },
-      },
-      component_id: {
-        type: 'integer',
-        column: {
-          unsigned: true,
-        },
-      },
-      component_type: {
-        type: 'string',
-      },
-      field: {
-        type: 'string',
-      },
-      order: {
-        type: 'float',
-        column: {
-          unsigned: true,
-          defaultTo: null,
-        },
-      },
+      id: { type: 'increments' },
+      entity_id: { type: 'integer', column: { unsigned: true } },
+      component_id: { type: 'integer', column: { unsigned: true } },
+      component_type: { type: 'string' },
+      field: { type: 'string' },
+      order: { type: 'float', column: { unsigned: true, defaultTo: null } },
     },
     indexes: [
-      {
-        name: 'countries_field_index',
-        columns: ['field'],
-      },
-      {
-        name: 'countries_component_type_index',
-        columns: ['component_type'],
-      },
-      {
-        name: 'countries_entity_fk',
-        columns: ['entity_id'],
-      },
+      { name: 'countries_field_index', columns: ['field'] },
+      { name: 'countries_component_type_index', columns: ['component_type'] },
+      { name: 'countries_entity_fk', columns: ['entity_id'] },
       {
         name: 'countries_unique',
         columns: ['entity_id', 'component_id', 'field', 'component_type'],
@@ -156,48 +151,47 @@ const expectedModels = [
     singularName: 'country',
     tableName: 'countries',
     attributes: {
-      id: {
-        type: 'increments',
-      },
-      documentId: {
-        type: 'string',
-      },
-      name: {
-        default: 'my name',
-        type: 'string',
-      },
-      categories: {
-        type: 'relation',
-        relation: 'oneToMany',
-        target: 'api::category.category',
-      },
+      id: { type: 'increments' },
+      documentId: { type: 'string' },
+      name: { default: 'my name', type: 'string' },
+      categories: { type: 'relation', relation: 'oneToMany', target: 'api::category.category' },
       comp: {
         type: 'relation',
         relation: 'oneToOne',
         target: 'default.comp',
         joinTable: {
           name: 'countries_components',
-          joinColumn: {
-            name: 'entity_id',
-            referencedColumn: 'id',
-          },
-          inverseJoinColumn: {
-            name: 'component_id',
-            referencedColumn: 'id',
-          },
-          on: {
-            field: 'comp',
-          },
+          joinColumn: { name: 'entity_id', referencedColumn: 'id' },
+          inverseJoinColumn: { name: 'component_id', referencedColumn: 'id' },
+          on: { field: 'comp' },
           orderColumnName: 'order',
-          orderBy: {
-            order: 'asc',
-          },
+          orderBy: { order: 'asc' },
           pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
         },
       },
-      coverImage: {
+      compRepeatable: {
+        type: 'relation',
+        relation: 'oneToMany',
+        target: 'default.comp',
+        joinTable: {
+          name: 'countries_components',
+          joinColumn: { name: 'entity_id', referencedColumn: 'id' },
+          inverseJoinColumn: { name: 'component_id', referencedColumn: 'id' },
+          on: { field: 'compRepeatable' },
+          orderColumnName: 'order',
+          orderBy: { order: 'asc' },
+          pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
+        },
+      },
+      singleImage: {
         type: 'relation',
         relation: 'morphOne',
+        target: 'plugin::upload.file',
+        morphBy: 'related',
+      },
+      repeatableImage: {
+        type: 'relation',
+        relation: 'morphMany',
         target: 'plugin::upload.file',
         morphBy: 'related',
       },
@@ -206,26 +200,14 @@ const expectedModels = [
         relation: 'morphToMany',
         joinTable: {
           name: 'countries_components',
-          joinColumn: {
-            name: 'entity_id',
-            referencedColumn: 'id',
-          },
+          joinColumn: { name: 'entity_id', referencedColumn: 'id' },
           morphColumn: {
-            idColumn: {
-              name: 'component_id',
-              referencedColumn: 'id',
-            },
-            typeColumn: {
-              name: 'component_type',
-            },
+            idColumn: { name: 'component_id', referencedColumn: 'id' },
+            typeColumn: { name: 'component_type' },
             typeField: '__component',
           },
-          on: {
-            field: 'dz',
-          },
-          orderBy: {
-            order: 'asc',
-          },
+          on: { field: 'dz' },
+          orderBy: { order: 'asc' },
           pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
         },
       },
@@ -236,16 +218,16 @@ const expectedModels = [
     singularName: 'category',
     tableName: 'categories',
     attributes: {
-      id: {
-        type: 'increments',
-      },
-      documentId: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
+      id: { type: 'increments' },
+      documentId: { type: 'string' },
+      name: { type: 'string' },
     },
+  },
+  {
+    uid: 'api::empty.empty',
+    singularName: 'empty',
+    tableName: 'empty',
+    attributes: { id: { type: 'increments' } },
   },
 ];
 
@@ -283,10 +265,6 @@ function patchContentTypes(
 describe('transformContentTypesToModels', () => {
   test('converts valid content types to models', () => {
     const models = transformContentTypesToModels(contentTypes);
-
-    models.forEach((model, index) => {
-      expect(model).toMatchObject(expectedModels[index]);
-    });
 
     expect(models).toMatchModels(expectedModels);
   });
