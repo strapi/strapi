@@ -92,13 +92,23 @@ describe('transformFilters', () => {
 
   it('should handle arrays in relational filters', async () => {
     const input = {
-      categories: [{ id: 'arrayValue1' }, { id: 'arrayValue2' }, { id: { $eq: 'arrayValue3' } }],
+      categories: [
+        { id: 'category1' },
+        { id: 'category2' },
+        { id: { $eq: 'category3' } },
+        { id: { $and: [{ $eq: 'category3' }, { $eq: 'category5' }] } },
+      ],
     };
     const expected = {
       categories: [
-        { documentId: 'arrayValue1', locale: 'en', publishedAt: { $ne: null } },
-        { documentId: 'arrayValue2', locale: 'en', publishedAt: { $ne: null } },
-        { documentId: { $eq: 'arrayValue3' }, locale: 'en', publishedAt: { $ne: null } },
+        { documentId: 'category1', locale: 'en', publishedAt: { $ne: null } },
+        { documentId: 'category2', locale: 'en', publishedAt: { $ne: null } },
+        { documentId: { $eq: 'category3' }, locale: 'en', publishedAt: { $ne: null } },
+        {
+          documentId: { $and: [{ $eq: 'category3' }, { $eq: 'category5' }] },
+          locale: 'en',
+          publishedAt: { $ne: null },
+        },
       ],
     };
 
