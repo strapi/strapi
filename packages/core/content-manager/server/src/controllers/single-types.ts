@@ -33,7 +33,6 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
   const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
 
   const { locale } = getDocumentDimensions(body);
-  const document = await findDocument(sanitizedQuery, model, { locale, status: 'draft' });
 
   // Load document version to update
   const [documentVersion, otherDocumentVersion] = await Promise.all([
@@ -44,11 +43,11 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
 
   const documentExists = !!otherDocumentVersion;
 
-  const pickPermittedFields = document
-    ? permissionChecker.sanitizeUpdateInput(document)
+  const pickPermittedFields = documentVersion
+    ? permissionChecker.sanitizeUpdateInput(documentVersion)
     : permissionChecker.sanitizeCreateInput;
 
-  const setCreator = document
+  const setCreator = documentVersion
     ? setCreatorFields({ user, isEdition: true })
     : setCreatorFields({ user });
 
@@ -164,6 +163,7 @@ export default {
     const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -185,7 +185,8 @@ export default {
     const { locale } = getDocumentDimensions(document);
     const publishedEntity = await entityManager.publish(document, model, { locale });
 
-    ctx.body = await permissionChecker.sanitizeOutput(publishedEntity);
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedEntity);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
   async unpublish(ctx: any) {
@@ -194,6 +195,7 @@ export default {
     const { body, query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -215,7 +217,8 @@ export default {
 
     const unpublishedEntity = await entityManager.unpublish(document, model, { locale });
 
-    ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedEntity);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
   async countDraftRelations(ctx: any) {

@@ -8,7 +8,7 @@ const { createAuthRequest } = require('api-tests/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-const uid = 'api::single-type-model.single-type-model';
+const MODEL_UID = 'api::single-type-model.single-type-model';
 
 const ct = {
   kind: 'singleType',
@@ -22,8 +22,45 @@ const ct = {
   },
 };
 
+const createOrUpdate = async (data) => {
+  return rq({
+    url: `/content-manager/single-types/${MODEL_UID}`,
+    method: 'PUT',
+    body: data,
+  });
+};
+
+const find = async () => {
+  return rq({
+    url: `/content-manager/single-types/${MODEL_UID}`,
+    method: 'GET',
+  });
+};
+
+const deleteSingleType = async () => {
+  return rq({
+    url: `/content-manager/single-types/${MODEL_UID}`,
+    method: 'DELETE',
+  });
+};
+
+const publish = async (data) => {
+  return rq({
+    url: `/content-manager/single-types/${MODEL_UID}/actions/publish`,
+    method: 'POST',
+    body: data,
+  });
+};
+
+const unpublish = async () => {
+  return rq({
+    url: `/content-manager/single-types/${MODEL_UID}/actions/unpublish`,
+    method: 'POST',
+  });
+};
+
 // TODO: Migrate single types to use document service
-describe.skip('Content Manager single types', () => {
+describe('Content Manager single types', () => {
   beforeAll(async () => {
     await builder.addContentType(ct).build();
 
@@ -31,46 +68,125 @@ describe.skip('Content Manager single types', () => {
     rq = await createAuthRequest({ strapi });
   });
 
+  beforeEach(async () => {
+    await strapi.db.query(MODEL_UID).deleteMany({});
+  });
+
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
   });
 
-  test('find single type content returns 404 when not created', async () => {
+  test('Find single type content returns 404 when not created', async () => {
     const res = await rq({
-      url: `/content-manager/single-types/${uid}`,
+      url: `/content-manager/single-types/${MODEL_UID}`,
       method: 'GET',
     });
 
     expect(res.statusCode).toBe(404);
   });
 
-  test('Create content', async () => {
-    const res = await rq({
-      url: `/content-manager/single-types/${uid}`,
-      method: 'PUT',
-      body: {
-        title: 'Title',
-      },
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject({
+  test('Create', async () => {
+    const resCreate = await createOrUpdate({ title: 'Title' });
+    expect(resCreate.statusCode).toBe(200);
+    expect(resCreate.body.data).toMatchObject({
       id: expect.anything(),
       title: 'Title',
     });
   });
 
-  test('find single type content returns an object ', async () => {
-    const res = await rq({
-      url: `/content-manager/single-types/${uid}`,
-      method: 'GET',
-    });
+  test('Find single type', async () => {
+    const resCreate = await createOrUpdate({ title: 'Title' });
+    expect(resCreate.statusCode).toBe(200);
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject({
+    const resGet = await find();
+    expect(resGet.statusCode).toBe(200);
+    expect(resGet.body.data).toMatchObject({
       id: expect.anything(),
       title: 'Title',
     });
   });
+
+  test('Update', async () => {
+    await createOrUpdate({ title: 'Title' });
+    const res = await createOrUpdate({ title: 'Title-updated' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      id: expect.anything(),
+      title: 'Title-updated',
+    });
+  });
+
+  test('Delete', async () => {
+    await createOrUpdate({ title: 'Title' });
+
+    const delRes = await deleteSingleType();
+    expect(delRes.statusCode).toBe(200);
+
+    // Try to find the single type again to check if it was deleted
+    const res = await find();
+    expect(res.statusCode).toBe(404);
+  });
+
+  test('Publish and create', async () => {
+    const res = await publish({ title: 'Title-created-and-published' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      id: expect.anything(),
+      title: 'Title-created-and-published',
+    });
+    expect(res.body.data.published_at).not.toBe(null);
+    expect(res.body.data.locale).toBe(null);
+
+    // There should be a draft and a published entry in db
+    const documents = await strapi.db.query(MODEL_UID).findMany({});
+
+    const draftDocument = documents.find((doc) => doc.publishedAt === null);
+    const publishedDocument = documents.find((doc) => doc.publishedAt !== null);
+
+    expect(documents.length).toBe(2);
+    expect(draftDocument).not.toBeUndefined();
+    expect(publishedDocument).not.toBeUndefined();
+  });
+
+  test('Publish and update', async () => {
+    await createOrUpdate({ title: 'Title' });
+    const res = await publish({ title: 'Title-updated-and-published' });
+
+    expect(res.statusCode).toBe(200);
+
+    // Both draft and publish versions should have been updated
+    const documents = await strapi.db.query(MODEL_UID).findMany({});
+
+    const draftDocument = documents.find((doc) => doc.publishedAt === null);
+    const publishedDocument = documents.find((doc) => doc.publishedAt !== null);
+
+    expect(documents.length).toBe(2);
+    expect(draftDocument.title).toBe('Title-updated-and-published');
+    expect(publishedDocument.title).toBe('Title-updated-and-published');
+  });
+
+  test('Unpublish', async () => {
+    // Create and publish
+    const publishedRes = await publish({ title: 'Title-published' });
+    expect(publishedRes.statusCode).toBe(200);
+
+    const unpublishedRes = await unpublish();
+    expect(unpublishedRes.statusCode).toBe(200);
+
+    // There should be a draft and a published entry in db
+    const documents = await strapi.db.query(MODEL_UID).findMany({});
+
+    const draftDocument = documents.find((doc) => doc.publishedAt === null);
+    const publishedDocument = documents.find((doc) => doc.publishedAt !== null);
+
+    expect(documents.length).toBe(1);
+    expect(draftDocument).not.toBeUndefined();
+    expect(publishedDocument).toBeUndefined();
+  });
+
+  // TODO: Move to i18n tests
+  test('Publish and create locale', async () => {});
 });
