@@ -201,7 +201,7 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const isDisabled = actions.every((action) => action.disabled);
+  const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
 
   const handleClick = (action: Action) => (e: React.SyntheticEvent) => {
     if (action.onClick) {

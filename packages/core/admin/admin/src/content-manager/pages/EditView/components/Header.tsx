@@ -109,6 +109,7 @@ const HeaderActions = () => {
       >
         {(actions) => {
           const headerActions = actions.filter((act) => act.position === 'header');
+
           return <DocumentActionsMenu actions={headerActions} />;
         }}
       </DescriptionComponentRenderer>
