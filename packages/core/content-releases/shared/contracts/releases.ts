@@ -121,7 +121,7 @@ export declare namespace UpdateRelease {
     body: {
       name: string;
       // When editing a release, scheduledAt always need to be explicitly sended, so it can be null to unschedule it
-      scheduledAt: Date | null;
+      scheduledAt?: Date | null;
     };
   }
 
