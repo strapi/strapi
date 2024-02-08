@@ -114,4 +114,54 @@ describe('Scheduling service', () => {
       expect(scheduledJobs.size).toBe(0);
     });
   });
+
+  describe('getAll', () => {
+    it('should return all the scheduled jobs', async () => {
+      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
+      // @ts-expect-error - scheduleJob is a mock
+      scheduleJob.mockImplementation(mockScheduleJob);
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn(() => ({
+            findOne: jest.fn().mockReturnValue({ id: 1 }),
+          })),
+        },
+      };
+
+      const date = new Date();
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+      await schedulingService.set('1', date);
+      expect(schedulingService.getAll().size).toBe(1);
+    });
+  });
+
+  describe('syncFromDatabase', () => {
+    it('should sync the scheduled jobs from the database', async () => {
+      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
+      // @ts-expect-error - scheduleJob is a mock
+      scheduleJob.mockImplementation(mockScheduleJob);
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn(() => ({
+            findMany: jest
+              .fn()
+              .mockReturnValue([{ id: 1, scheduledAt: new Date(), releasedAt: null }]),
+            findOne: jest.fn().mockReturnValue({ id: 1 }),
+          })),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+      const scheduledJobs = await schedulingService.syncFromDatabase();
+      expect(scheduledJobs.size).toBe(1);
+      expect(mockScheduleJob).toHaveBeenCalledWith(expect.any(Date), expect.any(Function));
+    });
+  });
 });
