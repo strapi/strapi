@@ -4,11 +4,6 @@ import { HISTORY_VERSION_UID } from '../constants';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
 
-interface Locale {
-  name: string;
-  code: string;
-}
-
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   /**
    * Use the query engine API, not the document service,
@@ -93,11 +88,17 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       }
 
       const locales = (await strapi.plugin('i18n').service('locales').find()) || [];
-      return locales.reduce((acc: Record<string, Locale>, locale: Locale) => {
-        acc[locale.code] = { name: locale.name, code: locale.code };
+      return locales.reduce(
+        (
+          acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
+          locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
+        ) => {
+          acc[locale.code] = { name: locale.name, code: locale.code };
 
-        return acc;
-      }, {});
+          return acc;
+        },
+        {}
+      );
     },
 
     async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {

@@ -15,7 +15,12 @@ export interface CreateHistoryVersion {
   schema: Record<string, unknown>;
 }
 
-export type HistoryVersionDataResponse = CreateHistoryVersion & {
+interface Locale {
+  name: string;
+  code: string;
+}
+
+export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, 'locale'> {
   id: Entity.ID;
   createdAt: string;
   createdBy?: {
@@ -25,11 +30,8 @@ export type HistoryVersionDataResponse = CreateHistoryVersion & {
     username?: string;
     email: string;
   };
-  locale: {
-    name: string;
-    code: string;
-  } | null;
-};
+  locale: Locale | null;
+}
 
 interface Pagination {
   page: number;
