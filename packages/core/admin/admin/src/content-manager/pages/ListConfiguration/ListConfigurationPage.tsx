@@ -12,7 +12,6 @@ import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
-import { useEnterprise } from '../../../hooks/useEnterprise';
 import { Form, FormProps } from '../../components/Form';
 import { useDoc } from '../../hooks/useDocument';
 import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
@@ -20,20 +19,10 @@ import { useUpdateContentTypeConfigurationMutation } from '../../services/conten
 import { setIn } from '../../utils/object';
 
 import { Header } from './components/Header';
-import { Settings, SettingsProps } from './components/Settings';
+import { Settings } from './components/Settings';
 import { SortDisplayedFields } from './components/SortDisplayedFields';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-
-const EXCLUDED_SORT_ATTRIBUTE_TYPES = [
-  'media',
-  'richtext',
-  'dynamiczone',
-  'relation',
-  'component',
-  'json',
-  'blocks',
-];
 
 interface FormData extends Pick<ListLayout, 'settings'> {
   layout: Array<Pick<ListFieldLayout, 'sortable' | 'name'> & { label: string }>;
@@ -45,7 +34,7 @@ const ListConfiguration = () => {
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { model, collectionType, schema } = useDoc();
+  const { model, collectionType } = useDoc();
 
   const { isLoading: isLoadingLayout, list, edit } = useDocLayout();
 
@@ -113,33 +102,6 @@ const ListConfiguration = () => {
     }
   };
 
-  const sortOptionsCE = React.useMemo(
-    () =>
-      Object.values(list.layout)
-        .filter((field) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(field.attribute.type))
-        .map<SettingsProps['options'][number]>(({ name, label }) => ({
-          value: name,
-          label: typeof label !== 'string' ? formatMessage(label) : label,
-        })),
-    [formatMessage, list.layout]
-  );
-
-  const eeSortOpt = useEnterprise(
-    [] as SettingsProps['options'],
-    async () => {
-      return (
-        await import('../../../../../ee/admin/src/content-manager/pages/ListSettingsView/constants')
-      ).REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME;
-    },
-    {
-      combine(ceOptions, eeOption) {
-        return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];
-      },
-      defaultValue: [],
-      enabled: !!schema?.options?.reviewWorkflows,
-    }
-  ) as SettingsProps['options'];
-
   const initialValues = React.useMemo(() => {
     return {
       layout: list.layout.map(({ label, sortable, name }) => ({
@@ -181,7 +143,7 @@ const ListConfiguration = () => {
               paddingLeft={7}
               paddingRight={7}
             >
-              <Settings options={[...sortOptionsCE, ...eeSortOpt]} />
+              <Settings />
               <Divider />
               <SortDisplayedFields layout={list.layout} />
             </Flex>

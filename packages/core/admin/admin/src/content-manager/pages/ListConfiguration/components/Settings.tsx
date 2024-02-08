@@ -4,11 +4,23 @@ import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { useCollator } from '@strapi/helper-plugin';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
+import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useForm, type InputProps } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
-import { EditFieldLayout } from '../../../hooks/useDocumentLayout';
+import { useDoc } from '../../../hooks/useDocument';
+import { type EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';
+import { type FormData } from '../ListConfigurationPage';
 
-import type { InputProps } from '../../../components/Form';
+const EXCLUDED_SORT_ATTRIBUTE_TYPES = [
+  'media',
+  'richtext',
+  'dynamiczone',
+  'relation',
+  'component',
+  'json',
+  'blocks',
+];
 
 interface SortOption {
   value: string;
@@ -16,16 +28,63 @@ interface SortOption {
 }
 
 interface SettingsProps {
-  options: SortOption[];
+  hasReviewWorkflows?: boolean;
 }
 
-const Settings = ({ options = [] }: SettingsProps) => {
+const Settings = () => {
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
+  const { schema } = useDoc();
 
-  const sortOptionsSorted = options.sort((a, b) => formatter.compare(a.label, b.label));
+  const layout = useForm<FormData['layout']>('Settings', (state) => state.values.layout);
+  const currentSortBy = useForm<FormData['settings']['defaultSortBy']>(
+    'Settings',
+    (state) => state.values.settings.defaultSortBy
+  );
+  const onChange = useForm('Settings', (state) => state.onChange);
+
+  const sortOptionsCE = React.useMemo(
+    () =>
+      Object.values(layout).reduce<SortOption[]>((acc, field) => {
+        if (schema && !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(schema.attributes[field.name].type)) {
+          acc.push({
+            value: field.name,
+            label: typeof field.label !== 'string' ? formatMessage(field.label) : field.label,
+          });
+        }
+
+        return acc;
+      }, []),
+    [formatMessage, layout, schema]
+  );
+
+  const sortOptions = useEnterprise(
+    sortOptionsCE,
+    async () => {
+      return (
+        await import(
+          '../../../../../../ee/admin/src/content-manager/pages/ListSettingsView/constants'
+        )
+      ).REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME;
+    },
+    {
+      combine(ceOptions, eeOption) {
+        return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];
+      },
+      defaultValue: sortOptionsCE,
+      enabled: schema?.options?.reviewWorkflows,
+    }
+  ) as SortOption[];
+
+  const sortOptionsSorted = sortOptions.sort((a, b) => formatter.compare(a.label, b.label));
+
+  React.useEffect(() => {
+    if (sortOptionsSorted.findIndex((opt) => opt.value === currentSortBy) === -1) {
+      onChange('settings.defaultSortBy', sortOptionsSorted[0].value);
+    }
+  }, [currentSortBy, onChange, sortOptionsSorted]);
 
   const formLayout = React.useMemo(
     () =>
