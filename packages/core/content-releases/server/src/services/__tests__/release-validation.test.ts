@@ -220,4 +220,32 @@ describe('Release Validation service', () => {
       ).resolves.not.toThrow();
     });
   });
+
+  describe('validateScheduledAtIsLaterThanNow', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2021-01-01'));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it('should throw an error if the scheduledAt date is in the past', () => {
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
+
+      expect(() =>
+        releaseValidationService.validateScheduledAtIsLaterThanNow(new Date('2020-01-01'))
+      ).rejects.toThrow('Scheduled at must be later than now');
+    });
+
+    it('should pass if the scheduledAt date is in the future', () => {
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
+
+      expect(() =>
+        releaseValidationService.validateScheduledAtIsLaterThanNow(new Date('2022-01-01'))
+      ).not.toThrow();
+    });
+  });
 });

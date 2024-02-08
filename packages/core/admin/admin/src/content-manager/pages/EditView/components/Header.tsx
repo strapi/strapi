@@ -9,9 +9,14 @@ import { getTranslation } from '../../../utils/translations';
 interface HeaderProps {
   isCreating?: boolean;
   status?: 'draft' | 'published' | 'modified';
+  title?: string;
 }
 
-const Header = ({ isCreating, status = 'draft' }: HeaderProps) => {
+const Header = ({
+  isCreating,
+  status = 'draft',
+  title: documentTitle = 'Untitled',
+}: HeaderProps) => {
   const { formatMessage } = useIntl();
 
   const title = isCreating
@@ -19,10 +24,7 @@ const Header = ({ isCreating, status = 'draft' }: HeaderProps) => {
         id: getTranslation('containers.Edit.pluginHeader.title.new'),
         defaultMessage: 'Create an entry',
       })
-    : /**
-       * TODO: check if the main field is NOT id and use that, otherwise use "Untitled"
-       */
-      'Unitled';
+    : documentTitle;
 
   const statusVariant =
     status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';

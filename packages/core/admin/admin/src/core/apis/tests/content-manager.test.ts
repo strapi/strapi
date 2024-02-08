@@ -1,5 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { ContentManagerPlugin, PanelComponent } from '../content-manager';
+import { ContentManagerPlugin, DocumentActionComponent, PanelComponent } from '../content-manager';
 
 describe('content-manager', () => {
   describe('config', () => {
@@ -9,7 +9,9 @@ describe('content-manager', () => {
       expect(plugin.config).toMatchInlineSnapshot(`
         {
           "apis": {
+            "addDocumentAction": [Function],
             "addEditViewSidePanel": [Function],
+            "getDocumentActions": [Function],
             "getEditViewSidePanels": [Function],
           },
           "id": "content-manager",
@@ -27,7 +29,9 @@ describe('content-manager', () => {
 
       expect(Object.keys(plugin.config.apis ?? {})).toMatchInlineSnapshot(`
         [
+          "addDocumentAction",
           "addEditViewSidePanel",
+          "getDocumentActions",
           "getEditViewSidePanels",
         ]
       `);
@@ -111,6 +115,93 @@ describe('content-manager', () => {
       // @ts-expect-error – testing it fails.
       expect(() => plugin.addEditViewSidePanel('I will break')).toThrowErrorMatchingInlineSnapshot(
         `"Expected the \`panels\` passed to \`addEditViewSidePanel\` to be an array or a function, but received string"`
+      );
+    });
+  });
+
+  describe('addDocumentAction', () => {
+    it('should let users add a document action as an array', () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(plugin.documentActions).toHaveLength(2);
+
+      // ensure we have our default options
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
+        [
+          "publish",
+          "update",
+        ]
+      `);
+
+      plugin.addDocumentAction([
+        () => ({
+          label: 'Publish & Notify Twitter',
+          disabled: false,
+          onClick: () => {},
+        }),
+      ]);
+
+      expect(plugin.documentActions).toHaveLength(3);
+      // ensure we have our default options, with the new option, which will not have a type
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
+        [
+          "publish",
+          "update",
+          undefined,
+        ]
+      `);
+    });
+
+    it('should let you mutate the existing array of panels with a reducer function', () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(plugin.documentActions).toHaveLength(2);
+
+      // ensure we have our default options
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
+        [
+          "publish",
+          "update",
+        ]
+      `);
+
+      const action: DocumentActionComponent = () => ({
+        label: 'Publish & Notify Twitter',
+        disabled: false,
+        onClick: () => {},
+      });
+
+      plugin.addDocumentAction((prev) => [...prev, action]);
+
+      expect(plugin.documentActions).toHaveLength(3);
+      // ensure we have our default options, with the new option, which will not have a type. The defaults should still be at the front.
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
+        [
+          "publish",
+          "update",
+          undefined,
+        ]
+      `);
+
+      plugin.addDocumentAction((prev) =>
+        prev.filter((action) => action.type !== 'publish' && action.type !== 'update')
+      );
+
+      expect(plugin.documentActions).toHaveLength(1);
+      // We should be missing our "1st" panel, the actions panel
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
+        [
+          undefined,
+        ]
+      `);
+    });
+
+    it("should throw an error if you've not passed a function or an array", () => {
+      const plugin = new ContentManagerPlugin();
+
+      // @ts-expect-error – testing it fails.
+      expect(() => plugin.addDocumentAction('I will break')).toThrowErrorMatchingInlineSnapshot(
+        `"Expected the \`actions\` passed to \`addDocumentAction\` to be an array or a function, but received string"`
       );
     });
   });
