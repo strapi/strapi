@@ -18,6 +18,7 @@ type NameInput = string | string[];
 type NameOptions = {
   suffix?: string;
   prefix?: string;
+  maxLength?: number;
 };
 
 export const getNameFromTokens = (tokens: NameToken[], max: number = MAX_DB_IDENTIFIER_LENGTH) => {
@@ -53,7 +54,7 @@ export const getName = (names: NameInput, options: NameOptions) => {
     tokens.unshift({ name: options.prefix, compressible: false });
   }
 
-  return getNameFromTokens(tokens);
+  return getNameFromTokens(tokens, options?.maxLength);
 };
 
 /**
@@ -119,13 +120,13 @@ export const getMorphColumnTypeName = (attributeName: string) => {
  */
 
 export const getIndexName = (names: NameInput) => {
-  return getName(names, { suffix: '_index' });
+  return getName(names, { suffix: 'index' });
 };
 
 export const getFkIndexName = (names: NameInput) => {
-  return getName(names, { suffix: '_fk' });
+  return getName(names, { suffix: 'fk' });
 };
 
 export const getUniqueIndexName = (names: NameInput) => {
-  return getName(names, { suffix: '_unique' });
+  return getName(names, { suffix: 'unique' });
 };
