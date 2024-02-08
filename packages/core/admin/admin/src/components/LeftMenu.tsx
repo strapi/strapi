@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
+import { Box, Divider, Flex, FocusTrap, Icon, Typography } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
@@ -12,7 +12,7 @@ import {
   NavUser,
 } from '@strapi/design-system/v2';
 import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
-import { Exit, Write } from '@strapi/icons';
+import { Exit, Write, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,6 +50,10 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
 `;
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
+
+const CustomIcon = styled(Icon)`
+  margin-right: ${({ theme }) => theme.spaces[4]};
+`;
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const navUserRef = React.useRef<HTMLDivElement>(null!);
@@ -135,18 +139,23 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           >
             {pluginsSectionLinks.map((link) => {
               const Icon = link.icon;
+              const { lockIcon = false } = link;
 
               return (
-                <NavLink
-                  as={RouterNavLink}
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                  to={link.to}
-                  key={link.to}
-                  icon={<Icon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                </NavLink>
+                <Flex key={link.to} justifyContent="space-between">
+                  <NavLink
+                    as={RouterNavLink}
+                    // @ts-expect-error the props from the passed as prop are not inferred // joined together
+                    to={link.to}
+                    icon={<Icon />}
+                    onClick={() => handleClickOnLink(link.to)}
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </NavLink>
+                  {lockIcon && (
+                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
+                  )}
+                </Flex>
               );
             })}
           </NavSection>
