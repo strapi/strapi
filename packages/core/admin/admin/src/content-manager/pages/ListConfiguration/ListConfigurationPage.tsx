@@ -13,6 +13,7 @@ import { Navigate } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../core/store/hooks';
 import { Form, FormProps } from '../../components/Form';
+import { SINGLE_TYPES } from '../../constants/collections';
 import { useDoc } from '../../hooks/useDocument';
 import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
@@ -113,7 +114,7 @@ const ListConfiguration = () => {
     } satisfies FormData;
   }, [formatMessage, list.layout, list.settings]);
 
-  if (collectionType === 'single-types') {
+  if (collectionType === SINGLE_TYPES) {
     return <Navigate to={`/single-types/${model}`} />;
   }
 

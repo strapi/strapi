@@ -74,7 +74,7 @@ const Settings = () => {
         return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];
       },
       defaultValue: sortOptionsCE,
-      enabled: schema?.options?.reviewWorkflows,
+      enabled: !!schema?.options?.reviewWorkflows,
     }
   ) as SortOption[];
 

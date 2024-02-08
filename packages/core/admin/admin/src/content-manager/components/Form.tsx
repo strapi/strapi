@@ -454,7 +454,8 @@ const reducer = <TFormValues extends FormValues = FormValues>(
       }
       case 'SET_ERRORS':
         if (!isEqual(state.errors, action.payload)) {
-          state.errors = action.payload;
+          // @ts-expect-error – TODO: figure out why this fails a TS check.
+          draft.errors = action.payload;
         }
         break;
       case 'SET_ISSUBMITTING':

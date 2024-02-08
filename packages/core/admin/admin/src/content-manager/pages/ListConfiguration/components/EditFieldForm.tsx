@@ -13,6 +13,7 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import * as yup from 'yup';
 
 import { capitalise } from '../../../../utils/strings';
 import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
@@ -27,6 +28,11 @@ interface EditFieldFormProps extends Pick<ListFieldLayout, 'attribute'> {
   name: string;
   onClose: () => void;
 }
+
+const FIELD_SCHEMA = yup.object().shape({
+  label: yup.string().required(),
+  sortable: yup.boolean(),
+});
 
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
@@ -52,6 +58,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
       <Form
         method="PUT"
         initialValues={value}
+        validationSchema={FIELD_SCHEMA}
         onSubmit={(data) => {
           onChange(name, data);
           onClose();
