@@ -30,6 +30,7 @@ export interface FormValues {
   date: Date | null;
   time: string;
   timezone: string;
+  isScheduled?: boolean;
   scheduledAt: Date | null;
 }
 
@@ -49,7 +50,6 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  const [isScheduled, setIsScheduled] = React.useState(false || Boolean(initialValues.scheduledAt));
   const { parseTimezone, options: timezoneOptions } = useTimezoneSelect({
     labelStyle: 'original',
     timezones: allTimezones,
@@ -99,16 +99,16 @@ export const ReleaseModal = ({
         onSubmit={(values) => {
           handleSubmit({
             ...values,
-            scheduledAt: isScheduled ? getScheduledTimestamp(values) : null,
+            scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
           });
         }}
         initialValues={{
           ...initialValues,
-          timezone: initialValues.timezone ?? usersTimezone.value,
+          timezone: initialValues.timezone ? initialValues.timezone : usersTimezone.value,
         }}
         validationSchema={RELEASE_SCHEMA}
       >
-        {({ values, errors, handleChange, setFieldValue }) => (
+        {({ values, errors, dirty, handleChange, setFieldValue }) => (
           <Form>
             <ModalBody>
               <Flex direction="column" alignItems="stretch" gap={6}>
@@ -123,10 +123,23 @@ export const ReleaseModal = ({
                   onChange={handleChange}
                   required
                 />
-                <Checkbox name="scheduleRelease" value={isScheduled} onValueChange={setIsScheduled}>
+                <Checkbox
+                  name="isScheduled"
+                  value={values.isScheduled}
+                  onChange={(event) => {
+                    setFieldValue('isScheduled', event.target.checked);
+                    if (!event.target.checked) {
+                      setFieldValue('date', null);
+                      setFieldValue('time', '');
+                    } else {
+                      setFieldValue('date', initialValues.date);
+                      setFieldValue('time', initialValues.time);
+                    }
+                  }}
+                >
                   <Typography
-                    textColor={isScheduled ? 'primary600' : 'neutral800'}
-                    fontWeight={isScheduled ? 'semiBold' : 'regular'}
+                    textColor={values.isScheduled ? 'primary600' : 'neutral800'}
+                    fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
                   >
                     {formatMessage({
                       id: 'modal.form.input.label.schedule-release',
@@ -134,7 +147,7 @@ export const ReleaseModal = ({
                     })}
                   </Typography>
                 </Checkbox>
-                {isScheduled && (
+                {values.isScheduled && (
                   <>
                     <Flex gap={4}>
                       <Box width="100%">
@@ -145,12 +158,12 @@ export const ReleaseModal = ({
                           })}
                           name="date"
                           onChange={(date) => {
-                            // UT error: It looks like you're passing a string as representation of a Date to the DatePicker.
+                            // TODO: UT error: It looks like you're passing a string as representation of a Date to the DatePicker.
                             // This is deprecated, look to passing a Date instead.
                             const isoFormatDate = date
                               ? formatISO(date, { representation: 'date' })
                               : null;
-                            setFieldValue('date', date);
+                            setFieldValue('date', isoFormatDate);
                           }}
                           clearLabel={formatMessage({
                             id: 'content-releases.modal.form.input.clearLabel',
@@ -220,9 +233,8 @@ export const ReleaseModal = ({
                   name="submit"
                   loading={isLoading}
                   disabled={
-                    !values.name ||
-                    (!isScheduled && values.name === initialValues.name) ||
-                    (isScheduled && (!values.time || !values.date || !values.timezone))
+                    !dirty ||
+                    (values.isScheduled && (!values.time || !values.date || !values.timezone))
                   }
                   type="submit"
                 >

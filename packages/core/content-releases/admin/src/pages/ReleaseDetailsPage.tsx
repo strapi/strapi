@@ -837,11 +837,14 @@ const ReleaseDetailsPage = () => {
   const releaseData = (isSuccessDetails && data?.data) || null;
 
   const title = releaseData?.name || '';
-  const scheduledAt = releaseData?.scheduledAt || '';
-  const date = new Date(scheduledAt);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  const scheduledAt = releaseData?.scheduledAt ? new Date(releaseData.scheduledAt) : null;
+
+  let time = '';
+  if (scheduledAt) {
+    const hours = scheduledAt.getHours();
+    const minutes = scheduledAt.getMinutes();
+    time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  }
 
   const handleEditRelease = async (values: FormValues) => {
     const editReleasePayload = {
@@ -911,7 +914,13 @@ const ReleaseDetailsPage = () => {
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
           isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{ name: title || '', scheduledAt, date, time }}
+          initialValues={{
+            name: title || '',
+            scheduledAt,
+            date: scheduledAt,
+            time,
+            isScheduled: Boolean(scheduledAt),
+          }}
         />
       )}
       <ConfirmDialog

@@ -148,6 +148,7 @@ const INITIAL_FORM_VALUES = {
   date: null,
   time: '',
   timezone: '',
+  isScheduled: false,
   scheduledAt: null,
 } satisfies FormValues;
 
