@@ -5,6 +5,9 @@ import {
   NotAllowedInput,
   useCMEditViewDataManager,
   useLibrary,
+  GenericInputProps,
+  // Needs to be imported to prevent the TypeScript "cannot be named" error
+  CustomInputProps as _CustomInputProps,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
@@ -12,7 +15,7 @@ import take from 'lodash/take';
 import { useIntl } from 'react-intl';
 
 import { useContentTypeLayout } from '../hooks/useContentTypeLayout';
-import { LazyComponentStore } from '../hooks/useLazyComponents';
+import { type LazyComponentStore } from '../hooks/useLazyComponents';
 import { getFieldName } from '../utils/fields';
 import { EditLayoutRow } from '../utils/layouts';
 
@@ -32,6 +35,28 @@ const VALIDATIONS_TO_OMIT = [
   'regex',
   'pluginOptions',
 ];
+
+/* -------------------------------------------------------------------------------------------------
+ * useCustomInputs
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * This is extracted into a hook because Content History also needs to have access to all inputs
+ * to properly display history versions.
+ */
+const useCustomInputs = (customFieldInputs: LazyComponentStore) => {
+  const { fields } = useLibrary();
+
+  // @ts-expect-error – TODO: fix this later...
+  return {
+    uid: InputUID,
+    media: fields!.media,
+    wysiwyg: Wysiwyg,
+    blocks: BlocksInput,
+    ...fields,
+    ...customFieldInputs,
+  } as GenericInputProps['customInputs'];
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Inputs
@@ -66,7 +91,6 @@ const Inputs = ({
     updateActionAllowedFields,
   } = useCMEditViewDataManager();
 
-  const { fields } = useLibrary();
   const { formatMessage } = useIntl();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
@@ -213,6 +237,8 @@ const Inputs = ({
 
   const { label, description, placeholder, visible } = metadatas;
 
+  const customInputs = useCustomInputs(customFieldInputs);
+
   if (visible === false) {
     return null;
   }
@@ -267,15 +293,6 @@ const Inputs = ({
     );
   }
 
-  const customInputs = {
-    uid: InputUID,
-    media: fields!.media,
-    wysiwyg: Wysiwyg,
-    blocks: BlocksInput,
-    ...fields,
-    ...customFieldInputs,
-  };
-
   return (
     <GenericInput
       attribute={fieldSchema}
@@ -292,7 +309,6 @@ const Inputs = ({
       error={error}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout!.uid}
-      // @ts-expect-error – TODO: fix this later...
       customInputs={customInputs}
       multiple={'multiple' in fieldSchema ? fieldSchema.multiple : false}
       name={keys}
@@ -363,4 +379,4 @@ const getInputType = (type = '') => {
   }
 };
 
-export { Inputs };
+export { Inputs, useCustomInputs, getInputType };

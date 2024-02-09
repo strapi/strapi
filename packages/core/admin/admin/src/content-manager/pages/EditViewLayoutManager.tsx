@@ -109,5 +109,5 @@ const reducer = (state: EditViewLayoutManagerState = initialState, action: Actio
     }
   });
 
-export { EditViewLayoutManager, reducer };
+export { EditViewLayoutManager, reducer, setLayout };
 export type { EditViewLayoutManagerState };

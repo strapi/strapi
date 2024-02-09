@@ -2,9 +2,11 @@ import * as React from 'react';
 
 import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { mockData } from '@tests/mockData';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
+import { HistoryProvider } from '../../pages/History';
 import { mockHistoryVersionsData } from '../../tests/mockData';
 import { VersionsList } from '../VersionsList';
 
@@ -16,8 +18,8 @@ const LocationDisplay = () => {
   return <span data-testid="location">{location.search}</span>;
 };
 
-const render = (props: React.ComponentProps<typeof VersionsList>) =>
-  renderRTL(<VersionsList {...props} />, {
+const render = (ui: React.ReactElement) =>
+  renderRTL(ui, {
     renderOptions: {
       wrapper({ children }) {
         return (
@@ -32,7 +34,18 @@ const render = (props: React.ComponentProps<typeof VersionsList>) =>
 
 describe('VersionsList', () => {
   it('renders a list of history versions', async () => {
-    render({ page: 1, versions: mockHistoryVersionsData.historyVersions });
+    render(
+      <HistoryProvider
+        page={1}
+        contentType="api::kitchensink.kitchensink"
+        // @ts-expect-error – we don't need to bother formatting the layout
+        layout={mockData.contentManager.collectionTypeLayout}
+        versions={mockHistoryVersionsData.historyVersions}
+        selectedVersion={mockHistoryVersionsData.historyVersions.data[0]}
+      >
+        <VersionsList />
+      </HistoryProvider>
+    );
 
     await waitFor(() => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();

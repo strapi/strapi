@@ -48,6 +48,19 @@ const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject:
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
 
+// Check if a block is a dynamic zone
+const isDynamicZone = (
+  block: EditLayoutRow[][]
+): block is Array<
+  Omit<EditLayoutRow, 'fieldSchema'> & {
+    fieldSchema: Attribute.DynamicZone;
+  }
+>[] => {
+  return block.every((subBlock) => {
+    return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
+  });
+};
+
 interface EditViewPageParams {
   collectionType: string;
   slug: string;
@@ -102,19 +115,6 @@ const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProp
     (collectionType === 'single-types'
       ? permissions.contentManager?.singleTypesConfigurations
       : permissions.contentManager?.collectionTypesConfigurations) ?? [];
-
-  // Check if a block is a dynamic zone
-  const isDynamicZone = (
-    block: EditLayoutRow[][]
-  ): block is Array<
-    Omit<EditLayoutRow, 'fieldSchema'> & {
-      fieldSchema: Attribute.DynamicZone;
-    }
-  >[] => {
-    return block.every((subBlock) => {
-      return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
-    });
-  };
 
   if (isLazyLoading) {
     return <LoadingIndicatorPage />;
@@ -182,18 +182,16 @@ const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProp
                           const [[{ name, fieldSchema, metadatas, ...restProps }]] = row;
 
                           return (
-                            <Box key={index}>
-                              <Grid gap={4}>
-                                <GridItem col={12} s={12} xs={12}>
-                                  <DynamicZone
-                                    name={name}
-                                    fieldSchema={fieldSchema}
-                                    metadatas={metadatas}
-                                    {...restProps}
-                                  />
-                                </GridItem>
-                              </Grid>
-                            </Box>
+                            <Grid gap={4} key={index}>
+                              <GridItem col={12} s={12} xs={12}>
+                                <DynamicZone
+                                  name={name}
+                                  fieldSchema={fieldSchema}
+                                  metadatas={metadatas}
+                                  {...restProps}
+                                />
+                              </GridItem>
+                            </Grid>
                           );
                         }
 
@@ -358,46 +356,50 @@ const EditViewPage = ({ allowedActions, userPermissions = [] }: EditViewPageProp
  * we manually split the layout into panes based on the presence of dynamic zones. where we then
  * use the original layout. Hence why, ITS ANOTHER ARRAY!
  */
-const selectAttributesLayout = createSelector(
-  (state: RootState) => state['content-manager_editViewLayoutManager'].currentLayout,
-  (layout) => {
-    const currentContentTypeLayoutData = layout?.contentType;
+const splitLayoutIntoPanes = (
+  layout: RootState['content-manager_editViewLayoutManager']['currentLayout']
+) => {
+  const currentContentTypeLayoutData = layout?.contentType;
 
-    if (!currentContentTypeLayoutData) {
-      return [];
+  if (!currentContentTypeLayoutData) {
+    return [];
+  }
+
+  const currentLayout = currentContentTypeLayoutData.layouts.edit;
+
+  let currentRowIndex = 0;
+  const newLayout: Array<FormattedLayouts['contentType']['layouts']['edit']> = [];
+
+  currentLayout.forEach((row) => {
+    const hasDynamicZone = row.some(
+      ({ name }) => currentContentTypeLayoutData.attributes[name]['type'] === 'dynamiczone'
+    );
+
+    if (!newLayout[currentRowIndex]) {
+      newLayout[currentRowIndex] = [];
     }
 
-    const currentLayout = currentContentTypeLayoutData.layouts.edit;
-
-    let currentRowIndex = 0;
-    const newLayout: Array<FormattedLayouts['contentType']['layouts']['edit']> = [];
-
-    currentLayout.forEach((row) => {
-      const hasDynamicZone = row.some(
-        ({ name }) => currentContentTypeLayoutData.attributes[name]['type'] === 'dynamiczone'
-      );
+    if (hasDynamicZone) {
+      currentRowIndex =
+        currentRowIndex === 0 && newLayout[0].length === 0 ? 0 : currentRowIndex + 1;
 
       if (!newLayout[currentRowIndex]) {
         newLayout[currentRowIndex] = [];
       }
+      newLayout[currentRowIndex].push(row);
 
-      if (hasDynamicZone) {
-        currentRowIndex =
-          currentRowIndex === 0 && newLayout[0].length === 0 ? 0 : currentRowIndex + 1;
+      currentRowIndex += 1;
+    } else {
+      newLayout[currentRowIndex].push(row);
+    }
+  });
 
-        if (!newLayout[currentRowIndex]) {
-          newLayout[currentRowIndex] = [];
-        }
-        newLayout[currentRowIndex].push(row);
+  return newLayout.filter((arr) => arr.length > 0);
+};
 
-        currentRowIndex += 1;
-      } else {
-        newLayout[currentRowIndex].push(row);
-      }
-    });
-
-    return newLayout.filter((arr) => arr.length > 0);
-  }
+const selectAttributesLayout = createSelector(
+  (state: RootState) => state['content-manager_editViewLayoutManager'].currentLayout,
+  splitLayoutIntoPanes
 );
 
 const selectCustomFieldUids = createSelector(
@@ -443,5 +445,5 @@ const ProtectedEditViewPage = ({ userPermissions = [] }: ProtectedEditViewPagePr
   return <EditViewPage allowedActions={allowedActions} userPermissions={userPermissions} />;
 };
 
-export { EditViewPage, ProtectedEditViewPage };
+export { EditViewPage, ProtectedEditViewPage, splitLayoutIntoPanes, isDynamicZone };
 export type { EditViewPageProps, EditViewPageParams, ProtectedEditViewPageProps };
