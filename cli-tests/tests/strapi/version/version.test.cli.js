@@ -15,7 +15,7 @@ describe('--version', () => {
     currentVersion = require(`${appPath}/package.json`).dependencies['@strapi/strapi'];
   });
 
-  it('should output version', async () => {
+  it('should output version with argument', async () => {
     await coffee
       .spawn('npm', ['run', '-s', 'strapi', '--', 'version'], { cwd: appPath })
       .expect('stderr', '')
