@@ -49,7 +49,7 @@ describe('import', () => {
       .end();
   });
 
-  it('should import the data without asking for confirmation', async () => {
+  it('should import data without asking for confirmation with --force', async () => {
     await coffee
       .spawn(
         'npm',
