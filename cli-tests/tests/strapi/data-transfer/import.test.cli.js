@@ -33,7 +33,7 @@ describe('import', () => {
       .end();
   });
 
-  it('should import the data', async () => {
+  it('should prompt for confirmation before importing data', async () => {
     await coffee
       .spawn(
         'npm',
