@@ -201,6 +201,16 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   ) {
     const releaseWithCreatorFields = await setCreatorFields({ user, isEdition: true })(releaseData);
 
+    const { validateUniqueNameForPendingRelease, validateScheduledAtIsLaterThanNow } = getService(
+      'release-validation',
+      { strapi }
+    );
+
+    await Promise.all([
+      validateUniqueNameForPendingRelease(releaseWithCreatorFields.name, id),
+      validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
+    ]);
+
     const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id);
 
     if (!release) {
@@ -219,6 +229,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       // @ts-expect-error see above
       data: releaseWithCreatorFields,
     });
+
+    if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+      const schedulingService = getService('scheduling', { strapi });
+
+      if (releaseData.scheduledAt) {
+        // set function always cancel the previous job if it exists, so we can call it directly
+        await schedulingService.set(id, releaseData.scheduledAt);
+      } else if (release.scheduledAt) {
+        // When user don't send a scheduledAt and we have one on the release, means that user want to unschedule it
+        schedulingService.cancel(id);
+      }
+    }
 
     return updatedRelease;
   },

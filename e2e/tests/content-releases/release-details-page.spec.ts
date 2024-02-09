@@ -73,7 +73,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
   test('A user should be able to edit and delete a release', async ({ page }) => {
     // Edit the release
     await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
-    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(page.getByRole('dialog', { name: 'Edit release' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
     await page.getByRole('textbox', { name: 'Name' }).fill('Trent Crimm: Independent');
@@ -84,7 +84,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
     // Delete the release
     await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
-    await page.getByRole('button', { name: 'Delete' }).click();
+    await page.getByRole('menuitem', { name: 'Delete' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
     // Wait for client side redirect to the releases page
     await page.waitForURL('/admin/plugins/content-releases');
