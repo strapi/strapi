@@ -21,6 +21,7 @@ const {
 export const resetDatabaseAndImportDataFromPath = async (filePath, contentTypesToWipe = []) => {
   const source = createSourceProvider(filePath);
   const destination = createDestinationProvider(contentTypesToWipe);
+  const includedTypes = [...ALLOWED_CONTENT_TYPES, ...contentTypesToWipe];
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
@@ -29,18 +30,20 @@ export const resetDatabaseAndImportDataFromPath = async (filePath, contentTypesT
     transforms: {
       links: [
         {
+          // only transfer relations to+from requested content types
           filter(link) {
             return (
-              ALLOWED_CONTENT_TYPES.includes(link.left.type) &&
-              (ALLOWED_CONTENT_TYPES.includes(link.right.type) || link.right.type === undefined)
+              includedTypes.includes(link.left.type) &&
+              (includedTypes.includes(link.right.type) || link.right.type === undefined)
             );
           },
         },
       ],
       entities: [
         {
+          // only include entities of requested content types
           filter(entity) {
-            return ALLOWED_CONTENT_TYPES.includes(entity.type);
+            return includedTypes.includes(entity.type);
           },
         },
       ],
