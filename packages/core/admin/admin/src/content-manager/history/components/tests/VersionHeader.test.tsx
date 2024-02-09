@@ -2,7 +2,6 @@ import React from 'react';
 
 import { UID } from '@strapi/types';
 import { render as renderRTL, screen } from '@tests/utils';
-import { Route, Routes } from 'react-router-dom';
 
 import { VersionHeader } from '../VersionHeader';
 
@@ -31,24 +30,7 @@ const version = {
 };
 
 const render = (props: React.ComponentProps<typeof VersionHeader>) =>
-  renderRTL(
-    <Routes>
-      <Route
-        path="/content-manager/:collectionType/:slug/:id/history"
-        element={<VersionHeader {...props} />}
-      />
-    </Routes>,
-    {
-      renderOptions: {
-        wrapper({ children }) {
-          return <>{children}</>;
-        },
-      },
-      initialEntries: [
-        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history?id=26',
-      ],
-    }
-  );
+  renderRTL(<VersionHeader {...props} />);
 
 describe('VersionHeader', () => {
   it('should display the correct title and subtitle for a non-localized entry', () => {
