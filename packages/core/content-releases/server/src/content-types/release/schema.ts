@@ -29,6 +29,9 @@ export default {
     scheduledAt: {
       type: 'datetime',
     },
+    timezone: {
+      type: 'string',
+    },
     actions: {
       type: 'relation',
       relation: 'oneToMany',
