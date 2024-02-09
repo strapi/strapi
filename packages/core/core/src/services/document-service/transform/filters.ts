@@ -4,18 +4,11 @@ import { transformFields } from './fields';
 import { type Data, type Options } from './types';
 import { switchDocumentIdForId } from './utils';
 
-const relationalIdReplacement = (filter: Data, opts: Options) => {
+const relationalIdReplacement = (filter: Data) => {
   // If there is an id field in the filter object, replace it with documentId
-  // and provide the filter parameters for the publishedAt and locale fields
   if ('id' in filter) {
     filter.documentId = filter.id;
     delete filter.id;
-
-    filter.publishedAt = opts.isDraft ? null : { $ne: null };
-
-    if (opts.locale) {
-      filter.locale = opts.locale;
-    }
   }
 };
 
@@ -41,7 +34,7 @@ export const transformFilters = async (data: Data, opts: Options) => {
         */
         (Array.isArray(value) ? value : [value]).forEach((item) => {
           if (typeof item === 'object') {
-            relationalIdReplacement(item as Data, opts);
+            relationalIdReplacement(item as Data);
           }
         });
 

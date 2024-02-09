@@ -83,7 +83,7 @@ describe('transformFilters', () => {
 
   it('should handle nested relational filters', async () => {
     const input = { category: { id: 'nestedValue' } };
-    const expected = { category: { documentId: 'nestedValue', publishedAt: { $ne: null } } };
+    const expected = { category: { documentId: 'nestedValue' } };
 
     expect(await transformFilters(input, { uid: PRODUCT_UID, isDraft: false })).toStrictEqual(
       expected
@@ -101,13 +101,11 @@ describe('transformFilters', () => {
     };
     const expected = {
       categories: [
-        { documentId: 'category1', locale: 'en', publishedAt: { $ne: null } },
-        { documentId: 'category2', locale: 'en', publishedAt: { $ne: null } },
-        { documentId: { $eq: 'category3' }, locale: 'en', publishedAt: { $ne: null } },
+        { documentId: 'category1' },
+        { documentId: 'category2' },
+        { documentId: { $eq: 'category3' } },
         {
           documentId: { $and: [{ $eq: 'category3' }, { $eq: 'category5' }] },
-          locale: 'en',
-          publishedAt: { $ne: null },
         },
       ],
     };
@@ -130,7 +128,7 @@ describe('transformFilters', () => {
     const expected = {
       relatedProducts: {
         categories: [
-          { documentId: 'complex1', publishedAt: { $ne: null } },
+          { documentId: 'complex1' },
           { someKey: { id: 'complex2' } },
           { documentId: 'complex3' },
         ],
@@ -158,7 +156,7 @@ describe('transformFilters', () => {
       },
       {
         input: { category: { id: 'documentId' } },
-        expected: { category: { documentId: 'documentId', publishedAt: null } },
+        expected: { category: { documentId: 'documentId' } },
       },
     ];
 

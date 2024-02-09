@@ -1,34 +1,38 @@
 import { traverse } from '@strapi/utils';
 import { Options, Data } from './types';
+import { switchDocumentIdForId } from './utils';
 
 type Sort = Data | string;
 
 const rootIdReplacement = (sort: Sort) => {
-  if (typeof sort !== 'string') {
-    // TODO: Handle non-string Root sorts
-    return sort;
+  if (typeof sort === 'object') {
+    return switchDocumentIdForId(sort);
   }
 
-  let sortCopy = sort;
-  let suffix = '';
-  const match = sort.match(/:(\w+)$/);
-  if (match) {
-    suffix = match[0];
+  if (typeof sort === 'string') {
+    let sortCopy = sort;
+    let suffix = '';
+    const match = sort.match(/:(\w+)$/);
+    if (match) {
+      suffix = match[0];
 
-    // TODO is there a regex to match :ASC or :DESC?
-    sortCopy = sort.replace(suffix, '');
+      // TODO is there a regex to match :ASC or :DESC?
+      sortCopy = sort.replace(suffix, '');
+    }
+
+    if (sortCopy === 'id') {
+      sortCopy = 'documentId';
+    } else {
+      sortCopy = sortCopy
+        .split(',')
+        .map((value: any) => (value === 'id' ? 'documentId' : value))
+        .join(',');
+    }
+
+    return sortCopy + suffix;
   }
 
-  if (sortCopy === 'id') {
-    sortCopy = 'documentId';
-  } else {
-    sortCopy = sortCopy
-      .split(',')
-      .map((value: any) => (value === 'id' ? 'documentId' : value))
-      .join(',');
-  }
-
-  return sortCopy + suffix;
+  return sort;
 };
 
 export const transformSort = async (sort: Sort | Sort[], opts: Options) => {

@@ -49,10 +49,8 @@ describe('transformSort', () => {
     expect(await transformSort(input, { uid: PRODUCT_UID, isDraft: false })).toEqual(expected);
   });
 
-  it('should transform arrays of complex sorts', async () => {
+  it('should transform arrays of complex string sorts', async () => {
     const input = [
-      // TODO handle object sorts
-      // { name: 'asc', category: { id: 'asc' } },
       'id',
       'name,id:DESC',
       'category.id:ASC',
@@ -68,6 +66,21 @@ describe('transformSort', () => {
       'categories.documentId',
       'nothing.id',
     ];
+
+    expect(await transformSort(input, { uid: PRODUCT_UID, isDraft: false })).toEqual(expected);
+  });
+
+  it('should transform complex object sorts', async () => {
+    const input = {
+      id: 'asc',
+      category: { id: 'asc', name: 'desc' },
+      nothing: { id: 'asc' },
+    };
+    const expected = {
+      documentId: 'asc',
+      category: { documentId: 'asc', name: 'desc' },
+      nothing: { id: 'asc' },
+    };
 
     expect(await transformSort(input, { uid: PRODUCT_UID, isDraft: false })).toEqual(expected);
   });
