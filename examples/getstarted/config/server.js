@@ -32,7 +32,9 @@ module.exports = ({ env }) => ({
     },
   },
   logger: {
-    level: 'silly',
+    config: {
+      level: 'silly',
+    },
     updates: {
       // enabled: false,
     },

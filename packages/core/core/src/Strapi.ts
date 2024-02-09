@@ -216,10 +216,10 @@ class Strapi extends Container implements StrapiI {
     this.eventHub = createEventHub();
     this.startupLogger = utils.createStartupLogger(this);
 
-    // We will continue to support 'logger' to prevent unnecessary deprecations but prioritize server.logger.level
-    // So we find: server.logger.level || logger || 'info'
+    // We will continue to support 'logger' to prevent unnecessary deprecations but prioritize server.logger.config
+    // So we find: server.logger.config || logger || 'info'
     const logLevel = this.config.get(
-      'server.logger',
+      'server.logger.config',
       this.config.get('logger', { level: 'info' })
     );
     this.log = createLogger(logLevel);
