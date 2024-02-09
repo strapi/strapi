@@ -74,7 +74,7 @@ describe('VersionHeader', () => {
           // @ts-expect-error ignore missing properties
           settings: {
             ...layout.contentType.settings,
-            mainField: 'id', // id or null do not return a subtitle
+            mainField: 'id', // id or null does not return a subtitle
           },
         },
       },
