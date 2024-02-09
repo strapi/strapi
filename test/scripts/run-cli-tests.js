@@ -227,7 +227,7 @@ yargs
                     domainDir,
                     '--color',
                     '--verbose',
-                    '--runInBand',
+                    '--runInBand', // tests must not run concurrently
                   ],
                   {
                     stdio: 'inherit',
