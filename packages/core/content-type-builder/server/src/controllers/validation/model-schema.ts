@@ -105,7 +105,7 @@ const forbiddenValidator = () => {
 const conflictingKeysValidator = (key: string) => {
   return yup.mixed().test({
     name: 'conflictingKeys',
-    message: `Attribue ${key} conflicts with an existing key`,
+    message: `Attribute ${key} conflicts with an existing key`,
     test: () => false,
   });
 };
