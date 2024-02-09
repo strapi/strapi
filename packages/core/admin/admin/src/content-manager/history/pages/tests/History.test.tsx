@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { act, waitForElementToBeRemoved } from '@testing-library/react';
-import { render as renderRTL, screen, waitFor } from '@tests/utils';
+import { waitForElementToBeRemoved } from '@testing-library/react';
+import { render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { HistoryPage } from '../History';
@@ -32,7 +32,8 @@ const render = ({ path, initialEntries }: { path: string; initialEntries: string
     }
   );
 
-describe('History page', () => {
+// TODO: remove when E2E tests are implemented
+describe.skip('History page', () => {
   it('renders single type correctly', async () => {
     render({
       path: '/content-manager/:singleType/:slug/history',

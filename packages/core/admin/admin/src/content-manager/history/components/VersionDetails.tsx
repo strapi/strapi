@@ -17,7 +17,6 @@ import {
   useStrapiApp,
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -26,12 +25,12 @@ import { useTypedDispatch } from '../../../core/store/hooks';
 import { DynamicZone } from '../../components/DynamicZone/Field';
 import { FieldComponent } from '../../components/FieldComponent';
 import { getInputType, useCustomInputs } from '../../components/Inputs';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { isDynamicZone, splitLayoutIntoPanes } from '../../pages/EditView/EditViewPage';
 import { setLayout } from '../../pages/EditViewLayoutManager';
 import { getFieldsActionMatchingPermissions } from '../../utils/permissions';
+import { useHistoryContext } from '../pages/History';
 
 /* -------------------------------------------------------------------------------------------------
  * VersionHeader
@@ -39,16 +38,16 @@ import { getFieldsActionMatchingPermissions } from '../../utils/permissions';
 
 interface VersionHeaderProps {
   headerId: string;
-  version: Contracts.HistoryVersions.HistoryVersionDataResponse;
 }
 
-const VersionHeader = ({ headerId, version }: VersionHeaderProps) => {
+const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage } = useIntl();
+  const { selectedVersion } = useHistoryContext('VersionHeader');
 
   return (
     <HeaderLayout
       id={headerId}
-      title={`History version ${version.id}`}
+      title={`History version ${selectedVersion.id}`}
       navigationAction={
         <Link
           startIcon={<ArrowLeft />}
@@ -70,16 +69,12 @@ const VersionHeader = ({ headerId, version }: VersionHeaderProps) => {
  * VersionContent
  * -----------------------------------------------------------------------------------------------*/
 
-interface VersionContentProps {
-  version: Contracts.HistoryVersions.HistoryVersionDataResponse;
-}
-
 // These types will be added in future PRs, they need special handling
 const UNSUPPORTED_TYPES = ['media', 'relation'];
 
-const VersionContent = ({ version }: VersionContentProps) => {
+const VersionContent = () => {
+  const { selectedVersion: version, layout } = useHistoryContext('VersionContent');
   const [{ query }] = useQueryParams();
-  const { isLoading, layout } = useContentTypeLayout(version.contentType);
   const dispatch = useTypedDispatch();
 
   const { runHookWaterfall } = useStrapiApp();
@@ -91,7 +86,7 @@ const VersionContent = ({ version }: VersionContentProps) => {
     }
   }, [dispatch, mutatedLayout, query]);
 
-  const { permissions } = useSyncRbac(query, layout?.contentType.uid, 'editView');
+  const { permissions } = useSyncRbac(query, layout.contentType.uid, 'editView');
 
   const { readActionAllowedFields } = getFieldsActionMatchingPermissions(
     permissions ?? [],
@@ -125,7 +120,7 @@ const VersionContent = ({ version }: VersionContentProps) => {
   const customInputs = useCustomInputs(lazyComponentStore);
 
   // TODO: better loading
-  if (isLoading || !mutatedLayout.layout || isLazyLoading) {
+  if (isLazyLoading) {
     return null;
   }
 
@@ -225,11 +220,16 @@ const VersionContent = ({ version }: VersionContentProps) => {
                       }
 
                       const getValue = () => {
+                        const value = version.data[column.name];
+
                         switch (attribute.type) {
                           case 'json':
-                            return JSON.stringify(version.data[column.name]);
+                            return JSON.stringify(value);
+                          case 'date':
+                          case 'datetime':
+                            return new Date(value as string);
                           default:
-                            return version.data[column.name];
+                            return value;
                         }
                       };
 
@@ -266,22 +266,13 @@ const VersionContent = ({ version }: VersionContentProps) => {
  * VersionDetails
  * -----------------------------------------------------------------------------------------------*/
 
-interface VersionDetailsProps {
-  version: Contracts.HistoryVersions.HistoryVersionDataResponse | undefined;
-}
-
-const VersionDetails = ({ version }: VersionDetailsProps) => {
+const VersionDetails = () => {
   const headerId = React.useId();
-
-  if (!version) {
-    // TODO: handle selected version not found when the designs are ready
-    return <Main grow={1} />;
-  }
 
   return (
     <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
-      <VersionHeader version={version} headerId={headerId} />
-      <VersionContent version={version} />
+      <VersionHeader headerId={headerId} />
+      <VersionContent />
     </Main>
   );
 };

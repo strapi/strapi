@@ -8,6 +8,7 @@ import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { getDisplayName } from '../../utils/users';
+import { useHistoryContext } from '../pages/History';
 
 /* -------------------------------------------------------------------------------------------------
  * BlueText
@@ -145,13 +146,9 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
  * VersionsList
  * -----------------------------------------------------------------------------------------------*/
 
-interface VersionsListProps {
-  versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
-  page: number;
-}
-
-const VersionsList = ({ versions, page }: VersionsListProps) => {
+const VersionsList = () => {
   const { formatMessage } = useIntl();
+  const { versions, page } = useHistoryContext('VersionsList');
 
   return (
     <Flex
