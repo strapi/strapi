@@ -14,7 +14,7 @@ describe('export', () => {
     appPath = testApps.at(0);
   });
 
-  it('should export the data', async () => {
+  it('should export data without error', async () => {
     await coffee
       .spawn(
         'npm',
