@@ -117,8 +117,8 @@ const HistoryPage = () => {
         page={page}
       >
         <Flex direction="row" alignItems="flex-start">
-          <Main grow={1} labelledBy={headerId}>
-            <VersionHeader version={selectedVersion} layout={layout} headerId={headerId} />
+          <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
+            <VersionHeader headerId={headerId} />
             <VersionContent />
           </Main>
           <VersionsList />
@@ -129,3 +129,4 @@ const HistoryPage = () => {
 };
 
 export { HistoryPage, HistoryProvider, useHistoryContext };
+export type { HistoryContextValue };

@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { render as renderRTL, screen } from '@tests/utils';
 
+import { type HistoryContextValue, HistoryProvider } from '../../pages/History';
 import { VersionHeader } from '../VersionHeader';
 
 import type { UID } from '@strapi/types';
@@ -17,7 +18,7 @@ const layout = {
     },
   },
 };
-const version = {
+const selectedVersion = {
   id: '26',
   contentType: 'api::kitchensink.kitchensink' as UID.ContentType,
   relatedDocumentId: 'pcwmq3rlmp5w0be3cuplhnpr',
@@ -30,14 +31,17 @@ const version = {
   },
 };
 
-const render = (props: React.ComponentProps<typeof VersionHeader>) =>
-  renderRTL(<VersionHeader {...props} />);
+const render = (props: HistoryContextValue) =>
+  renderRTL(
+    <HistoryProvider {...props}>
+      <VersionHeader headerId="123" />
+    </HistoryProvider>
+  );
 
 describe('VersionHeader', () => {
   it('should display the correct title and subtitle for a non-localized entry', () => {
     render({
-      version,
-      headerId: '123',
+      selectedVersion,
       // @ts-expect-error ignore missing properties
       layout,
     });
@@ -48,14 +52,13 @@ describe('VersionHeader', () => {
 
   it('should display the correct title and subtitle for a localized entry', () => {
     render({
-      version: {
-        ...version,
+      selectedVersion: {
+        ...selectedVersion,
         locale: {
           code: 'en',
           name: 'English (en)',
         },
       },
-      headerId: '123',
       // @ts-expect-error ignore missing properties
       layout,
     });
@@ -66,8 +69,7 @@ describe('VersionHeader', () => {
 
   it('should display the correct subtitle without an entry title (mainField)', () => {
     render({
-      version,
-      headerId: '123',
+      selectedVersion,
       layout: {
         ...layout,
         contentType: {

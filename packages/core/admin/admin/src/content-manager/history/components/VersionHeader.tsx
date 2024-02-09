@@ -3,20 +3,18 @@ import * as React from 'react';
 import { HeaderLayout, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { ArrowLeft } from '@strapi/icons';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import type { FormattedLayouts } from '../../utils/layouts';
+import { useHistoryContext } from '../pages/History';
 
 interface VersionHeaderProps {
   headerId: string;
-  version: Contracts.HistoryVersions.HistoryVersionDataResponse;
-  layout: FormattedLayouts;
 }
 
-export const VersionHeader = ({ headerId, version, layout }: VersionHeaderProps) => {
+export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const { selectedVersion: version, layout } = useHistoryContext('VersionHeader');
 
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
 
