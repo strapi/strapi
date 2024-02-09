@@ -32,7 +32,6 @@ describe('Document Service', () => {
           publishedAt: null, // should be a draft
         });
 
-        // @ts-expect-error - TODO: doc service entry type should contain documentId
         const articles = await findArticlesDb({ documentId: article.documentId });
         // Only one article should have been created
         expect(articles).toHaveLength(1);
@@ -91,19 +90,23 @@ describe('Document Service', () => {
       })
     );
 
-    // TODO
-    it.skip(
+    it(
       'can not directly create a published document',
       testInTransaction(async () => {
-        const articlePromise = strapi.documents(ARTICLE_UID).create({
+        const article = await strapi.documents(ARTICLE_UID).create({
           locale: 'fr',
           status: 'published',
           data: { title: 'Article' },
         });
+
+        expect(article).toMatchObject({
+          title: 'Article',
+          locale: 'fr', // selected locale
+          publishedAt: null, // should be a draft
+        });
       })
     );
 
-    // TODO: Make publishedAt not editable
     it(
       'publishedAt attribute is ignored when creating document',
       testInTransaction(async () => {
@@ -125,7 +128,7 @@ describe('Document Service', () => {
         const author = await strapi.documents(AUTHOR_UID).create({
           // Should be ignored on non-localized content types
           locale: 'fr',
-          data: { name: 'Author' },
+          data: { name: 'Author', locale: 'fr' },
         });
 
         // verify that the returned document was updated

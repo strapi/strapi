@@ -41,7 +41,14 @@ export const localeToLookup: Middleware = async (ctx, next) => {
  * Translate locale status parameter into the data that will be saved
  */
 export const localeToData: Middleware = async (ctx, next) => {
-  if (!isLocalizedContentType(ctx.uid)) return next(ctx);
+  if (!isLocalizedContentType(ctx.uid)) {
+    // Remove data.locale if it is not a localized content type
+    if (ctx.params?.data?.locale) {
+      ctx.params.data.locale = null;
+    }
+
+    return next(ctx);
+  }
   if (!ctx.params) ctx.params = {};
 
   const data = ctx.params.data || {};
