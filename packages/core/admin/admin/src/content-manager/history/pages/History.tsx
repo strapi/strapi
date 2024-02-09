@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { createContext } from '@radix-ui/react-context';
 import { Flex, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -9,6 +8,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
+import { createContext } from '../../../components/Context';
 import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { buildValidGetParams } from '../../utils/api';
 import { type FormattedLayouts } from '../../utils/layouts';

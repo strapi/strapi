@@ -14,7 +14,10 @@ interface VersionHeaderProps {
 
 export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
-  const { selectedVersion: version, layout } = useHistoryContext('VersionHeader');
+  const { version, layout } = useHistoryContext('VersionHeader', (state) => ({
+    version: state.selectedVersion,
+    layout: state.layout,
+  }));
 
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
 

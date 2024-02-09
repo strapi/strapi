@@ -24,7 +24,10 @@ import { useHistoryContext } from '../pages/History';
 const UNSUPPORTED_TYPES = ['media', 'relation'];
 
 const VersionContent = () => {
-  const { selectedVersion: version, layout } = useHistoryContext('VersionContent');
+  const { version, layout } = useHistoryContext('VersionContent', (state) => ({
+    version: state.selectedVersion,
+    layout: state.layout,
+  }));
   const [{ query }] = useQueryParams();
   const dispatch = useTypedDispatch();
 

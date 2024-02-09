@@ -148,7 +148,10 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
 
 const VersionsList = () => {
   const { formatMessage } = useIntl();
-  const { versions, page } = useHistoryContext('VersionsList');
+  const { versions, page } = useHistoryContext('VersionsList', (state) => ({
+    versions: state.versions,
+    page: state.page,
+  }));
 
   return (
     <Flex
