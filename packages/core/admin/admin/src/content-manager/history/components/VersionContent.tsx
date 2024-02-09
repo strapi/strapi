@@ -1,24 +1,12 @@
 import * as React from 'react';
 
-import {
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Main,
-  Typography,
-} from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import {
   ContentManagerEditViewDataManagerContext,
   GenericInput,
   useQueryParams,
   useStrapiApp,
 } from '@strapi/helper-plugin';
-import { ArrowLeft } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
 import { HOOKS } from '../../../constants';
 import { useTypedDispatch } from '../../../core/store/hooks';
@@ -31,43 +19,6 @@ import { isDynamicZone, splitLayoutIntoPanes } from '../../pages/EditView/EditVi
 import { setLayout } from '../../pages/EditViewLayoutManager';
 import { getFieldsActionMatchingPermissions } from '../../utils/permissions';
 import { useHistoryContext } from '../pages/History';
-
-/* -------------------------------------------------------------------------------------------------
- * VersionHeader
- * -----------------------------------------------------------------------------------------------*/
-
-interface VersionHeaderProps {
-  headerId: string;
-}
-
-const VersionHeader = ({ headerId }: VersionHeaderProps) => {
-  const { formatMessage } = useIntl();
-  const { selectedVersion } = useHistoryContext('VersionHeader');
-
-  return (
-    <HeaderLayout
-      id={headerId}
-      title={`History version ${selectedVersion.id}`}
-      navigationAction={
-        <Link
-          startIcon={<ArrowLeft />}
-          as={NavLink}
-          // @ts-expect-error - types are not inferred correctly through the as prop.
-          to=".."
-        >
-          {formatMessage({
-            id: 'global.back',
-            defaultMessage: 'Back',
-          })}
-        </Link>
-      }
-    />
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * VersionContent
- * -----------------------------------------------------------------------------------------------*/
 
 // These types will be added in future PRs, they need special handling
 const UNSUPPORTED_TYPES = ['media', 'relation'];
@@ -262,19 +213,4 @@ const VersionContent = () => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * VersionDetails
- * -----------------------------------------------------------------------------------------------*/
-
-const VersionDetails = () => {
-  const headerId = React.useId();
-
-  return (
-    <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
-      <VersionHeader headerId={headerId} />
-      <VersionContent />
-    </Main>
-  );
-};
-
-export { VersionDetails };
+export { VersionContent };

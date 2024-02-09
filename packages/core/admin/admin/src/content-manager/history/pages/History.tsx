@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { Flex } from '@strapi/design-system';
+import { Flex, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
@@ -11,8 +11,9 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { buildValidGetParams } from '../../utils/api';
-import { FormattedLayouts } from '../../utils/layouts';
-import { VersionDetails } from '../components/VersionDetails';
+import { type FormattedLayouts } from '../../utils/layouts';
+import { VersionContent } from '../components/VersionContent';
+import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
@@ -38,6 +39,7 @@ const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>(
  * -----------------------------------------------------------------------------------------------*/
 
 const HistoryPage = () => {
+  const headerId = React.useId();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { slug, id: documentId } = useParams<{
@@ -79,13 +81,18 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  const selectedVersion = versionsResponse.data?.data.find(
+  // TODO: real error state when designs are ready
+  if (versionsResponse.isError || !versionsResponse.data || !layout) {
+    return null;
+  }
+
+  const selectedVersion = versionsResponse.data.data.find(
     (version) => version.id.toString() === query.id
   );
 
-  // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !selectedVersion) {
-    return null;
+  if (!selectedVersion) {
+    // TODO: handle selected version not found when the designs are ready
+    return <Main />;
   }
 
   return (
@@ -110,7 +117,10 @@ const HistoryPage = () => {
         page={page}
       >
         <Flex direction="row" alignItems="flex-start">
-          <VersionDetails />
+          <Main grow={1} labelledBy={headerId}>
+            <VersionHeader version={selectedVersion} layout={layout} headerId={headerId} />
+            <VersionContent />
+          </Main>
           <VersionsList />
         </Flex>
       </HistoryProvider>
