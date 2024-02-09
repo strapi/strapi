@@ -10,6 +10,10 @@ If any changes are made to the template, or other issues are being encountered, 
 
 ## Writing tests
 
+The [coffee](https://github.com/node-modules/coffee) library is used to run commands and expect input, complete prompts, etc. Please see their documentation for more details.
+
+Warning: Due to issues with the monorepo in regards to linking packages, we currently have to use 'npm' instead of 'yarn' to run internal CLI commands
+
 ### Accessing test app information
 
 When a test domain is run, the path to the available test app is provided in the comma-separated env variable TEST_APPS. The number of apps provided will be the number of testApps set in the configuration, or the default of 1.
@@ -42,4 +46,4 @@ module.exports = () => {
 
 ### How to run and test CLI commands
 
-To be implemented
+See the available tests in the `tests` directory for examples.
