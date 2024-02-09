@@ -153,7 +153,7 @@ const ListViewPage = () => {
       (await import('../../../../../ee/admin/src/content-manager/pages/ListView/constants'))
         .REVIEW_WORKFLOW_COLUMNS_EE,
     {
-      enabled: schema?.options?.reviewWorkflows,
+      enabled: !!schema?.options?.reviewWorkflows,
     }
   );
   const ReviewWorkflowsColumns = useEnterprise(
@@ -165,7 +165,7 @@ const ListViewPage = () => {
       return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
     },
     {
-      enabled: schema?.options?.reviewWorkflows,
+      enabled: !!schema?.options?.reviewWorkflows,
     }
   );
 

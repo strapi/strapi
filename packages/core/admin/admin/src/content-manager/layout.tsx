@@ -123,7 +123,7 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
   switch (actualType) {
     case ItemTypes.EDIT_FIELD:
     case ItemTypes.FIELD:
-      return <CardDragPreview labelField={item.labelField} />;
+      return <CardDragPreview label={item.label} />;
     case ItemTypes.COMPONENT:
     case ItemTypes.DYNAMIC_ZONE:
       return <ComponentDragPreview displayedValue={item.displayedValue} />;

@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/types';
 
-interface EnumerationProps extends Omit<InputProps, 'type'> {
+interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
   options: Array<{ disabled?: boolean; hidden?: boolean; label?: string; value: string }>;
   type: 'enumeration';
 }
@@ -17,6 +17,7 @@ interface InputProps {
   name: string;
   placeholder?: string;
   required?: boolean;
+  options?: never;
   type: Exclude<
     Attribute.Kind,
     | 'enumeration'

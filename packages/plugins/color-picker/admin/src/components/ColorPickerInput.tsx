@@ -75,9 +75,9 @@ const ColorPickerPopover = styled(Popover)`
   min-height: 270px;
 `;
 
-interface ColorPickerInputProps extends InputProps {
+type ColorPickerInputProps = InputProps & {
   labelAction?: React.ReactNode;
-}
+};
 
 export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerInputProps>(
   ({ hint, disabled = false, labelAction, label, name, required = false }, forwardedRef) => {

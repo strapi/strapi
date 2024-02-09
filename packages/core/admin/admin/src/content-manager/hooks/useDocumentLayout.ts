@@ -49,7 +49,7 @@ interface ListLayout {
   metadatas: {
     [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['list'];
   };
-  settings: Contracts.ContentTypes.Settings;
+  settings: Contracts.ContentTypes.Settings & { displayName?: string };
 }
 interface EditFieldSharedProps extends Omit<InputProps, 'type'> {
   mainField?: string;
@@ -77,7 +77,9 @@ interface EditLayout {
       settings: Contracts.Components.ComponentConfiguration['settings'];
     };
   };
-  metadatas?: never;
+  metadatas: {
+    [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['edit'];
+  };
   settings: Contracts.ContentTypes.Settings;
 }
 
@@ -150,6 +152,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
             layout: [],
             components: {},
             settings: DEFAULT_SETTINGS,
+            metadatas: {},
           } as EditLayout),
     [data, schema, components]
   );
@@ -248,9 +251,20 @@ const formatEditLayout = (
     {}
   );
 
+  const editMetadatas = Object.entries(data.contentType.metadatas).reduce<EditLayout['metadatas']>(
+    (acc, [attribute, metadata]) => {
+      return {
+        ...acc,
+        [attribute]: metadata.edit,
+      };
+    },
+    {}
+  );
+
   return {
     layout: panelledEditAttributes,
     components: componentEditAttributes,
+    metadatas: editMetadatas,
     settings: data.contentType.settings,
   };
 };
@@ -337,7 +351,11 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
     data.components
   );
 
-  return { layout: listAttributes, settings: data.contentType.settings, metadatas: listMetadatas };
+  return {
+    layout: listAttributes,
+    settings: { ...data.contentType.settings, displayName: schema?.info.displayName },
+    metadatas: listMetadatas,
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------

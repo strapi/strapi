@@ -25,6 +25,7 @@ export const StringInput = forwardRef<any, InputProps>(
         hint={hint}
         label={label}
         name={name}
+        error={field.error}
         defaultValue={field.initialValue}
         onChange={field.onChange}
         placeholder={placeholder}
