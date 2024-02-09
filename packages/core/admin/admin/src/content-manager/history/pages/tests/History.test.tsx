@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { act, waitForElementToBeRemoved } from '@testing-library/react';
-import { render as renderRTL, screen, waitFor } from '@tests/utils';
+import { waitForElementToBeRemoved } from '@testing-library/react';
+import { render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { HistoryPage } from '../History';

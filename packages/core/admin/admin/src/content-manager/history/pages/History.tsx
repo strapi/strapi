@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex } from '@strapi/design-system';
+import { Flex, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
@@ -9,13 +9,15 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { useContentTypeLayout } from '../../hooks/useLayouts';
 import { buildValidGetParams } from '../../utils/api';
-import { VersionDetails } from '../components/VersionDetails';
+import { VersionContent } from '../components/VersionContent';
+import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
 import type { UID } from '@strapi/types';
 
 const HistoryPage = () => {
+  const headerId = React.useId();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { slug, id: documentId } = useParams<{
@@ -58,13 +60,18 @@ const HistoryPage = () => {
   }
 
   // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data) {
+  if (versionsResponse.isError || !versionsResponse.data || !layout) {
     return null;
   }
 
   const selectedVersion = versionsResponse.data?.data.find(
     (version) => version.id.toString() === query.id
   );
+
+  if (!selectedVersion) {
+    // TODO: handle selected version not found when the designs are ready
+    return <Main />;
+  }
 
   return (
     <>
@@ -80,7 +87,10 @@ const HistoryPage = () => {
         )}
       />
       <Flex direction="row" alignItems="flex-start">
-        <VersionDetails version={selectedVersion} />
+        <Main grow={1} labelledBy={headerId}>
+          <VersionHeader version={selectedVersion} layout={layout} headerId={headerId} />
+          <VersionContent version={selectedVersion} />
+        </Main>
         <VersionsList versions={versionsResponse.data} page={page} />
       </Flex>
     </>

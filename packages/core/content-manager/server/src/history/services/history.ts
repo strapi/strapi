@@ -82,23 +82,49 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       });
     },
 
-    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
-      const { results, pagination } = await query.findPage({
-        page: 1,
-        pageSize: 10,
-        where: {
-          $and: [
-            { contentType: params.contentType },
-            { relatedDocumentId: params.documentId },
-            ...(params.locale ? [{ locale: params.locale }] : []),
-          ],
+    /**
+     * TODO: Refactor so i18n can interact history without history itself being concerned about i18n
+     */
+    async getLocaleDictionary() {
+      if (!strapi.plugin('i18n')) {
+        return {};
+      }
+
+      const locales = (await strapi.plugin('i18n').service('locales').find()) || [];
+      return locales.reduce(
+        (
+          acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
+          locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
+        ) => {
+          acc[locale.code] = { name: locale.name, code: locale.code };
+
+          return acc;
         },
-        populate: ['createdBy'],
-        orderBy: [{ createdAt: 'desc' }],
-      });
+        {}
+      );
+    },
+
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
+      const [{ results, pagination }, localeDictionary] = await Promise.all([
+        query.findPage({
+          page: 1,
+          pageSize: 10,
+          where: {
+            $and: [
+              { contentType: params.contentType },
+              { relatedDocumentId: params.documentId },
+              ...(params.locale ? [{ locale: params.locale }] : []),
+            ],
+          },
+          populate: ['createdBy'],
+          orderBy: [{ createdAt: 'desc' }],
+        }),
+        this.getLocaleDictionary(),
+      ]);
 
       const sanitizedResults = results.map((result) => ({
         ...result,
+        locale: result.locale ? localeDictionary[result.locale] : null,
         createdBy: result.createdBy
           ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
           : null,
