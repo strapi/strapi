@@ -50,11 +50,8 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
 };
 
 const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
-  // @ts-expect-error - TODO: Fix this
-
   relation: EntityService.Params.Attribute.RelationInputValue<T>,
   getId: GetId
-  // @ts-expect-error - TODO: Fix this
 ): EntityService.Params.Attribute.RelationInputValue<T> => {
   const map = transformPrimitive(relation as any, getId);
   if (map) return map;

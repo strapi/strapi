@@ -5,6 +5,13 @@ import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, ID } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 
+type ExtractedId = { id: ID; locale?: string };
+
+const isLocalizedContentType = (uid: Common.UID.Schema) => {
+  const model = strapi.getModel(uid);
+  return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
+};
+
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
@@ -15,13 +22,14 @@ const handlePrimitive = (
     return []; // null
   }
   if (isShortHand(relation)) {
-    return [relation]; // id
+    return [{ id: relation }]; // id
   }
   if (isLongHand(relation)) {
-    return [relation.id]; // { id }
+    // Let this be handled
+    return [{ id: relation.id, locale: relation.locale }]; // { id, locale? }
   }
   if (Array.isArray(relation)) {
-    return relation.map((item) => (isShortHand(item) ? item : item.id)); // id[]
+    return relation.map((item) => (isShortHand(item) ? { id: item } : item)); // id[]
   }
 
   return [];
@@ -31,9 +39,8 @@ const handlePrimitive = (
  * Get all relations document ids from a relation input value
  */
 const extractRelationIds = <T extends Attribute.RelationKind.Any>(
-  // @ts-expect-error - TODO: Fix this
   relation: EntityService.Params.Attribute.RelationInputValue<T>
-): ID[] => {
+): ExtractedId[] => {
   const ids = handlePrimitive(relation);
   if (!isObject(relation)) return ids;
 
@@ -71,7 +78,7 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft: boolean }
+  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft?: boolean }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
@@ -83,14 +90,17 @@ const extractDataIds = (
         // TODO: Handle morph relations (they have multiple targets)
         if (!target) return;
 
-        extractedIds.forEach((id) =>
+        extractedIds.forEach(({ id, locale }) => {
+          const isTargetLocalized = isLocalizedContentType(target as Common.UID.Schema);
+          const targetLocale = locale || opts.locale;
+
           idMap.add({
             uid: target,
             documentId: id as string,
-            locale: opts.locale,
+            locale: isTargetLocalized ? targetLocale : null,
             isDraft: opts.isDraft,
-          })
-        );
+          });
+        });
       }
     },
     { schema: strapi.getModel(opts.uid) },
