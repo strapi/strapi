@@ -30,7 +30,7 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
     // keys that are not attributes or valid operators
     traverseQueryFilters(
-      ({ key, attribute }) => {
+      ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
         if (key === 'id') {
@@ -40,7 +40,7 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
         const isAttribute = !!attribute;
 
         if (!isAttribute && !isOperator(key)) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -65,7 +65,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
   return pipeAsync(
     // non attribute keys
     traverseQuerySort(
-      ({ key, attribute }) => {
+      ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
         if (key === 'id') {
@@ -73,7 +73,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
         }
 
         if (!attribute) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -88,7 +88,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
     traverseQuerySort(throwPassword, { schema }),
     // keys for empty non-scalar values
     traverseQuerySort(
-      ({ key, attribute, value }) => {
+      ({ key, attribute, value, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
         if (key === 'id') {
@@ -96,7 +96,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
         }
 
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -111,7 +111,7 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
   return pipeAsync(
     // Only allow scalar attributes
     traverseQueryFields(
-      ({ key, attribute }) => {
+      ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
         if (key === 'id') {
@@ -119,7 +119,7 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
         }
 
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }

@@ -51,7 +51,7 @@ const createContentAPIValidators = () => {
       .get('content-api.input')
       .forEach((validator: Validator) => transforms.push(validator(schema)));
 
-    pipeAsync(...transforms)(data as Data);
+    await pipeAsync(...transforms)(data as Data);
   };
 
   const validateQuery = async (
@@ -97,7 +97,7 @@ const createContentAPIValidators = () => {
       transforms.push(traverseQueryFilters(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
-    return pipeAsync(...transforms)(filters);
+    await pipeAsync(...transforms)(filters);
   };
 
   const validateSort: ValidateFunc = async (sort, schema: Model, { auth } = {}) => {
@@ -110,19 +110,19 @@ const createContentAPIValidators = () => {
       transforms.push(traverseQuerySort(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
-    return pipeAsync(...transforms)(sort);
+    await pipeAsync(...transforms)(sort);
   };
 
-  const validateFields: ValidateFunc = (fields, schema: Model) => {
+  const validateFields: ValidateFunc = async (fields, schema: Model) => {
     if (!schema) {
       throw new Error('Missing schema in validateFields');
     }
     const transforms = [validators.defaultValidateFields(schema)];
 
-    return pipeAsync(...transforms)(fields);
+    await pipeAsync(...transforms)(fields);
   };
 
-  const validatePopulate: ValidateFunc = (populate, schema: Model, { auth } = {}) => {
+  const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
@@ -132,7 +132,7 @@ const createContentAPIValidators = () => {
       transforms.push(traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }));
     }
 
-    return pipeAsync(...transforms)(populate);
+    await pipeAsync(...transforms)(populate);
   };
 
   return {
