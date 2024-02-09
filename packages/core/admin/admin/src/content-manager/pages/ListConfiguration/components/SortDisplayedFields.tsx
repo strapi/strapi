@@ -18,7 +18,7 @@ import type { FormData } from '../ListConfigurationPage';
 
 interface SortDisplayedFieldsProps extends Pick<ListLayout, 'layout'> {}
 
-const SortDisplayedFields = ({ layout }: SortDisplayedFieldsProps) => {
+const SortDisplayedFields = () => {
   const { formatMessage } = useIntl();
   const { model, schema } = useDoc();
   const [isDraggingSibling, setIsDraggingSibling] = React.useState(false);
@@ -43,7 +43,7 @@ const SortDisplayedFields = ({ layout }: SortDisplayedFieldsProps) => {
       return [];
     }
 
-    const displayedFieldNames = layout.map((field) => field.name);
+    const displayedFieldNames = values.map((field) => field.name);
 
     return Object.entries(schema.attributes).reduce<Array<FormData['layout'][number]>>(
       (acc, [name, attribute]) => {
@@ -61,7 +61,7 @@ const SortDisplayedFields = ({ layout }: SortDisplayedFieldsProps) => {
       },
       []
     );
-  }, [allMetadata, layout, schema]);
+  }, [allMetadata, values, schema]);
 
   const handleAddField = (field: FormData['layout'][number]) => {
     setLastAction('add');

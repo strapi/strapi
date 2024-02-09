@@ -61,8 +61,8 @@ const ListConfiguration = () => {
             edit: editMeta,
             list: {
               ...listMeta,
-              label,
-              sortable,
+              label: label || listMeta.label,
+              sortable: sortable || listMeta.sortable,
             },
           };
 
@@ -146,7 +146,7 @@ const ListConfiguration = () => {
             >
               <Settings />
               <Divider />
-              <SortDisplayedFields layout={list.layout} />
+              <SortDisplayedFields />
             </Flex>
           </ContentLayout>
         </Form>

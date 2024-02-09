@@ -176,25 +176,6 @@ const FieldContainer = styled(Flex)`
       fill: ${({ theme }) => theme.colors.neutral600};
     }
   }
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary100};
-    border-color: ${({ theme }) => theme.colors.primary200};
-
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
-
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-
-    ${DragButton} {
-      border-right: 1px solid ${({ theme }) => theme.colors.primary200};
-    }
-  }
 `;
 
 const FieldWrapper = styled(Box)`
