@@ -158,6 +158,18 @@ describe('transformFilters', () => {
         input: { category: { id: 'documentId' } },
         expected: { category: { documentId: 'documentId' } },
       },
+      {
+        input: {
+          $and: [{ id: 'documentId' }, { name: 'name' }],
+          category: { $and: [{ id: 'documentId' }, { name: 'name' }] },
+          nothing: { $and: [{ id: 'documentId' }, { _temp: '_temp' }] },
+        },
+        expected: {
+          $and: [{ documentId: 'documentId' }, { name: 'name' }],
+          category: { $and: [{ documentId: 'documentId' }, { name: 'name' }] },
+          nothing: { $and: [{ id: 'documentId' }, { _temp: '_temp' }] },
+        },
+      },
     ];
 
     inputs.forEach(async ({ input, expected }) => {
