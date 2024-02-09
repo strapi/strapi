@@ -20,8 +20,7 @@ interface VersionHeaderProps {
 export const VersionHeader = ({ headerId, version, layout }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
 
-  const mainField = layout.contentType.settings.mainField;
-  const mainFieldValue = version.data[mainField];
+  const mainFieldValue = version.data[layout.contentType.settings.mainField];
   const formattedSubtitle = mainFieldValue
     ? formatMessage(
         {
