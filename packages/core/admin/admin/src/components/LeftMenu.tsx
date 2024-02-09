@@ -135,27 +135,27 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           >
             {pluginsSectionLinks.map((link) => {
               const LinkIcon = link.icon;
-
               return (
-                <Flex key={link.to} justifyContent="space-between">
-                  <NavLink
-                    as={RouterNavLink}
-                    // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                    to={link.to}
-                    icon={<LinkIcon />}
-                    onClick={() => handleClickOnLink(link.to)}
-                  >
-                    {formatMessage(link.intlLabel)}
-                  </NavLink>
-                  {link.lockIcon && (
+                <NavLink
+                  key={link.to}
+                  as={RouterNavLink}
+                  to={link.to}
+                  icon={<LinkIcon />}
+                  onClick={() => handleClickOnLink(link.to)}
+                >
+                  {formatMessage(link.intlLabel)}
+                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                  {/* @ts-ignore */}
+                  {link?.lockIcon && (
                     <Icon
+                      position="absolute"
                       width={`${15 / 16}rem`}
                       height={`${15 / 16}rem`}
                       as={Lock}
-                      marginRight={4}
+                      right={4}
                     />
                   )}
-                </Flex>
+                </NavLink>
               );
             })}
           </NavSection>
