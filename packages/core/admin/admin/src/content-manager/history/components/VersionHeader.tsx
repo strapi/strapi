@@ -19,19 +19,6 @@ export const VersionHeader = ({ headerId, version, layout }: VersionHeaderProps)
   const { formatMessage, formatDate } = useIntl();
 
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
-  const formattedSubtitle = mainFieldValue
-    ? formatMessage(
-        {
-          id: 'content-manager.history.version.subtitle',
-          defaultMessage: '{hasLocale, select, true {{subtitle}, in {locale}} other {{subtitle}}}',
-        },
-        {
-          hasLocale: Boolean(version.locale),
-          subtitle: `${mainFieldValue} (${layout.contentType.info.singularName})`,
-          locale: version.locale?.name,
-        }
-      )
-    : null;
 
   return (
     <HeaderLayout
@@ -43,7 +30,22 @@ export const VersionHeader = ({ headerId, version, layout }: VersionHeaderProps)
         hour: 'numeric',
         minute: 'numeric',
       })}
-      subtitle={<Typography variant="epsilon">{formattedSubtitle}</Typography>}
+      subtitle={
+        <Typography variant="epsilon">
+          {formatMessage(
+            {
+              id: 'content-manager.history.version.subtitle',
+              defaultMessage:
+                '{hasLocale, select, true {{subtitle}, in {locale}} other {{subtitle}}}',
+            },
+            {
+              hasLocale: Boolean(version.locale),
+              subtitle: `${mainFieldValue || ''} (${layout.contentType.info.singularName})`.trim(),
+              locale: version.locale?.name,
+            }
+          )}
+        </Typography>
+      }
       navigationAction={
         <Link
           startIcon={<ArrowLeft />}

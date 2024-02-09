@@ -1,9 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 
-import { UID } from '@strapi/types';
 import { render as renderRTL, screen } from '@tests/utils';
 
 import { VersionHeader } from '../VersionHeader';
+
+import type { UID } from '@strapi/types';
 
 // Mocks
 const layout = {
@@ -63,7 +64,7 @@ describe('VersionHeader', () => {
     expect(screen.getByText('Test Title (kitchensink), in English (en)')).toBeInTheDocument();
   });
 
-  it('should display a title but not a subtitle', () => {
+  it('should display the correct subtitle without an entry title (mainField)', () => {
     render({
       version,
       headerId: '123',
@@ -74,14 +75,13 @@ describe('VersionHeader', () => {
           // @ts-expect-error ignore missing properties
           settings: {
             ...layout.contentType.settings,
-            mainField: 'id', // id or null does not return a subtitle
+            mainField: 'id', // id or null does will not return a value from version.data
           },
         },
       },
     });
 
     expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
-    expect(screen.queryByText('Test Title (kitchensink)')).not.toBeInTheDocument();
-    expect(screen.queryByText('Test Title (kitchensink), in English (en)')).not.toBeInTheDocument();
+    expect(screen.getByText('(kitchensink)')).toBeInTheDocument();
   });
 });

@@ -70,7 +70,7 @@ const HistoryPage = () => {
 
   if (!selectedVersion) {
     // TODO: handle selected version not found when the designs are ready
-    return <Main grow={1} />;
+    return <Main />;
   }
 
   return (
