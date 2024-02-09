@@ -124,7 +124,7 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      // @ts-ignore-error lodash types
+      // @ts-expect-error lodash types
       traverseEntity(throwDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
