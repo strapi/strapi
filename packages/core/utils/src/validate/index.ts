@@ -40,7 +40,7 @@ const createContentAPIValidators = () => {
     const transforms = [
       (data: unknown) => {
         if (isObject(data) && 'id' in data) {
-          throw throwInvalidParam({ key: 'id' });
+          throwInvalidParam({ key: 'id' });
         }
       },
       // non-writable attributes
