@@ -27,7 +27,7 @@ describe('transformFields', () => {
     expect(transformFields(input)).toEqual(expected);
   });
 
-  it('should throw if there is no id present in the fields', () => {
+  it('should add documentId if it is not present in the fields', () => {
     const input = ['name', 'description'];
     const expected = ['name', 'description', 'documentId'];
     expect(transformFields(input)).toEqual(expected);
