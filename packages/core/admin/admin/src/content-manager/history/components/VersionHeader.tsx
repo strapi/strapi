@@ -9,8 +9,6 @@ import { NavLink } from 'react-router-dom';
 
 import type { FormattedLayouts } from '../../utils/layouts';
 
-Contracts.ContentTypes;
-
 interface VersionHeaderProps {
   headerId: string;
   version: Contracts.HistoryVersions.HistoryVersionDataResponse;
