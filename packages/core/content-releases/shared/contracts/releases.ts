@@ -6,7 +6,8 @@ import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 
 export interface Release extends Entity {
   name: string;
-  releasedAt: string;
+  releasedAt: string | null;
+  scheduledAt: string | null;
   actions: ReleaseAction[];
 }
 
@@ -19,7 +20,7 @@ export type Pagination = {
 
 export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
   actions: { meta: { count: number } };
-  createdBy: Pick<SanitizedAdminUser, 'id' | 'firstname' | 'lastname' | 'username'>;
+  createdBy: SanitizedAdminUser;
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
@@ -96,6 +97,7 @@ export declare namespace CreateRelease {
     };
     body: {
       name: string;
+      scheduledAt?: Date;
     };
   }
 
