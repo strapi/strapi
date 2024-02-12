@@ -7931,7 +7931,6 @@ __metadata:
     react-intl: "npm:6.4.1"
     react-redux: "npm:8.1.1"
     react-router-dom: "npm:5.3.4"
-    react-timezone-select: "npm:3.2.3"
     styled-components: "npm:5.3.3"
     typescript: "npm:5.2.2"
     yup: "npm:0.32.9"
@@ -26605,20 +26604,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-timezone-select@npm:3.2.3":
-  version: 3.2.3
-  resolution: "react-timezone-select@npm:3.2.3"
-  dependencies:
-    spacetime: "npm:^7.4.8"
-    timezone-soft: "npm:^1.5.1"
-  peerDependencies:
-    react: ^18 || ^17.0.1 || ^16
-    react-dom: ^18 || ^17.0.1 || ^16
-    react-select: ^5.7.3
-  checksum: c018306eca96d353eed5965f771c2a022de34053e66db7c769ae5d37e32ef3208a6771b463915c445cb094674006272837e965dd439a2d14a6c79c3e6c33c876
-  languageName: node
-  linkType: hard
-
 "react-transition-group@npm:^4.3.0":
   version: 4.4.5
   resolution: "react-transition-group@npm:4.4.5"
@@ -28428,13 +28413,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"spacetime@npm:^7.4.8":
-  version: 7.5.0
-  resolution: "spacetime@npm:7.5.0"
-  checksum: 5b41ecc6bd7526e261a085f348780a19449df265c1878ef0ac91fc2d038ddfbd864c9dd7eb2ab204ede498039eb4043511c6a3fffd0e9b624e23569f33ebfd95
-  languageName: node
-  linkType: hard
-
 "spawn-command@npm:0.0.2":
   version: 0.0.2
   resolution: "spawn-command@npm:0.0.2"
@@ -29526,13 +29504,6 @@ __metadata:
   version: 2.0.0
   resolution: "tildify@npm:2.0.0"
   checksum: 0f5fee93624c4afdf75ee224c3b65aece4817ba5317fd70f49eaf084ea720d73556a6ef3f50079425a773ba3b93805b4524d14057841d4e4336516fdbe80635b
-  languageName: node
-  linkType: hard
-
-"timezone-soft@npm:^1.5.1":
-  version: 1.5.2
-  resolution: "timezone-soft@npm:1.5.2"
-  checksum: 0bbd4c8da5d06ca9d56f5196e97c0b68dd06d3a756b963be337c0f9997d0ee092c52c3dd7f7881a8f46444d926fa4e64c636c0f01873b0185e407941a81a4bbe
   languageName: node
   linkType: hard
 

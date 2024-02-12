@@ -13,14 +13,13 @@ import {
   Box,
   DatePicker,
   TimePicker,
-  SingleSelect,
-  SingleSelectOption,
+  Combobox,
+  ComboboxOption,
 } from '@strapi/design-system';
 import formatISO from 'date-fns/formatISO';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import { useTimezoneSelect, allTimezones, type ITimezoneOption } from 'react-timezone-select';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 import { pluginId } from '../pluginId';
@@ -50,12 +49,11 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  const { parseTimezone, options: timezoneOptions } = useTimezoneSelect({
-    labelStyle: 'original',
-    timezones: allTimezones,
-  });
-  const usersTimezone = parseTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const { timezoneList, currentTimezone = { offset: 'GMT+00:00' } } = useTimezone();
 
+  /**
+   * Generate scheduled time using, selected date, time and timezone
+   */
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
@@ -64,16 +62,16 @@ export const ReleaseModal = ({
     const combinedDateTime = new Date(date);
     combinedDateTime.setHours(hours);
     combinedDateTime.setMinutes(minutes);
-    const { offset } = parseTimezone(timezone); // Offset is in hours
-    if (!offset && offset !== 0) {
-      return combinedDateTime;
-    }
+    const selectedTimezone = timezoneList.find((zone) => zone.offset === timezone);
+    const timezoneOffset = selectedTimezone!.offset.slice(3);
+    const offset = timezoneOffset.length > 0 ? parseInt(timezoneOffset, 10) : 0;
+
     // Adjust the date based on the selected timezone offset
-    const combinedDate = combinedDateTime.getTime();
-    const combinedDateWithOffset = combinedDate - offset * 60 * 60 * 1000; // Convert offset in hours to milliseconds
+    const combinedTime = combinedDateTime.getTime();
+    const combinedTimeWithOffset = combinedTime - offset * 60 * 60 * 1000; // Convert offset in hours to milliseconds
 
     // Because new Date always adds local timezone offset, remove it to set the correct UTC time
-    const dateObject = new Date(combinedDateWithOffset);
+    const dateObject = new Date(combinedTimeWithOffset);
     const scheduledDate = new Date(
       dateObject.getTime() - dateObject.getTimezoneOffset() * 60 * 1000
     );
@@ -104,7 +102,7 @@ export const ReleaseModal = ({
         }}
         initialValues={{
           ...initialValues,
-          timezone: initialValues.timezone ? initialValues.timezone : usersTimezone.value,
+          timezone: initialValues.timezone ? initialValues.timezone : currentTimezone.offset,
         }}
         validationSchema={RELEASE_SCHEMA}
       >
@@ -158,8 +156,6 @@ export const ReleaseModal = ({
                           })}
                           name="date"
                           onChange={(date) => {
-                            // TODO: UT error: It looks like you're passing a string as representation of a Date to the DatePicker.
-                            // This is deprecated, look to passing a Date instead.
                             const isoFormatDate = date
                               ? formatISO(date, { representation: 'date' })
                               : null;
@@ -172,7 +168,8 @@ export const ReleaseModal = ({
                           onClear={() => {
                             setFieldValue('date', null);
                           }}
-                          selectedDate={values.date || undefined}
+                          selectedDate={values.date ? new Date(values.date) : undefined}
+                          required
                         />
                       </Box>
                       <Box width="100%">
@@ -193,17 +190,18 @@ export const ReleaseModal = ({
                             setFieldValue('time', '');
                           }}
                           value={values.time || undefined}
+                          required
                         />
                       </Box>
                     </Flex>
-                    <SingleSelect
+                    <Combobox
                       label={formatMessage({
                         id: 'content-releases.modal.form.input.label.timezone',
                         defaultMessage: 'Timezone',
                       })}
                       value={values.timezone}
                       onChange={(timezone) => {
-                        if (typeof timezone === 'string') {
+                        if (timezone) {
                           setFieldValue('timezone', timezone);
                         }
                       }}
@@ -212,12 +210,12 @@ export const ReleaseModal = ({
                       }}
                       required
                     >
-                      {timezoneOptions.map((timezone: ITimezoneOption) => (
-                        <SingleSelectOption key={timezone.value} value={timezone.value}>
+                      {timezoneList.map((timezone) => (
+                        <ComboboxOption key={timezone.offset} value={timezone.offset}>
                           {timezone.label}
-                        </SingleSelectOption>
+                        </ComboboxOption>
                       ))}
-                    </SingleSelect>
+                    </Combobox>
                   </>
                 )}
               </Flex>
@@ -234,6 +232,7 @@ export const ReleaseModal = ({
                   loading={isLoading}
                   disabled={
                     !dirty ||
+                    !values.name ||
                     (values.isScheduled && (!values.time || !values.date || !values.timezone))
                   }
                   type="submit"
@@ -253,4 +252,97 @@ export const ReleaseModal = ({
       </Formik>
     </ModalLayout>
   );
+};
+
+/**
+ * Timezone hook - Generates list of timezones and user's current timezone
+ */
+
+interface ITimezoneOption {
+  city?: string;
+  offset: string;
+  value: string;
+}
+
+const useTimezone = () => {
+  const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
+    /**
+     * This will be in the format GMT${OFFSET} where offset could be
+     * nothing, a positive four digit string e.g. +05:00 or -08:00
+     */
+    const offsetPart = new Intl.DateTimeFormat('en', {
+      timeZone: timezone,
+      timeZoneName: 'longOffset',
+    })
+      .formatToParts()
+      .find((part) => part.type === 'timeZoneName');
+
+    let offset = offsetPart ? offsetPart.value : '';
+
+    /**
+     * We want to show time based on UTC, not GMT so we swap that.
+     *
+     * TODO: investigate if just swapping to UTC will cause issues with daylight savings time,
+     * for example london is normally GMT+0, but in summer it would be GMT+1
+     */
+    // let utcOffset = offset.replace('GMT', 'UTC');
+
+    /**
+     * For perfect UTC (UTC+0:00) we only get the string UTC.
+     * So we need to append the 0's.
+     */
+    if (!offset.includes('+') && !offset.includes('-')) {
+      offset = `${offset}+00:00`;
+    }
+
+    /**
+     * Timezones come in the format `${CONTINENT}/${CITY}` if city
+     * is two separate words e.g. `BOA_VISTA` we want them separated
+     * by spaces.
+     *
+     * So America/Boa_Vista, becomes:
+     * - Boa_Vista
+     * - Boa Vista
+     */
+    const city = timezone.split('/')[1].split('_').join(' ');
+
+    return { city, offset, value: timezone } satisfies ITimezoneOption;
+  });
+
+  const groupedTimezonesByOffset = timezoneList.reduce<Record<string, ITimezoneOption[]>>(
+    (acc, current) => {
+      if (!acc[current.offset]) {
+        acc[current.offset] = [];
+      }
+
+      acc[current.offset] = [...acc[current.offset], current];
+
+      return acc;
+    },
+    {}
+  );
+
+  const options = Object.entries(groupedTimezonesByOffset)
+    .map(([offset, timezone]) => {
+      const allTheCities = timezone.map((zone) => zone.city).join(', ');
+
+      return {
+        value: timezone[0].value,
+        label: `${offset} - ${allTheCities}`,
+        offset,
+      };
+    })
+    .sort((a, b) => {
+      const offsetA = parseInt(a.offset.replace('GMT', ''));
+      const offsetB = parseInt(b.offset.replace('GMT', ''));
+
+      if (offsetA < offsetB) return -1;
+      return 1;
+    });
+
+  const currentTimezone = timezoneList.find(
+    (timezone) => timezone.value === Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
+
+  return { timezoneList: options, currentTimezone };
 };

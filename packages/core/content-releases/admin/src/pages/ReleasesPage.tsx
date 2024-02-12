@@ -231,6 +231,7 @@ const ReleasesPage = () => {
     const createReleasePayload = {
       name: values.name,
       scheduledAt: values.scheduledAt,
+      scheduledTimezone: values.timezone,
     };
 
     const response = await createRelease(createReleasePayload);

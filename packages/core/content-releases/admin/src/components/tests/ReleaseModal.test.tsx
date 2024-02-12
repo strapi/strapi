@@ -5,19 +5,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { pluginId } from '../../pluginId';
 import { ReleaseModal } from '../ReleaseModal';
 
-const mockUseTimezoneSelect = jest.fn(() => ({
-  parseTimezone: jest.fn(),
-  options: [
-    { value: 'timezone1', label: 'Timezone 1' },
-    { value: 'timezone2', label: 'Timezone 2' },
-  ],
-}));
-
-jest.mock('react-timezone-select', () => ({
-  ...jest.requireActual('react-timezone-select'),
-  useTimezoneSelect: mockUseTimezoneSelect,
-}));
-
 describe('ReleaseModal', () => {
   it('renders correctly the dialog content on create', async () => {
     const handleCloseMocked = jest.fn();
@@ -26,7 +13,7 @@ describe('ReleaseModal', () => {
         <ReleaseModal
           handleClose={handleCloseMocked}
           handleSubmit={jest.fn()}
-          initialValues={{ name: '', date: null, time: '', timezone: '' }}
+          initialValues={{ name: '', date: null, time: '', timezone: '', scheduledAt: null }}
           isLoading={false}
         />
       </MemoryRouter>
@@ -57,7 +44,7 @@ describe('ReleaseModal', () => {
       <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
-        initialValues={{ name: 'title', date: null, time: '', timezone: '' }}
+        initialValues={{ name: 'title', date: null, time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />
     );
@@ -88,7 +75,7 @@ describe('ReleaseModal', () => {
       <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
-        initialValues={{ name: 'title', date: null, time: '', timezone: '' }}
+        initialValues={{ name: 'title', date: null, time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />
     );
@@ -115,7 +102,7 @@ describe('ReleaseModal', () => {
     expect(dateField).toBeInTheDocument();
 
     const time = within(dialogContainer).getByRole('combobox', {
-      name: 'Time',
+      name: /time\s/i,
     });
     expect(time).toBeInTheDocument();
 
@@ -131,7 +118,7 @@ describe('ReleaseModal', () => {
       <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
-        initialValues={{ name: 'title', date: null, time: '', timezone: '' }}
+        initialValues={{ name: 'title', date: null, time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />
     );
@@ -156,7 +143,7 @@ describe('ReleaseModal', () => {
     await user.click(screen.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }));
 
     const time = within(dialogContainer).getByRole('combobox', {
-      name: 'Time',
+      name: 'Time *',
     });
 
     await user.click(time);
@@ -166,7 +153,7 @@ describe('ReleaseModal', () => {
       name: /timezone/i,
     });
     await user.click(timezone);
-    await user.click(screen.getByRole('option', { name: 'One' }));
+    await user.click(screen.getByRole('option', { name: 'GMT-11:00 - Midway, Niue, Pago Pago' }));
 
     // save button is enabled after filling all scheduling fields
     expect(dialogSaveButton).toBeEnabled();
