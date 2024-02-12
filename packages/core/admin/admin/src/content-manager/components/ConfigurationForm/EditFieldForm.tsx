@@ -98,6 +98,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
 
       return { data: [] };
     },
+    skip: attribute.type !== 'relation',
   });
 
   return (
@@ -159,7 +160,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 name: 'editable',
                 label: formatMessage({
                   id: getTranslation('containers.edit-settings.modal-form.editable'),
-                  defaultMessage: 'Label',
+                  defaultMessage: 'Editable',
                 }),
                 size: 6,
                 type: 'boolean' as const,
@@ -184,7 +185,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 name: 'size',
                 label: formatMessage({
                   id: getTranslation('containers.ListSettingsView.modal-form.size'),
-                  defaultMessage: 'Label',
+                  defaultMessage: 'Size',
                 }),
                 size: 6,
                 options: [

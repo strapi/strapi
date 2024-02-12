@@ -2219,12 +2219,6 @@ const CM_LAYOUT_MOCK_DATA = {
             size: 12,
           },
         ],
-        [
-          {
-            name: 'postal_code',
-            size: 6,
-          },
-        ],
       ],
     },
   },

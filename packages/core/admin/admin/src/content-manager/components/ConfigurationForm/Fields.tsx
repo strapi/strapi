@@ -49,14 +49,12 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
   const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
 
-  const meta = Object.entries(metadatas);
-
   /**
    * Get the fields that are not already in the layout
    * But also check that they are visible before we give users
    * the option to display them. e.g. `id` is not visible.
    */
-  const remainingFields = meta.reduce<Field[]>((acc, current) => {
+  const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
     const [name, { visible, ...field }] = current;
 
     if (!existingFields.includes(name) && visible === true) {

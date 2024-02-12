@@ -17,7 +17,7 @@ describe('EditConfigurationPage', () => {
     const { getByRole, findByRole } = render(
       <Routes>
         <Route
-          path="/content-manager/:contentType/:slug/configuration/edit"
+          path="/content-manager/:collectionType/:slug/configuration/edit"
           element={<EditConfigurationPage />}
         />
       </Routes>,
@@ -37,7 +37,6 @@ describe('EditConfigurationPage', () => {
     expect(getByRole('combobox', { name: 'Entry title' })).toBeInTheDocument();
 
     expect(getByRole('heading', { name: 'View' })).toBeInTheDocument();
-    expect(getByRole('link', { name: 'Edit the content type' })).toBeInTheDocument();
 
     EDIT_ATTRIBUTES.forEach((attributeRow) =>
       attributeRow.forEach((attribute) => {
@@ -50,10 +49,10 @@ describe('EditConfigurationPage', () => {
   });
 
   it('should add field and set it to disabled once all fields are showing', async () => {
-    const { user, findByRole, getByRole } = render(
+    const { user, findByRole, getByRole, findByText } = render(
       <Routes>
         <Route
-          path="/content-manager/:contentType/:slug/configuration/edit"
+          path="/content-manager/:collectionType/:slug/configuration/edit"
           element={<EditConfigurationPage />}
         />
       </Routes>,
@@ -81,16 +80,14 @@ describe('EditConfigurationPage', () => {
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
-
-    await user.click(getByRole('button', { name: 'Confirm' }));
+    await findByText('Saved');
   });
 
   it('should delete field', async () => {
-    const { queryByRole, findByRole, getByRole, user } = render(
+    const { queryByRole, findByText, findByRole, getByRole, user } = render(
       <Routes>
         <Route
-          path="/content-manager/:contentType/:slug/configuration/edit"
+          path="/content-manager/:collectionType/:slug/configuration/edit"
           element={<EditConfigurationPage />}
         />
       </Routes>,
@@ -112,8 +109,6 @@ describe('EditConfigurationPage', () => {
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
-
-    await user.click(getByRole('button', { name: 'Confirm' }));
+    await findByText('Saved');
   });
 });
