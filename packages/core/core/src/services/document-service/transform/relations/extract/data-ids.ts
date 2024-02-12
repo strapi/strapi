@@ -7,7 +7,7 @@ import { isShortHand, isLongHand } from '../utils/data';
 
 type ExtractedId = { id: ID; locale?: string };
 
-const isLocalizedContentType = (uid: Common.UID.Schema) => {
+export const isLocalizedContentType = (uid: Common.UID.Schema) => {
   const model = strapi.getModel(uid);
   return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
 };
@@ -25,7 +25,7 @@ const handlePrimitive = (
     return [{ id: relation }]; // id
   }
   if (isLongHand(relation)) {
-    // Let this be handled
+    // @ts-expect-error - TODO: Add relation type
     return [{ id: relation.id, locale: relation.locale }]; // { id, locale? }
   }
   if (Array.isArray(relation)) {

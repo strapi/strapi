@@ -4,6 +4,7 @@ import { isObject, isNil } from 'lodash/fp';
 import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
+import { isLocalizedContentType } from '../extract/data-ids';
 
 const isNumeric = (value: any): value is number => {
   const parsed = parseInt(value, 10);
@@ -34,7 +35,8 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     // It's already an entry id
     if (isNumeric(relation.id)) return relation;
 
-    const id = getId(relation.id) as T;
+    // @ts-expect-error - TODO: Add relation type
+    const id = getId(relation.id, relation.locale) as T;
 
     // If the id is not found, return undefined
     if (!id) return undefined;
@@ -125,11 +127,14 @@ const transformDataIdsVisitor = (
         // TODO: Handle this differently
         if (EXCLUDED_FIELDS.includes(key)) return;
 
-        const getId = (documentId: ID): ID | null => {
+        const getId = (documentId: ID, locale?: string): ID | null => {
+          const isTargetLocalized = isLocalizedContentType(target as Common.UID.Schema);
+          const targetLocale = locale || opts.locale;
+
           const entryId = idMap.get({
             uid: target,
             documentId: documentId as string,
-            locale: opts.locale,
+            locale: isTargetLocalized ? targetLocale : null,
             isDraft: opts.isDraft,
           });
 
