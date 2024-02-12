@@ -28,7 +28,7 @@ export interface FormValues {
   name: string;
   date: Date | null;
   time: string;
-  timezone: string;
+  timezone?: string;
   isScheduled?: boolean;
   scheduledAt: Date | null;
 }
@@ -277,22 +277,19 @@ const useTimezone = () => {
       .formatToParts()
       .find((part) => part.type === 'timeZoneName');
 
-    let offset = offsetPart ? offsetPart.value : '';
+    const offset = offsetPart ? offsetPart.value : '';
 
     /**
      * We want to show time based on UTC, not GMT so we swap that.
-     *
-     * TODO: investigate if just swapping to UTC will cause issues with daylight savings time,
-     * for example london is normally GMT+0, but in summer it would be GMT+1
      */
-    // let utcOffset = offset.replace('GMT', 'UTC');
+    let utcOffset = offset.replace('GMT', 'UTC');
 
     /**
      * For perfect UTC (UTC+0:00) we only get the string UTC.
      * So we need to append the 0's.
      */
-    if (!offset.includes('+') && !offset.includes('-')) {
-      offset = `${offset}+00:00`;
+    if (!utcOffset.includes('+') && !utcOffset.includes('-')) {
+      utcOffset = `${utcOffset}+00:00`;
     }
 
     /**
@@ -306,7 +303,7 @@ const useTimezone = () => {
      */
     const city = timezone.split('/')[1].split('_').join(' ');
 
-    return { city, offset, value: timezone } satisfies ITimezoneOption;
+    return { city, offset: utcOffset, value: timezone } satisfies ITimezoneOption;
   });
 
   const groupedTimezonesByOffset = timezoneList.reduce<Record<string, ITimezoneOption[]>>(
@@ -333,8 +330,8 @@ const useTimezone = () => {
       };
     })
     .sort((a, b) => {
-      const offsetA = parseInt(a.offset.replace('GMT', ''));
-      const offsetB = parseInt(b.offset.replace('GMT', ''));
+      const offsetA = parseInt(a.offset.replace('UTC', ''));
+      const offsetB = parseInt(b.offset.replace('UTC', ''));
 
       if (offsetA < offsetB) return -1;
       return 1;

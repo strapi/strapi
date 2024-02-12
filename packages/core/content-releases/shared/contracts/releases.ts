@@ -9,6 +9,7 @@ export interface Release extends Entity {
   releasedAt: string | null;
   scheduledAt: string | null;
   actions: ReleaseAction[];
+  timezone?: string;
 }
 
 export type Pagination = {

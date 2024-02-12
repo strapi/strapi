@@ -153,7 +153,7 @@ describe('ReleaseModal', () => {
       name: /timezone/i,
     });
     await user.click(timezone);
-    await user.click(screen.getByRole('option', { name: 'GMT-11:00 - Midway, Niue, Pago Pago' }));
+    await user.click(screen.getByRole('option', { name: 'UTC-11:00 - Midway, Niue, Pago Pago' }));
 
     // save button is enabled after filling all scheduling fields
     expect(dialogSaveButton).toBeEnabled();

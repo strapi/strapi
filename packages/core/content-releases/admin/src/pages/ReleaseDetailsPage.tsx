@@ -838,7 +838,7 @@ const ReleaseDetailsPage = () => {
 
   const title = releaseData?.name || '';
   const scheduledAt = releaseData?.scheduledAt ? new Date(releaseData.scheduledAt) : null;
-  const timezone = releaseData?.scheduledTimezone;
+  const timezone = releaseData?.timezone;
 
   let time = '';
   if (scheduledAt) {
@@ -852,7 +852,7 @@ const ReleaseDetailsPage = () => {
       id: releaseId,
       name: values.name,
       scheduledAt: values.scheduledAt,
-      scheduledTimezone: values.timezone,
+      timezone: values.timezone,
     };
 
     const response = await updateRelease(editReleasePayload);
