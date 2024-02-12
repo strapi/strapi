@@ -112,7 +112,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
   getStatus(
     document: DocumentVersionSelector,
-    otherStatusDocument?: DocumentMetadata['availableStatus']
+    otherDocumentStatuses?: DocumentMetadata['availableStatus']
   ) {
     const isPublished = document.publishedAt !== null;
 
@@ -122,7 +122,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     }
 
     // Document is a draft version
-    const publishedVersion = otherStatusDocument?.find((d) => d.publishedAt !== null);
+    const publishedVersion = otherDocumentStatuses?.find((d) => d.publishedAt !== null);
 
     // There is only a draft version
     if (!publishedVersion) {
@@ -130,7 +130,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     }
 
     // The draft version is the same as the published version
-    if (publishedVersion && areDatesEqual(document.updatedAt, publishedVersion.updatedAt, 500)) {
+    if (areDatesEqual(document.updatedAt, publishedVersion.updatedAt, 500)) {
       return CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
