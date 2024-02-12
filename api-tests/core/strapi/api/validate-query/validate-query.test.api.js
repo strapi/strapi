@@ -873,7 +873,7 @@ describe('Core API - Validate', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
             ['Document A', 1],
-            ['OO', 2],
+            [' OO', 2],
             ['Document', documentsLength],
           ])('Successfully applies search: %s', async (search, expectedLength) => {
             const res = await rq.get('/api/documents', { qs: { _q: search } });
