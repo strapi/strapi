@@ -63,6 +63,7 @@ export interface JoinColumn {
   name: string;
   referencedColumn: string;
   referencedTable?: string;
+  columnType?: ScalarAttribute['type'];
 }
 
 export interface BaseJoinTable {

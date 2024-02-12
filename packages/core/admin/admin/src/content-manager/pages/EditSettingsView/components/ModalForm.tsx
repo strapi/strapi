@@ -6,8 +6,8 @@ import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { selectSchemas } from '../../../layout';
 import { getTranslation } from '../../../utils/translations';
-import { selectSchemas } from '../../App';
 import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 

@@ -34,6 +34,7 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -88,16 +89,16 @@ const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
 `;
 
 const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.danger600};
   }
@@ -134,20 +135,24 @@ const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema: Schema.ContentType;
+  schema?: Schema.ContentType;
   components: { [key: Schema.Component['uid']]: Schema.Component };
   entry: ReleaseActionEntry;
 }
 
-const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument();
+  const { validate } = unstable_useDocument(
+    {
+      collectionType: schema?.kind ?? '',
+      model: schema?.uid ?? '',
+    },
+    {
+      skip: !schema,
+    }
+  );
 
-  const { errors } = validate(entry, {
-    contentType: schema,
-    components,
-    isCreatingEntry: false,
-  });
+  const errors = validate(entry) ?? {};
 
   if (Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)
@@ -248,6 +253,7 @@ const ReleaseDetailsLayout = ({
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
   const dispatch = useTypedDispatch();
+  const { trackUsage } = useTracking();
 
   const release = data?.data;
 
@@ -272,6 +278,14 @@ const ReleaseDetailsLayout = ({
           defaultMessage: 'Release was published successfully.',
         }),
       });
+
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+
+      trackUsage('didPublishRelease', {
+        totalEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
+      });
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -294,6 +308,25 @@ const ReleaseDetailsLayout = ({
 
   const handleRefresh = () => {
     dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+  };
+
+  const getCreatedByUser = () => {
+    if (!release?.createdBy) {
+      return null;
+    }
+
+    // Favor the username
+    if (release.createdBy.username) {
+      return release.createdBy.username;
+    }
+
+    // Firstname may not exist if created with SSO
+    if (release.createdBy.firstname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname || ''}`.trim();
+    }
+
+    // All users must have at least an email
+    return release.createdBy.email;
   };
 
   if (isLoadingDetails) {
@@ -320,9 +353,7 @@ const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = release.createdBy.lastname
-    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
-    : `${release.createdBy.firstname}`;
+  const hasCreatedByUser = Boolean(getCreatedByUser());
 
   return (
     <Main aria-busy={isLoadingDetails}>
@@ -349,7 +380,7 @@ const ReleaseDetailsLayout = ({
               <IconButton
                 label={formatMessage({
                   id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release actions',
+                  defaultMessage: 'Release edit and delete menu',
                 })}
                 ref={moreButtonRef}
                 onClick={handleTogglePopover}
@@ -402,9 +433,10 @@ const ReleaseDetailsLayout = ({
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage: ' by {createdBy}',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
                         },
-                        { createdBy }
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
@@ -479,6 +511,9 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(PERMISSIONS);
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -609,7 +644,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         <Flex>
           <SingleSelect
             aria-label={formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.groupBy.label',
+              id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
               defaultMessage: 'Group by',
             })}
             customizeContent={(value) =>
@@ -635,7 +670,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         </Flex>
         {Object.keys(releaseActions).map((key) => (
           <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
-            <Flex>
+            <Flex role="separator" aria-label={key}>
               <Badge>{key}</Badge>
             </Flex>
             <Table.Root
@@ -650,7 +685,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               <Table.Content>
                 <Table.Head>
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.name',
                       defaultMessage: 'name',
@@ -658,7 +693,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     name="name"
                   />
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
                       defaultMessage: 'locale',
@@ -666,7 +701,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     name="locale"
                   />
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
                       defaultMessage: 'content-type',
@@ -674,7 +709,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     name="content-type"
                   />
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.action',
                       defaultMessage: 'action',
@@ -683,7 +718,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                   />
                   {!release.releasedAt && (
                     <Table.HeaderCell
-                      fieldSchemaType="string"
+                      attribute={{ type: 'string' }}
                       label={formatMessage({
                         id: 'content-releases.page.ReleaseDetails.table.header.label.status',
                         defaultMessage: 'status',
@@ -730,6 +765,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                               selected={type}
                               handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
                               name={`release-action-${id}-type`}
+                              disabled={!canUpdate}
                             />
                           )}
                         </Td>

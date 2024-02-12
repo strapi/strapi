@@ -40,7 +40,7 @@ describe('Test type string', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 'Some string',
     });
   });
@@ -62,14 +62,14 @@ describe('Test type string', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withstring.withstring/${res.body.id}`,
+      `/content-manager/collection-types/api::withstring.withstring/${res.body.data.id}`,
       {
         body: { field: 'Updated string' },
       }
     );
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      id: res.body.data.id,
       field: 'Updated string',
     });
   });

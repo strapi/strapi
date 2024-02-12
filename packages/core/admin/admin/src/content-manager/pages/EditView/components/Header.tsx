@@ -1,266 +1,250 @@
-import * as React from 'react';
-
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Flex,
-  HeaderLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Flex, Icon, Status, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { AllowedActions, useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, ExclamationMarkCircle } from '@strapi/icons';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
+import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
+import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
+import { capitalise } from '../../../../utils/strings';
+import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentRBAC } from '../../../features/DocumentRBAC';
+import { useDoc } from '../../../hooks/useDocument';
+import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { getTranslation } from '../../../utils/translations';
 
+import { DocumentActionsMenu } from './DocumentActions';
+
+import type {
+  ContentManagerPlugin,
+  DocumentActionComponent,
+  DocumentActionProps,
+} from '../../../../core/apis/content-manager';
+
+/* -------------------------------------------------------------------------------------------------
+ * Header
+ * -----------------------------------------------------------------------------------------------*/
+
 interface HeaderProps {
-  allowedActions: AllowedActions;
+  isCreating?: boolean;
+  status?: 'draft' | 'published' | 'modified';
+  title?: string;
 }
 
-const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: HeaderProps) => {
-  const {
-    initialData,
-    isCreatingEntry,
-    isSingleType,
-    status,
-    layout,
-    modifiedData,
-    onPublish,
-    onUnpublish,
-    publishConfirmation: { show: showPublishConfirmation, draftCount } = {},
-    onPublishPromptDismissal,
-  } = useCMEditViewDataManager();
-  const navigate = useNavigate();
-  const [showWarningUnpublish, setWarningUnpublish] = React.useState(false);
+const Header = ({
+  isCreating,
+  status = 'draft',
+  title: documentTitle = 'Untitled',
+}: HeaderProps) => {
   const { formatMessage } = useIntl();
 
-  const currentContentTypeMainField = get(layout, ['settings', 'mainField'], 'id');
-  const currentContentTypeName = get(layout, ['info', 'displayName'], 'NOT FOUND');
-  const didChangeData =
-    !isEqual(initialData, modifiedData) ||
-    (isCreatingEntry && Object.keys(modifiedData).length > 0);
+  const title = isCreating
+    ? formatMessage({
+        id: getTranslation('containers.Edit.pluginHeader.title.new'),
+        defaultMessage: 'Create an entry',
+      })
+    : documentTitle;
 
-  const createEntryIntlTitle = formatMessage({
-    id: getTranslation('containers.Edit.pluginHeader.title.new'),
-    defaultMessage: 'Create an entry',
-  });
-
-  let title = createEntryIntlTitle;
-
-  if (!isCreatingEntry && !isSingleType) {
-    title = initialData[currentContentTypeMainField] || currentContentTypeName;
-  }
-
-  if (isSingleType) {
-    title = currentContentTypeName;
-  }
-
-  let primaryAction = null;
-
-  if (isCreatingEntry && canCreate) {
-    primaryAction = (
-      <Flex gap={2}>
-        <Button disabled startIcon={<Check />} variant="secondary">
-          {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-        </Button>
-        <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
-          {formatMessage({
-            id: getTranslation('containers.Edit.submit'),
-            defaultMessage: 'Save',
-          })}
-        </Button>
-      </Flex>
-    );
-  }
-
-  if (!isCreatingEntry && canUpdate) {
-    const isPublished = typeof initialData.publishedAt === 'string';
-    const isPublishButtonLoading = isPublished
-      ? status === 'unpublish-pending'
-      : status === 'publish-pending';
-    const pubishButtonLabel = isPublished
-      ? { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }
-      : { id: 'app.utils.publish', defaultMessage: 'Publish' };
-
-    const onClick = isPublished ? () => setWarningUnpublish(true) : () => onPublish?.();
-
-    primaryAction = (
-      <Flex>
-        {canPublish && (
-          <Button
-            disabled={didChangeData || !initialData.createdAt}
-            loading={isPublishButtonLoading}
-            onClick={onClick}
-            startIcon={<Check />}
-            variant="secondary"
-          >
-            {formatMessage(pubishButtonLabel)}
-          </Button>
-        )}
-        <Box paddingLeft={canPublish ? 2 : 0}>
-          <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
-            {formatMessage({
-              id: getTranslation('containers.Edit.submit'),
-              defaultMessage: 'Save',
-            })}
-          </Button>
-        </Box>
-      </Flex>
-    );
-  }
-
-  const toggleWarningUnpublish = () => setWarningUnpublish((prevState) => !prevState);
-
-  const handleUnpublish = () => {
-    toggleWarningUnpublish();
-    onUnpublish?.();
-  };
-
-  const subtitle = `${formatMessage({
-    id: getTranslation('api.id'),
-    defaultMessage: 'API ID',
-    // @ts-expect-error – issue comes from the context not having the correct layout from the admin.
-  })}: ${layout?.apiID}`;
+  const statusVariant =
+    status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
 
   return (
-    <>
-      <HeaderLayout
-        title={title.toString()}
-        primaryAction={primaryAction}
-        subtitle={subtitle}
-        navigationAction={
-          <Link
-            startIcon={<ArrowLeft />}
-            // Needed in order to redirect the user with the correct search params
-            // Since parts is using a link from react-router-dom the best way to do it is to disable the
-            // event
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(-1);
-            }}
-            as={NavLink}
-            // @ts-expect-error – DS issue with inferring props from the `as` prop.
-            to=""
-          >
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
-      />
-      <Dialog
-        onClose={toggleWarningUnpublish}
-        title="Confirmation"
-        aria-labelledby="confirmation"
-        aria-describedby="confirm-description"
-        isOpen={showWarningUnpublish}
-      >
-        <DialogBody icon={<ExclamationMarkCircle />}>
-          <Flex direction="column" alignItems="stretch" gap={2}>
-            <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-              <Typography id="confirm-description">
-                {formatMessage({
-                  id: getTranslation('popUpWarning.warning.unpublish'),
-                  defaultMessage: 'Unpublish this content will automatically change it to a draft.',
-                })}
-              </Typography>
-            </Flex>
-            <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-              <Typography id="confirm-description">
-                {formatMessage({
-                  id: getTranslation('popUpWarning.warning.unpublish-question'),
-                  defaultMessage: 'Are you sure you want to unpublish it?',
-                })}
-              </Typography>
-            </Flex>
-          </Flex>
-        </DialogBody>
-        <DialogFooter
-          startAction={
-            <Button onClick={toggleWarningUnpublish} variant="tertiary">
-              {formatMessage({
-                id: 'components.popUpWarning.button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Button>
-          }
-          endAction={
-            <Button variant="danger-light" onClick={handleUnpublish}>
-              {formatMessage({
-                id: 'components.popUpWarning.button.confirm',
-                defaultMessage: 'Confirm',
-              })}
-            </Button>
-          }
-        />
-      </Dialog>
-      <Dialog
-        // @ts-expect-error – Context issue with it living in the helper-plugin
-        onClose={onPublishPromptDismissal}
-        title={formatMessage({
-          id: getTranslation(`popUpWarning.warning.has-draft-relations.title`),
-          defaultMessage: 'Confirmation',
+    <Flex direction="column" alignItems="flex-start" paddingTop={8} paddingBottom={4} gap={3}>
+      {/* TODO: implement back button behaviour, track issue - https://strapi-inc.atlassian.net/browse/CONTENT-2173 */}
+      <Link startIcon={<ArrowLeft />}>
+        {formatMessage({
+          id: 'global.back',
+          defaultMessage: 'Back',
         })}
-        labelledBy="confirmation"
-        describedBy="confirm-description"
-        // @ts-expect-error – Context issue with it living in the helper-plugin
-        isOpen={showPublishConfirmation}
-      >
-        <DialogBody icon={<ExclamationMarkCircle />}>
-          <Flex direction="column" alignItems="stretch" gap={2}>
-            <Typography textAlign="center" id="confirm-description">
-              {draftCount}
-              {/* @ts-expect-error – this is an issue with rendering a component with the formatMessage helper, perhaps a mis-match in types? */}
-              {formatMessage(
-                {
-                  id: getTranslation(`popUpwarning.warning.has-draft-relations.message`),
-                  defaultMessage:
-                    '<b>{count, plural, one { relation is} other { relations are}}</b> not published yet and might lead to unexpected behavior.',
-                },
-                {
-                  b: (chunks) => <Typography fontWeight="bold">{chunks}</Typography>,
-                  count: draftCount,
-                }
-              )}
-            </Typography>
-            <Typography textAlign="center" id="confirm-description">
-              {formatMessage({
-                id: getTranslation('popUpWarning.warning.publish-question'),
-                defaultMessage: 'Do you still want to publish?',
-              })}
-            </Typography>
-          </Flex>
-        </DialogBody>
-        <DialogFooter
-          startAction={
-            <Button onClick={onPublishPromptDismissal} variant="tertiary">
-              {formatMessage({
-                id: 'components.popUpWarning.button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Button>
-          }
-          endAction={
-            <Button variant="success" onClick={onPublish}>
-              {formatMessage({
-                id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
-                defaultMessage: 'Publish',
-              })}
-            </Button>
-          }
-        />
-      </Dialog>
-    </>
+      </Link>
+      <Flex width="100%" justifyContent="space-between" paddingTop={1}>
+        <Typography variant="alpha" as="h1">
+          {title}
+        </Typography>
+        <HeaderActions />
+      </Flex>
+      <Status showBullet={false} size={'S'} variant={statusVariant}>
+        <Typography as="span" variant="omega" fontWeight="bold">
+          {capitalise(status)}
+        </Typography>
+      </Status>
+    </Flex>
   );
 };
 
-export { Header };
+/* -------------------------------------------------------------------------------------------------
+ * HeaderActions
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @description Contains the document actions that have `position: header`, if there are
+ * none we still render the menu because we render the information about the document there.
+ */
+const HeaderActions = () => {
+  const [
+    {
+      query: { status = 'draft' },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
+  const { model, id, document, meta, collectionType } = useDoc();
+  const { plugins } = useStrapiApp();
+
+  const props = {
+    activeTab: status,
+    model,
+    id,
+    document,
+    meta,
+    collectionType,
+  } satisfies DocumentActionProps;
+
+  return (
+    <Flex gap={2}>
+      <DescriptionComponentRenderer
+        props={props}
+        descriptions={(
+          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+        ).getDocumentActions()}
+      >
+        {(actions) => {
+          const headerActions = actions.filter((act) => act.position === 'header');
+
+          return <DocumentActionsMenu actions={headerActions} />;
+        }}
+      </DescriptionComponentRenderer>
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DocumentActionComponents
+ * -----------------------------------------------------------------------------------------------*/
+
+const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model }) => {
+  const navigate = useNavigate();
+  const { formatMessage } = useIntl();
+
+  return {
+    label: formatMessage({
+      id: 'app.links.configure-view',
+      defaultMessage: 'Configure the view',
+    }),
+    icon: <StyledCog />,
+    onClick: () => {
+      navigate(`../${collectionType}/${model}/configurations/edit`);
+    },
+    position: 'header',
+  };
+};
+
+ConfigureTheViewAction.type = 'configure-the-view';
+
+/**
+ * Because the icon system is completely broken, we have to do
+ * this to remove the fill from the cog.
+ */
+const StyledCog = styled(Cog)`
+  path {
+    fill: none;
+    stroke: currentColor;
+  }
+`;
+
+const EditTheModelAction: DocumentActionComponent = ({ model }) => {
+  const navigate = useNavigate();
+  const { formatMessage } = useIntl();
+
+  return {
+    label: formatMessage({
+      id: 'content-manager.link-to-ctb',
+      defaultMessage: 'Edit the model',
+    }),
+    icon: <StyledPencil />,
+    onClick: () => {
+      navigate(`/plugins/content-type-builder/content-types/${model}`);
+    },
+    position: 'header',
+  };
+};
+
+EditTheModelAction.type = 'edit-the-model';
+
+/**
+ * Because the icon system is completely broken, we have to do
+ * this to remove the fill from the cog.
+ */
+const StyledPencil = styled(Pencil)`
+  path {
+    fill: none;
+    stroke: currentColor;
+  }
+`;
+
+const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) => {
+  const navigate = useNavigate();
+  const { formatMessage } = useIntl();
+  const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
+  const { delete: deleteAction } = useDocumentActions();
+  const { document } = useDoc();
+
+  return {
+    disabled: !canDelete || !document,
+    label: formatMessage({
+      id: 'content-manager.actions.delete.label',
+      defaultMessage: 'Delete document',
+    }),
+    icon: <StyledTrash />,
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" gap={2}>
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Typography as="p" variant="omega" textAlign="center">
+            {formatMessage({
+              id: 'content-manager.actions.delete.dialog.body',
+              defaultMessage: 'Are you sure?',
+            })}
+          </Typography>
+        </Flex>
+      ),
+      onConfirm: async () => {
+        if (!id && collectionType !== SINGLE_TYPES) {
+          console.warn("You're trying to delete a document that doesn't exist, you can't do this.");
+
+          return;
+        }
+
+        const res = await deleteAction({ id, model, collectionType });
+
+        if (!('error' in res)) {
+          navigate(`../${collectionType}/${model}`, { replace: true });
+        }
+      },
+    },
+    variant: 'danger',
+    position: 'header',
+  };
+};
+
+DeleteAction.type = 'delete';
+
+/**
+ * Because the icon system is completely broken, we have to do
+ * this to remove the fill from the cog.
+ */
+const StyledTrash = styled(Trash)`
+  path {
+    fill: none;
+    stroke: currentColor;
+  }
+`;
+
+const DEFAULT_HEADER_ACTIONS = [EditTheModelAction, ConfigureTheViewAction, DeleteAction];
+
+export { Header, DEFAULT_HEADER_ACTIONS };
 export type { HeaderProps };

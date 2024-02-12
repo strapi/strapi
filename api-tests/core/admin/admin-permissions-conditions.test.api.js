@@ -139,7 +139,7 @@ describe.skip('Admin Permissions - Conditions', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    localTestData.entry = res.body;
+    localTestData.entry = res.body.data;
   });
 
   test('User A can read its entry', async () => {
@@ -152,7 +152,7 @@ describe.skip('Admin Permissions - Conditions', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(localTestData.entry);
+    expect(res.body.data).toMatchObject(localTestData.entry);
   });
 
   test('User B can read the entry created by user A', async () => {
@@ -165,7 +165,7 @@ describe.skip('Admin Permissions - Conditions', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(localTestData.entry);
+    expect(res.body.data).toMatchObject(localTestData.entry);
   });
 
   test('User B cannot delete the entry created by user A', async () => {
@@ -191,6 +191,6 @@ describe.skip('Admin Permissions - Conditions', () => {
 
     expect(res.statusCode).toBe(200);
     // Fix V5: Decide if we want to return the deleted entry or not
-    // expect(res.body).toMatchObject(localTestData.entry);
+    // expect(res.body.data).toMatchObject(localTestData.entry);
   });
 });

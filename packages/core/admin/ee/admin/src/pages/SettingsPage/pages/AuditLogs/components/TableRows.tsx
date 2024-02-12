@@ -4,7 +4,6 @@ import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-syst
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
 import { Attribute, Entity } from '@strapi/types';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { ListLayoutRow } from '../../../../../../../../admin/src/content-manager/utils/layouts';
@@ -27,7 +26,7 @@ type TableRowsProps = {
   onOpenModal: (id: Entity.ID) => void;
 };
 
-export const TableRows = ({ headers, rows, onOpenModal }: TableRowsProps) => {
+export const TableRows = ({ headers, rows = [], onOpenModal }: TableRowsProps) => {
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
 
@@ -95,14 +94,4 @@ export const TableRows = ({ headers, rows, onOpenModal }: TableRowsProps) => {
       })}
     </Tbody>
   );
-};
-
-TableRows.defaultProps = {
-  rows: [],
-};
-
-TableRows.propTypes = {
-  headers: PropTypes.array.isRequired,
-  rows: PropTypes.array,
-  onOpenModal: PropTypes.func.isRequired,
 };

@@ -1,7 +1,8 @@
 import { Table, useQueryParams } from '@strapi/helper-plugin';
-import { screen, waitForElementToBeRemoved, within, fireEvent } from '@testing-library/react';
-import { render as renderRTL, waitFor, server } from '@tests/utils';
+import { waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render as renderRTL, waitFor, server, screen, fireEvent } from '@tests/utils';
 import { rest } from 'msw';
+import { Route, Routes } from 'react-router-dom';
 
 import { SelectedEntriesModal } from '../SelectedEntriesModal';
 
@@ -26,20 +27,32 @@ const render = (props = { onToggle: jest.fn() }) =>
   renderRTL(
     <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
       <SelectedEntriesModal {...props} />
-    </Table.Root>
+    </Table.Root>,
+    {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <Routes>
+              <Route path="/content-manager/:collectionType/:slug" element={children} />
+            </Routes>
+          );
+        },
+      },
+      initialEntries: ['/content-manager/collection-types/api::address.address'],
+    }
   );
 
 describe('Bulk publish selected entries modal', () => {
   it('renders the selected items in the modal', async () => {
-    const { queryByText } = render();
+    render();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading content'));
 
     expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
 
     // Nested table should render the selected items from the parent table
-    expect(screen.getByText('Entry 1')).toBeInTheDocument();
-    expect(screen.queryByText('Entry 4')).not.toBeInTheDocument();
+    expect(screen.getByRole('gridcell', { name: '1' })).toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: '4' })).not.toBeInTheDocument();
   });
 
   it('renders the selected items in the modal even if the locale param is not passed', async () => {
@@ -61,14 +74,14 @@ describe('Bulk publish selected entries modal', () => {
     expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
 
     // Nested table should render the selected items from the parent table
-    expect(screen.getByText('Entry 1')).toBeInTheDocument();
-    expect(screen.queryByText('Entry 4')).not.toBeInTheDocument();
+    expect(screen.getByRole('gridcell', { name: '1' })).toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: '4' })).not.toBeInTheDocument();
   });
 
   it('reacts to selection updates', async () => {
-    const { queryByText } = render();
+    render();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading content'));
 
     // User can toggle selected entries in the modal
     const checkboxEntry1 = await screen.findByRole('checkbox', { name: 'Select 1' });
@@ -113,11 +126,11 @@ describe('Bulk publish selected entries modal', () => {
   it('should publish valid entries after confirming and close the modal', async () => {
     const mockOnToggle = jest.fn();
 
-    const { queryByText, user } = render({
+    const { user } = render({
       onToggle: mockOnToggle,
     });
 
-    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading content'));
 
     const publishButton = await screen.findByRole('button', { name: /publish/i });
     await user.click(publishButton);
@@ -146,11 +159,13 @@ describe('Bulk publish selected entries modal', () => {
             results: [
               {
                 id: 1,
-                name: 'Entry 1',
+                name: '1',
+                notrepeat_req: {},
               },
               {
                 id: 2,
-                name: 'Entry 2',
+                name: '2',
+                notrepeat_req: {},
               },
               {
                 id: 3,
@@ -162,9 +177,9 @@ describe('Bulk publish selected entries modal', () => {
       })
     );
 
-    const { queryByText, user } = render();
+    const { user } = render();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading content'));
 
     const publishButton = await screen.findByRole('button', { name: /publish/i });
     await user.click(publishButton);
@@ -176,12 +191,27 @@ describe('Bulk publish selected entries modal', () => {
     expect(publishDialog).toBeInTheDocument();
     expect(publishDialogButton).toBeInTheDocument();
 
+    server.use(
+      rest.get('*/content-manager/collection-types/:apiId', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            results: [
+              {
+                id: 3,
+                name: '',
+              },
+            ],
+          })
+        );
+      })
+    );
+
     await user.click(publishDialogButton);
 
     expect(publishDialog).not.toBeInTheDocument();
 
     await waitFor(() =>
-      expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('gridcell', { name: '1' })).not.toBeInTheDocument()
     );
 
     expect(screen.getByRole('gridcell', { name: '3' })).toBeInTheDocument();
@@ -200,11 +230,13 @@ describe('Bulk publish selected entries modal', () => {
             results: [
               {
                 id: 1,
-                name: 'Entry 1',
+                name: '1',
+                notrepeat_req: {},
               },
               {
                 id: 2,
-                name: 'Entry 2',
+                name: '2',
+                notrepeat_req: {},
               },
               {
                 id: 3,
@@ -216,9 +248,9 @@ describe('Bulk publish selected entries modal', () => {
       })
     );
 
-    const { queryByText } = render();
+    render();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading content'));
 
     // Is showing the error message
     expect(
@@ -246,12 +278,14 @@ describe('Bulk publish selected entries modal', () => {
             results: [
               {
                 id: 1,
-                name: 'Entry 1',
+                name: '1',
                 publishedAt: '2023-08-03T08:14:08.324Z',
+                notrepeat_req: {},
               },
               {
                 id: 2,
-                name: 'Entry 2',
+                name: '2',
+                notrepeat_req: {},
               },
               {
                 id: 3,
@@ -263,9 +297,9 @@ describe('Bulk publish selected entries modal', () => {
       })
     );
 
-    const { queryByText } = render();
+    render();
 
-    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading content'));
 
     // Should show a message with the entries already published
     const countAlreadyPublished = await screen.findByText('entry already published', {

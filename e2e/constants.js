@@ -1,15 +1,17 @@
 const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./app-template/template/src/constants');
 
+// NOTE: anything included here needs to be included in all test datasets exports
 const ALLOWED_CONTENT_TYPES = [
   'admin::user',
   'admin::role',
   'admin::permission',
-  'plugin::i18n.locale',
   'api::article.article',
   'api::author.author',
   'api::homepage.homepage',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
+  'plugin::content-releases.release',
+  'plugin::content-releases.release-action',
   /**
    * UPLOADS
    */

@@ -2,6 +2,8 @@
  * Related to fetching the actual content of a collection type or single type.
  */
 
+import { SINGLE_TYPES } from '../constants/collections';
+
 import { contentManagerApi } from './api';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -9,7 +11,7 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 const documentApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({
     autoCloneDocument: builder.mutation<
-      Contracts.CollectionTypes.Clone.Response['data'],
+      Contracts.CollectionTypes.Clone.Response,
       Contracts.CollectionTypes.Clone.Params & { query?: string }
     >({
       query: ({ model, sourceId: id, query }) => ({
@@ -19,14 +21,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params: query,
         },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.Clone.Response) => res.data,
       invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     cloneDocument: builder.mutation<
       Contracts.CollectionTypes.Clone.Response,
       Contracts.CollectionTypes.Clone.Params & {
         data: Contracts.CollectionTypes.Clone.Request['body'];
-        params: Contracts.CollectionTypes.Clone.Request['query'];
+        params?: Contracts.CollectionTypes.Clone.Request['query'];
       }
     >({
       query: ({ model, sourceId: id, data, params }) => ({
@@ -47,7 +48,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       Contracts.CollectionTypes.Create.Response,
       Contracts.CollectionTypes.Create.Params & {
         data: Contracts.CollectionTypes.Create.Request['body'];
-        params: Contracts.CollectionTypes.Create.Request['query'];
+        params?: Contracts.CollectionTypes.Create.Request['query'];
       }
     >({
       query: ({ model, data, params }) => ({
@@ -61,24 +62,29 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     deleteDocument: builder.mutation<
-      Contracts.CollectionTypes.Delete.Response['data'],
-      Contracts.CollectionTypes.Delete.Params & {
+      Contracts.CollectionTypes.Delete.Response,
+      {
+        model: string;
         collectionType: string;
-        params: Contracts.CollectionTypes.Delete.Request['query'];
+        id?: string;
+        params?: Contracts.CollectionTypes.Delete.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, params }) => ({
-        url: `/content-manager/${collectionType}/${model}/${id}`,
+        url: `/content-manager/${collectionType}/${model}${
+          collectionType !== SINGLE_TYPES && id ? `/${id}` : ''
+        }`,
         method: 'DELETE',
-        params,
+        config: {
+          params,
+        },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.Delete.Response) => res.data,
-      invalidatesTags: (_result, _error, { model, id }) => [
-        { type: 'Document', id: `${model}_${id}` },
+      invalidatesTags: (_result, _error, { collectionType, model }) => [
+        { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
       ],
     }),
     deleteManyDocuments: builder.mutation<
-      Contracts.CollectionTypes.BulkDelete.Response['data'],
+      Contracts.CollectionTypes.BulkDelete.Response,
       Contracts.CollectionTypes.BulkDelete.Params &
         Contracts.CollectionTypes.BulkDelete.Request['body']
     >({
@@ -96,13 +102,17 @@ const documentApi = contentManagerApi.injectEndpoints({
      */
     getAllDocuments: builder.query<
       Contracts.CollectionTypes.Find.Response,
-      Contracts.CollectionTypes.Find.Params & Pick<Contracts.CollectionTypes.Find.Request, 'query'>
+      Contracts.CollectionTypes.Find.Params & {
+        params?: Contracts.CollectionTypes.Find.Request['query'] & {
+          [key: string]: any;
+        };
+      }
     >({
-      query: (data) => ({
-        url: `/content-manager/collection-types/${data.model}`,
+      query: ({ model, params }) => ({
+        url: `/content-manager/collection-types/${model}`,
         method: 'GET',
         config: {
-          params: data.query,
+          params,
         },
       }),
       providesTags: (result, _error, arg) => {
@@ -116,7 +126,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       },
     }),
     getDraftRelationCount: builder.query<
-      Contracts.CollectionTypes.CountDraftRelations.Response['data'],
+      Contracts.CollectionTypes.CountDraftRelations.Response,
       {
         collectionType: string;
         model: string;
@@ -136,7 +146,6 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.CountDraftRelations.Response) => res.data,
     }),
     getDocument: builder.query<
       Contracts.CollectionTypes.FindOne.Response,
@@ -147,17 +156,39 @@ const documentApi = contentManagerApi.injectEndpoints({
         params?: Contracts.CollectionTypes.FindOne.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id, params }) => ({
-        url: `/content-manager/${collectionType}/${model}${id ? `/${id}` : ''}`,
-        method: 'GET',
-        config: {
-          params,
-        },
-      }),
-      providesTags: (result, _error, { model, id }) => [
-        // we prefer the result's id because we don't fetch single-types with an ID.
-        { type: 'Document', id: `${model}_${result && 'id' in result ? result.id : id}` },
-      ],
+      // @ts-expect-error – TODO: fix ts error where data unknown doesn't work with response via an assertion?
+      queryFn: async ({ collectionType, model, id, params }, _api, _extraOpts, baseQuery) => {
+        const res = await baseQuery({
+          url: `/content-manager/${collectionType}/${model}${id ? `/${id}` : ''}`,
+          method: 'GET',
+          config: {
+            params,
+          },
+        });
+
+        /**
+         * To stop the query from locking itself in multiple retries, we intercept the error here and manage correctly.
+         * This is because single-types don't have a list view and fetching them with the route `/single-types/:model`
+         * never returns a list, just a single document but this won't exist if you've not made one before.
+         */
+        if (res.error && res.error.name === 'NotFoundError' && collectionType === SINGLE_TYPES) {
+          return { data: { document: undefined }, error: undefined };
+        }
+
+        return res;
+      },
+      providesTags: (result, _error, { collectionType, model, id }) => {
+        return [
+          // we prefer the result's id because we don't fetch single-types with an ID.
+          {
+            type: 'Document',
+            id:
+              collectionType !== SINGLE_TYPES
+                ? `${model}_${result && 'id' in result ? result.id : id}`
+                : model,
+          },
+        ];
+      },
     }),
     getManyDraftRelationCount: builder.query<
       Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response['data'],
@@ -172,8 +203,9 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      transformResponse: (res: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response) =>
-        res.data,
+      transformResponse: (
+        response: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response
+      ) => response.data,
     }),
     publishDocument: builder.mutation<
       Contracts.CollectionTypes.Publish.Response,
@@ -196,11 +228,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (result, _error, { model, id }) => {
+      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
         return [
           {
             type: 'Document',
-            id: result && 'id' in result ? `${model}_${result.id}` : `${model}_${id}`,
+            id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
           },
         ];
       },
@@ -225,7 +257,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         model: string;
         id?: string;
         data: Contracts.CollectionTypes.Update.Request['body'];
-        params: Contracts.CollectionTypes.Update.Request['query'];
+        params?: Contracts.CollectionTypes.Update.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, data, params }) => ({
@@ -236,9 +268,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { model, id }) => [
-        { type: 'Document', id: `${model}_${id}` },
-      ],
+      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
+        return [
+          { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model },
+        ];
+      },
     }),
     unpublishDocument: builder.mutation<
       Contracts.CollectionTypes.Unpublish.Response,
@@ -249,7 +283,7 @@ const documentApi = contentManagerApi.injectEndpoints({
          * You don't pass the ID if the document is a single-type
          */
         id?: string;
-        params: Contracts.CollectionTypes.Unpublish.Request['query'];
+        params?: Contracts.CollectionTypes.Unpublish.Request['query'];
       }
     >({
       query: ({ collectionType, model, id, params }) => ({
@@ -261,17 +295,17 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (result, _error, { model, id }) => {
+      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
         return [
           {
             type: 'Document',
-            id: result && 'id' in result ? `${model}_${result.id}` : `${model}_${id}`,
+            id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
           },
         ];
       },
     }),
     unpublishManyDocuments: builder.mutation<
-      Contracts.CollectionTypes.BulkUnpublish.Response['data'],
+      Contracts.CollectionTypes.BulkUnpublish.Response,
       Contracts.CollectionTypes.BulkUnpublish.Params &
         Contracts.CollectionTypes.BulkUnpublish.Request['body']
     >({
@@ -293,6 +327,7 @@ const {
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
   useGetAllDocumentsQuery,
+  useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
@@ -310,6 +345,7 @@ export {
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
   useGetAllDocumentsQuery,
+  useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useLazyGetDraftRelationCountQuery as useGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
