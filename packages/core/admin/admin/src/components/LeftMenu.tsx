@@ -49,6 +49,13 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   }
 `;
 
+const NavLinkWrapper = styled(Box)`
+  div:nth-child(2) {
+    /* remove badge background color */
+    background: transparent;
+  }
+`;
+
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
@@ -136,26 +143,23 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             {pluginsSectionLinks.map((link) => {
               const LinkIcon = link.icon;
               return (
-                <NavLink
-                  key={link.to}
-                  as={RouterNavLink}
-                  to={link.to}
-                  icon={<LinkIcon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                  {/* @ts-ignore */}
-                  {link?.lockIcon && (
-                    <Icon
-                      position="absolute"
-                      width={`${15 / 16}rem`}
-                      height={`${15 / 16}rem`}
-                      as={Lock}
-                      right={4}
-                    />
-                  )}
-                </NavLink>
+                <NavLinkWrapper key={link.to}>
+                  <NavLink
+                    as={RouterNavLink}
+                    to={link.to}
+                    icon={<LinkIcon />}
+                    onClick={() => handleClickOnLink(link.to)}
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore: we need to change the badgeContent in the DS to accept not just only strings but also other components and also configure the badge background color
+                    badgeContent={
+                      link?.lockIcon ? (
+                        <Icon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
+                      ) : undefined
+                    }
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </NavLink>
+                </NavLinkWrapper>
               );
             })}
           </NavSection>
