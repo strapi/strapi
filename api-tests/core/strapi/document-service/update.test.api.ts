@@ -2,7 +2,7 @@ import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticleDb, switchIdForDocumentId } from './utils';
+import { ARTICLE_UID, findArticleDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
