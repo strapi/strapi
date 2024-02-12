@@ -5,13 +5,15 @@ import isNaN from 'lodash/isNaN';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
-import { isFieldTypeNumber } from './fields';
-
 import type { ComponentsDictionary } from '../hooks/useDocument';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
 import type Lazy from 'yup/lib/Lazy';
 import type { MixedSchema } from 'yup/lib/mixed';
+
+const isFieldTypeNumber = (type: string) => {
+  return ['integer', 'biginteger', 'decimal', 'float', 'number'].includes(type);
+};
 
 /* -------------------------------------------------------------------------------------------------
  * createYupSchema

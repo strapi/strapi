@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { AnyAction, createSelector } from '@reduxjs/toolkit';
+import { AnyAction } from '@reduxjs/toolkit';
 import { Layout as DSLayout, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import produce from 'immer';
@@ -10,14 +10,13 @@ import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from '../components/DragLayer';
-import { RootState } from '../core/store/configure';
 
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
 import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPreview';
 import { RelationDragPreview } from './components/DragPreviews/RelationDragPreview';
 import { LeftMenu } from './components/LeftMenu';
+import { ItemTypes } from './constants/dragAndDrop';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
-import { ItemTypes } from './utils/dragAndDrop';
 import { getTranslation } from './utils/translations';
 
 import type { ContentManagerLink } from './hooks/useContentManagerInitData';

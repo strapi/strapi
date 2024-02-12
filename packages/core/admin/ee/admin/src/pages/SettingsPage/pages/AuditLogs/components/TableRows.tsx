@@ -6,10 +6,31 @@ import { Eye } from '@strapi/icons';
 import { Attribute, Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
-import { ListLayoutRow } from '../../../../../../../../admin/src/content-manager/utils/layouts';
 import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
 import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
+
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+
+type MainField = Attribute.Any & {
+  name: string;
+};
+
+interface Metadata {
+  edit: Contracts.ContentTypes.Metadatas[string]['edit'] & {
+    mainField?: MainField;
+  };
+  list: Contracts.ContentTypes.Metadatas[string]['list'] & {
+    mainField?: MainField;
+  };
+}
+
+interface ListLayoutRow {
+  key: string;
+  name: string;
+  fieldSchema: Attribute.Any | { type: 'custom' };
+  metadatas: Metadata['list'];
+}
 
 export interface TableHeader extends Omit<ListLayoutRow, 'metadatas' | 'fieldSchema' | 'name'> {
   metadatas: Omit<ListLayoutRow['metadatas'], 'label'> & {
