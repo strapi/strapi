@@ -141,8 +141,13 @@ describe('Field selection API', () => {
 
     describe('Select multiple', () => {
       test('Select all fields', async () => {
-        const { body } = await getProductAPI('*');
-        expect(body.data).toEqual(data.product);
+        // You can select all fields by passing * or an empty fields array
+        const waysToSelectAll = [[], '*'];
+
+        for (const way of waysToSelectAll) {
+          const { body } = await getProductAPI(way);
+          expect(body.data).toEqual(data.product);
+        }
       });
 
       test('Select multiple fields', async () => {
