@@ -109,6 +109,23 @@ export declare namespace UnPublish {
 }
 
 /**
+ * POST /single-types/:model/actions/discard
+ */
+export declare namespace Discard {
+  export interface Request {
+    body: {};
+    query: {
+      locale: string;
+    };
+  }
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
  * GET /single-types/:model/actions/countDraftRelations
  */
 export declare namespace CountDraftRelations {

@@ -363,7 +363,7 @@ export default {
       }
 
       // TODO: Publish many locales at once
-      const { locale = 'en' } = getDocumentDimensions(body);
+      const { locale } = getDocumentDimensions(body);
       return entityManager.publish(document, model, {
         locale,
         data: setCreatorFields({ user, isEdition: true })({}),
@@ -472,7 +472,7 @@ export default {
       .build();
 
     // TODO: Unpublish many locales
-    const { locale = 'en' } = getDocumentDimensions(body);
+    const { locale } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, {
       populate,
       locale,
@@ -487,10 +487,54 @@ export default {
       return ctx.forbidden();
     }
 
-    const unpublishedDocument = await entityManager.unpublish(document, model, { locale });
+    ctx.body = await pipeAsync(
+      (document) => entityManager.unpublish(document, model, { locale }),
+      permissionChecker.sanitizeOutput,
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+    )(document);
+  },
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+  async discard(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { id, model } = ctx.params;
+    const { body } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    // Discarding updates the draft version, so it behaves like an update
+    if (permissionChecker.cannot.update()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
+    // @ts-expect-error populate builder needs to be called with a UID
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const { locale } = getDocumentDimensions(body);
+    const document = await entityManager.findOne(id, model, {
+      populate,
+      locale,
+      status: 'published',
+    });
+
+    // Can not discard a document that is not published
+    if (!document) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.update(document)) {
+      return ctx.forbidden();
+    }
+
+    ctx.body = await pipeAsync(
+      (document) => entityManager.discard(document, model, { locale }),
+      permissionChecker.sanitizeOutput,
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+    )(document);
   },
 
   async bulkDelete(ctx: any) {

@@ -183,6 +183,21 @@ export default {
       },
     },
     {
+      method: 'POST',
+      path: '/single-types/:model/actions/discard',
+      handler: 'single-types.discard',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.update'] },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
       path: '/single-types/:model/actions/countDraftRelations',
       handler: 'single-types.countDraftRelations',
@@ -343,6 +358,21 @@ export default {
           {
             name: 'plugin::content-manager.hasPermissions',
             config: { actions: ['plugin::content-manager.explorer.publish'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/collection-types/:model/:id/actions/discard',
+      handler: 'collection-types.discard',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.update'] },
           },
         ],
       },

@@ -216,10 +216,47 @@ export default {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await entityManager.unpublish(document, model, { locale });
+    ctx.body = await pipeAsync(
+      (document) => entityManager.unpublish(document, model, { locale }),
+      permissionChecker.sanitizeOutput,
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+    )(document);
+  },
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedEntity);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+  async discard(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { body, query = {} } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    // Discarding updates the draft version, so it behaves like an update
+
+    if (permissionChecker.cannot.update()) {
+      return ctx.forbidden();
+    }
+
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
+    const { locale } = getDocumentDimensions(body);
+
+    const document = await findDocument(sanitizedQuery, model, { locale, status: 'published' });
+
+    // Can not discard a document that is not published
+    if (!document) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.update(document)) {
+      return ctx.forbidden();
+    }
+
+    ctx.body = await pipeAsync(
+      (document) => entityManager.discard(document, model, { locale }),
+      permissionChecker.sanitizeOutput,
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+    )(document);
   },
 
   async countDraftRelations(ctx: any) {
