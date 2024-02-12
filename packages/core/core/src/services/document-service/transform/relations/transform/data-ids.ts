@@ -1,9 +1,10 @@
-import { EntityService, Attribute, Common } from '@strapi/types';
+import { EntityService, Attribute } from '@strapi/types';
 import { errors, traverseEntity } from '@strapi/utils';
 import { isObject, isNil } from 'lodash/fp';
 import { ShortHand, LongHand, ID, GetIdOrThrow } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
+import { Options } from '../../types';
 
 const transformPrimitive = <T extends ShortHand | LongHand>(
   relation: T | T[] | null | undefined,
@@ -71,11 +72,7 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
 
 const EXCLUDED_FIELDS = ['createdBy', 'updatedBy', 'localizations', 'strapi_stage'];
 
-const transformDataIdsVisitor = (
-  idMap: IdMap,
-  data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft: boolean }
-) => {
+const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, opts: Options) => {
   return traverseEntity(
     ({ key, value, attribute }, { set }) => {
       // Find relational attributes, and return the document ids

@@ -6,6 +6,10 @@ import { extractDataIds as extractDataRelationIds } from './relations/extract/da
 import { transformDataIdsVisitor as transformRelationDataIds } from './relations/transform/data-ids';
 import { transformOutputIds as transformRelationOutputIds } from './relations/transform/output-ids';
 import { switchIdForDocumentId } from './utils';
+import { transformFilters } from './filters';
+import { transformSort } from './sort';
+import { transformFields } from './fields';
+import { transformPopulate } from './populate';
 
 /**
  * Transform input of a query to map document ids to entity ids.
@@ -29,19 +33,30 @@ async function transformParamsDocumentId(
   await idMap.load();
 
   // Transform any relation ids to entity ids
+  let fields = input.fields;
+  if (input.fields) {
+    fields = transformFields(input.fields);
+  }
+
   let data = input.data;
   if (input.data) {
     data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
   }
 
-  // TODO: Transform fields
-  const fields = input.fields;
-  // TODO: Transform filters
-  const filters = input.filters;
-  // TODO: Transform populate
-  const populate = input.populate;
-  // TODO: Transform sort
-  const sort = input.sort;
+  let filters = input.filters;
+  if (input.filters) {
+    filters = await transformFilters(input.filters, { ...opts, uid });
+  }
+
+  let populate = input.populate;
+  if (input.populate) {
+    populate = await transformPopulate(input.populate, { ...opts, uid });
+  }
+
+  let sort = input.sort;
+  if (input.sort) {
+    sort = await transformSort(input.sort, { ...opts, uid });
+  }
 
   return {
     ...input,
