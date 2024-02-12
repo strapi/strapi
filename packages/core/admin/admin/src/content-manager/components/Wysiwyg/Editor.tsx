@@ -45,19 +45,21 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
     const onChangeRef = React.useRef(onChange);
 
     React.useEffect(() => {
-      editorRef.current = CodeMirror.fromTextArea(textareaRef.current!, {
-        lineWrapping: true,
-        extraKeys: {
-          Enter: 'newlineAndIndentContinueMarkdownList',
-          Tab: false,
-          'Shift-Tab': false,
-        },
-        readOnly: false,
-        smartIndent: false,
-        placeholder,
-        spellcheck: true,
-        inputStyle: 'contenteditable',
-      });
+      if (!editorRef.current) {
+        editorRef.current = CodeMirror.fromTextArea(textareaRef.current!, {
+          lineWrapping: true,
+          extraKeys: {
+            Enter: 'newlineAndIndentContinueMarkdownList',
+            Tab: false,
+            'Shift-Tab': false,
+          },
+          readOnly: false,
+          smartIndent: false,
+          placeholder,
+          spellcheck: true,
+          inputStyle: 'contenteditable',
+        });
+      }
 
       // @ts-expect-error – doesn't think command exists?
       CodeMirror.commands.newlineAndIndentContinueMarkdownList =
