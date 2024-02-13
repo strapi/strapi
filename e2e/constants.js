@@ -10,6 +10,7 @@ const ALLOWED_CONTENT_TYPES = [
   'api::homepage.homepage',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
+  'plugin::i18n.locale',
   'plugin::content-releases.release',
   'plugin::content-releases.release-action',
   /**
