@@ -520,12 +520,11 @@ export default {
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    // Discarding updates the draft version, so it behaves like an update
-    if (permissionChecker.cannot.update()) {
+    if (permissionChecker.cannot.discard()) {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.discard(ctx.query);
     // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
@@ -543,7 +542,7 @@ export default {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.update(document)) {
+    if (permissionChecker.cannot.discard(document)) {
       return ctx.forbidden();
     }
 
