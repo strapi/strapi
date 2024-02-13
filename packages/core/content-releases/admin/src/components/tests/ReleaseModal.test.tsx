@@ -96,7 +96,7 @@ describe('ReleaseModal', () => {
     expect(scheduleReleaseCheck).toBeChecked();
 
     // Date and other fields are visible
-    const dateField = within(dialogContainer).queryByRole('combobox', {
+    const dateField = within(dialogContainer).getByRole('combobox', {
       name: /date/i,
     });
     expect(dateField).toBeInTheDocument();
@@ -136,7 +136,7 @@ describe('ReleaseModal', () => {
     // save button is disabled initially
     expect(dialogSaveButton).toBeDisabled();
 
-    const date = within(dialogContainer).queryByRole('combobox', {
+    const date = within(dialogContainer).getByRole('combobox', {
       name: /date/i,
     });
     await user.click(date);
