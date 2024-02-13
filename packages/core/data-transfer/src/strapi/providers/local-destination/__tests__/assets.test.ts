@@ -45,7 +45,6 @@ const strapiFactory = getStrapiFactory({
 
 describe('Local Strapi Destination Provider - Get Assets Stream', () => {
   test('Throws an error if the Strapi instance is not provided', async () => {
-    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
     /* @ts-ignore: disable-next-line */
     const provider = createLocalStrapiDestinationProvider({
       strategy: 'restore',

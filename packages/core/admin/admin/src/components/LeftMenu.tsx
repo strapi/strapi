@@ -149,8 +149,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     to={link.to}
                     icon={<LinkIcon />}
                     onClick={() => handleClickOnLink(link.to)}
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore: we need to change the badgeContent in the DS to accept not just only strings but also other components and also configure the badge background color
+                    // @ts-expect-error: badgeContent in the DS accept only strings
                     badgeContent={
                       link?.lockIcon ? (
                         <Icon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />

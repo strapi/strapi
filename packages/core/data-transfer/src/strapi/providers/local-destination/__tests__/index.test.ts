@@ -100,7 +100,6 @@ describe('Local Strapi Source Destination', () => {
             getStrapi: getStrapiFactory({
               db: { transaction },
             }),
-            /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
             /* @ts-ignore: disable-next-line */
             strategy: 'foo',
           });
