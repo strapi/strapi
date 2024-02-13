@@ -238,7 +238,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
     const { locale } = getDocumentDimensions(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale, status: 'published' });
