@@ -57,8 +57,6 @@ import {
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
 
-import { type SchedulingInfo } from './ReleasesPage';
-
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
