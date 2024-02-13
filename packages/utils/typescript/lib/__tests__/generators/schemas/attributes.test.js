@@ -671,6 +671,38 @@ describe('Attributes', () => {
           // Check for string keyword on the second typeArgument
           expect(typeofMinMax.kind).toBe(ts.SyntaxKind.StringKeyword);
         });
+
+        test('Min: 0', () => {
+          const attribute = { min: 0 };
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(1);
+
+          expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
+
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Min/Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [min] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('0');
+
+          // Check for string keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
+        });
       });
 
       describe('MinLength / MaxLength', () => {
