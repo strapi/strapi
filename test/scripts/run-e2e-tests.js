@@ -129,6 +129,14 @@ yargs
               const envFile = (await fs.readFile(pathToEnv)).toString();
               const envWithoutPort = envFile.replace('PORT=1337', '');
               await fs.writeFile(pathToEnv, envWithoutPort);
+
+              /*
+               * Enable e2e test for future features since a strapi template does not include
+               * the config folder where this would be specified
+               */
+              const configFeatures = await fs.readFile(path.join(templateDir, 'features.js'));
+              const pathToFeaturesConfig = path.join(appPath, 'config', 'features.js');
+              await fs.writeFile(pathToFeaturesConfig, configFeatures);
             })
           );
 

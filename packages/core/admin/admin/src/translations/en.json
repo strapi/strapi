@@ -912,6 +912,7 @@
   "content-manager.listView.validation.errors.message": "Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)",
   "content-manager.history.page-title": "{contentType} history",
   "content-manager.history.sidebar.title": "Versions",
+  "content-manager.history.sidebar.version-card.aria-label": "Version card",
   "content-manager.history.sidebar.versionDescription": "{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}",
   "content-manager.history.version.subtitle": "{hasLocale, select, true {{subtitle}, in {locale}} other {{subtitle}}}",
   "dark": "Dark",
