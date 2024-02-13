@@ -175,7 +175,7 @@ export declare namespace Delete {
  */
 export declare namespace PublishAndCreate {
   export interface Request {
-    body: Document;
+    body: Partial<Document>;
     query: {
       locale?: string | null;
     };
@@ -197,7 +197,7 @@ export declare namespace PublishAndCreate {
  */
 export declare namespace Publish {
   export interface Request {
-    body: Document;
+    body: Partial<Document>;
     query: {
       locale?: string | null;
     };

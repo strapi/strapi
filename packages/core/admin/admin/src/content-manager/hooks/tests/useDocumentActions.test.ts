@@ -245,11 +245,16 @@ describe('useDocumentActions', () => {
       let response;
 
       await act(async () => {
-        const res = await result.current.publish({
-          collectionType: 'collection-types',
-          model: mockData.contentManager.contentType,
-          id: '12345',
-        });
+        const res = await result.current.publish(
+          {
+            collectionType: 'collection-types',
+            model: mockData.contentManager.contentType,
+            id: '12345',
+          },
+          {
+            title: 'Entry 1',
+          }
+        );
 
         response = res;
       });
@@ -280,11 +285,16 @@ describe('useDocumentActions', () => {
       let response;
 
       await act(async () => {
-        const res = await result.current.publish({
-          collectionType: 'collection-types',
-          model: mockData.contentManager.contentType,
-          id: '12345',
-        });
+        const res = await result.current.publish(
+          {
+            collectionType: 'collection-types',
+            model: mockData.contentManager.contentType,
+            id: '12345',
+          },
+          {
+            title: 'Entry 1',
+          }
+        );
 
         response = res;
       });
