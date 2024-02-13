@@ -1,4 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { snakeCase } from 'lodash/fp';
 import * as yup from 'yup';
 
 import { getTrad } from '../../../utils/getTrad';
@@ -25,9 +26,16 @@ export const createComponentSchema = (
 
           const name = createComponentUid(value, category);
 
+          const snakeCaseKey = snakeCase(name);
+          const snakeCaseCollectionName = snakeCase(currentCollectionName);
+
           return (
-            !usedComponentNames.includes(name) &&
-            !takenCollectionNames.includes(currentCollectionName)
+            usedComponentNames.every((reserved) => {
+              return snakeCase(reserved) !== snakeCaseKey;
+            }) &&
+            takenCollectionNames.every(
+              (collectionName) => snakeCase(collectionName) !== snakeCaseCollectionName
+            )
           );
         },
       })
@@ -38,7 +46,11 @@ export const createComponentSchema = (
           if (!value) {
             return false;
           }
-          return !reservedNames.includes(value?.trim()?.toLowerCase());
+
+          const snakeCaseKey = snakeCase(value);
+          return reservedNames.every((reserved) => {
+            return snakeCase(reserved) !== snakeCaseKey;
+          });
         },
       })
       .required(errorsTrads.required),

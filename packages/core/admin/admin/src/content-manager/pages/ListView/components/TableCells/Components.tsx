@@ -14,7 +14,7 @@ import type { Attribute } from '@strapi/types';
  * -----------------------------------------------------------------------------------------------*/
 
 interface SingleComponentProps extends Pick<CellContentProps, 'mainField'> {
-  content: Attribute.GetValue<Attribute.Component>;
+  content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, false>>;
   schema: ComponentsDictionary[string];
 }
 

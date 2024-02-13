@@ -25,7 +25,9 @@ export const fillValidSignUpForm = async ({ page }) => {
 
 test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('./e2e/data/without-admin.tar');
+    await resetDatabaseAndImportDataFromPath('./e2e/data/without-admin.tar', (cts) =>
+      cts.filter((ct) => ct !== 'plugin::i18n.locale')
+    );
     await page.goto('/admin');
     await fillValidSignUpForm({ page });
   });

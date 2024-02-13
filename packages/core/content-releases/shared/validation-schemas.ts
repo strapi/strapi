@@ -5,7 +5,7 @@ export const RELEASE_SCHEMA = yup
   .shape({
     name: yup.string().trim().required(),
     // scheduledAt is a date, but we always receive strings from the client
-    scheduledAt: yup.string(),
+    scheduledAt: yup.string().nullable(),
   })
   .required()
   .noUnknown();
