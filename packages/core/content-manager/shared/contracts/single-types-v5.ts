@@ -122,6 +122,11 @@ export declare namespace Discard {
       locale: string;
     };
   }
+
+  export interface Params {
+    model: string;
+  }
+
   export interface Response {
     data: Document;
     meta: DocumentMetadata;
