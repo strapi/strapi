@@ -49,6 +49,7 @@ test.describe('Uniqueness', () => {
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
        */
       const fieldRole = field?.role ?? 'textbox';
+      // @ts-expect-error – want's a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
@@ -64,6 +65,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
 
+      // @ts-expect-error – want's a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
@@ -82,6 +84,7 @@ test.describe('Uniqueness', () => {
           : `${Number(field.value) + 10}`);
 
       await page
+        // @ts-expect-error – want's a const string
         .getByRole(fieldRole, {
           name: field.name,
         })
@@ -103,6 +106,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
 
+      // @ts-expect-error – want's a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
