@@ -9480,6 +9480,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
+    "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/pack-up": "npm:4.20.0"
     "@strapi/utils": "npm:4.20.0"
     date-fns: "npm:2.30.0"
