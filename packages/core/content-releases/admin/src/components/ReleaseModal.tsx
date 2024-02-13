@@ -128,6 +128,7 @@ export const ReleaseModal = ({
                   onChange={(event) => {
                     setFieldValue('isScheduled', event.target.checked);
                     if (!event.target.checked) {
+                      // Clear scheduling info from a release on unchecking schedule release
                       setFieldValue('date', null);
                       setFieldValue('time', '');
                     } else {
@@ -202,9 +203,7 @@ export const ReleaseModal = ({
                       })}
                       value={values.timezone}
                       onChange={(timezone) => {
-                        if (timezone) {
-                          setFieldValue('timezone', timezone);
-                        }
+                        setFieldValue('timezone', timezone);
                       }}
                       onClear={() => {
                         setFieldValue('timezone', '');

@@ -848,14 +848,12 @@ const ReleaseDetailsPage = () => {
   }
 
   const handleEditRelease = async (values: FormValues) => {
-    const editReleasePayload = {
+    const response = await updateRelease({
       id: releaseId,
       name: values.name,
       scheduledAt: values.scheduledAt,
       timezone: values.timezone,
-    };
-
-    const response = await updateRelease(editReleasePayload);
+    });
 
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
