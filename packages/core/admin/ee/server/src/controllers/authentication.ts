@@ -24,6 +24,9 @@ export default {
     strapi.telemetry.send('didGetProvidersSSO', {
       groupProperties: {
         'authenticationProviders': providers.map(({ uid }) => uid)
+      },
+      eventProperties: {
+        'authenticationProviders': providers.map(({ uid }) => uid)
       }
     });
 
