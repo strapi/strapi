@@ -49,10 +49,11 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  const { timezoneList, currentTimezone = { offset: 'GMT+00:00' } } = useTimezone();
+  // Set default first value from the timezone list with offset UTC+00:00
+  const { timezoneList, currentTimezone = { value: 'Africa/Abidjan' } } = useTimezone();
 
   /**
-   * Generate scheduled time using, selected date, time and timezone
+   * Generate scheduled time using selected date, time and timezone
    */
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
@@ -62,7 +63,7 @@ export const ReleaseModal = ({
     const combinedDateTime = new Date(date);
     combinedDateTime.setHours(hours);
     combinedDateTime.setMinutes(minutes);
-    const selectedTimezone = timezoneList.find((zone) => zone.offset === timezone);
+    const selectedTimezone = timezoneList.find((zone) => zone.value === timezone);
     const timezoneOffset = selectedTimezone!.offset.slice(3);
     const offset = timezoneOffset.length > 0 ? parseInt(timezoneOffset, 10) : 0;
 
@@ -102,7 +103,7 @@ export const ReleaseModal = ({
         }}
         initialValues={{
           ...initialValues,
-          timezone: initialValues.timezone ? initialValues.timezone : currentTimezone.offset,
+          timezone: initialValues.timezone ? initialValues.timezone : currentTimezone.value,
         }}
         validationSchema={RELEASE_SCHEMA}
       >
@@ -211,8 +212,8 @@ export const ReleaseModal = ({
                       required
                     >
                       {timezoneList.map((timezone) => (
-                        <ComboboxOption key={timezone.offset} value={timezone.offset}>
-                          {timezone.label}
+                        <ComboboxOption key={timezone.value} value={timezone.value}>
+                          {timezone.offset} {timezone.value}
                         </ComboboxOption>
                       ))}
                     </Combobox>
@@ -255,11 +256,10 @@ export const ReleaseModal = ({
 };
 
 /**
- * Timezone hook - Generates list of timezones and user's current timezone
+ * Timezone hook - Generates the list of timezones and user's current timezone
  */
 
 interface ITimezoneOption {
-  city?: string;
   offset: string;
   value: string;
 }
@@ -268,7 +268,7 @@ const useTimezone = () => {
   const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
     /**
      * This will be in the format GMT${OFFSET} where offset could be
-     * nothing, a positive four digit string e.g. +05:00 or -08:00
+     * nothing, a four digit string e.g. +05:00 or -08:00
      */
     const offsetPart = new Intl.DateTimeFormat('en', {
       timeZone: timezone,
@@ -292,54 +292,12 @@ const useTimezone = () => {
       utcOffset = `${utcOffset}+00:00`;
     }
 
-    /**
-     * Timezones come in the format `${CONTINENT}/${CITY}` if city
-     * is two separate words e.g. `BOA_VISTA` we want them separated
-     * by spaces.
-     *
-     * So America/Boa_Vista, becomes:
-     * - Boa_Vista
-     * - Boa Vista
-     */
-    const city = timezone.split('/')[1].split('_').join(' ');
-
-    return { city, offset: utcOffset, value: timezone } satisfies ITimezoneOption;
+    return { offset: utcOffset, value: timezone } satisfies ITimezoneOption;
   });
-
-  const groupedTimezonesByOffset = timezoneList.reduce<Record<string, ITimezoneOption[]>>(
-    (acc, current) => {
-      if (!acc[current.offset]) {
-        acc[current.offset] = [];
-      }
-
-      acc[current.offset] = [...acc[current.offset], current];
-
-      return acc;
-    },
-    {}
-  );
-
-  const options = Object.entries(groupedTimezonesByOffset)
-    .map(([offset, timezone]) => {
-      const allTheCities = timezone.map((zone) => zone.city).join(', ');
-
-      return {
-        value: timezone[0].value,
-        label: `${offset} - ${allTheCities}`,
-        offset,
-      };
-    })
-    .sort((a, b) => {
-      const offsetA = parseInt(a.offset.replace('UTC', ''));
-      const offsetB = parseInt(b.offset.replace('UTC', ''));
-
-      if (offsetA < offsetB) return -1;
-      return 1;
-    });
 
   const currentTimezone = timezoneList.find(
     (timezone) => timezone.value === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
-  return { timezoneList: options, currentTimezone };
+  return { timezoneList, currentTimezone };
 };
