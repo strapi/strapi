@@ -143,7 +143,7 @@ const INITIAL_FORM_VALUES = {
   name: '',
   date: null,
   time: '',
-  isScheduled: false,
+  isScheduled: true, // Creating new release should include scheduling by default
   scheduledAt: null,
 } satisfies FormValues;
 
