@@ -2,6 +2,7 @@
  * Relations interactions with i18n.
  *
  * TODO: Move to i18n tests
+ * TODO: Test for every relation type
  */
 import { LoadedStrapi } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
@@ -15,18 +16,8 @@ let strapi: LoadedStrapi;
 const builder = createTestBuilder();
 let rq;
 
-const populateShop = [
-  'products_ow',
-  'products_oo',
-  'products_mo',
-  'products_om',
-  'products_mm',
-  'products_mw',
-  'myCompo.compo_products_ow',
-  'myCompo.compo_products_mw',
-];
-
 const PRODUCT_UID = 'api::product.product';
+const TAG_UID = 'api::tag.tag';
 const SHOP_UID = 'api::shop.shop';
 
 const compo = (withRelations = false) => ({
@@ -58,6 +49,11 @@ const productModel = {
     name: {
       type: 'string',
     },
+    tag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: TAG_UID,
+    },
   },
   pluginOptions: {
     i18n: {
@@ -67,6 +63,20 @@ const productModel = {
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',
+  description: '',
+  collectionName: '',
+};
+
+const tagModel = {
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
   description: '',
   collectionName: '',
 };
@@ -125,7 +135,7 @@ describe('Document Service relations', () => {
   beforeAll(async () => {
     await builder
       .addComponent(compo(false))
-      .addContentTypes([productModel, shopModel])
+      .addContentTypes([tagModel, productModel, shopModel])
       .addFixtures('plugin::i18n.locale', [
         { name: 'Es', code: 'es' },
         { name: 'Fr', code: 'fr' },
@@ -137,24 +147,26 @@ describe('Document Service relations', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    const productDocuments = strapi.documents(PRODUCT_UID);
-    const shopDocuments = strapi.documents(SHOP_UID);
-
     // PRODUCTS
     await strapi.db.query(PRODUCT_UID).createMany({
       data: [
-        { documentId: 'Skate', name: 'Skate-En', locale: 'en' },
-        { documentId: 'Skate', name: 'Skate-Es', locale: 'es' },
-        { documentId: 'Candle', name: 'Candle-En', locale: 'en' },
-        { documentId: 'Candle', name: 'Candle-Es', locale: 'es' },
-        { documentId: 'Mug', name: 'Mug-En', locale: 'en' },
-        { documentId: 'Mug', name: 'Mug-Es', locale: 'es' },
+        { documentId: 'Skate', name: 'Skate-En', locale: 'en', publishedAt: null },
+        { documentId: 'Skate', name: 'Skate-Es', locale: 'es', publishedAt: null },
+        { documentId: 'Candle', name: 'Candle-En', locale: 'en', publishedAt: null },
+        { documentId: 'Candle', name: 'Candle-Es', locale: 'es', publishedAt: null },
+        { documentId: 'Mug', name: 'Mug-En', locale: 'en', publishedAt: null },
+        { documentId: 'Mug', name: 'Mug-Es', locale: 'es', publishedAt: null },
       ],
     });
 
-    // SHOPS
-    // const englishShop = await shopDocuments.create({ data: { name: 'Shop' }, locale: 'en' });
-    // const spanishShop = await shopDocuments.create({ data: { name: 'Shop' }, locale: 'es' });
+    // TAGS
+    await strapi.db.query(TAG_UID).createMany({
+      data: [
+        { documentId: 'Tag1', name: 'Tag1', publishedAt: null },
+        { documentId: 'Tag2', name: 'Tag2', publishedAt: null },
+        { documentId: 'Tag3', name: 'Tag3', publishedAt: null },
+      ],
+    });
   });
 
   afterAll(async () => {
@@ -166,7 +178,7 @@ describe('Document Service relations', () => {
     it(
       'Can connect to single locale',
       testInTransaction(async () => {
-        await strapi.documents(SHOP_UID).create({
+        const document = await strapi.documents(SHOP_UID).create({
           data: {
             name: 'test',
             products_mm: [
@@ -174,7 +186,14 @@ describe('Document Service relations', () => {
               { id: 'Candle', locale: 'en' },
             ],
           },
-          locale: 'en',
+          populate: {
+            products_mm: true,
+          },
+        });
+
+        expect(document).toMatchObject({
+          name: 'test',
+          products_mm: [{ name: 'Skate-En' }, { name: 'Candle-En' }],
         });
       })
     );
@@ -182,7 +201,7 @@ describe('Document Service relations', () => {
     it(
       'Can connect to multiple locales',
       testInTransaction(async () => {
-        await strapi.documents(SHOP_UID).create({
+        const document = await strapi.documents(SHOP_UID).create({
           data: {
             name: 'test',
             products_mm: [
@@ -190,23 +209,34 @@ describe('Document Service relations', () => {
               { id: 'Skate', locale: 'es' },
             ],
           },
-          locale: 'en',
+          populate: {
+            products_mm: true,
+          },
+        });
+
+        expect(document).toMatchObject({
+          name: 'test',
+          products_mm: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
         });
       })
     );
   });
 
-  describe('i18n Content Type (Article) -> Non i18n Content Type (Author)', () => {
+  describe('i18n Content Type (Product) -> Non i18n Content Type (Tag)', () => {
     it(
       'Can create a document with relations',
-      testInTransaction(async () => {})
-    );
-  });
-
-  describe('i18n Content Type (Article) -> i18n Content Type (Category) ', () => {
-    it(
-      'Can create a document with relations',
-      testInTransaction(async () => {})
+      testInTransaction(async () => {
+        const document = await strapi.documents(PRODUCT_UID).create({
+          data: {
+            name: 'Skate',
+            tag: { id: 'Tag1', locale: null },
+          },
+          populate: {
+            tag: true,
+          },
+          locale: 'en',
+        });
+      })
     );
   });
 });

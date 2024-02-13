@@ -23,6 +23,7 @@ describe('Transform relational data', () => {
               if (model.uid === CATEGORY_UID) {
                 return true;
               }
+              // Shop is not localized
               return false;
             },
           },
