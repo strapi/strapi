@@ -42,6 +42,23 @@ const admin: Plugin.Config.AdminInput = {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
       });
+    } else if (
+      !window.strapi.features.isEnabled('cms-content-releases') &&
+      window.strapi?.flags?.promoteEE
+    ) {
+      app.addMenuLink({
+        to: `/plugins/purchase-content-releases`,
+        icon: PaperPlane,
+        intlLabel: {
+          id: `${pluginId}.plugin.name`,
+          defaultMessage: 'Releases',
+        },
+        async Component() {
+          const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
+          return PurchaseContentReleases;
+        },
+        lockIcon: true,
+      });
     }
   },
   async registerTrads({ locales }: { locales: string[] }) {
