@@ -422,32 +422,49 @@ const DocumentActionModal = ({
 const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
-  const canPublish = useDocumentRBAC('PublishAction', (state) => state.canPublish);
+  const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
+    'PublishAction',
+    ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
+  );
   const { publish } = useDocumentActions();
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
+  const document = useForm('UpdateAction', ({ values }) => values);
 
   return {
     disabled:
       !canPublish ||
       isSubmitting ||
       activeTab === 'published' ||
-      modified ||
-      (!id && collectionType !== SINGLE_TYPES),
+      !modified ||
+      Boolean((!id && !canCreate) || (id && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      if (id || collectionType === SINGLE_TYPES) {
-        const res = await publish({
+      const res = await publish(
+        {
           collectionType,
           model,
           id,
-        });
+        },
+        document
+      );
 
-        if ('data' in res) {
-          navigate({ search: `?status=published` });
+      if ('data' in res) {
+        if (collectionType !== SINGLE_TYPES) {
+          /**
+           * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+           */
+          navigate({
+            pathname: `../${collectionType}/${model}/${res.data.id}`,
+            search: '?status=published',
+          });
+        } else {
+          navigate({
+            search: '?status=published',
+          });
         }
       }
     },
@@ -504,7 +521,10 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
             /**
              * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
              */
-            navigate(`../${collectionType}/${model}/${res.data.id}`);
+            navigate({
+              pathname: `../${collectionType}/${model}/${res.data.id}`,
+              search: '?state=published',
+            });
           }
         }
       } finally {

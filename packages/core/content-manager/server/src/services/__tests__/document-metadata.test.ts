@@ -34,7 +34,12 @@ describe('Document Metadata', () => {
   describe('Get Metadata', () => {
     test('Gets available draft locales', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = { id: '1', locale: 'en', publishedAt: null };
+      const document: DocumentVersionSelector = {
+        id: '1',
+        locale: 'en',
+        publishedAt: null,
+        updatedAt: new Date(),
+      };
       await documentMetadata.getMetadata(uid, document);
 
       // Should have looked for available locales
@@ -52,7 +57,12 @@ describe('Document Metadata', () => {
 
     test('Gets available published locales', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = { id: '1', locale: 'en', publishedAt: new Date() };
+      const document: DocumentVersionSelector = {
+        id: '1',
+        locale: 'en',
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      };
       await documentMetadata.getMetadata(uid, document);
 
       // Should have looked for available locales
@@ -72,7 +82,12 @@ describe('Document Metadata', () => {
   describe('Get Status', () => {
     test('Gets published status', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = { id: '1', locale: 'en', publishedAt: new Date() };
+      const document: DocumentVersionSelector = {
+        id: '1',
+        locale: 'en',
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      };
 
       // Mock findOne to return the other status
       const expectedAvailableStatus = [{ id: 1, locale: 'en', publishedAt: null }];
@@ -92,7 +107,12 @@ describe('Document Metadata', () => {
 
     test('Gets draft status', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = { id: '1', locale: 'en', publishedAt: null };
+      const document: DocumentVersionSelector = {
+        id: '1',
+        locale: 'en',
+        publishedAt: null,
+        updatedAt: new Date(),
+      };
       await documentMetadata.getMetadata(uid, document);
 
       // Should have looked for available status

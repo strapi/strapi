@@ -233,7 +233,8 @@ describe('Deep Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(0, 2)));
       });
 
-      test('cards.name + _q=25', async () => {
+      // Searching by short strings could randomnly match with the document id
+      test('cards.name + _q=Bernard', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
@@ -243,7 +244,7 @@ describe('Deep Filtering API', () => {
                 name: data.card[0].attributes.name,
               },
             },
-            _q: 25,
+            _q: 'Bernard',
           },
         });
 

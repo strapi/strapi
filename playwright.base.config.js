@@ -52,7 +52,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
        Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
        because the Strapi server restarts every time a new file (trace) is created.
     */
-    trace: process.env.CI ? 'retain-on-failure' : 'off',
+    trace: 'off',
   },
 
   /* Configure projects for major browsers */

@@ -110,6 +110,8 @@ module.exports = {
 
     if (attribute.repeatable) {
       params.push(factory.createTrue());
+    } else {
+      params.push(factory.createFalse());
     }
 
     return [withAttributeNamespace('Component'), params];
