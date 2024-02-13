@@ -12,6 +12,7 @@ import {
   ModalBody,
   ModalHeader,
   ModalLayout,
+  Radio,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
@@ -423,6 +424,7 @@ const DocumentActionModal = ({
 const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const { meta } = useDoc();
   const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
     'PublishAction',
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
@@ -432,12 +434,16 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const document = useForm('UpdateAction', ({ values }) => values);
 
+  const isDocumentPublished =
+    document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
+    meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
+
   return {
     disabled:
       !canPublish ||
       isSubmitting ||
       activeTab === 'published' ||
-      !modified ||
+      (!modified && isDocumentPublished) ||
       Boolean((!id && !canCreate) || (id && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
@@ -537,15 +543,30 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
 
 UpdateAction.type = 'update';
 
+const UNPUBLISH_DRAFT_OPTIONS = {
+  KEEP: 'keep',
+  DISCARD: 'discard',
+};
+
 const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { document, meta } = useDoc();
   const { unpublish } = useDocumentActions();
+  const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
+
+  const isDocumentModified = document?.status === 'modified';
 
   const isDocumentPublished =
     document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
     meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
+
+  const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
+    React.FormEventHandler<HTMLDivElement> = (e) => {
+    if ('value' in e.target) {
+      setShouldKeepDraft(e.target.value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
+    }
+  };
 
   return {
     disabled: !canPublish || activeTab === 'published' || !isDocumentPublished,
@@ -555,7 +576,13 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
     }),
     icon: <StyledCrossCircle />,
     onClick: async () => {
-      if (!id) {
+      if (!id || isDocumentModified) {
+        if (!id) {
+          // This should never, ever, happen.
+          throw new Error(
+            "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
+          );
+        }
         return;
       }
 
@@ -565,6 +592,74 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
         id,
       });
     },
+    dialog: isDocumentModified
+      ? {
+          type: 'dialog',
+          title: formatMessage({
+            id: 'app.components.ConfirmDialog.title',
+            defaultMessage: 'Confirmation',
+          }),
+          content: (
+            <Flex alignItems="flex-start" direction="column" gap={6}>
+              <Flex width="100%" direction="column" gap={2}>
+                <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+                <Typography as="p" variant="omega" textAlign="center">
+                  {formatMessage({
+                    id: 'content-manager.actions.unpublish.dialog.body',
+                    defaultMessage: 'Are you sure?',
+                  })}
+                </Typography>
+              </Flex>
+              <Flex
+                onChange={handleChange}
+                direction="column"
+                alignItems="flex-start"
+                as="fieldset"
+                gap={3}
+              >
+                <VisuallyHidden as="legend"></VisuallyHidden>
+                <Radio
+                  checked={shouldKeepDraft}
+                  value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
+                  name="discard-options"
+                >
+                  {formatMessage({
+                    id: 'content-manager.actions.unpublish.dialog.option.keep-draft',
+                    defaultMessage: 'Keep draft',
+                  })}
+                </Radio>
+                <Radio
+                  checked={!shouldKeepDraft}
+                  value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}
+                  name="discard-options"
+                >
+                  {formatMessage({
+                    id: 'content-manager.actions.unpublish.dialog.option.replace-draft',
+                    defaultMessage: 'Replace draft',
+                  })}
+                </Radio>
+              </Flex>
+            </Flex>
+          ),
+          onConfirm: async () => {
+            if (!id) {
+              // This should never, ever, happen.
+              throw new Error(
+                "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
+              );
+            }
+
+            await unpublish(
+              {
+                collectionType,
+                model,
+                id,
+              },
+              !shouldKeepDraft
+            );
+          },
+        }
+      : undefined,
     variant: 'danger',
   };
 };

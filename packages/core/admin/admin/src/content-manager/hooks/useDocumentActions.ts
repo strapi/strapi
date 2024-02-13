@@ -103,11 +103,14 @@ type UseDocumentActions = () => {
       { name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry' }
     >['properties']
   ) => Promise<OperationResponse<Contracts.CollectionTypes.Update.Response>>;
-  unpublish: (args: {
-    collectionType: string;
-    model: string;
-    id: string;
-  }) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
+  unpublish: (
+    args: {
+      collectionType: string;
+      model: string;
+      id: string;
+    },
+    discardDraft?: boolean
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
 };
 
 type IUseDocumentActs = ReturnType<UseDocumentActions>;
@@ -313,7 +316,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
   const unpublish: IUseDocumentActs['unpublish'] = React.useCallback(
-    async ({ collectionType, model, id }) => {
+    async ({ collectionType, model, id }, discardDraft = false) => {
       try {
         trackUsage('willUnpublishEntry');
 
@@ -321,6 +324,9 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           id,
+          data: {
+            discardDraft,
+          },
         });
 
         if ('error' in res) {

@@ -319,13 +319,15 @@ const documentApi = contentManagerApi.injectEndpoints({
          */
         id?: string;
         params?: Contracts.CollectionTypes.Unpublish.Request['query'];
+        data: Contracts.CollectionTypes.Unpublish.Request['body'];
       }
     >({
-      query: ({ collectionType, model, id, params }) => ({
+      query: ({ collectionType, model, id, params, data }) => ({
         url: id
           ? `/content-manager/${collectionType}/${model}/${id}/actions/unpublish`
           : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
+        data,
         config: {
           params,
         },
