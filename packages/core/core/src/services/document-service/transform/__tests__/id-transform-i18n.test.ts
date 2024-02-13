@@ -89,6 +89,25 @@ describe('Transform relational data', () => {
         relatedProducts: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }],
       });
     });
+
+    it('Connect to the default locale if not provided', async () => {
+      // Should connect to the default locale if not provided in the relation
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ id: 'category-1' }],
+          },
+        },
+        { isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 'category-1-en-draft' }],
+      });
+    });
   });
 
   describe('I18n (categories) -> Non I18n (products)', () => {

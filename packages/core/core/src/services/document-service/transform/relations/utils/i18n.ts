@@ -7,6 +7,11 @@ export const isLocalizedContentType = (uid: Common.UID.Schema) => {
   return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
 };
 
+export const getDefaultLocale = (uid: Common.UID.Schema) => {
+  const model = strapi.getModel(uid);
+  return strapi.plugin('i18n').service('locales').getDefaultLocale(model);
+};
+
 export const getRelationTargetLocale = (
   relation: LongHand,
   opts: {
@@ -15,7 +20,8 @@ export const getRelationTargetLocale = (
     sourceLocale?: string | null;
   }
 ) => {
-  const targetLocale = relation.locale || opts.sourceLocale;
+  const defaultLocale = 'en';
+  const targetLocale = relation.locale || opts.sourceLocale || defaultLocale;
 
   const isTargetLocalized = isLocalizedContentType(opts.targetUid);
   const isSourceLocalized = isLocalizedContentType(opts.sourceUid);
