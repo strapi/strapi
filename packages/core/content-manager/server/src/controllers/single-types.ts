@@ -193,13 +193,20 @@ export default {
   async unpublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { body, query = {} } = ctx.request;
+    const {
+      body: { discardDraft, ...body },
+      query = {},
+    } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
+      return ctx.forbidden();
+    }
+
+    if (discardDraft && permissionChecker.cannot.discard()) {
       return ctx.forbidden();
     }
 
@@ -216,11 +223,21 @@ export default {
       return ctx.forbidden();
     }
 
-    ctx.body = await pipeAsync(
-      (document) => entityManager.unpublish(document, model, { locale }),
-      permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
-    )(document);
+    if (discardDraft && permissionChecker.cannot.discard(document)) {
+      return ctx.forbidden();
+    }
+
+    await strapi.db.transaction(async () => {
+      if (discardDraft) {
+        await entityManager.discard(document, model, { locale });
+      }
+
+      ctx.body = await pipeAsync(
+        (document) => entityManager.unpublish(document, model, { locale }),
+        permissionChecker.sanitizeOutput,
+        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      )(document);
+    });
   },
 
   async discard(ctx: any) {
@@ -232,9 +249,7 @@ export default {
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    // Discarding updates the draft version, so it behaves like an update
-
-    if (permissionChecker.cannot.update()) {
+    if (permissionChecker.cannot.discard()) {
       return ctx.forbidden();
     }
 
@@ -248,7 +263,7 @@ export default {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.update(document)) {
+    if (permissionChecker.cannot.discard(document)) {
       return ctx.forbidden();
     }
 

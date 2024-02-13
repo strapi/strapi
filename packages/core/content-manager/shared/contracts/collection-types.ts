@@ -217,10 +217,16 @@ export declare namespace Publish {
 
 /**
  * POST /collection-types/:model/:id/actions/unpublish
+ *
+ * TODO: Unpublish many locales at once
  */
 export declare namespace Unpublish {
   export interface Request {
-    body: {};
+    body: {
+      // Discards the draft version before un-publishing, so the document is be reverted to the last published version.
+      // Default: false
+      discardDraft?: boolean;
+    };
     query: {
       locale?: string | null;
     };

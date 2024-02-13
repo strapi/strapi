@@ -1,4 +1,5 @@
 import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
+import { cond, stubTrue } from 'lodash/fp';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
@@ -455,7 +456,9 @@ export default {
   async unpublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
-    const { body } = ctx.request;
+    const {
+      body: { discardDraft, ...body },
+    } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
@@ -465,13 +468,17 @@ export default {
       return ctx.forbidden();
     }
 
+    if (discardDraft && permissionChecker.cannot.discard()) {
+      return ctx.forbidden();
+    }
+
     const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
+
     // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
-    // TODO: Unpublish many locales
     const { locale } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, {
       populate,
@@ -480,18 +487,28 @@ export default {
     });
 
     if (!document) {
-      return ctx.notFound();
+      throw new errors.NotFoundError();
     }
 
     if (permissionChecker.cannot.unpublish(document)) {
-      return ctx.forbidden();
+      throw new errors.ForbiddenError();
     }
 
-    ctx.body = await pipeAsync(
-      (document) => entityManager.unpublish(document, model, { locale }),
-      permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
-    )(document);
+    if (discardDraft && permissionChecker.cannot.discard(document)) {
+      throw new errors.ForbiddenError();
+    }
+
+    await strapi.db.transaction(async () => {
+      if (discardDraft) {
+        await entityManager.discard(document, model, { locale });
+      }
+
+      ctx.body = await pipeAsync(
+        (document) => entityManager.unpublish(document, model, { locale }),
+        permissionChecker.sanitizeOutput,
+        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      )(document);
+    });
   },
 
   async discard(ctx: any) {
