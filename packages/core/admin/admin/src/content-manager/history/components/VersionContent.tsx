@@ -181,7 +181,7 @@ const VersionContent = () => {
                             return JSON.stringify(value);
                           case 'date':
                           case 'datetime':
-                            return new Date(value as string);
+                            return value;
                           default:
                             return value;
                         }
