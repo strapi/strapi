@@ -12,13 +12,20 @@ const isErrorWithCode = (error: any): error is ErrorWithCode => {
   return error && typeof error.code === 'string';
 };
 
-const isForeignKeyConstraintError = (e: Error) => {
-  const MYSQL_FK_ERROR_CODES = ['1452', '1557', '1216', '1217', '1451'];
-  const POSTGRES_FK_ERROR_CODE = '23503';
-  const SQLITE_FK_ERROR_CODE = 'SQLITE_CONSTRAINT_FOREIGNKEY';
+const FOREIGN_KEY_ERROR_CODES = new Set([
+  // MYSQL Error Numbers
+  '1452', '1557', '1216', '1217', '1451',
+  // MYSQL Error Codes
+  'ER_ROW_IS_REFERENCED_2', 'ER_NO_REFERENCED_ROW_2', 'ER_FOREIGN_DUPLICATE_KEY_OLD_UNUSED', 'ER_NO_REFERENCED_ROW', 'ER_ROW_IS_REFERENCED',
+  // PostgreSQL
+  '23503',
+  // SQLLite
+  'SQLITE_CONSTRAINT_FOREIGNKEY'
+]);
 
+const isForeignKeyConstraintError = (e: Error) => {
   if (isErrorWithCode(e) && e.code) {
-    return [SQLITE_FK_ERROR_CODE, POSTGRES_FK_ERROR_CODE, ...MYSQL_FK_ERROR_CODES].includes(e.code);
+    return FOREIGN_KEY_ERROR_CODES.has(e.code);
   }
 
   return e.message.toLowerCase().includes('foreign key constraint');
