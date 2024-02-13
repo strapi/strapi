@@ -77,6 +77,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       await schedulingService.set(release.id, release.scheduledAt);
     }
 
+    strapi.telemetry.send('didCreateContentRelease');
+
     return release;
   },
 
@@ -241,6 +243,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         schedulingService.cancel(id);
       }
     }
+
+    strapi.telemetry.send('didUpdateContentRelease');
 
     return updatedRelease;
   },
@@ -451,6 +455,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
     });
 
+    strapi.telemetry.send('didDeleteContentRelease');
+
     return release;
   },
 
@@ -613,6 +619,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         releasedAt: new Date(),
       },
     });
+
+    strapi.telemetry.send('didPublishContentRelease');
 
     return release;
   },

@@ -39,6 +39,15 @@ const sendUpdateProjectInformation = async () => {
 
     groupProperties = assign(groupProperties, { SSOProviders, isSSOConfigured: SSOProviders.length !== 0 });
   }
+
+  if (EE.features.isEnabled('cms-content-releases')) {
+    const numberOfContentReleases = await strapi.entityService.count('plugin::content-releases.release');
+    const numberOfPublishedContentReleases = await strapi.entityService.count('plugin::content-releases.release', { 
+      filters: { $not: { releasedAt: null } }
+    }); 
+
+    groupProperties = assign(groupProperties, { numberOfContentReleases, numberOfPublishedContentReleases });
+  }
   
   groupProperties = assign(groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
 
