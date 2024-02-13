@@ -37,16 +37,14 @@ const sendUpdateProjectInformation = async () => {
   if (EE.features.isEnabled('sso')) {
     const SSOProviders = await getProvidersListSSO();
 
-    groupProperties = assign(groupProperties, { SSOProviders });
+    groupProperties = assign(groupProperties, { SSOProviders, isSSOConfigured: SSOProviders.length !== 0 });
   }
   
   groupProperties = assign(groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
 
-  console.log(groupProperties);
-
-  // strapi.telemetry.send('didUpdateProjectInformation', {
-  //   groupProperties
-  // });
+  strapi.telemetry.send('didUpdateProjectInformation', {
+    groupProperties
+  });
 };
 
 const startCron = (strapi: Strapi) => {
