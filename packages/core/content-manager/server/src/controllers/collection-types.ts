@@ -1,5 +1,4 @@
 import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
-import { cond, stubTrue } from 'lodash/fp';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
