@@ -8,6 +8,7 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
+  Icon,
   ModalBody,
   ModalHeader,
   ModalLayout,
@@ -16,7 +17,7 @@ import {
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
 import { useNotification } from '@strapi/helper-plugin';
-import { CrossCircle, More } from '@strapi/icons';
+import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
@@ -570,6 +571,50 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
 
 UnpublishAction.type = 'unpublish';
 
+const DiscardAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+  const { formatMessage } = useIntl();
+  const canUpdate = useDocumentRBAC('PublishAction', ({ canUpdate }) => canUpdate);
+  const { document } = useDoc();
+  const { discard } = useDocumentActions();
+
+  return {
+    disabled: !canUpdate || activeTab === 'published' || document?.status !== 'modified',
+    label: formatMessage({
+      id: 'content-manager.actions.discard.label',
+      defaultMessage: 'Discard changes',
+    }),
+    icon: <StyledCrossCircle />,
+    variant: 'danger',
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" gap={2}>
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Typography as="p" variant="omega" textAlign="center">
+            {formatMessage({
+              id: 'content-manager.actions.discard.dialog.body',
+              defaultMessage: 'Are you sure?',
+            })}
+          </Typography>
+        </Flex>
+      ),
+      onConfirm: async () => {
+        await discard({
+          collectionType,
+          model,
+          id,
+        });
+      },
+    },
+  };
+};
+
+DiscardAction.type = 'discard';
+
 /**
  * Because the icon system is completely broken, we have to do
  * this to remove the fill from the cog.
@@ -580,7 +625,7 @@ const StyledCrossCircle = styled(CrossCircle)`
   }
 `;
 
-const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction];
+const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
 export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };
