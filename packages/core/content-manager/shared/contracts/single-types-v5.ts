@@ -115,7 +115,7 @@ export declare namespace Discard {
   export interface Request {
     body: {};
     query: {
-      locale: string;
+      locale?: string | null;
     };
   }
 
