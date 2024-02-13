@@ -19,8 +19,15 @@ const providerAuthenticationFlow = compose([
 export default {
   async getProviders(ctx: Context) {
     const { providerRegistry } = strapi.admin.services.passport;
+    const providers = providerRegistry.getAll().map(toProviderDTO);
 
-    ctx.body = providerRegistry.getAll().map(toProviderDTO);
+    strapi.telemetry.send('didGetProvidersSSO', {
+      groupProperties: {
+        'authenticationProviders': providers.map(({ uid }) => uid)
+      }
+    });
+
+    ctx.body = providers;
   },
 
   async getProviderLoginOptions(ctx: Context) {
@@ -43,6 +50,8 @@ export default {
     const currentAuthOptions = (await adminStore.get({ key: 'auth' })) as any;
     const newAuthOptions = { ...currentAuthOptions, providers: body };
     await adminStore.set({ key: 'auth', value: newAuthOptions });
+
+    strapi.telemetry.send('didUpdateSettingsSSO');
 
     ctx.body = {
       data: toProviderLoginOptionsDTO(newAuthOptions.providers),
