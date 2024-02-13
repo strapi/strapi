@@ -207,10 +207,14 @@ const documentApi = contentManagerApi.injectEndpoints({
         response: Contracts.CollectionTypes.CountManyEntriesDraftRelations.Response
       ) => response.data,
     }),
+    /**
+     * This endpoint will either create or update documents at the same time as publishing.
+     */
     publishDocument: builder.mutation<
       Contracts.CollectionTypes.Publish.Response,
       {
         collectionType: string;
+        data: Contracts.CollectionTypes.Publish.Request['body'];
         model: string;
         /**
          * You don't pass the ID if the document is a single-type
@@ -219,11 +223,12 @@ const documentApi = contentManagerApi.injectEndpoints({
         params?: Contracts.CollectionTypes.Publish.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id, params }) => ({
+      query: ({ collectionType, model, id, params, data }) => ({
         url: id
           ? `/content-manager/${collectionType}/${model}/${id}/actions/publish`
           : `/content-manager/${collectionType}/${model}/actions/publish`,
         method: 'POST',
+        data,
         config: {
           params,
         },
@@ -234,6 +239,7 @@ const documentApi = contentManagerApi.injectEndpoints({
             type: 'Document',
             id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
           },
+          { type: 'Document', id: `${model}_LIST` },
         ];
       },
     }),

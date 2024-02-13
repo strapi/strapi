@@ -69,11 +69,11 @@ describe('Releases details page', () => {
     await user.click(moreButton);
 
     // shows the popover actions
-    const editButton = screen.getByRole('button', { name: 'Edit' });
-    expect(editButton).toBeInTheDocument();
+    const editMenuItem = screen.getByRole('menuitem', { name: 'Edit' });
+    expect(editMenuItem).toBeInTheDocument();
 
-    const deleteButton = screen.getByRole('button', { name: 'Delete' });
-    expect(deleteButton).toBeInTheDocument();
+    const deleteMenuItem = screen.getByRole('menuitem', { name: 'Delete' });
+    expect(deleteMenuItem).toBeInTheDocument();
 
     const createdByAuthor = screen.getByText(/by Admin Admin/i);
     expect(createdByAuthor).toBeInTheDocument();
@@ -121,11 +121,11 @@ describe('Releases details page', () => {
     await user.click(moreButton);
 
     // shows the popover actions
-    const editButton = screen.getByRole('button', { name: 'Edit' });
-    expect(editButton).toBeDisabled();
+    const editMenuItem = screen.getByRole('menuitem', { name: 'Edit' });
+    expect(editMenuItem).toHaveAttribute('aria-disabled', 'true');
 
-    const deleteButton = screen.getByRole('button', { name: 'Delete' });
-    expect(deleteButton).toBeDisabled();
+    const deleteMenuItem = screen.getByRole('menuitem', { name: 'Delete' });
+    expect(deleteMenuItem).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('renders as many tables as there are in the response', async () => {
