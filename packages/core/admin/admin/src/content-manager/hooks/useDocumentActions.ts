@@ -74,15 +74,15 @@ type UseDocumentActions = () => {
     id?: string;
     params?: object;
   }) => Promise<Contracts.CollectionTypes.FindOne.Response | undefined>;
-  publish: ({
-    collectionType,
-    model,
-    id,
-  }: {
-    collectionType: string;
-    model: string;
-    id?: string;
-  }) => Promise<OperationResponse<Contracts.CollectionTypes.Publish.Response>>;
+  publish: (
+    args: {
+      collectionType: string;
+      model: string;
+      id?: string;
+      params?: object;
+    },
+    document: Partial<Document>
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Publish.Response>>;
   update: (
     args: {
       collectionType: string;
@@ -181,7 +181,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [publishDocument] = usePublishDocumentMutation();
   const publish: IUseDocumentActs['publish'] = React.useCallback(
-    async ({ collectionType, model, id }) => {
+    async ({ collectionType, model, id, params }, data) => {
       try {
         trackUsage('willPublishEntry');
 
@@ -189,6 +189,8 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           id,
+          data,
+          params,
         });
 
         if ('error' in res) {
