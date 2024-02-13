@@ -27,7 +27,7 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
   ).toBeVisible();
 };
 
-describeOnCondition(/*edition === 'EE'*/ false)('Release page', () => {
+describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
