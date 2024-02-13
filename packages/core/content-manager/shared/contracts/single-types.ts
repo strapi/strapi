@@ -96,7 +96,11 @@ export declare namespace Publish {
  */
 export declare namespace UnPublish {
   export interface Request {
-    body: {};
+    body: {
+      // Discards the draft version before un-publishing, so the document is be reverted to the last published version.
+      // Default: false
+      discardDraft?: boolean; // Defaults to false
+    };
     query: {
       locale: string;
     };
