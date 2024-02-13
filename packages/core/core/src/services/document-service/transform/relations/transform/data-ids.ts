@@ -4,7 +4,7 @@ import { isObject, isNil } from 'lodash/fp';
 import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
-import { isLocalizedContentType } from '../extract/data-ids';
+import { getRelationTargetLocale } from '../utils/i18n';
 
 const isNumeric = (value: any): value is number => {
   const parsed = parseInt(value, 10);
@@ -41,7 +41,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     // If the id is not found, return undefined
     if (!id) return undefined;
 
-    return { ...(relation as object), id: getId(relation.id) } as T;
+    return { ...(relation as object), id } as T;
   }
 
   // id[]
@@ -128,13 +128,17 @@ const transformDataIdsVisitor = (
         if (EXCLUDED_FIELDS.includes(key)) return;
 
         const getId = (documentId: ID, locale?: string): ID | null => {
-          const isTargetLocalized = isLocalizedContentType(target as Common.UID.Schema);
-          const targetLocale = locale || opts.locale;
-
           const entryId = idMap.get({
             uid: target,
             documentId: documentId as string,
-            locale: isTargetLocalized ? targetLocale : null,
+            locale: getRelationTargetLocale(
+              { id: documentId, locale },
+              {
+                targetUid: target as Common.UID.Schema,
+                sourceUid: opts.uid,
+                sourceLocale: opts.locale,
+              }
+            ),
             isDraft: opts.isDraft,
           });
 

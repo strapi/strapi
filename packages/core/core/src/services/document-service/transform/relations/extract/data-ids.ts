@@ -4,20 +4,16 @@ import { traverseEntity } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, ID } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
+import { getRelationTargetLocale } from '../utils/i18n';
 
 type ExtractedId = { id: ID; locale?: string };
-
-export const isLocalizedContentType = (uid: Common.UID.Schema) => {
-  const model = strapi.getModel(uid);
-  return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
-};
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
 const handlePrimitive = (
   relation: ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined | any
-) => {
+): LongHand[] => {
   if (!relation) {
     return []; // null
   }
@@ -85,19 +81,20 @@ const extractDataIds = (
       // Find relational attributes, and return the document ids
       if (attribute.type === 'relation') {
         const extractedIds = extractRelationIds(value as any);
-        const target = attribute.target;
 
         // TODO: Handle morph relations (they have multiple targets)
+        const target = attribute.target;
         if (!target) return;
 
-        extractedIds.forEach(({ id, locale }) => {
-          const isTargetLocalized = isLocalizedContentType(target as Common.UID.Schema);
-          const targetLocale = locale || opts.locale;
-
+        extractedIds.forEach((relation) => {
           idMap.add({
             uid: target,
-            documentId: id as string,
-            locale: isTargetLocalized ? targetLocale : null,
+            documentId: relation.id as string,
+            locale: getRelationTargetLocale(relation, {
+              targetUid: target as Common.UID.Schema,
+              sourceUid: opts.uid,
+              sourceLocale: opts.locale,
+            }),
             isDraft: opts.isDraft,
           });
         });

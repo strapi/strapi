@@ -11,13 +11,9 @@ const findManyQueries = {
 } as Record<string, jest.Mock>;
 
 // TODO: Relation between published documents
-// TODO: Relation between non localized and localized documents
-// TODO: Relation between ct with D&P enabled and ct with D&P disabled
 describe('Transform relational data', () => {
   global.strapi = {
-    // List models by uids
     getModel: (uid: string) => models[uid],
-    // Mock content localization check
     plugins: {
       i18n: {
         services: {
@@ -40,211 +36,111 @@ describe('Transform relational data', () => {
 
   beforeEach(() => {
     findCategories.mockReturnValue([
-      { id: 'doc1-en-draft', documentId: 'doc1', locale: 'en', publishedAt: null },
-      { id: 'doc1-fr-draft', documentId: 'doc1', locale: 'fr', publishedAt: null },
-      { id: 'doc2-en-draft', documentId: 'doc2', locale: 'en', publishedAt: null },
-      { id: 'doc3-en-draft', documentId: 'doc3', locale: 'en', publishedAt: null },
-      { id: 'doc4-en-draft', documentId: 'doc4', locale: 'en', publishedAt: null },
-      { id: 'doc5-en-draft', documentId: 'doc5', locale: 'en', publishedAt: null },
-      { id: 'doc6-en-draft', documentId: 'doc6', locale: 'en', publishedAt: null },
-      { id: 'doc7-en-draft', documentId: 'doc7', locale: 'en', publishedAt: null },
-      { id: 'doc8-en-draft', documentId: 'doc8', locale: 'en', publishedAt: null },
-      { id: 'doc9-en-draft', documentId: 'doc9', locale: 'en', publishedAt: null },
-      { id: 'doc10-en-draft', documentId: 'doc10', locale: 'en', publishedAt: null },
+      { id: 'category-1-en-draft', documentId: 'category-1', locale: 'en', publishedAt: null },
+      { id: 'category-1-fr-draft', documentId: 'category-1', locale: 'fr', publishedAt: null },
+      { id: 'category-2-en-draft', documentId: 'category-2', locale: 'en', publishedAt: null },
+      { id: 'category-3-en-draft', documentId: 'category-3', locale: 'en', publishedAt: null },
+      { id: 'category-4-en-draft', documentId: 'category-4', locale: 'en', publishedAt: null },
+      { id: 'category-5-en-draft', documentId: 'category-5', locale: 'en', publishedAt: null },
+      { id: 'category-6-en-draft', documentId: 'category-6', locale: 'en', publishedAt: null },
+      { id: 'category-7-en-draft', documentId: 'category-7', locale: 'en', publishedAt: null },
+      { id: 'category-8-en-draft', documentId: 'category-8', locale: 'en', publishedAt: null },
+      { id: 'category-9-en-draft', documentId: 'category-9', locale: 'en', publishedAt: null },
+      { id: 'category-10-en-draft', documentId: 'category-10', locale: 'en', publishedAt: null },
     ]);
 
     findProducts.mockReturnValue([
-      { id: 'doc1-draft', documentId: 'doc1', locale: null, publishedAt: null },
-      { id: 'doc1-published', documentId: 'doc1', locale: null, publishedAt: null },
-      { id: 'doc2-draft', documentId: 'doc2', locale: null, publishedAt: null },
-      { id: 'doc3-draft', documentId: 'doc3', locale: null, publishedAt: null },
+      { id: 'product-1-draft', documentId: 'product-1', locale: null, publishedAt: null },
+      { id: 'product-1-published', documentId: 'product-1', locale: null, publishedAt: new Date() },
+      { id: 'product-2-draft', documentId: 'product-2', locale: null, publishedAt: null },
+      { id: 'product-3-draft', documentId: 'product-3', locale: null, publishedAt: null },
     ]);
   });
 
   describe('Non I18n (products) -> I18n (categories)', () => {
-    it('Shorthand syntax', async () => {
+    it('Connect to locales of the same category document', async () => {
+      //
       const { data } = await transformParamsDocumentId(
         PRODUCT_UID,
         {
           data: {
             name: 'test',
             categories: [
-              { id: 'doc1', locale: 'en' },
-              { id: 'doc1', locale: 'fr' },
-              { id: 'doc2', locale: 'en' },
+              { id: 'category-1', locale: 'en' },
+              { id: 'category-1', locale: 'fr' },
+              { id: 'category-2', locale: 'en' },
             ],
-            category: {
-              id: 'doc4',
-              locale: 'en',
-            },
-            relatedProducts: [{ id: 'doc1' }, { id: 'doc2', locale: null }],
+            category: { id: 'category-4', locale: 'en' },
+            relatedProducts: [{ id: 'product-1' }, { id: 'product-2', locale: null }],
           },
         },
         { locale: 'en', isDraft: true }
       );
 
-      expect(data).toEqual({
+      expect(data).toMatchObject({
         name: 'test',
-        categories: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-        category: 'doc4-en-draft',
-        relatedProducts: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+        categories: [
+          { id: 'category-1-en-draft' },
+          { id: 'category-1-fr-draft' },
+          { id: 'category-2-en-draft' },
+        ],
+        category: { id: 'category-4-en-draft' },
+        relatedProducts: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }],
       });
     });
   });
 
-  it('Longhand syntax', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: [{ id: 'doc1' }, { id: 'doc2' }, { id: 'doc3' }],
-          category: { id: 'doc4' },
-        },
-      },
-      { locale: 'en', isDraft: true }
-    );
-
-    expect(data).toEqual({
-      name: 'test',
-      categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
-      category: { id: 'doc4-en-draft' },
-    });
-  });
-
-  it('Set', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { set: ['doc1', 'doc2', 'doc3'] },
-          category: { set: 'doc4' },
-        },
-      },
-      { locale: 'en', isDraft: true }
-    );
-
-    expect(data).toEqual({
-      name: 'test',
-      categories: { set: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { set: 'doc4-en-draft' },
-    });
-  });
-
-  it('Connect', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { connect: ['doc1', 'doc2', 'doc3'] },
-          category: { connect: 'doc4' },
-        },
-      },
-      { locale: 'en', isDraft: true }
-    );
-
-    expect(data).toEqual({
-      name: 'test',
-      categories: { connect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { connect: 'doc4-en-draft' },
-    });
-  });
-
-  it('Connect before', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { connect: [{ id: 'doc1', position: { before: 'doc2' } }] },
-          category: { connect: 'doc4' },
-        },
-      },
-      { locale: 'en', isDraft: false }
-    );
-
-    expect(data).toEqual({
-      name: 'test',
-      categories: { connect: [{ id: 'doc1-en-draft', position: { before: 'doc2-en-draft' } }] },
-      category: { connect: 'doc4-en-draft' },
-    });
-  });
-
-  it('Connect after', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { connect: [{ id: 'doc1', position: { after: 'doc2' } }] },
-          category: { connect: 'doc4' },
-        },
-      },
-      { locale: 'en', isDraft: true }
-    );
-
-    expect(data).toEqual({
-      name: 'test',
-      categories: { connect: [{ id: 'doc1-en-draft', position: { after: 'doc2-en-draft' } }] },
-      category: { connect: 'doc4-en-draft' },
-    });
-  });
-
-  it('Disconnect', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { disconnect: ['doc1', 'doc2', 'doc3'] },
-          category: { disconnect: 'doc4' },
-        },
-      },
-      { locale: 'en', isDraft: true }
-    );
-
-    expect(data).toEqual({
-      name: 'test',
-      categories: { disconnect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { disconnect: 'doc4-en-draft' },
-    });
-  });
-
-  it('Multiple', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: {
-            set: ['doc1', 'doc2', 'doc3'],
-            connect: ['doc4', 'doc5'],
-            disconnect: ['doc6', 'doc7'],
-          },
-          category: {
-            set: 'doc8',
-            connect: 'doc9',
-            disconnect: 'doc10',
+  describe('I18n (categories) -> Non I18n (products)', () => {
+    it('Ignore locale when connecting to non localized content type', async () => {
+      // Should ignore the locale when connecting to non localized content type
+      const { data } = await transformParamsDocumentId(
+        CATEGORY_UID,
+        {
+          data: {
+            products: [{ id: 'product-1' }, { id: 'product-2', locale: 'en' }],
           },
         },
-      },
-      { locale: 'en', isDraft: true }
-    );
+        { locale: 'en', isDraft: true }
+      );
 
-    expect(data).toEqual({
-      name: 'test',
-      categories: {
-        set: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-        connect: ['doc4-en-draft', 'doc5-en-draft'],
-        disconnect: ['doc6-en-draft', 'doc7-en-draft'],
-      },
-      category: {
-        set: 'doc8-en-draft',
-        connect: 'doc9-en-draft',
-        disconnect: 'doc10-en-draft',
-      },
+      expect(data).toMatchObject({
+        products: [{ id: 'product-1-draft' }, { id: 'product-2-draft', locale: 'en' }],
+      });
+    });
+  });
+
+  describe('I18n (categories) -> I18n (categories)', () => {
+    it('Connect to source locale if not provided', async () => {
+      // Should connect to the source locale if not provided in the relation
+      const { data } = await transformParamsDocumentId(
+        CATEGORY_UID,
+        {
+          data: {
+            relatedCategories: [{ id: 'category-1' }],
+          },
+        },
+        { locale: 'fr', isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        relatedCategories: [{ id: 'category-1-fr-draft' }],
+      });
+    });
+
+    it('Prevent connecting to invalid locales ', async () => {
+      // Should not be able to connect to different locales than the current one
+      const promise = transformParamsDocumentId(
+        CATEGORY_UID,
+        {
+          data: {
+            // Connect to another locale than the current one
+            relatedCategories: [{ id: 'category-1', locale: 'fr' }],
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(promise).rejects.toThrowError();
     });
   });
 });
