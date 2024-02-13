@@ -9,6 +9,7 @@ export const switchIdForDocumentId = (output: Record<string, any>) => {
   }
 
   delete output.documentId;
+  output.id = documentId;
   return output;
 };
 
