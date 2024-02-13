@@ -288,6 +288,65 @@ describe('CM API - Basic', () => {
     data.productsWithDP.shift();
   });
 
+  test('Discard a draft', async () => {
+    // Create and publish a new product
+    const product = {
+      name: 'Product 4',
+      description: 'Product description',
+    };
+
+    const { body } = await rq({
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/actions/publish`,
+      method: 'POST',
+      body: product,
+    });
+
+    // Update the product
+    const updatedProduct = {
+      name: 'Product 4 updated',
+      description: 'Product description updated',
+    };
+
+    await rq({
+      method: 'PUT',
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+      body: updatedProduct,
+    });
+
+    // Discard the draft
+    const discardRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/discard`,
+    });
+
+    expect(discardRes.statusCode).toBe(200);
+    // The discarded draft should be the same as the published version
+    expect(discardRes.body.data.name).toBe(product.name);
+    expect(discardRes.body.data.description).toBe(product.description);
+  });
+
+  test('Discard a draft that is not published should return 404', async () => {
+    // Create a new product
+    const product = {
+      name: 'Product 5',
+      description: 'Product description',
+    };
+
+    const { body } = await rq({
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp`,
+      method: 'POST',
+      body: product,
+    });
+
+    // Discard the draft
+    const discardRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/discard`,
+    });
+
+    expect(discardRes.statusCode).toBe(404);
+  });
+
   describe('validators', () => {
     test('Can create a product - minLength', async () => {
       const product = {

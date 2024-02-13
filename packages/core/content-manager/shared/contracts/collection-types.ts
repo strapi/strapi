@@ -239,6 +239,29 @@ export declare namespace Unpublish {
 }
 
 /**
+ * POST /collection-types/:model/:id/actions/discard
+ */
+export declare namespace Discard {
+  export interface Request {
+    body: {};
+    query: {
+      locale?: string | null;
+    };
+  }
+
+  export interface Params {
+    model: string;
+    id: Documents.ID;
+  }
+
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
  * POST /collection-types/:model/actions/bulkDelete
  */
 export declare namespace BulkDelete {
