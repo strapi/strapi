@@ -24,7 +24,7 @@ import type {
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type { Entity, UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getPopulatedEntry, getService, getEntryValidStatus } from '../utils';
 
 export interface Locale extends Entity {
   name: string;
@@ -65,7 +65,10 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     ]);
 
     const release = await strapi.entityService.create(RELEASE_MODEL_UID, {
-      data: releaseWithCreatorFields,
+      data: {
+        ...releaseWithCreatorFields,
+        status: 'empty',
+      },
     });
 
     if (
@@ -242,6 +245,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       }
     }
 
+    this.updateReleaseStatus(id);
+
     return updatedRelease;
   },
 
@@ -270,11 +275,15 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
 
     const { entry, type } = action;
 
-    return strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
+    const populatedEntry = await getPopulatedEntry(entry.contentType, entry.id, { strapi });
+    const isEntryValid = await getEntryValidStatus(entry.contentType, populatedEntry, { strapi });
+
+    const releaseAction = await strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
       data: {
         type,
         contentType: entry.contentType,
         locale: entry.locale,
+        isValid: isEntryValid,
         entry: {
           id: entry.id,
           __type: entry.contentType,
@@ -284,6 +293,10 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       },
       populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
     });
+
+    this.updateReleaseStatus(releaseId);
+
+    return releaseAction;
   },
 
   async findActions(
@@ -528,7 +541,17 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
     const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
 
     // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
-    await strapi.db.transaction(async () => {
+    await strapi.db.transaction(async ({ onRollback }) => {
+      // If transaction failed, change release status to failed
+      onRollback(() => {
+        strapi.db.query(RELEASE_MODEL_UID).update({
+          where: { id: releaseId },
+          data: {
+            status: 'failed',
+          },
+        });
+      });
+
       // First we publish all the singleTypes
       for (const { uid, action, id } of singleTypeActions) {
         // @ts-expect-error - populateBuilderService should be a function but is returning service
@@ -611,6 +634,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
          */
         // @ts-expect-error see above
         releasedAt: new Date(),
+        status: 'done',
       },
     });
 
@@ -666,7 +690,56 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       );
     }
 
+    this.updateReleaseStatus(releaseId);
+
     return deletedAction;
+  },
+
+  async updateReleaseStatus(releaseId: Release['id']) {
+    const [totalActions, invalidActions] = await Promise.all([
+      this.countActions({
+        filters: {
+          release: releaseId,
+        },
+      }),
+      this.countActions({
+        filters: {
+          release: releaseId,
+          isValid: false,
+        },
+      }),
+    ]);
+
+    if (totalActions > 0) {
+      if (invalidActions > 0) {
+        return strapi.db.query(RELEASE_MODEL_UID).update({
+          where: {
+            id: releaseId,
+          },
+          data: {
+            status: 'blocked',
+          },
+        });
+      }
+
+      return strapi.db.query(RELEASE_MODEL_UID).update({
+        where: {
+          id: releaseId,
+        },
+        data: {
+          status: 'ready',
+        },
+      });
+    }
+
+    return strapi.db.query(RELEASE_MODEL_UID).update({
+      where: {
+        id: releaseId,
+      },
+      data: {
+        status: 'empty',
+      },
+    });
   },
 });
 

@@ -26,6 +26,11 @@ const baseStrapiMock = {
       isEnabled: jest.fn().mockReturnValue(true),
     },
   },
+  db: {
+    query: jest.fn().mockReturnValue({
+      update: jest.fn(),
+    }),
+  },
 };
 
 const mockUser = {
@@ -53,6 +58,7 @@ describe('release service', () => {
         entityService: {
           findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
           update: jest.fn().mockReturnValue({ id: 1, name: 'Release name' }),
+          count: jest.fn(),
         },
       };
       // @ts-expect-error Ignore missing properties
@@ -117,6 +123,7 @@ describe('release service', () => {
           update: jest
             .fn()
             .mockReturnValue({ id: 1, name: 'Release name', scheduledAt: scheduledDate }),
+          count: jest.fn(),
         },
       };
 
@@ -139,6 +146,7 @@ describe('release service', () => {
         entityService: {
           findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
           update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
+          count: jest.fn(),
         },
       };
 
@@ -176,6 +184,19 @@ describe('release service', () => {
 
   describe('createAction', () => {
     it('creates an action', async () => {
+      const servicesMock = {
+        'release-validation': {
+          validateEntryContentType: jest.fn(),
+          validateUniqueEntry: jest.fn(),
+        },
+        'populate-builder': () => ({
+          default: jest.fn().mockReturnThis(),
+          populateDeep: jest.fn().mockReturnThis(),
+          countRelations: jest.fn().mockReturnThis(),
+          build: jest.fn().mockReturnThis(),
+        }),
+      };
+
       const strapiMock = {
         ...baseStrapiMock,
         entityService: {
@@ -184,13 +205,21 @@ describe('release service', () => {
             entry: { id: 1, contentType: 'api::contentType.contentType' },
           }),
           findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          count: jest.fn(),
         },
         plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({
-            validateEntryContentType: jest.fn(),
-            validateUniqueEntry: jest.fn(),
-          }),
+          service: jest
+            .fn()
+            .mockImplementation((service: 'release-validation' | 'populate-builder') => {
+              return servicesMock[service];
+            }),
         }),
+        db: {
+          query: jest.fn().mockReturnValue({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            update: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
+        },
       };
 
       // @ts-expect-error Ignore missing properties
@@ -322,6 +351,7 @@ describe('release service', () => {
         'populate-builder': () => ({
           default: jest.fn().mockReturnThis(),
           populateDeep: jest.fn().mockReturnThis(),
+          countRelations: jest.fn().mockReturnThis(),
           build: jest.fn().mockReturnThis(),
         }),
       };
@@ -329,7 +359,7 @@ describe('release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
-          transaction: jest.fn().mockImplementation((cb) => cb()),
+          transaction: jest.fn().mockImplementation((fn) => fn({ onRollback: jest.fn() })),
         },
         plugin: jest.fn().mockReturnValue({
           service: jest
@@ -583,7 +613,11 @@ describe('release service', () => {
         db: {
           query: jest.fn().mockReturnValue({
             delete: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
+            update: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
           }),
+        },
+        entityService: {
+          count: jest.fn(),
         },
       };
 
@@ -676,6 +710,7 @@ describe('release service', () => {
           createdBy: mockUser.id,
           updatedBy: mockUser.id,
           name: 'Release name',
+          status: 'empty',
         },
       });
     });

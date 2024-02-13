@@ -8,6 +8,7 @@ export interface Release extends Entity {
   name: string;
   releasedAt: string | null;
   scheduledAt: string | null;
+  status: 'ready' | 'blocked' | 'failed' | 'done' | 'empty';
   actions: ReleaseAction[];
 }
 

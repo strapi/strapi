@@ -29,6 +29,14 @@ export default {
     scheduledAt: {
       type: 'datetime',
     },
+    timezone: {
+      type: 'string',
+    },
+    status: {
+      type: 'enumeration',
+      enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
+      required: true,
+    },
     actions: {
       type: 'relation',
       relation: 'oneToMany',

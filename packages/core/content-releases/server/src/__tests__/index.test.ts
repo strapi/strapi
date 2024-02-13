@@ -31,7 +31,7 @@ describe('register', () => {
       })),
     })),
     hook: jest.fn(() => ({
-      register: jest.fn(),
+      register: jest.fn().mockReturnThis(),
     })),
     admin: {
       services: {
