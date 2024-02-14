@@ -23,7 +23,7 @@ export const normalizeRelation = (
 ) => {
   const nextRelation: NormalizedRelation = {
     ...relation,
-    // @ts-expect-error – TODO: fix why this want's it to be an attribute as opposed to a string.
+    // @ts-expect-error – TODO: fix why this wants it to be an attribute as opposed to a string.
     mainField: relation[mainFieldName],
   };
 

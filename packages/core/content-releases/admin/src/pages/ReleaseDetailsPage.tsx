@@ -9,7 +9,6 @@ import {
   IconButton,
   Link,
   Main,
-  Popover,
   Tr,
   Td,
   Typography,
@@ -19,7 +18,7 @@ import {
   Icon,
   Tooltip,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   LoadingIndicatorPage,
@@ -76,10 +75,7 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
-  align-self: stretch;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-
+const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
@@ -107,31 +103,6 @@ const TrashIcon = styled(Trash)`
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
-
-interface PopoverButtonProps {
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}
-
-const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
-  return (
-    <StyledFlex
-      paddingTop={2}
-      paddingBottom={2}
-      paddingLeft={4}
-      paddingRight={4}
-      alignItems="center"
-      gap={2}
-      as="button"
-      hasRadius
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </StyledFlex>
-  );
-};
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
@@ -229,8 +200,6 @@ const ReleaseDetailsLayout = ({
 }: ReleaseDetailsLayoutProps) => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
-  const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
-  const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const {
     data,
     isLoading: isLoadingDetails,
@@ -252,15 +221,6 @@ const ReleaseDetailsLayout = ({
   const { trackUsage } = useTracking();
 
   const release = data?.data;
-
-  const handleTogglePopover = () => {
-    setIsPopoverVisible((prev) => !prev);
-  };
-
-  const openReleaseModal = () => {
-    toggleEditReleaseModal();
-    handleTogglePopover();
-  };
 
   const handlePublishRelease = (id: string) => async () => {
     const response = await publishRelease({ id });
@@ -295,11 +255,6 @@ const ReleaseDetailsLayout = ({
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-  };
-
-  const openWarningConfirmDialog = () => {
-    toggleWarningSubmit();
-    handleTogglePopover();
   };
 
   const handleRefresh = () => {
@@ -373,43 +328,72 @@ const ReleaseDetailsLayout = ({
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <IconButton
-                label={formatMessage({
-                  id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release edit and delete menu',
-                })}
-                ref={moreButtonRef}
-                onClick={handleTogglePopover}
-              >
-                <More />
-              </IconButton>
-              {isPopoverVisible && (
-                <Popover
-                  source={moreButtonRef}
-                  placement="bottom-end"
-                  onDismiss={handleTogglePopover}
-                  spacing={4}
-                  minWidth="242px"
-                >
-                  <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                    <PopoverButton disabled={!canUpdate} onClick={openReleaseModal}>
-                      <PencilIcon />
-                      <Typography ellipsis>
-                        {formatMessage({
-                          id: 'content-releases.header.actions.edit',
-                          defaultMessage: 'Edit',
-                        })}
-                      </Typography>
-                    </PopoverButton>
-                    <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
-                      <TrashIcon />
-                      <Typography ellipsis textColor="danger600">
-                        {formatMessage({
-                          id: 'content-releases.header.actions.delete',
-                          defaultMessage: 'Delete',
-                        })}
-                      </Typography>
-                    </PopoverButton>
+              <Menu.Root>
+                {/* 
+                  TODO Fix in the DS
+                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
+                */}
+                <Menu.Trigger
+                  as={IconButton}
+                  paddingLeft={2}
+                  paddingRight={2}
+                  aria-label={formatMessage({
+                    id: 'content-releases.header.actions.open-release-actions',
+                    defaultMessage: 'Release edit and delete menu',
+                  })}
+                  // @ts-expect-error See above
+                  icon={<More />}
+                  variant="tertiary"
+                />
+                {/*
+                  TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
+                  Refactor this once fixed in the DS
+                */}
+                <Menu.Content top={1} popoverPlacement="bottom-end">
+                  <Flex
+                    alignItems="center"
+                    justifyContent="center"
+                    direction="column"
+                    padding={1}
+                    width="100%"
+                  >
+                    <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
+                      <Flex
+                        paddingTop={2}
+                        paddingBottom={2}
+                        alignItems="center"
+                        gap={2}
+                        hasRadius
+                        width="100%"
+                      >
+                        <PencilIcon />
+                        <Typography ellipsis>
+                          {formatMessage({
+                            id: 'content-releases.header.actions.edit',
+                            defaultMessage: 'Edit',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
+                    <StyledMenuItem disabled={!canDelete} onSelect={toggleWarningSubmit}>
+                      <Flex
+                        paddingTop={2}
+                        paddingBottom={2}
+                        alignItems="center"
+                        gap={2}
+                        hasRadius
+                        width="100%"
+                      >
+                        <TrashIcon />
+                        <Typography ellipsis textColor="danger600">
+                          {formatMessage({
+                            id: 'content-releases.header.actions.delete',
+                            defaultMessage: 'Delete',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
@@ -436,8 +420,8 @@ const ReleaseDetailsLayout = ({
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
-                </Popover>
-              )}
+                </Menu.Content>
+              </Menu.Root>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',

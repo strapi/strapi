@@ -10,8 +10,7 @@ test.describe('Edit View', () => {
   });
 
   test.describe('Collection Type', () => {
-    // TODO V5: D&P
-    test.skip('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
+    test('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
@@ -57,7 +56,8 @@ test.describe('Edit View', () => {
 
       await page.getByRole('combobox', { name: 'authors' }).click();
 
-      await page.getByRole('option', { name: 'Ted Lasso' }).click();
+      expect(page.getByRole('option', { name: 'State: Draft Ted Lasso' })).toBeEnabled();
+      await page.getByRole('option', { name: 'State: Published Ted Lasso' }).click();
 
       await expect(page.getByRole('link', { name: 'Ted Lasso' })).toBeVisible();
 
@@ -72,25 +72,27 @@ test.describe('Edit View', () => {
       await page.getByRole('button', { name: 'Publish' }).click();
       await expect(page.getByText('Success:Published', { exact: true })).toBeVisible();
 
-      await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
+      // These do not work in the current hybrid version of D&P because a draft never has the `publishedAt` attribute,
 
-      await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
+      // await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
 
-      await expect(page.getByRole('button', { name: 'Unpublish' })).toBeDisabled();
+      // await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
 
-      await page.getByRole('button', { name: 'Save' }).click();
+      // await expect(page.getByRole('button', { name: 'Unpublish' })).toBeDisabled();
 
-      await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
+      // await page.getByRole('button', { name: 'Save' }).click();
 
-      await page.getByRole('button', { name: 'Unpublish' }).click();
+      // await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
 
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
+      // await page.getByRole('button', { name: 'Unpublish' }).click();
 
-      await page.getByRole('button', { name: 'Yes, confirm' }).click();
+      // await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
 
-      await expect(page.getByText('Unpublished')).toBeVisible();
+      // await page.getByRole('button', { name: 'Yes, confirm' }).click();
 
-      await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
+      // await expect(page.getByText('Unpublished')).toBeVisible();
+
+      // await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       await page.getByRole('button', { name: 'Delete this entry' }).click();
 
@@ -114,8 +116,7 @@ test.describe('Edit View', () => {
   });
 
   test.describe('Single Type', () => {
-    // TODO V5: D&P
-    test.skip('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
+    test('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
@@ -146,26 +147,28 @@ test.describe('Edit View', () => {
 
       await expect(page.getByText('Published', { exact: true })).toBeVisible();
 
-      await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
+      // These do not work in the current hybrid version of D&P because a draft never has the `publishedAt` attribute,
 
-      await page.getByRole('combobox', { name: 'admin_user' }).click();
-      await page.getByRole('option').nth(0).click();
+      // await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
 
-      await expect(page.getByRole('button', { name: 'Unpublish' })).toBeDisabled();
+      // await page.getByRole('combobox', { name: 'admin_user' }).click();
+      // await page.getByRole('option').nth(0).click();
 
-      await page.getByRole('button', { name: 'Save' }).click();
+      // await expect(page.getByRole('button', { name: 'Unpublish' })).toBeDisabled();
 
-      await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
+      // await page.getByRole('button', { name: 'Save' }).click();
 
-      await page.getByRole('button', { name: 'Unpublish' }).click();
+      // await expect(page.getByRole('button', { name: 'Unpublish' })).not.toBeDisabled();
 
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
+      // await page.getByRole('button', { name: 'Unpublish' }).click();
 
-      await page.getByRole('button', { name: 'Yes, confirm' }).click();
+      // await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
 
-      await expect(page.getByText('Unpublished')).toBeVisible();
+      // await page.getByRole('button', { name: 'Yes, confirm' }).click();
 
-      await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
+      // await expect(page.getByText('Unpublished')).toBeVisible();
+
+      // await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       await page.getByRole('button', { name: 'Delete this entry' }).click();
 

@@ -2,6 +2,7 @@ import { RELEASE_MODEL_UID } from '../../constants';
 import createReleaseService from '../release';
 
 const mockSchedulingSet = jest.fn();
+const mockSchedulingCancel = jest.fn();
 
 const baseStrapiMock = {
   utils: {
@@ -17,6 +18,7 @@ const baseStrapiMock = {
       validateUniqueNameForPendingRelease: jest.fn(),
       validateScheduledAtIsLaterThanNow: jest.fn(),
       set: mockSchedulingSet,
+      cancel: mockSchedulingCancel,
     }),
   }),
   features: {
@@ -41,6 +43,10 @@ const mockUser = {
 
 describe('release service', () => {
   describe('update', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('updates the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
@@ -99,6 +105,54 @@ describe('release service', () => {
       expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
         'Release already published'
       );
+    });
+
+    it('should set scheduling if scheduledAt is present', async () => {
+      const scheduledDate = new Date();
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          update: jest
+            .fn()
+            .mockReturnValue({ id: 1, name: 'Release name', scheduledAt: scheduledDate }),
+        },
+      };
+
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+        scheduledAt: scheduledDate,
+      };
+
+      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'Release name', scheduledAt: scheduledDate });
+      expect(mockSchedulingSet).toHaveBeenCalledWith(1, mockReleaseArgs.scheduledAt);
+    });
+
+    it('should remove scheduling if scheduledAt is null', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
+          update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
+        },
+      };
+
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+        scheduledAt: null,
+      };
+
+      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'Release name', scheduledAt: null });
+      expect(mockSchedulingCancel).toHaveBeenCalledWith(1);
     });
   });
 
