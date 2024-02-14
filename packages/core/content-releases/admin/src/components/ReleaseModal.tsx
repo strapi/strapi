@@ -16,7 +16,8 @@ import {
   Combobox,
   ComboboxOption,
 } from '@strapi/design-system';
-import formatISO from 'date-fns/formatISO';
+import { formatISO, parse } from 'date-fns';
+import { zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -58,25 +59,8 @@ export const ReleaseModal = ({
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
-
-    const [hours, minutes] = time.split(':').map(Number);
-    const combinedDateTime = new Date(date);
-    combinedDateTime.setHours(hours);
-    combinedDateTime.setMinutes(minutes);
-    const selectedTimezone = timezoneList.find((zone) => zone.value === timezone);
-    const timezoneOffset = selectedTimezone!.offset.slice(3);
-    const offset = timezoneOffset.length > 0 ? parseInt(timezoneOffset, 10) : 0;
-
-    // Adjust the date based on the selected timezone offset
-    const combinedTime = combinedDateTime.getTime();
-    const combinedTimeWithOffset = combinedTime - offset * 60 * 60 * 1000; // Convert offset in hours to milliseconds
-
-    // Because new Date always adds local timezone offset, remove it to set the correct UTC time
-    const dateObject = new Date(combinedTimeWithOffset);
-    const scheduledDate = new Date(
-      dateObject.getTime() - dateObject.getTimezoneOffset() * 60 * 1000
-    );
-    return scheduledDate;
+    const formattedDate = parse(`${time}`, 'HH:mm', new Date(date));
+    return zonedTimeToUtc(formattedDate, timezone);
   };
 
   return (
@@ -94,7 +78,6 @@ export const ReleaseModal = ({
         </Typography>
       </ModalHeader>
       <Formik
-        validateOnChange={false}
         onSubmit={(values) => {
           handleSubmit({
             ...values,
@@ -122,100 +105,105 @@ export const ReleaseModal = ({
                   onChange={handleChange}
                   required
                 />
-                <Checkbox
-                  name="isScheduled"
-                  value={values.isScheduled}
-                  onChange={(event) => {
-                    setFieldValue('isScheduled', event.target.checked);
-                    if (!event.target.checked) {
-                      // Clear scheduling info from a release on unchecking schedule release
-                      setFieldValue('date', null);
-                      setFieldValue('time', '');
-                    } else {
-                      setFieldValue('date', initialValues.date);
-                      setFieldValue('time', initialValues.time);
-                    }
-                  }}
-                >
-                  <Typography
-                    textColor={values.isScheduled ? 'primary600' : 'neutral800'}
-                    fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
-                  >
-                    {formatMessage({
-                      id: 'modal.form.input.label.schedule-release',
-                      defaultMessage: 'Schedule release',
-                    })}
-                  </Typography>
-                </Checkbox>
-                {values.isScheduled && (
+                {/* Remove future flag check after Scheduling Beta release */}
+                {window.strapi.future.isEnabled('contentReleasesScheduling') && (
                   <>
-                    <Flex gap={4}>
-                      <Box width="100%">
-                        <DatePicker
-                          label={formatMessage({
-                            id: 'content-releases.modal.form.input.label.date',
-                            defaultMessage: 'Date',
-                          })}
-                          name="date"
-                          onChange={(date) => {
-                            const isoFormatDate = date
-                              ? formatISO(date, { representation: 'date' })
-                              : null;
-                            setFieldValue('date', isoFormatDate);
-                          }}
-                          clearLabel={formatMessage({
-                            id: 'content-releases.modal.form.input.clearLabel',
-                            defaultMessage: 'Clear',
-                          })}
-                          onClear={() => {
-                            setFieldValue('date', null);
-                          }}
-                          selectedDate={values.date ? new Date(values.date) : undefined}
-                          required
-                        />
-                      </Box>
-                      <Box width="100%">
-                        <TimePicker
-                          label={formatMessage({
-                            id: 'content-releases.modal.form.input.label.time',
-                            defaultMessage: 'Time',
-                          })}
-                          name="time"
-                          onChange={(time) => {
-                            setFieldValue('time', time);
-                          }}
-                          clearLabel={formatMessage({
-                            id: 'content-releases.modal.form.input.clearLabel',
-                            defaultMessage: 'Clear',
-                          })}
-                          onClear={() => {
-                            setFieldValue('time', '');
-                          }}
-                          value={values.time || undefined}
-                          required
-                        />
-                      </Box>
-                    </Flex>
-                    <Combobox
-                      label={formatMessage({
-                        id: 'content-releases.modal.form.input.label.timezone',
-                        defaultMessage: 'Timezone',
-                      })}
-                      value={values.timezone}
-                      onChange={(timezone) => {
-                        setFieldValue('timezone', timezone);
+                    <Checkbox
+                      name="isScheduled"
+                      value={values.isScheduled}
+                      onChange={(event) => {
+                        setFieldValue('isScheduled', event.target.checked);
+                        if (!event.target.checked) {
+                          // Clear scheduling info from a release on unchecking schedule release
+                          setFieldValue('date', null);
+                          setFieldValue('time', '');
+                        } else {
+                          setFieldValue('date', initialValues.date);
+                          setFieldValue('time', initialValues.time);
+                        }
                       }}
-                      onClear={() => {
-                        setFieldValue('timezone', '');
-                      }}
-                      required
                     >
-                      {timezoneList.map((timezone) => (
-                        <ComboboxOption key={timezone.value} value={timezone.value}>
-                          {timezone.offset} {timezone.value}
-                        </ComboboxOption>
-                      ))}
-                    </Combobox>
+                      <Typography
+                        textColor={values.isScheduled ? 'primary600' : 'neutral800'}
+                        fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
+                      >
+                        {formatMessage({
+                          id: 'modal.form.input.label.schedule-release',
+                          defaultMessage: 'Schedule release',
+                        })}
+                      </Typography>
+                    </Checkbox>
+                    {values.isScheduled && (
+                      <>
+                        <Flex gap={4}>
+                          <Box width="100%">
+                            <DatePicker
+                              label={formatMessage({
+                                id: 'content-releases.modal.form.input.label.date',
+                                defaultMessage: 'Date',
+                              })}
+                              name="date"
+                              onChange={(date) => {
+                                const isoFormatDate = date
+                                  ? formatISO(date, { representation: 'date' })
+                                  : null;
+                                setFieldValue('date', isoFormatDate);
+                              }}
+                              clearLabel={formatMessage({
+                                id: 'content-releases.modal.form.input.clearLabel',
+                                defaultMessage: 'Clear',
+                              })}
+                              onClear={() => {
+                                setFieldValue('date', null);
+                              }}
+                              selectedDate={values.date ? new Date(values.date) : undefined}
+                              required
+                            />
+                          </Box>
+                          <Box width="100%">
+                            <TimePicker
+                              label={formatMessage({
+                                id: 'content-releases.modal.form.input.label.time',
+                                defaultMessage: 'Time',
+                              })}
+                              name="time"
+                              onChange={(time) => {
+                                setFieldValue('time', time);
+                              }}
+                              clearLabel={formatMessage({
+                                id: 'content-releases.modal.form.input.clearLabel',
+                                defaultMessage: 'Clear',
+                              })}
+                              onClear={() => {
+                                setFieldValue('time', '');
+                              }}
+                              value={values.time || undefined}
+                              required
+                            />
+                          </Box>
+                        </Flex>
+                        <Combobox
+                          label={formatMessage({
+                            id: 'content-releases.modal.form.input.label.timezone',
+                            defaultMessage: 'Timezone',
+                          })}
+                          value={values.timezone}
+                          onChange={(timezone) => {
+                            setFieldValue('timezone', timezone);
+                          }}
+                          onClear={() => {
+                            setFieldValue('timezone', '');
+                          }}
+                          required
+                        >
+                          {timezoneList.map((timezone) => (
+                            <ComboboxOption key={timezone.value} value={timezone.value}>
+                              {timezone.offset} {timezone.value}
+                            </ComboboxOption>
+                          ))}
+                        </Combobox>
+                      </>
+                    )}
                   </>
                 )}
               </Flex>

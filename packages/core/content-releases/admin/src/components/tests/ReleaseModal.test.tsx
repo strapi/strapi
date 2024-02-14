@@ -1,11 +1,23 @@
-import { within, fireEvent } from '@testing-library/react';
-import { render, screen } from '@tests/utils';
+import { fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@tests/utils';
 import { MemoryRouter } from 'react-router-dom';
 
 import { pluginId } from '../../pluginId';
 import { ReleaseModal } from '../ReleaseModal';
 
 describe('ReleaseModal', () => {
+  beforeAll(() => {
+    window.strapi.future = {
+      isEnabled: () => true,
+    };
+  });
+
+  afterAll(() => {
+    window.strapi.future = {
+      isEnabled: () => false,
+    };
+  });
+
   it('renders correctly the dialog content on create', async () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
@@ -18,8 +30,7 @@ describe('ReleaseModal', () => {
         />
       </MemoryRouter>
     );
-    const dialogContainer = screen.getByRole('dialog');
-    const dialogCancelButton = within(dialogContainer).getByRole('button', {
+    const dialogCancelButton = screen.getByRole('button', {
       name: /cancel/i,
     });
     expect(dialogCancelButton).toBeInTheDocument();
@@ -27,11 +38,11 @@ describe('ReleaseModal', () => {
     expect(handleCloseMocked).toHaveBeenCalledTimes(1);
 
     // the initial field value is empty
-    const inputElement = within(dialogContainer).getByRole('textbox', { name: /name/i });
+    const inputElement = screen.getByRole('textbox', { name: /name/i });
     expect(inputElement).toHaveValue('');
 
     // enable the submit button when there is content inside the input
-    const dialogContinueButton = within(dialogContainer).getByRole('button', {
+    const dialogContinueButton = screen.getByRole('button', {
       name: /continue/i,
     });
     await user.type(inputElement, 'new release');
@@ -48,14 +59,13 @@ describe('ReleaseModal', () => {
         isLoading={false}
       />
     );
-    const dialogContainer = screen.getByRole('dialog');
 
     // the initial field value is the title
-    const inputElement = within(dialogContainer).getByRole('textbox', { name: /name/i });
+    const inputElement = screen.getByRole('textbox', { name: /name/i });
     expect(inputElement).toHaveValue('title');
 
     // disable the submit button when there are no changes inside the input
-    const dialogSaveButton = within(dialogContainer).getByRole('button', {
+    const dialogSaveButton = screen.getByRole('button', {
       name: /save/i,
     });
     expect(dialogSaveButton).toBeDisabled();
@@ -79,37 +89,44 @@ describe('ReleaseModal', () => {
         isLoading={false}
       />
     );
-    const dialogContainer = screen.getByRole('dialog');
-    const scheduleReleaseCheck = within(dialogContainer).getByRole('checkbox', {
+    const scheduleReleaseCheck = screen.getByRole('checkbox', {
       name: /schedule release/i,
     });
 
     // Schedule release checkbox is not checked and date field is not visible
     expect(scheduleReleaseCheck).not.toBeChecked();
-    const date = within(dialogContainer).queryByRole('combobox', {
+    const date = screen.queryByRole('combobox', {
       name: /date/i,
     });
     expect(date).not.toBeInTheDocument();
 
     // Click Schedule release checkbox
     fireEvent.click(scheduleReleaseCheck);
-    expect(scheduleReleaseCheck).toBeChecked();
+    await waitFor(() => {
+      expect(scheduleReleaseCheck).toBeChecked();
+    });
 
     // Date and other fields are visible
-    const dateField = within(dialogContainer).getByRole('combobox', {
+    const dateField = screen.getByRole('combobox', {
       name: /date/i,
     });
-    expect(dateField).toBeInTheDocument();
+    await waitFor(() => {
+      expect(dateField).toBeInTheDocument();
+    });
 
-    const time = within(dialogContainer).getByRole('combobox', {
+    const time = screen.getByRole('combobox', {
       name: /time\s/i,
     });
-    expect(time).toBeInTheDocument();
+    await waitFor(() => {
+      expect(time).toBeInTheDocument();
+    });
 
-    const timezone = within(dialogContainer).getByRole('combobox', {
+    const timezone = screen.getByRole('combobox', {
       name: /timezone/i,
     });
-    expect(timezone).toBeInTheDocument();
+    await waitFor(() => {
+      expect(timezone).toBeInTheDocument();
+    });
   });
 
   it('should update save button status when schedule release is selected', async () => {
@@ -122,34 +139,33 @@ describe('ReleaseModal', () => {
         isLoading={false}
       />
     );
-    const dialogContainer = screen.getByRole('dialog');
-    const scheduleReleaseCheck = within(dialogContainer).getByRole('checkbox', {
+    const scheduleReleaseCheck = screen.getByRole('checkbox', {
       name: /schedule release/i,
     });
     // Click Schedule release checkbox
     fireEvent.click(scheduleReleaseCheck);
     expect(scheduleReleaseCheck).toBeChecked();
 
-    const dialogSaveButton = within(dialogContainer).getByRole('button', {
+    const dialogSaveButton = screen.getByRole('button', {
       name: /save/i,
     });
     // save button is disabled initially
     expect(dialogSaveButton).toBeDisabled();
 
-    const date = within(dialogContainer).getByRole('combobox', {
+    const date = screen.getByRole('combobox', {
       name: /date/i,
     });
     await user.click(date);
     await user.click(screen.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }));
 
-    const time = within(dialogContainer).getByRole('combobox', {
+    const time = screen.getByRole('combobox', {
       name: 'Time *',
     });
 
     await user.click(time);
     await user.click(screen.getByRole('option', { name: '14:00' }));
 
-    const timezone = within(dialogContainer).getByRole('combobox', {
+    const timezone = screen.getByRole('combobox', {
       name: /timezone/i,
     });
     await user.click(timezone);

@@ -36,6 +36,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import format from 'date-fns/format';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
@@ -837,13 +838,7 @@ const ReleaseDetailsPage = () => {
   const title = releaseData?.name || '';
   const scheduledAt = releaseData?.scheduledAt ? new Date(releaseData.scheduledAt) : null;
   const timezone = releaseData?.timezone;
-
-  let time = '';
-  if (scheduledAt) {
-    const hours = scheduledAt.getHours();
-    const minutes = scheduledAt.getMinutes();
-    time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  }
+  const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
     const response = await updateRelease({

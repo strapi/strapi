@@ -7921,6 +7921,7 @@ __metadata:
     "@types/styled-components": "npm:5.1.26"
     axios: "npm:1.6.0"
     date-fns: "npm:2.30.0"
+    date-fns-tz: "npm:2.0.0"
     formik: "npm:2.4.0"
     koa: "npm:2.13.4"
     lodash: "npm:4.17.21"
@@ -14572,6 +14573,15 @@ __metadata:
     whatwg-mimetype: "npm:^3.0.0"
     whatwg-url: "npm:^11.0.0"
   checksum: 033fc3dd0fba6d24bc9a024ddcf9923691dd24f90a3d26f6545d6a2f71ec6956f93462f2cdf2183cc46f10dc01ed3bcb36731a8208456eb1a08147e571fe2a76
+  languageName: node
+  linkType: hard
+
+"date-fns-tz@npm:2.0.0":
+  version: 2.0.0
+  resolution: "date-fns-tz@npm:2.0.0"
+  peerDependencies:
+    date-fns: ">=2.0.0"
+  checksum: 31ff66d49fc54ff7e3521297ed5e792d1edb51be0afb83a8aab0493154fbe654b72c6ba8e5c4ca12e845957781a24904afdcd48060aba9fe86ad04a5a36793a0
   languageName: node
   linkType: hard
 
