@@ -63,7 +63,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
             select: ['id', 'documentId', 'locale'],
             where: {
               documentId: { $in: documentIds },
-              locale,
+              locale: locale || null,
               publishedAt: null,
               // TODO: Fix this
               // publishedAt: isDraft ? null : { $ne: null },

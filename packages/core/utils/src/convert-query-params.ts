@@ -511,7 +511,7 @@ const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery 
 };
 
 const isValidSchemaAttribute = (key: string, schema?: Model) => {
-  if (key === 'id') {
+  if (['id', 'documentId'].includes(key)) {
     return true;
   }
 
