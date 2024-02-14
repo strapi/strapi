@@ -118,6 +118,7 @@ export const ReleaseModal = ({
                           setFieldValue('date', null);
                           setFieldValue('time', '');
                         } else {
+                          // On ticking back schedule release date and time should be restored to the initial state
                           setFieldValue('date', initialValues.date);
                           setFieldValue('time', initialValues.time);
                         }
