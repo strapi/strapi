@@ -202,6 +202,7 @@ export const PreviewBox = ({
                 label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
                 icon={<Resize />}
                 onClick={handleCropStart}
+                data-testid="crop"
               />
             )}
           </Flex>
@@ -230,6 +231,7 @@ export const PreviewBox = ({
             ref={previewRef}
             mime={asset.mime}
             name={asset.name}
+            data-testid="preview"
             url={hasCropIntent ? assetUrl : thumbnailUrl}
             onLoad={() => {
               if (asset.isLocal || hasCropIntent) {
@@ -246,10 +248,24 @@ export const PreviewBox = ({
           blurry={isInCroppingMode}
         >
           {isInCroppingMode && (
-            <BadgeOverride background="neutral900" color="neutral0">
-              <Input label="height" type="text" min={0} value={height} onChange={onChangeHeight} />
+            <BadgeOverride background="neutral900" color="neutral0" data-testid="crop-size">
+              <Input
+                data-testid="cropbox-height"
+                label="height"
+                type="text"
+                min={0}
+                value={height}
+                onChange={onChangeHeight}
+              />
               x
-              <Input label="width" type="text" min={0} value={width} onChange={onChangeWidth} />
+              <Input
+                data-testid="cropbox-width"
+                label="width"
+                type="text"
+                min={0}
+                value={width}
+                onChange={onChangeWidth}
+              />
             </BadgeOverride>
           )}
         </ActionRow>
