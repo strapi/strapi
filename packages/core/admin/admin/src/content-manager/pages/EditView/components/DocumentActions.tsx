@@ -98,6 +98,7 @@ interface DocumentActionsProps {
 }
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
+  const { formatMessage } = useIntl();
   const [primaryAction, secondaryAction, ...restActions] = actions.filter(
     (action) => action.position !== 'header'
   );
@@ -110,7 +111,15 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <Flex gap={2}>
         <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-        {restActions.length > 0 ? <DocumentActionsMenu actions={restActions} /> : null}
+        {restActions.length > 0 ? (
+          <DocumentActionsMenu
+            actions={restActions}
+            label={formatMessage({
+              id: 'content-manager.containers.edit.panels.default.more-actions',
+              defaultMessage: 'More document actions',
+            })}
+          />
+        ) : null}
       </Flex>
       {secondaryAction ? (
         <DocumentActionButton
@@ -197,9 +206,11 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
 
 interface DocumentActionsMenuProps {
   actions: Action[];
+  label?: string;
 }
 
-const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
+const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
+  const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -231,10 +242,11 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
 
   const handleClose = () => {
     setDialogId(null);
+    setIsOpen(false);
   };
 
   return (
-    <Menu.Root>
+    <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
       <Menu.Trigger
         disabled={isDisabled}
         size="S"
@@ -246,10 +258,11 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
       >
         <More aria-hidden focusable={false} />
         <VisuallyHidden as="span">
-          {formatMessage({
-            id: 'content-manager.containers.edit.panels.default.more-actions',
-            defaultMessage: 'More actions',
-          })}
+          {label ||
+            formatMessage({
+              id: 'content-manager.containers.edit.panels.default.more-actions',
+              defaultMessage: 'More document actions',
+            })}
         </VisuallyHidden>
       </Menu.Trigger>
       <Menu.Content popoverPlacement="bottom-end">
@@ -439,12 +452,23 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
     meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
 
   return {
+    /**
+     * Disabled when:
+     *  - the form is submitting
+     *  - the active tab is the published tab
+     *  - the document is already published & not modified
+     *  - the document is being created & not modified
+     *  - the user doesn't have the permission to publish
+     *  - the user doesn't have the permission to create a new document
+     *  - the user doesn't have the permission to update the document
+     */
     disabled:
-      !canPublish ||
       isSubmitting ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
-      Boolean((!id && !canCreate) || (id && !canUpdate)),
+      (!modified && !document.id) ||
+      !canPublish ||
+      Boolean((!document.id && !canCreate) || (document.id && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -495,11 +519,19 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
   const document = useForm('UpdateAction', ({ values }) => values);
 
   return {
+    /**
+     * Disabled when:
+     * - the form is submitting
+     * - the document is not modified
+     * - the active tab is the published tab
+     * - the user doesn't have the permission to create a new document
+     * - the user doesn't have the permission to update the document
+     */
     disabled:
-      Boolean((!id && !canCreate) || (id && !canUpdate)) ||
       isSubmitting ||
       !modified ||
-      activeTab === 'published',
+      activeTab === 'published' ||
+      Boolean((!id && !canCreate) || (id && !canUpdate)),
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',
@@ -576,7 +608,7 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
     }),
     icon: <StyledCrossCircle />,
     onClick: async () => {
-      if (!id || isDocumentModified) {
+      if ((!id && collectionType !== SINGLE_TYPES) || isDocumentModified) {
         if (!id) {
           // This should never, ever, happen.
           throw new Error(
@@ -642,7 +674,7 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
             </Flex>
           ),
           onConfirm: async () => {
-            if (!id) {
+            if (!id && collectionType !== SINGLE_TYPES) {
               // This should never, ever, happen.
               throw new Error(
                 "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."

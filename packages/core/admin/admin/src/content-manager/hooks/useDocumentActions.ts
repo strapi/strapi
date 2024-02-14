@@ -107,7 +107,7 @@ type UseDocumentActions = () => {
     args: {
       collectionType: string;
       model: string;
-      id: string;
+      id?: string;
     },
     discardDraft?: boolean
   ) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;

@@ -29,7 +29,7 @@ export const StringInput = forwardRef<any, InputProps>(
         defaultValue={field.initialValue}
         onChange={field.onChange}
         placeholder={placeholder}
-        value={field.value}
+        value={field.value ?? ''}
       />
     );
   }

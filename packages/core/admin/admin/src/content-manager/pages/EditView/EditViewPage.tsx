@@ -198,7 +198,7 @@ const EditViewPage = () => {
                 defaultMessage: 'draft',
               })}
             </StatusTab>
-            <StatusTab disabled={meta?.availableStatus.length === 0}>
+            <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
               {formatMessage({
                 id: getTranslation('containers.edit.tabs.published'),
                 defaultMessage: 'published',
