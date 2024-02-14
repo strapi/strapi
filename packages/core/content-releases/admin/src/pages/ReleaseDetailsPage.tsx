@@ -37,6 +37,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import format from 'date-fns/format';
+import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
@@ -836,8 +837,9 @@ const ReleaseDetailsPage = () => {
   const releaseData = (isSuccessDetails && data?.data) || null;
 
   const title = releaseData?.name || '';
-  const scheduledAt = releaseData?.scheduledAt ? new Date(releaseData.scheduledAt) : null;
   const timezone = releaseData?.timezone ?? null;
+  const scheduledAt =
+    releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
