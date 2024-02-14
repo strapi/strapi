@@ -52,7 +52,7 @@ export const ReleaseModal = ({
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
   // Set default first value from the timezone list with offset UTC+00:00
   const { timezoneList, currentTimezone = { value: 'Africa/Abidjan' } } = useTimezone();
-
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   /**
    * Generate scheduled time using selected date, time and timezone
    */
@@ -106,7 +106,7 @@ export const ReleaseModal = ({
                   required
                 />
                 {/* Remove future flag check after Scheduling Beta release */}
-                {window.strapi.future.isEnabled('contentReleasesScheduling') && (
+                {IsSchedulingEnabled && (
                   <>
                     <Checkbox
                       name="isScheduled"
