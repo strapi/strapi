@@ -11,7 +11,6 @@ export interface Release extends Entity {
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
   actions: ReleaseAction[];
-  timezone?: string;
 }
 
 export type Pagination = {
