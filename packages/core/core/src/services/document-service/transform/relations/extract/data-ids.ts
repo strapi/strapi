@@ -49,17 +49,19 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 
     // handle positional arguments
     const connect = Array.isArray(relation.connect) ? relation.connect : [relation.connect];
-    connect.forEach((item) => {
-      if (isShortHand(item) || !('position' in item)) return;
+    connect.forEach((relation) => {
+      if (isShortHand(relation) || !('position' in relation)) return;
+
+      const { position } = relation;
 
       // { connect: { id: id, position: { before: id } } }
-      if (item.position?.before) {
-        ids.push(...handlePrimitive(item.position.before));
+      if (position?.before) {
+        ids.push(...handlePrimitive({ ...position, id: position.before }));
       }
 
       // { connect: { id: id, position: { after: id } } }
-      if (item.position?.after) {
-        ids.push(...handlePrimitive(item.position.after));
+      if (position?.after) {
+        ids.push(...handlePrimitive({ ...position, id: position.after }));
       }
     });
   }

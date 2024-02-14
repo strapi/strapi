@@ -73,20 +73,24 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
     // connect: id[] | { id } | ...
     relation.connect = transformPrimitive(relation.connect as any, getId);
 
-    const mapPosition = (item: any) => {
-      if (isShortHand(item) || !('position' in item)) return item;
+    const mapPosition = (relation: any) => {
+      if (isShortHand(relation) || !('position' in relation)) return relation;
+
+      const { position } = relation;
 
       // { connect: { id: id, position: { before: id } } }
-      if (item.position?.before) {
-        item.position.before = transformPrimitive(item.position.before, getId);
+      if (position?.before) {
+        const { id } = transformPrimitive({ ...position, id: position.before }, getId);
+        position.before = id;
       }
 
       // { connect: { id: id, position: { after: id } } }
-      if (item.position?.after) {
-        item.position.after = transformPrimitive(item.position.after, getId);
+      if (position?.after) {
+        const { id } = transformPrimitive({ ...position, id: position.after }, getId);
+        position.after = id;
       }
 
-      return item;
+      return relation;
     };
 
     if (Array.isArray(relation.connect)) {

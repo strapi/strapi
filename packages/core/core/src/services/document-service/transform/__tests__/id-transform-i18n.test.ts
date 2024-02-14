@@ -108,6 +108,39 @@ describe('Transform relational data', () => {
         categories: [{ id: 'category-1-en-draft' }],
       });
     });
+
+    it('Connect and reorder', async () => {
+      // Should connect and reorder the relations,
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: {
+              connect: [
+                {
+                  id: 'category-1',
+                  locale: 'fr',
+                  position: { before: 'category-2', locale: 'en' },
+                },
+                { id: 'category-2', locale: 'en', position: { after: 'category-1', locale: 'fr' } },
+              ],
+            },
+          },
+        },
+        { isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: {
+          connect: [
+            { id: 'category-1-fr-draft', position: { before: 'category-2-en-draft' } },
+            { id: 'category-2-en-draft', position: { after: 'category-1-fr-draft' } },
+          ],
+        },
+      });
+    });
   });
 
   describe('I18n (categories) -> Non I18n (products)', () => {
