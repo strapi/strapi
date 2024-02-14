@@ -211,12 +211,14 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
  * -----------------------------------------------------------------------------------------------*/
 interface DocumentActionsMenuProps {
   actions: Action[];
+  children?: React.ReactNode;
   label?: string;
   variant?: 'ghost' | 'tertiary';
 }
 
 const DocumentActionsMenu = ({
   actions,
+  children,
   label,
   variant = 'tertiary',
 }: DocumentActionsMenuProps) => {
@@ -274,7 +276,7 @@ const DocumentActionsMenu = ({
             })}
         </VisuallyHidden>
       </Menu.Trigger>
-      <Menu.Content top="4px" popoverPlacement="bottom-end">
+      <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
             <React.Fragment key={action.id}>
@@ -291,6 +293,7 @@ const DocumentActionsMenu = ({
             </React.Fragment>
           );
         })}
+        {children}
       </Menu.Content>
       {actions.map((action) => {
         return (
