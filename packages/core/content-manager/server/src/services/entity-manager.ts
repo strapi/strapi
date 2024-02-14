@@ -360,6 +360,32 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     return mappedEntity;
   },
 
+  async discard(
+    document: Entity,
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.ServiceInstance['discardDraft']>[1] = {} as any
+  ) {
+    const populate = await buildDeepPopulate(uid);
+    const params = { ...opts, populate };
+
+    const { versions: discardedDocuments } = await strapi.documents(uid).discardDraft(
+      // @ts-expect-error - Change entity to document
+      document.id,
+      params
+    );
+
+    // We only discard one document at a time
+    const discardedDocument = discardedDocuments.at(0);
+    const mappedEntity = await this.mapEntity(discardedDocument, uid);
+
+    // If relations were populated, relations count will be returned instead of the array of relations.
+    if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {
+      return getDeepRelationsCount(mappedEntity, uid);
+    }
+
+    return mappedEntity;
+  },
+
   async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 

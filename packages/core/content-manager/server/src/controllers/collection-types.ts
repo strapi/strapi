@@ -113,6 +113,7 @@ export default {
     const { model } = ctx.params;
     const { query } = ctx.request;
 
+    const documentMetadata = getService('document-metadata');
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -131,18 +132,32 @@ export default {
 
     const { locale, status } = getDocumentDimensions(query);
 
-    const { results, pagination } = await entityManager.findPage(
+    const { results: documents, pagination } = await entityManager.findPage(
       { ...permissionQuery, populate, locale, status },
       model
     );
 
-    const sanitizedResults = await mapAsync(results, async (result: any) => {
-      const sanitizedResult = await permissionChecker.sanitizeOutput(result);
-      return sanitizedResult;
-    });
+    // TODO: Skip this part if not necessary (if D&P disabled or columns not displayed in the view)
+    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
+      model,
+      documents
+    );
+
+    const setStatus = (document: any) => {
+      // Available status of document
+      const availableStatus = documentsAvailableStatus.find((d: any) => d.id === document.id);
+      // Compute document version status
+      document.status = documentMetadata.getStatus(document, availableStatus);
+      return document;
+    };
+
+    const results = await mapAsync(
+      documents,
+      pipeAsync(permissionChecker.sanitizeOutput, setStatus)
+    );
 
     ctx.body = {
-      results: sanitizedResults,
+      results,
       pagination,
     };
   },
@@ -363,7 +378,7 @@ export default {
       }
 
       // TODO: Publish many locales at once
-      const { locale = 'en' } = getDocumentDimensions(body);
+      const { locale } = getDocumentDimensions(body);
       return entityManager.publish(document, model, {
         locale,
         data: setCreatorFields({ user, isEdition: true })({}),
@@ -455,7 +470,9 @@ export default {
   async unpublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
-    const { body } = ctx.request;
+    const {
+      body: { discardDraft, ...body },
+    } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
@@ -465,14 +482,18 @@ export default {
       return ctx.forbidden();
     }
 
+    if (discardDraft && permissionChecker.cannot.discard()) {
+      return ctx.forbidden();
+    }
+
     const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
+
     // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
-    // TODO: Unpublish many locales
-    const { locale = 'en' } = getDocumentDimensions(body);
+    const { locale } = getDocumentDimensions(body);
     const document = await entityManager.findOne(id, model, {
       populate,
       locale,
@@ -480,17 +501,70 @@ export default {
     });
 
     if (!document) {
-      return ctx.notFound();
+      throw new errors.NotFoundError();
     }
 
     if (permissionChecker.cannot.unpublish(document)) {
+      throw new errors.ForbiddenError();
+    }
+
+    if (discardDraft && permissionChecker.cannot.discard(document)) {
+      throw new errors.ForbiddenError();
+    }
+
+    await strapi.db.transaction(async () => {
+      if (discardDraft) {
+        await entityManager.discard(document, model, { locale });
+      }
+
+      ctx.body = await pipeAsync(
+        (document) => entityManager.unpublish(document, model, { locale }),
+        permissionChecker.sanitizeOutput,
+        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      )(document);
+    });
+  },
+
+  async discard(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { id, model } = ctx.params;
+    const { body } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.discard()) {
       return ctx.forbidden();
     }
 
-    const unpublishedDocument = await entityManager.unpublish(document, model, { locale });
+    const permissionQuery = await permissionChecker.sanitizedQuery.discard(ctx.query);
+    // @ts-expect-error populate builder needs to be called with a UID
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    const { locale } = getDocumentDimensions(body);
+    const document = await entityManager.findOne(id, model, {
+      populate,
+      locale,
+      status: 'published',
+    });
+
+    // Can not discard a document that is not published
+    if (!document) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.discard(document)) {
+      return ctx.forbidden();
+    }
+
+    ctx.body = await pipeAsync(
+      (document) => entityManager.discard(document, model, { locale }),
+      permissionChecker.sanitizeOutput,
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+    )(document);
   },
 
   async bulkDelete(ctx: any) {

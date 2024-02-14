@@ -8,6 +8,7 @@ const ACTIONS = {
   delete: 'plugin::content-manager.explorer.delete',
   publish: 'plugin::content-manager.explorer.publish',
   unpublish: 'plugin::content-manager.explorer.publish',
+  discard: 'plugin::content-manager.explorer.update',
 } as const;
 
 type Entity = EntityService.Result<Common.UID.ContentType>;

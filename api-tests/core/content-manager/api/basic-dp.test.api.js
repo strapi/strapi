@@ -241,39 +241,84 @@ describe('CM API - Basic', () => {
     });
   });
 
-  // FIX: We don't return the draft entry when unpublishing in v5
-  test.skip('Unpublish article1, expect article1 to be set to null', async () => {
-    const entry = data.productsWithDP[0];
+  describe('Unpublish', () => {
+    // FIX: We don't return the draft entry when unpublishing in v5
+    test.skip('Unpublish article1, expect article1 to be set to null', async () => {
+      const entry = data.productsWithDP[0];
 
-    const { body } = await rq({
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
-      method: 'POST',
+      const { body } = await rq({
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
+        method: 'POST',
+      });
+
+      data.productsWithDP[0] = body;
+
+      expect(body.publishedAt).toBeNull();
     });
 
-    data.productsWithDP[0] = body;
+    test.skip('Unpublish article1, expect article1 to already be a draft', async () => {
+      const entry = data.productsWithDP[0];
 
-    expect(body.publishedAt).toBeNull();
+      const { body } = await rq({
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
+        method: 'POST',
+      });
+
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'already.draft',
+          details: {},
+        },
+      });
+    });
+
+    test('Unpublish and discard a draft, expect the draft to contain the published data', async () => {
+      // Create and publish product
+      const product = {
+        name: 'Product',
+        description: 'Product description',
+      };
+
+      const { body } = await rq({
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/actions/publish`,
+        method: 'POST',
+        body: product,
+      });
+
+      // Update the product draft
+      const updatedProduct = {
+        name: 'Product updated',
+        description: 'Product description updated',
+      };
+
+      await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        body: updatedProduct,
+      });
+
+      // Unpublish and discard product draft
+      const unpublishRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/unpublish`,
+        body: { discardDraft: true },
+      });
+
+      // Get draft
+      const draft = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        qs: { status: 'draft' },
+      });
+
+      expect(unpublishRes.statusCode).toBe(200);
+      expect(draft.body.data.publishedAt).toBeNull();
+      expect(draft.body.data.name).toBe(product.name);
+    });
   });
-
-  test.skip('Unpublish article1, expect article1 to already be a draft', async () => {
-    const entry = data.productsWithDP[0];
-
-    const { body } = await rq({
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
-      method: 'POST',
-    });
-
-    expect(body).toMatchObject({
-      data: null,
-      error: {
-        status: 400,
-        name: 'ApplicationError',
-        message: 'already.draft',
-        details: {},
-      },
-    });
-  });
-
   // FIX: We don't return the draft entry when deleting in v5
   test.skip('Delete a draft', async () => {
     const res = await rq({
@@ -286,6 +331,67 @@ describe('CM API - Basic', () => {
     expect(res.body.id).toEqual(data.productsWithDP[0].id);
     expect(res.body.publishedAt).toBeNull();
     data.productsWithDP.shift();
+  });
+
+  describe('Discard', () => {
+    test('Discard a draft', async () => {
+      // Create and publish a new product
+      const product = {
+        name: 'Product 4',
+        description: 'Product description',
+      };
+
+      const { body } = await rq({
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/actions/publish`,
+        method: 'POST',
+        body: product,
+      });
+
+      // Update the product
+      const updatedProduct = {
+        name: 'Product 4 updated',
+        description: 'Product description updated',
+      };
+
+      await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        body: updatedProduct,
+      });
+
+      // Discard the draft
+      const discardRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/discard`,
+      });
+
+      expect(discardRes.statusCode).toBe(200);
+      // The discarded draft should be the same as the published version
+      expect(discardRes.body.data.name).toBe(product.name);
+      expect(discardRes.body.data.description).toBe(product.description);
+    });
+
+    test('Discard a draft that is not published should return 404', async () => {
+      // Create a new product
+      const product = {
+        name: 'Product 5',
+        description: 'Product description',
+      };
+
+      const { body } = await rq({
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp`,
+        method: 'POST',
+        body: product,
+      });
+
+      // Discard the draft
+      const discardRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/discard`,
+      });
+
+      expect(discardRes.statusCode).toBe(404);
+    });
   });
 
   describe('validators', () => {

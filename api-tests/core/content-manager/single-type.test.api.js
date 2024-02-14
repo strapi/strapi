@@ -52,9 +52,10 @@ const publish = async (data) => {
   });
 };
 
-const unpublish = async () => {
+const unpublish = async (discardDraft = false) => {
   return rq({
     url: `/content-manager/single-types/${MODEL_UID}/actions/unpublish`,
+    body: { discardDraft },
     method: 'POST',
   });
 };
@@ -184,6 +185,30 @@ describe('Content Manager single types', () => {
 
     expect(documents.length).toBe(1);
     expect(draftDocument).not.toBeUndefined();
+    expect(publishedDocument).toBeUndefined();
+  });
+
+  test('Unpublish and discard draft', async () => {
+    // Create and publish
+    const publishedRes = await publish({ title: 'Title-published' });
+    expect(publishedRes.statusCode).toBe(200);
+
+    // Update draft
+    await createOrUpdate({ title: 'Title-draft' });
+
+    // Unpublish and discard draft
+    const unpublishedRes = await unpublish(true);
+    expect(unpublishedRes.statusCode).toBe(200);
+
+    // Published entry should be deleted, and draft should contain the published content
+    const documents = await strapi.db.query(MODEL_UID).findMany({});
+
+    const draftDocument = documents.find((doc) => doc.publishedAt === null);
+    const publishedDocument = documents.find((doc) => doc.publishedAt !== null);
+
+    expect(documents.length).toBe(1);
+    expect(draftDocument).not.toBeUndefined();
+    expect(draftDocument.title).toBe('Title-published');
     expect(publishedDocument).toBeUndefined();
   });
 

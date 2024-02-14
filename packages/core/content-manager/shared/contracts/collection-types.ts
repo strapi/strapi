@@ -175,7 +175,7 @@ export declare namespace Delete {
  */
 export declare namespace PublishAndCreate {
   export interface Request {
-    body: Document;
+    body: Partial<Document>;
     query: {
       locale?: string | null;
     };
@@ -197,7 +197,7 @@ export declare namespace PublishAndCreate {
  */
 export declare namespace Publish {
   export interface Request {
-    body: Document;
+    body: Partial<Document>;
     query: {
       locale?: string | null;
     };
@@ -217,8 +217,37 @@ export declare namespace Publish {
 
 /**
  * POST /collection-types/:model/:id/actions/unpublish
+ *
+ * TODO: Unpublish many locales at once
  */
 export declare namespace Unpublish {
+  export interface Request {
+    body: {
+      // Discards the draft version before un-publishing, so the document is be reverted to the last published version.
+      // Default: false
+      discardDraft?: boolean;
+    };
+    query: {
+      locale?: string | null;
+    };
+  }
+
+  export interface Params {
+    model: string;
+    id: Documents.ID;
+  }
+
+  export interface Response {
+    data: Document;
+    meta: DocumentMetadata;
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /collection-types/:model/:id/actions/discard
+ */
+export declare namespace Discard {
   export interface Request {
     body: {};
     query: {

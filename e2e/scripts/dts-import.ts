@@ -15,13 +15,14 @@ const {
  * Reset the DB and import data from a DTS backup
  * This function ensures we keep all admin user's and roles in the DB
  * see: https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html
- * @param {String} filePath the path to a DTS backup
- * @param {Array<String>} contentTypesToWipe remove all entries of these content types before importing
  */
-export const resetDatabaseAndImportDataFromPath = async (filePath, contentTypesToWipe = []) => {
+export const resetDatabaseAndImportDataFromPath = async (
+  filePath: string,
+  modifiedContentTypesFn: (cts: string[]) => string[] = (cts) => cts
+) => {
   const source = createSourceProvider(filePath);
-  const destination = createDestinationProvider(contentTypesToWipe);
-  const includedTypes = [...ALLOWED_CONTENT_TYPES, ...contentTypesToWipe];
+  const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES);
+  const destination = createDestinationProvider(includedTypes);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
@@ -67,7 +68,7 @@ const createSourceProvider = (filePath) =>
     compression: { enabled: false },
   });
 
-const createDestinationProvider = (contentTypesToWipe = []) => {
+const createDestinationProvider = (includedTypes = []) => {
   return createRemoteStrapiDestinationProvider({
     url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
@@ -75,7 +76,7 @@ const createDestinationProvider = (contentTypesToWipe = []) => {
     restore: {
       assets: true,
       entities: {
-        include: [...ALLOWED_CONTENT_TYPES, ...contentTypesToWipe],
+        include: includedTypes,
       },
       configuration: {
         coreStore: false,

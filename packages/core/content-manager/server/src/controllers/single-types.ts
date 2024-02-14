@@ -193,13 +193,20 @@ export default {
   async unpublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { body, query = {} } = ctx.request;
+    const {
+      body: { discardDraft, ...body },
+      query = {},
+    } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
+      return ctx.forbidden();
+    }
+
+    if (discardDraft && permissionChecker.cannot.discard()) {
       return ctx.forbidden();
     }
 
@@ -216,10 +223,55 @@ export default {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await entityManager.unpublish(document, model, { locale });
+    if (discardDraft && permissionChecker.cannot.discard(document)) {
+      return ctx.forbidden();
+    }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(unpublishedEntity);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    await strapi.db.transaction(async () => {
+      if (discardDraft) {
+        await entityManager.discard(document, model, { locale });
+      }
+
+      ctx.body = await pipeAsync(
+        (document) => entityManager.unpublish(document, model, { locale }),
+        permissionChecker.sanitizeOutput,
+        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      )(document);
+    });
+  },
+
+  async discard(ctx: any) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { body, query = {} } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const documentMetadata = getService('document-metadata');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.discard()) {
+      return ctx.forbidden();
+    }
+
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.discard(query);
+    const { locale } = getDocumentDimensions(body);
+
+    const document = await findDocument(sanitizedQuery, model, { locale, status: 'published' });
+
+    // Can not discard a document that is not published
+    if (!document) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.discard(document)) {
+      return ctx.forbidden();
+    }
+
+    ctx.body = await pipeAsync(
+      (document) => entityManager.discard(document, model, { locale }),
+      permissionChecker.sanitizeOutput,
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+    )(document);
   },
 
   async countDraftRelations(ctx: any) {
