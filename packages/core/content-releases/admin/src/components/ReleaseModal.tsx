@@ -29,7 +29,7 @@ export interface FormValues {
   name: string;
   date: Date | null;
   time: string;
-  timezone?: string;
+  timezone: string | null;
   isScheduled?: boolean;
   scheduledAt: Date | null;
 }

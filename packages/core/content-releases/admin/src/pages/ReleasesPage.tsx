@@ -146,6 +146,7 @@ const INITIAL_FORM_VALUES = {
   // Remove future flag check after Scheduling Beta release and replace with true as creating new release should include scheduling by default
   isScheduled: window.strapi.future.isEnabled('contentReleasesScheduling'),
   scheduledAt: null,
+  timezone: null,
 } satisfies FormValues;
 
 const ReleasesPage = () => {

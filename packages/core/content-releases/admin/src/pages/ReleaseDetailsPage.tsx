@@ -837,7 +837,7 @@ const ReleaseDetailsPage = () => {
 
   const title = releaseData?.name || '';
   const scheduledAt = releaseData?.scheduledAt ? new Date(releaseData.scheduledAt) : null;
-  const timezone = releaseData?.timezone;
+  const timezone = releaseData?.timezone ?? null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
