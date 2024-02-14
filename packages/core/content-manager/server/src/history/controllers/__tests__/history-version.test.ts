@@ -28,20 +28,41 @@ jest.mock('../../../utils', () => ({
   }),
 }));
 
-const mockStrapi = {};
-
-// @ts-expect-error - we're not mocking the entire strapi object
-const historyVersionController = createHistoryVersionController({ strapi: mockStrapi });
-
 describe('History version controller', () => {
   describe('findMany', () => {
-    it('should require contentType and documentId', () => {
+    it('should require contentType and documentId for collection types', () => {
       const ctx = {
         state: {
           userAbility: {},
         },
         query: {},
       };
+
+      const historyVersionController = createHistoryVersionController({
+        // @ts-expect-error - we're not mocking the entire strapi object
+        strapi: { getModel: jest.fn(() => 'collectionType') },
+      });
+
+      // @ts-expect-error partial context
+      expect(historyVersionController.findMany(ctx)).rejects.toThrow(
+        /contentType and documentId are required/
+      );
+
+      expect(mockFindVersionsPage).not.toHaveBeenCalled();
+    });
+
+    it('should require contentType for single types', () => {
+      const ctx = {
+        state: {
+          userAbility: {},
+        },
+        query: {},
+      };
+
+      const historyVersionController = createHistoryVersionController({
+        // @ts-expect-error - we're not mocking the entire strapi object
+        strapi: { getModel: jest.fn(() => 'singleType') },
+      });
 
       // @ts-expect-error partial context
       expect(historyVersionController.findMany(ctx)).rejects.toThrow(
@@ -52,7 +73,7 @@ describe('History version controller', () => {
     });
   });
 
-  it('should call findVersionsPage', async () => {
+  it('should call findVersionsPage for collection types', async () => {
     const ctx = {
       state: {
         userAbility: {},
@@ -71,6 +92,44 @@ describe('History version controller', () => {
         pageCount: 1,
         total: 0,
       },
+    });
+
+    const historyVersionController = createHistoryVersionController({
+      // @ts-expect-error - we're not mocking the entire strapi object
+      strapi: { getModel: jest.fn(() => 'collectionType') },
+    });
+
+    // @ts-expect-error partial context
+    const response = await historyVersionController.findMany(ctx);
+
+    expect(mockFindVersionsPage).toHaveBeenCalled();
+    expect(response.data.length).toBe(1);
+    expect(response.meta.pagination).toBeDefined();
+  });
+
+  it('should call findVersionsPage for single types', async () => {
+    const ctx = {
+      state: {
+        userAbility: {},
+      },
+      query: {
+        contentType: 'api::test.test',
+      },
+    };
+
+    mockFindVersionsPage.mockResolvedValueOnce({
+      results: [{ id: 'history-version-id' }],
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        pageCount: 1,
+        total: 0,
+      },
+    });
+
+    const historyVersionController = createHistoryVersionController({
+      // @ts-expect-error - we're not mocking the entire strapi object
+      strapi: { getModel: jest.fn(() => 'singleType') },
     });
 
     // @ts-expect-error partial context
