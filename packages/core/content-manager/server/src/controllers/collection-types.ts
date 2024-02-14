@@ -145,9 +145,9 @@ export default {
 
     const setStatus = (document: any) => {
       // Available status of document
-      const availableStatus = documentsAvailableStatus.find((d: any) => d.id === document.id);
+      const availableStatuses = documentsAvailableStatus.filter((d: any) => d.id === document.id);
       // Compute document version status
-      document.status = documentMetadata.getStatus(document, [availableStatus]);
+      document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
     };
 
