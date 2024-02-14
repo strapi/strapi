@@ -36,9 +36,9 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More actions' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
     expect(screen.getByRole('menuitem', { name: 'Action 3' })).toBeInTheDocument();
   });
@@ -54,7 +54,7 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
   });
 
   it('should render a notification if either of the button actions has been pressed and the notification dialog props are provided', async () => {
@@ -182,9 +182,9 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More actions' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
     expect(screen.getByRole('menuitem', { name: 'Action 1' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Action 2' })).toBeInTheDocument();
@@ -200,7 +200,7 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
   });
 
   it("should render an actions's icon if provided", async () => {
@@ -213,7 +213,7 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
     expect(screen.getByText('icon 1')).toBeInTheDocument();
     expect(screen.getByText('icon 2')).toBeInTheDocument();
@@ -231,7 +231,7 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
     expect(screen.getByText('Action 1')).toHaveStyle({ color: '#4945ff' }); // primary600
     expect(screen.getByText('Action 2')).toHaveStyle({ color: 'rgb(50, 50, 77);' }); // neutral800
@@ -255,7 +255,7 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
     await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
 
     expect(screen.getByText('hello world')).toBeInTheDocument();
@@ -286,7 +286,7 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
     await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
 
     expect(screen.getByText('hello world')).toBeInTheDocument();
@@ -299,6 +299,7 @@ describe('DocumentActionsMenu', () => {
 
     expect(onCancel).toHaveBeenCalled();
 
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
     await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
@@ -328,7 +329,7 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
     await user.click(screen.getByRole('menuitem', { name: 'Action 1' }));
 
     expect(screen.getByText('hello world')).toBeInTheDocument();

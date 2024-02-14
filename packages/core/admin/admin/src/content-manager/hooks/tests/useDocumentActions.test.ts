@@ -12,6 +12,7 @@ describe('useDocumentActions', () => {
     expect(result.current).toEqual({
       clone: expect.any(Function),
       create: expect.any(Function),
+      discard: expect.any(Function),
       delete: expect.any(Function),
       getDocument: expect.any(Function),
       publish: expect.any(Function),
@@ -171,6 +172,134 @@ describe('useDocumentActions', () => {
           `);
 
       await screen.findByText("Couldn't create entry.");
+    });
+  });
+
+  describe('delete', () => {
+    it('should return the deleted document when successful', async () => {
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.delete({
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          id: '12345',
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+        {
+          "id": "12345",
+          "title": "test",
+        }
+      `);
+    });
+
+    it('should return the errors when unsuccessful', async () => {
+      server.use(
+        rest.delete('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
+          return res(
+            ctx.status(500),
+            ctx.json({
+              error: new errors.ApplicationError("Couldn't delete entry."),
+            })
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.delete({
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          id: '12345',
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+                {
+                  "error": {
+                    "details": {},
+                    "message": "Couldn't delete entry.",
+                    "name": "ApplicationError",
+                  },
+                }
+              `);
+
+      await screen.findByText("Couldn't delete entry.");
+    });
+  });
+
+  describe('discard', () => {
+    it('should return the discarded document when successful', async () => {
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.discard({
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          id: '12345',
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+        {
+          "id": "12345",
+          "title": "test",
+        }
+      `);
+    });
+
+    it('should return the errors when unsuccessful', async () => {
+      server.use(
+        rest.post('/content-manager/:collectionType/:uid/:id/actions/discard', (_, res, ctx) => {
+          return res(
+            ctx.status(500),
+            ctx.json({
+              error: new errors.ApplicationError("Couldn't discard entry."),
+            })
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.discard({
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          id: '12345',
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+        {
+          "error": {
+            "details": {},
+            "message": "Couldn't discard entry.",
+            "name": "ApplicationError",
+          },
+        }
+      `);
+
+      await screen.findByText("Couldn't discard entry.");
     });
   });
 

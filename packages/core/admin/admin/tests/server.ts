@@ -561,6 +561,26 @@ export const server = setupServer(
         })
       );
     }),
+    rest.post('/content-manager/:collectionType/:uid/:id/actions/discard', (req, res, ctx) => {
+      const { id } = req.params;
+
+      if (id === '12345') {
+        return res(
+          ctx.status(200),
+          ctx.json({
+            id: '12345',
+            title: 'test',
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
+    }),
     rest.post(
       '/content-manager/:collectionType/:uid/:id/actions/publish',
       async (req, res, ctx) => {
