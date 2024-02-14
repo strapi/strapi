@@ -286,10 +286,11 @@ export const PreviewBox = ({
 
 const Input = styled.input`
   border: 0;
-  width: 60px;
+  width: 50px;
   &:focus {
     outline: none;
   }
+  text-align: center;
 `;
 
 PreviewBox.defaultProps = {
