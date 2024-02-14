@@ -5,6 +5,7 @@ import { useTracking } from '@strapi/helper-plugin';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { AssetDefinition, AssetType } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
@@ -49,7 +50,7 @@ export const PreviewBox = ({
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
+  const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height, cropperRef } =
     useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
 
@@ -141,6 +142,24 @@ export const PreviewBox = ({
     setHasCropIntent(true);
   };
 
+  const onChangeWidth = (e) => {
+    if (cropperRef) {
+      const imageData = cropperRef.current?.getImageData();
+      const ratio = imageData.width / imageData.naturalWidth;
+      cropperRef.current?.setCropBoxData({
+        width: parseFloat(e.target.value * ratio),
+      });
+    }
+  };
+
+  const onChangeHeight = (e) => {
+    const imageData = cropperRef.current?.getImageData();
+    const ratio = imageData.height / imageData.naturalHeight;
+    cropperRef.current?.setCropBoxData({
+      height: parseFloat(e.target.value * ratio),
+    });
+  };
+
   return (
     <>
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
@@ -226,9 +245,11 @@ export const PreviewBox = ({
           justifyContent="flex-end"
           blurry={isInCroppingMode}
         >
-          {isInCroppingMode && width && height && (
+          {isInCroppingMode && (
             <BadgeOverride background="neutral900" color="neutral0">
-              {width && height ? `${height}✕${width}` : 'N/A'}
+              <Input label="height" type="text" min={0} value={height} onChange={onChangeHeight} />
+              x
+              <Input label="width" type="text" min={0} value={width} onChange={onChangeWidth} />
             </BadgeOverride>
           )}
         </ActionRow>
@@ -246,6 +267,14 @@ export const PreviewBox = ({
     </>
   );
 };
+
+const Input = styled.input`
+  border: 0;
+  width: 60px;
+  &:focus {
+    outline: none;
+  }
+`;
 
 PreviewBox.defaultProps = {
   replacementFile: undefined,
