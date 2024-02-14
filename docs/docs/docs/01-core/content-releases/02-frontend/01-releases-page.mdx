@@ -1,0 +1,18 @@
+---
+title: Releases page
+tags:
+  - content-releases
+  - tech design
+---
+
+### Overview
+
+The releases page provides a comprehensive display of all available content releases. Content is organized into two tabs: 'pending' (releases not yet published) and 'done' (releases already published).
+
+#### New Release Creation:
+
+If a user has the `plugin::content-releases.update` permissions, a 'New release' button will be visible in the header. Clicking the button opens a form requiring a name. The name of a pending release must be unique.
+
+#### License limits
+
+If the user reaches the limit of maximum pending releases defined on their license then the 'New release' button is disabled and a banner is displayed to inform the user.

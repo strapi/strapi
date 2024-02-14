@@ -13,17 +13,36 @@ An app template has been created in `e2e/app-template` which provide some custom
 
 Here you can read about what content schemas the test instance has & the API customisations we've built (incl. why we built them).
 
+## Update the app template
+
+To update the app template:
+
+- run the tests to create a Strapi app based on the existing template at `test-apps/e2e/test-app-<number>`.
+- Move into this folder and run `yarn develop`.
+- Login using the credentials found in `e2e/constants.js`.
+- Make any changes you need (i.e. create a content-type).
+- Kill the server and run [[`yarn strapi templates:generate <path>`]](https://docs.strapi.io/dev-docs/cli#strapi-templatesgenerate).
+- Replace the existing template in `e2e/app-template` with the newly generated one.
+
 ## Content Schemas
 
-:::note
-There's no content yet!
-:::
+### Article
+
+A collection type, the schema can be found in: `e2e/app-template/template/src/api/article/content-types/article/schema.json`
+
+### Author
+
+A collection type, the schema can be found in `e2e/app-template/template/src/api/article/content-types/author/schema.json`
+
+### Homepage
+
+A single type, the schema can be found in `e2e/app-template/template/src/api/homepage/content-types/homepage/schema.json`
 
 ## API Customisations
 
 ### Database
 
-found at `template/src/api/database`
+Found at `template/src/api/database`
 
 #### Usage
 
@@ -46,7 +65,7 @@ This endpoint `DELETES` every row from every table _excluding_ the "core" tables
 #### Why do we have it?
 
 This lets us wipe the entire test instance _if_ we need to. DTS does technically
-does this already for us. But nonetheless, its useful.
+do this already for us. But nonetheless, its useful.
 
 ### Config
 

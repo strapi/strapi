@@ -96,6 +96,7 @@ const AddActionToReleaseModal = ({
   contentTypeUid,
   entryId,
 }: AddActionToReleaseModalProps) => {
+  const releaseHeaderId = React.useId();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -155,9 +156,9 @@ const AddActionToReleaseModal = ({
   };
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy="title">
+    <ModalLayout onClose={handleClose} labelledBy={releaseHeaderId}>
       <ModalHeader>
-        <Typography id="title" fontWeight="bold" textColor="neutral800">
+        <Typography id={releaseHeaderId} fontWeight="bold" textColor="neutral800">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.add-to-release',
             defaultMessage: 'Add to release',
