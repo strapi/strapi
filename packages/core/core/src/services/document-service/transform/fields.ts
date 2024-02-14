@@ -1,5 +1,5 @@
 export const transformFields = (fields: string[]): string[] => {
-  if (fields.length === 0) {
+  if (!fields || fields.length === 0 || !Array.isArray(fields)) {
     // If fields is empty, return it as is
     return fields;
   }
