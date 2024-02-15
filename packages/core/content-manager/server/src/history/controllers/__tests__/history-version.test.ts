@@ -40,14 +40,13 @@ describe('History version controller', () => {
 
       const historyVersionController = createHistoryVersionController({
         // @ts-expect-error - we're not mocking the entire strapi object
-        strapi: { getModel: jest.fn(() => 'collectionType') },
+        strapi: { getModel: jest.fn(() => ({ kind: 'collectionType' })) },
       });
 
       // @ts-expect-error partial context
       expect(historyVersionController.findMany(ctx)).rejects.toThrow(
         /contentType and documentId are required/
       );
-
       expect(mockFindVersionsPage).not.toHaveBeenCalled();
     });
 
@@ -61,14 +60,11 @@ describe('History version controller', () => {
 
       const historyVersionController = createHistoryVersionController({
         // @ts-expect-error - we're not mocking the entire strapi object
-        strapi: { getModel: jest.fn(() => 'singleType') },
+        strapi: { getModel: jest.fn(() => ({ kind: 'singleType' })) },
       });
 
       // @ts-expect-error partial context
-      expect(historyVersionController.findMany(ctx)).rejects.toThrow(
-        /contentType and documentId are required/
-      );
-
+      expect(historyVersionController.findMany(ctx)).rejects.toThrow(/contentType is required/);
       expect(mockFindVersionsPage).not.toHaveBeenCalled();
     });
   });
