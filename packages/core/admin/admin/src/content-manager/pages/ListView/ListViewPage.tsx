@@ -37,6 +37,7 @@ import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { capitalise } from '../../../utils/strings';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -365,26 +366,25 @@ const ListViewPage = () => {
                       </Td>
                       {tableHeaders.map(({ cellFormatter, ...header }) => {
                         if (header.name === 'status') {
+                          const { status } = rowData;
+
+                          const statusVariant =
+                            status === 'draft'
+                              ? 'primary'
+                              : status === 'published'
+                              ? 'success'
+                              : 'alternative';
+
                           return (
                             <Td key={header.name}>
                               <Status
-                                width="min-content"
+                                maxWidth="min-content"
                                 showBullet={false}
-                                variant={rowData.publishedAt ? 'success' : 'secondary'}
-                                size="S"
+                                size={'S'}
+                                variant={statusVariant}
                               >
-                                <Typography
-                                  fontWeight="bold"
-                                  textColor={`${rowData.publishedAt ? 'success' : 'secondary'}700`}
-                                >
-                                  {formatMessage({
-                                    id: getTranslation(
-                                      `containers.List.${
-                                        rowData.publishedAt ? 'published' : 'draft'
-                                      }`
-                                    ),
-                                    defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
-                                  })}
+                                <Typography as="span" variant="omega" fontWeight="bold">
+                                  {capitalise(status)}
                                 </Typography>
                               </Status>
                             </Td>
