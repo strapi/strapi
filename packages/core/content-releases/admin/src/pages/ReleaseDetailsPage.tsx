@@ -57,6 +57,8 @@ import {
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
 
+import { getBadgeProps } from './ReleasesPage';
+
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
@@ -302,18 +304,27 @@ export const ReleaseDetailsLayout = ({
 
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
+  const releaseStatus = release.status || 'empty';
 
   return (
     <Main aria-busy={isLoadingDetails}>
       <HeaderLayout
         title={release.name}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Details.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-          },
-          { number: totalEntries }
-        )}
+        subtitle={
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {formatMessage(
+                {
+                  id: 'content-releases.pages.Details.header-subtitle',
+                  defaultMessage:
+                    '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+                },
+                { number: totalEntries }
+              )}
+            </Typography>
+            <Badge {...getBadgeProps(releaseStatus)}>{releaseStatus}</Badge>
+          </Flex>
+        }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
             {formatMessage({

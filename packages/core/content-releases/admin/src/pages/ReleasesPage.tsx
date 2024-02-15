@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
   Alert,
+  Badge,
   Box,
   Button,
   ContentLayout,
@@ -38,7 +39,7 @@ import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { GetReleases } from '../../../shared/contracts/releases';
+import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -60,6 +61,53 @@ interface ReleasesGridProps {
 const LinkCard = styled(Link)`
   display: block;
 `;
+
+const getBadgeProps = (status: Release['status']) => {
+  switch (status) {
+    case 'ready':
+      return {
+        textColor: 'success600',
+        backgroundColor: 'success100',
+        borderColor: 'success200',
+      };
+
+    case 'blocked':
+      return {
+        textColor: 'warning600',
+        backgroundColor: 'warning100',
+        borderColor: 'warning200',
+      };
+
+    case 'failed':
+      return {
+        textColor: 'danger600',
+        backgroundColor: 'danger100',
+        borderColor: 'danger200',
+      };
+
+    case 'failed':
+      return {
+        textColor: 'danger600',
+        backgroundColor: 'danger100',
+        borderColor: 'danger200',
+      };
+
+    case 'done':
+      return {
+        textColor: 'primary600',
+        backgroundColor: 'primary100',
+        borderColor: 'primary200',
+      };
+
+    case 'empty':
+    default:
+      return {
+        textColor: 'neutral600',
+        backgroundColor: 'neutral100',
+        borderColor: 'neutral200',
+      };
+  }
+};
 
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
@@ -87,7 +135,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, actions }) => (
+      {releases.map(({ id, name, status = 'empty' }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -100,21 +148,12 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               height="100%"
               width="100%"
               alignItems="start"
-              gap={2}
+              gap={4}
             >
               <Typography as="h3" variant="delta" fontWeight="bold">
                 {name}
               </Typography>
-              <Typography variant="pi">
-                {formatMessage(
-                  {
-                    id: 'content-releases.page.Releases.release-item.entries',
-                    defaultMessage:
-                      '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                  },
-                  { number: actions.meta.count }
-                )}
-              </Typography>
+              <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
         </GridItem>
@@ -382,4 +421,4 @@ const ReleasesPage = () => {
   );
 };
 
-export { ReleasesPage };
+export { ReleasesPage, getBadgeProps };
