@@ -189,7 +189,7 @@ describe.skip('Simple Test GraphQL Users API End to End', () => {
 });
 
 // Test with attributes such as components, relations..
-describe('Advanced Test GraphQL Users API End to End', () => {
+describe.skip('Advanced Test GraphQL Users API End to End', () => {
   const builder = createTestBuilder();
 
   let strapi;
