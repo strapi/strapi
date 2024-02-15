@@ -13,7 +13,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID: UID.ContentType;
     field: string;
     data: Record<string, any>;
-    locale: string;
+    locale?: string;
   }) {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
@@ -51,13 +51,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
-    locale: string;
+    locale?: string;
   }) {
     const foundDocuments = await strapi.documents(contentTypeUID).findMany({
       filters: {
         [field]: { $contains: value },
       },
-      locale: locale ?? null,
+      locale,
       // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
       // However, when publishing this "available" UID might collide with another published entry
       status: 'draft',
@@ -101,13 +101,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
-    locale: string;
+    locale?: string;
   }) {
     const documentCount = await strapi.documents(contentTypeUID).count({
       filters: {
         [field]: value,
       },
-      locale: locale ?? null,
+      locale,
       // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
       // However, when publishing this "available" UID might collide with another published entry
       status: 'draft',
