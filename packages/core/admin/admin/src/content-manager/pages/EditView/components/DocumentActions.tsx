@@ -265,7 +265,7 @@ const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
             })}
         </VisuallyHidden>
       </Menu.Trigger>
-      <Menu.Content popoverPlacement="bottom-end">
+      <Menu.Content top="4px" popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
             <React.Fragment key={action.id}>
@@ -585,6 +585,7 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { document, meta } = useDoc();
   const { unpublish } = useDocumentActions();
+  const toggleNotification = useNotification();
   const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
 
   const isDocumentModified = document?.status === 'modified';
@@ -608,13 +609,27 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
     }),
     icon: <StyledCrossCircle />,
     onClick: async () => {
+      /**
+       * return if there's no id & we're in a collection type, or the status modified
+       * for either collection type because we use a dialog to handle the process in
+       * the latter case.
+       */
       if ((!id && collectionType !== SINGLE_TYPES) || isDocumentModified) {
         if (!id) {
           // This should never, ever, happen.
-          throw new Error(
+          console.error(
             "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
           );
+
+          toggleNotification({
+            message: formatMessage({
+              id: 'content-manager.actions.unpublish.error',
+              defaultMessage: 'An error occurred while trying to unpublish the document.',
+            }),
+            type: 'warning',
+          });
         }
+
         return;
       }
 
@@ -676,9 +691,17 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
           onConfirm: async () => {
             if (!id && collectionType !== SINGLE_TYPES) {
               // This should never, ever, happen.
-              throw new Error(
+              console.error(
                 "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
               );
+
+              toggleNotification({
+                message: formatMessage({
+                  id: 'content-manager.actions.unpublish.error',
+                  defaultMessage: 'An error occurred while trying to unpublish the document.',
+                }),
+                type: 'warning',
+              });
             }
 
             await unpublish(

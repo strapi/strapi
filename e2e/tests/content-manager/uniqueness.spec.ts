@@ -28,6 +28,18 @@ test.describe('Uniqueness', () => {
     await page.getByRole('button', { name: 'Save' }).click();
   };
 
+  const getNewValue = (field: (typeof FIELDS_TO_TEST)[number]) => {
+    if ('newValue' in field) {
+      return field.newValue;
+    }
+
+    if (isNaN(Number(field.value))) {
+      return String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1);
+    }
+
+    return `${Number(field.value) + 10}`;
+  };
+
   const CREATE_URL =
     /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
   const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
@@ -74,12 +86,7 @@ test.describe('Uniqueness', () => {
        * Either take the new value provided in the field object or generate a random new one
        */
       // TODO: find a better way to generate random values for all field types
-      const newValue =
-        'newValue' in field
-          ? field.newValue
-          : isNaN(Number(field.value))
-          ? String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1)
-          : `${Number(field.value) + 10}`;
+      const newValue = getNewValue(field);
 
       await page
         .getByRole(fieldRole, {
