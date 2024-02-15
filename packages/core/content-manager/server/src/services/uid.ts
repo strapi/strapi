@@ -55,7 +55,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   }) {
     const foundDocuments = await strapi.documents(contentTypeUID).findMany({
       filters: {
-        [field]: value,
+        [field]: { $contains: value },
       },
       locale: locale ?? null,
       // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
@@ -106,8 +106,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const documentCount = await strapi.documents(contentTypeUID).count({
       filters: {
         [field]: value,
-        locale: locale ?? null,
       },
+      locale: locale ?? null,
       // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
       // However, when publishing this "available" UID might collide with another published entry
       status: 'draft',

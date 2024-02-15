@@ -2,6 +2,28 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 
+type Field = {
+  name: string;
+  value: string;
+  newValue?: string;
+  role?: string;
+};
+
+// When we need to adjust the value of a field to test uniqueness
+// Either take the new value provided in the field object or generate a random
+// new one based on the type of the field
+const getNewValue = (field: Pick<Field, 'newValue' | 'value'>) => {
+  if (field?.newValue) {
+    return field.newValue;
+  }
+
+  if (isNaN(Number(field.value))) {
+    return String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1);
+  }
+
+  return `${Number(field.value) + 10}`;
+};
+
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
@@ -15,7 +37,7 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const FIELDS_TO_TEST: Array<Field> = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
@@ -43,7 +65,7 @@ test.describe('Uniqueness', () => {
     }) => {
       await page.locator('text=Create new entry').first().click();
 
-      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
+      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create');
 
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
@@ -63,7 +85,7 @@ test.describe('Uniqueness', () => {
 
       await page.locator('text=Create new entry').first().click();
 
-      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
+      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create');
 
       // @ts-expect-error – wants a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
@@ -76,12 +98,7 @@ test.describe('Uniqueness', () => {
        * Modify the value and try again, this should save successfully
        * Either take the new value provided in the field object or generate a random new one
        */
-      // TODO find a better way to generate random values for all field types
-      const newValue =
-        field?.newValue ||
-        (isNaN(Number(field.value))
-          ? String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1)
-          : `${Number(field.value) + 10}`);
+      const newValue = getNewValue({ newValue: field.newValue, value: field.value });
 
       await page
         // @ts-expect-error – wants a const string
@@ -104,7 +121,7 @@ test.describe('Uniqueness', () => {
 
       await page.locator('text=Create new entry').first().click();
 
-      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
+      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create');
 
       // @ts-expect-error – wants a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
