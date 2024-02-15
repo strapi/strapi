@@ -16,6 +16,7 @@ import {
   removePrivate,
   removeDynamicZones,
   removeMorphToRelations,
+  expandWildcardPopulate,
 } from './visitors';
 import { isOperator } from '../operators';
 
@@ -164,6 +165,7 @@ const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
     throw new Error('Missing schema in defaultSanitizePopulate');
   }
   return pipeAsync(
+    traverseQueryPopulate(expandWildcardPopulate, { schema }),
     traverseQueryPopulate(
       async ({ key, value, schema, attribute }, { set }) => {
         if (attribute) {
@@ -180,6 +182,10 @@ const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
 
         if (key === 'fields') {
           set(key, await defaultSanitizeFields(schema, value));
+        }
+
+        if (key === 'populate') {
+          set(key, await defaultSanitizePopulate(schema, value));
         }
       },
       { schema }
