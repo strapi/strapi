@@ -45,21 +45,24 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
     const onChangeRef = React.useRef(onChange);
 
     React.useEffect(() => {
-      if (!editorRef.current) {
-        editorRef.current = CodeMirror.fromTextArea(textareaRef.current!, {
-          lineWrapping: true,
-          extraKeys: {
-            Enter: 'newlineAndIndentContinueMarkdownList',
-            Tab: false,
-            'Shift-Tab': false,
-          },
-          readOnly: false,
-          smartIndent: false,
-          placeholder,
-          spellcheck: true,
-          inputStyle: 'contenteditable',
-        });
+      if (editorRef.current) {
+        // Ensure the editor and its wrapper are cleaned up whenever this view is re-rendered
+        // e.g. in case of re-ordering wysiwyg components in a DynamicZone
+        editorRef.current.toTextArea();
       }
+      editorRef.current = CodeMirror.fromTextArea(textareaRef.current!, {
+        lineWrapping: true,
+        extraKeys: {
+          Enter: 'newlineAndIndentContinueMarkdownList',
+          Tab: false,
+          'Shift-Tab': false,
+        },
+        readOnly: false,
+        smartIndent: false,
+        placeholder,
+        spellcheck: true,
+        inputStyle: 'contenteditable',
+      });
 
       // @ts-expect-error – doesn't think command exists?
       CodeMirror.commands.newlineAndIndentContinueMarkdownList =
