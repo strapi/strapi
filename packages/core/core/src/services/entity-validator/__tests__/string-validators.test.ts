@@ -142,7 +142,11 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'non-updated-unique-test-data',
             },
-            entity: { id: 1, attrStringUnique: 'non-updated-unique-test-data' },
+            entity: {
+              documentId: 'DocId',
+              id: 1,
+              attrStringUnique: 'non-updated-unique-test-data',
+            },
           },
           mockOptions
         )
@@ -192,7 +196,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: valueToCheck,
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -204,7 +208,7 @@ describe('String validator', () => {
         filters: {
           attrStringUnique: valueToCheck,
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',
@@ -224,7 +228,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -243,7 +247,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -266,7 +270,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -289,7 +293,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -310,7 +314,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -333,7 +337,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -356,7 +360,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -379,7 +383,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -398,7 +402,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )
@@ -417,7 +421,7 @@ describe('String validator', () => {
               name: 'attrStringUnique',
               value: 'test-data',
             },
-            entity: { id: 1, attrStringUnique: 'other-data' },
+            entity: { documentId: 'DocId', id: 1, attrStringUnique: 'other-data' },
           },
           mockOptions
         )

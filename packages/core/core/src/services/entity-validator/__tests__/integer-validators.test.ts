@@ -127,7 +127,7 @@ describe('Integer validator', () => {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrIntegerUnique', value: 3 },
-            entity: { id: 1, attrIntegerUnique: 3 },
+            entity: { documentId: 'DocId', id: 1, attrIntegerUnique: 3 },
           },
           mockOptions
         )
@@ -171,7 +171,7 @@ describe('Integer validator', () => {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrIntegerUnique', value: valueToCheck },
-            entity: { id: 1, attrIntegerUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrIntegerUnique: 42 },
           },
           mockOptions
         )
@@ -183,7 +183,7 @@ describe('Integer validator', () => {
         filters: {
           attrIntegerUnique: valueToCheck,
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',
@@ -202,7 +202,7 @@ describe('Integer validator', () => {
             attr: { type: 'integer', min: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrIntegerUnique', value: 5 },
-            entity: { id: 1, attrIntegerUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrIntegerUnique: 42 },
           },
           mockOptions
         )
@@ -222,7 +222,7 @@ describe('Integer validator', () => {
             attr: { type: 'integer', min: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrIntegerUnique', value: 5 },
-            entity: { id: 1, attrIntegerUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrIntegerUnique: 42 },
           },
           mockOptions
         )
@@ -242,7 +242,7 @@ describe('Integer validator', () => {
             attr: { type: 'integer', max: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrIntegerUnique', value: 5 },
-            entity: { id: 1, attrIntegerUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrIntegerUnique: 42 },
           },
           mockOptions
         )
@@ -262,7 +262,7 @@ describe('Integer validator', () => {
             attr: { type: 'integer', max: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrIntegerUnique', value: 5 },
-            entity: { id: 1, attrIntegerUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrIntegerUnique: 42 },
           },
           mockOptions
         )

@@ -133,7 +133,7 @@ describe('UID validator', () => {
             attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: 'unchanged-unique-uid' },
-            entity: { id: 1, attrUidUnique: 'unchanged-unique-uid' },
+            entity: { documentId: 'DocId', id: 1, attrUidUnique: 'unchanged-unique-uid' },
           },
           mockOptions
         )
@@ -176,7 +176,7 @@ describe('UID validator', () => {
             attr: { type: 'uid' },
             model: fakeModel,
             updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
-            entity: { id: 1, attrUidUnique: 'other-uid' },
+            entity: { documentId: 'DocId', id: 1, attrUidUnique: 'other-uid' },
           },
           mockOptions
         )

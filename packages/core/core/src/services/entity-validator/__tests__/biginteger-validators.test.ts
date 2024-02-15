@@ -142,7 +142,7 @@ describe('BigInteger validator', () => {
               name: 'attrBigIntegerUnique',
               value: 3,
             },
-            entity: { id: 1, attrBigIntegerUnique: 3 },
+            entity: { documentId: 'DocId', id: 1, attrBigIntegerUnique: 3 },
           },
           mockOptions
         )
@@ -190,7 +190,7 @@ describe('BigInteger validator', () => {
               name: 'attrBigIntegerUnique',
               value: 5,
             },
-            entity: { id: 1, attrBigIntegerUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrBigIntegerUnique: 42 },
           },
           mockOptions
         )
@@ -202,7 +202,7 @@ describe('BigInteger validator', () => {
         filters: {
           attrBigIntegerUnique: 5,
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',

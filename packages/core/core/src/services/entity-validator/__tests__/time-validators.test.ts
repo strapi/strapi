@@ -65,7 +65,7 @@ describe('Time validator', () => {
               attr: { type: 'time', unique: true },
               model: fakeModel,
               updatedAttribute: { name: 'attrTimeUnique', value: null },
-              entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+              entity: { documentId: 'DocId', id: 1, attrTimeUnique: '00:00:00.000Z' },
             },
             mockOptions
           )
@@ -126,7 +126,7 @@ describe('Time validator', () => {
             attr: { type: 'time', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-            entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+            entity: { documentId: 'DocId', id: 1, attrTimeUnique: '00:00:00.000Z' },
           },
           mockOptions
         )
@@ -170,7 +170,7 @@ describe('Time validator', () => {
             attr: { type: 'time', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrTimeUnique', value: valueToCheck },
-            entity: { id: 1, attrTimeUnique: '01:00:00.000Z' },
+            entity: { documentId: 'DocId', id: 1, attrTimeUnique: '01:00:00.000Z' },
           },
           mockOptions
         )
@@ -182,7 +182,7 @@ describe('Time validator', () => {
         filters: {
           attrTimeUnique: valueToCheck,
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',

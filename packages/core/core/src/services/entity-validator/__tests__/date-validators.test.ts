@@ -126,7 +126,7 @@ describe('Date validator', () => {
             attr: { type: 'date', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: { id: 1, attrDateUnique: '2021-11-29' },
+            entity: { documentId: 'DocId', id: 1, attrDateUnique: '2021-11-29' },
           },
           mockOptions
         )
@@ -168,7 +168,7 @@ describe('Date validator', () => {
             attr: { type: 'date', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
-            entity: { id: 1, attrDateUnique: '2021-12-15' },
+            entity: { documentId: 'DocId', id: 1, attrDateUnique: '2021-12-15' },
           },
           mockOptions
         )
@@ -180,7 +180,7 @@ describe('Date validator', () => {
         filters: {
           attrDateUnique: '2021-11-29',
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',

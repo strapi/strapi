@@ -142,7 +142,7 @@ describe('Time validator', () => {
               name: 'attrTimestampUnique',
               value: '1638140400',
             },
-            entity: { id: 1, attrTimestampUnique: '1638140400' },
+            entity: { documentId: 'DocId', id: 1, attrTimestampUnique: '1638140400' },
           },
           mockOptions
         )
@@ -191,7 +191,7 @@ describe('Time validator', () => {
               name: 'attrTimestampUnique',
               value: valueToCheck,
             },
-            entity: { id: 1, attrTimestampUnique: '1000000000' },
+            entity: { documentId: 'DocId', id: 1, attrTimestampUnique: '1000000000' },
           },
           mockOptions
         )
@@ -203,7 +203,7 @@ describe('Time validator', () => {
         filters: {
           attrTimestampUnique: valueToCheck,
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',

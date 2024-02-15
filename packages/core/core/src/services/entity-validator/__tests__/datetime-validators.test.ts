@@ -44,7 +44,7 @@ describe('Datetime validator', () => {
             attr: { type: 'datetime' },
             model: fakeModel,
             updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-            entity: { id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+            entity: { documentId: 'DocId', id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
           },
           mockOptions
         )
@@ -126,7 +126,7 @@ describe('Datetime validator', () => {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-            entity: { id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+            entity: { documentId: 'DocId', id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
           },
           mockOptions
         )
@@ -170,7 +170,7 @@ describe('Datetime validator', () => {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-            entity: { id: 1, attrDateTimeUnique: '2021-12-25T00:00:00.000Z' },
+            entity: { documentId: 'DocId', id: 1, attrDateTimeUnique: '2021-12-25T00:00:00.000Z' },
           },
           mockOptions
         )
@@ -182,7 +182,7 @@ describe('Datetime validator', () => {
         filters: {
           attrDateTimeUnique: '2021-11-29T00:00:00.000Z',
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',

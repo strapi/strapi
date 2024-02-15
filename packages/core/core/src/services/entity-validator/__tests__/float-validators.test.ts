@@ -127,7 +127,7 @@ describe('Float validator', () => {
             attr: { type: 'float', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrFloatUnique', value: 3 },
-            entity: { id: 1, attrFloatUnique: 3 },
+            entity: { documentId: 'DocId', id: 1, attrFloatUnique: 3 },
           },
           mockOptions
         )
@@ -169,7 +169,7 @@ describe('Float validator', () => {
             attr: { type: 'float', unique: true },
             model: fakeModel,
             updatedAttribute: { name: 'attrFloatUnique', value: 5 },
-            entity: { id: 1, attrFloatUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrFloatUnique: 42 },
           },
           mockOptions
         )
@@ -181,7 +181,7 @@ describe('Float validator', () => {
         filters: {
           attrFloatUnique: 5,
           id: {
-            $ne: 1,
+            $ne: 'DocId',
           },
         },
         locale: 'en',
@@ -200,7 +200,7 @@ describe('Float validator', () => {
             attr: { type: 'float', min: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrFloatUnique', value: 5 },
-            entity: { id: 1, attrFloatUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrFloatUnique: 42 },
           },
           mockOptions
         )
@@ -220,7 +220,7 @@ describe('Float validator', () => {
             attr: { type: 'float', min: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrFloatUnique', value: 5 },
-            entity: { id: 1, attrFloatUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrFloatUnique: 42 },
           },
           mockOptions
         )
@@ -240,7 +240,7 @@ describe('Float validator', () => {
             attr: { type: 'float', max: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrFloatUnique', value: 5 },
-            entity: { id: 1, attrFloatUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrFloatUnique: 42 },
           },
           mockOptions
         )
@@ -260,7 +260,7 @@ describe('Float validator', () => {
             attr: { type: 'float', max: 3 },
             model: fakeModel,
             updatedAttribute: { name: 'attrFloatUnique', value: 5 },
-            entity: { id: 1, attrFloatUnique: 42 },
+            entity: { documentId: 'DocId', id: 1, attrFloatUnique: 42 },
           },
           mockOptions
         )

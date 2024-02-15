@@ -20,7 +20,7 @@ const internals = {
 
 const data = {};
 
-describe.skip('Auth API', () => {
+describe('Auth API', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({ bypassAuth: false });
 
