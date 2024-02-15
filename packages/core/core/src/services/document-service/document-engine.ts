@@ -1,8 +1,13 @@
 import type { Database } from '@strapi/database';
-import type { Common, Documents, Schema, Shared, Strapi } from '@strapi/types';
-import { contentTypes as contentTypesUtils, convertQueryParams, mapAsync } from '@strapi/utils';
+import type { Documents, Schema, Strapi, Shared, Common } from '@strapi/types';
+import {
+  contentTypes as contentTypesUtils,
+  convertQueryParams,
+  mapAsync,
+  pipeAsync,
+} from '@strapi/utils';
 
-import { isArray, omit } from 'lodash/fp';
+import { isArray, omit, set } from 'lodash/fp';
 import uploadFiles from '../utils/upload-files';
 
 import {
@@ -18,6 +23,7 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';
+import { transformParamsDocumentId, transformOutputDocumentId } from './transform/id-transform';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -56,44 +62,62 @@ const createDocumentEngine = ({
   async findMany(uid, params) {
     const { kind } = strapi.getModel(uid);
 
-    const query = transformParamsToQuery(uid, params || ({} as any));
-    query.where = { ...params?.lookup, ...query.where };
+    const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsToQuery(uid, params),
+      (query) => set('where', { ...params?.lookup, ...query.where }, query)
+    )(params || {});
 
     if (kind === 'singleType') {
-      return db.query(uid).findOne(query);
+      return db
+        .query(uid)
+        .findOne(query)
+        .then((doc) => transformOutputDocumentId(uid, doc));
     }
 
-    return db.query(uid).findMany(query);
+    return db
+      .query(uid)
+      .findMany(query)
+      .then((doc) => transformOutputDocumentId(uid, doc));
   },
 
   async findFirst(uid, params) {
-    const query = transformParamsToQuery(uid, params || ({} as any));
+    const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsToQuery(uid, params)
+    )(params || {});
 
-    return db.query(uid).findOne({ ...query, where: { ...params?.lookup, ...query.where } });
+    return db
+      .query(uid)
+      .findOne({ ...query, where: { ...params?.lookup, ...query.where } })
+      .then((doc) => transformOutputDocumentId(uid, doc));
   },
 
   async findOne(uid, documentId, params) {
-    const query = transformParamsToQuery(uid, params || ({} as any));
+    const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsToQuery(uid, params)
+    )(params || {});
+
     return db
       .query(uid)
-      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } });
+      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } })
+      .then((doc) => transformOutputDocumentId(uid, doc));
   },
 
   async delete(uid, documentId, params = {} as any) {
-    const query = transformParamsToQuery(uid, params as any);
+    const query = await pipeAsync(
+      // TODO: What if we are deleting more than one locale / publication state?
+      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsToQuery(uid, params),
+      (query) => set('where', { ...params?.lookup, ...query.where, documentId }, query)
+    )(params);
 
     if (params.status === 'draft') {
       throw new Error('Cannot delete a draft document');
     }
 
-    const entriesToDelete = await db.query(uid).findMany({
-      ...query,
-      where: {
-        ...params.lookup,
-        ...query?.where,
-        documentId,
-      },
-    });
+    const entriesToDelete = await db.query(uid).findMany(query);
 
     // Delete all matched entries and its components
     await mapAsync(entriesToDelete, async (entryToDelete: any) => {
@@ -103,29 +127,31 @@ const createDocumentEngine = ({
     });
 
     // TODO: Change return value to actual count
-    return { versions: entriesToDelete };
+    return { versions: await transformOutputDocumentId(uid, entriesToDelete) };
   },
 
   // TODO: should we provide two separate methods?
   async deleteMany(uid, paramsOrIds) {
-    let queryParams;
-    if (isArray(paramsOrIds)) {
-      queryParams = { filter: { documentID: { $in: paramsOrIds } } };
-    } else {
-      queryParams = paramsOrIds;
-    }
-
-    const query = transformParamsToQuery(uid, queryParams || ({} as any));
+    const query = await pipeAsync(
+      // Transform ids to query if needed
+      (params) => (isArray(params) ? { filter: { documentID: { $in: params } } } : params),
+      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsToQuery(uid, params)
+    )(paramsOrIds || {});
 
     return db.query(uid).deleteMany(query);
   },
 
   async create(uid, params) {
-    // TODO: Entity validator.
-    // TODO: File upload - Probably in the lifecycles?
-    const { data } = params;
+    // Param parsing
+    const { data, ...restParams } = await transformParamsDocumentId(uid, params, {
+      locale: params.locale,
+      isDraft: true,
+    });
+    const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
-    if (!data) {
+    // Validation
+    if (!params.data) {
       throw new Error('Create requires data attribute');
     }
 
@@ -136,39 +162,38 @@ const createDocumentEngine = ({
       locale: params?.locale,
     });
 
-    const componentData = await createComponents(uid, validData);
+    // Component handling
+    const componentData = await createComponents(uid, validData as any);
     const entryData = createPipeline(
       Object.assign(omitComponentData(model, validData), componentData),
-      {
-        contentType: model,
-      }
+      { contentType: model }
     );
 
-    // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params) as any);
-
-    return db.query(uid).create({ ...query, data: entryData });
+    return db
+      .query(uid)
+      .create({ ...query, data: entryData })
+      .then((doc) => transformOutputDocumentId(uid, doc));
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to update?
   async update(uid, documentId, params) {
     // TODO: Prevent updating a published document
-    // TODO: Entity validator.
     // TODO: File upload
-    const { data } = params || {};
-    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(params || {}) as any);
+    // Param parsing
+    const { data, ...restParams } = await transformParamsDocumentId(uid, params || {}, {
+      isDraft: true,
+      locale: params?.locale,
+    });
+    const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
-    // Find all locales of the document
+    // Validation
+    const model = strapi.getModel(uid);
+    // Find if document exists
     const entryToUpdate = await db
       .query(uid)
       .findOne({ ...query, where: { ...params?.lookup, ...query?.where, documentId } });
-
-    // Document does not exist
-    if (!entryToUpdate) {
-      return null;
-    }
+    if (!entryToUpdate) return null;
 
     const validData = await entityValidator.validateEntityUpdate(
       model,
@@ -180,18 +205,25 @@ const createDocumentEngine = ({
       entryToUpdate
     );
 
-    const componentData = await updateComponents(uid, entryToUpdate, validData);
+    // Component handling
+    const componentData = await updateComponents(uid, entryToUpdate, validData as any);
     const entryData = updatePipeline(
       Object.assign(omitComponentData(model, validData), componentData),
       { contentType: model }
     );
 
-    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
+    return db
+      .query(uid)
+      .update({ ...query, where: { id: entryToUpdate.id }, data: entryData })
+      .then((doc) => transformOutputDocumentId(uid, doc));
   },
 
   async count(uid, params = undefined) {
-    const query = transformParamsToQuery(uid, params || ({} as any));
-    query.where = { ...params?.lookup, ...query.where };
+    const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsToQuery(uid, params),
+      (query) => set('where', { ...params?.lookup, ...query.where }, query)
+    )(params || {});
 
     return db.query(uid).count(query);
   },
@@ -199,11 +231,16 @@ const createDocumentEngine = ({
   async clone(uid, documentId, params) {
     // TODO: File upload
     // TODO: Entity validator.
-    const { data = {} as any } = params!;
 
+    // Param parsing
+    const { data, ...restParams } = await transformParamsDocumentId(uid, params || {}, {
+      isDraft: true,
+      locale: params?.locale,
+    });
+    const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any);
+
+    // Validation
     const model = strapi.getModel(uid);
-    const query = transformParamsToQuery(uid, pickSelectionParams(params) as any);
-
     // Find all locales of the document
     const entries = await db.query(uid).findMany({
       ...query,
@@ -235,11 +272,14 @@ const createDocumentEngine = ({
       );
 
       // TODO: Transform params to query
-      return db.query(uid).clone(entryToClone.id, {
-        ...query,
-        // Allows entityData to override the documentId (e.g. when publishing)
-        data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
-      });
+      return db
+        .query(uid)
+        .clone(entryToClone.id, {
+          ...query,
+          // Allows entityData to override the documentId (e.g. when publishing)
+          data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
+        })
+        .then((doc) => transformOutputDocumentId(uid, doc));
     });
 
     return { id: newDocumentId, versions };

@@ -23,7 +23,7 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.id, {
           locale: 'en', // should only clone the english locale
           data: {
             title: 'Cloned Document',
@@ -44,7 +44,7 @@ describe('Document Service', () => {
         });
 
         // Original article should not be modified
-        const originalArticleDb = await findArticleDb({ documentId: articleDb.documentId });
+        const originalArticleDb = await findArticleDb({ documentId: articleDb.id });
         expect(originalArticleDb).toMatchObject(articleDb);
       })
     );
@@ -54,7 +54,7 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.id, {
           data: {
             title: 'Cloned Document', // Clone all locales
           },
@@ -63,7 +63,7 @@ describe('Document Service', () => {
         expect(result).not.toBeNull();
 
         const originalArticlesDb = await findArticlesDb({
-          documentId: articleDb.documentId,
+          documentId: articleDb.id,
           publishedAt: null,
         });
         const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
@@ -83,7 +83,7 @@ describe('Document Service', () => {
       'clone a document with components',
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ documentId: 'Article1' });
-        const documentId = articlesDb.at(0)!.documentId;
+        const documentId = articlesDb.at(0)!.id;
 
         const componentData = {
           comp: {

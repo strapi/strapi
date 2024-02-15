@@ -32,8 +32,7 @@ describe('Document Service', () => {
           publishedAt: null, // should be a draft
         });
 
-        // @ts-expect-error - TODO: doc service entry type should contain documentId
-        const articles = await findArticlesDb({ documentId: article.documentId });
+        const articles = await findArticlesDb({ documentId: article.id });
         // Only one article should have been created
         expect(articles).toHaveLength(1);
       })
