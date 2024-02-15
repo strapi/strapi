@@ -92,7 +92,7 @@ describe('History version controller', () => {
 
     const historyVersionController = createHistoryVersionController({
       // @ts-expect-error - we're not mocking the entire strapi object
-      strapi: { getModel: jest.fn(() => 'collectionType') },
+      strapi: { getModel: jest.fn(() => ({ kind: 'collectionType' })) },
     });
 
     // @ts-expect-error partial context
@@ -125,7 +125,7 @@ describe('History version controller', () => {
 
     const historyVersionController = createHistoryVersionController({
       // @ts-expect-error - we're not mocking the entire strapi object
-      strapi: { getModel: jest.fn(() => 'singleType') },
+      strapi: { getModel: jest.fn(() => ({ kind: 'singleType' })) },
     });
 
     // @ts-expect-error partial context
