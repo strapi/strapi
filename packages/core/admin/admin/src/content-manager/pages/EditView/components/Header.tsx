@@ -58,7 +58,13 @@ const Header = ({
           defaultMessage: 'Back',
         })}
       </Link>
-      <Flex width="100%" justifyContent="space-between" paddingTop={1}>
+      <Flex
+        width="100%"
+        justifyContent="space-between"
+        paddingTop={1}
+        gap="80px"
+        alignItems="flex-start"
+      >
         <Typography variant="alpha" as="h1">
           {title}
         </Typography>

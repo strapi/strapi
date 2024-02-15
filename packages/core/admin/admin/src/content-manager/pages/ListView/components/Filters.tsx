@@ -243,7 +243,7 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
       // we have to wait for admin users to be fully loaded, because otherwise
       // combine is called to early and does not contain the latest state of
       // the users array
-      enabled: options?.reviewWorkflows && !isLoadingAdminUsers,
+      enabled: !!options?.reviewWorkflows && !isLoadingAdminUsers,
     }
     /**
      * this is cast because the data returns MessageDescriptor
