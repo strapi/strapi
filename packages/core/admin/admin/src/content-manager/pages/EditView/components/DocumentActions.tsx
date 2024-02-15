@@ -8,15 +8,17 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
+  Icon,
   ModalBody,
   ModalHeader,
   ModalLayout,
+  Radio,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
 import { useNotification } from '@strapi/helper-plugin';
-import { CrossCircle, More } from '@strapi/icons';
+import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
@@ -96,6 +98,7 @@ interface DocumentActionsProps {
 }
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
+  const { formatMessage } = useIntl();
   const [primaryAction, secondaryAction, ...restActions] = actions.filter(
     (action) => action.position !== 'header'
   );
@@ -108,7 +111,15 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <Flex gap={2}>
         <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-        {restActions.length > 0 ? <DocumentActionsMenu actions={restActions} /> : null}
+        {restActions.length > 0 ? (
+          <DocumentActionsMenu
+            actions={restActions}
+            label={formatMessage({
+              id: 'content-manager.containers.edit.panels.default.more-actions',
+              defaultMessage: 'More document actions',
+            })}
+          />
+        ) : null}
       </Flex>
       {secondaryAction ? (
         <DocumentActionButton
@@ -195,9 +206,11 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
 
 interface DocumentActionsMenuProps {
   actions: Action[];
+  label?: string;
 }
 
-const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
+const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
+  const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -229,10 +242,11 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
 
   const handleClose = () => {
     setDialogId(null);
+    setIsOpen(false);
   };
 
   return (
-    <Menu.Root>
+    <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
       <Menu.Trigger
         disabled={isDisabled}
         size="S"
@@ -244,13 +258,14 @@ const DocumentActionsMenu = ({ actions }: DocumentActionsMenuProps) => {
       >
         <More aria-hidden focusable={false} />
         <VisuallyHidden as="span">
-          {formatMessage({
-            id: 'content-manager.containers.edit.panels.default.more-actions',
-            defaultMessage: 'More actions',
-          })}
+          {label ||
+            formatMessage({
+              id: 'content-manager.containers.edit.panels.default.more-actions',
+              defaultMessage: 'More document actions',
+            })}
         </VisuallyHidden>
       </Menu.Trigger>
-      <Menu.Content popoverPlacement="bottom-end">
+      <Menu.Content top="4px" popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
             <React.Fragment key={action.id}>
@@ -422,6 +437,7 @@ const DocumentActionModal = ({
 const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const { meta } = useDoc();
   const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
     'PublishAction',
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
@@ -431,13 +447,28 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const document = useForm('UpdateAction', ({ values }) => values);
 
+  const isDocumentPublished =
+    document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
+    meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
+
   return {
+    /**
+     * Disabled when:
+     *  - the form is submitting
+     *  - the active tab is the published tab
+     *  - the document is already published & not modified
+     *  - the document is being created & not modified
+     *  - the user doesn't have the permission to publish
+     *  - the user doesn't have the permission to create a new document
+     *  - the user doesn't have the permission to update the document
+     */
     disabled:
-      !canPublish ||
       isSubmitting ||
       activeTab === 'published' ||
-      !modified ||
-      Boolean((!id && !canCreate) || (id && !canUpdate)),
+      (!modified && isDocumentPublished) ||
+      (!modified && !document.id) ||
+      !canPublish ||
+      Boolean((!document.id && !canCreate) || (document.id && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -488,11 +519,19 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
   const document = useForm('UpdateAction', ({ values }) => values);
 
   return {
+    /**
+     * Disabled when:
+     * - the form is submitting
+     * - the document is not modified
+     * - the active tab is the published tab
+     * - the user doesn't have the permission to create a new document
+     * - the user doesn't have the permission to update the document
+     */
     disabled:
-      Boolean((!id && !canCreate) || (id && !canUpdate)) ||
       isSubmitting ||
       !modified ||
-      activeTab === 'published',
+      activeTab === 'published' ||
+      Boolean((!id && !canCreate) || (id && !canUpdate)),
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',
@@ -536,15 +575,31 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
 
 UpdateAction.type = 'update';
 
+const UNPUBLISH_DRAFT_OPTIONS = {
+  KEEP: 'keep',
+  DISCARD: 'discard',
+};
+
 const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { document, meta } = useDoc();
   const { unpublish } = useDocumentActions();
+  const toggleNotification = useNotification();
+  const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
+
+  const isDocumentModified = document?.status === 'modified';
 
   const isDocumentPublished =
     document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
     meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
+
+  const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
+    React.FormEventHandler<HTMLDivElement> = (e) => {
+    if ('value' in e.target) {
+      setShouldKeepDraft(e.target.value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
+    }
+  };
 
   return {
     disabled: !canPublish || activeTab === 'published' || !isDocumentPublished,
@@ -554,7 +609,27 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
     }),
     icon: <StyledCrossCircle />,
     onClick: async () => {
-      if (!id) {
+      /**
+       * return if there's no id & we're in a collection type, or the status modified
+       * for either collection type because we use a dialog to handle the process in
+       * the latter case.
+       */
+      if ((!id && collectionType !== SINGLE_TYPES) || isDocumentModified) {
+        if (!id) {
+          // This should never, ever, happen.
+          console.error(
+            "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
+          );
+
+          toggleNotification({
+            message: formatMessage({
+              id: 'content-manager.actions.unpublish.error',
+              defaultMessage: 'An error occurred while trying to unpublish the document.',
+            }),
+            type: 'warning',
+          });
+        }
+
         return;
       }
 
@@ -564,11 +639,131 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
         id,
       });
     },
+    dialog: isDocumentModified
+      ? {
+          type: 'dialog',
+          title: formatMessage({
+            id: 'app.components.ConfirmDialog.title',
+            defaultMessage: 'Confirmation',
+          }),
+          content: (
+            <Flex alignItems="flex-start" direction="column" gap={6}>
+              <Flex width="100%" direction="column" gap={2}>
+                <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+                <Typography as="p" variant="omega" textAlign="center">
+                  {formatMessage({
+                    id: 'content-manager.actions.unpublish.dialog.body',
+                    defaultMessage: 'Are you sure?',
+                  })}
+                </Typography>
+              </Flex>
+              <Flex
+                onChange={handleChange}
+                direction="column"
+                alignItems="flex-start"
+                as="fieldset"
+                gap={3}
+              >
+                <VisuallyHidden as="legend"></VisuallyHidden>
+                <Radio
+                  checked={shouldKeepDraft}
+                  value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
+                  name="discard-options"
+                >
+                  {formatMessage({
+                    id: 'content-manager.actions.unpublish.dialog.option.keep-draft',
+                    defaultMessage: 'Keep draft',
+                  })}
+                </Radio>
+                <Radio
+                  checked={!shouldKeepDraft}
+                  value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}
+                  name="discard-options"
+                >
+                  {formatMessage({
+                    id: 'content-manager.actions.unpublish.dialog.option.replace-draft',
+                    defaultMessage: 'Replace draft',
+                  })}
+                </Radio>
+              </Flex>
+            </Flex>
+          ),
+          onConfirm: async () => {
+            if (!id && collectionType !== SINGLE_TYPES) {
+              // This should never, ever, happen.
+              console.error(
+                "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
+              );
+
+              toggleNotification({
+                message: formatMessage({
+                  id: 'content-manager.actions.unpublish.error',
+                  defaultMessage: 'An error occurred while trying to unpublish the document.',
+                }),
+                type: 'warning',
+              });
+            }
+
+            await unpublish(
+              {
+                collectionType,
+                model,
+                id,
+              },
+              !shouldKeepDraft
+            );
+          },
+        }
+      : undefined,
     variant: 'danger',
   };
 };
 
 UnpublishAction.type = 'unpublish';
+
+const DiscardAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+  const { formatMessage } = useIntl();
+  const canUpdate = useDocumentRBAC('PublishAction', ({ canUpdate }) => canUpdate);
+  const { document } = useDoc();
+  const { discard } = useDocumentActions();
+
+  return {
+    disabled: !canUpdate || activeTab === 'published' || document?.status !== 'modified',
+    label: formatMessage({
+      id: 'content-manager.actions.discard.label',
+      defaultMessage: 'Discard changes',
+    }),
+    icon: <StyledCrossCircle />,
+    variant: 'danger',
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" gap={2}>
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Typography as="p" variant="omega" textAlign="center">
+            {formatMessage({
+              id: 'content-manager.actions.discard.dialog.body',
+              defaultMessage: 'Are you sure?',
+            })}
+          </Typography>
+        </Flex>
+      ),
+      onConfirm: async () => {
+        await discard({
+          collectionType,
+          model,
+          id,
+        });
+      },
+    },
+  };
+};
+
+DiscardAction.type = 'discard';
 
 /**
  * Because the icon system is completely broken, we have to do
@@ -580,7 +775,7 @@ const StyledCrossCircle = styled(CrossCircle)`
   }
 `;
 
-const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction];
+const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
 export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };

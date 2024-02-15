@@ -11,6 +11,7 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
+import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import * as yup from 'yup';
@@ -36,15 +37,26 @@ const FIELD_SCHEMA = yup.object().shape({
 
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
   const id = useId();
 
   const { value, onChange } = useField<FormData['layout'][number]>(name);
 
   if (!value) {
     // This is very unlikely to happen, but it ensures the form is not opened without a value.
-    throw new Error(
+    console.error(
       "You've opened a field to edit without it being part of the form, this is likely a bug with Strapi. Please open an issue."
     );
+
+    toggleNotification({
+      message: formatMessage({
+        id: 'content-manager.containers.list-settings.modal-form.error',
+        defaultMessage: 'An error occurred while trying to open the form.',
+      }),
+      type: 'warning',
+    });
+
+    return null;
   }
 
   let shouldDisplaySortToggle = !['media', 'relation'].includes(attribute.type);
@@ -71,7 +83,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
               {formatMessage(
                 {
-                  id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
+                  id: getTranslation('containers.list-settings.modal-form.label'),
                   defaultMessage: 'Edit {fieldName}',
                 },
                 { fieldName: capitalise(value.label) }

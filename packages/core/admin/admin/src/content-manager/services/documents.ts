@@ -96,6 +96,35 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_res, _error, { model, ids }) =>
         ids.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
     }),
+    discardDocument: builder.mutation<
+      Contracts.CollectionTypes.Discard.Response,
+      Pick<Contracts.CollectionTypes.Discard.Params, 'model'> & {
+        collectionType: string;
+        id?: Contracts.CollectionTypes.Discard.Params['id'];
+        params?: Contracts.CollectionTypes.Find.Request['query'] & {
+          [key: string]: any;
+        };
+      }
+    >({
+      query: ({ collectionType, model, id, params }) => ({
+        url: id
+          ? `/content-manager/${collectionType}/${model}/${id}/actions/discard`
+          : `/content-manager/${collectionType}/${model}/actions/discard`,
+        method: 'POST',
+        config: {
+          params,
+        },
+      }),
+      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
+        return [
+          {
+            type: 'Document',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
+          },
+          { type: 'Document', id: `${model}_LIST` },
+        ];
+      },
+    }),
     /**
      * Gets all documents of a collection type or single type.
      * By passing different params you can get different results e.g. only published documents or 'es' documents.
@@ -290,13 +319,15 @@ const documentApi = contentManagerApi.injectEndpoints({
          */
         id?: string;
         params?: Contracts.CollectionTypes.Unpublish.Request['query'];
+        data: Contracts.CollectionTypes.Unpublish.Request['body'];
       }
     >({
-      query: ({ collectionType, model, id, params }) => ({
+      query: ({ collectionType, model, id, params, data }) => ({
         url: id
           ? `/content-manager/${collectionType}/${model}/${id}/actions/unpublish`
           : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
+        data,
         config: {
           params,
         },
@@ -332,6 +363,7 @@ const {
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
+  useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
@@ -350,6 +382,7 @@ export {
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
   useDeleteManyDocumentsMutation,
+  useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,

@@ -11,6 +11,7 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
+import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -51,20 +52,14 @@ interface EditFieldFormProps {
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
   const id = React.useId();
+  const toggleNotification = useNotification();
 
   const { value, onChange } =
     useField<ConfigurationFormData['layout'][number]['children'][number]>(name);
 
-  if (!value || value.name === TEMP_FIELD_NAME || !attribute) {
-    // This is very unlikely to happen, but it ensures the form is not opened without a value.
-    throw new Error(
-      "You've opened a field to edit without it being part of the form, this is likely a bug with Strapi. Please open an issue."
-    );
-  }
-
   const { data: mainFieldOptions } = useGetInitialDataQuery(undefined, {
     selectFromResult: (res) => {
-      if (attribute.type !== 'relation' || !res.data) {
+      if (attribute?.type !== 'relation' || !res.data) {
         return { data: [] };
       }
 
@@ -98,8 +93,25 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
 
       return { data: [] };
     },
-    skip: attribute.type !== 'relation',
+    skip: attribute?.type !== 'relation',
   });
+
+  if (!value || value.name === TEMP_FIELD_NAME || !attribute) {
+    // This is very unlikely to happen, but it ensures the form is not opened without a value.
+    console.error(
+      "You've opened a field to edit without it being part of the form, this is likely a bug with Strapi. Please open an issue."
+    );
+
+    toggleNotification({
+      message: formatMessage({
+        id: 'content-manager.containers.edit-settings.modal-form.error',
+        defaultMessage: 'An error occurred while trying to open the form.',
+      }),
+      type: 'warning',
+    });
+
+    return null;
+  }
 
   return (
     <ModalLayout onClose={onClose} labelledBy={id}>
@@ -118,7 +130,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
               {formatMessage(
                 {
-                  id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
+                  id: 'content-manager.containers.edit-settings.modal-form.label',
                   defaultMessage: 'Edit {fieldName}',
                 },
                 { fieldName: capitalise(value.name) }

@@ -13,6 +13,7 @@ import {
   useCloneDocumentMutation,
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
+  useDiscardDocumentMutation,
   useLazyGetDocumentQuery,
   usePublishDocumentMutation,
   useUnpublishDocumentMutation,
@@ -68,6 +69,12 @@ type UseDocumentActions = () => {
       { name: 'willDeleteEntry' | 'didDeleteEntry' | 'didNotDeleteEntry' }
     >['properties']
   ) => Promise<OperationResponse<Contracts.CollectionTypes.Delete.Response>>;
+  discard: (args: {
+    collectionType: string;
+    model: string;
+    id?: string;
+    params?: object;
+  }) => Promise<OperationResponse<Contracts.CollectionTypes.Discard.Response>>;
   getDocument: (args: {
     collectionType: string;
     model: string;
@@ -96,11 +103,14 @@ type UseDocumentActions = () => {
       { name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry' }
     >['properties']
   ) => Promise<OperationResponse<Contracts.CollectionTypes.Update.Response>>;
-  unpublish: (args: {
-    collectionType: string;
-    model: string;
-    id: string;
-  }) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
+  unpublish: (
+    args: {
+      collectionType: string;
+      model: string;
+      id?: string;
+    },
+    discardDraft?: boolean
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
 };
 
 type IUseDocumentActs = ReturnType<UseDocumentActions>;
@@ -177,6 +187,46 @@ const useDocumentActions: UseDocumentActions = () => {
       }
     },
     [trackUsage, deleteDocument, toggleNotification, formatAPIError]
+  );
+
+  const [discardDocument] = useDiscardDocumentMutation();
+  const discard: IUseDocumentActs['discard'] = React.useCallback(
+    async ({ collectionType, model, id }) => {
+      try {
+        const res = await discardDocument({
+          collectionType,
+          model,
+          id,
+        });
+
+        if ('error' in res) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(res.error),
+          });
+
+          return { error: res.error };
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: {
+            id: 'content-manager.success.record.discard',
+            defaultMessage: 'Changes discarded',
+          },
+        });
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'warning',
+          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+        });
+
+        throw err;
+      }
+    },
+    []
   );
 
   const [publishDocument] = usePublishDocumentMutation();
@@ -266,7 +316,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
   const unpublish: IUseDocumentActs['unpublish'] = React.useCallback(
-    async ({ collectionType, model, id }) => {
+    async ({ collectionType, model, id }, discardDraft = false) => {
       try {
         trackUsage('willUnpublishEntry');
 
@@ -274,6 +324,9 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           id,
+          data: {
+            discardDraft,
+          },
         });
 
         if ('error' in res) {
@@ -402,8 +455,9 @@ const useDocumentActions: UseDocumentActions = () => {
   return {
     clone,
     create,
-    getDocument,
     delete: _delete,
+    discard,
+    getDocument,
     publish,
     unpublish,
     update,
