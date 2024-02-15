@@ -1,16 +1,8 @@
-import * as React from 'react';
-
 import { fireEvent } from '@testing-library/react';
 import { render } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { EditSettingsView } from '../EditSettingsView';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+import { EditConfigurationPage } from '../EditConfigurationPage';
 
 const EDIT_ATTRIBUTES = [
   [
@@ -20,16 +12,13 @@ const EDIT_ATTRIBUTES = [
   ],
 ];
 
-/**
- * TODO: reimplement this once the ListViewSettings component is fixed
- */
-describe.skip('EditSettingsView', () => {
+describe('EditConfigurationPage', () => {
   it('renders correctly', async () => {
     const { getByRole, findByRole } = render(
       <Routes>
         <Route
-          path="/content-manager/:contentType/:slug/configuration/edit"
-          element={<EditSettingsView />}
+          path="/content-manager/:collectionType/:slug/configuration/edit"
+          element={<EditConfigurationPage />}
         />
       </Routes>,
       {
@@ -48,7 +37,6 @@ describe.skip('EditSettingsView', () => {
     expect(getByRole('combobox', { name: 'Entry title' })).toBeInTheDocument();
 
     expect(getByRole('heading', { name: 'View' })).toBeInTheDocument();
-    expect(getByRole('link', { name: 'Edit the content type' })).toBeInTheDocument();
 
     EDIT_ATTRIBUTES.forEach((attributeRow) =>
       attributeRow.forEach((attribute) => {
@@ -61,11 +49,11 @@ describe.skip('EditSettingsView', () => {
   });
 
   it('should add field and set it to disabled once all fields are showing', async () => {
-    const { user, findByRole, getByRole } = render(
+    const { user, findByRole, getByRole, findByText } = render(
       <Routes>
         <Route
-          path="/content-manager/:contentType/:slug/configuration/edit"
-          element={<EditSettingsView />}
+          path="/content-manager/:collectionType/:slug/configuration/edit"
+          element={<EditConfigurationPage />}
         />
       </Routes>,
       {
@@ -92,17 +80,15 @@ describe.skip('EditSettingsView', () => {
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
-
-    await user.click(getByRole('button', { name: 'Confirm' }));
+    await findByText('Saved');
   });
 
   it('should delete field', async () => {
-    const { queryByRole, findByRole, getByRole, user } = render(
+    const { queryByRole, findByText, findByRole, getByRole, user } = render(
       <Routes>
         <Route
-          path="/content-manager/:contentType/:slug/configuration/edit"
-          element={<EditSettingsView />}
+          path="/content-manager/:collectionType/:slug/configuration/edit"
+          element={<EditConfigurationPage />}
         />
       </Routes>,
       {
@@ -123,8 +109,6 @@ describe.skip('EditSettingsView', () => {
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
-
-    await user.click(getByRole('button', { name: 'Confirm' }));
+    await findByText('Saved');
   });
 });

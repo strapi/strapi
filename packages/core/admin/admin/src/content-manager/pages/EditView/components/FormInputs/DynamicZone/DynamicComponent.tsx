@@ -19,9 +19,9 @@ import styled from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { useForm } from '../../../../../components/Form';
+import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
-import { ItemTypes } from '../../../../../utils/dragAndDrop';
 import { getIn } from '../../../../../utils/object';
 import { useComposedRefs } from '../../../../../utils/refs';
 import { getTranslation } from '../../../../../utils/translations';

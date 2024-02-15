@@ -3,7 +3,6 @@ import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
 
 import { useDoc } from '../../../../hooks/useDocument';
-import { isFieldTypeNumber } from '../../../../utils/fields';
 
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';
@@ -134,7 +133,7 @@ const hasContent = (
       Biginteger fields need to be treated as strings, as `isNumber`
       doesn't deal with them.
   */
-  if (isFieldTypeNumber(attribute.type) && attribute.type !== 'biginteger') {
+  if (['integer', 'decimal', 'float', 'number'].includes(attribute.type)) {
     return typeof content === 'number';
   }
 
