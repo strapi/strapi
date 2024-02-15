@@ -135,7 +135,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
       <Flex justifyContent="space-between">
         <Typography as="legend" variant="pi" fontWeight="bold">
           {formatMessage({
-            id: 'containers.ListPage.displayedFields',
+            id: 'containers.list.displayedFields',
             defaultMessage: 'Displayed fields',
           })}
         </Typography>

@@ -34,6 +34,7 @@ import { useDocumentActions } from '../../../hooks/useDocumentActions';
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
+type DocumentActionPosition = 'panel' | 'header' | 'table-row';
 
 interface DocumentActionDescription {
   label: string;
@@ -47,7 +48,7 @@ interface DocumentActionDescription {
    * @default 'panel'
    * @description Where the action should be rendered.
    */
-  position?: 'panel' | 'header';
+  position?: DocumentActionPosition | DocumentActionPosition[];
   dialog?: DialogOptions | NotificationOptions | ModalOptions;
   /**
    * @default 'secondary'
@@ -99,9 +100,14 @@ interface DocumentActionsProps {
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
   const { formatMessage } = useIntl();
-  const [primaryAction, secondaryAction, ...restActions] = actions.filter(
-    (action) => action.position !== 'header'
-  );
+  const [primaryAction, secondaryAction, ...restActions] = actions.filter((action) => {
+    if (action.position === undefined) {
+      return true;
+    }
+
+    const positions = Array.isArray(action.position) ? action.position : [action.position];
+    return positions.includes('panel');
+  });
 
   if (!primaryAction) {
     return null;
@@ -203,13 +209,17 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionMenu
  * -----------------------------------------------------------------------------------------------*/
-
 interface DocumentActionsMenuProps {
   actions: Action[];
   label?: string;
+  variant?: 'ghost' | 'tertiary';
 }
 
-const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
+const DocumentActionsMenu = ({
+  actions,
+  label,
+  variant = 'tertiary',
+}: DocumentActionsMenuProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
@@ -254,7 +264,7 @@ const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
         paddingTop="7px"
         paddingLeft="9px"
         paddingRight="9px"
-        variant="tertiary"
+        variant={variant}
       >
         <More aria-hidden focusable={false} />
         <VisuallyHidden as="span">
@@ -580,10 +590,16 @@ const UNPUBLISH_DRAFT_OPTIONS = {
   DISCARD: 'discard',
 };
 
-const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const UnpublishAction: DocumentActionComponent = ({
+  activeTab,
+  id,
+  model,
+  collectionType,
+  document,
+  meta,
+}) => {
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { document, meta } = useDoc();
   const { unpublish } = useDocumentActions();
   const toggleNotification = useNotification();
   const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
@@ -716,6 +732,7 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
         }
       : undefined,
     variant: 'danger',
+    position: ['panel', 'table-row'],
   };
 };
 
@@ -734,6 +751,7 @@ const DiscardAction: DocumentActionComponent = ({ activeTab, id, model, collecti
       defaultMessage: 'Discard changes',
     }),
     icon: <StyledCrossCircle />,
+    position: ['panel', 'table-row'],
     variant: 'danger',
     dialog: {
       type: 'dialog',

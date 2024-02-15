@@ -182,7 +182,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
       <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
         <Typography fontWeight="bold">
           {formatMessage({
-            id: getTranslation('containers.ListPage.displayedFields'),
+            id: getTranslation('containers.list.displayedFields'),
             defaultMessage: 'Displayed fields',
           })}
         </Typography>

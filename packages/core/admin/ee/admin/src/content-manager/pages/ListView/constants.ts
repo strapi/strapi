@@ -17,7 +17,7 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
       target: 'admin::review-workflow-stage',
     },
     label: {
-      id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.stage`),
+      id: getTranslation(`containers.list.table-headers.reviewWorkflows.stage`),
       defaultMessage: 'Review stage',
     },
     searchable: false,
@@ -32,7 +32,7 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
       relation: 'oneToMany',
     },
     label: {
-      id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.assignee`),
+      id: getTranslation(`containers.list.table-headers.reviewWorkflows.assignee`),
       defaultMessage: 'Assignee',
     },
     searchable: false,
@@ -58,7 +58,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
       customInput: StageFilter,
 
       label: {
-        id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.stage`),
+        id: getTranslation(`containers.list.table-headers.reviewWorkflows.stage`),
         defaultMessage: 'Review stage',
       },
     },
@@ -99,7 +99,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
       ],
 
       label: {
-        id: getTranslation(`containers.ListPage.table-headers.reviewWorkflows.assignee.label`),
+        id: getTranslation(`containers.list.table-headers.reviewWorkflows.assignee.label`),
         defaultMessage: 'Assignee',
       },
     },

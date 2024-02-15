@@ -1,6 +1,6 @@
 import { Flex, Icon, Status, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,6 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { getTranslation } from '../../../utils/translations';
 
 import { DocumentActionsMenu } from './DocumentActions';
 
@@ -115,7 +114,10 @@ const HeaderActions = () => {
         ).getDocumentActions()}
       >
         {(actions) => {
-          const headerActions = actions.filter((act) => act.position === 'header');
+          const headerActions = actions.filter((action) => {
+            const positions = Array.isArray(action.position) ? action.position : [action.position];
+            return positions.includes('header');
+          });
 
           return (
             <DocumentActionsMenu
@@ -161,8 +163,7 @@ ConfigureTheViewAction.type = 'configure-the-view';
  */
 const StyledCog = styled(Cog)`
   path {
-    fill: none;
-    stroke: currentColor;
+    fill: currentColor;
   }
 `;
 
@@ -191,8 +192,7 @@ EditTheModelAction.type = 'edit-the-model';
  */
 const StyledPencil = styled(Pencil)`
   path {
-    fill: none;
-    stroke: currentColor;
+    fill: currentColor;
   }
 `;
 
@@ -202,6 +202,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
   const { document } = useDoc();
+  const toggleNotification = useNotification();
 
   return {
     disabled: !canDelete || !document,
@@ -229,7 +230,17 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
       ),
       onConfirm: async () => {
         if (!id && collectionType !== SINGLE_TYPES) {
-          console.warn("You're trying to delete a document that doesn't exist, you can't do this.");
+          console.error(
+            "You're trying to delete a document without an id, this is likely a bug with Strapi. Please open an issue."
+          );
+
+          toggleNotification({
+            message: formatMessage({
+              id: 'content-manager.actions.delete.error',
+              defaultMessage: 'An error occurred while trying to delete the document.',
+            }),
+            type: 'warning',
+          });
 
           return;
         }
@@ -242,7 +253,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) =>
       },
     },
     variant: 'danger',
-    position: 'header',
+    position: ['header', 'table-row'],
   };
 };
 
@@ -254,8 +265,7 @@ DeleteAction.type = 'delete';
  */
 const StyledTrash = styled(Trash)`
   path {
-    fill: none;
-    stroke: currentColor;
+    fill: currentColor;
   }
 `;
 

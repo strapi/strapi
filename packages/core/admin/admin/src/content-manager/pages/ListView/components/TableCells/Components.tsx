@@ -58,7 +58,7 @@ const RepeatableComponent = ({ content, mainField, schema }: RepeatableComponent
         <Badge>{content.length}</Badge>{' '}
         {formatMessage(
           {
-            id: 'content-manager.containers.ListPage.items',
+            id: 'content-manager.containers.list.items',
             defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
           },
           { number: content.length }

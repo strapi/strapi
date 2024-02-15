@@ -33,6 +33,7 @@ import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
@@ -54,6 +55,7 @@ import { getDisplayName } from '../../utils/users';
 
 import { Filters } from './components/Filters';
 import { Table } from './components/Table';
+import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
@@ -193,7 +195,7 @@ const ListViewPage = () => {
       },
       name: 'status',
       label: {
-        id: getTranslation(`containers.ListPage.table-headers.status`),
+        id: getTranslation(`containers.list.table-headers.status`),
         defaultMessage: 'status',
       },
       searchable: false,
@@ -451,6 +453,9 @@ const ListViewPage = () => {
                           </Td>
                         );
                       })}
+                      <ActionsCell>
+                        <TableActions id={rowData.id} />
+                      </ActionsCell>
                     </Tr>
                   );
                 })}
@@ -466,6 +471,15 @@ const ListViewPage = () => {
     </Main>
   );
 };
+
+const ActionsCell = styled(Td)`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * CreateButton
+ * -----------------------------------------------------------------------------------------------*/
 
 interface CreateButtonProps extends Pick<ButtonProps, 'variant'> {}
 
