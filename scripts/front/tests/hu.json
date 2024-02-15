@@ -1,8 +1,8 @@
 {
-  "Analytics": "Analytics",
-  "Auth.components.Oops.text": "Your account has been suspended.",
-  "Auth.components.Oops.text.admin": "If this is a mistake, please contact your administrator.",
-  "Auth.components.Oops.title": "Oops...",
-  "Auth.form.button.forgot-password": "Send Email",
-  "Auth.form.button.go-home": "GO BACK HOME"
+  "Analytics": "Analitika",
+  "Auth.components.Oops.text": "A fiókod felfüggesztésre került.",
+  "Auth.components.Oops.text.admin": "Ha ez tévedés, kérjük, lépj kapcsolatba az adminisztrátoroddal.",
+  "Auth.components.Oops.title": "Hoppá...",
+  "Auth.form.button.forgot-password": "E-mail küldése",
+  "Auth.form.button.go-home": "Vissza a főoldalra"
 }
