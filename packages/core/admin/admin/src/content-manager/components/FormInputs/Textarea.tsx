@@ -28,7 +28,7 @@ export const TextareaInput = forwardRef<any, InputProps>(
         onChange={field.onChange}
         required={required}
         placeholder={placeholder}
-        value={field.value}
+        value={field.value ?? ''}
       />
     );
   }

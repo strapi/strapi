@@ -71,7 +71,14 @@ interface DocumentActionProps extends EditViewContext {}
 
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
-  type?: 'configure-the-view' | 'delete' | 'edit-the-model' | 'publish' | 'unpublish' | 'update';
+  type?:
+    | 'configure-the-view'
+    | 'delete'
+    | 'discard'
+    | 'edit-the-model'
+    | 'publish'
+    | 'unpublish'
+    | 'update';
 }
 
 /* -------------------------------------------------------------------------------------------------
