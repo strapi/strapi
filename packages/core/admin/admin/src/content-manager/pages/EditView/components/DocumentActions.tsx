@@ -494,20 +494,13 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
         document
       );
 
-      if ('data' in res) {
-        if (collectionType !== SINGLE_TYPES) {
-          /**
-           * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
-           */
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.id}`,
-            search: '?status=published',
-          });
-        } else {
-          navigate({
-            search: '?status=published',
-          });
-        }
+      if ('data' in res && collectionType !== SINGLE_TYPES) {
+        /**
+         * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+         */
+        navigate({
+          pathname: `../${collectionType}/${model}/${res.data.id}`,
+        });
       }
     },
   };
@@ -573,7 +566,6 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
              */
             navigate({
               pathname: `../${collectionType}/${model}/${res.data.id}`,
-              search: '?state=published',
             });
           }
         }
