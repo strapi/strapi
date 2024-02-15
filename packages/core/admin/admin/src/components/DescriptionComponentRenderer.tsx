@@ -11,6 +11,7 @@ import isEqual from 'lodash/isEqual';
 
 import { useForceUpdate } from '../hooks/useForceUpdate';
 import { useThrottledCallback } from '../hooks/useThrottledCallback';
+import { cancelIdleCallback, requestIdleCallback } from '../utils/shims';
 
 interface DescriptionComponent<Props, Description> {
   (props: Props): Description | null;
