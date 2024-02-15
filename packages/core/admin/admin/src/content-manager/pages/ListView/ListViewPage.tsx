@@ -453,7 +453,8 @@ const ListViewPage = () => {
                           </Td>
                         );
                       })}
-                      <ActionsCell>
+                      {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
+                      <ActionsCell onClick={(e) => e.stopPropagation()}>
                         <TableActions id={rowData.id} document={rowData} />
                       </ActionsCell>
                     </Tr>
