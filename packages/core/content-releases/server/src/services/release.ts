@@ -4,7 +4,7 @@ import type { LoadedStrapi, EntityService, UID, Schema } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
-import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import { ALLOWED_WEBHOOK_EVENTS, RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
   GetReleases,
   CreateRelease,
@@ -460,166 +460,192 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   },
 
   async publish(releaseId: PublishRelease.Request['params']['id']) {
-    // We need to pass the type because entityService.findOne is not returning the correct type
-    const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
-      RELEASE_MODEL_UID,
-      releaseId,
-      {
-        populate: {
-          actions: {
-            populate: {
-              entry: {
-                fields: ['id'],
+    try {
+      // We need to pass the type because entityService.findOne is not returning the correct type
+      const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
+        RELEASE_MODEL_UID,
+        releaseId,
+        {
+          populate: {
+            actions: {
+              populate: {
+                entry: {
+                  fields: ['id'],
+                },
               },
             },
           },
-        },
+        }
+      )) as unknown as Release;
+
+      if (!releaseWithPopulatedActionEntries) {
+        throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
-    )) as unknown as Release;
 
-    if (!releaseWithPopulatedActionEntries) {
-      throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-    }
+      if (releaseWithPopulatedActionEntries.releasedAt) {
+        throw new errors.ValidationError('Release already published');
+      }
 
-    if (releaseWithPopulatedActionEntries.releasedAt) {
-      throw new errors.ValidationError('Release already published');
-    }
+      if (releaseWithPopulatedActionEntries.actions.length === 0) {
+        throw new errors.ValidationError('No entries to publish');
+      }
 
-    if (releaseWithPopulatedActionEntries.actions.length === 0) {
-      throw new errors.ValidationError('No entries to publish');
-    }
+      /**
+       * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
+       * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
+       */
+      const collectionTypeActions: {
+        [key: UID.ContentType]: {
+          entriestoPublishIds: ReleaseAction['entry']['id'][];
+          entriesToUnpublishIds: ReleaseAction['entry']['id'][];
+        };
+      } = {};
+      const singleTypeActions: {
+        uid: UID.ContentType;
+        id: ReleaseAction['entry']['id'];
+        action: ReleaseAction['type'];
+      }[] = [];
+      for (const action of releaseWithPopulatedActionEntries.actions) {
+        const contentTypeUid = action.contentType;
 
-    /**
-     * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
-     * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
-     */
-    const collectionTypeActions: {
-      [key: UID.ContentType]: {
-        entriestoPublishIds: ReleaseAction['entry']['id'][];
-        entriesToUnpublishIds: ReleaseAction['entry']['id'][];
-      };
-    } = {};
-    const singleTypeActions: {
-      uid: UID.ContentType;
-      id: ReleaseAction['entry']['id'];
-      action: ReleaseAction['type'];
-    }[] = [];
-    for (const action of releaseWithPopulatedActionEntries.actions) {
-      const contentTypeUid = action.contentType;
+        if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
+          if (!collectionTypeActions[contentTypeUid]) {
+            collectionTypeActions[contentTypeUid] = {
+              entriestoPublishIds: [],
+              entriesToUnpublishIds: [],
+            };
+          }
 
-      if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
-        if (!collectionTypeActions[contentTypeUid]) {
-          collectionTypeActions[contentTypeUid] = {
-            entriestoPublishIds: [],
-            entriesToUnpublishIds: [],
-          };
-        }
-
-        if (action.type === 'publish') {
-          collectionTypeActions[contentTypeUid].entriestoPublishIds.push(action.entry.id);
+          if (action.type === 'publish') {
+            collectionTypeActions[contentTypeUid].entriestoPublishIds.push(action.entry.id);
+          } else {
+            collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
+          }
         } else {
-          collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
+          singleTypeActions.push({
+            uid: contentTypeUid,
+            action: action.type,
+            id: action.entry.id,
+          });
         }
-      } else {
-        singleTypeActions.push({
-          uid: contentTypeUid,
-          action: action.type,
-          id: action.entry.id,
+      }
+
+      const entityManagerService = strapi.plugin('content-manager').service('entity-manager');
+      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+
+      // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
+      await strapi.db.transaction(async () => {
+        // First we publish all the singleTypes
+        for (const { uid, action, id } of singleTypeActions) {
+          // @ts-expect-error - populateBuilderService should be a function but is returning service
+          const populate = await populateBuilderService(uid).populateDeep(Infinity).build();
+
+          const entry = await strapi.entityService.findOne(uid, id, { populate });
+
+          try {
+            if (action === 'publish') {
+              await entityManagerService.publish(entry, uid);
+            } else {
+              await entityManagerService.unpublish(entry, uid);
+            }
+          } catch (error) {
+            if (
+              error instanceof errors.ApplicationError &&
+              (error.message === 'already.published' || error.message === 'already.draft')
+            ) {
+              // We don't want throw an error if the entry is already published or draft
+            } else {
+              throw error;
+            }
+          }
+        }
+
+        // Then, we can continue with publishing the collectionTypes
+        for (const contentTypeUid of Object.keys(collectionTypeActions)) {
+          // @ts-expect-error - populateBuilderService should be a function but is returning service
+          const populate = await populateBuilderService(contentTypeUid)
+            .populateDeep(Infinity)
+            .build();
+
+          const { entriestoPublishIds, entriesToUnpublishIds } =
+            collectionTypeActions[contentTypeUid as UID.ContentType];
+
+          /**
+           * We need to get the populate entries to be able to publish without errors on components/relations/dynamicZones
+           * Considering that populate doesn't work well with morph relations we can't get the entries from the Release model
+           * So, we need to fetch them manually
+           */
+          const entriesToPublish = (await strapi.entityService.findMany(
+            contentTypeUid as UID.ContentType,
+            {
+              filters: {
+                id: {
+                  $in: entriestoPublishIds,
+                },
+              },
+              populate,
+            }
+          )) as Entity[];
+
+          const entriesToUnpublish = (await strapi.entityService.findMany(
+            contentTypeUid as UID.ContentType,
+            {
+              filters: {
+                id: {
+                  $in: entriesToUnpublishIds,
+                },
+              },
+              populate,
+            }
+          )) as Entity[];
+
+          if (entriesToPublish.length > 0) {
+            await entityManagerService.publishMany(entriesToPublish, contentTypeUid);
+          }
+
+          if (entriesToUnpublish.length > 0) {
+            await entityManagerService.unpublishMany(entriesToUnpublish, contentTypeUid);
+          }
+        }
+      });
+
+      // When the transaction fails it throws an error, when it is successful proceed to updating the release
+      const release = await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
+        data: {
+          /*
+           * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">> looks like it's wrong
+           */
+          // @ts-expect-error see above
+          releasedAt: new Date(),
+        },
+        populate: {
+          actions: {
+            // @ts-expect-error is not expecting count but it is working
+            count: true,
+          },
+        },
+      });
+
+      if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+        strapi.eventHub.emit(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+          isPublished: true,
+          release,
+          error: {},
         });
       }
+
+      return release;
+    } catch (error) {
+      if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+        strapi.eventHub.emit(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+          isPublished: false,
+          error,
+          release: {},
+        });
+      }
+
+      throw error;
     }
-
-    const entityManagerService = strapi.plugin('content-manager').service('entity-manager');
-    const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-
-    // Only publish the release if all action updates are applied successfully to their entry, otherwise leave everything as is
-    await strapi.db.transaction(async () => {
-      // First we publish all the singleTypes
-      for (const { uid, action, id } of singleTypeActions) {
-        // @ts-expect-error - populateBuilderService should be a function but is returning service
-        const populate = await populateBuilderService(uid).populateDeep(Infinity).build();
-
-        const entry = await strapi.entityService.findOne(uid, id, { populate });
-
-        try {
-          if (action === 'publish') {
-            await entityManagerService.publish(entry, uid);
-          } else {
-            await entityManagerService.unpublish(entry, uid);
-          }
-        } catch (error) {
-          if (
-            error instanceof errors.ApplicationError &&
-            (error.message === 'already.published' || error.message === 'already.draft')
-          ) {
-            // We don't want throw an error if the entry is already published or draft
-          } else {
-            throw error;
-          }
-        }
-      }
-
-      // Then, we can continue with publishing the collectionTypes
-      for (const contentTypeUid of Object.keys(collectionTypeActions)) {
-        // @ts-expect-error - populateBuilderService should be a function but is returning service
-        const populate = await populateBuilderService(contentTypeUid)
-          .populateDeep(Infinity)
-          .build();
-
-        const { entriestoPublishIds, entriesToUnpublishIds } =
-          collectionTypeActions[contentTypeUid as UID.ContentType];
-
-        /**
-         * We need to get the populate entries to be able to publish without errors on components/relations/dynamicZones
-         * Considering that populate doesn't work well with morph relations we can't get the entries from the Release model
-         * So, we need to fetch them manually
-         */
-        const entriesToPublish = (await strapi.entityService.findMany(
-          contentTypeUid as UID.ContentType,
-          {
-            filters: {
-              id: {
-                $in: entriestoPublishIds,
-              },
-            },
-            populate,
-          }
-        )) as Entity[];
-
-        const entriesToUnpublish = (await strapi.entityService.findMany(
-          contentTypeUid as UID.ContentType,
-          {
-            filters: {
-              id: {
-                $in: entriesToUnpublishIds,
-              },
-            },
-            populate,
-          }
-        )) as Entity[];
-
-        if (entriesToPublish.length > 0) {
-          await entityManagerService.publishMany(entriesToPublish, contentTypeUid);
-        }
-
-        if (entriesToUnpublish.length > 0) {
-          await entityManagerService.unpublishMany(entriesToUnpublish, contentTypeUid);
-        }
-      }
-    });
-
-    // When the transaction fails it throws an error, when it is successful proceed to updating the release
-    const release = await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
-      data: {
-        /*
-         * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">> looks like it's wrong
-         */
-        // @ts-expect-error see above
-        releasedAt: new Date(),
-      },
-    });
-
-    return release;
   },
 
   async updateAction(

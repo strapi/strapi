@@ -84,6 +84,9 @@ describe('bootstrap', () => {
     log: {
       error: jest.fn(),
     },
+    webhookStore: {
+      addAllowedEvent: jest.fn(),
+    },
   };
 
   beforeEach(() => {
