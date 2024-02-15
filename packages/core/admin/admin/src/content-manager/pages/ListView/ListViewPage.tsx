@@ -454,7 +454,7 @@ const ListViewPage = () => {
                         );
                       })}
                       <ActionsCell>
-                        <TableActions id={rowData.id} />
+                        <TableActions id={rowData.id} document={rowData} />
                       </ActionsCell>
                     </Tr>
                   );

@@ -21,9 +21,10 @@ import type {
 
 interface TableActionsProps {
   id: Document['id'];
+  document: Document;
 }
 
-const TableActions = ({ id }: TableActionsProps) => {
+const TableActions = ({ id, document }: TableActionsProps) => {
   const { formatMessage } = useIntl();
   const { model, collectionType } = useDoc();
   const { plugins } = useStrapiApp();
@@ -34,6 +35,7 @@ const TableActions = ({ id }: TableActionsProps) => {
     // @ts-expect-error – this will be solved when we make `id` only a string.
     id,
     collectionType,
+    document,
   };
 
   return (

@@ -196,12 +196,11 @@ const StyledPencil = styled(Pencil)`
   }
 `;
 
-const DeleteAction: DocumentActionComponent = ({ id, model, collectionType }) => {
+const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, document }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
-  const { document } = useDoc();
   const toggleNotification = useNotification();
 
   return {

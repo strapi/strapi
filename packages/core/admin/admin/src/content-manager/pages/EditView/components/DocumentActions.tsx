@@ -28,7 +28,6 @@ import { useForm } from '../../../components/Form';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 
 /* -------------------------------------------------------------------------------------------------
@@ -279,8 +278,11 @@ const DocumentActionsMenu = ({
         {actions.map((action) => {
           return (
             <React.Fragment key={action.id}>
-              {/* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */}
-              <Menu.Item disabled={action.disabled} onSelect={handleClick(action)}>
+              <Menu.Item
+                disabled={action.disabled}
+                /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
+                onSelect={handleClick(action)}
+              >
                 <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
                   {action.icon}
                   {action.label}
@@ -444,10 +446,9 @@ const DocumentActionModal = ({
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType, meta }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
-  const { meta } = useDoc();
   const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
     'PublishAction',
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
@@ -596,7 +597,6 @@ const UnpublishAction: DocumentActionComponent = ({
   model,
   collectionType,
   document,
-  meta,
 }) => {
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
@@ -606,10 +606,6 @@ const UnpublishAction: DocumentActionComponent = ({
 
   const isDocumentModified = document?.status === 'modified';
 
-  const isDocumentPublished =
-    document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
-    meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
-
   const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
     React.FormEventHandler<HTMLDivElement> = (e) => {
     if ('value' in e.target) {
@@ -618,7 +614,10 @@ const UnpublishAction: DocumentActionComponent = ({
   };
 
   return {
-    disabled: !canPublish || activeTab === 'published' || !isDocumentPublished,
+    disabled:
+      !canPublish ||
+      activeTab === 'published' ||
+      (document?.status !== 'published' && document?.status !== 'modified'),
     label: formatMessage({
       id: 'app.utils.unpublish',
       defaultMessage: 'Unpublish',
@@ -738,10 +737,15 @@ const UnpublishAction: DocumentActionComponent = ({
 
 UnpublishAction.type = 'unpublish';
 
-const DiscardAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const DiscardAction: DocumentActionComponent = ({
+  activeTab,
+  id,
+  model,
+  collectionType,
+  document,
+}) => {
   const { formatMessage } = useIntl();
   const canUpdate = useDocumentRBAC('PublishAction', ({ canUpdate }) => canUpdate);
-  const { document } = useDoc();
   const { discard } = useDocumentActions();
 
   return {
