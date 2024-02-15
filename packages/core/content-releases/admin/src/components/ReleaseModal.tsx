@@ -18,7 +18,7 @@ import {
 } from '@strapi/design-system';
 import { formatISO, parse } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
-import { Formik, Form } from 'formik';
+import { Formik, Form, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
@@ -50,8 +50,6 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  // Set default first value from the timezone list with offset UTC+00:00
-  const { timezoneList, currentTimezone = { value: 'Africa/Abidjan' } } = useTimezone();
   const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   /**
    * Generate scheduled time using selected date, time and timezone
@@ -59,7 +57,7 @@ export const ReleaseModal = ({
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
-    const formattedDate = parse(`${time}`, 'HH:mm', new Date(date));
+    const formattedDate = parse(time, 'HH:mm', new Date(date));
     return zonedTimeToUtc(formattedDate, timezone);
   };
 
@@ -86,11 +84,12 @@ export const ReleaseModal = ({
         }}
         initialValues={{
           ...initialValues,
-          timezone: initialValues.timezone ? initialValues.timezone : currentTimezone.value,
+          timezone: initialValues.timezone ?? null,
         }}
         validationSchema={RELEASE_SCHEMA}
+        validateOnChange={false}
       >
-        {({ values, errors, dirty, handleChange, setFieldValue }) => (
+        {({ values, errors, handleChange, setFieldValue }) => (
           <Form>
             <ModalBody>
               <Flex direction="column" alignItems="stretch" gap={6}>
@@ -136,7 +135,7 @@ export const ReleaseModal = ({
                     </Checkbox>
                     {values.isScheduled && (
                       <>
-                        <Flex gap={4}>
+                        <Flex gap={4} alignItems="start">
                           <Box width="100%">
                             <DatePicker
                               label={formatMessage({
@@ -144,6 +143,7 @@ export const ReleaseModal = ({
                                 defaultMessage: 'Date',
                               })}
                               name="date"
+                              error={errors.date}
                               onChange={(date) => {
                                 const isoFormatDate = date
                                   ? formatISO(date, { representation: 'date' })
@@ -168,6 +168,7 @@ export const ReleaseModal = ({
                                 defaultMessage: 'Time',
                               })}
                               name="time"
+                              error={errors.time}
                               onChange={(time) => {
                                 setFieldValue('time', time);
                               }}
@@ -183,26 +184,7 @@ export const ReleaseModal = ({
                             />
                           </Box>
                         </Flex>
-                        <Combobox
-                          label={formatMessage({
-                            id: 'content-releases.modal.form.input.label.timezone',
-                            defaultMessage: 'Timezone',
-                          })}
-                          value={values.timezone}
-                          onChange={(timezone) => {
-                            setFieldValue('timezone', timezone);
-                          }}
-                          onClear={() => {
-                            setFieldValue('timezone', '');
-                          }}
-                          required
-                        >
-                          {timezoneList.map((timezone) => (
-                            <ComboboxOption key={timezone.value} value={timezone.value}>
-                              {timezone.offset} {timezone.value}
-                            </ComboboxOption>
-                          ))}
-                        </Combobox>
+                        <TimezoneComponent />
                       </>
                     )}
                   </>
@@ -216,16 +198,7 @@ export const ReleaseModal = ({
                 </Button>
               }
               endActions={
-                <Button
-                  name="submit"
-                  loading={isLoading}
-                  disabled={
-                    !dirty ||
-                    !values.name ||
-                    (values.isScheduled && (!values.time || !values.date || !values.timezone))
-                  }
-                  type="submit"
-                >
+                <Button name="submit" loading={isLoading} type="submit">
                   {formatMessage(
                     {
                       id: 'content-releases.modal.form.button.submit',
@@ -244,7 +217,7 @@ export const ReleaseModal = ({
 };
 
 /**
- * Timezone hook - Generates the list of timezones and user's current timezone
+ * Generates the list of timezones and user's current timezone
  */
 
 interface ITimezoneOption {
@@ -252,7 +225,7 @@ interface ITimezoneOption {
   value: string;
 }
 
-const useTimezone = () => {
+const getTimezones = (selectedDate: Date) => {
   const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
     /**
      * This will be in the format GMT${OFFSET} where offset could be
@@ -262,7 +235,7 @@ const useTimezone = () => {
       timeZone: timezone,
       timeZoneName: 'longOffset',
     })
-      .formatToParts()
+      .formatToParts(selectedDate)
       .find((part) => part.type === 'timeZoneName');
 
     const offset = offsetPart ? offsetPart.value : '';
@@ -283,9 +256,53 @@ const useTimezone = () => {
     return { offset: utcOffset, value: timezone } satisfies ITimezoneOption;
   });
 
-  const currentTimezone = timezoneList.find(
+  const systemTimezone = timezoneList.find(
     (timezone) => timezone.value === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
-  return { timezoneList, currentTimezone };
+  return { timezoneList, systemTimezone };
+};
+
+const TimezoneComponent = () => {
+  const { values, errors, setFieldValue } = useFormikContext();
+  const { formatMessage } = useIntl();
+  const { timezoneList: timezoneOptions } = getTimezones(new Date(values.date) || new Date());
+  const [timezoneList, setTimezoneList] = React.useState<ITimezoneOption[]>(timezoneOptions);
+
+  React.useEffect(() => {
+    // Update the value of timezone, based on the date selected which varies with DST(daylight saving time)
+    if (values.date) {
+      const { timezoneList, systemTimezone } = getTimezones(new Date(values.date));
+
+      if (values.timezone === systemTimezone?.value) {
+        // When selected timezone is same as system timezone then only update the value
+        setFieldValue('timezone', systemTimezone!.value);
+      }
+      setTimezoneList(timezoneList);
+    }
+  }, [setFieldValue, values.date, values.timezone]);
+
+  return (
+    <Combobox
+      label={formatMessage({
+        id: 'content-releases.modal.form.input.label.timezone',
+        defaultMessage: 'Timezone',
+      })}
+      value={values.timezone} // timezone value e.g: Europe/Paris
+      onChange={(timezone) => {
+        setFieldValue('timezone', timezone);
+      }}
+      onClear={() => {
+        setFieldValue('timezone', '');
+      }}
+      error={errors.timezone}
+      required
+    >
+      {timezoneList.map((timezone) => (
+        <ComboboxOption key={timezone.value} value={timezone.value}>
+          {timezone.offset} {timezone.value}
+        </ComboboxOption>
+      ))}
+    </Combobox>
+  );
 };
