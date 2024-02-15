@@ -1,4 +1,5 @@
-import type { Schema } from '@strapi/types';
+import type { Documents, Schema } from '@strapi/types';
+import { pipeAsync } from '@strapi/utils';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import createDocumentEngine from './document-engine';
@@ -7,131 +8,107 @@ import * as i18n from './internationalization';
 
 export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleType> = (
   contentType
-) => {
+): Documents.ServiceInstance<Schema.SingleType> => {
   const { uid } = contentType;
 
   // TODO: move the code back into here instead of using the document-engine
   const documents = createDocumentEngine({ strapi, db: strapi?.db });
 
-  async function findMany(params = {} as any) {
-    // TODO: replace with chaining
-    DP.defaultToDraft(params);
-    DP.statusToLookup(params);
-    i18n.defaultLocale(contentType, params);
-    i18n.localeToLookup(contentType, params);
+  async function find(params = {} as any) {
+    const queryParams = await pipeAsync(
+      DP.defaultToDraft,
+      DP.statusToLookup,
+      i18n.defaultLocale(contentType),
+      i18n.localeToLookup(contentType)
+    )(params);
 
-    return documents.findMany(uid, params);
+    return documents.findFirst(uid, queryParams);
   }
 
-  async function findFirst(params = {} as any) {
-    DP.defaultToDraft(params);
-    DP.statusToLookup(params);
-    i18n.defaultLocale(contentType, params);
-    i18n.localeToLookup(contentType, params);
+  async function update(params = {} as any) {
+    const queryParams = await pipeAsync(
+      DP.setStatusToDraft,
+      DP.statusToLookup,
+      DP.statusToData,
+      DP.filterDataPublishedAt,
+      // Default locale will be set if not provided
+      i18n.defaultLocale(contentType),
+      i18n.localeToLookup(contentType),
+      i18n.localeToData(contentType)
+    )(params);
 
-    return documents.findFirst(uid, params);
-  }
+    // TODO: post v5 optimize with a find many and a or query
+    const existingDoc = await strapi.db.query(contentType.uid).findOne();
+    let doc: Documents.AnyDocument | null;
 
-  async function findOne(id: string, params = {} as any) {
-    DP.defaultToDraft(params);
-    DP.statusToLookup(params);
-    i18n.defaultLocale(contentType, params);
-    i18n.localeToLookup(contentType, params);
+    if (!existingDoc) {
+      doc = await documents.create(uid, queryParams);
+    } else {
+      doc = await documents.update(uid, existingDoc.documentId, queryParams);
 
-    return documents.findOne(uid, id, params);
-  }
-
-  async function deleteFn(id: string, params = {} as any) {
-    DP.statusToLookup(params);
-    i18n.localeToLookup(contentType, params);
-
-    return documents.delete(uid, id, params);
-  }
-
-  async function deleteMany(params = {} as any) {
-    return documents.deleteMany(uid, params);
-  }
-
-  async function create(params = {} as any) {
-    DP.setStatusToDraft(params);
-    DP.statusToData(params);
-    DP.filterDataPublishedAt(params);
-    i18n.defaultLocale(contentType, params);
-    i18n.localeToData(contentType, params);
-
-    return documents.create(uid, params);
-  }
-
-  async function clone(id: string, params = {} as any) {
-    DP.filterDataPublishedAt(params);
-    i18n.localeToLookup(contentType, params);
-
-    return documents.clone(uid, id, params);
-  }
-
-  async function update(id: string, params = {} as any) {
-    DP.setStatusToDraft(params);
-    DP.statusToLookup(params);
-    DP.statusToData(params);
-    DP.filterDataPublishedAt(params);
-    // Default locale will be set if not provided
-    i18n.defaultLocale(contentType, params);
-    i18n.localeToLookup(contentType, params);
-    i18n.localeToData(contentType, params);
-
-    const res = await documents.update(uid, id, params);
-
-    if (!res) {
-      const documentExists = await strapi.db
-        .query(contentType.uid)
-        .findOne({ where: { documentId: id } });
-
-      if (documentExists) {
-        return create({
-          ...params,
-          data: { ...params.data, documentId: id },
+      if (!doc) {
+        doc = await documents.create(uid, {
+          ...queryParams,
+          data: { ...queryParams.data, documentId: existingDoc.documentId },
         });
       }
     }
 
-    return res;
+    if (params.status === 'published') {
+      return documents.create(uid, {
+        ...queryParams,
+        data: {
+          ...queryParams.data,
+          documentId: doc.id,
+          publishedAt: params?.data?.publishedAt ?? new Date(),
+        },
+      });
+    }
+
+    return doc;
   }
 
-  async function count(params = {} as any) {
-    DP.defaultToDraft(params);
-    i18n.defaultLocale(contentType, params);
+  async function deleteFn(params = {} as any) {
+    // TODO: Apply default locale like update ?
+    // TODO: allow action on multiple locales with array or all locales with *
 
-    return documents.count(uid, params);
+    // always delete both draft & published
+    const queryParams = i18n.localeToLookup(contentType, params);
+    const existingDoc = await strapi.db.query(contentType.uid).findOne();
+    return documents.delete(uid, existingDoc.documentId, queryParams);
   }
 
-  async function publish(id: string, params = {} as any) {
-    i18n.localeToLookup(contentType, params);
+  async function publish(params = {} as any) {
+    // TODO: Apply default locale like update
+    // TODO: allow action on multiple locales with array or all locales with *
 
-    return documents.publish(uid, id, params);
+    const queryParams = i18n.localeToLookup(contentType, params);
+    const existingDoc = await strapi.db.query(contentType.uid).findOne();
+    return documents.publish(uid, existingDoc.documentId, queryParams);
   }
 
-  async function unpublish(id: string, params = {} as any) {
-    i18n.localeToLookup(contentType, params);
+  async function unpublish(params = {} as any) {
+    // TODO: Apply default locale like update ?
+    // TODO: allow action on multiple locales with array or all locales with *
 
-    return documents.unpublish(uid, id, params);
+    const queryParams = i18n.localeToLookup(contentType, params);
+    const existingDoc = await strapi.db.query(contentType.uid).findOne();
+    return documents.unpublish(uid, existingDoc.documentId, queryParams);
   }
 
-  async function discardDraft(id: string, params = {} as any) {
-    i18n.localeToLookup(contentType, params);
+  async function discardDraft(params = {} as any) {
+    // TODO: Apply default locale like update ?
+    // TODO: allow action on multiple locales with array or all locales with *
 
-    return documents.discardDraft(uid, id, params);
+    const queryParams = i18n.localeToLookup(contentType, params);
+    const existingDoc = await strapi.db.query(contentType.uid).findOne();
+    return documents.discardDraft(uid, existingDoc.documentId, queryParams);
   }
 
   return {
-    findMany: wrapInTransaction(findMany),
-    findFirst: wrapInTransaction(findFirst),
-    findOne: wrapInTransaction(findOne),
+    find: wrapInTransaction(find),
     delete: wrapInTransaction(deleteFn),
-    deleteMany: wrapInTransaction(deleteMany),
-    create: wrapInTransaction(create),
-    clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
-    count: wrapInTransaction(count),
     publish: wrapInTransaction(publish),
     unpublish: wrapInTransaction(unpublish),
     discardDraft: wrapInTransaction(discardDraft),

@@ -28,12 +28,9 @@ export type FindOne<
   TParams extends Params.FindFirst<TContentTypeUID>
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
-export type Delete<
-  TContentTypeUID extends Common.UID.ContentType,
-  TParams extends Params.Delete<TContentTypeUID>
-> = Promise<{
-  versions: Result<TContentTypeUID, TParams>[];
-} | null>;
+export type Delete = Promise<{
+  deletedEntries: number;
+}>;
 
 export type DeleteMany = Promise<CountResult | null>;
 

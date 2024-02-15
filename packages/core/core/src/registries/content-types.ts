@@ -73,13 +73,13 @@ const contentTypesRegistry = () => {
      */
     extend(ctUID: Common.UID.ContentType, extendFn: ContentTypeExtendFn) {
       const currentContentType = this.get(ctUID);
+      console.log(ctUID, currentContentType);
 
       if (!currentContentType) {
         throw new Error(`Content-Type ${ctUID} doesn't exist`);
       }
 
-      const newContentType = extendFn(currentContentType);
-      contentTypes[ctUID] = newContentType;
+      extendFn(currentContentType);
 
       return this;
     },

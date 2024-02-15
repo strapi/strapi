@@ -1,12 +1,11 @@
-import type { Common, Utils, Entity as E } from '..';
+import type { Common, Utils } from '..';
+import type { Documents } from '../..';
 
-type EntityID = E.ID;
-
-// TODO Use actual entities instead of regular object
-type Entity = { id: EntityID } & Record<string, unknown>;
+// TODO: Migration to use Documents
+type Document = Documents.AnyDocument;
 
 type PaginatedEntities = {
-  results: Entity[];
+  results: Document[] | null;
   pagination:
     | {
         page: number;
@@ -43,22 +42,24 @@ export type Generic = {
  */
 export interface CollectionType extends Base {
   find(params: object): Promise<PaginatedEntities>;
-  findOne(entityId: EntityID, params: object): Promise<Entity | null>;
-  create(params: { data: Data; [key: string]: unknown }): Promise<Entity>;
+  findOne(docId: Documents.ID, params: object): Promise<Document | null>;
+  create(params: { data: Data; [key: string]: unknown }): Promise<Document>;
   update(
-    entityId: EntityID,
+    docId: Documents.ID,
     params: { data: Data; [key: string]: unknown }
-  ): Promise<Entity> | Entity;
-  delete(entityId: EntityID, params: object): Promise<Entity> | Entity;
+  ): Promise<Document | null>;
+  delete(docId: Documents.ID, params: object): Promise<Document | null>;
 }
 
 /**
  * Core-API single type service
  */
 export interface SingleType extends Base {
-  find(params: object): Promise<Entity> | Entity;
-  createOrUpdate(params: { data: Data; [key: string]: unknown }): Promise<Entity> | Entity;
-  delete(params: object): Promise<Entity> | Entity;
+  find(params: object): Promise<Document | null>;
+  createOrUpdate(params: { data: Data; [key: string]: unknown }): Promise<Document | null>;
+  delete(params: object): Promise<{
+    deletedEntries: number;
+  }>;
 }
 
 export type ContentType<TContentTypeUID extends Common.UID.ContentType> =

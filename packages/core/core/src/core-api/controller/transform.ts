@@ -1,6 +1,4 @@
 import { isNil, isPlainObject } from 'lodash/fp';
-import { parseMultipartData } from '@strapi/utils';
-import type Koa from 'koa';
 import type { Common, Schema, UID } from '@strapi/types';
 
 type TransformedEntry = {
@@ -26,16 +24,6 @@ function isEntry(property: unknown): property is Entry | Entry[] {
 function isDZEntries(property: unknown): property is (Entry & { __component: UID.Component })[] {
   return Array.isArray(property);
 }
-
-const parseBody = (ctx: Koa.Context) => {
-  if (ctx.is('multipart')) {
-    return parseMultipartData(ctx);
-  }
-
-  const { data } = ctx.request.body || {};
-
-  return { data };
-};
 
 const transformResponse = (
   resource: any,
@@ -136,4 +124,4 @@ function transformEntry(
   };
 }
 
-export { parseBody, transformResponse };
+export { transformResponse };
