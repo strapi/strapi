@@ -10,6 +10,7 @@ import {
 
 import { BaseQueryError } from '../../utils/baseQuery';
 import {
+  useAutoCloneDocumentMutation,
   useCloneDocumentMutation,
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
@@ -35,6 +36,15 @@ type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> 
   | { error: BaseQueryError | SerializedError };
 
 type UseDocumentActions = () => {
+  /**
+   * @description Attempts to clone a document based on the provided sourceId.
+   * This will return a list of the fields as an error if it's unable to clone.
+   * You most likely want to use the `clone` action instead.
+   */
+  autoClone: (args: {
+    model: string;
+    sourceId: string;
+  }) => Promise<OperationResponse<Contracts.CollectionTypes.AutoClone.Response>>;
   clone: (
     args: {
       model: string;
@@ -226,7 +236,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    []
+    [discardDocument, formatAPIError, toggleNotification]
   );
 
   const [publishDocument] = usePublishDocumentMutation();
@@ -395,6 +405,39 @@ const useDocumentActions: UseDocumentActions = () => {
     [createDocument, formatAPIError, toggleNotification, trackUsage]
   );
 
+  const [autoCloneDocument] = useAutoCloneDocumentMutation();
+  const autoClone: IUseDocumentActs['autoClone'] = React.useCallback(
+    async ({ model, sourceId }) => {
+      try {
+        const res = await autoCloneDocument({
+          model,
+          sourceId,
+        });
+
+        if ('error' in res) {
+          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+
+          return { error: res.error };
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: { id: getTranslation('success.record.save') },
+        });
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'warning',
+          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+        });
+
+        throw err;
+      }
+    },
+    [autoCloneDocument, formatAPIError, toggleNotification]
+  );
+
   const [cloneDocument] = useCloneDocumentMutation();
   const clone: IUseDocumentActs['clone'] = React.useCallback(
     async ({ model, id, params }, body, trackerProperty) => {
@@ -453,6 +496,7 @@ const useDocumentActions: UseDocumentActions = () => {
   );
 
   return {
+    autoClone,
     clone,
     create,
     delete: _delete,

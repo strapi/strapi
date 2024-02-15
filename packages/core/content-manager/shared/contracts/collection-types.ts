@@ -80,6 +80,8 @@ export declare namespace Create {
   }
 }
 
+export type ProhibitedCloningField = [fieldNames: string[], 'unique' | 'relation'];
+
 /**
  * POST /collection-types/:model/auto-clone/:sourceId
  */
@@ -97,7 +99,11 @@ export declare namespace AutoClone {
   export interface Response {
     data: Document;
     meta: DocumentMetadata;
-    error?: errors.ApplicationError;
+    error?: errors.ApplicationError<
+      'BadRequestError',
+      string,
+      { prohibitedFields: ProhibitedCloningField[] }
+    >;
   }
 }
 

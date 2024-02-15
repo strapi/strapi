@@ -41,6 +41,9 @@ const CollectionTypePages = () => {
   );
 };
 
+const CLONE_RELATIVE_PATH = ':collectionType/:slug/clone/:origin';
+const CLONE_PATH = `/content-manager/${CLONE_RELATIVE_PATH}`;
+
 const routes: RouteObject[] = [
   {
     path: 'content-manager/*',
@@ -94,7 +97,7 @@ const routes: RouteObject[] = [
         },
       },
       {
-        path: ':collectionType/:slug/create/clone/:origin',
+        path: CLONE_RELATIVE_PATH,
         lazy: async () => {
           const { ProtectedEditViewPage } = await import('./pages/EditView/EditViewPage');
 
@@ -161,4 +164,4 @@ const routes: RouteObject[] = [
   },
 ];
 
-export { routes };
+export { routes, CLONE_PATH };
