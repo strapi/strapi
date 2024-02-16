@@ -115,8 +115,8 @@ describe('i18n - Content API', () => {
           method: 'POST',
           url: `/content-manager/collection-types/api::category.category`,
           qs: {
-            plugins: { i18n: { relatedEntityId: data.categories[0].id } },
             locale,
+            relatedEntityId: data.categories[0].id,
           },
           body: {
             name: `category in ${locale}`,
