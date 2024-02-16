@@ -1,4 +1,4 @@
-import documentMetadataLoader, { type DocumentVersionSelector } from '../document-metadata';
+import documentMetadataLoader, { type DocumentVersion } from '../document-metadata';
 
 import '@strapi/types';
 
@@ -34,7 +34,7 @@ describe('Document Metadata', () => {
   describe('Get Metadata', () => {
     test('Gets available draft locales', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = {
+      const document: DocumentVersion = {
         id: '1',
         locale: 'en',
         publishedAt: null,
@@ -57,7 +57,7 @@ describe('Document Metadata', () => {
 
     test('Gets available published locales', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = {
+      const document: DocumentVersion = {
         id: '1',
         locale: 'en',
         publishedAt: new Date(),
@@ -82,7 +82,7 @@ describe('Document Metadata', () => {
   describe('Get Status', () => {
     test('Gets published status', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = {
+      const document: DocumentVersion = {
         id: '1',
         locale: 'en',
         publishedAt: new Date(),
@@ -107,7 +107,7 @@ describe('Document Metadata', () => {
 
     test('Gets draft status', async () => {
       const uid = 'api::test.test';
-      const document: DocumentVersionSelector = {
+      const document: DocumentVersion = {
         id: '1',
         locale: 'en',
         publishedAt: null,
