@@ -55,7 +55,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   }) {
     const foundDocuments = await strapi.documents(contentTypeUID).findMany({
       filters: {
-        [field]: { $contains: value },
+        [field]: { $startsWith: value },
       },
       locale,
       // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
