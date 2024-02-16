@@ -69,7 +69,7 @@ export default (allowedFields: string[] | null = null): Visitor =>
     }
 
     // throw otherwise
-    throwInvalidParam({ key });
+    throwInvalidParam({ key, path });
   };
 
 /**
