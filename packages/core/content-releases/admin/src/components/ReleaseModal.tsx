@@ -13,8 +13,8 @@ import {
   Box,
   DatePicker,
   TimePicker,
-  SingleSelect,
-  SingleSelectOption,
+  Combobox,
+  ComboboxOption,
 } from '@strapi/design-system';
 import { formatISO, parse } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
@@ -51,7 +51,10 @@ export const ReleaseModal = ({
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
   const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
-  const { systemTimezone = { value: 'Africa/Abidjan ' } } = getTimezones(new Date());
+  // Set default first timezone from the list if no system timezone detected
+  const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
+    initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : new Date()
+  );
 
   /**
    * Generate scheduled time using selected date, time and timezone
@@ -60,7 +63,18 @@ export const ReleaseModal = ({
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
     const formattedDate = parse(time, 'HH:mm', new Date(date));
-    return zonedTimeToUtc(formattedDate, timezone);
+    const timezoneWithoutOffset = timezone.split('-')[1];
+    return zonedTimeToUtc(formattedDate, timezoneWithoutOffset);
+  };
+
+  /**
+   * Get timezone with offset to show the selected value in the dropdown
+   */
+  const getTimezoneWithOffset = () => {
+    const currentTimezone = timezoneList.find(
+      (timezone) => timezone.value.split('-')[1] === initialValues.timezone
+    );
+    return currentTimezone?.value || systemTimezone.value;
   };
 
   return (
@@ -81,12 +95,13 @@ export const ReleaseModal = ({
         onSubmit={(values) => {
           handleSubmit({
             ...values,
+            timezone: values.timezone ? values.timezone.split('-')[1] : null,
             scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
           });
         }}
         initialValues={{
           ...initialValues,
-          timezone: initialValues.timezone ?? systemTimezone?.value,
+          timezone: initialValues.timezone ? getTimezoneWithOffset() : systemTimezone.value,
         }}
         validationSchema={RELEASE_SCHEMA}
         validateOnChange={false}
@@ -164,7 +179,7 @@ export const ReleaseModal = ({
                               onClear={() => {
                                 setFieldValue('date', null);
                               }}
-                              selectedDate={values.date ? new Date(values.date) : undefined}
+                              selectedDate={values.date || undefined}
                               required
                             />
                           </Box>
@@ -191,7 +206,7 @@ export const ReleaseModal = ({
                             />
                           </Box>
                         </Flex>
-                        <TimezoneComponent />
+                        <TimezoneComponent timezoneOptions={timezoneList} />
                       </>
                     )}
                   </>
@@ -252,29 +267,31 @@ const getTimezones = (selectedDate: Date) => {
       utcOffset = `${utcOffset}+00:00`;
     }
 
-    return { offset: utcOffset, value: timezone } satisfies ITimezoneOption;
+    // Offset and timezone are concatenated with '-', so to split and save the required timezone in DB
+    return { offset: utcOffset, value: `${utcOffset}-${timezone}` } satisfies ITimezoneOption;
   });
 
   const systemTimezone = timezoneList.find(
-    (timezone) => timezone.value === Intl.DateTimeFormat().resolvedOptions().timeZone
+    (timezone) => timezone.value.split('-')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
   return { timezoneList, systemTimezone };
 };
 
-const TimezoneComponent = () => {
-  const { values, errors, setFieldValue } = useFormikContext();
+const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOption[] }) => {
+  const { values, errors, setFieldValue } = useFormikContext<FormValues>();
   const { formatMessage } = useIntl();
-  const { timezoneList: timezoneOptions } = getTimezones(new Date(values.date) || new Date());
   const [timezoneList, setTimezoneList] = React.useState<ITimezoneOption[]>(timezoneOptions);
 
   React.useEffect(() => {
     if (values.date) {
-      // Update the value of timezone and list which varies with DST based on the date selected
+      // Update the timezone offset which varies with DST based on the date selected
       const { timezoneList } = getTimezones(new Date(values.date));
       setTimezoneList(timezoneList);
 
-      const updatedTimezone = timezoneList.find((tz) => tz.value === values.timezone);
+      const updatedTimezone =
+        values.timezone &&
+        timezoneList.find((tz) => tz.value.split('-')[1] === values.timezone!.split('-')[1]);
       if (updatedTimezone) {
         setFieldValue('timezone', updatedTimezone!.value);
       }
@@ -282,13 +299,14 @@ const TimezoneComponent = () => {
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <SingleSelect
+    <Combobox
       label={formatMessage({
         id: 'content-releases.modal.form.input.label.timezone',
         defaultMessage: 'Timezone',
       })}
       name="timezone"
-      value={values.timezone} // timezone value e.g: Europe/Paris
+      value={values.timezone || undefined}
+      textValue={values.timezone || undefined} // required to show the updated DST timezone
       onChange={(timezone) => {
         setFieldValue('timezone', timezone);
       }}
@@ -299,11 +317,10 @@ const TimezoneComponent = () => {
       required
     >
       {timezoneList.map((timezone) => (
-        <SingleSelectOption key={timezone.value} value={timezone.value}>
-          {/* Display value e.g: "UTC+01:00 Europe/Paris" */}
-          {timezone.offset} {timezone.value}
-        </SingleSelectOption>
+        <ComboboxOption key={timezone.value} value={timezone.value}>
+          {timezone.value}
+        </ComboboxOption>
       ))}
-    </SingleSelect>
+    </Combobox>
   );
 };

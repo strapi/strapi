@@ -840,6 +840,8 @@ const ReleaseDetailsPage = () => {
   const timezone = releaseData?.timezone ?? null;
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
+  // Just get the date and time to display without considering updated timezone time
+  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
@@ -912,7 +914,7 @@ const ReleaseDetailsPage = () => {
           initialValues={{
             name: title || '',
             scheduledAt,
-            date: scheduledAt,
+            date,
             time,
             isScheduled: Boolean(scheduledAt),
             timezone,
