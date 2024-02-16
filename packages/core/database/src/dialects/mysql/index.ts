@@ -63,7 +63,7 @@ export default class MysqlDialect extends Dialect {
 
     // We only need to get info on the first connection in the pool
     if (!this.info) {
-      this.info = await this.databaseInspector.getInformation();
+      this.info = await this.databaseInspector.getInformation(nativeConnection);
     }
   }
 
