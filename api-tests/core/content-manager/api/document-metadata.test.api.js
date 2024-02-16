@@ -166,16 +166,23 @@ describe('CM API - Document metadata', () => {
       await createProduct('product', 'fr', 'published', { updatedAt: '2024-02-11' });
 
       const draftProduct = await getProduct('product', 'en', 'draft');
-
       const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
       expect(data.status).toBe('modified');
       expect(meta.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
       // expect(meta.availableStatus).toMatchObject([
-      //   {
-      //     status: 'modified',
-      //   },
+      //   { status: 'modified' },
       // ]);
+
+      const publishedProduct = await getProduct('product', 'en', 'published');
+      const { data: dataPublished, meta: metaPublished } = await formatDocument(
+        PRODUCT_UID,
+        publishedProduct,
+        {}
+      );
+
+      expect(dataPublished.status).toBe('modified');
+      expect(metaPublished.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
     })
   );
 });
