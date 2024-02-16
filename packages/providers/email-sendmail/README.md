@@ -75,7 +75,7 @@ module.exports = ({ env }) => ({
     providerOptions: {
       dkim: {
         privateKey: 'replace-with-dkim-private-key',
-        keySelector: 'abcd', // the same as the one set in DNS txt record, use online dns lookup tools to be sure that is retreivable
+        keySelector: 'abcd', // the same as the one set in DNS txt record, use online dns lookup tools to be sure that is retrievable
       },
     },
     settings: {
