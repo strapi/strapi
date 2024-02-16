@@ -112,7 +112,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           where: {
             $and: [
               { contentType: params.contentType },
-              { relatedDocumentId: params.documentId },
+              ...(params.documentId ? [{ relatedDocumentId: params.documentId }] : []),
               ...(params.locale ? [{ locale: params.locale }] : []),
             ],
           },

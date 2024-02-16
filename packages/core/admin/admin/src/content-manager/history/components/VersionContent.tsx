@@ -176,15 +176,11 @@ const VersionContent = () => {
                       const getValue = () => {
                         const value = version.data[column.name];
 
-                        switch (attribute.type) {
-                          case 'json':
-                            return JSON.stringify(value);
-                          case 'date':
-                          case 'datetime':
-                            return new Date(value as string);
-                          default:
-                            return value;
+                        if (attribute.type === 'json') {
+                          return JSON.stringify(value);
                         }
+
+                        return value;
                       };
 
                       return (

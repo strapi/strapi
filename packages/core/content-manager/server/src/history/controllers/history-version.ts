@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Common, Strapi } from '@strapi/types';
+import type { Common, Strapi, UID } from '@strapi/types';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
@@ -7,7 +7,14 @@ import { HistoryVersions } from '../../../../shared/contracts';
 const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
   return {
     async findMany(ctx) {
-      if (!ctx.query.contentType || !ctx.query.documentId) {
+      const contentTypeUid = ctx.query.contentType as UID.ContentType;
+      const isSingleType = strapi.getModel(contentTypeUid).kind === 'singleType';
+
+      if (isSingleType && !contentTypeUid) {
+        throw new errors.ForbiddenError('contentType is required');
+      }
+
+      if (!contentTypeUid && !ctx.query.documentId) {
         throw new errors.ForbiddenError('contentType and documentId are required');
       }
 
