@@ -383,7 +383,7 @@ const ListPage = () => {
                 <Button
                   variant="secondary"
                   startIcon={<Plus />}
-                  onClick={canCreate ? goTo('create') : undefined}
+                  onClick={canCreate && goTo('create')}
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',
