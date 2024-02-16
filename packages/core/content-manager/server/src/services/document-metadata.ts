@@ -104,8 +104,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return matchLocale && matchStatus;
     });
 
+    if (!availableStatus) return availableStatus;
+
     // Pick status fields (at fields, status, by fields), use lodash fp
-    return [pick(AVAILABLE_STATUS_FIELDS, availableStatus)];
+    return pick(AVAILABLE_STATUS_FIELDS, availableStatus);
   },
   /**
    * Get the available status of many documents, useful for batch operations
