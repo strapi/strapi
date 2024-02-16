@@ -92,6 +92,7 @@ export default {
         }
       }
     } else if (documentId) {
+      // TODO: components
       const entity = await strapi.entityService.findOne(model, documentId);
 
       if (!entity) {
@@ -150,14 +151,15 @@ export default {
     });
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
-    const queryParams = {
-      sort: mainField,
-      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      ...permissionQuery,
-    };
-
     const locale = ctx.request?.query?.locale || null;
     const status = ctx.request?.query.status;
+
+    const queryParams = {
+      sort: mainField,
+      // cannot select other fields as the user may not have the permissions
+      fields: locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect,
+      ...permissionQuery,
+    };
 
     let currentRelationIds: string[] = [];
     if (id) {
@@ -209,23 +211,21 @@ export default {
       return;
     }
 
-    const { model } = ctx.params;
+    const locale = ctx.request?.query?.locale || null;
+    const status = ctx.request?.query.status;
 
+    let { fieldsToSelect } = validation;
+    fieldsToSelect = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
+
+    const { model } = ctx.params;
     const { targetField, targetedModel, attribute } = validation;
     // TODO sorting on mainField?
     // const { mainField } = validation;
-
-    let { fieldsToSelect } = validation;
-
-    const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query.status;
-    fieldsToSelect = uniq([...fieldsToSelect, 'locale', PUBLISHED_AT_ATTRIBUTE]);
 
     let modelUid: string = '';
     let filters;
     let sort = null;
     let populate = null;
-
     if (!isOneToAny(attribute)) {
       // If it is a many to any relation, we query for the target content type
       // Filtering for those related to the current entity
