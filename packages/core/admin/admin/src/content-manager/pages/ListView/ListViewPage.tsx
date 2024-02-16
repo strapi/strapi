@@ -33,10 +33,12 @@ import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { capitalise } from '../../../utils/strings';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -53,6 +55,7 @@ import { getDisplayName } from '../../utils/users';
 
 import { Filters } from './components/Filters';
 import { Table } from './components/Table';
+import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
@@ -192,7 +195,7 @@ const ListViewPage = () => {
       },
       name: 'status',
       label: {
-        id: getTranslation(`containers.ListPage.table-headers.status`),
+        id: getTranslation(`containers.list.table-headers.status`),
         defaultMessage: 'status',
       },
       searchable: false,
@@ -365,26 +368,25 @@ const ListViewPage = () => {
                       </Td>
                       {tableHeaders.map(({ cellFormatter, ...header }) => {
                         if (header.name === 'status') {
+                          const { status } = rowData;
+
+                          const statusVariant =
+                            status === 'draft'
+                              ? 'primary'
+                              : status === 'published'
+                              ? 'success'
+                              : 'alternative';
+
                           return (
                             <Td key={header.name}>
                               <Status
-                                width="min-content"
+                                maxWidth="min-content"
                                 showBullet={false}
-                                variant={rowData.publishedAt ? 'success' : 'secondary'}
-                                size="S"
+                                size={'S'}
+                                variant={statusVariant}
                               >
-                                <Typography
-                                  fontWeight="bold"
-                                  textColor={`${rowData.publishedAt ? 'success' : 'secondary'}700`}
-                                >
-                                  {formatMessage({
-                                    id: getTranslation(
-                                      `containers.List.${
-                                        rowData.publishedAt ? 'published' : 'draft'
-                                      }`
-                                    ),
-                                    defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
-                                  })}
+                                <Typography as="span" variant="omega" fontWeight="bold">
+                                  {capitalise(status)}
                                 </Typography>
                               </Status>
                             </Td>
@@ -451,6 +453,10 @@ const ListViewPage = () => {
                           </Td>
                         );
                       })}
+                      {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
+                      <ActionsCell onClick={(e) => e.stopPropagation()}>
+                        <TableActions id={rowData.id} document={rowData} />
+                      </ActionsCell>
                     </Tr>
                   );
                 })}
@@ -466,6 +472,15 @@ const ListViewPage = () => {
     </Main>
   );
 };
+
+const ActionsCell = styled(Td)`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * CreateButton
+ * -----------------------------------------------------------------------------------------------*/
 
 interface CreateButtonProps extends Pick<ButtonProps, 'variant'> {}
 
