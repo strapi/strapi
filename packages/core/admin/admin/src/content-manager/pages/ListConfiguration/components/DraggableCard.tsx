@@ -7,8 +7,8 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
+import { ItemTypes } from '../../../constants/dragAndDrop';
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
-import { ItemTypes } from '../../../utils/dragAndDrop';
 import { useComposedRefs } from '../../../utils/refs';
 import { getTranslation } from '../../../utils/translations';
 

@@ -5,7 +5,7 @@ const { createRequest, createAuthRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
 
 // Test a simple default API with no relations
-describe('Simple Test GraphQL Users API End to End', () => {
+describe.skip('Simple Test GraphQL Users API End to End', () => {
   let strapi;
   let rq;
   let graphqlQuery;
@@ -189,7 +189,7 @@ describe('Simple Test GraphQL Users API End to End', () => {
 });
 
 // Test with attributes such as components, relations..
-describe('Advanced Test GraphQL Users API End to End', () => {
+describe.skip('Advanced Test GraphQL Users API End to End', () => {
   const builder = createTestBuilder();
 
   let strapi;

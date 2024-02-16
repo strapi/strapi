@@ -21,10 +21,10 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../components/Form';
+import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
-import { ItemTypes } from '../../../../../utils/dragAndDrop';
 import { getIn } from '../../../../../utils/object';
 import { useComposedRefs } from '../../../../../utils/refs';
 import { getTranslation } from '../../../../../utils/translations';

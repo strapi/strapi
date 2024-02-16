@@ -41,7 +41,7 @@ const Header = ({
 
   const title = isCreating
     ? formatMessage({
-        id: getTranslation('containers.Edit.pluginHeader.title.new'),
+        id: 'content-manager.containers.edit.title.new',
         defaultMessage: 'Create an entry',
       })
     : documentTitle;
@@ -82,6 +82,7 @@ const Header = ({
  * none we still render the menu because we render the information about the document there.
  */
 const HeaderActions = () => {
+  const { formatMessage } = useIntl();
   const [
     {
       query: { status = 'draft' },
@@ -110,7 +111,15 @@ const HeaderActions = () => {
         {(actions) => {
           const headerActions = actions.filter((act) => act.position === 'header');
 
-          return <DocumentActionsMenu actions={headerActions} />;
+          return (
+            <DocumentActionsMenu
+              actions={headerActions}
+              label={formatMessage({
+                id: 'content-manager.containers.edit.header.more-actions',
+                defaultMessage: 'More actions',
+              })}
+            />
+          );
         }}
       </DescriptionComponentRenderer>
     </Flex>

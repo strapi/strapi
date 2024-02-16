@@ -25,8 +25,8 @@ interface ListLayout {
 interface EditLayout {
   layout: Array<Array<EditFieldLayout[]>>;
   components: Record<string, Omit<EditLayout, 'metadatas' | 'components'>>;
-  metadatas?: never;
-  settings?: never;
+  metadatas: object;
+  settings: object;
 }
 ```
 

@@ -74,13 +74,16 @@ interface EditLayout {
   components: {
     [uid: string]: {
       layout: Array<EditFieldLayout[]>;
-      settings: Contracts.Components.ComponentConfiguration['settings'];
+      settings: Contracts.Components.ComponentConfiguration['settings'] & {
+        displayName?: string;
+        icon?: string;
+      };
     };
   };
   metadatas: {
     [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['edit'];
   };
-  settings: Contracts.ContentTypes.Settings;
+  settings: Contracts.ContentTypes.Settings & { displayName?: string };
 }
 
 type UseDocumentLayout = (model: string) => {
@@ -244,7 +247,11 @@ const formatEditLayout = (
           components[uid].attributes,
           configuration.metadatas
         ),
-        settings: configuration.settings,
+        settings: {
+          ...configuration.settings,
+          icon: components[uid].info.icon,
+          displayName: components[uid].info.displayName,
+        },
       };
       return acc;
     },
@@ -265,7 +272,10 @@ const formatEditLayout = (
     layout: panelledEditAttributes,
     components: componentEditAttributes,
     metadatas: editMetadatas,
-    settings: data.contentType.settings,
+    settings: {
+      ...data.contentType.settings,
+      displayName: schema?.info.displayName,
+    },
   };
 };
 
@@ -400,5 +410,11 @@ const convertListLayoutToFieldLayouts = (
     .filter((field) => field !== null) as ListFieldLayout[];
 };
 
-export { useDocLayout, useDocumentLayout, convertListLayoutToFieldLayouts };
+export {
+  useDocLayout,
+  useDocumentLayout,
+  convertListLayoutToFieldLayouts,
+  convertEditLayoutToFieldLayouts,
+  DEFAULT_SETTINGS,
+};
 export type { EditLayout, EditFieldLayout, ListLayout, ListFieldLayout, UseDocumentLayout };
