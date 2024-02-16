@@ -1,11 +1,9 @@
-import releaseAction from './release-action';
 import release from './release';
 import releaseValidation from './validation';
-import eventManager from './event-manager';
+import scheduling from './scheduling';
 
 export const services = {
   release,
-  'release-action': releaseAction,
   'release-validation': releaseValidation,
-  'event-manager': eventManager,
+  ...(strapi.features.future.isEnabled('contentReleasesScheduling') ? { scheduling } : {}),
 };

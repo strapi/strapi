@@ -12,10 +12,7 @@ import type { Plugin } from '@strapi/types';
 const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: any) {
-    if (
-      window.strapi.features.isEnabled('cms-content-releases') &&
-      window.strapi.future.isEnabled('contentReleases')
-    ) {
+    if (window.strapi.features.isEnabled('cms-content-releases')) {
       app.addMenuLink({
         to: `/plugins/${pluginId}`,
         icon: PaperPlane,
@@ -44,6 +41,23 @@ const admin: Plugin.Config.AdminInput = {
       app.injectContentManagerComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
+      });
+    } else if (
+      !window.strapi.features.isEnabled('cms-content-releases') &&
+      window.strapi?.flags?.promoteEE
+    ) {
+      app.addMenuLink({
+        to: `/plugins/purchase-content-releases`,
+        icon: PaperPlane,
+        intlLabel: {
+          id: `${pluginId}.plugin.name`,
+          defaultMessage: 'Releases',
+        },
+        async Component() {
+          const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
+          return PurchaseContentReleases;
+        },
+        lockIcon: true,
       });
     }
   },

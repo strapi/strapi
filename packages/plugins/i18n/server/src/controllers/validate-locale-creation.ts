@@ -23,8 +23,8 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
     return next();
   }
 
-  const locale = get('plugins.i18n.locale', query);
-  const relatedEntityId = get('plugins.i18n.relatedEntityId', query);
+  const locale = get('locale', query);
+  const relatedEntityId = get('relatedEntityId', query);
   // cleanup to avoid creating duplicates in singletypes
   ctx.request.query = {};
 

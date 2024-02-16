@@ -114,6 +114,7 @@ describe('Release Validation service', () => {
       );
     });
   });
+
   describe('validatePendingReleasesLimit', () => {
     it('should throw an error if the default pending release limit has been reached', () => {
       // @ts-expect-error - get is a mock
@@ -196,6 +197,72 @@ describe('Release Validation service', () => {
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
       await expect(releaseValidationService.validatePendingReleasesLimit()).resolves.not.toThrow();
+    });
+  });
+
+  describe('validateUniqueNameForPendingRelease', () => {
+    it('should throw an error if a release with the same name already exists', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findMany: jest.fn().mockReturnValue([
+            {
+              name: 'release1',
+            },
+          ]),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(
+        releaseValidationService.validateUniqueNameForPendingRelease('release1')
+      ).rejects.toThrow('Release with name release1 already exists');
+    });
+
+    it('should pass if a release with the same name does NOT already exist', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findMany: jest.fn().mockReturnValue([]),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      await expect(
+        releaseValidationService.validateUniqueNameForPendingRelease('release1')
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('validateScheduledAtIsLaterThanNow', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2021-01-01'));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it('should throw an error if the scheduledAt date is in the past', () => {
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
+
+      expect(() =>
+        releaseValidationService.validateScheduledAtIsLaterThanNow(new Date('2020-01-01'))
+      ).rejects.toThrow('Scheduled at must be later than now');
+    });
+
+    it('should pass if the scheduledAt date is in the future', () => {
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
+
+      expect(() =>
+        releaseValidationService.validateScheduledAtIsLaterThanNow(new Date('2022-01-01'))
+      ).not.toThrow();
     });
   });
 });

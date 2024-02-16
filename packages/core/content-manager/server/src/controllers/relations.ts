@@ -1,4 +1,4 @@
-import { prop, isEmpty, uniq, flow } from 'lodash/fp';
+import { prop, isEmpty, uniq, flow, uniqBy, concat } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -126,11 +126,16 @@ export default {
       fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
     }
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model: targetedModel.uid,
+    });
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
+
     const queryParams = {
       sort: mainField,
-      ...query,
       fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      filters: {}, // cannot filter for RBAC reasons
+      ...permissionQuery,
     };
 
     if (!isEmpty(idsToOmit)) {
@@ -242,13 +247,36 @@ export default {
       fields: fieldsToSelect,
     };
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model: targetedModel.uid,
+    });
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
+
     if (isAnyToMany(attribute)) {
       const res = await strapi.entityService.loadPages(
         model,
         { id },
         targetField,
         {
-          ...queryParams,
+          fields: ['id'],
+          ordering: 'desc',
+        } as any,
+        {
+          page: ctx.request.query.page,
+          pageSize: ctx.request.query.pageSize,
+        }
+      );
+      const ids = res.results.map((item: any) => item.id);
+
+      addFiltersClause(permissionQuery, { id: { $in: ids } });
+
+      const sanitizedRes = await strapi.entityService.loadPages(
+        model,
+        { id },
+        targetField,
+        {
+          ...permissionQuery,
           ordering: 'desc',
         } as any,
         {
@@ -257,9 +285,19 @@ export default {
         }
       );
 
+      res.results = uniqBy('id', concat(sanitizedRes.results, res.results));
+
       ctx.body = res;
     } else {
-      const result = await strapi.entityService.load(model, { id }, targetField, queryParams);
+      const [resWithOnlyId, res] = await Promise.all([
+        strapi.entityService.load(model, { id }, targetField, {
+          fields: ['id'],
+        }),
+        strapi.entityService.load(model, { id }, targetField, {
+          ...permissionQuery,
+        }),
+      ]);
+      const result = res || resWithOnlyId;
       ctx.body = {
         data: result,
       };

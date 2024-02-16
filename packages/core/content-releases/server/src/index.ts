@@ -1,34 +1,24 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { register } from './register';
 import { bootstrap } from './bootstrap';
+import { destroy } from './destroy';
 import { contentTypes } from './content-types';
 import { services } from './services';
 import { controllers } from './controllers';
 import { routes } from './routes';
-import { getService } from './utils';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
 const getPlugin = () => {
-  if (
-    features.isEnabled('cms-content-releases') &&
-    strapi.features.future.isEnabled('contentReleases')
-  ) {
+  if (features.isEnabled('cms-content-releases')) {
     return {
       register,
       bootstrap,
+      destroy,
       contentTypes,
       services,
       controllers,
       routes,
-      destroy() {
-        if (
-          features.isEnabled('cms-content-releases') &&
-          strapi.features.future.isEnabled('contentReleases')
-        ) {
-          getService('event-manager').destroyAllListeners();
-        }
-      },
     };
   }
 
