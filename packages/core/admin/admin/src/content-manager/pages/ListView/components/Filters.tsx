@@ -305,7 +305,7 @@ const AdminUsersFilter = ({ value, onChange }: AdminUsersFilterProps) => {
       value={value}
       aria-label={formatMessage({
         id: 'content-manager.components.Filters.usersSelect.label',
-        defaultMessage: 'Search and select an user to filter',
+        defaultMessage: 'Search and select a user to filter',
       })}
       onChange={onChange}
       loading={isLoading}
