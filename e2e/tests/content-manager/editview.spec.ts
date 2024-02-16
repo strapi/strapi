@@ -95,13 +95,22 @@ test.describe('Edit View', () => {
       // await expect(page.getByRole('link', { name: 'Ted Lasso' })).toBeVisible();
 
       /**
-       * When we click publish, we should be moved to the publish tab where all the actions
-       * are disabled, going back to the draft tab will tell us what actions are then
+       * When we click publish, we should stay on the draft tab but check the published tab to ensure
+       * all the actions are disabled, going back to the draft tab will tell us what actions are then
        * available.
        */
-      await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Publish' }).click();
       await expect(page.getByText('Success:Published')).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+        'aria-selected',
+        'false'
+      );
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeEnabled();
+      await page.getByRole('tab', { name: 'Published' }).click();
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'false'
@@ -250,12 +259,22 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       /**
-       * When we click publish, we should be moved to the publish tab where all the actions
-       * are disabled, going back to the draft tab will tell us what actions are then
+       * When we click publish, we should stay on the draft tab but check the published tab to ensure
+       * all the actions are disabled, going back to the draft tab will tell us what actions are then
        * available.
        */
       await page.getByRole('button', { name: 'Publish' }).click();
       await expect(page.getByText('Success:Published')).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      await expect(page.getByRole('tab', { name: 'Published' })).toHaveAttribute(
+        'aria-selected',
+        'false'
+      );
+      await expect(page.getByRole('tab', { name: 'Published' })).toBeEnabled();
+      await page.getByRole('tab', { name: 'Published' }).click();
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'false'
