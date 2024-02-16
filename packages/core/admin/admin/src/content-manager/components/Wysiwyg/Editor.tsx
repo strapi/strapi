@@ -45,6 +45,11 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
     const onChangeRef = React.useRef(onChange);
 
     React.useEffect(() => {
+      if (editorRef.current) {
+        // Ensure the editor and its wrapper are cleaned up whenever this view is re-rendered
+        // e.g. in case of re-ordering wysiwyg components in a DynamicZone
+        editorRef.current.toTextArea();
+      }
       editorRef.current = CodeMirror.fromTextArea(textareaRef.current!, {
         lineWrapping: true,
         extraKeys: {
