@@ -45,8 +45,6 @@ const sendUpdateProjectInformation = async () => {
   
   groupProperties = assign(groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
 
-  console.log(groupProperties);
-
   strapi.telemetry.send('didUpdateProjectInformation', {
     groupProperties
   });
