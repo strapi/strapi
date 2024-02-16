@@ -22,7 +22,7 @@ const sendDidChangeInterfaceLanguage = async () => {
   strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
 };
 
-const getProvidersListSSO = async () => {
+const getSSOProvidersList = async () => {
   const { providerRegistry } = strapi.admin.services.passport;
 
   return providerRegistry.getAll().map(({ uid }) => uid);
@@ -35,7 +35,7 @@ const sendUpdateProjectInformation = async () => {
   const numberOfAdminUsers = await getService('user').count();
 
   if (EE.features.isEnabled('sso')) {
-    const SSOProviders = await getProvidersListSSO();
+    const SSOProviders = await getSSOProvidersList();
 
     groupProperties = assign(groupProperties, { SSOProviders, isSSOConfigured: SSOProviders.length !== 0 });
   }
@@ -67,6 +67,6 @@ export {
   sendDidUpdateRolePermissions,
   sendDidChangeInterfaceLanguage,
   sendUpdateProjectInformation,
-  getProvidersListSSO,
+  getSSOProvidersList,
   startCron,
 };
