@@ -2,7 +2,7 @@ import EE from '@strapi/strapi/dist/utils/ee';
 import type { Strapi } from '@strapi/types';
 import { assign } from 'lodash/fp';
 import { getService } from '../utils';
-
+import metrics from '../../../ee/server/src/services/metrics';
 
 const sendDidInviteUser = async () => {
   const numberOfUsers = await getService('user').count();
@@ -22,12 +22,6 @@ const sendDidChangeInterfaceLanguage = async () => {
   strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
 };
 
-const getSSOProvidersList = async () => {
-  const { providerRegistry } = strapi.admin.services.passport;
-
-  return providerRegistry.getAll().map(({ uid }) => uid);
-}
-
 const sendUpdateProjectInformation = async () => {
   let groupProperties = {};
 
@@ -35,7 +29,7 @@ const sendUpdateProjectInformation = async () => {
   const numberOfAdminUsers = await getService('user').count();
 
   if (EE.features.isEnabled('sso')) {
-    const SSOProviders = await getSSOProvidersList();
+    const SSOProviders = await metrics.getSSOProvidersList();
 
     groupProperties = assign(groupProperties, { SSOProviders, isSSOConfigured: SSOProviders.length !== 0 });
   }
@@ -50,6 +44,8 @@ const sendUpdateProjectInformation = async () => {
   }
   
   groupProperties = assign(groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
+
+  console.log(groupProperties);
 
   strapi.telemetry.send('didUpdateProjectInformation', {
     groupProperties
@@ -67,6 +63,5 @@ export {
   sendDidUpdateRolePermissions,
   sendDidChangeInterfaceLanguage,
   sendUpdateProjectInformation,
-  getSSOProvidersList,
   startCron,
 };
