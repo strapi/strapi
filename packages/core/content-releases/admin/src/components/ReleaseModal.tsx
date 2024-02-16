@@ -13,8 +13,8 @@ import {
   Box,
   DatePicker,
   TimePicker,
-  Combobox,
-  ComboboxOption,
+  SingleSelect,
+  SingleSelectOption,
 } from '@strapi/design-system';
 import { formatISO, parse } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
@@ -51,6 +51,8 @@ export const ReleaseModal = ({
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
   const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
+  const { systemTimezone = { value: 'Africa/Abidjan ' } } = getTimezones(new Date());
+
   /**
    * Generate scheduled time using selected date, time and timezone
    */
@@ -84,7 +86,7 @@ export const ReleaseModal = ({
         }}
         initialValues={{
           ...initialValues,
-          timezone: initialValues.timezone ?? null,
+          timezone: initialValues.timezone ?? systemTimezone?.value,
         }}
         validationSchema={RELEASE_SCHEMA}
         validateOnChange={false}
@@ -113,13 +115,18 @@ export const ReleaseModal = ({
                       onChange={(event) => {
                         setFieldValue('isScheduled', event.target.checked);
                         if (!event.target.checked) {
-                          // Clear scheduling info from a release on unchecking schedule release
+                          // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
                           setFieldValue('date', null);
                           setFieldValue('time', '');
+                          setFieldValue('timezone', null);
                         } else {
-                          // On ticking back schedule release date and time should be restored to the initial state
+                          // On ticking back schedule release date, time and timezone should be restored to the initial state
                           setFieldValue('date', initialValues.date);
                           setFieldValue('time', initialValues.time);
+                          setFieldValue(
+                            'timezone',
+                            initialValues.timezone ?? systemTimezone?.value
+                          );
                         }
                       }}
                     >
@@ -217,9 +224,8 @@ export const ReleaseModal = ({
 };
 
 /**
- * Generates the list of timezones and user's current timezone
+ * Generates the list of timezones and user's current timezone(system timezone)
  */
-
 interface ITimezoneOption {
   offset: string;
   value: string;
@@ -227,10 +233,8 @@ interface ITimezoneOption {
 
 const getTimezones = (selectedDate: Date) => {
   const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
-    /**
-     * This will be in the format GMT${OFFSET} where offset could be
-     * nothing, a four digit string e.g. +05:00 or -08:00
-     */
+    // Timezone will be in the format GMT${OFFSET} where offset could be nothing,
+    // a four digit string e.g. +05:00 or -08:00
     const offsetPart = new Intl.DateTimeFormat('en', {
       timeZone: timezone,
       timeZoneName: 'longOffset',
@@ -240,15 +244,10 @@ const getTimezones = (selectedDate: Date) => {
 
     const offset = offsetPart ? offsetPart.value : '';
 
-    /**
-     * We want to show time based on UTC, not GMT so we swap that.
-     */
+    // We want to show time based on UTC, not GMT so we swap that.
     let utcOffset = offset.replace('GMT', 'UTC');
 
-    /**
-     * For perfect UTC (UTC+0:00) we only get the string UTC.
-     * So we need to append the 0's.
-     */
+    // For perfect UTC (UTC+0:00) we only get the string UTC, So we need to append the 0's.
     if (!utcOffset.includes('+') && !utcOffset.includes('-')) {
       utcOffset = `${utcOffset}+00:00`;
     }
@@ -270,24 +269,25 @@ const TimezoneComponent = () => {
   const [timezoneList, setTimezoneList] = React.useState<ITimezoneOption[]>(timezoneOptions);
 
   React.useEffect(() => {
-    // Update the value of timezone, based on the date selected which varies with DST(daylight saving time)
     if (values.date) {
-      const { timezoneList, systemTimezone } = getTimezones(new Date(values.date));
-
-      if (values.timezone === systemTimezone?.value) {
-        // When selected timezone is same as system timezone then only update the value
-        setFieldValue('timezone', systemTimezone!.value);
-      }
+      // Update the value of timezone and list which varies with DST based on the date selected
+      const { timezoneList } = getTimezones(new Date(values.date));
       setTimezoneList(timezoneList);
+
+      const updatedTimezone = timezoneList.find((tz) => tz.value === values.timezone);
+      if (updatedTimezone) {
+        setFieldValue('timezone', updatedTimezone!.value);
+      }
     }
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Combobox
+    <SingleSelect
       label={formatMessage({
         id: 'content-releases.modal.form.input.label.timezone',
         defaultMessage: 'Timezone',
       })}
+      name="timezone"
       value={values.timezone} // timezone value e.g: Europe/Paris
       onChange={(timezone) => {
         setFieldValue('timezone', timezone);
@@ -299,10 +299,11 @@ const TimezoneComponent = () => {
       required
     >
       {timezoneList.map((timezone) => (
-        <ComboboxOption key={timezone.value} value={timezone.value}>
+        <SingleSelectOption key={timezone.value} value={timezone.value}>
+          {/* Display value e.g: "UTC+01:00 Europe/Paris" */}
           {timezone.offset} {timezone.value}
-        </ComboboxOption>
+        </SingleSelectOption>
       ))}
-    </Combobox>
+    </SingleSelect>
   );
 };

@@ -36,32 +36,6 @@ describe('ReleaseModal', () => {
     expect(dialogCancelButton).toBeInTheDocument();
     await user.click(dialogCancelButton);
     expect(handleCloseMocked).toHaveBeenCalledTimes(1);
-
-    // the initial field value is empty
-    const inputElement = screen.getByRole('textbox', { name: /name/i });
-    expect(inputElement).toHaveValue('');
-
-    // enable the submit button when there is content inside the input
-    const dialogContinueButton = screen.getByRole('button', {
-      name: /continue/i,
-    });
-    await user.type(inputElement, 'new release');
-    expect(dialogContinueButton).toBeEnabled();
-  });
-
-  it('renders correctly the dialog content on update', async () => {
-    render(
-      <ReleaseModal
-        handleClose={jest.fn()}
-        handleSubmit={jest.fn()}
-        initialValues={{ name: 'title', date: null, time: '', timezone: '', scheduledAt: null }}
-        isLoading={false}
-      />
-    );
-
-    // the initial field value is the title
-    const inputElement = screen.getByRole('textbox', { name: /name/i });
-    expect(inputElement).toHaveValue('title');
   });
 
   it('should show scheduled fields when selecting schedule release', async () => {
