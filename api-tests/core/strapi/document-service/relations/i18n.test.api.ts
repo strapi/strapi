@@ -236,6 +236,11 @@ describe('Document Service relations', () => {
           },
           locale: 'en',
         });
+
+        expect(document).toMatchObject({
+          name: 'Skate',
+          tag: { name: 'Tag1' },
+        });
       })
     );
   });
