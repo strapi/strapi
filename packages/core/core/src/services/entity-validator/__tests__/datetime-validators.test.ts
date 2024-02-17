@@ -153,7 +153,9 @@ describe('Datetime validator', () => {
       await validator('2021-11-29T00:00:00.000Z');
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+        filters: {
+          attrDateTimeUnique: '2021-11-29T00:00:00.000Z',
+        },
         locale: 'en',
         status: 'draft',
       });
@@ -177,7 +179,12 @@ describe('Datetime validator', () => {
       await validator('2021-11-29T00:00:00.000Z');
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+        filters: {
+          attrDateTimeUnique: '2021-11-29T00:00:00.000Z',
+          id: {
+            $ne: 1,
+          },
+        },
         locale: 'en',
         status: 'draft',
       });

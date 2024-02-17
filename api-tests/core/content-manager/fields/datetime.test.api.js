@@ -41,7 +41,7 @@ describe.skip('Test type datetime', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: '2019-08-08T10:10:57.000Z',
     });
   });
@@ -56,7 +56,7 @@ describe.skip('Test type datetime', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: now.toISOString(),
     });
   });
@@ -71,7 +71,7 @@ describe.skip('Test type datetime', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: now.toISOString(),
     });
   });
@@ -108,7 +108,7 @@ describe.skip('Test type datetime', () => {
 
     const newDate = new Date(2017, 10, 23);
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withdatetime.withdatetime/${res.body.id}`,
+      `/content-manager/collection-types/api::withdatetime.withdatetime/${res.body.data.id}`,
       {
         body: {
           field: newDate,
@@ -117,8 +117,8 @@ describe.skip('Test type datetime', () => {
     );
 
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      id: res.body.data.id,
       field: newDate.toISOString(),
     });
   });

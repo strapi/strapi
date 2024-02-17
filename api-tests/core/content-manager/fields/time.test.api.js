@@ -41,7 +41,7 @@ describe.skip('Test type time', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: '10:10:57.123',
     });
   });
@@ -90,7 +90,7 @@ describe.skip('Test type time', () => {
     });
 
     const uptimeRes = await rq.put(
-      `/content-manager/collection-types/api::withtime.withtime/${res.body.id}`,
+      `/content-manager/collection-types/api::withtime.withtime/${res.body.data.id}`,
       {
         body: {
           field: '13:45:19.123',
@@ -99,8 +99,8 @@ describe.skip('Test type time', () => {
     );
 
     expect(uptimeRes.statusCode).toBe(200);
-    expect(uptimeRes.body).toMatchObject({
-      id: res.body.id,
+    expect(uptimeRes.body.data).toMatchObject({
+      id: res.body.data.id,
       field: '13:45:19.123',
     });
   });

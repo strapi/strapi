@@ -1,16 +1,19 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import { Attribute } from '@strapi/types';
 import isBoolean from 'lodash/isBoolean';
 import isEmpty from 'lodash/isEmpty';
 import isNaN from 'lodash/isNaN';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
-import { isFieldTypeNumber } from './fields';
-import { FormattedComponentLayout, FormattedContentTypeLayout } from './layouts';
-
+import type { ComponentsDictionary } from '../hooks/useDocument';
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { Attribute } from '@strapi/types';
 import type Lazy from 'yup/lib/Lazy';
 import type { MixedSchema } from 'yup/lib/mixed';
+
+const isFieldTypeNumber = (type: string) => {
+  return ['integer', 'biginteger', 'decimal', 'float', 'number'].includes(type);
+};
 
 /* -------------------------------------------------------------------------------------------------
  * createYupSchema
@@ -32,8 +35,8 @@ interface CreateYupSchemaOpts {
 }
 
 const createYupSchema = (
-  model: FormattedContentTypeLayout | FormattedComponentLayout,
-  { components }: { components: Record<string, FormattedComponentLayout> },
+  attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
+  components: ComponentsDictionary = {},
   options: CreateYupSchemaOpts = {
     isCreatingEntry: true,
     isDraft: true,
@@ -41,8 +44,6 @@ const createYupSchema = (
     isJSONTestDisabled: false,
   }
 ) => {
-  const { attributes } = model;
-
   return yup.object().shape(
     Object.keys(attributes).reduce<Record<string, MixedSchema | Lazy<any>>>((acc, current) => {
       const attribute = attributes[current];
@@ -72,10 +73,8 @@ const createYupSchema = (
 
       if (attribute.type === 'component') {
         const componentFieldSchema = createYupSchema(
-          components[attribute.component],
-          {
-            components,
-          },
+          components[attribute.component]?.attributes,
+          components,
           { ...options, isFromComponent: true }
         );
 
@@ -129,11 +128,10 @@ const createYupSchema = (
         let dynamicZoneSchema = yup.array().of(
           // @ts-expect-error – see comment at top of file
           yup.lazy(({ __component }) => {
-            return createYupSchema(
-              components[__component],
-              { components },
-              { ...options, isFromComponent: true }
-            );
+            return createYupSchema(components[__component]?.attributes, components, {
+              ...options,
+              isFromComponent: true,
+            });
           })
         );
 

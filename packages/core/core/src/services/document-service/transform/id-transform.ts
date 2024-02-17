@@ -1,8 +1,15 @@
 import { Common } from '@strapi/types';
 import { mapAsync, pipeAsync } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
+import { createIdMap } from './id-map';
+import { extractDataIds as extractDataRelationIds } from './relations/extract/data-ids';
+import { transformDataIdsVisitor as transformRelationDataIds } from './relations/transform/data-ids';
 import { transformOutputIds as transformRelationOutputIds } from './relations/transform/output-ids';
 import { switchIdForDocumentId } from './utils';
+import { transformFilters } from './filters';
+import { transformSort } from './sort';
+import { transformFields } from './fields';
+import { transformPopulate } from './populate';
 import { transformData } from './data';
 
 /**
@@ -16,20 +23,37 @@ async function transformParamsDocumentId(
     isDraft: boolean;
   }
 ) {
-  // Transform any relation ids to entity ids
+  
   let data = input.data;
   if (input.data) {
-    data = await transformData(input.data, { ...opts, uid });
+      data = await transformData(input.data, {...opts, uid })
   }
 
-  // TODO: Transform fields
-  const fields = input.fields;
-  // TODO: Transform filters
-  const filters = input.filters;
-  // TODO: Transform populate
-  const populate = input.populate;
-  // TODO: Transform sort
-  const sort = input.sort;
+  // Transform any relation ids to entity ids
+  let fields = input.fields;
+  if (input.fields) {
+    fields = transformFields(input.fields);
+  }
+
+  let data = input.data;
+  if (input.data) {
+    data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
+  }
+
+  let filters = input.filters;
+  if (input.filters) {
+    filters = await transformFilters(input.filters, { ...opts, uid });
+  }
+
+  let populate = input.populate;
+  if (input.populate) {
+    populate = await transformPopulate(input.populate, { ...opts, uid });
+  }
+
+  let sort = input.sort;
+  if (input.sort) {
+    sort = await transformSort(input.sort, { ...opts, uid });
+  }
 
   return {
     ...input,

@@ -123,7 +123,10 @@ const setup = (props?: Partial<RelationInputDataManagerProps>) => ({
   ...render(<RelationInputDataManagerComponent {...props} />),
 });
 
-describe('RelationInputDataManager', () => {
+/**
+ * TODO: re-enable with V5 contracts when BE has introduced relations again.
+ */
+describe.skip('RelationInputDataManager', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

@@ -1,5 +1,5 @@
 {
-  "Plugin.name": "Strapi Cloud",
+  "Plugin.name": "Déploiement",
   "Homepage.title": "Hébergement cloud entièrement géré pour votre projet Strapi",
   "Homepage.subTitle": "Suivez ce processus en 2 étapes pour obtenir tout ce dont vous avez besoin pour exécuter Strapi en production.",
   "Homepage.githubBox.title.versioned": "Projet uploadé sur GitHub",

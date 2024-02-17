@@ -212,6 +212,10 @@ const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne)
   const idColumnName = 'target_id';
   const typeColumnName = 'target_type';
 
+  if ('morphColumn' in attribute && attribute.morphColumn) {
+    return;
+  }
+
   Object.assign(attribute, {
     owner: true,
     morphColumn: {
@@ -238,6 +242,10 @@ const createMorphToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  if ('joinTable' in attribute && attribute.joinTable) {
+    return;
+  }
+
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_morphs`);
 
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
@@ -386,6 +394,10 @@ const createJoinColum = (metadata: Metadata, { attribute, attributeName }: JoinC
     referencedTable: targetMeta.tableName,
   };
 
+  if ('joinColumn' in attribute) {
+    Object.assign(joinColumn, attribute.joinColumn);
+  }
+
   Object.assign(attribute, { owner: true, joinColumn });
 
   if (isBidirectional(attribute)) {
@@ -411,6 +423,11 @@ const createJoinTable = (
 
   if (!targetMeta) {
     throw new Error(`Unknown target ${attribute.target}`);
+  }
+
+  // TODO: implement overwrite logic instead
+  if ('joinTable' in attribute && attribute.joinTable) {
+    return;
   }
 
   const joinTableName = getJoinTableName(meta.tableName, attributeName);

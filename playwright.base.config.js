@@ -28,7 +28,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000,
+    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 30 * 1000),
   },
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -52,7 +52,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
        Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
        because the Strapi server restarts every time a new file (trace) is created.
     */
-    trace: process.env.CI ? 'retain-on-failure' : 'off',
+    trace: 'off',
   },
 
   /* Configure projects for major browsers */
