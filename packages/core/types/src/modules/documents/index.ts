@@ -84,22 +84,22 @@ export type ServiceInstance<
     opts?: Middleware.Options
   ) => ThisType<ServiceInstance<TContentTypeUID>>;
 
-  /**
-   * `.with()` instantiates a new document repository with default parameters
-   * @example Add default values to your document service
-   *  // with the given default values
-   *  const enDocs = strapi.documents.with({ locales: ['en']})
-   *  const frDocs = strapi.documents.with({ locales: ['fr']})
-   *
-   *  const enArticles = enDocs('api::article.article').findMany(params)
-   *  const frArticles = frDocs('api::article.article').findMany(params)
-   *
-   * @example Apply sanitization to your document service
-   * const sanitizedDocs = strapi.documents.with({ auth })
-   */
-  with: <TParams extends Params.With<TContentTypeUID>>(
-    params?: TParams
-  ) => ServiceInstance<TContentTypeUID>;
+  // /**
+  //  * `.with()` instantiates a new document repository with default parameters
+  //  * @example Add default values to your document service
+  //  *  // with the given default values
+  //  *  const enDocs = strapi.documents.with({ locales: ['en']})
+  //  *  const frDocs = strapi.documents.with({ locales: ['fr']})
+  //  *
+  //  *  const enArticles = enDocs('api::article.article').findMany(params)
+  //  *  const frArticles = frDocs('api::article.article').findMany(params)
+  //  *
+  //  * @example Apply sanitization to your document service
+  //  * const sanitizedDocs = strapi.documents.with({ auth })
+  //  */
+  // with: <TParams extends Params.With<TContentTypeUID>>(
+  //   params?: TParams
+  // ) => ServiceInstance<TContentTypeUID>;
 };
 
 export type Service = {
@@ -107,20 +107,20 @@ export type Service = {
     uid: TContentTypeUID
   ): ServiceInstance<TContentTypeUID>;
 
-  /** Add a middleware for all uid's and a specific action
-   *  @example - Add a default locale
-   *  strapi.documents.use('findMany', (ctx, next) => {
-   *    if (!params.locale) params.locale = 'en'
-   *    return next(ctx)
-   *  })
-   */
-  use: <TAction extends keyof DocumentEngine>(
-    action: TAction,
-    cb:
-      | Middleware.Middleware<Common.UID.ContentType, TAction>
-      | Middleware.Middleware<Common.UID.ContentType, TAction>[],
-    opts?: Middleware.Options
-  ) => Service;
+  // /** Add a middleware for all uid's and a specific action
+  //  *  @example - Add a default locale
+  //  *  strapi.documents.use('findMany', (ctx, next) => {
+  //  *    if (!params.locale) params.locale = 'en'
+  //  *    return next(ctx)
+  //  *  })
+  //  */
+  // use: <TAction extends keyof DocumentEngine>(
+  //   action: TAction,
+  //   cb:
+  //     | Middleware.Middleware<Common.UID.ContentType, TAction>
+  //     | Middleware.Middleware<Common.UID.ContentType, TAction>[],
+  //   opts?: Middleware.Options
+  // ) => Service;
 
-  middlewares: Middleware.Manager;
+  // middlewares: Middleware.Manager;
 } & DocumentEngine;

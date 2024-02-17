@@ -20,7 +20,7 @@ export type ParamsMap<TContentTypeUID extends Common.UID.ContentType = Common.UI
 
 export interface Context<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
-  TAction extends keyof DocumentEngine = keyof DocumentEngine
+  TAction extends string = string
 > {
   uid: TContentTypeUID;
   action: TAction;

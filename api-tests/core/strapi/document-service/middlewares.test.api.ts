@@ -16,7 +16,7 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
-  describe('Middlewares', () => {
+  describe.skip('Middlewares', () => {
     it('Add filters', async () => {
       strapi.documents.use('findMany', (ctx, next) => {
         // @ts-expect-error - this is using a generic ContentType.UID , so article attributes are not typed
@@ -29,7 +29,7 @@ describe('Document Service', () => {
     });
   });
 
-  describe('Middleware on uid', () => {
+  describe.skip('Middleware on uid', () => {
     it('Add filters on uid', async () => {
       strapi.documents(ARTICLE_UID).use('findMany', (ctx, next) => {
         ctx.params.filters = { title: 'Article1-Draft-EN' };
@@ -41,7 +41,7 @@ describe('Document Service', () => {
     });
   });
 
-  describe('Middleware priority', () => {
+  describe.skip('Middleware priority', () => {
     it('Add middlewares with different priority', async () => {
       const ARTICLE_1 = 'Article1-Draft-EN';
       const ARTICLE_2 = 'Article2-Draft-EN';
