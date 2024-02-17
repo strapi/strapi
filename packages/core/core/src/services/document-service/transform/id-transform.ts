@@ -1,9 +1,6 @@
 import { Common } from '@strapi/types';
 import { mapAsync, pipeAsync } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
-import { createIdMap } from './id-map';
-import { extractDataIds as extractDataRelationIds } from './relations/extract/data-ids';
-import { transformDataIdsVisitor as transformRelationDataIds } from './relations/transform/data-ids';
 import { transformOutputIds as transformRelationOutputIds } from './relations/transform/output-ids';
 import { switchIdForDocumentId } from './utils';
 import { transformFilters } from './filters';
@@ -23,21 +20,15 @@ async function transformParamsDocumentId(
     isDraft: boolean;
   }
 ) {
-  
   let data = input.data;
   if (input.data) {
-      data = await transformData(input.data, {...opts, uid })
+    data = await transformData(input.data, { ...opts, uid });
   }
 
   // Transform any relation ids to entity ids
   let fields = input.fields;
   if (input.fields) {
     fields = transformFields(input.fields);
-  }
-
-  let data = input.data;
-  if (input.data) {
-    data = await transformRelationDataIds(idMap, input.data, { ...opts, uid });
   }
 
   let filters = input.filters;

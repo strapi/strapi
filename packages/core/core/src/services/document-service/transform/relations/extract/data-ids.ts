@@ -31,7 +31,6 @@ const handlePrimitive = (
  * Get all relations document ids from a relation input value
  */
 const extractRelationIds = <T extends Attribute.RelationKind.Any>(
-  // @ts-expect-error - TODO: Fix this
   relation: EntityService.Params.Attribute.RelationInputValue<T>
 ): ID[] => {
   const ids = handlePrimitive(relation);
