@@ -54,6 +54,12 @@ const setup = (props?: StagesProps) => ({
     wrapper({ children }) {
       const store = configureStore({
         reducer,
+        middleware: (getDefaultMiddleware: any) =>
+          getDefaultMiddleware({
+            // Disable timing checks for test env
+            immutableCheck: false,
+            serializableCheck: false,
+          }),
       });
 
       return (

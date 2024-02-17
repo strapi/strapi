@@ -1,9 +1,29 @@
+import { RELEASE_MODEL_UID } from '../../constants';
 import createReleaseService from '../release';
+
+const mockSchedulingSet = jest.fn();
+const mockSchedulingCancel = jest.fn();
 
 const baseStrapiMock = {
   utils: {
     errors: {
       ValidationError: jest.fn(),
+    },
+  },
+  plugin: jest.fn().mockReturnValue({
+    service: jest.fn().mockReturnValue({
+      validateEntryContentType: jest.fn(),
+      validateUniqueEntry: jest.fn(),
+      validatePendingReleasesLimit: jest.fn(),
+      validateUniqueNameForPendingRelease: jest.fn(),
+      validateScheduledAtIsLaterThanNow: jest.fn(),
+      set: mockSchedulingSet,
+      cancel: mockSchedulingCancel,
+    }),
+  }),
+  features: {
+    future: {
+      isEnabled: jest.fn().mockReturnValue(true),
     },
   },
 };
@@ -23,6 +43,10 @@ const mockUser = {
 
 describe('release service', () => {
   describe('update', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('updates the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
@@ -81,6 +105,54 @@ describe('release service', () => {
       expect(() => releaseService.update(1, mockReleaseArgs, { user: mockUser })).rejects.toThrow(
         'Release already published'
       );
+    });
+
+    it('should set scheduling if scheduledAt is present', async () => {
+      const scheduledDate = new Date();
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          update: jest
+            .fn()
+            .mockReturnValue({ id: 1, name: 'Release name', scheduledAt: scheduledDate }),
+        },
+      };
+
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+        scheduledAt: scheduledDate,
+      };
+
+      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'Release name', scheduledAt: scheduledDate });
+      expect(mockSchedulingSet).toHaveBeenCalledWith(1, mockReleaseArgs.scheduledAt);
+    });
+
+    it('should remove scheduling if scheduledAt is null', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
+          update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
+        },
+      };
+
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+        scheduledAt: null,
+      };
+
+      const release = await releaseService.update(1, mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'Release name', scheduledAt: null });
+      expect(mockSchedulingCancel).toHaveBeenCalledWith(1);
     });
   });
 
@@ -234,14 +306,18 @@ describe('release service', () => {
       expect(() => releaseService.publish(1)).rejects.toThrow('No entries to publish');
     });
 
-    it('calls publishMany for each contentType with the right actions', async () => {
+    it('calls publishMany for each collectionType with the right actions and publish for singleTypes', async () => {
       const mockPublishMany = jest.fn();
       const mockUnpublishMany = jest.fn();
+      const mockPublish = jest.fn();
+      const mockUnpublish = jest.fn();
 
       const servicesMock = {
         'entity-manager': {
           publishMany: mockPublishMany,
           unpublishMany: mockUnpublishMany,
+          publish: mockPublish,
+          unpublish: mockUnpublish,
         },
         'populate-builder': () => ({
           default: jest.fn().mockReturnThis(),
@@ -263,54 +339,76 @@ describe('release service', () => {
             }),
         }),
         entityService: {
-          findOne: jest.fn().mockReturnValue({
-            releasedAt: null,
-            actions: [
-              {
-                contentType: 'contentType',
-                type: 'publish',
-                entry: { id: 1 },
-              },
-              {
-                contentType: 'contentType',
-                type: 'unpublish',
-                entry: { id: 2 },
-              },
-            ],
-          }),
+          findOne: jest.fn(),
           findMany: jest.fn(),
           update: jest.fn().mockReturnValue({}),
+        },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+          singleType: {
+            kind: 'singleType',
+          },
         },
       };
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
+      // We mock the first call to findOne to get the release info
+      strapiMock.entityService.findOne.mockReturnValueOnce({
+        releasedAt: null,
+        actions: [
+          {
+            contentType: 'collectionType',
+            type: 'publish',
+            entry: { id: 1 },
+          },
+          {
+            contentType: 'collectionType',
+            type: 'unpublish',
+            entry: { id: 2 },
+          },
+          {
+            contentType: 'singleType',
+            type: 'publish',
+            entry: { id: 3 },
+          },
+          {
+            contentType: 'singleType',
+            type: 'unbpublish',
+            entry: { id: 4 },
+          },
+        ],
+      });
+
+      // We mock the calls to findOne to get singleType entries info
+      strapiMock.entityService.findOne.mockReturnValueOnce({
+        id: 3,
+      });
+
+      strapiMock.entityService.findOne.mockReturnValueOnce({
+        id: 4,
+      });
+
       strapiMock.entityService.findMany.mockReturnValueOnce([
         {
-          contentType: 'contentType',
-          type: 'publish',
-          entry: { id: 1 },
+          id: 1,
         },
       ]);
       strapiMock.entityService.findMany.mockReturnValueOnce([
         {
-          contentType: 'contentType',
-          type: 'unpublish',
-          entry: { id: 2 },
+          id: 2,
         },
       ]);
 
       await releaseService.publish(1);
 
-      expect(mockPublishMany).toHaveBeenCalledWith(
-        [{ contentType: 'contentType', entry: { id: 1 }, type: 'publish' }],
-        'contentType'
-      );
-      expect(mockUnpublishMany).toHaveBeenCalledWith(
-        [{ contentType: 'contentType', entry: { id: 2 }, type: 'unpublish' }],
-        'contentType'
-      );
+      expect(mockPublish).toHaveBeenCalledWith({ id: 3 }, 'singleType');
+      expect(mockUnpublish).toHaveBeenCalledWith({ id: 4 }, 'singleType');
+      expect(mockPublishMany).toHaveBeenCalledWith([{ id: 1 }], 'collectionType');
+      expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'collectionType');
     });
   });
 
@@ -339,6 +437,10 @@ describe('release service', () => {
   });
 
   describe('delete', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('deletes the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
@@ -385,6 +487,46 @@ describe('release service', () => {
       const releaseService = createReleaseService({ strapi: strapiMock });
 
       expect(() => releaseService.delete(1)).rejects.toThrow('Release already published');
+    });
+
+    it('removes the scheduling if the release is scheduled', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
+          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+        db: {
+          transaction: jest.fn(),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.delete(1);
+
+      expect(mockSchedulingCancel).toHaveBeenCalledWith(1);
+    });
+
+    it('does not remove the scheduling if the release is not scheduled', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+        db: {
+          transaction: jest.fn(),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.delete(1);
+
+      expect(mockSchedulingCancel).not.toHaveBeenCalled();
     });
   });
 
@@ -551,6 +693,79 @@ describe('release service', () => {
       expect(() => releaseService.updateAction(1, 1, { type: 'publish' })).rejects.toThrow(
         'Action with id 1 not found in release with id 1 or it is already published'
       );
+    });
+  });
+
+  describe('create', () => {
+    it('should set creator fields', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          create: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+      };
+
+      const release = await releaseService.create(mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'test' });
+      expect(strapiMock.entityService.create).toHaveBeenCalledWith(RELEASE_MODEL_UID, {
+        data: {
+          createdBy: mockUser.id,
+          updatedBy: mockUser.id,
+          name: 'Release name',
+        },
+      });
+    });
+
+    it('should create a release', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          create: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+      };
+
+      const release = await releaseService.create(mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'test' });
+    });
+
+    it('should set scheduling if scheduledAt is present', async () => {
+      const scheduledDate = new Date();
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        entityService: {
+          create: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: scheduledDate }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const mockReleaseArgs = {
+        name: 'Release name',
+        scheduledAt: scheduledDate,
+      };
+
+      const release = await releaseService.create(mockReleaseArgs, { user: mockUser });
+
+      expect(release).toEqual({ id: 1, name: 'test', scheduledAt: scheduledDate });
+      expect(mockSchedulingSet).toHaveBeenCalledWith(1, mockReleaseArgs.scheduledAt);
     });
   });
 });

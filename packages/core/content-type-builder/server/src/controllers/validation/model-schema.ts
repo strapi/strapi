@@ -1,6 +1,6 @@
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-
+import { snakeCase } from 'lodash/fp';
 import { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } from '../../services/constants';
 import { getService } from '../../utils';
 import { isValidKey, isValidCollectionName } from './common';
@@ -47,6 +47,10 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
             return forbiddenValidator();
           }
 
+          if (isConflictingKey(key, attributes)) {
+            return conflictingKeysValidator(key);
+          }
+
           if (attribute.type === 'relation') {
             return getRelationValidator(attribute, relations).test(isValidKey(key));
           }
@@ -64,11 +68,25 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
   });
 };
 
+const isConflictingKey = (key: string, attributes: Record<string, any>) => {
+  const snakeCaseKey = snakeCase(key);
+
+  return Object.keys(attributes).some((existingKey) => {
+    if (existingKey === key) return false; // don't compare against itself
+    return snakeCase(existingKey) === snakeCaseKey;
+  });
+};
+
 const isForbiddenKey = (key: string) => {
-  return [
+  const snakeCaseKey = snakeCase(key);
+  const reservedNames = [
     ...FORBIDDEN_ATTRIBUTE_NAMES,
     ...getService('builder').getReservedNames().attributes,
-  ].includes(key);
+  ];
+
+  return reservedNames.some((reserved) => {
+    return snakeCase(reserved) === snakeCaseKey;
+  });
 };
 
 const forbiddenValidator = () => {
@@ -80,6 +98,14 @@ const forbiddenValidator = () => {
   return yup.mixed().test({
     name: 'forbiddenKeys',
     message: `Attribute keys cannot be one of ${reservedNames.join(', ')}`,
+    test: () => false,
+  });
+};
+
+const conflictingKeysValidator = (key: string) => {
+  return yup.mixed().test({
+    name: 'conflictingKeys',
+    message: `Attribute ${key} conflicts with an existing key`,
     test: () => false,
   });
 };
