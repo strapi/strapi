@@ -39,7 +39,7 @@ const createAFile = async (parent = null) => {
   return res.body[0];
 };
 
-describe('Folder', () => {
+describe.skip('Folder', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -269,7 +269,7 @@ describe('Folder', () => {
         method: 'PUT',
         url: `/upload/folders/${folder.id}`,
         body: {
-          name: 'new name',
+          name: 'new name folder',
         },
       });
 

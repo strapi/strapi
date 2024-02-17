@@ -61,7 +61,7 @@ const AutoCloneFailureModal = ({
       <ModalHeader>
         <Typography variant="omega" fontWeight="bold" as="h2" id="title">
           {formatMessage({
-            id: getTranslation('containers.ListPage.autoCloneModal.header'),
+            id: getTranslation('containers.list.autoCloneModal.header'),
             defaultMessage: 'Duplicate',
           })}
         </Typography>
@@ -69,14 +69,14 @@ const AutoCloneFailureModal = ({
       <ModalBody>
         <Typography variant="beta">
           {formatMessage({
-            id: getTranslation('containers.ListPage.autoCloneModal.title'),
+            id: getTranslation('containers.list.autoCloneModal.title'),
             defaultMessage: "This entry can't be duplicated directly.",
           })}
         </Typography>
         <Box marginTop={2}>
           <Typography textColor="neutral600">
             {formatMessage({
-              id: getTranslation('containers.ListPage.autoCloneModal.description'),
+              id: getTranslation('containers.list.autoCloneModal.description'),
               defaultMessage:
                 "A new entry will be created with the same content, but you'll have to change the following fields to save it.",
             })}
@@ -112,7 +112,7 @@ const AutoCloneFailureModal = ({
               </Flex>
               <Typography as="p" textColor="neutral600">
                 {formatMessage({
-                  id: getTranslation(`containers.ListPage.autoCloneModal.error.${reason}`),
+                  id: getTranslation(`containers.list.autoCloneModal.error.${reason}`),
                   defaultMessage: getDefaultErrorMessage(reason),
                 })}
               </Typography>
@@ -133,7 +133,7 @@ const AutoCloneFailureModal = ({
           // @ts-expect-error - types are not inferred correctly through the as prop.
           <LinkButton as={NavLink} to={editPath}>
             {formatMessage({
-              id: getTranslation('containers.ListPage.autoCloneModal.create'),
+              id: getTranslation('containers.list.autoCloneModal.create'),
               defaultMessage: 'Create',
             })}
           </LinkButton>

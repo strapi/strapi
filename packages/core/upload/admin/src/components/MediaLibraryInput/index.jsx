@@ -1,10 +1,9 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 
+import { useField } from '@strapi/admin/strapi-admin';
 import { useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
 
-import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import getTrad from '../../utils/getTrad';
 import { AssetDialog } from '../AssetDialog';
@@ -21,28 +20,16 @@ const STEPS = {
 
 export const MediaLibraryInput = forwardRef(
   (
-    {
-      attribute: { allowedTypes },
-      intlLabel,
-      description,
-      disabled,
-      error,
-      labelAction,
-      multiple,
-      name,
-      onChange,
-      value,
-      required,
-    },
+    { attribute: { allowedTypes }, label, hint, disabled, labelAction, multiple, name, required },
     forwardedRef
   ) => {
+    const { onChange, value, error } = useField(name);
     const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [step, setStep] = useState(undefined);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [droppedAssets, setDroppedAssets] = useState();
     const [folderId, setFolderId] = useState(null);
-    const { formatMessage } = useIntl();
     const toggleNotification = useNotification();
 
     useEffect(() => {
@@ -52,7 +39,13 @@ export const MediaLibraryInput = forwardRef(
       }
     }, [step]);
 
-    const selectedAssets = Array.isArray(value) ? value : [value];
+    let selectedAssets = [];
+
+    if (Array.isArray(value)) {
+      selectedAssets = value;
+    } else if (value) {
+      selectedAssets = [value];
+    }
 
     const handleValidation = (nextSelectedAssets) => {
       onChange({
@@ -135,8 +128,6 @@ export const MediaLibraryInput = forwardRef(
       });
     };
 
-    let label = intlLabel.id ? formatMessage(intlLabel) : '';
-
     if (multiple && selectedAssets.length > 0) {
       label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
     }
@@ -152,13 +143,6 @@ export const MediaLibraryInput = forwardRef(
     const handleFilesUploadSucceeded = (uploadedFiles) => {
       setUploadedFiles((prev) => [...prev, ...uploadedFiles]);
     };
-
-    const hint = description
-      ? formatMessage(
-          { id: description.id, defaultMessage: description.defaultMessage },
-          { ...description.values }
-        )
-      : '';
 
     let initiallySelectedAssets = selectedAssets;
 
@@ -232,29 +216,20 @@ export const MediaLibraryInput = forwardRef(
 MediaLibraryInput.defaultProps = {
   attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },
   disabled: false,
-  description: undefined,
-  error: undefined,
-  intlLabel: undefined,
+  hint: undefined,
+  label: undefined,
   labelAction: undefined,
   multiple: false,
   required: false,
-  value: [],
 };
 
 MediaLibraryInput.propTypes = {
   attribute: PropTypes.shape({ allowedTypes: PropTypes.arrayOf(PropTypes.string) }),
   disabled: PropTypes.bool,
-  description: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
-    values: PropTypes.shape({}),
-  }),
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
+  hint: PropTypes.string,
+  label: PropTypes.string,
   labelAction: PropTypes.node,
   multiple: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  value: PropTypes.oneOfType([PropTypes.arrayOf(AssetDefinition), AssetDefinition]),
 };

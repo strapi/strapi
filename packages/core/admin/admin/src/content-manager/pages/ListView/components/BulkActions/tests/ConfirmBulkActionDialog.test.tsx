@@ -3,6 +3,7 @@ import { errors } from '@strapi/utils';
 import { within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
+import { Route, Routes } from 'react-router-dom';
 
 import {
   ConfirmBulkActionDialog,
@@ -64,9 +65,15 @@ describe('ConfirmDialogPublishAll', () => {
       {
         renderOptions: {
           wrapper: ({ children }) => (
-            <Table.Root defaultSelectedEntries={[1, 2]}>{children}</Table.Root>
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug"
+                element={<Table.Root defaultSelectedEntries={[1, 2]}>{children}</Table.Root>}
+              />
+            </Routes>
           ),
         },
+        initialEntries: ['/content-manager/collection-types/api::address.address'],
       }
     ),
   });

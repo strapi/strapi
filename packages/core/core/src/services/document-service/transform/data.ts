@@ -5,10 +5,7 @@ import { transformDataIdsVisitor as transformRelationDataIds } from './relations
 /**
  * Transforms input data, containing relation document ids, to entity ids.
  */
-export const transformData = async (
-  data: any,
-  opts: Parameters<typeof transformRelationDataIds>[2]
-) => {
+export const transformData = async (data: any, opts: any) => {
   const idMap = createIdMap({ strapi });
 
   // Extract any relation ids from the input

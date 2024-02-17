@@ -118,7 +118,7 @@ const transformDataIdsVisitor = (
     uid: Common.UID.Schema;
     locale?: string | null;
     isDraft?: boolean;
-    throwOnMissingId?: boolean; // Wether to throw an error if an id is not found
+    allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
   }
 ) => {
   return traverseEntity(
@@ -147,7 +147,7 @@ const transformDataIdsVisitor = (
           });
 
           if (entryId) return entryId;
-          if (opts.throwOnMissingId === false) return null;
+          if (opts.allowMissingId) return null;
 
           throw new Error(`Document with id "${documentId}" not found`);
         };

@@ -149,9 +149,9 @@ describe.skip('CM API - Populate dz', () => {
 
     expect(productRes.status).toBe(200);
 
-    data.productsWithDz.push(productRes.body);
+    data.productsWithDz.push(productRes.body.data);
 
-    expect(productRes.body).toMatchObject({
+    expect(productRes.body.data).toMatchObject({
       name: 'name',
       dz: [
         {

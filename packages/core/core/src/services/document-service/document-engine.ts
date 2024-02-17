@@ -315,7 +315,7 @@ const createDocumentEngine = ({
         (entry) => transformOutputIds(uid, entry),
         // documentId -> published entryId
         (entry) => {
-          const opts = { uid, locale: entry.locale, isDraft: false, throwOnMissingId: false };
+          const opts = { uid, locale: entry.locale, isDraft: false, allowMissingId: true };
           return transformData(entry, opts);
         },
         // Create the published entry
@@ -371,7 +371,7 @@ const createDocumentEngine = ({
         (entry) => transformOutputIds(uid, entry),
         // documentId -> draft entryId
         (entry) => {
-          const opts = { uid, locale: entry.locale, isDraft: true, throwOnMissingId: false };
+          const opts = { uid, locale: entry.locale, isDraft: true, allowMissingId: true };
           return transformData(entry, opts);
         },
         // Create the draft entry

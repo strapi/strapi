@@ -1,4 +1,4 @@
-import { Strapi } from '@strapi/types';
+import { Strapi, Entity } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 
 /**
@@ -19,7 +19,7 @@ const encodeKey = (obj: any) => {
 
 interface KeyFields {
   uid: string;
-  documentId: string;
+  documentId: Entity.ID;
   locale?: string | null;
   isDraft?: boolean;
 }

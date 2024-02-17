@@ -92,7 +92,7 @@ const deleteConfigurationRecords = async (
   }
 
   if (webhook) {
-    models.push('webhook');
+    models.push('strapi::webhook');
   }
 
   const [results, updateResults] = useResults(models);

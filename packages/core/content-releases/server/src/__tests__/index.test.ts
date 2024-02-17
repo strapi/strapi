@@ -4,6 +4,12 @@
 import { ACTIONS } from '../constants';
 
 const { register } = require('../register');
+const { bootstrap } = require('../bootstrap');
+const { getService } = require('../utils');
+
+jest.mock('../utils', () => ({
+  getService: jest.fn(),
+}));
 
 describe('register', () => {
   const strapi = {
@@ -52,5 +58,52 @@ describe('register', () => {
     strapi.ee.features.isEnabled.mockReturnValue(false);
     register({ strapi });
     expect(strapi.admin.services.permission.actionProvider.registerMany).not.toHaveBeenCalled();
+  });
+});
+
+describe('bootstrap', () => {
+  const mockSyncFromDatabase = jest.fn();
+
+  getService.mockReturnValue({
+    syncFromDatabase: mockSyncFromDatabase,
+  });
+
+  const strapi = {
+    db: {
+      lifecycles: {
+        subscribe: jest.fn(),
+      },
+    },
+    ee: {
+      features: {
+        isEnabled: jest.fn(),
+      },
+    },
+    features: {
+      future: {
+        isEnabled: jest.fn(),
+      },
+    },
+    log: {
+      error: jest.fn(),
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should sync scheduled jobs from the database if contentReleasesScheduling flag is enabled', async () => {
+    strapi.ee.features.isEnabled.mockReturnValue(true);
+    strapi.features.future.isEnabled.mockReturnValue(true);
+    mockSyncFromDatabase.mockResolvedValue(new Map());
+    await bootstrap({ strapi });
+    expect(mockSyncFromDatabase).toHaveBeenCalled();
+  });
+
+  it('should not sync scheduled jobs from the database if contentReleasesScheduling flag is disabled', async () => {
+    strapi.features.future.isEnabled.mockReturnValue(false);
+    await bootstrap({ strapi });
+    expect(mockSyncFromDatabase).not.toHaveBeenCalled();
   });
 });

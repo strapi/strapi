@@ -37,7 +37,7 @@ describe('Document Service', () => {
       createdCategory = category;
 
       expect(async () => {
-        await strapi.documents(CATEGORY_UID).update(category.documentId, {
+        await strapi.documents(CATEGORY_UID).update(category.id, {
           data: { name: testName },
         });
       }).rejects.toThrow();
@@ -46,18 +46,16 @@ describe('Document Service', () => {
     it('cannot publish a document to have a duplicated unique field value in the same publication state', async () => {
       const updatedName = `${createdCategory.name}-1`;
       // Update the previously created category to have a new name
-      const category: Category = await strapi
-        .documents(CATEGORY_UID)
-        .update(createdCategory.documentId, {
-          data: { name: updatedName },
-        });
+      const category: Category = await strapi.documents(CATEGORY_UID).update(createdCategory.id, {
+        data: { name: updatedName },
+      });
 
       // Publish that category
-      const publishRes = strapi.documents(CATEGORY_UID).publish(category.documentId);
+      const publishRes = strapi.documents(CATEGORY_UID).publish(category.id);
       await expect(publishRes).resolves.not.toThrowError();
 
       // Reset the name of the draft category
-      await strapi.documents(CATEGORY_UID).update(createdCategory.documentId, {
+      await strapi.documents(CATEGORY_UID).update(createdCategory.id, {
         data: { name: createdCategory.name },
       });
 
@@ -68,7 +66,7 @@ describe('Document Service', () => {
       });
 
       expect(async () => {
-        await strapi.documents(CATEGORY_UID).publish(newCategory.documentId);
+        await strapi.documents(CATEGORY_UID).publish(newCategory.id);
       }).rejects.toThrow();
     });
   });

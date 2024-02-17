@@ -38,7 +38,10 @@ function setup(args?: Partial<UseRelationArgs>) {
   );
 }
 
-describe('useRelation', () => {
+/**
+ * TODO: re-enable with V5 contracts when BE has introduced relations again.
+ */
+describe.skip('useRelation', () => {
   test('fetch relations and calls onLoadRelationsCallback', async () => {
     const onLoadMock = jest.fn();
     const { result } = setup({

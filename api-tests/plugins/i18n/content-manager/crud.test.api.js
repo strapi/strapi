@@ -74,12 +74,12 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         locale: 'en',
         localizations: [],
         name: 'category in english',
       });
-      data.categories.push(res.body);
+      data.categories.push(res.body.data);
     });
 
     // V5: Fix locale creation test
@@ -98,11 +98,11 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({
+      expect(body.data).toMatchObject({
         locale: 'ko',
         name: 'category in korean',
       });
-      data.categories.push(res.body);
+      data.categories.push(body.data);
     });
 
     // This tests is sensible to foreign keys deadlocks
@@ -112,8 +112,12 @@ describe('i18n - Content API', () => {
 
       for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
         res = await rq({
-          method: 'PUT',
-          url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
+          method: 'POST',
+          url: `/content-manager/collection-types/api::category.category`,
+          qs: {
+            plugins: { i18n: { relatedEntityId: data.categories[0].id } },
+            locale,
+          },
           body: {
             name: `category in ${locale}`,
             locale,
@@ -121,12 +125,12 @@ describe('i18n - Content API', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.locale).toBe(locale);
+        expect(res.body.data.locale).toBe(locale);
       }
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      data.categories.push(body);
+      data.categories.push(body.data);
     });
 
     test.skip('should not be able to duplicate unique field values within the same locale', async () => {
@@ -156,7 +160,7 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({ count: 1 });
+      expect(body.data).toMatchObject({ count: 1 });
       data.categories.shift();
     });
 
@@ -172,7 +176,7 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body).toMatchObject({ count: 1 });
+      expect(body.data).toMatchObject({ count: 1 });
       data.categories.shift();
     });
   });
