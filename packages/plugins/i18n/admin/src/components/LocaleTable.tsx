@@ -101,7 +101,7 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
               <Td>
                 <Flex gap={1} justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
                   {canUpdate && <EditLocale {...locale} />}
-                  {canDelete && !locale.isDefault && <DeleteLocale id={locale.id} />}
+                  {canDelete && !locale.isDefault && <DeleteLocale {...locale} />}
                 </Flex>
               </Td>
             </Tr>
