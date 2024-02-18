@@ -2,7 +2,7 @@ import {
   contentManagementUtilRemoveFieldsFromData,
   formatContentTypeData,
 } from '@strapi/helper-plugin';
-import { Schema, Attribute } from '@strapi/types';
+import { Schema, Attribute } from '@strapi/strapi';
 
 import { Entity } from '../../../shared/contracts/shared';
 

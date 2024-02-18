@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, Popover, Tooltip, Typography } from '@strapi/design-system';
 import { SortIcon } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
+import { Entity } from '@strapi/strapi';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
