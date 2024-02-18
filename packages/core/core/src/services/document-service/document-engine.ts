@@ -319,7 +319,7 @@ const createDocumentEngine = ({
           return transformData(entry, opts);
         },
         // Create the published entry
-        ({ locale, ...data }) => this.create(uid, { data, locale, ...params })
+        (data) => this.create(uid, { data, locale: data.locale, ...params })
       )
     );
 
