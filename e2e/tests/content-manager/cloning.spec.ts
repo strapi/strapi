@@ -49,6 +49,7 @@ test.describe('Cloning', () => {
      */
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(LIST_URL);
+    await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
     expect(await page.getByRole('row', { name: 'Coach Beard' }).all()).toHaveLength(2);
   });
 

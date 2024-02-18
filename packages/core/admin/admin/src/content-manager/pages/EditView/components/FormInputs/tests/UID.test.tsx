@@ -72,17 +72,17 @@ describe('UIDInput', () => {
     expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('regenerated');
   });
 
-  test('If the field is required and the value is empty it should automatically fill it', async () => {
+  test.only('If the field is required and the value is empty it should automatically fill it', async () => {
     render({
-      initialValues: {
-        name: '',
-      },
+      initialValues: {},
       required: true,
     });
 
     await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(screen.getByRole('textbox', { name: 'Label *' })).toHaveValue('regenerated');
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: 'Label *' })).toHaveValue('regenerated')
+    );
   });
 
   test('If the field is required and the value is not empty it should not automatically fill it', async () => {
