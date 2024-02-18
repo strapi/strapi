@@ -5,8 +5,8 @@ import { getDefaultLocale } from '../utils/locales';
 
 import type { Locale, RootState } from '../store/reducers';
 import type { Permission, StrapiAppSettingLink } from '@strapi/helper-plugin';
+import type { Schema } from '@strapi/strapi';
 import type { Store } from '@strapi/strapi/admin';
-import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * addLocaleToLinksHook

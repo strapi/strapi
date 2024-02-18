@@ -15,7 +15,7 @@ import { Localization } from '../utils/data';
 import { getTranslation } from '../utils/getTranslation';
 
 import type { Locale } from '../store/reducers';
-import type { Entity } from '@strapi/types';
+import type { Entity } from '@strapi/strapi';
 
 export interface CMEditViewLocalePickerProps {
   appLocales: Locale[];

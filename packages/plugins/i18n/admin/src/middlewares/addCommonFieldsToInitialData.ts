@@ -13,7 +13,7 @@ import { pluginId } from '../pluginId';
 import { RootState } from '../store/reducers';
 
 import type { GetNonLocalizedFields } from '../../../shared/contracts/content-manager';
-import type { Schema } from '@strapi/types';
+import type { Schema } from '@strapi/strapi';
 import type { AxiosResponse } from 'axios';
 
 const addCommonFieldsToInitialDataMiddleware: () => Middleware<object, RootState> =
