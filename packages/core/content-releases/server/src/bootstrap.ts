@@ -8,8 +8,20 @@ const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (features.isEnabled('cms-content-releases')) {
+    const contentTypeWithDraftAndPublish = (
+      Object.keys(strapi.contentTypes) as Array<Common.UID.ContentType>
+    ).reduce((acc, contentTypeUid) => {
+      const contentType = strapi.contentTypes[contentTypeUid];
+      if (contentType.options?.draftAndPublish) {
+        acc.push(contentTypeUid);
+      }
+      return acc;
+    }, [] as Array<Common.UID.ContentType>);
+
     // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
+      models: contentTypeWithDraftAndPublish,
+
       async afterDelete(event) {
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         const { model, result } = event;
@@ -94,7 +106,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         const { model, result } = event;
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const isValid = getEntryValidStatus(model.uid as Common.UID.ContentType, result, {
+          const isEntryValid = getEntryValidStatus(model.uid as Common.UID.ContentType, result, {
             strapi,
           });
 
@@ -104,7 +116,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
               target_id: result.id,
             },
             data: {
-              isValid,
+              isEntryValid,
             },
           });
 

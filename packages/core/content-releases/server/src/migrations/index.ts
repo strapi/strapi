@@ -4,6 +4,7 @@ import { contentTypes as contentTypesUtils, mapAsync } from '@strapi/utils';
 import { difference, keys } from 'lodash';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import { getPopulatedEntry, getEntryValidStatus, getService } from '../utils';
+import { Release } from '../../../shared/contracts/releases';
 
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
@@ -54,7 +55,7 @@ export async function deleteActionsOnDeleteContentType({ oldContentTypes, conten
 }
 
 export async function migrateIsValidAndStatusReleases() {
-  const releasesWithoutStatus = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+  const releasesWithoutStatus = (await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
       status: null,
       releasedAt: null,
@@ -66,29 +67,30 @@ export async function migrateIsValidAndStatusReleases() {
         },
       },
     },
-  });
+  })) as Release[];
 
-  mapAsync(releasesWithoutStatus, async (release) => {
+  mapAsync(releasesWithoutStatus, async (release: Release) => {
     const actions = release.actions;
 
-    // check isValid is null
-    const notValidatedActions = actions.filter((action) => action.isValid === null);
+    const notValidatedActions = actions.filter((action) => action.isEntryValid === null);
 
     for (const action of notValidatedActions) {
-      console.log('action', action);
       const populatedEntry = await getPopulatedEntry(action.contentType, action.entry.id, {
         strapi,
       });
-      const isValid = getEntryValidStatus(action.target_type, populatedEntry, { strapi });
 
-      await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-        where: {
-          id: action.id,
-        },
-        data: {
-          isValid,
-        },
-      });
+      if (populatedEntry) {
+        const isEntryValid = getEntryValidStatus(action.contentType, populatedEntry, { strapi });
+
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+          where: {
+            id: action.id,
+          },
+          data: {
+            isEntryValid,
+          },
+        });
+      }
     }
 
     return getService('release', { strapi }).updateReleaseStatus(release.id);
@@ -103,7 +105,7 @@ export async function migrateIsValidAndStatusReleases() {
     },
   });
 
-  mapAsync(publishedReleases, async (release) => {
+  mapAsync(publishedReleases, async (release: Release) => {
     return strapi.db.query(RELEASE_MODEL_UID).update({
       where: {
         id: release.id,

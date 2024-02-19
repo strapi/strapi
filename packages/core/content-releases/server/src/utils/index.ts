@@ -23,7 +23,7 @@ export const getPopulatedEntry = async (
 
 export const getEntryValidStatus = async (
   contentTypeUid: Common.UID.ContentType,
-  entry: Entity.ID,
+  entry: { id: Entity.ID; [key: string]: any },
   { strapi } = { strapi: global.strapi }
 ) => {
   try {

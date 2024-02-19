@@ -283,7 +283,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
         type,
         contentType: entry.contentType,
         locale: entry.locale,
-        isValid: isEntryValid,
+        isEntryValid,
         entry: {
           id: entry.id,
           __type: entry.contentType,
@@ -710,7 +710,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       this.countActions({
         filters: {
           release: releaseId,
-          isValid: false,
+          isEntryValid: false,
         },
       }),
     ]);
