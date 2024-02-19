@@ -26,6 +26,9 @@ const baseStrapiMock = {
       isEnabled: jest.fn().mockReturnValue(true),
     },
   },
+  telemetry: {
+    send: jest.fn().mockReturnValue(true),
+  },
 };
 
 const mockUser = {
