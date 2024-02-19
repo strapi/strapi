@@ -926,6 +926,88 @@ describe('EditViewDataManagerProvider | reducer', () => {
     });
   });
 
+  it('should add a component with a __temp_key__ that is higher than the highest id to not get rendering conflicts', () => {
+    const components = {
+      'blog.simple': {
+        uid: 'blog.simple',
+        attributes: {
+          id: {
+            type: 'integer',
+          },
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    } as unknown as Record<string, FormattedComponentLayout>;
+
+    const state = {
+      ...initialState,
+      componentsDataStructure: {
+        'blog.simple': { name: 'test' },
+      },
+      initialData: {
+        name: 'name',
+        dz: [
+          { name: 'test', __component: 'blog.simple', id: 14 },
+          { name: 'test', __component: 'blog.simple', id: 3 },
+        ],
+      },
+      modifiedData: {
+        name: 'name',
+        dz: [
+          { name: 'test', __component: 'blog.simple', id: 14 },
+          { name: 'test', __component: 'blog.simple', id: 3 },
+        ],
+      },
+    };
+
+    const expected = {
+      ...initialState,
+      componentsDataStructure: {
+        'blog.simple': { name: 'test' },
+      },
+      initialData: {
+        name: 'name',
+        dz: [
+          { name: 'test', __component: 'blog.simple', id: 14 },
+          { name: 'test', __component: 'blog.simple', id: 3 },
+        ],
+      },
+      modifiedData: {
+        name: 'name',
+        dz: [
+          { name: 'test', __component: 'blog.simple', __temp_key__: 15 },
+          { name: 'test', __component: 'blog.simple', id: 14 },
+          { name: 'test', __component: 'blog.simple', id: 3 },
+        ],
+      },
+      modifiedDZName: 'dz',
+      shouldCheckErrors: true,
+    };
+
+    const action = {
+      type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE' as const,
+      componentLayoutData: {
+        uid: 'blog.simple',
+        attributes: {
+          id: {
+            type: 'integer',
+          },
+          name: {
+            type: 'string',
+          },
+        },
+      } as unknown as FormattedComponentLayout,
+      allComponents: components,
+      keys: ['dz'],
+      shouldCheckErrors: true,
+      position: -1,
+    };
+
+    expect(reducer(state, action)).toEqual(expected);
+  });
+
   describe('CONNECT_RELATION', () => {
     it('should add a relation in the modifiedData', () => {
       const state = {
