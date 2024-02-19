@@ -55,12 +55,6 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mapEntity<T = any>(entity: any, uid?: Common.UID.ContentType): T {
-    // Map documentId to id
-    // TODO: remove this when we change documentId to id in database
-    if (entity?.documentId) {
-      entity.id = entity.documentId;
-      delete entity.documentId;
-    }
     return entity;
   },
 
@@ -81,14 +75,17 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     return this.mapEntity(entities, uid);
   },
 
-  async find(opts: Parameters<typeof strapi.documents.findMany>[1], uid: Common.UID.ContentType) {
+  async find(
+    opts: Parameters<Documents.ServiceInstance['findMany']>[0],
+    uid: Common.UID.ContentType
+  ) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
     const entities = await strapi.documents(uid).findMany(params);
     return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(
-    opts: Parameters<typeof strapi.documents.findMany>[1],
+    opts: Parameters<Documents.ServiceInstance['findMany']>[0],
     uid: Common.UID.ContentType
   ) {
     // Pagination
