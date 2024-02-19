@@ -173,29 +173,27 @@ const Information = ({ activeTab }: InformationProps) => {
    * So, we decipher which document to show the creator for based on the activeTab.
    */
 
-  const createAndUpdateDocument = (
+  const createAndUpdateDocument =
     activeTab === 'draft'
       ? document
-      : meta?.availableStatus.find((status) => status.publishedAt === null)
-  )!;
+      : meta?.availableStatus.find((status) => status.publishedAt === null);
 
-  const publishDocument = (
+  const publishDocument =
     activeTab === 'published'
       ? document
-      : meta?.availableStatus.find((status) => status.publishedAt !== null)
-  )!;
+      : meta?.availableStatus.find((status) => status.publishedAt !== null);
 
-  const creator = createAndUpdateDocument[CREATED_BY_ATTRIBUTE_NAME]
+  const creator = createAndUpdateDocument?.[CREATED_BY_ATTRIBUTE_NAME]
     ? getDisplayName(createAndUpdateDocument[CREATED_BY_ATTRIBUTE_NAME], formatMessage)
     : null;
 
-  const updator = createAndUpdateDocument[UPDATED_BY_ATTRIBUTE_NAME]
+  const updator = createAndUpdateDocument?.[UPDATED_BY_ATTRIBUTE_NAME]
     ? getDisplayName(createAndUpdateDocument[UPDATED_BY_ATTRIBUTE_NAME], formatMessage)
     : null;
 
   const information: Array<{ isDisplayed?: boolean; label: string; value: React.ReactNode }> = [
     {
-      isDisplayed: !!publishDocument[PUBLISHED_AT_ATTRIBUTE_NAME],
+      isDisplayed: !!publishDocument?.[PUBLISHED_AT_ATTRIBUTE_NAME],
       label: formatMessage({
         id: 'content-manager.containers.edit.information.last-published.label',
         defaultMessage: 'Last published',
@@ -206,16 +204,18 @@ const Information = ({ activeTab }: InformationProps) => {
           defaultMessage: `Published {time}{isAnonymous, select, true {} other { by {author}}}`,
         },
         {
-          time: <RelativeTime timestamp={new Date(publishDocument[PUBLISHED_AT_ATTRIBUTE_NAME])} />,
-          isAnonymous: !publishDocument[PUBLISHED_BY_ATTRIBUTE_NAME],
-          author: publishDocument[PUBLISHED_BY_ATTRIBUTE_NAME]
-            ? getDisplayName(publishDocument[PUBLISHED_BY_ATTRIBUTE_NAME], formatMessage)
+          time: (
+            <RelativeTime timestamp={new Date(publishDocument?.[PUBLISHED_AT_ATTRIBUTE_NAME])} />
+          ),
+          isAnonymous: !publishDocument?.[PUBLISHED_BY_ATTRIBUTE_NAME],
+          author: publishDocument?.[PUBLISHED_BY_ATTRIBUTE_NAME]
+            ? getDisplayName(publishDocument?.[PUBLISHED_BY_ATTRIBUTE_NAME], formatMessage)
             : null,
         }
       ),
     },
     {
-      isDisplayed: !!document[UPDATED_AT_ATTRIBUTE_NAME],
+      isDisplayed: !!createAndUpdateDocument?.[UPDATED_AT_ATTRIBUTE_NAME],
       label: formatMessage({
         id: 'content-manager.containers.edit.information.last-draft.label',
         defaultMessage: 'Last draft',
@@ -228,7 +228,7 @@ const Information = ({ activeTab }: InformationProps) => {
         {
           time: (
             <RelativeTime
-              timestamp={new Date(createAndUpdateDocument[UPDATED_AT_ATTRIBUTE_NAME])}
+              timestamp={new Date(createAndUpdateDocument?.[UPDATED_AT_ATTRIBUTE_NAME])}
             />
           ),
           isAnonymous: !updator,
@@ -237,7 +237,7 @@ const Information = ({ activeTab }: InformationProps) => {
       ),
     },
     {
-      isDisplayed: !!document[CREATED_AT_ATTRIBUTE_NAME],
+      isDisplayed: !!createAndUpdateDocument?.[CREATED_AT_ATTRIBUTE_NAME],
       label: formatMessage({
         id: 'content-manager.containers.edit.information.document.label',
         defaultMessage: 'Document',
@@ -250,7 +250,7 @@ const Information = ({ activeTab }: InformationProps) => {
         {
           time: (
             <RelativeTime
-              timestamp={new Date(createAndUpdateDocument[CREATED_AT_ATTRIBUTE_NAME])}
+              timestamp={new Date(createAndUpdateDocument?.[CREATED_AT_ATTRIBUTE_NAME])}
             />
           ),
           isAnonymous: !creator,
