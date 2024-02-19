@@ -171,9 +171,14 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   for (const entry of entries) {
     const dataToCreate = isFunction(entry) ? entry(results) : entry;
-    results.push(
-      await strapi.entityService.create(toContentTypeUID(model), { data: dataToCreate })
-    );
+    try {
+      results.push(
+        await strapi.entityService.create(toContentTypeUID(model), { data: dataToCreate })
+      );
+    } catch (err) {
+      strapi.log.error('Error creating fixture for', model, JSON.stringify(data));
+      throw err;
+    }
   }
 
   await cleanup();
