@@ -96,29 +96,35 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
     const { locale, status } = getDocumentDimensions(query);
 
-    const document = await findDocument(permissionQuery, model, { locale, status });
+    const version = await findDocument(permissionQuery, model, { locale, status });
 
     // allow user with create permission to know a single type is not created
-    if (!document) {
+    if (!version) {
       if (permissionChecker.cannot.create()) {
         return ctx.forbidden();
       }
       // Check if document exists
-      const exists = await getService('entity-manager').exists(model);
-      if (!exists) {
+      const document = await strapi.db.query(model).findOne({});
+
+      if (!document) {
         return ctx.notFound();
       }
 
       // If the requested locale doesn't exist, return an empty response
-      ctx.status = 204;
+      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+        model,
+        { id: document.documentId, locale, publishedAt: null },
+        { availableLocales: true, availableStatus: false }
+      );
+      ctx.body = { data: {}, meta };
       return;
     }
 
-    if (permissionChecker.cannot.read(document)) {
+    if (permissionChecker.cannot.read(version)) {
       return ctx.forbidden();
     }
 
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
