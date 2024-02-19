@@ -152,7 +152,7 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
       try {
         entries.push(await strapi.entityService.create(toContentTypeUID(model), { data }));
       } catch (err) {
-        console.error(err);
+        strapi.log.error('Error creating fixture', model, JSON.stringify(data));
         throw err;
       }
     }
