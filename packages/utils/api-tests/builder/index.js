@@ -85,8 +85,7 @@ const createTestBuilder = (options = {}) => {
           await modelsUtils.cleanupModel(model.uid);
         }
 
-        // Clean locales, as they are not deleted by the builder
-        await strapi.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
+        await modelsUtils.cleanupModel('plugin::i18n.locale');
       }
 
       for (const action of actions.reverse()) {
