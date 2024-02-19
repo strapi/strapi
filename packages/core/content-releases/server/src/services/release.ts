@@ -454,12 +454,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => ({
       });
       await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
     });
-    
+
     if (strapi.features.future.isEnabled('contentReleasesScheduling') && release.scheduledAt) {
       const schedulingService = getService('scheduling', { strapi });
       await schedulingService.cancel(release.id);
     }
-    
+
     strapi.telemetry.send('didDeleteContentRelease');
 
     return release;
