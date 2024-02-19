@@ -198,7 +198,13 @@ export default {
       }
 
       // If the requested locale doesn't exist, return an empty response
-      ctx.status = 204;
+      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+        model,
+        { id, locale, publishedAt: null },
+        { availableLocales: true, availableStatus: false }
+      );
+      ctx.body = { data: {}, meta };
+
       return;
     }
 

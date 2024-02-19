@@ -194,7 +194,12 @@ describe('i18n - Content API', () => {
         },
       });
 
-      expect(locale.statusCode).toBe(204);
+      expect(locale.statusCode).toBe(200);
+      expect(locale.body.data).toMatchObject({});
+      expect(locale.body.meta).toMatchObject({
+        availableStatus: [],
+        availableLocales: [{ locale: 'en' }],
+      });
     });
   });
   // V5: Fix bulk actions
