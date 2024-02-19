@@ -1,5 +1,4 @@
 import type { Strapi } from '@strapi/types';
-import { assign } from 'lodash/fp';
 import { getService } from '../utils';
 
 const sendDidInviteUser = async () => {
@@ -21,15 +20,11 @@ const sendDidChangeInterfaceLanguage = async () => {
 };
 
 const sendUpdateProjectInformation = async () => {
-  let groupProperties = {};
-
   const numberOfActiveAdminUsers = await getService('user').count({ isActive: true });
   const numberOfAdminUsers = await getService('user').count();
-  
-  groupProperties = assign(groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
 
   strapi.telemetry.send('didUpdateProjectInformation', {
-    groupProperties
+    groupProperties: { numberOfActiveAdminUsers, numberOfAdminUsers },
   });
 };
 
