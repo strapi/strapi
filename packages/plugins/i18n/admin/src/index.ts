@@ -20,7 +20,7 @@ import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTB
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
 import { localePermissionMiddleware } from './middlewares/localePermission';
 import { pluginId } from './pluginId';
-import { reducers } from './store/reducers';
+import { i18nApi } from './services/api';
 import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
@@ -34,16 +34,16 @@ export default {
     //   extendCTBInitialDataMiddleware,
     //   localePermissionMiddleware,
     // ]);
-    // /**
-    //  * TODO: this should use the `useInjectReducer` hook when it's exported from the `@strapi/admin` package.
-    //  */
-    // app.addReducers(reducers);
-    // app.registerPlugin({
-    //   id: pluginId,
-    //   initializer: Initializer,
-    //   isReady: false,
-    //   name: pluginId,
-    // });
+    app.addMiddlewares([() => i18nApi.middleware]);
+    app.addReducers({
+      [i18nApi.reducerPath]: i18nApi.reducer,
+    });
+    app.registerPlugin({
+      id: pluginId,
+      initializer: Initializer,
+      isReady: false,
+      name: pluginId,
+    });
   },
   bootstrap(app: any) {
     // // Hooks that mutate the collection types links in order to add the locale filter
@@ -59,18 +59,19 @@ export default {
     // app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     // // Hooks that mutates the edit view layout
     // app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
-    // // Add the settings link
-    // app.addSettingsLink('global', {
-    //   intlLabel: {
-    //     id: getTranslation('plugin.name'),
-    //     defaultMessage: 'Internationalization',
-    //   },
-    //   id: 'internationalization',
-    //   to: 'internationalization',
-    //   Component: () =>
-    //     import('./pages/SettingsPage').then((mod) => ({ default: mod.ProtectedSettingsPage })),
-    //   permissions: PERMISSIONS.accessMain,
-    // });
+
+    // Add the settings link
+    app.addSettingsLink('global', {
+      intlLabel: {
+        id: getTranslation('plugin.name'),
+        defaultMessage: 'Internationalization',
+      },
+      id: 'internationalization',
+      to: 'internationalization',
+      Component: () =>
+        import('./pages/SettingsPage').then((mod) => ({ default: mod.ProtectedSettingsPage })),
+      permissions: PERMISSIONS.accessMain,
+    });
 
     // app.injectContentManagerComponent('editView', 'informations', {
     //   name: 'i18n-locale-filter-edit-view',

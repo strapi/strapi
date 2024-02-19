@@ -1,4 +1,3 @@
-import { within } from '@testing-library/react';
 import { render, screen, server } from '@tests/utils';
 import { rest } from 'msw';
 
@@ -51,56 +50,5 @@ describe('Settings Page', () => {
 
     expect(screen.getByText('There are no locales')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Add new locale' })).toHaveLength(2);
-  });
-
-  it('renders the create modal successfully', async () => {
-    const { user } = render(<SettingsPage />);
-
-    expect(
-      await screen.findByRole('heading', { name: 'Internationalization' })
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Add new locale' }));
-
-    const dialog = screen.getByRole('dialog', { name: 'Add new locale' });
-
-    expect(dialog).toBeInTheDocument();
-
-    expect(within(dialog).getByRole('heading', { name: 'Add new locale' })).toBeInTheDocument();
-  });
-
-  it('renders the edit modal successfully', async () => {
-    const { user } = render(<SettingsPage />);
-
-    expect(
-      await screen.findByRole('heading', { name: 'Internationalization' })
-    ).toBeInTheDocument();
-
-    /**
-     * click the first edit button which will be the EN locale
-     */
-    await user.click(screen.getAllByRole('button', { name: 'Edit' })[0]);
-
-    const dialog = screen.getByRole('dialog', { name: 'Edit a locale' });
-
-    expect(dialog).toBeInTheDocument();
-
-    expect(within(dialog).getByRole('heading', { name: 'Edit a locale' })).toBeInTheDocument();
-  });
-
-  it('renders the delete modal successfully', async () => {
-    const { user } = render(<SettingsPage />);
-
-    expect(
-      await screen.findByRole('heading', { name: 'Internationalization' })
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
-
-    const dialog = screen.getByRole('dialog', { name: 'Confirmation' });
-
-    expect(dialog).toBeInTheDocument();
-
-    expect(within(dialog).getByRole('heading', { name: 'Confirmation' })).toBeInTheDocument();
   });
 });

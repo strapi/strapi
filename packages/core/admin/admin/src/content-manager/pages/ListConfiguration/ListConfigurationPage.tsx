@@ -41,8 +41,6 @@ const ListConfiguration = () => {
 
   const [updateContentTypeConfiguration] = useUpdateContentTypeConfigurationMutation();
   const handleSubmit: FormProps<FormData>['onSubmit'] = async (data, event) => {
-    event.preventDefault();
-
     try {
       trackUsage('willSaveContentTypeLayout');
 

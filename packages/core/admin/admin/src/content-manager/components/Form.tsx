@@ -4,6 +4,7 @@ import { useCallbackRef } from '@strapi/helper-plugin';
 import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
 import isEqual from 'lodash/isEqual';
+import { useIntl } from 'react-intl';
 
 import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
@@ -81,11 +82,15 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
  * Form
  * -----------------------------------------------------------------------------------------------*/
 
+interface FormHelpers<TFormValues extends FormValues = FormValues> {
+  setErrors: (errors: FormErrors<TFormValues>) => void;
+}
+
 interface FormProps<TFormValues extends FormValues = FormValues>
   extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
   children: React.ReactNode;
   method: 'POST' | 'PUT';
-  onSubmit?: (values: TFormValues, e: React.FormEvent<HTMLFormElement>) => Promise<void> | void;
+  onSubmit?: (values: TFormValues, helpers: FormHelpers<TFormValues>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
 }
@@ -141,7 +146,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             }
             for (const error of err.inner) {
               if (!getIn(errors, error.path!)) {
-                errors = setIn(errors, error.path!, err.message);
+                errors = setIn(errors, error.path!, error.message);
               }
             }
           }
@@ -161,6 +166,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       }
     }, [props, state.values]);
 
+    const setErrors = React.useCallback((errors: FormErrors) => {
+      dispatch({
+        type: 'SET_ERRORS',
+        payload: errors,
+      });
+    }, []);
+
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -177,15 +189,14 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         const errors = await validate();
 
         if (errors !== null) {
-          dispatch({
-            type: 'SET_ERRORS',
-            payload: errors,
-          });
+          setErrors(errors);
 
           throw new Error('Submission failed');
         }
 
-        await onSubmit(state.values, e);
+        await onSubmit(state.values, {
+          setErrors,
+        });
 
         dispatch({
           type: 'SUBMIT_SUCCESS',
@@ -512,6 +523,8 @@ interface FieldValue<TValue = any> {
 }
 
 const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> => {
+  const { formatMessage } = useIntl();
+
   const initialValue = useForm(
     'useField',
     (state) => getIn(state.initialValues, path) as FieldValue<TValue>['initialValue']
@@ -528,11 +541,22 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   return {
     initialValue,
-    error,
+    /**
+     * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     */
+    error: !error || typeof error === 'string' ? error : formatMessage(error),
     onChange: handleChange,
     value: value,
   };
 };
 
 export { Form, useField, useForm };
-export type { FormProps, FormValues, FormContextValue, FormState, FieldValue, InputProps };
+export type {
+  FormHelpers,
+  FormProps,
+  FormValues,
+  FormContextValue,
+  FormState,
+  FieldValue,
+  InputProps,
+};

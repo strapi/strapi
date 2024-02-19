@@ -12,7 +12,7 @@ import { InputProps } from './types';
  * TODO: fix the ref type when the design system is fixed.
  */
 export const StringInput = forwardRef<any, InputProps>(
-  ({ disabled, label, hint, name, placeholder }, ref) => {
+  ({ disabled, label, hint, name, placeholder, required }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField(name);
 
@@ -29,6 +29,7 @@ export const StringInput = forwardRef<any, InputProps>(
         defaultValue={field.initialValue}
         onChange={field.onChange}
         placeholder={placeholder}
+        required={required}
         value={field.value ?? ''}
       />
     );

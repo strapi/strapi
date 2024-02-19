@@ -129,8 +129,6 @@ const ComponentConfigurationPage = () => {
 
   const [updateConfiguration] = useUpdateComponentConfigurationMutation();
   const handleSubmit: ConfigurationFormProps['onSubmit'] = async (formData, event) => {
-    event.preventDefault();
-
     try {
       /**
        * We reconstruct the metadatas object by taking the existing list metadatas

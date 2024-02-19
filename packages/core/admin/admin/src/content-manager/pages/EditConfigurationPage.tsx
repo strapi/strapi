@@ -64,9 +64,7 @@ const EditConfigurationPage = () => {
     isLoadingSchema || isLoadingLayout || isLoadingFieldSizes || isFetchingFieldSizes;
 
   const [updateConfiguration] = useUpdateContentTypeConfigurationMutation();
-  const handleSubmit: ConfigurationFormProps['onSubmit'] = async (data, event) => {
-    event.preventDefault();
-
+  const handleSubmit: ConfigurationFormProps['onSubmit'] = async (data) => {
     try {
       trackUsage('willSaveContentTypeLayout');
 

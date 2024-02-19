@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useLocales } from '../hooks/useLocales';
 import { pluginId } from '../pluginId';
 
 type InitializerProps = {
@@ -8,16 +7,11 @@ type InitializerProps = {
 };
 
 const Initializer = ({ setPlugin }: InitializerProps) => {
-  const { isLoading, locales } = useLocales();
-  const ref = React.useRef<InitializerProps['setPlugin']>();
-
-  ref.current = setPlugin;
+  const ref = React.useRef(setPlugin);
 
   React.useEffect(() => {
-    if (!isLoading && locales.length > 0) {
-      ref.current!(pluginId);
-    }
-  }, [isLoading, locales]);
+    ref.current(pluginId);
+  }, []);
 
   return null;
 };
