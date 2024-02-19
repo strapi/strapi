@@ -65,8 +65,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Create a release
     const newReleaseName = 'The Diamond Dogs';
     await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
-    await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
 
+    // Select valid date and time
     await page
       .getByRole('combobox', {
         name: 'Date',
