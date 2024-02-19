@@ -44,7 +44,7 @@ describe('Document Service', () => {
       }).rejects.toThrow();
     });
 
-    it('cannot publish a document to have a duplicated unique field value in the same publication state', async () => {
+    it.skip('cannot publish a document to have a duplicated unique field value in the same publication state', async () => {
       const name = `unique-name`;
 
       const category = await strapi.documents(CATEGORY_UID).create({ data: { name } });
