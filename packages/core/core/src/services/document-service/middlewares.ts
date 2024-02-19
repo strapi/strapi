@@ -52,4 +52,6 @@ export const createMiddlewareManager = () => {
       return facade;
     },
   };
+
+  return manager;
 };
