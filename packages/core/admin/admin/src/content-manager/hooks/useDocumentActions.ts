@@ -306,7 +306,7 @@ const useDocumentActions: UseDocumentActions = () => {
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          message: { id: getTranslation('success.record.save'), defaultMessage: 'Saved document' },
         });
 
         return res.data;
@@ -349,7 +349,10 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.unpublish') },
+          message: {
+            id: getTranslation('success.record.unpublish'),
+            defaultMessage: 'Unpublished document',
+          },
         });
 
         return res.data;
@@ -387,7 +390,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          message: { id: getTranslation('success.record.save'), defaultMessage: 'Saved document' },
         });
 
         return res.data;
@@ -422,7 +425,10 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          message: {
+            id: getTranslation('success.record.clone'),
+            defaultMessage: 'Cloned document',
+          },
         });
 
         return res.data;
@@ -467,7 +473,10 @@ const useDocumentActions: UseDocumentActions = () => {
         trackUsage('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          message: {
+            id: getTranslation('success.record.clone'),
+            defaultMessage: 'Cloned document',
+          },
         });
 
         return res.data;

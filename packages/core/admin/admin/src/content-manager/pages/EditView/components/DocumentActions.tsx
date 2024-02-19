@@ -554,16 +554,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
     onClick: async () => {
       setSubmitting(true);
       try {
-        if (id || collectionType === SINGLE_TYPES) {
-          await update(
-            {
-              collectionType,
-              model,
-              id,
-            },
-            document
-          );
-        } else if (isCloning) {
+        if (isCloning) {
           const res = await clone(
             {
               model,
@@ -580,6 +571,15 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
               pathname: `../${collectionType}/${model}/${res.data.id}`,
             });
           }
+        } else if (id || collectionType === SINGLE_TYPES) {
+          await update(
+            {
+              collectionType,
+              model,
+              id,
+            },
+            document
+          );
         } else {
           const res = await create(
             {
