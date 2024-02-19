@@ -16,5 +16,19 @@ export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
  */
 export type { Store } from './core/store/configure';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
+export type {
+  Context,
+  DescriptionComponent,
+  DescriptionReducer,
+  PanelComponentProps,
+  PanelComponent,
+  PanelDescription,
+  DocumentActionComponent,
+  DocumentActionDescription,
+  DocumentActionProps,
+  HeaderActionComponent,
+  HeaderActionDescription,
+  HeaderActionProps,
+} from './core/apis/content-manager';
 
 export * from './content-manager/exports';

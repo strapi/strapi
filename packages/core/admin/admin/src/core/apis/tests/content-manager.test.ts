@@ -10,9 +10,11 @@ describe('content-manager', () => {
         {
           "apis": {
             "addDocumentAction": [Function],
+            "addDocumentHeaderAction": [Function],
             "addEditViewSidePanel": [Function],
             "getDocumentActions": [Function],
             "getEditViewSidePanels": [Function],
+            "getHeaderActions": [Function],
           },
           "id": "content-manager",
           "name": "Content Manager",
@@ -30,8 +32,10 @@ describe('content-manager', () => {
       expect(Object.keys(plugin.config.apis ?? {})).toMatchInlineSnapshot(`
         [
           "addDocumentAction",
+          "addDocumentHeaderAction",
           "addEditViewSidePanel",
           "getDocumentActions",
+          "getHeaderActions",
           "getEditViewSidePanels",
         ]
       `);
@@ -237,6 +241,35 @@ describe('content-manager', () => {
       // @ts-expect-error – testing it fails.
       expect(() => plugin.addDocumentAction('I will break')).toThrowErrorMatchingInlineSnapshot(
         `"Expected the \`actions\` passed to \`addDocumentAction\` to be an array or a function, but received string"`
+      );
+    });
+  });
+
+  describe('addDocumentHeaderAction', () => {
+    it('should let users add a document action as an array', () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(plugin.headerActions).toHaveLength(0);
+
+      plugin.addDocumentHeaderAction([
+        () => ({
+          label: 'Notify Twitter',
+          disabled: false,
+          onClick: () => {},
+        }),
+      ]);
+
+      expect(plugin.headerActions).toHaveLength(1);
+    });
+
+    it("should throw an error if you've not passed a function or an array", () => {
+      const plugin = new ContentManagerPlugin();
+
+      expect(() =>
+        // @ts-expect-error – testing it fails.
+        plugin.addDocumentHeaderAction('I will break')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Expected the \`actions\` passed to \`addDocumentHeaderAction\` to be an array or a function, but received string"`
       );
     });
   });

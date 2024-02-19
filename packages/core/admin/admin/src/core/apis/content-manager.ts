@@ -10,7 +10,10 @@ import {
   DEFAULT_ACTIONS,
   type DocumentActionDescription,
 } from '../../content-manager/pages/EditView/components/DocumentActions';
-import { DEFAULT_HEADER_ACTIONS } from '../../content-manager/pages/EditView/components/Header';
+import {
+  DEFAULT_HEADER_ACTIONS,
+  type HeaderActionDescription,
+} from '../../content-manager/pages/EditView/components/Header';
 import {
   ActionsPanel,
   type PanelDescription,
@@ -19,8 +22,8 @@ import { DEFAULT_TABLE_ROW_ACTIONS } from '../../content-manager/pages/ListView/
 
 import type { PluginConfig } from './Plugin';
 import type { DescriptionComponent } from '../../components/DescriptionComponentRenderer';
+import type { Document } from '../../content-manager/hooks/useDocument';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Types
@@ -41,9 +44,7 @@ interface Context {
   /**
    * this will be undefined if someone is creating an entry.
    */
-  document?: {
-    [key: string]: Attribute.GetValue<Attribute.Any>;
-  };
+  document?: Document;
   /**
    * this will be undefined if someone is creating an entry.
    */
@@ -84,6 +85,11 @@ interface DocumentActionComponent
     | 'update';
 }
 
+interface HeaderActionProps extends Context {}
+
+interface HeaderActionComponent
+  extends DescriptionComponent<HeaderActionProps, HeaderActionDescription> {}
+
 /* -------------------------------------------------------------------------------------------------
  * ContentManager plugin
  * -----------------------------------------------------------------------------------------------*/
@@ -101,6 +107,7 @@ class ContentManagerPlugin {
     ...DEFAULT_HEADER_ACTIONS,
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel, ReviewWorkflowsPanel];
+  headerActions: HeaderActionComponent[] = [];
 
   constructor() {}
 
@@ -138,14 +145,34 @@ class ContentManagerPlugin {
     }
   }
 
+  addDocumentHeaderAction(actions: DescriptionReducer<HeaderActionComponent>): void;
+  addDocumentHeaderAction(actions: HeaderActionComponent[]): void;
+  addDocumentHeaderAction(
+    actions: DescriptionReducer<HeaderActionComponent> | HeaderActionComponent[]
+  ) {
+    if (Array.isArray(actions)) {
+      this.headerActions = [...this.headerActions, ...actions];
+    } else if (typeof actions === 'function') {
+      this.headerActions = actions(this.headerActions);
+    } else {
+      throw new Error(
+        `Expected the \`actions\` passed to \`addDocumentHeaderAction\` to be an array or a function, but received ${getPrintableType(
+          actions
+        )}`
+      );
+    }
+  }
+
   get config() {
     return {
       id: 'content-manager',
       name: 'Content Manager',
       apis: {
-        addDocumentAction: this.addDocumentAction,
-        addEditViewSidePanel: this.addEditViewSidePanel,
+        addDocumentAction: this.addDocumentAction.bind(this),
+        addDocumentHeaderAction: this.addDocumentHeaderAction.bind(this),
+        addEditViewSidePanel: this.addEditViewSidePanel.bind(this),
         getDocumentActions: () => this.documentActions,
+        getHeaderActions: () => this.headerActions,
         getEditViewSidePanels: () => this.editViewSidePanels,
       },
     } satisfies PluginConfig;
@@ -177,13 +204,16 @@ const getPrintableType = (value: unknown): string => {
 
 export { ContentManagerPlugin };
 export type {
-  PanelComponent,
-  PanelDescription,
+  Context,
   DescriptionComponent,
   DescriptionReducer,
-  Context,
   PanelComponentProps,
+  PanelComponent,
+  PanelDescription,
   DocumentActionComponent,
   DocumentActionDescription,
   DocumentActionProps,
+  HeaderActionComponent,
+  HeaderActionDescription,
+  HeaderActionProps,
 };

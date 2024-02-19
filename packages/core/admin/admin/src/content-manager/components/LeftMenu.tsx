@@ -7,7 +7,8 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system/v2';
-import { useCollator, useFilter } from '@strapi/helper-plugin';
+import { useCollator, useFilter, useQueryParams } from '@strapi/helper-plugin';
+import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ import { getTranslation } from '../utils/translations';
 
 const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
+  const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager_app'].collectionTypeLinks
@@ -110,11 +112,27 @@ const LeftMenu = () => {
               badgeLabel={section.links.length.toString()}
             >
               {section.links.map((link) => {
-                const search = link.search ? `?${link.search}` : '';
-
                 return (
-                  // @ts-expect-error – DS inference does not work with the `as` prop.
-                  <SubNavLink as={NavLink} key={link.uid} to={`${link.to}${search}`}>
+                  <SubNavLink
+                    as={NavLink}
+                    key={link.uid}
+                    // @ts-expect-error – DS inference does not work with the `as` prop.
+                    to={{
+                      pathname: link.to,
+                      /**
+                       * We re-add the plugins query to the params available in the menu,
+                       * this means once you've changed the locale in the app, you continue
+                       * to see the same locale when changing content-type.
+                       *
+                       * NOTE: if you go to a content-type that does not have i18n enabled,
+                       * we return the default documents anyway.
+                       */
+                      search: stringify({
+                        ...parse(link.search ?? ''),
+                        plugins: query.plugins,
+                      }),
+                    }}
+                  >
                     {link.title}
                   </SubNavLink>
                 );

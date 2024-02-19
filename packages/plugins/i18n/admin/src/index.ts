@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
-import { CMEditViewInjectedComponents } from './components/CMEditViewInjectedComponents';
+import { LocalePickerAction } from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
@@ -12,10 +12,7 @@ import {
 import { Initializer } from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
-import { addLocaleToLinksHook } from './contentManagerHooks/app';
-import { mutateEditViewLayoutHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
-import { addCommonFieldsToInitialDataMiddleware } from './middlewares/addCommonFieldsToInitialData';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
 import { localePermissionMiddleware } from './middlewares/localePermission';
@@ -28,12 +25,11 @@ import { mutateCTBContentTypeSchema } from './utils/schemas';
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    // app.addMiddlewares([
-    //   addCommonFieldsToInitialDataMiddleware,
-    //   extendCTBAttributeInitialDataMiddleware,
-    //   extendCTBInitialDataMiddleware,
-    //   localePermissionMiddleware,
-    // ]);
+    app.addMiddlewares([
+      extendCTBAttributeInitialDataMiddleware,
+      extendCTBInitialDataMiddleware,
+      localePermissionMiddleware,
+    ]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({
       [i18nApi.reducerPath]: i18nApi.reducer,
@@ -46,19 +42,8 @@ export default {
     });
   },
   bootstrap(app: any) {
-    // // Hooks that mutate the collection types links in order to add the locale filter
-    // app.registerHook(
-    //   'Admin/CM/pages/App/mutate-collection-types-links',
-    //   addLocaleToLinksHook('collection-types')
-    // );
-    // app.registerHook(
-    //   'Admin/CM/pages/App/mutate-single-types-links',
-    //   addLocaleToLinksHook('single-types')
-    // );
     // // Hook that adds a column into the CM's LV table
-    // app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
-    // // Hooks that mutates the edit view layout
-    // app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
+    app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
 
     // Add the settings link
     app.addSettingsLink('global', {
@@ -73,30 +58,29 @@ export default {
       permissions: PERMISSIONS.accessMain,
     });
 
-    // app.injectContentManagerComponent('editView', 'informations', {
-    //   name: 'i18n-locale-filter-edit-view',
-    //   Component: CMEditViewInjectedComponents,
-    // });
+    const contentManager = app.getPlugin('content-manager');
 
-    // app.injectContentManagerComponent('listView', 'actions', {
-    //   name: 'i18n-locale-filter',
-    //   Component: LocalePicker,
-    // });
+    contentManager.apis.addDocumentHeaderAction([LocalePickerAction]);
 
-    // app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-    //   name: 'i18n-delete-bullets-in-modal',
-    //   Component: DeleteModalAdditionalInfo,
-    // });
+    app.injectContentManagerComponent('listView', 'actions', {
+      name: 'i18n-locale-filter',
+      Component: LocalePicker,
+    });
 
-    // app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
-    //   name: 'i18n-publish-bullets-in-modal',
-    //   Component: PublishModalAdditionalInfo,
-    // });
+    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: DeleteModalAdditionalInfo,
+    });
 
-    // app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
-    //   name: 'i18n-unpublish-bullets-in-modal',
-    //   Component: UnpublishModalAdditionalInfo,
-    // });
+    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+      name: 'i18n-publish-bullets-in-modal',
+      Component: PublishModalAdditionalInfo,
+    });
+
+    app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
+      name: 'i18n-unpublish-bullets-in-modal',
+      Component: UnpublishModalAdditionalInfo,
+    });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
 

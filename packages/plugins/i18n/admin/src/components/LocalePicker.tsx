@@ -1,64 +1,41 @@
-import { useState } from 'react';
-
 import { SingleSelect, SingleSelectOption, SingleSelectProps } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
-import { useMatch } from 'react-router-dom';
 
-import { useContentTypeHasI18n } from '../hooks/useContentTypeHasI18n';
-import { useContentTypePermissions } from '../hooks/useContentTypePermissions';
-import { useTypedSelector } from '../store/hooks';
+import { useI18n } from '../hooks/useI18n';
+import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
-import { getInitialLocale } from '../utils/locales';
 
 import type { I18nBaseQuery } from '../types';
 
+interface Query extends I18nBaseQuery {
+  page?: number;
+}
+
 const LocalePicker = () => {
   const { formatMessage } = useIntl();
-  const dispatch = useDispatch();
-  const locales = useTypedSelector((state) => state.i18n_locales.locales);
-  interface Query extends I18nBaseQuery {
-    page?: number;
-  }
-
   const [{ query }, setQuery] = useQueryParams<Query>();
-  const match = useMatch('/content-manager/:collectiontype/:slug');
-  const isContentTypeLocalized = useContentTypeHasI18n();
-  const { createPermissions, readPermissions } = useContentTypePermissions(match?.params.slug);
 
-  const initialLocale = getInitialLocale(query, locales);
-  const [selected, setSelected] = useState(initialLocale?.code || '');
+  const { hasI18n, canRead, canCreate } = useI18n();
+  const { data: locales = [] } = useGetLocalesQuery(undefined, {
+    skip: !hasI18n,
+  });
 
-  if (!isContentTypeLocalized) {
-    return null;
-  }
-
-  if (!locales || locales.length === 0) {
+  if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
     return null;
   }
 
   const displayedLocales = locales.filter((locale) => {
-    const canCreate = createPermissions.some(({ properties }) =>
-      (properties?.locales ?? []).includes(locale.code)
-    );
-    const canRead = readPermissions.some(({ properties }) =>
-      (properties?.locales ?? []).includes(locale.code)
-    );
-
-    return canCreate || canRead;
+    /**
+     * If you can create or read we allow you to see the locale exists
+     * this is because in the ListView, you may be able to create a new entry
+     * in a locale you can't read.
+     */
+    return canCreate.includes(locale.code) || canRead.includes(locale.code);
   });
 
   // @ts-expect-error – This can be removed in V2 of the DS.
   const handleChange: SingleSelectProps['onChange'] = (code: string) => {
-    if (code === selected) {
-      return;
-    }
-
-    setSelected(code);
-
-    dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
-
     setQuery({
       page: 1,
       plugins: { ...query.plugins, i18n: { locale: code } },
@@ -72,7 +49,7 @@ const LocalePicker = () => {
         id: getTranslation('actions.select-locale'),
         defaultMessage: 'Select locale',
       })}
-      value={selected}
+      value={query.plugins?.i18n?.locale || locales.find((locale) => locale.isDefault)?.code}
       onChange={handleChange}
     >
       {displayedLocales.map((locale) => (

@@ -89,13 +89,19 @@ describe('Create Locale', () => {
       const { user } = render(<CreateLocale />);
       await user.click(screen.getByRole('button', { name: 'Add new locale' }));
 
+      await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'a');
+
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
       expect(await screen.findByText('Please select a locale')).toBeInTheDocument();
-      expect(await screen.findByText('Please give the locale a display name')).toBeInTheDocument();
 
       await user.click(screen.getByRole('combobox', { name: 'Locales' }));
       await user.click(screen.getByRole('option', { name: 'Afrikaans (af)' }));
+      await user.clear(screen.getByRole('textbox', { name: 'Locale display name *' }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      expect(await screen.findByText('Please give the locale a display name')).toBeInTheDocument();
 
       await user.type(
         screen.getByRole('textbox', { name: 'Locale display name *' }),
