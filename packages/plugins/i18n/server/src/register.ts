@@ -20,7 +20,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
  */
 const addContentManagerLocaleMiddleware = (strapi: Strapi) => {
   strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
-    if (ctx.method === 'POST') {
+    if (ctx.method === 'POST' || ctx.method === 'PUT') {
       return validateLocaleCreation(ctx, next);
     }
 
