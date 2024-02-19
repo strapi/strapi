@@ -15,6 +15,11 @@ export type Category = Attribute.GetValues<
   id?: Entity.ID;
 };
 
+export const findCategoryDb = async (where: any) => {
+  const category = (await strapi.query(CATEGORY_UID).findOne({ where })) as Category | undefined;
+  return switchIdForDocumentId(category);
+};
+
 export const findArticleDb = async (where: any) => {
   const article = (await strapi.query(ARTICLE_UID).findOne({ where })) as Article | undefined;
   return switchIdForDocumentId(article);

@@ -2,7 +2,7 @@ import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
+import { ARTICLE_UID, CATEGORY_UID, findArticleDb, findArticlesDb, findCategoryDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
@@ -27,6 +27,7 @@ describe('Document Service', () => {
           locale: 'en', // should only clone the english locale
           data: {
             title: 'Cloned Document',
+            publishedAt: null,
           },
         });
 
@@ -57,6 +58,7 @@ describe('Document Service', () => {
         const result = await strapi.documents(ARTICLE_UID).clone(articleDb.id, {
           data: {
             title: 'Cloned Document', // Clone all locales
+            publishedAt: null,
           },
         });
 
@@ -103,6 +105,7 @@ describe('Document Service', () => {
           data: {
             comp: componentData.comp,
             dz: [...componentData.dz],
+            publishedAt: null,
           },
           populate: ['comp', 'dz'],
         });
@@ -113,6 +116,26 @@ describe('Document Service', () => {
           ...componentData,
           publishedAt: null,
         });
+      })
+    );
+
+    it(
+      'when cloning a document with unique fields, the unique fields should be validated correctly',
+      testInTransaction(async () => {
+        const categoryDb = await findCategoryDb({ documentId: 'Cat2' });
+
+        const documentId = categoryDb!.id;
+
+        // 'name' is a unique field, try to clone the category using the same name
+        await expect(
+          strapi.documents(CATEGORY_UID).clone(documentId, {
+            locale: categoryDb!.locale,
+            data: {
+              name: categoryDb!.name,
+              publishedAt: categoryDb?.publishedAt || null,
+            },
+          })
+        ).rejects.toThrow('This attribute must be unique');
       })
     );
 
