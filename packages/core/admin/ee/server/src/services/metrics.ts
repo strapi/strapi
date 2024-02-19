@@ -54,4 +54,4 @@ const startCron = (strapi: Strapi) => {
   });
 };
 
-export { startCron, getSSOProvidersList, sendUpdateProjectInformation };
+export default { startCron, getSSOProvidersList, sendUpdateProjectInformation };

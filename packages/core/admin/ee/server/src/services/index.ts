@@ -2,7 +2,7 @@ import auth from './auth';
 import passport from './passport';
 import role from './role';
 import user from './user';
-import * as metrics from './metrics';
+import metrics from './metrics';
 import seatEnforcement from './seat-enforcement';
 import workflows from './review-workflows/workflows';
 import stages from './review-workflows/stages';
