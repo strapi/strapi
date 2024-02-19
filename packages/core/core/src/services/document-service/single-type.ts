@@ -2,8 +2,8 @@ import type { Schema } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import createDocumentEngine from './document-engine';
-import DP from './draft-and-publish';
-import i18n from './internationalization';
+import * as DP from './draft-and-publish';
+import * as i18n from './internationalization';
 
 export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleType> = (
   contentType
@@ -55,6 +55,7 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
   async function create(params = {} as any) {
     DP.setStatusToDraft(params);
     DP.statusToData(params);
+    DP.filterDataPublishedAt(params);
     i18n.defaultLocale(contentType, params);
     i18n.localeToData(contentType, params);
 
@@ -62,6 +63,7 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
   }
 
   async function clone(id: string, params = {} as any) {
+    DP.filterDataPublishedAt(params);
     i18n.localeToLookup(contentType, params);
 
     return documents.clone(uid, id, params);
@@ -71,6 +73,7 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
     DP.setStatusToDraft(params);
     DP.statusToLookup(params);
     DP.statusToData(params);
+    DP.filterDataPublishedAt(params);
     // Default locale will be set if not provided
     i18n.defaultLocale(contentType, params);
     i18n.localeToLookup(contentType, params);
