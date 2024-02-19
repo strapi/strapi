@@ -22,4 +22,5 @@ export const RELEASE_SCHEMA = yup
       otherwise: yup.string().nullable(),
     }),
   })
-  .required();
+  .required()
+  .noUnknown();

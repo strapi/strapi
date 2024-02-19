@@ -65,25 +65,19 @@ describe('ReleaseModal', () => {
     });
 
     // Date and other fields are visible
-    const dateField = screen.getByRole('combobox', {
+    const dateField = await screen.findByRole('combobox', {
       name: /date/i,
     });
-    await waitFor(() => {
-      expect(dateField).toBeInTheDocument();
-    });
+    expect(dateField).toBeInTheDocument();
 
-    const time = screen.getByRole('combobox', {
+    const time = await screen.findByRole('combobox', {
       name: /time\s/i,
     });
-    await waitFor(() => {
-      expect(time).toBeInTheDocument();
-    });
+    expect(time).toBeInTheDocument();
 
-    const timezone = screen.getByRole('combobox', {
+    const timezone = await screen.findByRole('combobox', {
       name: /timezone/i,
     });
-    await waitFor(() => {
-      expect(timezone).toBeInTheDocument();
-    });
+    expect(timezone).toBeInTheDocument();
   });
 });
