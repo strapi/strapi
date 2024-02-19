@@ -66,6 +66,8 @@ const createMiddlewareManager = (): Documents.Middleware.Manager => {
 
       return runMiddlewares(ctx);
     },
+
+    // TODO: add a wrapping method to be able to pipe middleware logic
   } satisfies Documents.Middleware.Manager;
 };
 
