@@ -90,6 +90,8 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
         });
       }
     }
+
+    return res;
   }
 
   async function count(params = {} as any) {

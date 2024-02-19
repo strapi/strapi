@@ -81,14 +81,17 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     return this.mapEntity(entities, uid);
   },
 
-  async find(opts: Parameters<typeof strapi.documents.findMany>[1], uid: Common.UID.ContentType) {
+  async find(
+    opts: Parameters<Documents.ServiceInstance['findMany']>[0],
+    uid: Common.UID.ContentType
+  ) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
     const entities = await strapi.documents(uid).findMany(params);
     return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(
-    opts: Parameters<typeof strapi.documents.findMany>[1],
+    opts: Parameters<Documents.ServiceInstance['findMany']>[0],
     uid: Common.UID.ContentType
   ) {
     // Pagination

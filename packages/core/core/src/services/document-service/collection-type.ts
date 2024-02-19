@@ -90,6 +90,8 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.Coll
         });
       }
     }
+
+    return res;
   }
 
   async function count(params = {} as any) {
