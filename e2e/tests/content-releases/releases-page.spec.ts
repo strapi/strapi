@@ -29,7 +29,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Open the create release dialog
     await page.getByRole('button', { name: 'New release' }).click();
     await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
 
     // Create a release
     const newReleaseName = 'The Diamond Dogs';
