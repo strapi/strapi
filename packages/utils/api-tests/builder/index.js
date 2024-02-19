@@ -78,14 +78,17 @@ const createTestBuilder = (options = {}) => {
 
     async cleanup(options = {}) {
       const { enableTestDataAutoCleanup = true } = options;
-      const { models, actions } = ctx.state;
+      const { models, actions, fixtures } = ctx.state;
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
           await modelsUtils.cleanupModel(model.uid);
         }
 
-        await modelsUtils.cleanupModel('plugin::i18n.locale');
+        // Clean locales if they were created
+        if ('plugin::i18n.locale' in fixtures) {
+          await modelsUtils.cleanupModel('plugin::i18n.locale');
+        }
       }
 
       for (const action of actions.reverse()) {
