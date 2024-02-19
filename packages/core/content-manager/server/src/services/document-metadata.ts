@@ -95,7 +95,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    */
   async getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
     // Find the other status of the document
-    const status = version.publishedAt !== null ? 'draft' : 'published';
+    const status = version.publishedAt !== null ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
 
     // Get version that match the current locale and not match the current status
     const availableStatus = allVersions.find((v) => {
