@@ -27,7 +27,7 @@ import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
 
 Releases are assigned one of five statuses:
 
-- **Ready**: Release is ready for publishing without any invalid entries.
+- **Ready**: Indicates that the release is fully prepared for publishing, with no invalid entries present.
 - **Blocked**: Release has at least one invalid entry preventing publishing.
 - **Empty**: Release contains no entries and cannot be published.
 - **Failed**: Publishing attempt for the release has failed, with no changes since then.
