@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
-import { pageSizes } from '../../../packages/core/upload/admin/src/constants';
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
