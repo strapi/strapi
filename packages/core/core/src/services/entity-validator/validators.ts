@@ -147,16 +147,14 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   }
 
   return validator.test('unique', 'This attribute must be unique', async (value) => {
-    const isPublish = options.isDraft === false;
-
-    // When publishing, the value will not have changed so we take the value from the entity
-    // const valueToCheck = isPublish ? entity?.[updatedAttribute.name] : value;
+    // The value to validate is either provided or taken from the existing entity
+    const valueToCheck = value || entity?.[updatedAttribute.name];
 
     /**
      * If the attribute value is `null` we want to skip the unique validation.
      * Otherwise it'll only accept a single `null` entry in the database.
      */
-    if (_.isNil(value)) {
+    if (_.isNil(valueToCheck)) {
       return true;
     }
 
@@ -166,7 +164,8 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
      * unique constraint after already creating multiple entries with
      * the same attribute value for that field.
      */
-    if (!isPublish && value === entity?.[updatedAttribute.name]) {
+    const isDraft = options.isDraft === true;
+    if (isDraft && valueToCheck === entity?.[updatedAttribute.name]) {
       return true;
     }
 
@@ -176,9 +175,9 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
      */
     const record = await strapi.documents(model.uid).findFirst({
       locale: options.locale,
-      status: options.isDraft ? 'draft' : 'published',
+      status: isDraft ? 'draft' : 'published',
       filters: {
-        [updatedAttribute.name]: value,
+        [updatedAttribute.name]: valueToCheck,
         ...(entity?.id ? { id: { $ne: entity.id } } : {}),
       },
     });
