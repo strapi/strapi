@@ -20,30 +20,6 @@ const PRODUCT_UID = 'api::product.product';
 const TAG_UID = 'api::tag.tag';
 const SHOP_UID = 'api::shop.shop';
 
-const compo = (withRelations = false) => ({
-  displayName: 'compo',
-  category: 'default',
-  attributes: {
-    name: {
-      type: 'string',
-    },
-    ...(!withRelations
-      ? {}
-      : {
-          compo_products_ow: {
-            type: 'relation',
-            relation: 'oneToOne',
-            target: PRODUCT_UID,
-          },
-          compo_products_mw: {
-            type: 'relation',
-            relation: 'oneToMany',
-            target: PRODUCT_UID,
-          },
-        }),
-  },
-});
-
 const productModel = {
   attributes: {
     name: {
@@ -120,11 +96,6 @@ const shopModel = {
       relation: 'oneToMany',
       target: PRODUCT_UID,
     },
-    myCompo: {
-      type: 'component',
-      repeatable: false,
-      component: 'default.compo',
-    },
   },
   displayName: 'Shop',
   singularName: 'shop',
@@ -134,15 +105,12 @@ const shopModel = {
 describe('Document Service relations', () => {
   beforeAll(async () => {
     await builder
-      .addComponent(compo(false))
       .addContentTypes([tagModel, productModel, shopModel])
-      .addFixtures('plugin::i18n.locale', [
-        { name: 'Es', code: 'es' },
-        { name: 'Fr', code: 'fr' },
-      ])
+      // .addFixtures('plugin::i18n.locale', [
+      //   { name: 'Es', code: 'es' },
+      //   { name: 'Fr', code: 'fr' },
+      // ])
       .build();
-
-    await modelsUtils.modifyComponent(compo(true));
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });

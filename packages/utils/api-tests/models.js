@@ -149,7 +149,12 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
     const entries = [];
 
     for (const data of dataMap[model]) {
-      entries.push(await strapi.entityService.create(toContentTypeUID(model), { data }));
+      try {
+        entries.push(await strapi.entityService.create(toContentTypeUID(model), { data }));
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
     }
 
     resultMap[model] = entries;
