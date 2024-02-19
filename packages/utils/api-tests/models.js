@@ -149,12 +149,7 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
     const entries = [];
 
     for (const data of dataMap[model]) {
-      try {
-        entries.push(await strapi.entityService.create(toContentTypeUID(model), { data }));
-      } catch (err) {
-        strapi.log.error('Error creating fixture', model, JSON.stringify(data));
-        throw err;
-      }
+      entries.push(await strapi.entityService.create(toContentTypeUID(model), { data }));
     }
 
     resultMap[model] = entries;
@@ -171,14 +166,9 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   for (const entry of entries) {
     const dataToCreate = isFunction(entry) ? entry(results) : entry;
-    try {
-      results.push(
-        await strapi.entityService.create(toContentTypeUID(model), { data: dataToCreate })
-      );
-    } catch (err) {
-      strapi.log.error(`Error creating fixture for ${model}, entry: ${JSON.stringify(entry)}`);
-      throw err;
-    }
+    results.push(
+      await strapi.entityService.create(toContentTypeUID(model), { data: dataToCreate })
+    );
   }
 
   await cleanup();

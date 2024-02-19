@@ -149,9 +149,6 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   return validator.test('unique', 'This attribute must be unique', async (value) => {
     const isPublish = options.isDraft === false;
 
-    // When publishing, the value will not have changed so we take the value from the entity
-    // const valueToCheck = isPublish ? entity?.[updatedAttribute.name] : value;
-
     /**
      * If the attribute value is `null` we want to skip the unique validation.
      * Otherwise it'll only accept a single `null` entry in the database.
