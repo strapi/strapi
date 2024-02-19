@@ -50,8 +50,6 @@ describe('CRUD locales', () => {
   afterAll(async () => {
     await localeService.setDefaultLocale({ code: 'en' });
 
-    // Clean locales, as they are not deleted by the builder
-    await strapi.query('plugin::i18n.locale').delete({ where: { code: { $ne: 'en' } } });
     await strapi.destroy();
     await builder.cleanup();
   });
