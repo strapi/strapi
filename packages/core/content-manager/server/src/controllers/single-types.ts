@@ -103,8 +103,15 @@ export default {
       if (permissionChecker.cannot.create()) {
         return ctx.forbidden();
       }
+      // Check if document exists
+      const exists = await getService('entity-manager').exists(model);
+      if (!exists) {
+        return ctx.notFound();
+      }
 
-      return ctx.notFound();
+      // If the requested locale doesn't exist, return an empty response
+      ctx.status = 204;
+      return;
     }
 
     if (permissionChecker.cannot.read(document)) {
