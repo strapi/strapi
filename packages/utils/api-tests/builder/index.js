@@ -85,10 +85,7 @@ const createTestBuilder = (options = {}) => {
           await modelsUtils.cleanupModel(model.uid);
         }
 
-        // Clean locales if they were created
-        if ('plugin::i18n.locale' in fixtures) {
-          await modelsUtils.cleanupModel('plugin::i18n.locale');
-        }
+        await modelsUtils.cleanupModel('plugin::i18n.locale');
       }
 
       for (const action of actions.reverse()) {
