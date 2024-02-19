@@ -58,11 +58,7 @@ export default class MysqlDialect extends Dialect {
         .raw(`set session sql_require_primary_key = 0;`)
         .connection(nativeConnection);
     } catch (err) {
-      if ((err as any)?.code === 'ER_SPECIFIC_ACCESS_DENIED_ERROR') {
-        console.warn('Failed to set session sql_require_primary_key = 0');
-      } else {
-        throw err;
-      }
+      // Ignore error due to lack of session permissions
     }
 
     // We only need to get info on the first connection in the pool
@@ -76,11 +72,7 @@ export default class MysqlDialect extends Dialect {
     try {
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
     } catch (err) {
-      if ((err as any)?.code === 'ER_SPECIFIC_ACCESS_DENIED_ERROR') {
-        console.warn('Failed to set session sql_require_primary_key = 0');
-      } else {
-        throw err;
-      }
+      // Ignore error due to lack of session permissions
     }
   }
 
