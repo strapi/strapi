@@ -184,23 +184,37 @@ export default {
 
     const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
 
-    const document = await entityManager.findOne(id, model, {
+    const version = await entityManager.findOne(id, model, {
       populate,
       locale,
       status,
     });
 
-    if (!document) {
-      return ctx.notFound();
+    if (!version) {
+      // Check if document exists
+      const exists = await entityManager.exists(model, id);
+      if (!exists) {
+        return ctx.notFound();
+      }
+
+      // If the requested locale doesn't exist, return an empty response
+      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+        model,
+        { id, locale, publishedAt: null },
+        { availableLocales: true, availableStatus: false }
+      );
+      ctx.body = { data: {}, meta };
+
+      return;
     }
 
     // if the user has condition that needs populated content, it's not applied because entity don't have relations populated
-    if (permissionChecker.cannot.read(document)) {
+    if (permissionChecker.cannot.read(version)) {
       return ctx.forbidden();
     }
 
     // TODO: Count populated relations by permissions
-    const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
   },
 
