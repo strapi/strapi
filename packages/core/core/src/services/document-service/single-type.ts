@@ -2,10 +2,11 @@ import type { Schema } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import createDocumentEngine from './document-engine';
+import DP from './draft-and-publish';
+import i18n from './internationalization';
 
 export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleType> = (
-  contentType,
-  { middlewareManager }
+  contentType
 ) => {
   const { uid } = contentType;
 
@@ -13,79 +14,109 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
   const documents = createDocumentEngine({ strapi, db: strapi?.db });
 
   async function findMany(params = {} as any) {
-    return middlewareManager.run({ action: 'findMany', uid, params, options: {} }, ({ params }) =>
-      documents.findMany(uid, params)
-    );
+    // TODO: replace with chaining
+    DP.defaultToDraft(params);
+    DP.statusToLookup(params);
+    i18n.defaultLocale(contentType, params);
+    i18n.localeToLookup(contentType, params);
+
+    return documents.findMany(uid, params);
   }
 
   async function findFirst(params = {} as any) {
-    return middlewareManager.run({ action: 'findFirst', uid, params, options: {} }, ({ params }) =>
-      documents.findFirst(uid, params)
-    );
+    DP.defaultToDraft(params);
+    DP.statusToLookup(params);
+    i18n.defaultLocale(contentType, params);
+    i18n.localeToLookup(contentType, params);
+
+    return documents.findFirst(uid, params);
   }
 
   async function findOne(id: string, params = {} as any) {
-    return middlewareManager.run(
-      { action: 'findOne', uid, params, options: { id } },
-      ({ params }) => documents.findOne(uid, id, params)
-    );
+    DP.defaultToDraft(params);
+    DP.statusToLookup(params);
+    i18n.defaultLocale(contentType, params);
+    i18n.localeToLookup(contentType, params);
+
+    return documents.findOne(uid, id, params);
   }
 
   async function deleteFn(id: string, params = {} as any) {
-    return middlewareManager.run({ action: 'delete', uid, params, options: { id } }, ({ params }) =>
-      documents.delete(uid, id, params)
-    );
+    DP.statusToLookup(params);
+    i18n.localeToLookup(contentType, params);
+
+    return documents.delete(uid, id, params);
   }
 
   async function deleteMany(params = {} as any) {
-    return middlewareManager.run({ action: 'deleteMany', uid, params, options: {} }, ({ params }) =>
-      documents.deleteMany(uid, params)
-    );
+    return documents.deleteMany(uid, params);
   }
 
   async function create(params = {} as any) {
-    return middlewareManager.run({ action: 'create', uid, params, options: {} }, ({ params }) =>
-      documents.create(uid, params)
-    );
+    DP.setStatusToDraft(params);
+    DP.statusToData(params);
+    i18n.defaultLocale(contentType, params);
+    i18n.localeToData(contentType, params);
+
+    return documents.create(uid, params);
   }
 
   async function clone(id: string, params = {} as any) {
-    return middlewareManager.run({ action: 'clone', uid, params, options: { id } }, ({ params }) =>
-      documents.clone(uid, id, params)
-    );
+    i18n.localeToLookup(contentType, params);
+
+    return documents.clone(uid, id, params);
   }
 
   async function update(id: string, params = {} as any) {
-    return middlewareManager.run({ action: 'update', uid, params, options: { id } }, ({ params }) =>
-      documents.update(uid, id, params)
-    );
+    DP.setStatusToDraft(params);
+    DP.statusToLookup(params);
+    DP.statusToData(params);
+    // Default locale will be set if not provided
+    i18n.defaultLocale(contentType, params);
+    i18n.localeToLookup(contentType, params);
+    i18n.localeToData(contentType, params);
+
+    const res = await documents.update(uid, id, params);
+
+    if (!res) {
+      const documentExists = await strapi.db
+        .query(contentType.uid)
+        .findOne({ where: { documentId: id } });
+
+      if (documentExists) {
+        return create({
+          ...params,
+          data: { ...params.data, documentId: id },
+        });
+      }
+    }
+
+    return res;
   }
 
   async function count(params = {} as any) {
-    return middlewareManager.run({ action: 'count', uid, params, options: {} }, ({ params }) =>
-      documents.count(uid, params)
-    );
+    DP.defaultToDraft(params);
+    i18n.defaultLocale(contentType, params);
+
+    return documents.count(uid, params);
   }
 
   async function publish(id: string, params = {} as any) {
-    return middlewareManager.run(
-      { action: 'publish', uid, params, options: { id } },
-      ({ params }) => documents.publish(uid, id, params)
-    );
+    i18n.localeToLookup(contentType, params);
+
+    return documents.publish(uid, id, params);
   }
 
   async function unpublish(id: string, params = {} as any) {
-    return middlewareManager.run(
-      { action: 'unpublish', uid, params, options: { id } },
-      ({ params }) => documents.unpublish(uid, id, params)
-    );
+    i18n.localeToLookup(contentType, params);
+
+    return documents.unpublish(uid, id, params);
   }
 
   async function discardDraft(id: string, params = {} as any) {
-    return middlewareManager.run(
-      { action: 'discardDraft', uid, params, options: { id } },
-      ({ params }) => documents.discardDraft(uid, id, params)
-    );
+    i18n.localeToLookup(contentType, params);
+
+    return documents.discardDraft(uid, id, params);
   }
 
   return {
