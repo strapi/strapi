@@ -10,6 +10,7 @@ import type { UID } from '@strapi/types';
 // Mocks
 const layout = {
   contentType: {
+    kind: 'collectionType',
     info: {
       singularName: 'kitchensink',
     },
@@ -30,6 +31,18 @@ const selectedVersion = {
     title: 'Test Title',
   },
 };
+const useParamsMock = jest.fn();
+const useQueryParamsMock = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => useParamsMock(),
+}));
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useQueryParams: () => useQueryParamsMock(),
+}));
 
 const render = (props: HistoryContextValue) =>
   renderRTL(
@@ -40,6 +53,9 @@ const render = (props: HistoryContextValue) =>
 
 describe('VersionHeader', () => {
   it('should display the correct title and subtitle for a non-localized entry', () => {
+    useParamsMock.mockReturnValue({ collectionType: 'collection-types' });
+    useQueryParamsMock.mockReturnValue([{ query: {} }]);
+
     render({
       selectedVersion,
       // @ts-expect-error ignore missing properties
@@ -48,9 +64,18 @@ describe('VersionHeader', () => {
 
     expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
     expect(screen.getByText('Test Title (kitchensink)')).toBeInTheDocument();
+
+    const backLink = screen.getByRole('link', { name: 'Back' });
+    expect(backLink).toHaveAttribute(
+      'href',
+      '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr'
+    );
   });
 
   it('should display the correct title and subtitle for a localized entry', () => {
+    useParamsMock.mockReturnValue({ collectionType: 'collection-types' });
+    useQueryParamsMock.mockReturnValue([{ query: { plugins: { i18n: { locale: 'en' } } } }]);
+
     render({
       selectedVersion: {
         ...selectedVersion,
@@ -65,9 +90,18 @@ describe('VersionHeader', () => {
 
     expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
     expect(screen.getByText('Test Title (kitchensink), in English (en)')).toBeInTheDocument();
+
+    const backLink = screen.getByRole('link', { name: 'Back' });
+    expect(backLink).toHaveAttribute(
+      'href',
+      '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr?plugins[i18n][locale]=en'
+    );
   });
 
   it('should display the correct subtitle without an entry title (mainField)', () => {
+    useParamsMock.mockReturnValue({ collectionType: 'collection-types' });
+    useQueryParamsMock.mockReturnValue([{ query: {} }]);
+
     render({
       selectedVersion,
       layout: {

@@ -6,7 +6,7 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { NavLink, type To, useParams } from 'react-router-dom';
 
 import { useHistoryContext } from '../pages/History';
 
@@ -23,20 +23,25 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
+  const params = useParams<{ collectionType: string; slug: string }>();
 
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
 
-  const backLink = (() => {
+  const getBackLink = (): To => {
     const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
     if (layout.contentType.kind === 'collectionType') {
-      // TODO: use the constant from constants/collections.ts once D&P v5 is merged
-      return `../collection-types/${version.contentType}/${version.relatedDocumentId}?${pluginsQueryParams}`;
+      return {
+        pathname: `../${params.collectionType}/${version.contentType}/${version.relatedDocumentId}`,
+        search: pluginsQueryParams,
+      };
     }
 
-    // TODO: use the constant from constants/collections.ts once D&P v5 is merged
-    return `../single-types/${version.contentType}/${version.relatedDocumentId}?${pluginsQueryParams}`;
-  })();
+    return {
+      pathname: `../${params.collectionType}/${version.contentType}`,
+      search: pluginsQueryParams,
+    };
+  };
 
   return (
     <HeaderLayout
@@ -69,7 +74,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           startIcon={<ArrowLeft />}
           as={NavLink}
           // @ts-expect-error - types are not inferred correctly through the as prop.
-          to={backLink}
+          to={getBackLink()}
         >
           {formatMessage({
             id: 'global.back',
