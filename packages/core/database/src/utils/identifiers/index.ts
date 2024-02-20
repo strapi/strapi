@@ -38,7 +38,7 @@ export const getNameFromTokens = (tokens: NameToken[], max: number = MAX_DB_IDEN
 };
 
 // Generic name handler used by all helper functions
-export const getName = (names: NameInput, options: NameOptions) => {
+export const getName = (names: NameInput, options: NameOptions = {}) => {
   const tokens = _.castArray(names).map((name) => {
     return {
       name,
@@ -93,7 +93,10 @@ export const getMorphTableName = (collectionName: string, attributeName: string)
  * COLUMNS
  */
 
-// Regular relation join tables
+export const getColumnName = (attributeName: string) => {
+  return getName(attributeName);
+};
+
 export const getJoinColumnEntityIdName = () => {
   return getName(ENTITY, { suffix: 'id' });
 };
@@ -102,7 +105,25 @@ export const getJoinColumnAttributeIdName = (attributeName: string) => {
   return getName(attributeName, { suffix: 'id' });
 };
 
-// Morph Join Tables
+export const getJoinColumnIdName = (singularName: string) => {
+  return getName(singularName, { suffix: 'id' });
+};
+
+export const getInverseJoinColumnIdName = (singularName: string) => {
+  return getName(singularName, { suffix: 'id', prefix: 'inv' });
+};
+
+export const getOrderColumnName = (singularName: string) => {
+  return getName(singularName, { suffix: 'order' });
+};
+
+export const getInverseOrderColumnName = (singularName: string) => {
+  return getName(singularName, { suffix: 'order', prefix: 'inv' });
+};
+
+/**
+ * Morph Join Tables
+ */
 export const getMorphColumnJoinTableIdName = (singularName: string) => {
   return getName(singularName, { suffix: 'id' });
 };
@@ -127,6 +148,17 @@ export const getFkIndexName = (names: NameInput) => {
   return getName(names, { suffix: 'fk' });
 };
 
+export const getInverseFkIndexName = (names: NameInput) => {
+  return getName(names, { suffix: 'inv_fk' });
+};
+
+export const getOrderFkIndexName = (names: NameInput) => {
+  return getName(names, { suffix: 'order_fk' });
+};
+
+export const getOrderInverseFkIndexName = (names: NameInput) => {
+  return getName(names, { suffix: 'order_inv_fk' });
+};
 export const getUniqueIndexName = (names: NameInput) => {
   return getName(names, { suffix: 'unique' });
 };
