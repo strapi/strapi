@@ -82,7 +82,14 @@ const extractDataIds = (
         // TODO: Handle morph relations (they have multiple targets)
         if (!target) return;
 
-        extractedIds.forEach((id) => idMap.add(target, id as string, opts.locale));
+        extractedIds.forEach((id) =>
+          idMap.add({
+            uid: target,
+            documentId: id as string,
+            locale: opts.locale,
+            isDraft: opts.isDraft,
+          })
+        );
       }
     },
     { schema: strapi.getModel(opts.uid) },

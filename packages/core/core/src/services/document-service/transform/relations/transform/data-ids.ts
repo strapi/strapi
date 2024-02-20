@@ -1,30 +1,57 @@
-import { EntityService, Attribute } from '@strapi/types';
-import { errors, traverseEntity } from '@strapi/utils';
+import { EntityService, Attribute, Common } from '@strapi/types';
+import { traverseEntity } from '@strapi/utils';
 import { isObject, isNil } from 'lodash/fp';
-import { ShortHand, LongHand, ID, GetIdOrThrow } from '../utils/types';
+import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
-import { Options } from '../../types';
+
+const isNumeric = (value: any): value is number => {
+  const parsed = parseInt(value, 10);
+  return !Number.isNaN(parsed);
+};
 
 const transformPrimitive = <T extends ShortHand | LongHand>(
   relation: T | T[] | null | undefined,
-  getId: GetIdOrThrow
+  getId: GetId
 ): T | T[] | undefined => {
+  // If id value is a number, return it as is, it's already an entry id
+  if (isNumeric(relation)) {
+    return relation;
+  }
+
   // null
-  if (isNil(relation)) return relation as T | undefined;
+  if (isNil(relation)) {
+    return relation as T | undefined;
+  }
+
   // id
-  if (isShortHand(relation)) return getId(relation) as T;
+  if (isShortHand(relation)) {
+    return getId(relation) as T;
+  }
+
   // { id }
-  if (isLongHand(relation)) return { ...(relation as object), id: getId(relation.id) } as T;
+  if (isLongHand(relation)) {
+    // It's already an entry id
+    if (isNumeric(relation.id)) return relation;
+
+    const id = getId(relation.id) as T;
+
+    // If the id is not found, return undefined
+    if (!id) return undefined;
+
+    return { ...(relation as object), id: getId(relation.id) } as T;
+  }
+
   // id[]
-  if (Array.isArray(relation))
-    return relation.map((item) => transformPrimitive(item, getId)) as T[];
+  if (Array.isArray(relation)) {
+    return relation.map((item) => transformPrimitive(item, getId)).filter(Boolean) as T[];
+  }
   return undefined;
 };
 
 const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>,
-  getId: GetIdOrThrow
+  getId: GetId
 ): EntityService.Params.Attribute.RelationInputValue<T> => {
   const map = transformPrimitive(relation as any, getId);
   if (map) return map;
@@ -70,9 +97,24 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   return relation;
 };
 
-const EXCLUDED_FIELDS = ['createdBy', 'updatedBy', 'localizations', 'strapi_stage'];
+const EXCLUDED_FIELDS = [
+  'createdBy',
+  'updatedBy',
+  'localizations',
+  'strapi_stage',
+  'strapi_assignee',
+];
 
-const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, opts: Options) => {
+const transformDataIdsVisitor = (
+  idMap: IdMap,
+  data: Record<string, any>,
+  opts: {
+    uid: Common.UID.Schema;
+    locale?: string | null;
+    isDraft?: boolean;
+    allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
+  }
+) => {
   return traverseEntity(
     ({ key, value, attribute }, { set }) => {
       // Find relational attributes, and return the document ids
@@ -83,13 +125,21 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, opts: 
         // TODO: Handle this differently
         if (EXCLUDED_FIELDS.includes(key)) return;
 
-        const getIdOrThrow = (documentId: ID): ID => {
-          const entryId = idMap.get(target, documentId as string, opts.locale);
+        const getId = (documentId: ID): ID | null => {
+          const entryId = idMap.get({
+            uid: target,
+            documentId: documentId as string,
+            locale: opts.locale,
+            isDraft: opts.isDraft,
+          });
+
           if (entryId) return entryId;
-          throw new errors.NotFoundError(`Document with id "${documentId}" not found`);
+          if (opts.allowMissingId) return null;
+
+          throw new Error(`Document with id "${documentId}" not found`);
         };
 
-        const newRelation = transformRelationIdsVisitor(value as any, getIdOrThrow);
+        const newRelation = transformRelationIdsVisitor(value as any, getId);
         set(key, newRelation as any);
       }
     },

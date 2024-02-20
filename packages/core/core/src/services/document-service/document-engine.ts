@@ -24,6 +24,9 @@ import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';
 import { transformParamsDocumentId, transformOutputDocumentId } from './transform/id-transform';
+import { getDeepPopulate } from './utils/populate';
+import { transformOutputIds } from './transform/relations/transform/output-ids';
+import { transformData } from './transform/data';
 
 const { transformParamsToQuery } = convertQueryParams;
 
@@ -32,9 +35,7 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: i18n - Move logic to i18n package
  * TODO: Webhooks
  * TODO: Audit logs
- * TODO: Entity Validation - Uniqueness across same locale and publication status
  * TODO: File upload
- * TODO: replace 'any'
  * TODO: availableLocales
  *
  */
@@ -146,7 +147,9 @@ const createDocumentEngine = ({
     // Param parsing
     const { data, ...restParams } = await transformParamsDocumentId(uid, params, {
       locale: params.locale,
-      isDraft: true,
+      // @ts-expect-error - published at is not always present
+      // User can not set publishedAt on create, but other methods in the engine can (publish)
+      isDraft: !params.data?.publishedAt,
     });
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
@@ -158,7 +161,7 @@ const createDocumentEngine = ({
     const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
 
     const validData = await entityValidator.validateEntityCreation(model, data, {
-      isDraft: true,
+      isDraft: !data.publishedAt,
       locale: params?.locale,
     });
 
@@ -230,8 +233,6 @@ const createDocumentEngine = ({
 
   async clone(uid, documentId, params) {
     // TODO: File upload
-    // TODO: Entity validator.
-
     // Param parsing
     const { data, ...restParams } = await transformParamsDocumentId(uid, params || {}, {
       isDraft: true,
@@ -293,15 +294,36 @@ const createDocumentEngine = ({
       lookup: { ...params?.lookup, publishedAt: { $ne: null } },
     });
 
-    // Clone every draft version to be published
-    const clonedDocuments = (await this.clone(uid, documentId, {
-      ...(params || {}),
-      // @ts-expect-error - Generic type does not have publishedAt attribute by default
-      data: { documentId, publishedAt: new Date() },
-    })) as any;
+    // Get deep populate
+    const entriesToPublish = await strapi.db?.query(uid).findMany({
+      where: {
+        ...params?.lookup,
+        documentId,
+        publishedAt: null,
+      },
+      populate: getDeepPopulate(uid),
+    });
 
-    // TODO: Return actual count
-    return { versions: clonedDocuments?.versions || [] };
+    // Transform draft entry data and create published versions
+    const publishedEntries = await mapAsync(
+      entriesToPublish,
+      pipeAsync(
+        set('publishedAt', new Date()),
+        set('documentId', documentId),
+        omit('id'),
+        // draft entryId -> documentId
+        (entry) => transformOutputIds(uid, entry),
+        // documentId -> published entryId
+        (entry) => {
+          const opts = { uid, locale: entry.locale, isDraft: false, allowMissingId: true };
+          return transformData(entry, opts);
+        },
+        // Create the published entry
+        ({ locale, ...data }) => this.create(uid, { data, locale, ...params })
+      )
+    );
+
+    return { versions: publishedEntries };
   },
 
   async unpublish(uid, documentId, params) {
@@ -316,6 +338,9 @@ const createDocumentEngine = ({
    * Steps:
    * - Delete the matching draft versions (publishedAt = null)
    * - Clone the matching published versions into draft versions
+   *
+   * If the document has a published version, the draft version will be created from the published version.
+   * If the document has no published version, the version will be removed.
    */
   async discardDraft(uid, documentId, params) {
     // Delete draft versions, clone published versions into draft versions
@@ -325,16 +350,36 @@ const createDocumentEngine = ({
       lookup: { ...params?.lookup, publishedAt: null },
     });
 
-    // Clone published versions into draft versions
-    const clonedDocuments = (await this.clone(uid, documentId, {
-      ...(params || {}),
-      // Clone only published versions
-      lookup: { ...params?.lookup, publishedAt: { $ne: null } },
-      // @ts-expect-error - Generic type does not have publishedAt attribute by default
-      data: { documentId, publishedAt: null },
-    })) as any;
+    // Get deep populate of published versions
+    const entriesToDraft = await strapi.db?.query(uid).findMany({
+      where: {
+        ...params?.lookup,
+        documentId,
+        publishedAt: { $ne: null },
+      },
+      populate: getDeepPopulate(uid),
+    });
 
-    return { versions: clonedDocuments?.versions || [] };
+    // Transform published entry data and create draft versions
+    const draftEntries = await mapAsync(
+      entriesToDraft,
+      pipeAsync(
+        set('publishedAt', null),
+        set('documentId', documentId),
+        omit('id'),
+        // published entryId -> document
+        (entry) => transformOutputIds(uid, entry),
+        // documentId -> draft entryId
+        (entry) => {
+          const opts = { uid, locale: entry.locale, isDraft: true, allowMissingId: true };
+          return transformData(entry, opts);
+        },
+        // Create the draft entry
+        ({ locale, ...data }) => this.create(uid, { data, locale, ...params })
+      )
+    );
+
+    return { versions: draftEntries };
   },
 });
 
