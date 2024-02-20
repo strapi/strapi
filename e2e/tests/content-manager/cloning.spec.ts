@@ -32,7 +32,7 @@ test.describe('Cloning', () => {
     await expect(page.getByRole('button', { name: 'Row actions' }).first()).toBeEnabled();
     await page.getByRole('button', { name: 'Row actions' }).first().click();
     await page.getByRole('menuitem', { name: 'Duplicate' }).click();
-    await expect(page.getByText('Success:Saved')).toBeVisible();
+    await expect(page.getByText('Success:Cloned document')).toBeVisible();
 
     /**
      * Now we should be in our edit view with the new document already saved.
@@ -98,7 +98,7 @@ test.describe('Cloning', () => {
     await page.getByRole('textbox', { name: 'slug' }).fill('');
     await page.getByRole('textbox', { name: 'slug' }).fill('hammers-post-match-analysis');
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByText('Success:Saved')).toBeVisible();
+    await expect(page.getByText('Success:Cloned document')).toBeVisible();
     await page.waitForURL(EDIT_URL);
 
     /**
