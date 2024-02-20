@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { Common, LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
 
-import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from './constants';
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { getEntryValidStatus, getService } from './utils';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
@@ -146,6 +146,10 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
 
           throw err;
         });
+
+      Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+        strapi.webhookStore.addAllowedEvent(key, value);
+      });
     }
   }
 };

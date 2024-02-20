@@ -92,6 +92,9 @@ describe('bootstrap', () => {
         uid: 'contentTypeB',
       },
     },
+    webhookStore: {
+      addAllowedEvent: jest.fn(),
+    },
   };
 
   beforeEach(() => {
