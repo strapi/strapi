@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
+import { Box, Divider, Flex, FocusTrap, Icon, Typography } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
@@ -12,7 +12,7 @@ import {
   NavUser,
 } from '@strapi/design-system/v2';
 import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
-import { Exit, Write } from '@strapi/icons';
+import { Exit, Write, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -46,6 +46,13 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
     path {
       fill: ${({ theme }) => theme.colors.danger600};
     }
+  }
+`;
+
+const NavLinkWrapper = styled(Box)`
+  div:nth-child(2) {
+    /* remove badge background color */
+    background: transparent;
   }
 `;
 
@@ -134,19 +141,24 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })}
           >
             {pluginsSectionLinks.map((link) => {
-              const Icon = link.icon;
-
+              const LinkIcon = link.icon;
               return (
-                <NavLink
-                  as={RouterNavLink}
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                  to={link.to}
-                  key={link.to}
-                  icon={<Icon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                </NavLink>
+                <NavLinkWrapper key={link.to}>
+                  <NavLink
+                    as={RouterNavLink}
+                    to={link.to}
+                    icon={<LinkIcon />}
+                    onClick={() => handleClickOnLink(link.to)}
+                    // @ts-expect-error: badgeContent in the DS accept only strings
+                    badgeContent={
+                      link?.lockIcon ? (
+                        <Icon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
+                      ) : undefined
+                    }
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </NavLink>
+                </NavLinkWrapper>
               );
             })}
           </NavSection>

@@ -31,6 +31,13 @@ module.exports = {
       target: 'api::relation.relation',
       targetAttribute: 'documents',
     },
+    private_relations: {
+      type: 'relation',
+      private: true,
+      relation: 'manyToMany',
+      target: 'api::relation.relation',
+      targetAttribute: 'documents',
+    },
     componentA: {
       type: 'component',
       component: 'default.component-a',
