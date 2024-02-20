@@ -28,7 +28,7 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   }
 
   /**
-   * Keep returning contentTypes to avoid losing the data if the feature is disabled,
+   * Keep registering the model to avoid losing the data if the feature is disabled,
    * or if the license expires.
    */
   return {
