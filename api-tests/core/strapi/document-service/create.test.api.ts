@@ -74,17 +74,17 @@ describe('Document Service', () => {
     );
 
     it(
-      'can create an article in french',
+      'can create an article in dutch',
       testInTransaction(async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
-          locale: 'fr',
+          locale: 'nl',
           data: { title: 'Article' },
         });
 
         // verify that the returned document was updated
         expect(article).toMatchObject({
           title: 'Article',
-          locale: 'fr', // selected locale
+          locale: 'nl', // selected locale
           publishedAt: null, // should be a draft
         });
       })
@@ -95,7 +95,7 @@ describe('Document Service', () => {
       'can not directly create a published document',
       testInTransaction(async () => {
         const articlePromise = strapi.documents(ARTICLE_UID).create({
-          locale: 'fr',
+          locale: 'nl',
           status: 'published',
           data: { title: 'Article' },
         });
@@ -123,7 +123,7 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const author = await strapi.documents(AUTHOR_UID).create({
           // Should be ignored on non-localized content types
-          locale: 'fr',
+          locale: 'nl',
           data: { name: 'Author' },
         });
 

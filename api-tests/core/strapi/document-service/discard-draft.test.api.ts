@@ -28,7 +28,7 @@ describe('Document Service', () => {
 
         // Update drafts
         await Promise.all(
-          ['es', 'fr', 'en'].map((locale) =>
+          ['es', 'nl', 'en'].map((locale) =>
             strapi.documents(ARTICLE_UID).update(articleDb.id, {
               locale,
               data: { title: 'Draft Article' },
@@ -71,7 +71,7 @@ describe('Document Service', () => {
 
         // Update drafts
         await Promise.all(
-          ['es', 'fr', 'en'].map((locale) =>
+          ['es', 'nl', 'en'].map((locale) =>
             strapi.documents(ARTICLE_UID).update(articleDb.id, {
               locale,
               data: { title: 'Draft Article' },
@@ -103,7 +103,7 @@ describe('Document Service', () => {
         draftArticlesDb.forEach((article) => {
           // The draft title should not have been discarded
           // @ts-expect-error - FIX: 'StringAttribute' and 'string' have no overlap
-          if (['es', 'fr'].includes(article.locale)) {
+          if (['es', 'nl'].includes(article.locale)) {
             expect(article.title).toBe('Draft Article');
           }
         });
