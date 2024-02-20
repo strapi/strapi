@@ -18,21 +18,44 @@ describeOnCondition(hasFutureFlag)('History', () => {
     }) => {
       // Navigate to the content-manager - collection type - article
       await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('combobox', { name: 'Select a locale' }).click();
+      await page.getByRole('option', { name: 'French (fr)' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
       await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article/create?plugins\\[i18n\\]\\[locale\\]=en'
+        '**/content-manager/collection-types/api::article.article/create?plugins\\[i18n\\]\\[locale\\]=fr'
       );
 
       /**
        * Create
        */
       const titleInput = await page.getByRole('textbox', { name: 'title' });
-      await titleInput.fill('Being from Kansas is a pity');
+      // Create a french version
+      const frenchTitle = "N'importe quoi";
+      await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
       await page.getByRole('link', { name: 'History' }).click();
       await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=en'
+        `**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=fr`
+      );
+      await expect(titleInput).toHaveValue(frenchTitle);
+
+      // Go back to create new entry
+      await page.goto('/admin');
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await page.waitForURL(
+        '**/content-manager/collection-types/api::article.article/create?plugins\\[i18n\\]\\[locale\\]=en'
+      );
+
+      // Create an english version
+      const englishTitle = 'Being from Kansas is a pity';
+      await titleInput.fill(englishTitle);
+      await page.getByRole('button', { name: 'Save' }).click();
+      // Go to the history page
+      await page.getByRole('link', { name: 'History' }).click();
+      await page.waitForURL(
+        `**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=en`
       );
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
@@ -41,7 +64,9 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(currentVersion.getByText('(current)')).toBeVisible();
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toBeDisabled();
-      await expect(titleInput).toHaveValue('Being from Kansas is a pity');
+      await expect(titleInput).toHaveValue(englishTitle);
+      // Assert only the english versions are available
+      await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
       // Go back to the entry
       // TODO: Use the back button when it works
@@ -63,15 +88,17 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // Assert the most recent version is the current version
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // Assert the previous version in the list is the expected version
-      versionCards.nth(1).click();
+      const previousVersion = versionCards.nth(1);
+      previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas is a pity');
+      await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
       // Go back to the entry
       // TODO: Use the back button when it works
       // await page.getByRole('link', { name: 'Back' }).click();
-      await page.goto('/admin');
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('gridcell', { name: 'Being from Kansas City' }).click();
+      // await page.goto('/admin');
+      // await page.getByRole('link', { name: 'Content Manager' }).click();
+      // await page.getByRole('gridcell', { name: 'Being from Kansas City' }).click();
 
       /**
        * Publish
@@ -96,6 +123,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // await expect(titleInput).toHaveValue('Being from Kansas City');
     });
   });
+
   test.describe('Single Type', () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
@@ -106,6 +134,10 @@ describeOnCondition(hasFutureFlag)('History', () => {
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
+      /**
+       * TODO: Test version locales when saving single type locales works
+       */
+
       // Navigate to the content-manager - single type - homepage
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Homepage' }).click();
@@ -153,9 +185,9 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // Go back
       // TODO: Use the back button when it works
       // await page.getByRole('link', { name: 'Back' }).click();
-      await page.goto('/admin');
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      // await page.goto('/admin');
+      // await page.getByRole('link', { name: 'Content Manager' }).click();
+      // await page.getByRole('link', { name: 'Homepage' }).click();
 
       /**
        * Publish
