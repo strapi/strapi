@@ -4,9 +4,10 @@ import { errors } from '@strapi/utils';
 
 type Document = Documents.Document<any>;
 type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
+type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
 type DocumentMetadata = {
   // All status of the returned locale
-  availableStatus: Pick<Document, 'id' | 'status' | AT_FIELDS>[];
+  availableStatus: Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>[];
   // Available locales within the same status of the returned document
   availableLocales: Pick<Document, 'id' | 'locale' | 'status' | AT_FIELDS>[];
 };

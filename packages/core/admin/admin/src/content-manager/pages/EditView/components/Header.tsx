@@ -1,17 +1,29 @@
+import * as React from 'react';
+
 import { Flex, Icon, Status, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { RelativeTime, useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { capitalise } from '../../../../utils/strings';
+import {
+  CREATED_AT_ATTRIBUTE_NAME,
+  CREATED_BY_ATTRIBUTE_NAME,
+  PUBLISHED_AT_ATTRIBUTE_NAME,
+  PUBLISHED_BY_ATTRIBUTE_NAME,
+  UPDATED_AT_ATTRIBUTE_NAME,
+  UPDATED_BY_ATTRIBUTE_NAME,
+} from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
+import { CLONE_PATH } from '../../../router';
+import { getDisplayName } from '../../../utils/users';
 
 import { DocumentActionsMenu } from './DocumentActions';
 
@@ -37,6 +49,7 @@ const Header = ({
   title: documentTitle = 'Untitled',
 }: HeaderProps) => {
   const { formatMessage } = useIntl();
+  const isCloning = useMatch(CLONE_PATH) !== null;
 
   const title = isCreating
     ? formatMessage({
@@ -69,9 +82,9 @@ const Header = ({
         </Typography>
         <HeaderActions />
       </Flex>
-      <Status showBullet={false} size={'S'} variant={statusVariant}>
+      <Status showBullet={false} size={'S'} variant={isCloning ? 'primary' : statusVariant}>
         <Typography as="span" variant="omega" fontWeight="bold">
-          {capitalise(status)}
+          {capitalise(isCloning ? 'draft' : status)}
         </Typography>
       </Status>
     </Flex>
@@ -88,6 +101,7 @@ const Header = ({
  */
 const HeaderActions = () => {
   const { formatMessage } = useIntl();
+  const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
       query: { status = 'draft' },
@@ -100,8 +114,8 @@ const HeaderActions = () => {
     activeTab: status,
     model,
     id,
-    document,
-    meta,
+    document: isCloning ? undefined : document,
+    meta: isCloning ? undefined : meta,
     collectionType,
   } satisfies DocumentActionProps;
 
@@ -126,10 +140,150 @@ const HeaderActions = () => {
                 id: 'content-manager.containers.edit.header.more-actions',
                 defaultMessage: 'More actions',
               })}
-            />
+            >
+              <Information activeTab={status} />
+            </DocumentActionsMenu>
           );
         }}
       </DescriptionComponentRenderer>
+    </Flex>
+  );
+};
+
+interface InformationProps {
+  activeTab: 'draft' | 'published';
+}
+
+const Information = ({ activeTab }: InformationProps) => {
+  const { formatMessage } = useIntl();
+  const { document, meta } = useDoc();
+
+  if (!document) {
+    return null;
+  }
+
+  /**
+   * Because in the backend separate entries are made for draft and published
+   * documents, the creator fields are different for each of them. For example,
+   * you could make your draft in January and then publish it for the first time
+   * in Feb. This would make the createdAt value for the published entry in Feb
+   * but really we want to show the document as a whole. The draft entry will also
+   * never have the publishedAt values.
+   *
+   * So, we decipher which document to show the creator for based on the activeTab.
+   */
+
+  const createAndUpdateDocument =
+    activeTab === 'draft'
+      ? document
+      : meta?.availableStatus.find((status) => status.publishedAt === null);
+
+  const publishDocument =
+    activeTab === 'published'
+      ? document
+      : meta?.availableStatus.find((status) => status.publishedAt !== null);
+
+  const creator = createAndUpdateDocument?.[CREATED_BY_ATTRIBUTE_NAME]
+    ? getDisplayName(createAndUpdateDocument[CREATED_BY_ATTRIBUTE_NAME], formatMessage)
+    : null;
+
+  const updator = createAndUpdateDocument?.[UPDATED_BY_ATTRIBUTE_NAME]
+    ? getDisplayName(createAndUpdateDocument[UPDATED_BY_ATTRIBUTE_NAME], formatMessage)
+    : null;
+
+  const information: Array<{ isDisplayed?: boolean; label: string; value: React.ReactNode }> = [
+    {
+      isDisplayed: !!publishDocument?.[PUBLISHED_AT_ATTRIBUTE_NAME],
+      label: formatMessage({
+        id: 'content-manager.containers.edit.information.last-published.label',
+        defaultMessage: 'Last published',
+      }),
+      value: formatMessage(
+        {
+          id: 'content-manager.containers.edit.information.last-published.value',
+          defaultMessage: `Published {time}{isAnonymous, select, true {} other { by {author}}}`,
+        },
+        {
+          time: (
+            <RelativeTime timestamp={new Date(publishDocument?.[PUBLISHED_AT_ATTRIBUTE_NAME])} />
+          ),
+          isAnonymous: !publishDocument?.[PUBLISHED_BY_ATTRIBUTE_NAME],
+          author: publishDocument?.[PUBLISHED_BY_ATTRIBUTE_NAME]
+            ? getDisplayName(publishDocument?.[PUBLISHED_BY_ATTRIBUTE_NAME], formatMessage)
+            : null,
+        }
+      ),
+    },
+    {
+      isDisplayed: !!createAndUpdateDocument?.[UPDATED_AT_ATTRIBUTE_NAME],
+      label: formatMessage({
+        id: 'content-manager.containers.edit.information.last-draft.label',
+        defaultMessage: 'Last draft',
+      }),
+      value: formatMessage(
+        {
+          id: 'content-manager.containers.edit.information.last-draft.value',
+          defaultMessage: `Modified {time}{isAnonymous, select, true {} other { by {author}}}`,
+        },
+        {
+          time: (
+            <RelativeTime
+              timestamp={new Date(createAndUpdateDocument?.[UPDATED_AT_ATTRIBUTE_NAME])}
+            />
+          ),
+          isAnonymous: !updator,
+          author: updator,
+        }
+      ),
+    },
+    {
+      isDisplayed: !!createAndUpdateDocument?.[CREATED_AT_ATTRIBUTE_NAME],
+      label: formatMessage({
+        id: 'content-manager.containers.edit.information.document.label',
+        defaultMessage: 'Document',
+      }),
+      value: formatMessage(
+        {
+          id: 'content-manager.containers.edit.information.document.value',
+          defaultMessage: `Created {time}{isAnonymous, select, true {} other { by {author}}}`,
+        },
+        {
+          time: (
+            <RelativeTime
+              timestamp={new Date(createAndUpdateDocument?.[CREATED_AT_ATTRIBUTE_NAME])}
+            />
+          ),
+          isAnonymous: !creator,
+          author: creator,
+        }
+      ),
+    },
+  ].filter((info) => info.isDisplayed);
+
+  return (
+    <Flex
+      borderWidth="1px 0 0 0"
+      borderStyle="solid"
+      borderColor="neutral150"
+      direction="column"
+      marginTop={2}
+      marginLeft="-4px"
+      marginRight="-4px"
+      as="dl"
+      padding={5}
+      gap={3}
+      alignItems="flex-start"
+    >
+      {information.map((info) => (
+        <Flex gap={1} direction="column" alignItems="flex-start" key={info.label}>
+          <Typography as="dt" variant="pi" fontWeight="bold">
+            {info.label}
+          </Typography>
+          <Typography as="dd" variant="pi" textColor="neutral600">
+            {info.value}
+          </Typography>
+        </Flex>
+      ))}
     </Flex>
   );
 };
