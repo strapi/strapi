@@ -26,6 +26,9 @@ const baseStrapiMock = {
       isEnabled: jest.fn().mockReturnValue(true),
     },
   },
+  eventHub: {
+    emit: jest.fn(),
+  },
   telemetry: {
     send: jest.fn().mockReturnValue(true),
   },
