@@ -138,6 +138,12 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
+  date: null,
+  time: '',
+  // Remove future flag check after Scheduling Beta release and replace with true as creating new release should include scheduling by default
+  isScheduled: window.strapi.future.isEnabled('contentReleasesScheduling'),
+  scheduledAt: null,
+  timezone: null,
 } satisfies FormValues;
 
 const ReleasesPage = () => {
@@ -215,9 +221,11 @@ const ReleasesPage = () => {
     });
   };
 
-  const handleAddRelease = async (values: FormValues) => {
+  const handleAddRelease = async ({ name, scheduledAt, timezone }: FormValues) => {
     const response = await createRelease({
-      name: values.name,
+      name,
+      scheduledAt,
+      timezone,
     });
     if ('data' in response) {
       // When the response returns an object with 'data', handle success

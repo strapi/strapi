@@ -403,8 +403,9 @@ describe('CRUD locales', () => {
       });
 
       await rq({
-        url: `/content-manager/collection-types/api::product.product/${frenchProduct.id}`,
-        method: 'PUT',
+        url: '/content-manager/collection-types/api::product.product',
+        method: 'POST',
+        qs: { locale: 'en', relatedEntityId: frenchProduct.id },
         body: { name: 'product name' },
         qs: {
           locale: 'en',
@@ -412,20 +413,25 @@ describe('CRUD locales', () => {
       });
 
       const {
-        body: { results: createdProducts },
+        body: { results: createdFrenchProducts },
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
         qs: { locale: 'fr-FR' },
       });
 
-      expect(createdProducts).toHaveLength(1);
-      // expect(createdProducts[0].localizations[0].locale).toBe('en');
+      expect(createdFrenchProducts).toHaveLength(1);
+
+      // We have related the english product to the french product
+      // The english entity should be present in the french product localizations
+      expect(createdFrenchProducts[0].localizations[0].locale).toBe('en');
 
       const res = await rq({
         url: `/i18n/locales/${data.locales[1].id}`,
         method: 'DELETE',
       });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
 
       const {
         body: { results: frenchProducts },
@@ -445,8 +451,6 @@ describe('CRUD locales', () => {
       });
       expect(englishProducts).toHaveLength(1);
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
       data.deletedLocales.push(res.body);
       data.locales.splice(1, 1);
     });

@@ -10,9 +10,16 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
+
+    await page.evaluate(() => {
+      // Remove after Scheduling Beta release
+      window.strapi.future = {
+        isEnabled: () => true,
+      };
+    });
   });
 
-  test('A user should be able to create a release and view their pending and done releases', async ({
+  test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
     page,
   }) => {
     // Navigate to the releases page
@@ -29,11 +36,51 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Open the create release dialog
     await page.getByRole('button', { name: 'New release' }).click();
     await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
 
     // Create a release
     const newReleaseName = 'The Diamond Dogs';
     await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
+    // Uncheck default scheduling of a release and save
+    await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    // Wait for client side redirect to created release
+    await page.waitForURL('/admin/plugins/content-releases/*');
+    await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
+
+    // Navigate back to the release page to see the newly created release
+    await page.getByRole('link', { name: 'Releases' }).click();
+    await expect(page.getByRole('link', { name: `${newReleaseName} No entries` })).toBeVisible();
+  });
+
+  test('A user should be able to create a release with scheduling info and view their pending and done releases', async ({
+    page,
+  }) => {
+    // Navigate to the releases page
+    await page.getByRole('link', { name: 'Releases' }).click();
+
+    // Open the create release dialog
+    await page.getByRole('button', { name: 'New release' }).click();
+    await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
+
+    // Create a release
+    const newReleaseName = 'The Diamond Dogs';
+    await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
+
+    // Select valid date and time
+    await page
+      .getByRole('combobox', {
+        name: 'Date',
+      })
+      .click();
+    await page.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }).click();
+
+    await page
+      .getByRole('combobox', {
+        name: 'Time *',
+      })
+      .click();
+    await page.getByRole('option', { name: '14:00' }).click();
+
     await page.getByRole('button', { name: 'Continue' }).click();
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
