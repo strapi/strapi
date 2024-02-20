@@ -16,6 +16,15 @@ const testRoot = path.join(cwd, 'e2e');
 const testsDir = path.join(testRoot, 'tests');
 const templateDir = path.join(testRoot, 'app-template');
 
+const pathExists = async (path) => {
+  try {
+    await fs.access(path);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 /**
  * Updates the env file for a generated test app
  * - Removes the PORT key/value from generated app .env
@@ -37,8 +46,13 @@ const setupTestEnvironment = async (generatedAppPath) => {
    * Enable future features in the generated app manually since a template
    * does not allow the config folder.
    */
-  const configFeatures = await fs.readFile(path.join(templateDir, 'config', 'features.js'));
-  const pathToFeaturesConfig = path.join(generatedAppPath, 'config', 'features.js');
+  const featuresConfigPath = path.join(generatedAppPath, 'config', 'features.js');
+  const hasFeaturesConfig = await pathExists(featuresConfigPath);
+
+  if (!hasFeaturesConfig) return;
+
+  const configFeatures = await fs.readFile(featuresConfigPath);
+  const pathToFeaturesConfig = path.join(featuresConfigPath);
   await fs.writeFile(pathToFeaturesConfig, configFeatures);
 };
 
@@ -82,7 +96,7 @@ yargs
     async handler(argv) {
       try {
         // Run tests with the env variables specified in the e2e/app-template/.env
-        dotenv.config({ path: path.join(templateDir, '.env') });
+        dotenv.config({ path: path.join(testRoot, '.env') });
 
         const { concurrency, domains, setup } = argv;
 
