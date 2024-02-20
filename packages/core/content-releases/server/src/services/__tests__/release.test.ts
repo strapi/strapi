@@ -29,6 +29,9 @@ const baseStrapiMock = {
   eventHub: {
     emit: jest.fn(),
   },
+  telemetry: {
+    send: jest.fn().mockReturnValue(true),
+  },
 };
 
 const mockUser = {

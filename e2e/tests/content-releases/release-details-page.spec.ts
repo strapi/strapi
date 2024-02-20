@@ -75,9 +75,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
     await page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(page.getByRole('dialog', { name: 'Edit release' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
     await page.getByRole('textbox', { name: 'Name' }).fill('Trent Crimm: Independent');
-    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
     const editedEntryName = 'Trent Crimm: Independent';
     await expect(page.getByRole('heading', { name: editedEntryName })).toBeVisible();

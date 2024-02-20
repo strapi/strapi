@@ -20,5 +20,7 @@ export default {
     const body = await auditLogs.findOne(id);
 
     ctx.body = body;
+
+    strapi.telemetry.send('didWatchAnAuditLog');
   },
 };

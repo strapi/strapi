@@ -44,6 +44,8 @@ export default {
     const newAuthOptions = { ...currentAuthOptions, providers: body };
     await adminStore.set({ key: 'auth', value: newAuthOptions });
 
+    strapi.telemetry.send('didUpdateSSOSettings');
+
     ctx.body = {
       data: toProviderLoginOptionsDTO(newAuthOptions.providers),
     };
