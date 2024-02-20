@@ -9476,7 +9476,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/database@npm:4.20.0, @strapi/database@workspace:packages/core/database":
+"@strapi/database@npm:4.20.0, @strapi/database@workspace:*, @strapi/database@workspace:packages/core/database":
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
@@ -9776,6 +9776,7 @@ __metadata:
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
+    "@strapi/database": "workspace:*"
     "@strapi/pack-up": "workspace:*"
     "@strapi/types": "npm:4.20.0"
     "@strapi/utils": "npm:4.20.0"
