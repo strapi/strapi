@@ -58,11 +58,14 @@ const HistoryPage = () => {
   const validQueryParams = buildValidGetParams(query);
   const page = validQueryParams.page ? Number(validQueryParams.page) : 1;
 
-  const versionsResponse = useGetHistoryVersionsQuery({
-    contentType: slug!,
-    ...(documentId ? { documentId } : {}),
-    ...validQueryParams,
-  });
+  const versionsResponse = useGetHistoryVersionsQuery(
+    {
+      contentType: slug!,
+      ...(documentId ? { documentId } : {}),
+      ...validQueryParams,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   // Make sure the user lands on a selected history version
   React.useEffect(() => {
