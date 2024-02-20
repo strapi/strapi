@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
-import { LocalePickerAction } from './components/CMHeaderActions';
+import { DeleteLocaleAction, LocalePickerAction } from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
@@ -21,6 +21,8 @@ import { i18nApi } from './services/api';
 import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
+
+import type { DocumentActionComponent } from '@strapi/strapi/admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -61,6 +63,11 @@ export default {
     const contentManager = app.getPlugin('content-manager');
 
     contentManager.apis.addDocumentHeaderAction([LocalePickerAction]);
+    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+      const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
+      actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
+      return actions;
+    });
 
     app.injectContentManagerComponent('listView', 'actions', {
       name: 'i18n-locale-filter',
