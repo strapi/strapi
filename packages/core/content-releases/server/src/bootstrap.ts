@@ -23,32 +23,37 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       models: contentTypeWithDraftAndPublish,
 
       async afterDelete(event) {
-        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        const { model, result } = event;
-        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const { id } = result;
+        try {
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+          const { model, result } = event;
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+            const { id } = result;
 
-          const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-            where: {
-              actions: {
+            const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+              where: {
+                actions: {
+                  target_type: model.uid,
+                  target_id: id,
+                },
+              },
+            });
+
+            await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+              where: {
                 target_type: model.uid,
                 target_id: id,
               },
-            },
-          });
+            });
 
-          await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-            where: {
-              target_type: model.uid,
-              target_id: id,
-            },
-          });
-
-          // We update the status of each release after delete the actions
-          for (const release of releases) {
-            getService('release', { strapi }).updateReleaseStatus(release.id);
+            // We update the status of each release after delete the actions
+            for (const release of releases) {
+              getService('release', { strapi }).updateReleaseStatus(release.id);
+            }
           }
+        } catch (error) {
+          // If an error happens we don't want to block the delete entry flow, but we log the error
+          strapi.log.error('Error while deleting release actions after entry delete', { error });
         }
       },
       /**
@@ -71,67 +76,81 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
        * We make this only after deleteMany is succesfully executed to avoid errors
        */
       async afterDeleteMany(event) {
-        const { model, state } = event;
-        const entriesToDelete = state.entriesToDelete;
-        if (entriesToDelete) {
-          const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-            where: {
-              actions: {
+        try {
+          const { model, state } = event;
+          const entriesToDelete = state.entriesToDelete;
+          if (entriesToDelete) {
+            const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+              where: {
+                actions: {
+                  target_type: model.uid,
+                  target_id: {
+                    $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map(
+                      (entry) => entry.id
+                    ),
+                  },
+                },
+              },
+            });
+
+            await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+              where: {
                 target_type: model.uid,
                 target_id: {
                   $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
                 },
               },
-            },
-          });
+            });
 
-          await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-            where: {
-              target_type: model.uid,
-              target_id: {
-                $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
-              },
-            },
-          });
-
-          // We update the status of each release after delete the actions
-          for (const release of releases) {
-            getService('release', { strapi }).updateReleaseStatus(release.id);
+            // We update the status of each release after delete the actions
+            for (const release of releases) {
+              getService('release', { strapi }).updateReleaseStatus(release.id);
+            }
           }
+        } catch (error) {
+          // If an error happens we don't want to block the delete entry flow, but we log the error
+          strapi.log.error('Error while deleting release actions after entry deleteMany', {
+            error,
+          });
         }
       },
 
       async afterUpdate(event) {
-        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        const { model, result } = event;
-        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const isEntryValid = getEntryValidStatus(model.uid as Common.UID.ContentType, result, {
-            strapi,
-          });
+        try {
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+          const { model, result } = event;
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+            const isEntryValid = getEntryValidStatus(model.uid as Common.UID.ContentType, result, {
+              strapi,
+            });
 
-          await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-            where: {
-              target_type: model.uid,
-              target_id: result.id,
-            },
-            data: {
-              isEntryValid,
-            },
-          });
-
-          const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-            where: {
-              actions: {
+            await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+              where: {
                 target_type: model.uid,
                 target_id: result.id,
               },
-            },
-          });
+              data: {
+                isEntryValid,
+              },
+            });
 
-          for (const release of releases) {
-            getService('release', { strapi }).updateReleaseStatus(release.id);
+            const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+              where: {
+                actions: {
+                  target_type: model.uid,
+                  target_id: result.id,
+                },
+              },
+            });
+
+            for (const release of releases) {
+              getService('release', { strapi }).updateReleaseStatus(release.id);
+            }
           }
+        } catch (error) {
+          // If an error happens we don't want to block the update entry flow, but we log the error
+          strapi.log.error('Error while updating release actions after entry update', { error });
         }
       },
     });
