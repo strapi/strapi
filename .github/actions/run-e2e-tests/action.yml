@@ -5,6 +5,8 @@ inputs:
     description: 'Should run EE or CE e2e tests'
   jestOptions:
     description: 'Jest options'
+  futureContentHistory:
+    description: 'Future unstable content history feature'
 runs:
   using: 'composite'
   steps:
