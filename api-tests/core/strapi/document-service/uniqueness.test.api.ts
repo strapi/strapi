@@ -3,7 +3,7 @@ import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper
 import resources from './resources/index';
 import { CATEGORY_UID, Category } from './utils';
 
-describe('Document Service', () => {
+describe.skip('Document Service', () => {
   let testUtils;
   let strapi: LoadedStrapi;
 

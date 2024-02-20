@@ -77,15 +77,17 @@ const createTestBuilder = (options = {}) => {
     },
 
     async cleanup(options = {}) {
-      const { enableTestDataAutoCleanup = true, strapi } = options;
-      const { models, actions } = ctx.state;
+      const { enableTestDataAutoCleanup = true } = options;
+      const { models, actions, fixtures } = ctx.state;
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
-          await modelsUtils.cleanupModel(model.uid, { strapi });
+          await modelsUtils.cleanupModel(model.uid);
         }
 
-        await modelsUtils.cleanupModel('plugin::i18n.locale', { strapi });
+        if ('plugin::i18n.locale' in fixtures) {
+          await modelsUtils.cleanupModel('plugin::i18n.locale');
+        }
       }
 
       for (const action of actions.reverse()) {
