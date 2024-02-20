@@ -38,7 +38,7 @@ If you add anything to the template, be sure to add this information to [the doc
 
 ## Running tests with environment variables
 
-To set environment specific environment variables for your tests, a `.env` file can be created in the root of the e2e folder. This is useful if you need to run tests with a Strapi license or set future flags.
+To set specific environment variables for your tests, a `.env` file can be created in the root of the e2e folder. This is useful if you need to run tests with a Strapi license or set future flags.
 
 ## Running tests with future flags
 

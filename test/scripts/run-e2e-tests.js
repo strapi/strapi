@@ -48,7 +48,7 @@ const setupTestEnvironment = async (generatedAppPath) => {
    */
   const testRootFeaturesConfigPath = path.join(templateDir, 'config', 'features.js');
   const hasFeaturesConfig = await pathExists(testRootFeaturesConfigPath);
-console.log('hasFeaturesConfig', hasFeaturesConfig);
+
   if (!hasFeaturesConfig) return;
 
   const configFeatures = await fs.readFile(testRootFeaturesConfigPath);
