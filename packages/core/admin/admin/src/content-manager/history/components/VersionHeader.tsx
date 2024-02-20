@@ -2,9 +2,11 @@ import * as React from 'react';
 
 import { HeaderLayout, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { NavLink, type To, useParams } from 'react-router-dom';
 
 import { useHistoryContext } from '../pages/History';
 
@@ -18,8 +20,28 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
     version: state.selectedVersion,
     layout: state.layout,
   }));
+  const [{ query }] = useQueryParams<{
+    plugins?: Record<string, unknown>;
+  }>();
+  const params = useParams<{ collectionType: string; slug: string }>();
 
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
+
+  const getBackLink = (): To => {
+    const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
+
+    if (layout.contentType.kind === 'collectionType') {
+      return {
+        pathname: `../${params.collectionType}/${version.contentType}/${version.relatedDocumentId}`,
+        search: pluginsQueryParams,
+      };
+    }
+
+    return {
+      pathname: `../${params.collectionType}/${version.contentType}`,
+      search: pluginsQueryParams,
+    };
+  };
 
   return (
     <HeaderLayout
@@ -52,7 +74,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           startIcon={<ArrowLeft />}
           as={NavLink}
           // @ts-expect-error - types are not inferred correctly through the as prop.
-          to=".."
+          to={getBackLink()}
         >
           {formatMessage({
             id: 'global.back',
