@@ -1,5 +1,5 @@
 module.exports = ({ env }) => ({
   future: {
-    contentReleasesScheduling: true,
+    history: true,
   },
 });
