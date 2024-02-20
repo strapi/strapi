@@ -46,14 +46,14 @@ const setupTestEnvironment = async (generatedAppPath) => {
    * Enable future features in the generated app manually since a template
    * does not allow the config folder.
    */
-  const featuresConfigPath = path.join(generatedAppPath, 'config', 'features.js');
-  const hasFeaturesConfig = await pathExists(featuresConfigPath);
-
+  const testRootFeaturesConfigPath = path.join(templateDir, 'config', 'features.js');
+  const hasFeaturesConfig = await pathExists(testRootFeaturesConfigPath);
+console.log('hasFeaturesConfig', hasFeaturesConfig);
   if (!hasFeaturesConfig) return;
 
-  const configFeatures = await fs.readFile(featuresConfigPath);
-  const pathToFeaturesConfig = path.join(featuresConfigPath);
-  await fs.writeFile(pathToFeaturesConfig, configFeatures);
+  const configFeatures = await fs.readFile(testRootFeaturesConfigPath);
+  const appFeaturesConfigPath = path.join(generatedAppPath, 'config', 'features.js');
+  await fs.writeFile(appFeaturesConfigPath, configFeatures);
 };
 
 yargs

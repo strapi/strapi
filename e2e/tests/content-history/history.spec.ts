@@ -188,13 +188,6 @@ describeOnCondition(hasFutureFlag)('History', () => {
       versionCards.nth(1).click();
       await expect(titleInput).toHaveValue('AFC Richmond');
 
-      // Go back
-      // TODO: Use the back button when it works
-      // await page.getByRole('link', { name: 'Back' }).click();
-      // await page.goto('/admin');
-      // await page.getByRole('link', { name: 'Content Manager' }).click();
-      // await page.getByRole('link', { name: 'Homepage' }).click();
-
       /**
        * Publish
        *
