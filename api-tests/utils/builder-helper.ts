@@ -73,9 +73,6 @@ export const createTestSetup = async (
 };
 
 export const destroyTestSetup = async ({ strapi, builder }) => {
-  // Delete all locales that have been created
-  await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
-
   await strapi.destroy();
   await builder.cleanup();
 };
