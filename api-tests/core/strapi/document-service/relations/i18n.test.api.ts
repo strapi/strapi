@@ -106,10 +106,10 @@ describe('Document Service relations', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([tagModel, productModel, shopModel])
-      // .addFixtures('plugin::i18n.locale', [
-      //   { name: 'Es', code: 'es' },
-      //   { name: 'Fr', code: 'fr' },
-      // ])
+      .addFixtures('plugin::i18n.locale', [
+        { name: 'Es', code: 'es' },
+        { name: 'Fr', code: 'fr' },
+      ])
       .build();
 
     strapi = await createStrapiInstance();
@@ -138,6 +138,9 @@ describe('Document Service relations', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
