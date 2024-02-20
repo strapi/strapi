@@ -9,6 +9,9 @@ test.describe('Edit View', () => {
     await login({ page });
   });
 
+  /**
+   * TODO: we should split these tests into smaller ones.
+   */
   test.describe('Collection Type', () => {
     const CREATE_URL =
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
@@ -153,13 +156,29 @@ test.describe('Edit View', () => {
 
       /**
        * Now we'll unpublish the entry while it is unmodified
-       *
-       * NOTE: because of a bug in the statuses, we still think it's modified
-       * and as such we get the option to discard the draft.
        */
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
-      // await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled(); // this won't be disabled because we still think the document is modified
+      await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
+      await page.getByRole('menuitem', { name: 'Unpublish' }).click();
+      await expect(page.getByText('Success:Unpublished')).toBeVisible();
+      // wait for the all the notifications to clear.
+      await expect(page.getByText('Success:Unpublished')).not.toBeVisible();
+      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+
+      /**
+       * Now we'll unpublish the entry while it is modified to verify the
+       * discard draft flow
+       */
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await expect(page.getByText('Success:Published')).toBeVisible();
+      await expect(page.getByText('Success:Published')).not.toBeVisible();
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(page.getByText('Saved')).toBeVisible();
+      await page.getByRole('button', { name: 'More document actions' }).click();
+      await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
+      await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
       await page.getByRole('menuitem', { name: 'Unpublish' }).click();
       await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await expect(
@@ -317,13 +336,29 @@ test.describe('Edit View', () => {
 
       /**
        * Now we'll unpublish the entry while it is unmodified
-       *
-       * NOTE: because of a bug in the statuses, we still think it's modified
-       * and as such we get the option to discard the draft.
        */
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
-      // await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled(); // this won't be disabled because we still think the document is modified
+      await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
+      await page.getByRole('menuitem', { name: 'Unpublish' }).click();
+      await expect(page.getByText('Success:Unpublished')).toBeVisible();
+      // wait for the all the notifications to clear.
+      await expect(page.getByText('Success:Unpublished')).not.toBeVisible();
+      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+
+      /**
+       * Now we'll unpublish the entry while it is modified to verify the
+       * discard draft flow
+       */
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await expect(page.getByText('Success:Published')).toBeVisible();
+      await expect(page.getByText('Success:Published')).not.toBeVisible();
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(page.getByText('Saved')).toBeVisible();
+      await page.getByRole('button', { name: 'More document actions' }).click();
+      await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
+      await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
       await page.getByRole('menuitem', { name: 'Unpublish' }).click();
       await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await expect(

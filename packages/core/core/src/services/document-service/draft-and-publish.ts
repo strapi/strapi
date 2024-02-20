@@ -16,6 +16,15 @@ export const defaultToDraft = (params: any) => {
 };
 
 /**
+ * In mutating actions we don't want user to set the publishedAt attribute.
+ */
+export const filterDataPublishedAt = async (params: any) => {
+  if (params?.data.publishedAt) {
+    params.data.publishedAt = null;
+  }
+};
+
+/**
  * Add status lookup query to the params
  */
 export const statusToLookup = (params: any) => {
@@ -54,11 +63,4 @@ export const statusToData = (params: any) => {
   }
 
   params.data = data;
-};
-
-export default {
-  setStatusToDraft,
-  defaultToDraft,
-  statusToLookup,
-  statusToData,
 };

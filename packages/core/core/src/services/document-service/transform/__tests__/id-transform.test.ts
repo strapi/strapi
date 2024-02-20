@@ -16,13 +16,24 @@ const findManyQueries = {
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],
+    plugins: {
+      i18n: {
+        services: {
+          'content-types': {
+            isLocalizedContentType() {
+              return true;
+            },
+          },
+        },
+      },
+    },
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
     },
   } as unknown as LoadedStrapi;
 
   beforeEach(() => {
-    findCategories.mockReturnValueOnce([
+    findCategories.mockReturnValue([
       { id: 'doc1-en-draft', documentId: 'doc1', locale: 'en', publishedAt: null },
       { id: 'doc1-fr-draft', documentId: 'doc1', locale: 'fr', publishedAt: null },
       { id: 'doc2-en-draft', documentId: 'doc2', locale: 'en', publishedAt: null },
@@ -36,7 +47,7 @@ describe('Transform relational data', () => {
       { id: 'doc10-en-draft', documentId: 'doc10', locale: 'en', publishedAt: null },
     ]);
 
-    findProducts.mockReturnValueOnce([
+    findProducts.mockReturnValue([
       { id: 'doc1-en-draft', documentId: 'doc1', locale: 'en', publishedAt: null },
       { id: 'doc1-fr-draft', documentId: 'doc1', locale: 'fr', publishedAt: null },
       { id: 'doc2-en-draft', documentId: 'doc2', locale: 'en', publishedAt: null },
@@ -136,10 +147,10 @@ describe('Transform relational data', () => {
           category: { connect: 'doc4' },
         },
       },
-      { locale: 'en', isDraft: false }
+      { locale: 'en', isDraft: true }
     );
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
       categories: { connect: [{ id: 'doc1-en-draft', position: { before: 'doc2-en-draft' } }] },
       category: { connect: 'doc4-en-draft' },

@@ -4,6 +4,7 @@ import { isObject, isNil } from 'lodash/fp';
 import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
+import { getRelationTargetLocale } from '../utils/i18n';
 
 const isNumeric = (value: any): value is number => {
   const parsed = parseInt(value, 10);
@@ -34,12 +35,13 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     // It's already an entry id
     if (isNumeric(relation.id)) return relation;
 
-    const id = getId(relation.id) as T;
+    // @ts-expect-error - TODO: Add relation type
+    const id = getId(relation.id, relation.locale) as T;
 
     // If the id is not found, return undefined
     if (!id) return undefined;
 
-    return { ...(relation as object), id: getId(relation.id) } as T;
+    return { ...(relation as object), id } as T;
   }
 
   // id[]
@@ -71,20 +73,24 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
     // connect: id[] | { id } | ...
     relation.connect = transformPrimitive(relation.connect as any, getId);
 
-    const mapPosition = (item: any) => {
-      if (isShortHand(item) || !('position' in item)) return item;
+    const mapPosition = (relation: any) => {
+      if (isShortHand(relation) || !('position' in relation)) return relation;
+
+      const { position } = relation;
 
       // { connect: { id: id, position: { before: id } } }
-      if (item.position?.before) {
-        item.position.before = transformPrimitive(item.position.before, getId);
+      if (position?.before) {
+        const { id } = transformPrimitive({ ...position, id: position.before }, getId);
+        position.before = id;
       }
 
       // { connect: { id: id, position: { after: id } } }
-      if (item.position?.after) {
-        item.position.after = transformPrimitive(item.position.after, getId);
+      if (position?.after) {
+        const { id } = transformPrimitive({ ...position, id: position.after }, getId);
+        position.after = id;
       }
 
-      return item;
+      return relation;
     };
 
     if (Array.isArray(relation.connect)) {
@@ -125,11 +131,18 @@ const transformDataIdsVisitor = (
         // TODO: Handle this differently
         if (EXCLUDED_FIELDS.includes(key)) return;
 
-        const getId = (documentId: ID): ID | null => {
+        const getId = (documentId: ID, locale?: string): ID | null => {
           const entryId = idMap.get({
             uid: target,
             documentId: documentId as string,
-            locale: opts.locale,
+            locale: getRelationTargetLocale(
+              { id: documentId, locale },
+              {
+                targetUid: target as Common.UID.Schema,
+                sourceUid: opts.uid,
+                sourceLocale: opts.locale,
+              }
+            ),
             isDraft: opts.isDraft,
           });
 

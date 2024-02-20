@@ -319,7 +319,7 @@ const createDocumentEngine = ({
           return transformData(entry, opts);
         },
         // Create the published entry
-        ({ locale, ...data }) => this.create(uid, { data, locale, ...params })
+        (data) => this.create(uid, { ...params, data, locale: data.locale })
       )
     );
 
@@ -375,7 +375,7 @@ const createDocumentEngine = ({
           return transformData(entry, opts);
         },
         // Create the draft entry
-        ({ locale, ...data }) => this.create(uid, { data, locale, ...params })
+        (data) => this.create(uid, { ...params, locale: data.locale, data })
       )
     );
 

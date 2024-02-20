@@ -26,11 +26,11 @@ describe('Document Service', () => {
       expect(article).toMatchObject(articleDb);
     });
 
-    it('find first document in french', async () => {
-      const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
+    it('find first document in dutch', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
 
       const article = await strapi.documents(ARTICLE_UID).findFirst({
-        locale: 'fr',
+        locale: 'nl',
         filters: {
           title: { $startsWith: 'Article1' },
         },

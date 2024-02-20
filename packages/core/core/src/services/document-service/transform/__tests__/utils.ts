@@ -34,6 +34,17 @@ export const models: Record<string, Schema.ContentType> = {
       name: {
         type: 'string',
       },
+      relatedCategories: {
+        type: 'relation',
+        relation: 'oneToMany',
+        target: CATEGORY_UID,
+      },
+      products: {
+        type: 'relation',
+        relation: 'manyToMany',
+        target: PRODUCT_UID,
+        mappedBy: 'categories',
+      },
     },
     'category',
     'categories'
@@ -51,6 +62,7 @@ export const models: Record<string, Schema.ContentType> = {
         type: 'relation',
         relation: 'manyToMany',
         target: CATEGORY_UID,
+        inversedBy: 'products',
       },
       category: {
         type: 'relation',
