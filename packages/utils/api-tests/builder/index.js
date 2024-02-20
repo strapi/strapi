@@ -84,8 +84,6 @@ const createTestBuilder = (options = {}) => {
         for (const model of models.reverse()) {
           await modelsUtils.cleanupModel(model.uid);
         }
-
-        await modelsUtils.cleanupModel('plugin::i18n.locale');
       }
 
       for (const action of actions.reverse()) {

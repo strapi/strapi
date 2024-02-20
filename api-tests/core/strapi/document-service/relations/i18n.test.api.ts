@@ -106,10 +106,10 @@ describe('Document Service relations', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([tagModel, productModel, shopModel])
-      .addFixtures('plugin::i18n.locale', [
-        { name: 'Es', code: 'es' },
-        { name: 'Fr', code: 'fr' },
-      ])
+      // .addFixtures('plugin::i18n.locale', [
+      //   { name: 'Es', code: 'es' },
+      //   { name: 'Fr', code: 'fr' },
+      // ])
       .build();
 
     strapi = await createStrapiInstance();
