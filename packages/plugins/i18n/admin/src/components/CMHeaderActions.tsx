@@ -1,6 +1,15 @@
-import { Status, Typography } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { Flex, Icon, Status, Typography } from '@strapi/design-system';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
+import {
+  type HeaderActionComponent,
+  unstable_useDocument,
+  unstable_useDocumentActions as useDocumentActions,
+  type DocumentActionComponent,
+} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
@@ -8,10 +17,9 @@ import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
 import type { I18nBaseQuery } from '../types';
-import type { HeaderActionComponent, unstable_useDocument } from '@strapi/strapi/admin';
 
 /* -------------------------------------------------------------------------------------------------
- * LocalePicker
+ * LocalePickerAction
  * -----------------------------------------------------------------------------------------------*/
 
 const LocalePickerAction: HeaderActionComponent = ({ document, meta }) => {
@@ -112,4 +120,87 @@ const getDocumentStatus = (
   return docStatus;
 };
 
-export { LocalePickerAction };
+/* -------------------------------------------------------------------------------------------------
+ * DeleteLocaleAction
+ * -----------------------------------------------------------------------------------------------*/
+
+const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, collectionType }) => {
+  const { formatMessage } = useIntl();
+  const navigate = useNavigate();
+  const toggleNotification = useNotification();
+  const { delete: deleteAction } = useDocumentActions();
+  const { hasI18n, canDelete } = useI18n();
+
+  if (!hasI18n) {
+    return null;
+  }
+
+  return {
+    disabled: (document?.locale && !canDelete.includes(document.locale)) || !document,
+    position: ['header', 'table-row'],
+    label: formatMessage({
+      id: getTranslation('actions.delete.label'),
+      defaultMessage: 'Delete locale',
+    }),
+    icon: <StyledTrash />,
+    variant: 'danger',
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: getTranslation('actions.delete.dialog.title'),
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" gap={2}>
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Typography as="p" variant="omega" textAlign="center">
+            {formatMessage({
+              id: getTranslation('actions.delete.dialog.body'),
+              defaultMessage: 'Are you sure?',
+            })}
+          </Typography>
+        </Flex>
+      ),
+      onConfirm: async () => {
+        if (!id || !document?.locale) {
+          console.error(
+            "You're trying to delete a document without an id or locale, this is likely a bug with Strapi. Please open an issue."
+          );
+
+          toggleNotification({
+            message: formatMessage({
+              id: getTranslation('actions.delete.error'),
+              defaultMessage: 'An error occurred while trying to delete the document locale.',
+            }),
+            type: 'warning',
+          });
+
+          return;
+        }
+
+        const res = await deleteAction({
+          id,
+          model,
+          collectionType,
+          params: { locale: document.locale },
+        });
+
+        if (!('error' in res)) {
+          navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });
+        }
+      },
+    },
+  };
+};
+
+/**
+ * Because the icon system is completely broken, we have to do
+ * this to remove the fill from the cog.
+ */
+const StyledTrash = styled(Trash)`
+  path {
+    fill: currentColor;
+  }
+`;
+
+export { DeleteLocaleAction, LocalePickerAction };
