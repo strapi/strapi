@@ -123,7 +123,7 @@ describe('content-manager', () => {
     it('should let users add a document action as an array', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.documentActions).toHaveLength(8);
+      expect(plugin.documentActions).toHaveLength(9);
 
       // ensure we have our default options
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
@@ -133,6 +133,7 @@ describe('content-manager', () => {
           "unpublish",
           "discard",
           "edit",
+          "clone",
           "edit-the-model",
           "configure-the-view",
           "delete",
@@ -147,7 +148,7 @@ describe('content-manager', () => {
         }),
       ]);
 
-      expect(plugin.documentActions).toHaveLength(9);
+      expect(plugin.documentActions).toHaveLength(10);
       // ensure we have our default options, with the new option, which will not have a type
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
         [
@@ -156,6 +157,7 @@ describe('content-manager', () => {
           "unpublish",
           "discard",
           "edit",
+          "clone",
           "edit-the-model",
           "configure-the-view",
           "delete",
@@ -167,7 +169,7 @@ describe('content-manager', () => {
     it('should let you mutate the existing array of panels with a reducer function', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.documentActions).toHaveLength(8);
+      expect(plugin.documentActions).toHaveLength(9);
 
       // ensure we have our default options
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
@@ -177,6 +179,7 @@ describe('content-manager', () => {
           "unpublish",
           "discard",
           "edit",
+          "clone",
           "edit-the-model",
           "configure-the-view",
           "delete",
@@ -191,7 +194,7 @@ describe('content-manager', () => {
 
       plugin.addDocumentAction((prev) => [...prev, action]);
 
-      expect(plugin.documentActions).toHaveLength(9);
+      expect(plugin.documentActions).toHaveLength(10);
       // ensure we have our default options, with the new option, which will not have a type. The defaults should still be at the front.
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
         [
@@ -200,6 +203,7 @@ describe('content-manager', () => {
           "unpublish",
           "discard",
           "edit",
+          "clone",
           "edit-the-model",
           "configure-the-view",
           "delete",
@@ -211,13 +215,14 @@ describe('content-manager', () => {
         prev.filter((action) => action.type !== 'publish' && action.type !== 'update')
       );
 
-      expect(plugin.documentActions).toHaveLength(7);
+      expect(plugin.documentActions).toHaveLength(8);
       // We should be missing our "1st" panel, the actions panel
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
         [
           "unpublish",
           "discard",
           "edit",
+          "clone",
           "edit-the-model",
           "configure-the-view",
           "delete",

@@ -73,6 +73,7 @@ interface DocumentActionProps extends Context {}
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
   type?:
+    | 'clone'
     | 'configure-the-view'
     | 'delete'
     | 'discard'

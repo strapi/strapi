@@ -3,7 +3,7 @@ import { Link } from '@strapi/design-system/v2';
 import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
@@ -12,6 +12,7 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
+import { CLONE_PATH } from '../../../router';
 
 import { DocumentActionsMenu } from './DocumentActions';
 
@@ -37,6 +38,7 @@ const Header = ({
   title: documentTitle = 'Untitled',
 }: HeaderProps) => {
   const { formatMessage } = useIntl();
+  const isCloning = useMatch(CLONE_PATH) !== null;
 
   const title = isCreating
     ? formatMessage({
@@ -69,9 +71,9 @@ const Header = ({
         </Typography>
         <HeaderActions />
       </Flex>
-      <Status showBullet={false} size={'S'} variant={statusVariant}>
+      <Status showBullet={false} size={'S'} variant={isCloning ? 'primary' : statusVariant}>
         <Typography as="span" variant="omega" fontWeight="bold">
-          {capitalise(status)}
+          {capitalise(isCloning ? 'draft' : status)}
         </Typography>
       </Status>
     </Flex>
@@ -88,6 +90,7 @@ const Header = ({
  */
 const HeaderActions = () => {
   const { formatMessage } = useIntl();
+  const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
       query: { status = 'draft' },
@@ -100,8 +103,8 @@ const HeaderActions = () => {
     activeTab: status,
     model,
     id,
-    document,
-    meta,
+    document: isCloning ? undefined : document,
+    meta: isCloning ? undefined : meta,
     collectionType,
   } satisfies DocumentActionProps;
 
