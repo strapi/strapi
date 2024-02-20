@@ -59,6 +59,9 @@ describeOnCondition(hasFutureFlag)('History', () => {
       );
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
+      // Assert the id was added after page load
+      const idRegex = /id=\d+/;
+      await expect(idRegex.test(page.url())).toBe(true);
       // Assert the most recent version is the current version
       const currentVersion = versionCards.nth(0);
       await expect(currentVersion.getByText('(current)')).toBeVisible();
@@ -154,6 +157,9 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
+      // Assert the id was added after page load
+      const idRegex = /id=\d+/;
+      await expect(idRegex.test(page.url())).toBe(true);
       // Assert the most recent version is the current version
       const currentVersion = versionCards.nth(0);
       await expect(currentVersion.getByText('(current)')).toBeVisible();
