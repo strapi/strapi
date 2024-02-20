@@ -68,6 +68,9 @@ window.strapi = {
     SSO: 'sso',
     isEnabled: () => false,
   },
+  future: {
+    isEnabled: () => false,
+  },
   projectType: 'Community',
   telemetryDisabled: true,
   flags: {
