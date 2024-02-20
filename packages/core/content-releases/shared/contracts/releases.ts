@@ -100,8 +100,8 @@ export declare namespace CreateRelease {
     };
     body: {
       name: string;
-      scheduledAt?: Date;
-      timezone?: string;
+      scheduledAt: Date | null;
+      timezone: string | null;
     };
   }
 

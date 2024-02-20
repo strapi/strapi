@@ -31,6 +31,9 @@ const baseStrapiMock = {
       update: jest.fn(),
     }),
   },
+  telemetry: {
+    send: jest.fn().mockReturnValue(true),
+  },
 };
 
 const mockUser = {
