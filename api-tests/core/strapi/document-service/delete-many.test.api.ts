@@ -37,15 +37,15 @@ describe('Document Service', () => {
     it.skip(
       'delete all documents of a locale',
       testInTransaction(async () => {
-        const articleDb = await findArticlesDb({ locale: 'fr' });
-        const deleted = await strapi.documents(ARTICLE_UID).deleteMany({ locale: 'fr' });
+        const articleDb = await findArticlesDb({ locale: 'nl' });
+        const deleted = await strapi.documents(ARTICLE_UID).deleteMany({ locale: 'nl' });
 
         expect(deleted).toEqual({ count: articleDb.length });
 
         const enArticles = await findArticlesDb({ locale: 'en' });
-        const frArticles = await findArticlesDb({ locale: 'fr' });
+        const nlArticles = await findArticlesDb({ locale: 'nl' });
 
-        expect(frArticles).toBe(undefined);
+        expect(nlArticles).toBe(undefined);
         expect(enArticles.length).toBeGreaterThan(0);
       })
     );

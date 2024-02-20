@@ -52,9 +52,3 @@ export const localeToData = (
 
   params.data = data;
 };
-
-export default {
-  defaultLocale,
-  localeToLookup,
-  localeToData,
-};
