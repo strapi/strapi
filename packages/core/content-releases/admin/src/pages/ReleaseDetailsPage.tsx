@@ -306,6 +306,7 @@ export const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
@@ -342,10 +343,7 @@ export const ReleaseDetailsLayout = ({
       <HeaderLayout
         title={release.name}
         subtitle={
-          <>
-            {numberOfEntriesText}
-            {isScheduled && `- ${scheduledText}`}
-          </>
+          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? `- ${scheduledText}` : '')
         }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
