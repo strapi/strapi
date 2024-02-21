@@ -69,14 +69,13 @@ const HistoryPage = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // Make sure the user lands on a selected history version
+  const versionsLength = versionsResponse.data?.data.length;
+  const firstVersionId = versionsResponse.data?.data?.[0].id;
   React.useEffect(() => {
-    const versions = versionsResponse.data?.data;
-
-    if (!query.id && !versionsResponse.isLoading && versions?.[0]) {
-      navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
+    if (versionsLength) {
+      navigate({ search: stringify({ ...query, id: firstVersionId }) }, { replace: true });
     }
-  }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
+  }, [versionsLength, navigate, query, firstVersionId]);
 
   if (!layout || versionsResponse.isLoading) {
     return <LoadingIndicatorPage />;
