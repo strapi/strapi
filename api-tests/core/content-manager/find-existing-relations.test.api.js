@@ -12,6 +12,10 @@ const data = {
   shops: [],
 };
 
+const productUid = 'api::product.product';
+const shopUid = 'api::shop.shop';
+const compoUid = 'default.compo';
+
 const compo = (withRelations = false) => ({
   displayName: 'compo',
   category: 'default',
@@ -25,12 +29,12 @@ const compo = (withRelations = false) => ({
           compo_products_ow: {
             type: 'relation',
             relation: 'oneToOne',
-            target: 'api::product.product',
+            target: productUid,
           },
           compo_products_mw: {
             type: 'relation',
             relation: 'oneToMany',
-            target: 'api::product.product',
+            target: productUid,
           },
         }),
   },
@@ -57,41 +61,41 @@ const shopModel = () => ({
     products_ow: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::product.product',
+      target: productUid,
     },
     products_oo: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shop',
     },
     products_mo: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shops_mo',
     },
     products_om: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shop_om',
     },
     products_mm: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shops',
     },
     products_mw: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::product.product',
+      target: productUid,
     },
     myCompo: {
       type: 'component',
       repeatable: false,
-      component: 'default.compo',
+      component: compoUid,
     },
   },
   displayName: 'Shop',
@@ -109,8 +113,7 @@ const createEntry = async (uid, data) => {
   return body;
 };
 
-// TODO
-describe.skip('Relations', () => {
+describe('Relations', () => {
   const builder = createTestBuilder();
   const addPublishedAtCheck = (value) => {
     publishedAt: value;
@@ -124,12 +127,12 @@ describe.skip('Relations', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    const createdProduct1 = await createEntry('api::product.product', { name: 'Skate' });
-    const createdProduct2 = await createEntry('api::product.product', { name: 'Candle' });
-    const createdProduct3 = await createEntry('api::product.product', { name: 'Tofu' });
+    const createdProduct1 = await createEntry(productUid, { name: 'Skate' });
+    const createdProduct2 = await createEntry(productUid, { name: 'Candle' });
+    const createdProduct3 = await createEntry(productUid, { name: 'Tofu' });
 
     await rq({
-      url: `/content-manager/collection-types/api::product.product/${createdProduct1.id}/actions/publish`,
+      url: `/content-manager/collection-types/${productUid}/${createdProduct1.id}/actions/publish`,
       method: 'POST',
     });
 
@@ -140,7 +143,7 @@ describe.skip('Relations', () => {
     const id1 = createdProduct1.data.id;
     const id2 = createdProduct2.data.id;
 
-    const createdShop1 = await createEntry('api::shop.shop', {
+    const createdShop1 = await createEntry(shopUid, {
       name: 'Cazotte Shop',
       products_ow: id1,
       products_oo: id1,
@@ -153,7 +156,7 @@ describe.skip('Relations', () => {
         compo_products_mw: [id1, id2],
       },
     });
-    const createdShop2 = await createEntry('api::shop.shop', {
+    const createdShop2 = await createEntry(shopUid, {
       name: 'Empty Shop',
       myCompo: {
         compo_products_ow: null,
@@ -175,7 +178,7 @@ describe.skip('Relations', () => {
       test('Fail when entity is not found', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/999999/products_ow`,
+          url: `/content-manager/relations/${shopUid}/999999/products_ow`,
           qs: {
             status: 'draft',
           },
@@ -196,7 +199,7 @@ describe.skip('Relations', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${data.shops[0].data.id}/unkown`,
+          url: `/content-manager/relations/${shopUid}/${data.shops[0].data.id}/unkown`,
           qs: {
             status: 'draft',
           },
@@ -207,7 +210,7 @@ describe.skip('Relations', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: `The relational field unkown doesn't exist on ${shopUid}`,
             name: 'BadRequestError',
             status: 400,
           },
@@ -217,7 +220,7 @@ describe.skip('Relations', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${data.shops[0].data.id}/name`,
+          url: `/content-manager/relations/${shopUid}/${data.shops[0].data.id}/name`,
           qs: {
             status: 'draft',
           },
@@ -228,25 +231,25 @@ describe.skip('Relations', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: `The relational field name doesn't exist on ${shopUid}`,
             name: 'BadRequestError',
             status: 400,
           },
         });
       });
 
-      describe.each([
-        ['one-way', 'products_ow', false],
-        ['one-one', 'products_oo', false],
-        ['one-to-many', 'products_om', true],
-        ['many-to-one', 'products_mo', false],
-        ['many-many', 'products_mm', true],
-        ['many-way', 'products_mw', true],
-      ])('%s relation (%s)', (relationType, fieldName, isManyRelation) => {
+      describe.only.each([
+        ['products_ow', false],
+        ['products_oo', false],
+        ['products_om', true],
+        ['products_mo', false],
+        ['products_mm', true],
+        ['products_mw', true],
+      ])('%s relation (%s)', (fieldName, isManyRelation) => {
         test('Can retrieve the relation(s) for an entity that have some relations', async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/relations/api::shop.shop/${data.shops[0].data.id}/${fieldName}`,
+            url: `/content-manager/relations/${shopUid}/${data.shops[0].data.id}/${fieldName}`,
             qs: {
               locale: null,
               status: 'draft',
@@ -282,7 +285,7 @@ describe.skip('Relations', () => {
         test("Can retrieve the relation(s) for an entity that don't have relations yet", async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/relations/api::shop.shop/${data.shops[1].data.id}/${fieldName}`,
+            url: `/content-manager/relations/${shopUid}/${data.shops[1].data.id}/${fieldName}`,
           });
 
           expect(res.status).toBe(200);
@@ -294,7 +297,7 @@ describe.skip('Relations', () => {
           test.skip("Can search ''", async () => {
             const res = await rq({
               method: 'GET',
-              url: `/content-manager/relations/api::shop.shop/${data.shops[0].data.id}/${fieldName}`,
+              url: `/content-manager/relations/${shopUid}/${data.shops[0].data.id}/${fieldName}`,
               qs: {
                 _q: 'Candle',
               },
@@ -318,11 +321,11 @@ describe.skip('Relations', () => {
       });
     });
 
-    describe.skip('On a component', () => {
+    describe('On a component', () => {
       test('Fail when the component is not found', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/default.compo/999999/compo_products_ow`,
+          url: `/content-manager/relations/${compoUid}/999999/compo_products_ow`,
         });
 
         expect(res.status).toBe(404);
@@ -340,7 +343,7 @@ describe.skip('Relations', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/default.compo/${data.shops[0].data.myCompo.id}/unknown`,
+          url: `/content-manager/relations/${compoUid}/${data.shops[0].data.myCompo.id}/unknown`,
         });
 
         expect(res.status).toBe(400);
@@ -348,17 +351,17 @@ describe.skip('Relations', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: `The relational field unknown doesn't exist on ${compoUid}`,
             name: 'BadRequestError',
             status: 400,
           },
         });
       });
 
-      test.only('Fail when the field exists but is not a relational field', async () => {
+      test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/default.compo/${data.shops[0].myCompo.data.id}/name`,
+          url: `/content-manager/relations/${compoUid}/${data.shops[0].data.myCompo.id}/name`,
         });
 
         expect(res.status).toBe(400);
@@ -366,7 +369,7 @@ describe.skip('Relations', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: `The relational field name doesn't exist on ${compoUid}`,
             name: 'BadRequestError',
             status: 400,
           },
@@ -374,13 +377,13 @@ describe.skip('Relations', () => {
       });
 
       describe.each([
-        ['one-way', 'compo_products_ow', false],
-        ['many-way', 'compo_products_mw', true],
-      ])('%s relation (%s)', (relationType, fieldName, isManyRelation) => {
+        ['compo_products_ow', false],
+        ['compo_products_mw', true],
+      ])('%s relation (%s)', (fieldName, isManyRelation) => {
         test('Can retrieve the relation(s)', async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/relations/default.compo/${data.shops[0].data.myCompo.id}/${fieldName}`,
+            url: `/content-manager/relations/${compoUid}/${data.shops[0].data.myCompo.id}/${fieldName}`,
           });
 
           expect(res.status).toBe(200);
@@ -388,22 +391,24 @@ describe.skip('Relations', () => {
           if (isManyRelation) {
             expect(res.body.results).toMatchObject([
               {
-                id: expect.any(String),
+                id: expect.any(Number),
                 name: 'Candle',
                 ...addPublishedAtCheck(null),
               },
               {
-                id: expect.any(String),
+                id: expect.any(Number),
                 name: 'Skate',
                 ...addPublishedAtCheck(expect.any(String)),
               },
             ]);
           } else {
-            expect(res.body.data).toMatchObject({
-              id: expect.any(String),
-              name: 'Skate',
-              ...addPublishedAtCheck(expect.any(String)),
-            });
+            expect(res.body.results).toMatchObject([
+              {
+                id: expect.any(Number),
+                name: 'Skate',
+                ...addPublishedAtCheck(expect.any(String)),
+              },
+            ]);
           }
         });
       });

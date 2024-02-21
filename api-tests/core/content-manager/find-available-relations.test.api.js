@@ -12,6 +12,10 @@ const data = {
   shops: [],
 };
 
+const productUid = 'api::product.product';
+const shopUid = 'api::shop.shop';
+const compoUid = 'default.compo';
+
 const compo = (withRelations = false) => ({
   displayName: 'compo',
   category: 'default',
@@ -25,12 +29,12 @@ const compo = (withRelations = false) => ({
           compo_products_ow: {
             type: 'relation',
             relation: 'oneToOne',
-            target: 'api::product.product',
+            target: productUid,
           },
           compo_products_mw: {
             type: 'relation',
             relation: 'oneToMany',
-            target: 'api::product.product',
+            target: productUid,
           },
         }),
   },
@@ -57,41 +61,41 @@ const shopModel = () => ({
     products_ow: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::product.product',
+      target: productUid,
     },
     products_oo: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shop',
     },
     products_mo: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shops_mo',
     },
     products_om: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shop_om',
     },
     products_mm: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'api::product.product',
+      target: productUid,
       targetAttribute: 'shops',
     },
     products_mw: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::product.product',
+      target: productUid,
     },
     myCompo: {
       type: 'component',
       repeatable: false,
-      component: 'default.compo',
+      component: compoUid,
     },
   },
   displayName: 'Shop',
@@ -122,11 +126,11 @@ describe('Relations, with d&p: %p', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    const createdProduct1 = await createEntry('api::product.product', { name: 'Skate' });
-    const createdProduct2 = await createEntry('api::product.product', { name: 'Candle' });
+    const createdProduct1 = await createEntry(productUid, { name: 'Skate' });
+    const createdProduct2 = await createEntry(productUid, { name: 'Candle' });
 
     await rq({
-      url: `/content-manager/collection-types/api::product.product/${createdProduct1.data.id}/actions/publish`,
+      url: `/content-manager/collection-types/${productUid}/${createdProduct1.data.id}/actions/publish`,
       method: 'POST',
     });
 
@@ -135,7 +139,7 @@ describe('Relations, with d&p: %p', () => {
 
     const id1 = createdProduct1.data.id;
 
-    const createdShop1 = await createEntry('api::shop.shop', {
+    const createdShop1 = await createEntry(shopUid, {
       name: 'Cazotte Shop',
       products_ow: id1,
       products_oo: id1,
@@ -148,7 +152,7 @@ describe('Relations, with d&p: %p', () => {
         compo_products_mw: [id1],
       },
     });
-    const createdShop2 = await createEntry('api::shop.shop', {
+    const createdShop2 = await createEntry(shopUid, {
       name: 'Empty Shop',
       myCompo: {
         compo_products_ow: null,
@@ -170,7 +174,7 @@ describe('Relations, with d&p: %p', () => {
       test('Fail when entity is not found', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/api::shop.shop/products_ow',
+          url: `/content-manager/relations/${shopUid}/products_ow`,
           qs: {
             id: 99999,
             status: 'draft',
@@ -192,7 +196,7 @@ describe('Relations, with d&p: %p', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/api::shop.shop/unknown',
+          url: `/content-manager/relations/${shopUid}/unknown`,
         });
 
         expect(res.status).toBe(400);
@@ -200,7 +204,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "The relational field unknown doesn't exist on api::shop.shop",
+            message: `The relational field unknown doesn't exist on ${shopUid}`,
             name: 'BadRequestError',
             status: 400,
           },
@@ -210,7 +214,7 @@ describe('Relations, with d&p: %p', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/api::shop.shop/name',
+          url: `/content-manager/relations/${shopUid}/name`,
         });
 
         expect(res.status).toBe(400);
@@ -218,7 +222,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "The relational field name doesn't exist on api::shop.shop",
+            message: `The relational field name doesn't exist on ${shopUid}`,
             name: 'BadRequestError',
             status: 400,
           },
@@ -243,7 +247,7 @@ describe('Relations, with d&p: %p', () => {
       beforeAll(() => {
         id = isComponent ? data.shops[0].myCompo.id : data.shops[0].id;
         idEmptyShop = isComponent ? data.shops[1].myCompo.id : data.shops[1].id;
-        modelUID = isComponent ? 'default.compo' : 'api::shop.shop';
+        modelUID = isComponent ? compoUid : shopUid;
       });
 
       test('Can retrieve available relation(s) for an entity that have some relations', async () => {
@@ -408,7 +412,7 @@ describe('Relations, with d&p: %p', () => {
       test('Fail when the component is not found', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/default.compo/compo_products_ow',
+          url: `/content-manager/relations/${compoUid}/compo_products_ow`,
           qs: {
             id: 99999,
           },
@@ -429,7 +433,7 @@ describe('Relations, with d&p: %p', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/default.compo/unknown',
+          url: `/content-manager/relations/${compoUid}/unknown`,
         });
 
         expect(res.status).toBe(400);
@@ -437,7 +441,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "The relational field unknown doesn't exist on default.compo",
+            message: `The relational field unknown doesn't exist on ${compoUid}`,
             name: 'BadRequestError',
             status: 400,
           },
@@ -447,7 +451,7 @@ describe('Relations, with d&p: %p', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/default.compo/name',
+          url: `/content-manager/relations/${compoUid}/name`,
         });
 
         expect(res.status).toBe(400);
@@ -455,7 +459,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "The relational field name doesn't exist on default.compo",
+            message: `The relational field name doesn't exist on ${compoUid}`,
             name: 'BadRequestError',
             status: 400,
           },
