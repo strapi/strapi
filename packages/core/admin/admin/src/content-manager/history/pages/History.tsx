@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Flex, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { omit } from 'lodash/fp';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -62,7 +63,8 @@ const HistoryPage = () => {
     {
       contentType: slug!,
       ...(documentId ? { documentId } : {}),
-      ...validQueryParams,
+      // Omit id since it's not needed by the endpoint and caused extra refetches
+      ...omit(['id'], validQueryParams),
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -71,7 +73,7 @@ const HistoryPage = () => {
   React.useEffect(() => {
     const versions = versionsResponse.data?.data;
 
-    if (!query.id && versions?.[0]) {
+    if (!query.id && !versionsResponse.isLoading && versions?.[0]) {
       navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
