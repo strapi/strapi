@@ -21,11 +21,11 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish first all locales
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
         // Unpublish all locales
-        await strapi.documents(ARTICLE_UID).unpublish(articleDb.id);
+        await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId);
 
-        const publishedArticles = await findPublishedArticlesDb(articleDb.id);
+        const publishedArticles = await findPublishedArticlesDb(articleDb.documentId);
 
         // All locales should have been unpublished
         expect(publishedArticles.length).toBe(0);
@@ -38,14 +38,14 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish first all locales
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
-        const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.id);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.documentId);
 
-        await strapi.documents(ARTICLE_UID).unpublish(articleDb.id, {
+        await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId, {
           locale: 'en',
         });
 
-        const publishedArticlesAfter = await findPublishedArticlesDb(articleDb.id);
+        const publishedArticlesAfter = await findPublishedArticlesDb(articleDb.documentId);
 
         // Sanity check to validate there are multiple locales
         expect(publishedArticlesBefore.length).toBeGreaterThan(1);

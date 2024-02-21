@@ -2,7 +2,7 @@ import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticleDb, switchIdForDocumentId } from './utils';
+import { ARTICLE_UID, findArticleDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
@@ -24,7 +24,7 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
         const newName = 'Updated Document';
 
-        const article = await strapi.documents(ARTICLE_UID).update(articleDb.id, {
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
           data: { title: newName },
         });
 
@@ -61,7 +61,7 @@ describe('Document Service', () => {
           ],
         } as const;
 
-        const article = await strapi.documents(ARTICLE_UID).update(articleDb.id, {
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
           data: {
             comp: dataToUpdate.comp,
             dz: [...dataToUpdate.dz],
@@ -85,7 +85,7 @@ describe('Document Service', () => {
         const newName = 'updated document';
 
         // Update an existing locale of a document
-        const article = await strapi.documents(ARTICLE_UID).update(articleDb.id, {
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
           locale: 'nl',
           data: { title: newName },
         });
@@ -100,7 +100,7 @@ describe('Document Service', () => {
         // verify it was updated in the database
         const updatedArticleDb = await findArticleDb({ title: newName });
         expect(updatedArticleDb).toMatchObject({
-          id: articleDb.id,
+          documentId: articleDb.documentId,
           locale: 'nl',
           title: newName,
           updatedAt: article.updatedAt,
@@ -119,14 +119,14 @@ describe('Document Service', () => {
         const newName = 'updated document';
 
         // Create a new article in spanish
-        const article = await strapi.documents(ARTICLE_UID).update(articleDb.id, {
+        const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
           locale: 'es',
           data: { title: newName, password: '123456' },
         });
 
         // verify that the returned document was updated
         expect(article).toMatchObject({
-          id: articleDb.id,
+          documentId: articleDb.documentId,
           locale: 'es',
           title: newName,
           updatedAt: article.updatedAt,
@@ -149,7 +149,7 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
         const newName = 'updated document';
 
-        const updatePromise = strapi.documents(ARTICLE_UID).update(articleDb.id, {
+        const updatePromise = strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
           status: 'published',
           data: { title: newName },
         });

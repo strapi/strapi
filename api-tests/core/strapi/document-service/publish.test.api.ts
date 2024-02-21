@@ -23,17 +23,17 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).publish(articleDb.id);
+        const result = await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
 
         expect(result).not.toBeNull();
 
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({
-            documentId: articleDb.id,
+            documentId: articleDb.documentId,
             publishedAt: { $null: true },
           }),
           findArticlesDb({
-            documentId: articleDb.id,
+            documentId: articleDb.documentId,
             publishedAt: { $notNull: true },
           }),
         ]);
@@ -54,16 +54,16 @@ describe('Document Service', () => {
 
         // Publish twice should not create two new published versions,
         // the second published version should replace the first one
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
 
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({
-            documentId: articleDb.id,
+            documentId: articleDb.documentId,
             publishedAt: { $null: true },
           }),
           findArticlesDb({
-            documentId: articleDb.id,
+            documentId: articleDb.documentId,
             publishedAt: { $notNull: true },
           }),
         ]);
@@ -81,7 +81,7 @@ describe('Document Service', () => {
       'publish one locale',
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ documentId: 'Article1' });
-        const documentId = articlesDb.at(0)!.id;
+        const documentId = articlesDb.at(0)!.documentId;
 
         const result = await strapi.documents(ARTICLE_UID).publish(documentId, {
           locale: 'en', // should only publish the english locale
