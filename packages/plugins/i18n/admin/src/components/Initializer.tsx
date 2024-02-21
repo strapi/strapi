@@ -7,10 +7,10 @@ type InitializerProps = {
 };
 
 const Initializer = ({ setPlugin }: InitializerProps) => {
-  const ref = React.useRef(setPlugin);
+  const setPluginRef = React.useRef(setPlugin);
 
   React.useEffect(() => {
-    ref.current(pluginId);
+    setPluginRef.current(pluginId);
   }, []);
 
   return null;

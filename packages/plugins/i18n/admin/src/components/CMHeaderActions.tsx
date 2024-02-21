@@ -152,7 +152,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, coll
       }),
       content: (
         <Flex direction="column" gap={2}>
-          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Icon as={ExclamationMarkCircle} width={6} height={6} color="danger600" />
           <Typography as="p" variant="omega" textAlign="center">
             {formatMessage({
               id: getTranslation('actions.delete.dialog.body'),

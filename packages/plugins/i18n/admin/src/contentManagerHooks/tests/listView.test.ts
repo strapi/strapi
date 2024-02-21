@@ -31,7 +31,7 @@ describe('addColumnToTableHook', () => {
     },
   };
 
-  it('does nothing when there s no i18n.localized key in the action', () => {
+  it('does nothing when there is no i18n.localized key in the action', () => {
     const result = addColumnToTableHook({
       displayedHeaders: [DEFAULT_FIELD],
       layout: DEFAULT_LAYOUT,
