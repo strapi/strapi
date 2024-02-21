@@ -40,7 +40,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       );
       await expect(titleInput).toHaveValue(frenchTitle);
 
-      // Go back to create new entry
+      // Go back to the CM to create a new english entry
       await page.goto('/admin');
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
@@ -72,23 +72,18 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
       // Go back to the entry
-      // TODO: Use the back button when it works
-      // await page.getByRole('link', { name: 'Back' }).click();
-      await page.goto('/admin');
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('gridcell', { name: 'Being from Kansas is a pity' }).click();
+      await page.getByRole('link', { name: 'Back' }).click();
 
       /**
        * Update
        */
-      await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
+      await titleInput.fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
+      // Go to the history page
       await page.getByRole('link', { name: 'History' }).click();
-      await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=en'
-      );
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
+      versionCards.first().click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // Assert the previous version in the list is the expected version
       const previousVersion = versionCards.nth(1);
@@ -97,11 +92,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
       // Go back to the entry
-      // TODO: Use the back button when it works
       // await page.getByRole('link', { name: 'Back' }).click();
-      // await page.goto('/admin');
-      // await page.getByRole('link', { name: 'Content Manager' }).click();
-      // await page.getByRole('gridcell', { name: 'Being from Kansas City' }).click();
 
       /**
        * Publish
@@ -167,12 +158,8 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(titleInput).toBeDisabled();
       await expect(titleInput).toHaveValue('AFC Richmond');
 
-      // Go back
-      // TODO: Use the back button when it works
-      // await page.getByRole('link', { name: 'Back' }).click();
-      await page.goto('/admin');
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      // Go back to the entry
+      await page.getByRole('link', { name: 'Back' }).click();
 
       /**
        * Update
@@ -180,13 +167,16 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
       await page.getByRole('link', { name: 'History' }).click();
-      await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
+      versionCards.first().click();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
       // Assert the previous version in the list is the expected version
       versionCards.nth(1).click();
       await expect(titleInput).toHaveValue('AFC Richmond');
+
+      // Go back to the entry
+      // await page.getByRole('link', { name: 'Back' }).click();
 
       /**
        * Publish
