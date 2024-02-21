@@ -181,6 +181,10 @@ const VersionContent = () => {
                             return JSON.stringify(value);
                           case 'date':
                           case 'datetime':
+                            if (!value) {
+                              return null;
+                            }
+
                             return new Date(value as string);
                           default:
                             return value;
