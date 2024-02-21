@@ -121,9 +121,13 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const isEntryValid = getEntryValidStatus(model.uid as Common.UID.ContentType, result, {
-              strapi,
-            });
+            const isEntryValid = await getEntryValidStatus(
+              model.uid as Common.UID.ContentType,
+              result,
+              {
+                strapi,
+              }
+            );
 
             await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
               where: {
