@@ -47,6 +47,7 @@
   "pages.Releases.tab.done": "Done",
   "page.Releases.tab.emptyEntries": "No releases",
   "pages.Details.tab.emptyEntries": "This release is empty. Open the Content Manager, select an entry and add it to the release.",
+  "page.Releases.release-item.entries": "{number, plural, =0 {No entries} one {# entry} other {# entries}}",
   "page.ReleaseDetails.table.header.label.name": "name",
   "page.ReleaseDetails.table.header.label.locale": "locale",
   "page.ReleaseDetails.table.header.label.content-type": "content-type",

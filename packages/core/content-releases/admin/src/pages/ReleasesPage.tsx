@@ -63,7 +63,7 @@ const LinkCard = styled(Link)`
 `;
 
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
-  const { formatMessage, formatRelativeTime } = useIntl();
+  const { formatMessage } = useIntl();
   const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
 
   if (isError) {
