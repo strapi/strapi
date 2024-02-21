@@ -55,20 +55,25 @@ const HistoryPage = () => {
     id?: string;
     plugins?: Record<string, unknown>;
   }>();
-  const validQueryParams = buildValidGetParams(query);
-  const page = validQueryParams.page ? Number(validQueryParams.page) : 1;
+  const { id: selectedVersionId, ...queryWithoutId } = query;
+  const validQueryParamsWithoutId = buildValidGetParams(queryWithoutId);
+  const page = validQueryParamsWithoutId.page ? Number(validQueryParamsWithoutId.page) : 1;
 
-  const versionsResponse = useGetHistoryVersionsQuery({
-    contentType: slug!,
-    ...(documentId ? { documentId } : {}),
-    ...validQueryParams,
-  });
+  const versionsResponse = useGetHistoryVersionsQuery(
+    {
+      contentType: slug!,
+      ...(documentId ? { documentId } : {}),
+      // Omit id since it's not needed by the endpoint and caused extra refetches
+      ...validQueryParamsWithoutId,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   // Make sure the user lands on a selected history version
   React.useEffect(() => {
     const versions = versionsResponse.data?.data;
 
-    if (!query.id && versions?.[0]) {
+    if (!query.id && !versionsResponse.isLoading && versions?.[0]) {
       navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
@@ -87,7 +92,7 @@ const HistoryPage = () => {
   }
 
   const selectedVersion = versionsResponse.data.data.find(
-    (version) => version.id.toString() === query.id
+    (version) => version.id.toString() === selectedVersionId
   );
 
   if (!selectedVersion) {

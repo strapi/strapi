@@ -17,6 +17,7 @@ const historyVersionsApi = contentManagerApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['HistoryVersion'],
     }),
   }),
 });
