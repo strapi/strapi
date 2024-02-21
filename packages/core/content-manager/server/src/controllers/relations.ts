@@ -76,11 +76,11 @@ export default {
     let currentEntity = { id: null };
     if (id) {
       // The Id we receive can be a documentId or a numerical entity id
-      // TODO is there a better way to distinguish between the two?
-      if (Number.isNaN(Number(id))) {
-        where.documentId = id;
-      } else {
+      if (Number(id)) {
+        // TODO is there a better way to distinguish between the two?
         where.id = Number(id);
+      } else {
+        where.documentId = id;
       }
 
       currentEntity = await strapi.db.query(model).findOne({
@@ -130,8 +130,8 @@ export default {
       attribute,
       fieldsToSelect,
       mainField,
-      sourceUid: sourceSchema.uid,
-      targetUid: targetSchema.uid,
+      sourceSchema,
+      targetSchema,
       targetField,
       currentEntityId: currentEntity?.id,
     };
@@ -151,8 +151,14 @@ export default {
       return;
     }
 
-    const { targetField, fieldsToSelect, mainField, sourceUid, targetUid, currentEntityId } =
-      validation;
+    const {
+      targetField,
+      fieldsToSelect,
+      mainField,
+      sourceSchema: { uid: sourceUid },
+      targetSchema: { uid: targetUid },
+      currentEntityId,
+    } = validation;
 
     const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
@@ -236,64 +242,69 @@ export default {
   },
 
   async findExisting(ctx: any) {
-    // TODO
-    return;
     await validateFindExisting(ctx.request.query);
     const { id } = ctx.params;
+    const locale = ctx.request?.query?.locale || null;
+    const status = ctx.request?.query.status;
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id);
+    const validation = await this.extractAndValidateRequestInfo(ctx, status, id, locale);
     if (!validation) {
       // If validation of the request has failed the error has already been sent
       // to the ctx
       return;
     }
 
-    const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query.status;
-
-    let { fieldsToSelect } = validation;
-    fieldsToSelect = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
-
     const { model } = ctx.params;
-    const { targetField, targetedModel, attribute } = validation;
-    // TODO sorting on mainField?
-    // const { mainField } = validation;
+    const {
+      targetField,
+      attribute,
+      fieldsToSelect,
+      sourceSchema: { modelType: sourceModelType },
+      targetSchema: { uid: targetUid },
+      currentEntityId,
+    } = validation;
 
-    let modelUid: string = '';
+    // TODO type modelUid = ContentType
+    let modelUid: any = '';
+    let fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
     let filters;
     let sort = null;
     let populate = null;
     if (!isOneToAny(attribute)) {
-      // If it is a many to any relation, we query for the target content type
+      // If it is a many to any relation, we query for the target (relation) content type
       // Filtering for those related to the current entity
 
-      modelUid = targetedModel.uid;
+      modelUid = targetUid;
       filters = {
         [attribute?.mappedBy ?? attribute?.inversedBy]: {
           $and: [
-            { id },
+            { id: currentEntityId },
             { locale },
             { publishedAt: status === 'published' ? { $ne: null } : null },
           ],
         },
       };
-      sort = fieldsToSelect
+      sort = fields
         .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
         .map((field: any) => `${field}:ASC`);
     } else {
       // If it is a one to any relation, we query for the source content type
-      // filtering to the documentId, locale and status and populate the
-      // selected fields from the target relation
-
+      // This could be a component or a content type
       modelUid = model;
-      filters = { id };
-      populate = { [targetField]: { fields: fieldsToSelect } };
+      filters = { id: currentEntityId };
+
+      if (sourceModelType === 'component') {
+        // If the source is a component, remove fields that are not present for components
+        fields = fields.filter(
+          (field: string) => !['documentId', 'locale', PUBLISHED_AT_ATTRIBUTE].includes(field)
+        );
+      }
+
+      populate = { [targetField]: { fields } };
     }
 
-    const queryParams = {
-      fields: fieldsToSelect,
-      locale,
-      status,
+    const queryParams: Record<string, any> = {
+      fields,
       filters,
       sort,
       populate,
@@ -301,9 +312,10 @@ export default {
       pageSize: ctx.request.query.pageSize,
     };
 
-    const page = await getService('entity-manager').findPage(queryParams, modelUid);
+    const page = await strapi.entityService.findPage(modelUid, queryParams);
 
     // TODO simplify isOneToAny conditions
+    let results;
     if (isOneToAny(attribute) && page.results.length === 1) {
       let targetResult = page.results[0][targetField];
       if (!targetResult) {
@@ -318,10 +330,20 @@ export default {
         )
       );
 
-      const uniqueResults = getSortedResults(targetResult);
-      ctx.body = { ...page, results: uniqueResults };
+      results = getSortedResults(targetResult);
     } else {
-      ctx.body = page;
+      results = page.results;
     }
+
+    ctx.body = {
+      ...page,
+      results: results.map((result: any) => {
+        if (result.documentId === undefined) {
+          return result;
+        }
+
+        return { ...omit(['documentId'], result), id: result.documentId };
+      }),
+    };
   },
 };
