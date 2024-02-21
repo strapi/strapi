@@ -41,7 +41,41 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
   validate: (setErrors?: boolean) => Promise<FormErrors<TFormValues> | null>;
 }
 
-const [FormProvider, useForm] = createContext<FormContextValue>('Form');
+/**
+ * @internal
+ * @description We use this just to warn people that they're using the useForm
+ * methods outside of a Form component, but we don't want to throw an error
+ * because otherwise the DocumentActions list cannot be rendered in our list-view.
+ */
+const ERR_MSG =
+  'The Form Component has not been initialised, ensure you are using this hook within a Form component';
+
+const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
+  disabled: false,
+  errors: {},
+  initialValues: {},
+  isSubmitting: false,
+  modified: false,
+  addFieldRow: () => {
+    throw new Error(ERR_MSG);
+  },
+  moveFieldRow: () => {
+    throw new Error(ERR_MSG);
+  },
+  onChange: () => {
+    throw new Error(ERR_MSG);
+  },
+  removeFieldRow: () => {
+    throw new Error(ERR_MSG);
+  },
+  setSubmitting: () => {
+    throw new Error(ERR_MSG);
+  },
+  validate: async () => {
+    throw new Error(ERR_MSG);
+  },
+  values: {},
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Form

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button } from '@strapi/design-system';
+import { Button, Combobox, ComboboxOption, ComboboxProps } from '@strapi/design-system';
 import {
   FilterData,
   FilterListURLQuery,
@@ -21,8 +21,6 @@ import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getDisplayName } from '../../../utils/users';
 
-import { AdminUsersFilter } from './AdminUsersFilter';
-
 const REVIEW_WORKFLOW_FILTER_CE: FilterData[] = [];
 
 /**
@@ -40,6 +38,9 @@ const NOT_ALLOWED_FILTERS = [
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
 const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
+/* -------------------------------------------------------------------------------------------------
+ * Filters
+ * -----------------------------------------------------------------------------------------------*/
 interface FiltersProps {
   disabled?: boolean;
   schema: Schema;
@@ -243,7 +244,7 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
       // we have to wait for admin users to be fully loaded, because otherwise
       // combine is called to early and does not contain the latest state of
       // the users array
-      enabled: options?.reviewWorkflows && !isLoadingAdminUsers,
+      enabled: !!options?.reviewWorkflows && !isLoadingAdminUsers,
     }
     /**
      * this is cast because the data returns MessageDescriptor
@@ -284,6 +285,39 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
       )}
       <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * AdminUsersFilter
+ * -----------------------------------------------------------------------------------------------*/
+
+interface AdminUsersFilterProps extends Pick<ComboboxProps, 'value' | 'onChange'> {}
+
+const AdminUsersFilter = ({ value, onChange }: AdminUsersFilterProps) => {
+  const { formatMessage } = useIntl();
+  const { data, isLoading } = useAdminUsers();
+
+  const users = data?.users || [];
+
+  return (
+    <Combobox
+      value={value}
+      aria-label={formatMessage({
+        id: 'content-manager.components.Filters.usersSelect.label',
+        defaultMessage: 'Search and select a user to filter',
+      })}
+      onChange={onChange}
+      loading={isLoading}
+    >
+      {users.map((user) => {
+        return (
+          <ComboboxOption key={user.id} value={user.id.toString()}>
+            {getDisplayName(user, formatMessage)}
+          </ComboboxOption>
+        );
+      })}
+    </Combobox>
   );
 };
 

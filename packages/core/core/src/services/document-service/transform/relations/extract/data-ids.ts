@@ -4,24 +4,28 @@ import { traverseEntity } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, ID } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
+import { getRelationTargetLocale } from '../utils/i18n';
+
+type ExtractedId = { id: ID; locale?: string };
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
 const handlePrimitive = (
   relation: ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined | any
-) => {
+): LongHand[] => {
   if (!relation) {
     return []; // null
   }
   if (isShortHand(relation)) {
-    return [relation]; // id
+    return [{ id: relation }]; // id
   }
   if (isLongHand(relation)) {
-    return [relation.id]; // { id }
+    // @ts-expect-error - TODO: Add relation type
+    return [{ id: relation.id, locale: relation.locale }]; // { id, locale? }
   }
   if (Array.isArray(relation)) {
-    return relation.map((item) => (isShortHand(item) ? item : item.id)); // id[]
+    return relation.map((item) => (isShortHand(item) ? { id: item } : item)); // id[]
   }
 
   return [];
@@ -32,7 +36,7 @@ const handlePrimitive = (
  */
 const extractRelationIds = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>
-): ID[] => {
+): ExtractedId[] => {
   const ids = handlePrimitive(relation);
   if (!isObject(relation)) return ids;
 
@@ -45,17 +49,19 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 
     // handle positional arguments
     const connect = Array.isArray(relation.connect) ? relation.connect : [relation.connect];
-    connect.forEach((item) => {
-      if (isShortHand(item) || !('position' in item)) return;
+    connect.forEach((relation) => {
+      if (isShortHand(relation) || !('position' in relation)) return;
+
+      const { position } = relation;
 
       // { connect: { id: id, position: { before: id } } }
-      if (item.position?.before) {
-        ids.push(...handlePrimitive(item.position.before));
+      if (position?.before) {
+        ids.push(...handlePrimitive({ ...position, id: position.before }));
       }
 
       // { connect: { id: id, position: { after: id } } }
-      if (item.position?.after) {
-        ids.push(...handlePrimitive(item.position.after));
+      if (position?.after) {
+        ids.push(...handlePrimitive({ ...position, id: position.after }));
       }
     });
   }
@@ -70,19 +76,30 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft: boolean }
+  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft?: boolean }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
       // Find relational attributes, and return the document ids
       if (attribute.type === 'relation') {
         const extractedIds = extractRelationIds(value as any);
-        const target = attribute.target;
 
         // TODO: Handle morph relations (they have multiple targets)
+        const target = attribute.target;
         if (!target) return;
 
-        extractedIds.forEach((id) => idMap.add(target, id as string, opts.locale));
+        extractedIds.forEach((relation) => {
+          idMap.add({
+            uid: target,
+            documentId: relation.id as string,
+            locale: getRelationTargetLocale(relation, {
+              targetUid: target as Common.UID.Schema,
+              sourceUid: opts.uid,
+              sourceLocale: opts.locale,
+            }),
+            isDraft: opts.isDraft,
+          });
+        });
       }
     },
     { schema: strapi.getModel(opts.uid) },

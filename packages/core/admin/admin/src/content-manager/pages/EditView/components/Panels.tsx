@@ -3,10 +3,12 @@ import * as React from 'react';
 import { Flex, Typography } from '@strapi/design-system';
 import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import { useMatch } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { InjectionZone } from '../../../../components/InjectionZone';
 import { useDoc } from '../../../hooks/useDocument';
+import { CLONE_PATH } from '../../../router';
 
 import { DocumentActions } from './DocumentActions';
 
@@ -51,7 +53,7 @@ const Panels = () => {
       (
         plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
       ).getEditViewSidePanels(),
-    []
+    [plugins]
   );
 
   return (
@@ -88,6 +90,7 @@ const ActionsPanel: PanelComponent = () => {
 ActionsPanel.type = 'actions';
 
 const ActionsPanelContent = () => {
+  const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
       query: { status = 'draft' },
@@ -100,8 +103,8 @@ const ActionsPanelContent = () => {
     activeTab: status,
     model,
     id,
-    document,
-    meta,
+    document: isCloning ? undefined : document,
+    meta: isCloning ? undefined : meta,
     collectionType,
   } satisfies DocumentActionProps;
 

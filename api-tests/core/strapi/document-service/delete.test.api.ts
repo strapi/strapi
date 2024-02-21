@@ -78,17 +78,17 @@ describe('Document Service', () => {
     it(
       'delete a document locale',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
         await strapi.documents(ARTICLE_UID).delete(articleDb.id, {
-          locale: 'fr',
+          locale: 'nl',
         });
 
         const articles = await findArticlesDb({ documentId: articleDb.id });
 
         expect(articles.length).toBeGreaterThan(0);
-        // Should not have french locale
+        // Should not have dutch locale
         articles.forEach((article) => {
-          expect(article.locale).not.toBe('fr');
+          expect(article.locale).not.toBe('nl');
         });
       })
     );

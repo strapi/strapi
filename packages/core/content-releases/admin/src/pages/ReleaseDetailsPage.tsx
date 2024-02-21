@@ -36,6 +36,8 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import format from 'date-fns/format';
+import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -849,12 +851,22 @@ const ReleaseDetailsPage = () => {
     return <Navigate to=".." />;
   }
 
-  const title = (isSuccessDetails && data?.data?.name) || '';
+  const releaseData = (isSuccessDetails && data?.data) || null;
+
+  const title = releaseData?.name || '';
+  const timezone = releaseData?.timezone ?? null;
+  const scheduledAt =
+    releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
+  // Just get the date and time to display without considering updated timezone time
+  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
+  const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
     const response = await updateRelease({
       id: releaseId,
       name: values.name,
+      scheduledAt: values.scheduledAt,
+      timezone: values.timezone,
     });
 
     if ('data' in response) {
@@ -916,7 +928,14 @@ const ReleaseDetailsPage = () => {
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
           isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{ name: title || '' }}
+          initialValues={{
+            name: title || '',
+            scheduledAt,
+            date,
+            time,
+            isScheduled: Boolean(scheduledAt),
+            timezone,
+          }}
         />
       )}
       <ConfirmDialog

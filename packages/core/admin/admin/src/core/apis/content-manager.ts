@@ -15,6 +15,7 @@ import {
   ActionsPanel,
   type PanelDescription,
 } from '../../content-manager/pages/EditView/components/Panels';
+import { DEFAULT_TABLE_ROW_ACTIONS } from '../../content-manager/pages/ListView/components/TableActions';
 
 import type { PluginConfig } from './Plugin';
 import type { DescriptionComponent } from '../../components/DescriptionComponentRenderer';
@@ -27,7 +28,7 @@ import type { Attribute } from '@strapi/types';
 
 type DescriptionReducer<Config extends object> = (prev: Config[]) => Config[];
 
-interface EditViewContext {
+interface Context {
   /**
    * This will ONLY be null, if the content-type
    * does not have draft & published enabled.
@@ -57,7 +58,7 @@ interface EditViewContext {
   model: string;
 }
 
-interface PanelComponentProps extends EditViewContext {}
+interface PanelComponentProps extends Context {}
 
 interface PanelComponent extends DescriptionComponent<PanelComponentProps, PanelDescription> {
   /**
@@ -67,14 +68,16 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
   type?: 'actions' | 'review-workflows' | 'releases';
 }
 
-interface DocumentActionProps extends EditViewContext {}
+interface DocumentActionProps extends Context {}
 
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
   type?:
+    | 'clone'
     | 'configure-the-view'
     | 'delete'
     | 'discard'
+    | 'edit'
     | 'edit-the-model'
     | 'publish'
     | 'unpublish'
@@ -92,7 +95,11 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
-  documentActions: DocumentActionComponent[] = [...DEFAULT_HEADER_ACTIONS, ...DEFAULT_ACTIONS];
+  documentActions: DocumentActionComponent[] = [
+    ...DEFAULT_ACTIONS,
+    ...DEFAULT_TABLE_ROW_ACTIONS,
+    ...DEFAULT_HEADER_ACTIONS,
+  ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel, ReviewWorkflowsPanel];
 
   constructor() {}
@@ -174,7 +181,7 @@ export type {
   PanelDescription,
   DescriptionComponent,
   DescriptionReducer,
-  EditViewContext,
+  Context,
   PanelComponentProps,
   DocumentActionComponent,
   DocumentActionDescription,

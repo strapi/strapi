@@ -57,6 +57,9 @@ describe('i18n - Content API', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -115,8 +118,8 @@ describe('i18n - Content API', () => {
           method: 'POST',
           url: `/content-manager/collection-types/api::category.category`,
           qs: {
-            plugins: { i18n: { relatedEntityId: data.categories[0].id } },
             locale,
+            relatedEntityId: data.categories[0].id,
           },
           body: {
             name: `category in ${locale}`,
@@ -146,6 +149,62 @@ describe('i18n - Content API', () => {
     });
   });
 
+  describe('Find locale', () => {
+    it('Can find a locale if it exists', async () => {
+      // Create locale
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::category.category',
+        body: {
+          name: 'categoría',
+          locale: 'es-AR',
+        },
+      });
+
+      // Can find it
+      const locale = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::category.category/${res.body.data.id}`,
+        qs: {
+          locale: 'es-AR',
+        },
+      });
+
+      expect(locale.statusCode).toBe(200);
+      expect(locale.body).toMatchObject({
+        locale: 'es-AR',
+        name: 'categoría',
+      });
+    });
+
+    it.only('Not existing locale in an existing document returns empty body', async () => {
+      // Create default locale
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::category.category',
+        body: {
+          name: 'category in english',
+          locale: 'en',
+        },
+      });
+
+      // Find by another language
+      const locale = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::category.category/${res.body.data.id}`,
+        qs: {
+          locale: 'es-AR',
+        },
+      });
+
+      expect(locale.statusCode).toBe(200);
+      expect(locale.body.data).toMatchObject({});
+      expect(locale.body.meta).toMatchObject({
+        availableStatus: [],
+        availableLocales: [{ locale: 'en' }],
+      });
+    });
+  });
   // V5: Fix bulk actions
   describe.skip('Bulk Delete', () => {
     test('default locale', async () => {

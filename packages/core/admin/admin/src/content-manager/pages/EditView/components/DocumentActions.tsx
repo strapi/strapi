@@ -20,7 +20,7 @@ import { Menu } from '@strapi/design-system/v2';
 import { useNotification } from '@strapi/helper-plugin';
 import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
@@ -28,16 +28,17 @@ import { useForm } from '../../../components/Form';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
+import { CLONE_PATH } from '../../../router';
 
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
+type DocumentActionPosition = 'panel' | 'header' | 'table-row';
 
 interface DocumentActionDescription {
   label: string;
-  onClick?: (event: React.SyntheticEvent) => void;
+  onClick?: (event: React.SyntheticEvent) => Promise<boolean | void> | boolean | void;
   icon?: React.ReactNode;
   /**
    * @default false
@@ -47,7 +48,7 @@ interface DocumentActionDescription {
    * @default 'panel'
    * @description Where the action should be rendered.
    */
-  position?: 'panel' | 'header';
+  position?: DocumentActionPosition | DocumentActionPosition[];
   dialog?: DialogOptions | NotificationOptions | ModalOptions;
   /**
    * @default 'secondary'
@@ -81,7 +82,7 @@ interface ModalOptions {
   type: 'modal';
   title: string;
   content: React.ReactNode;
-  footer: React.ReactNode;
+  footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   onClose?: () => void;
 }
 
@@ -99,9 +100,14 @@ interface DocumentActionsProps {
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
   const { formatMessage } = useIntl();
-  const [primaryAction, secondaryAction, ...restActions] = actions.filter(
-    (action) => action.position !== 'header'
-  );
+  const [primaryAction, secondaryAction, ...restActions] = actions.filter((action) => {
+    if (action.position === undefined) {
+      return true;
+    }
+
+    const positions = Array.isArray(action.position) ? action.position : [action.position];
+    return positions.includes('panel');
+  });
 
   if (!primaryAction) {
     return null;
@@ -141,26 +147,26 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const toggleNotification = useNotification();
 
-  const handleClick = (action: Action) => (e: React.MouseEvent) => {
-    if (action.onClick) {
-      action.onClick(e);
-    }
+  const handleClick = (action: Action) => async (e: React.MouseEvent) => {
+    const { onClick = () => false, dialog, id } = action;
 
-    if (action.dialog) {
-      switch (action.dialog.type) {
+    const muteDialog = await onClick(e);
+
+    if (dialog && !muteDialog) {
+      switch (dialog.type) {
         case 'notification':
           toggleNotification({
-            title: action.dialog.title,
-            message: action.dialog.content,
-            type: action.dialog.status,
-            timeout: action.dialog.timeout,
-            onClose: action.dialog.onClose,
+            title: dialog.title,
+            message: dialog.content,
+            type: dialog.status,
+            timeout: dialog.timeout,
+            onClose: dialog.onClose,
           });
           break;
         case 'dialog':
         case 'modal':
           e.preventDefault();
-          setDialogId(action.id);
+          setDialogId(id);
       }
     }
   };
@@ -203,39 +209,44 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionMenu
  * -----------------------------------------------------------------------------------------------*/
-
 interface DocumentActionsMenuProps {
   actions: Action[];
+  children?: React.ReactNode;
   label?: string;
+  variant?: 'ghost' | 'tertiary';
 }
 
-const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
+const DocumentActionsMenu = ({
+  actions,
+  children,
+  label,
+  variant = 'tertiary',
+}: DocumentActionsMenuProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
 
-  const handleClick = (action: Action) => (e: React.SyntheticEvent) => {
-    if (action.onClick) {
-      action.onClick(e);
-    }
+  const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
+    const { onClick = () => false, dialog, id } = action;
 
-    if (action.dialog) {
-      switch (action.dialog.type) {
+    const muteDialog = await onClick(e);
+
+    if (dialog && !muteDialog) {
+      switch (dialog.type) {
         case 'notification':
           toggleNotification({
-            title: action.dialog.title,
-            message: action.dialog.content,
-            type: action.dialog.status,
-            timeout: action.dialog.timeout,
-            onClose: action.dialog.onClose,
+            title: dialog.title,
+            message: dialog.content,
+            type: dialog.status,
+            timeout: dialog.timeout,
+            onClose: dialog.onClose,
           });
           break;
         case 'dialog':
         case 'modal':
-          e.preventDefault();
-          setDialogId(action.id);
+          setDialogId(id);
       }
     }
   };
@@ -254,7 +265,7 @@ const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
         paddingTop="7px"
         paddingLeft="9px"
         paddingRight="9px"
-        variant="tertiary"
+        variant={variant}
       >
         <More aria-hidden focusable={false} />
         <VisuallyHidden as="span">
@@ -265,36 +276,46 @@ const DocumentActionsMenu = ({ actions, label }: DocumentActionsMenuProps) => {
             })}
         </VisuallyHidden>
       </Menu.Trigger>
-      <Menu.Content top="4px" popoverPlacement="bottom-end">
+      <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
             <React.Fragment key={action.id}>
-              {/* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */}
-              <Menu.Item disabled={action.disabled} onSelect={handleClick(action)}>
+              <Menu.Item
+                disabled={action.disabled}
+                /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
+                onSelect={handleClick(action)}
+              >
                 <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
                   {action.icon}
                   {action.label}
                 </Flex>
               </Menu.Item>
-              {action.dialog?.type === 'dialog' ? (
-                <DocumentActionConfirmDialog
-                  {...action.dialog}
-                  variant={action.variant}
-                  isOpen={dialogId === action.id}
-                  onClose={handleClose}
-                />
-              ) : null}
-              {action.dialog?.type === 'modal' ? (
-                <DocumentActionModal
-                  {...action.dialog}
-                  onModalClose={handleClose}
-                  isOpen={dialogId === action.id}
-                />
-              ) : null}
             </React.Fragment>
           );
         })}
+        {children}
       </Menu.Content>
+      {actions.map((action) => {
+        return (
+          <React.Fragment key={action.id}>
+            {action.dialog?.type === 'dialog' ? (
+              <DocumentActionConfirmDialog
+                {...action.dialog}
+                variant={action.variant}
+                isOpen={dialogId === action.id}
+                onClose={handleClose}
+              />
+            ) : null}
+            {action.dialog?.type === 'modal' ? (
+              <DocumentActionModal
+                {...action.dialog}
+                onModalClose={handleClose}
+                isOpen={dialogId === action.id}
+              />
+            ) : null}
+          </React.Fragment>
+        );
+      })}
     </Menu.Root>
   );
 };
@@ -388,7 +409,7 @@ const DocumentActionModal = ({
   isOpen,
   title,
   onClose,
-  footer,
+  footer: Footer,
   content,
   onModalClose,
 }: DocumentActionModalProps) => {
@@ -424,7 +445,7 @@ const DocumentActionModal = ({
         borderColor="neutral150"
         background="neutral100"
       >
-        {footer}
+        {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
       </Box>
     </ModalLayout>
   );
@@ -434,10 +455,10 @@ const DocumentActionModal = ({
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType, meta }) => {
   const navigate = useNavigate();
+  const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
-  const { meta } = useDoc();
   const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
     'PublishAction',
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
@@ -454,6 +475,7 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
   return {
     /**
      * Disabled when:
+     *  - currently if you're cloning a document we don't support publish & clone at the same time.
      *  - the form is submitting
      *  - the active tab is the published tab
      *  - the document is already published & not modified
@@ -463,6 +485,7 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
      *  - the user doesn't have the permission to update the document
      */
     disabled:
+      isCloning ||
       isSubmitting ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
@@ -483,20 +506,13 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
         document
       );
 
-      if ('data' in res) {
-        if (collectionType !== SINGLE_TYPES) {
-          /**
-           * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
-           */
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.id}`,
-            search: '?status=published',
-          });
-        } else {
-          navigate({
-            search: '?status=published',
-          });
-        }
+      if ('data' in res && collectionType !== SINGLE_TYPES) {
+        /**
+         * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+         */
+        navigate({
+          pathname: `../${collectionType}/${model}/${res.data.id}`,
+        });
       }
     },
   };
@@ -506,12 +522,14 @@ PublishAction.type = 'publish';
 
 const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
+  const cloneMatch = useMatch(CLONE_PATH);
+  const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
   const { canCreate, canUpdate } = useDocumentRBAC('PublishAction', ({ canCreate, canUpdate }) => ({
     canCreate,
     canUpdate,
   }));
-  const { create, update } = useDocumentActions();
+  const { create, update, clone } = useDocumentActions();
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -522,14 +540,14 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
     /**
      * Disabled when:
      * - the form is submitting
-     * - the document is not modified
+     * - the document is not modified & we're not cloning (you can save a clone entity straight away)
      * - the active tab is the published tab
      * - the user doesn't have the permission to create a new document
      * - the user doesn't have the permission to update the document
      */
     disabled:
       isSubmitting ||
-      !modified ||
+      (!modified && !isCloning) ||
       activeTab === 'published' ||
       Boolean((!id && !canCreate) || (id && !canUpdate)),
     label: formatMessage({
@@ -539,7 +557,24 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
     onClick: async () => {
       setSubmitting(true);
       try {
-        if (id || collectionType === SINGLE_TYPES) {
+        if (isCloning) {
+          const res = await clone(
+            {
+              model,
+              id: cloneMatch.params.origin!,
+            },
+            document
+          );
+
+          if ('data' in res) {
+            /**
+             * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+             */
+            navigate({
+              pathname: `../${collectionType}/${model}/${res.data.id}`,
+            });
+          }
+        } else if (id || collectionType === SINGLE_TYPES) {
           await update(
             {
               collectionType,
@@ -562,7 +597,6 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
              */
             navigate({
               pathname: `../${collectionType}/${model}/${res.data.id}`,
-              search: '?state=published',
             });
           }
         }
@@ -580,19 +614,20 @@ const UNPUBLISH_DRAFT_OPTIONS = {
   DISCARD: 'discard',
 };
 
-const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const UnpublishAction: DocumentActionComponent = ({
+  activeTab,
+  id,
+  model,
+  collectionType,
+  document,
+}) => {
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { document, meta } = useDoc();
   const { unpublish } = useDocumentActions();
   const toggleNotification = useNotification();
   const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
 
   const isDocumentModified = document?.status === 'modified';
-
-  const isDocumentPublished =
-    document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
-    meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
 
   const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
     React.FormEventHandler<HTMLDivElement> = (e) => {
@@ -602,7 +637,10 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
   };
 
   return {
-    disabled: !canPublish || activeTab === 'published' || !isDocumentPublished,
+    disabled:
+      !canPublish ||
+      activeTab === 'published' ||
+      (document?.status !== 'published' && document?.status !== 'modified'),
     label: formatMessage({
       id: 'app.utils.unpublish',
       defaultMessage: 'Unpublish',
@@ -716,15 +754,21 @@ const UnpublishAction: DocumentActionComponent = ({ activeTab, id, model, collec
         }
       : undefined,
     variant: 'danger',
+    position: ['panel', 'table-row'],
   };
 };
 
 UnpublishAction.type = 'unpublish';
 
-const DiscardAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const DiscardAction: DocumentActionComponent = ({
+  activeTab,
+  id,
+  model,
+  collectionType,
+  document,
+}) => {
   const { formatMessage } = useIntl();
   const canUpdate = useDocumentRBAC('PublishAction', ({ canUpdate }) => canUpdate);
-  const { document } = useDoc();
   const { discard } = useDocumentActions();
 
   return {
@@ -734,6 +778,7 @@ const DiscardAction: DocumentActionComponent = ({ activeTab, id, model, collecti
       defaultMessage: 'Discard changes',
     }),
     icon: <StyledCrossCircle />,
+    position: ['panel', 'table-row'],
     variant: 'danger',
     dialog: {
       type: 'dialog',

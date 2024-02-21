@@ -2,6 +2,6 @@
 // It's also a number here to make it works with existing V4 types.
 export type ID = string | number;
 export type ShortHand = ID;
-export type LongHand = { id: ID };
+export type LongHand = { id: ID; locale?: string };
 
-export type GetIdOrThrow = (relation: ID) => ID | never;
+export type GetId = (relation: ID) => ID | null;

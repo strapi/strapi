@@ -10,6 +10,7 @@ describe('useDocumentActions', () => {
     const { result } = renderHook(() => useDocumentActions());
 
     expect(result.current).toEqual({
+      autoClone: expect.any(Function),
       clone: expect.any(Function),
       create: expect.any(Function),
       discard: expect.any(Function),

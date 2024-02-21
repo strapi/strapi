@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { BaseCheckbox } from '@strapi/design-system';
+import {
+  BaseCheckbox,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Flex,
+  Typography,
+} from '@strapi/design-system';
 import {
   ActionBarProps,
   BulkDeleteButtonProps,
@@ -12,10 +20,11 @@ import {
   Table,
   useTableContext,
 } from '@strapi/helper-plugin';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { Documents, Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
-import { DialogConfirmDelete } from './DialogConfirmDelete';
+import { InjectionZoneList } from './InjectionZoneList';
 // import { BulkActionButtons } from './BulkActions/Buttons';
 
 /* -------------------------------------------------------------------------------------------------
@@ -53,99 +62,6 @@ const CheckboxDataCell = ({ rowId, index }: CheckboxDataCellProps) => {
     />
   );
 };
-
-/* -------------------------------------------------------------------------------------------------
- * EntityActionsDataCell
- * -----------------------------------------------------------------------------------------------*/
-
-// interface EntityActionsDataCellProps {
-//   rowId: Entity.ID;
-//   index: number;
-//   canCreate?: boolean;
-//   canDelete?: boolean;
-//   setIsConfirmDeleteRowOpen: (isOpen: boolean) => void;
-//   handleCloneClick: (id: Entity.ID) => () => void;
-// }
-
-// const EntityActionsDataCell = ({
-//   rowId,
-//   index,
-//   canCreate = false,
-//   canDelete = false,
-//   setIsConfirmDeleteRowOpen,
-//   handleCloneClick,
-// }: EntityActionsDataCellProps) => {
-//   const location = useLocation();
-//   const { formatMessage } = useIntl();
-//   const { trackUsage } = useTracking();
-//   const { setSelectedEntries } = useTableContext();
-//   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
-
-//   const itemLineText = formatMessage(
-//     {
-//       id: 'content-manager.components.ListViewTable.row-line',
-//       defaultMessage: 'item line {number}',
-//     },
-//     { number: index + 1 }
-//   );
-
-//   return (
-//     <Flex gap={1} justifyContent="end" onClick={stopPropagation}>
-//       <IconButton
-//         forwardedAs={Link}
-//         onClick={() => {
-//           trackUsage('willEditEntryFromButton');
-//         }}
-//         // @ts-expect-error – DS does not correctly infer props from the as prop.
-//         to={{
-//           pathname: rowId.toString(),
-//           state: { from: location.pathname },
-//           search: query.plugins ? stringify({ plugins: query.plugins }) : '',
-//         }}
-//         label={formatMessage(
-//           { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-//           { target: itemLineText }
-//         )}
-//         borderWidth={0}
-//       >
-//         <Pencil />
-//       </IconButton>
-
-//       {canCreate && (
-//         <IconButton
-//           onClick={handleCloneClick(rowId)}
-//           label={formatMessage(
-//             {
-//               id: 'app.component.table.duplicate',
-//               defaultMessage: 'Duplicate {target}',
-//             },
-//             { target: itemLineText }
-//           )}
-//           borderWidth={0}
-//         >
-//           <Duplicate />
-//         </IconButton>
-//       )}
-
-//       {canDelete && (
-//         <IconButton
-//           onClick={() => {
-//             trackUsage('willDeleteEntryFromList');
-//             setSelectedEntries([rowId]);
-//             setIsConfirmDeleteRowOpen(true);
-//           }}
-//           label={formatMessage(
-//             { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-//             { target: itemLineText }
-//           )}
-//           borderWidth={0}
-//         >
-//           <Trash />
-//         </IconButton>
-//       )}
-//     </Flex>
-//   );
-// };
 
 /* -------------------------------------------------------------------------------------------------
  * BodyImpl
@@ -191,6 +107,76 @@ const BodyImpl = ({
         isOpen={isConfirmDeleteRowOpen}
       />
     </Table.Body>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DialogConfirmDelete
+ * -----------------------------------------------------------------------------------------------*/
+interface DialogConfirmDeleteProps {
+  isConfirmButtonLoading?: boolean;
+  isOpen?: boolean;
+  onConfirm: () => void;
+  onToggleDialog: () => void;
+}
+
+const DialogConfirmDelete = ({
+  isConfirmButtonLoading = false,
+  isOpen = false,
+  onToggleDialog,
+  onConfirm,
+}: DialogConfirmDeleteProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Dialog
+      onClose={onToggleDialog}
+      title={formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      })}
+      isOpen={isOpen}
+    >
+      <DialogBody icon={<ExclamationMarkCircle />}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          <Flex justifyContent="center">
+            <Typography id="confirm-description">
+              {formatMessage({
+                id: 'components.popUpWarning.message',
+                defaultMessage: 'Are you sure you want to delete this?',
+              })}
+            </Typography>
+          </Flex>
+          <Flex>
+            <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
+          </Flex>
+        </Flex>
+      </DialogBody>
+      <DialogFooter
+        startAction={
+          <Button onClick={onToggleDialog} variant="tertiary">
+            {formatMessage({
+              id: 'app.components.Button.cancel',
+              defaultMessage: 'Cancel',
+            })}
+          </Button>
+        }
+        endAction={
+          <Button
+            onClick={onConfirm}
+            variant="danger-light"
+            startIcon={<Trash />}
+            id="confirm-delete"
+            loading={isConfirmButtonLoading}
+          >
+            {formatMessage({
+              id: 'app.components.Button.confirm',
+              defaultMessage: 'Confirm',
+            })}
+          </Button>
+        }
+      />
+    </Dialog>
   );
 };
 
