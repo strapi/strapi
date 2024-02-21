@@ -58,20 +58,13 @@ const createDocumentEngine = ({
   db: Database;
 }): Documents.Engine => ({
   async findMany(uid, params) {
-    const { kind } = strapi.contentType(uid);
-
     const query = await pipeAsync(
       (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
       (params) => transformParamsToQuery(uid, params),
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
 
-    if (kind === 'singleType') {
-      return db
-        .query(uid)
-        .findOne(query)
-        .then((doc) => transformOutputDocumentId(uid, doc));
-    }
+    console.log(query);
 
     return db
       .query(uid)

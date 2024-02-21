@@ -1,3 +1,5 @@
+import { omit } from 'lodash/fp';
+
 import type { Schema } from '@strapi/types';
 import { pipeAsync } from '@strapi/utils';
 
@@ -49,10 +51,7 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.Coll
   }
 
   async function deleteFn(id: string, params = {} as any) {
-    const queryParams = await pipeAsync(
-      DP.statusToLookup,
-      i18n.localeToLookup(contentType)
-    )(params);
+    const queryParams = await pipeAsync(omit('status'), i18n.localeToLookup(contentType))(params);
 
     return documents.delete(uid, id, queryParams);
   }
@@ -103,33 +102,39 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.Coll
       i18n.localeToData(contentType)
     )(params);
 
-    let doc = await documents.update(uid, id, queryParams);
+    let updatedDraft = await documents.update(uid, id, queryParams);
 
-    if (!doc) {
+    if (!updatedDraft) {
       const documentExists = await strapi.db
         .query(contentType.uid)
         .findOne({ where: { documentId: id } });
 
       if (documentExists) {
-        doc = await create({
+        updatedDraft = await create({
           ...queryParams,
-          data: { ...params.data, documentId: id },
+          data: { ...queryParams.data, documentId: id },
         });
       }
     }
 
-    if (doc && params.status === 'published') {
+    if (updatedDraft && params.status === 'published') {
+      await documents.delete(uid, id, {
+        ...queryParams,
+        status: 'published',
+        lookup: { ...params?.lookup, publishedAt: { $notNull: true } },
+      });
+
       return documents.create(uid, {
         ...queryParams,
         data: {
           ...queryParams.data,
-          documentId: doc.id,
+          documentId: updatedDraft.id,
           publishedAt: params?.data?.publishedAt ?? new Date(),
         },
       });
     }
 
-    return doc;
+    return updatedDraft;
   }
 
   async function count(params = {} as any) {

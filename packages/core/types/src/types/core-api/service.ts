@@ -48,7 +48,12 @@ export interface CollectionType extends Base {
     docId: Documents.ID,
     params: { data: Data; [key: string]: unknown }
   ): Promise<Document | null>;
-  delete(docId: Documents.ID, params: object): Promise<Document | null>;
+  delete(
+    docId: Documents.ID,
+    params: object
+  ): Promise<{
+    deletedEntries: number;
+  }>;
 }
 
 /**

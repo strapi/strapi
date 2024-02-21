@@ -1,3 +1,5 @@
+import { omit } from 'lodash/fp';
+
 import type { Documents, Schema } from '@strapi/types';
 import { pipeAsync } from '@strapi/utils';
 
@@ -55,6 +57,13 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
     }
 
     if (params.status === 'published') {
+      // @ts-expect-error invalid ID type
+      await documents.delete(uid, doc.id, {
+        ...queryParams,
+        status: 'published',
+        lookup: { ...params?.lookup, publishedAt: { $notNull: true } },
+      });
+
       return documents.create(uid, {
         ...queryParams,
         data: {
@@ -73,7 +82,8 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
     // TODO: allow action on multiple locales with array or all locales with *
 
     // always delete both draft & published
-    const queryParams = i18n.localeToLookup(contentType, params);
+    const queryParams = await pipeAsync(omit('status'), i18n.localeToLookup(contentType))(params);
+
     const existingDoc = await strapi.db.query(contentType.uid).findOne();
     return documents.delete(uid, existingDoc.documentId, queryParams);
   }

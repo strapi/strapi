@@ -1,4 +1,4 @@
-import { Common, Utils } from '../../..';
+import { Common } from '../../..';
 import { Result } from '.';
 import * as Params from '../params/document-engine';
 
@@ -7,16 +7,7 @@ export type CountResult = { count: number };
 export type FindMany<
   TContentTypeUID extends Common.UID.ContentType,
   TParams extends Params.FindMany<TContentTypeUID>
-> = Promise<
-  Utils.Expression.MatchFirst<
-    [
-      [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
-      // Is this true for documents?
-      [Common.UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
-    ],
-    (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
-  >
->;
+> = Promise<Result<TContentTypeUID, TParams>[]>;
 
 export type FindFirst<
   TContentTypeUID extends Common.UID.ContentType,

@@ -87,7 +87,7 @@ const createCollectionTypeController = ({
 
       const entity = await strapi.service(uid).update(id, {
         ...sanitizedQuery,
-        data: sanitizedInputData
+        data: sanitizedInputData,
       });
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -103,10 +103,9 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const entity = await strapi.service(uid).delete(id, sanitizedQuery);
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      await strapi.service(uid).delete(id, sanitizedQuery);
 
-      return this.transformResponse(sanitizedEntity);
+      ctx.status = 204;
     },
   };
 };
