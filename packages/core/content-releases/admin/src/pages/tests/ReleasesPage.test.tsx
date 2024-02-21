@@ -28,6 +28,18 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 describe('Releases home page', () => {
+  beforeAll(() => {
+    window.strapi.future = {
+      isEnabled: () => true,
+    };
+  });
+
+  afterAll(() => {
+    window.strapi.future = {
+      isEnabled: () => false,
+    };
+  });
+
   it('renders the tab content correctly when there are no releases', async () => {
     server.use(
       rest.get('/content-releases', (req, res, ctx) =>
