@@ -2,28 +2,35 @@ import { isObject } from 'lodash/fp';
 import { EntityService, Attribute, Common } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { IdMap } from '../../id-map';
-import { ShortHand, LongHand, ID } from '../utils/types';
+import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
 
-type ExtractedId = { id: ID; locale?: string };
+type ExtractedId = LongHandDocument;
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
 const handlePrimitive = (
   relation: ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined | any
-): LongHand[] => {
+): LongHandDocument[] => {
   if (!relation) {
     return []; // null
   }
+
   if (isShortHand(relation)) {
-    return [{ id: relation }]; // id
+    return [{ documentId: relation }]; // id
   }
+
   if (isLongHand(relation)) {
-    // @ts-expect-error - TODO: Add relation type
-    return [{ id: relation.id, locale: relation.locale }]; // { id, locale? }
+    // { documentId, locale?  }
+    if ('documentId' in relation) {
+      return [{ documentId: relation.documentId, locale: relation.locale }];
+    }
+    // { id}
+    return [];
   }
+
   if (Array.isArray(relation)) {
     return relation.map((item) => (isShortHand(item) ? { id: item } : item)); // id[]
   }
@@ -91,7 +98,7 @@ const extractDataIds = (
         extractedIds.forEach((relation) => {
           idMap.add({
             uid: target,
-            documentId: relation.id as string,
+            documentId: relation.documentId,
             locale: getRelationTargetLocale(relation, {
               targetUid: target as Common.UID.Schema,
               sourceUid: opts.uid,

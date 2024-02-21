@@ -15,6 +15,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
   relation: T | T[] | null | undefined,
   getId: GetId
 ): T | T[] | undefined => {
+  // TODO: Remove this, we should use the long hand version with 'id' for this case
   // If id value is a number, return it as is, it's already an entry id
   if (isNumeric(relation)) {
     return relation;
@@ -32,16 +33,16 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
 
   // { id }
   if (isLongHand(relation)) {
-    // It's already an entry id
-    if (isNumeric(relation.id)) return relation;
+    // If the id is already an entry id, return it as is
+    if ('id' in relation) return relation;
 
     // @ts-expect-error - TODO: Add relation type
-    const id = getId(relation.id, relation.locale) as T;
+    const entryId = getId(relation.documentId, relation.locale) as T;
 
     // If the id is not found, return undefined
-    if (!id) return undefined;
+    if (!entryId) return undefined;
 
-    return { ...(relation as object), id } as T;
+    return { ...(relation as object), id: entryId } as T;
   }
 
   // id[]
@@ -80,13 +81,13 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
 
       // { connect: { id: id, position: { before: id } } }
       if (position?.before) {
-        const { id } = transformPrimitive({ ...position, id: position.before }, getId);
+        const { id } = transformPrimitive({ ...position, documentId: position.before }, getId);
         position.before = id;
       }
 
       // { connect: { id: id, position: { after: id } } }
       if (position?.after) {
-        const { id } = transformPrimitive({ ...position, id: position.after }, getId);
+        const { id } = transformPrimitive({ ...position, documentId: position.after }, getId);
         position.after = id;
       }
 
@@ -134,9 +135,9 @@ const transformDataIdsVisitor = (
         const getId = (documentId: ID, locale?: string): ID | null => {
           const entryId = idMap.get({
             uid: target,
-            documentId: documentId as string,
+            documentId,
             locale: getRelationTargetLocale(
-              { id: documentId, locale },
+              { documentId, locale },
               {
                 targetUid: target as Common.UID.Schema,
                 sourceUid: opts.uid,

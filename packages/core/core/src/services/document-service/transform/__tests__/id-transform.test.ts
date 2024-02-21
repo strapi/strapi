@@ -83,14 +83,14 @@ describe('Transform relational data', () => {
       {
         data: {
           name: 'test',
-          categories: [{ id: 'doc1' }, { id: 'doc2' }, { id: 'doc3' }],
-          category: { id: 'doc4' },
+          categories: [{ documentId: 'doc1' }, { documentId: 'doc2' }, { documentId: 'doc3' }],
+          category: { documentId: 'doc4' },
         },
       },
       { locale: 'en', isDraft: true }
     );
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
       categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
       category: { id: 'doc4-en-draft' },
@@ -143,7 +143,7 @@ describe('Transform relational data', () => {
       {
         data: {
           name: 'test',
-          categories: { connect: [{ id: 'doc1', position: { before: 'doc2' } }] },
+          categories: { connect: [{ documentId: 'doc1', position: { before: 'doc2' } }] },
           category: { connect: 'doc4' },
         },
       },
@@ -163,14 +163,14 @@ describe('Transform relational data', () => {
       {
         data: {
           name: 'test',
-          categories: { connect: [{ id: 'doc1', position: { after: 'doc2' } }] },
+          categories: { connect: [{ documentId: 'doc1', position: { after: 'doc2' } }] },
           category: { connect: 'doc4' },
         },
       },
       { locale: 'en', isDraft: true }
     );
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
       categories: { connect: [{ id: 'doc1-en-draft', position: { after: 'doc2-en-draft' } }] },
       category: { connect: 'doc4-en-draft' },
