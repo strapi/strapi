@@ -247,7 +247,7 @@ const createDocumentEngine = ({
       });
     });
 
-    return { id: newDocumentId, versions };
+    return { documentId: newDocumentId, versions };
   },
 
   // TODO: Handle relations so they target the published version
