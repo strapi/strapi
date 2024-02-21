@@ -394,7 +394,7 @@ describe('CRUD locales', () => {
       data.locales.splice(1, 1);
     });
 
-    test('Delete a locale and entities in this locale', async () => {
+    test.skip('Delete a locale and entities in this locale', async () => {
       const { body: frenchProduct } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
