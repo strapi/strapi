@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Flex, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { omit } from 'lodash/fp';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -56,26 +55,28 @@ const HistoryPage = () => {
     id?: string;
     plugins?: Record<string, unknown>;
   }>();
-  const validQueryParams = buildValidGetParams(query);
-  const page = validQueryParams.page ? Number(validQueryParams.page) : 1;
+  const { id: selectedVersionId, ...queryWithoutId } = query;
+  const validQueryParamsWithoutId = buildValidGetParams(queryWithoutId);
+  const page = validQueryParamsWithoutId.page ? Number(validQueryParamsWithoutId.page) : 1;
 
   const versionsResponse = useGetHistoryVersionsQuery(
     {
       contentType: slug!,
       ...(documentId ? { documentId } : {}),
       // Omit id since it's not needed by the endpoint and caused extra refetches
-      ...omit(['id'], validQueryParams),
+      ...validQueryParamsWithoutId,
     },
     { refetchOnMountOrArgChange: true }
   );
 
-  const versionsLength = versionsResponse.data?.data.length;
-  const firstVersionId = versionsResponse.data?.data?.[0].id;
+  // Make sure the user lands on a selected history version
   React.useEffect(() => {
-    if (versionsLength) {
-      navigate({ search: stringify({ ...query, id: firstVersionId }) }, { replace: true });
+    const versions = versionsResponse.data?.data;
+
+    if (!query.id && !versionsResponse.isLoading && versions?.[0]) {
+      navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
     }
-  }, [versionsLength, navigate, query, firstVersionId]);
+  }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
   if (!layout || versionsResponse.isLoading) {
     return <LoadingIndicatorPage />;
@@ -91,7 +92,7 @@ const HistoryPage = () => {
   }
 
   const selectedVersion = versionsResponse.data.data.find(
-    (version) => version.id.toString() === query.id
+    (version) => version.id.toString() === selectedVersionId
   );
 
   if (!selectedVersion) {
