@@ -1,14 +1,12 @@
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
-import { useField } from '../../../../../components/Form';
+import { InputProps, useField } from '../../../../../components/Form';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
-import { prepareRelations, removeProhibitedFields, transformDocument } from '../../../utils/data';
+import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 
 import { Initializer } from './Initializer';
@@ -16,7 +14,8 @@ import { NonRepeatableComponent } from './NonRepeatable';
 import { RepeatableComponent } from './Repeatable';
 
 interface ComponentInputProps
-  extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size'> {}
+  extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
+    Pick<InputProps, 'hint'> {}
 
 const ComponentInput = ({
   label,

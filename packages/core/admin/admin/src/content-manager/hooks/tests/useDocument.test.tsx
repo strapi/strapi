@@ -71,11 +71,24 @@ describe('useDocument', () => {
     expect(result.current.validate).toBeInstanceOf(Function);
 
     expect(
-      result.current.validate({ id: '12345', postal_code: 'N2', notrepeat_req: {} })
+      result.current.validate({
+        id: '12345',
+        postal_code: 'N2',
+        notrepeat_req: {},
+        city: 'London',
+        repeat_req: [],
+      })
     ).toBeNull();
 
-    expect(result.current.validate({ id: '12345', notrepeat_req: {}, postal_code: 12 }))
-      .toMatchInlineSnapshot(`
+    expect(
+      result.current.validate({
+        id: '12345',
+        notrepeat_req: {},
+        postal_code: 12,
+        city: 'London',
+        repeat_req: [],
+      })
+    ).toMatchInlineSnapshot(`
       {
         "postal_code": {
           "defaultMessage": "postal_code must be a \`string\` type, but the final value was: \`12\`.",

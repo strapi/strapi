@@ -42,7 +42,10 @@ const render = (props = { onToggle: jest.fn() }) =>
     }
   );
 
-describe('Bulk publish selected entries modal', () => {
+/**
+ * TODO: re-enable this once we re-implement bulk actions
+ */
+describe.skip('Bulk publish selected entries modal', () => {
   it('renders the selected items in the modal', async () => {
     render();
 

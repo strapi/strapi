@@ -1,458 +1,314 @@
-import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import isBoolean from 'lodash/isBoolean';
-import isEmpty from 'lodash/isEmpty';
-import isNaN from 'lodash/isNaN';
-import toNumber from 'lodash/toNumber';
+import { translatedErrors } from '@strapi/helper-plugin';
+import pipe from 'lodash/fp/pipe';
 import * as yup from 'yup';
 
-import type { ComponentsDictionary } from '../hooks/useDocument';
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
 import type { Attribute } from '@strapi/types';
-import type Lazy from 'yup/lib/Lazy';
-import type { MixedSchema } from 'yup/lib/mixed';
+import type { ObjectShape } from 'yup/lib/object';
 
-const isFieldTypeNumber = (type: string) => {
-  return ['integer', 'biginteger', 'decimal', 'float', 'number'].includes(type);
-};
+type AnySchema =
+  | yup.StringSchema
+  | yup.NumberSchema
+  | yup.BooleanSchema
+  | yup.DateSchema
+  | yup.ArraySchema<any>
+  | yup.ObjectSchema<any>;
 
 /* -------------------------------------------------------------------------------------------------
  * createYupSchema
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * TODO: this whole thing needs actually fixing because it's useless without types
- * but it obviously something has gone wrong between conception and now for it to need
- * this many ts-error directives.
- *
- * See CONTENT-2107
- */
-
-interface CreateYupSchemaOpts {
-  isCreatingEntry?: boolean;
-  isDraft?: boolean;
-  isFromComponent?: boolean;
-  isJSONTestDisabled?: boolean;
-}
-
 const createYupSchema = (
-  attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
-  components: ComponentsDictionary = {},
-  options: CreateYupSchemaOpts = {
-    isCreatingEntry: true,
-    isDraft: true,
-    isFromComponent: false,
-    isJSONTestDisabled: false,
-  }
-) => {
-  return yup.object().shape(
-    Object.keys(attributes).reduce<Record<string, MixedSchema | Lazy<any>>>((acc, current) => {
-      const attribute = attributes[current];
+  attributes: Schema['attributes'] = {},
+  components: ComponentsDictionary = {}
+): yup.ObjectSchema<any> => {
+  const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
+    yup.object().shape(
+      Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
+        /**
+         * These validations won't apply to every attribute
+         * and that's okay, in that case we just return the
+         * schema as it was passed.
+         */
+        const validations = [
+          addRequiredValidation,
+          addMinLengthValidation,
+          addMaxLengthValidation,
+          addMinValidation,
+          addMaxValidation,
+          addRegexValidation,
+        ].map((fn) => fn(attribute));
 
-      if (
-        attribute.type !== 'relation' &&
-        attribute.type !== 'component' &&
-        attribute.type !== 'dynamiczone'
-      ) {
-        // @ts-expect-error – see comment at top of file
-        const formatted = createYupSchemaAttribute(attribute.type, attribute, options);
-        acc[current] = formatted;
-      }
+        const transformSchema = pipe(...validations);
 
-      if (attribute.type === 'relation') {
-        acc[current] = [
-          'oneWay',
-          'oneToOne',
-          'manyToOne',
-          'oneToManyMorph',
-          'oneToOneMorph',
-          // @ts-expect-error – see comment at top of file
-        ].includes(attribute.relationType)
-          ? yup.object().nullable()
-          : yup.array().nullable();
-      }
+        switch (attribute.type) {
+          case 'component': {
+            const { attributes } = components[attribute.component];
 
-      if (attribute.type === 'component') {
-        const componentFieldSchema = createYupSchema(
-          components[attribute.component]?.attributes,
-          components,
-          { ...options, isFromComponent: true }
-        );
-
-        if (attribute.repeatable === true) {
-          const { min, max, required } = attribute;
-
-          const componentSchema = yup.lazy((value) => {
-            let baseSchema = yup.array().of(componentFieldSchema);
-
-            if (min) {
-              if (required) {
-                baseSchema = baseSchema.min(min, errorsTrads.min);
-                // @ts-expect-error – see comment at top of file
-              } else if (required !== true && isEmpty(value)) {
-                // @ts-expect-error – see comment at top of file
-                baseSchema = baseSchema.nullable();
-              } else {
-                baseSchema = baseSchema.min(min, errorsTrads.min);
-              }
-            } else if (required && !options.isDraft) {
-              baseSchema = baseSchema.min(1, errorsTrads.required);
+            if (attribute.repeatable) {
+              return {
+                ...acc,
+                [name]: transformSchema(
+                  yup.array().of(createModelSchema(attributes).nullable(false))
+                ),
+              };
+            } else {
+              return {
+                ...acc,
+                [name]: transformSchema(createModelSchema(attributes)),
+              };
             }
-
-            if (max) {
-              baseSchema = baseSchema.max(max, errorsTrads.max);
-            }
-
-            return baseSchema;
-          });
-
-          acc[current] = componentSchema;
-
-          return acc;
-        }
-        const componentSchema = yup.lazy((obj) => {
-          if (obj !== undefined) {
-            return attribute.required === true && !options.isDraft
-              ? componentFieldSchema.defined()
-              : componentFieldSchema.nullable();
           }
+          case 'dynamiczone':
+            return {
+              ...acc,
+              [name]: transformSchema(
+                yup.array().of(
+                  yup.lazy((data: Attribute.GetValue<Attribute.DynamicZone>[number]) => {
+                    const { attributes } = components[data.__component];
 
-          return attribute.required === true ? yup.object().defined() : yup.object().nullable();
-        });
-
-        acc[current] = componentSchema;
-
-        return acc;
-      }
-
-      if (attribute.type === 'dynamiczone') {
-        let dynamicZoneSchema = yup.array().of(
-          // @ts-expect-error – see comment at top of file
-          yup.lazy(({ __component }) => {
-            return createYupSchema(components[__component]?.attributes, components, {
-              ...options,
-              isFromComponent: true,
-            });
-          })
-        );
-
-        const { max, min } = attribute;
-
-        if (min) {
-          if (attribute.required) {
-            dynamicZoneSchema = dynamicZoneSchema
-              // @ts-expect-error – see comment at top of file
-              .test('min', errorsTrads.min, (value) => {
-                if (options.isCreatingEntry) {
-                  return value && value.length >= min;
-                }
-
-                if (value === undefined) {
-                  return true;
-                }
-
-                return value !== null && value.length >= min;
-              })
-              .test('required', errorsTrads.required, (value) => {
-                if (options.isCreatingEntry) {
-                  return value !== null || value !== undefined;
-                }
-
-                if (value === undefined) {
-                  return true;
-                }
-
-                return value !== null;
-              });
-          } else {
-            // @ts-expect-error – see comment at top of file
-            dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
-          }
-        } else if (attribute.required && !options.isDraft) {
-          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, (value) => {
-            if (options.isCreatingEntry) {
-              return value !== null || value !== undefined;
-            }
-
-            if (value === undefined) {
-              return true;
-            }
-
-            return value !== null;
-          });
+                    return yup
+                      .object()
+                      .shape({
+                        __component: yup.string().required().oneOf(Object.keys(components)),
+                      })
+                      .nullable(false)
+                      .concat(createModelSchema(attributes));
+                  }) as unknown as yup.ObjectSchema<any>
+                )
+              ),
+            };
+          case 'relation':
+            return {
+              ...acc,
+              [name]: transformSchema(
+                yup.array().of(
+                  yup.object().shape({
+                    id: yup.string().required(),
+                  })
+                )
+              ),
+            };
+          default:
+            return {
+              ...acc,
+              [name]: transformSchema(createAttributeSchema(attribute)),
+            };
         }
+      }, {})
+    );
 
-        if (max) {
-          dynamicZoneSchema = dynamicZoneSchema.max(max, errorsTrads.max);
-        }
-
-        acc[current] = dynamicZoneSchema;
-      }
-
-      return acc;
-    }, {})
-  );
+  return createModelSchema(attributes);
 };
 
-const createYupSchemaAttribute = (
-  type: Attribute.Any['type'],
-  validations: Exclude<
+const createAttributeSchema = (
+  attribute: Exclude<
     Attribute.Any,
     { type: 'dynamiczone' } | { type: 'component' } | { type: 'relation' }
-  >,
-  options: Required<CreateYupSchemaOpts>
+  >
 ) => {
-  let schema = yup.mixed();
-
-  if (['string', 'uid', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(type)) {
-    schema = yup.string();
-  }
-
-  if (type === 'blocks') {
-    schema = yup.mixed().test('isJSON', errorsTrads.json, (value) => {
-      // Disable the test for bulk publish, it's valid when it comes from the db
-      if (options.isJSONTestDisabled) {
-        return true;
-      }
-
-      // Don't run validations on drafts
-      if (options.isDraft) {
-        return true;
-      }
-
-      // The backend validates the actual schema, check if a value different than null is not an array
-      if (value && !Array.isArray(value)) {
-        return false;
-      }
-
-      return true;
-    });
-  }
-
-  if (type === 'json') {
-    schema = yup
-      // @ts-expect-error – see comment at top of file
-      .mixed(errorsTrads.json)
-      .test('isJSON', errorsTrads.json, (value) => {
-        // Disable the test for bulk publish, it's valid when it comes from the db
-        if (options.isJSONTestDisabled) {
-          return true;
+  switch (attribute.type) {
+    case 'biginteger':
+      return yup.string().matches(/^-?\d*$/);
+    case 'boolean':
+      return yup.boolean();
+    case 'blocks':
+      return yup.mixed().test(
+        'isBlocks',
+        {
+          id: translatedErrors.json,
+          defaultMessage: "This doesn't match the JSON format",
+        },
+        (value) => {
+          if (!value || Array.isArray(value)) {
+            return true;
+          } else {
+            return false;
+          }
         }
-
-        if (!value || !value.length) {
-          return true;
-        }
-
-        try {
-          JSON.parse(value);
-
-          return true;
-        } catch (err) {
-          return false;
-        }
-      })
-      .nullable()
-      .test('required', errorsTrads.required, (value) => {
-        if (validations.required && (!value || !value.length)) {
-          return false;
-        }
-
-        return true;
+      );
+    case 'date':
+    case 'datetime':
+    case 'time':
+    case 'timestamp':
+      return yup.mixed();
+    case 'decimal':
+    case 'float':
+    case 'integer':
+      return yup.number();
+    case 'email':
+      return yup.string().email({
+        id: translatedErrors.email,
+        defaultMessage: 'This is not a valid email.',
       });
-  }
-
-  if (type === 'email') {
-    // @ts-expect-error – see comment at top of file
-    schema = schema.email(errorsTrads.email);
-  }
-
-  if (['number', 'integer', 'float', 'decimal'].includes(type)) {
-    schema = yup
-      .number()
-      .transform((cv) => (isNaN(cv) ? undefined : cv))
-      // @ts-expect-error – see comment at top of file
-      .typeError();
-  }
-
-  if (type === 'biginteger') {
-    schema = yup.string().matches(/^-?\d*$/);
-  }
-
-  if (['date', 'datetime'].includes(type)) {
-    schema = yup.date();
-  }
-
-  Object.keys(validations).forEach((validation) => {
-    const validationValue = validations[validation as keyof typeof validations];
-
-    if (
-      !!validationValue ||
-      // @ts-expect-error – see comment at top of file
-      (!isBoolean(validationValue) && Number.isInteger(Math.floor(validationValue))) ||
-      // @ts-expect-error – see comment at top of file
-      validationValue === 0
-    ) {
-      switch (validation) {
-        case 'required': {
-          if (!options.isDraft) {
-            if (type === 'password' && options.isCreatingEntry) {
-              schema = schema.required(errorsTrads.required);
-            }
-
-            if (type !== 'password') {
-              if (options.isCreatingEntry) {
-                schema = schema.required(errorsTrads.required);
-              } else {
-                schema = schema.test('required', errorsTrads.required, (value) => {
-                  // Field is not touched and the user is editing the entry
-                  if (value === undefined && !options.isFromComponent) {
-                    return true;
-                  }
-
-                  if (isFieldTypeNumber(type)) {
-                    if (value === 0) {
-                      return true;
-                    }
-
-                    return !!value;
-                  }
-
-                  if (type === 'boolean') {
-                    // Boolean value can be undefined/unset in modifiedData when generated in a new component
-                    return value !== null && value !== undefined;
-                  }
-
-                  if (type === 'date' || type === 'datetime') {
-                    if (typeof value === 'string') {
-                      return !isEmpty(value);
-                    }
-
-                    return !isEmpty(value?.toString());
-                  }
-
-                  return !isEmpty(value);
-                });
-              }
-            }
+    case 'enumeration':
+      return yup.string().oneOf([...attribute.enum, null]);
+    case 'json':
+      return yup.mixed().test(
+        'isJSON',
+        {
+          id: translatedErrors.json,
+          defaultMessage: "This doesn't match the JSON format",
+        },
+        (value) => {
+          /**
+           * We don't want to validate the JSON field if it's empty.
+           */
+          if (!value || (typeof value === 'string' && value.length === 0)) {
+            return true;
           }
 
-          break;
+          try {
+            JSON.parse(value);
+
+            return true;
+          } catch (err) {
+            return false;
+          }
         }
-
-        case 'max': {
-          if (type === 'biginteger') {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.isInferior(errorsTrads.max, validationValue);
-          } else {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.max(validationValue, errorsTrads.max);
-          }
-          break;
-        }
-        case 'maxLength':
-          // @ts-expect-error – see comment at top of file
-          schema = schema.max(validationValue, errorsTrads.maxLength);
-          break;
-        case 'min': {
-          if (type === 'biginteger') {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.isSuperior(errorsTrads.min, validationValue);
-          } else {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.min(validationValue, errorsTrads.min);
-          }
-          break;
-        }
-        case 'minLength': {
-          if (!options.isDraft) {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.min(validationValue, errorsTrads.minLength);
-          }
-          break;
-        }
-        case 'regex':
-          // @ts-expect-error – see comment at top of file
-          schema = schema.matches(new RegExp(validationValue), {
-            message: errorsTrads.regex,
-            excludeEmptyString: !validations.required,
-          });
-          break;
-        case 'lowercase':
-          if (['text', 'textarea', 'email', 'string'].includes(type)) {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.strict().lowercase();
-          }
-          break;
-        case 'uppercase':
-          if (['text', 'textarea', 'email', 'string'].includes(type)) {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.strict().uppercase();
-          }
-          break;
-        case 'positive':
-          if (isFieldTypeNumber(type)) {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.positive();
-          }
-          break;
-        case 'negative':
-          if (isFieldTypeNumber(type)) {
-            // @ts-expect-error – see comment at top of file
-            schema = schema.negative();
-          }
-          break;
-        default:
-          schema = schema.nullable();
-      }
-    }
-  });
-
-  return schema;
+      );
+    case 'password':
+    case 'richtext':
+    case 'string':
+    case 'text':
+      return yup.string();
+    case 'uid':
+      return yup.string().matches(/^[A-Za-z0-9-_.~]*$/);
+    default:
+      /**
+       * This allows any value.
+       */
+      return yup.mixed();
+  }
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Addition Yup methods
+ * Validators
  * -----------------------------------------------------------------------------------------------*/
+/**
+ * Our validator functions can be preped with the
+ * attribute and then have the schema piped through them.
+ */
+type ValidationFn = (
+  attribute: Schema['attributes'][string]
+) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
-yup.addMethod(yup.mixed, 'defined', function () {
-  return this.test('defined', errorsTrads.required, (value) => value !== undefined);
-});
+const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
+  if (attribute.required) {
+    return schema.required({
+      id: translatedErrors.required,
+      defaultMessage: 'This field is required.',
+    });
+  }
 
-yup.addMethod(yup.array, 'notEmptyMin', function (min) {
-  return this.test('notEmptyMin', errorsTrads.min, (value) => {
-    if (!value || !value.length) {
-      return true;
+  return schema.nullable();
+};
+
+const addMinLengthValidation: ValidationFn =
+  (attribute) =>
+  <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    if (
+      'minLength' in attribute &&
+      attribute.minLength &&
+      Number.isInteger(attribute.minLength) &&
+      'min' in schema
+    ) {
+      return schema.min(attribute.minLength, {
+        id: translatedErrors.minLength,
+        defaultMessage: 'The value is too short (min: {min}).',
+        values: {
+          min: attribute.minLength,
+        },
+      }) as TSchema;
     }
 
-    return value.length >= min;
-  });
-});
+    return schema;
+  };
 
-yup.addMethod(yup.string, 'isInferior', function (message, max) {
-  return this.test('isInferior', message, function (value) {
-    if (!value) {
-      return true;
+const addMaxLengthValidation: ValidationFn =
+  (attribute) =>
+  <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    if (
+      'maxLength' in attribute &&
+      attribute.maxLength &&
+      Number.isInteger(attribute.maxLength) &&
+      'max' in schema
+    ) {
+      return schema.max(attribute.maxLength, {
+        id: translatedErrors.maxLength,
+        defaultMessage: 'The value is too long (max: {max}).',
+        values: {
+          max: attribute.maxLength,
+        },
+      }) as TSchema;
     }
 
-    if (Number.isNaN(toNumber(value))) {
-      return true;
+    return schema;
+  };
+
+const addMinValidation: ValidationFn =
+  (attribute) =>
+  <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    if ('min' in attribute) {
+      const min = toInteger(attribute.min);
+
+      if ('min' in schema && min) {
+        return schema.min(min, {
+          id: translatedErrors.min,
+          defaultMessage: 'The value is too low (min: {min}).',
+          values: {
+            min,
+          },
+        }) as TSchema;
+      }
     }
 
-    return toNumber(max) >= toNumber(value);
-  });
-});
+    return schema;
+  };
 
-yup.addMethod(yup.string, 'isSuperior', function (message, min) {
-  return this.test('isSuperior', message, function (value) {
-    if (!value) {
-      return true;
+const addMaxValidation: ValidationFn =
+  (attribute) =>
+  <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    if ('max' in attribute) {
+      const max = toInteger(attribute.max);
+
+      if ('max' in schema && max) {
+        return schema.max(max, {
+          id: translatedErrors.max,
+          defaultMessage: 'The value is too high (max: {max}).',
+          values: {
+            max,
+          },
+        }) as TSchema;
+      }
     }
 
-    if (Number.isNaN(toNumber(value))) {
-      return true;
+    return schema;
+  };
+
+const toInteger = (val?: string | number): number | undefined => {
+  if (typeof val === 'number' || val === undefined) {
+    return val;
+  } else {
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }
+};
+
+const addRegexValidation: ValidationFn =
+  (attribute) =>
+  <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    if ('regex' in attribute && attribute.regex && 'matches' in schema) {
+      return schema.matches(new RegExp(attribute.regex), {
+        message: {
+          id: translatedErrors.regex,
+          defaultMessage: 'The value does not match the defined pattern.',
+        },
+        excludeEmptyString: !attribute.required,
+      }) as TSchema;
     }
 
-    return toNumber(value) >= toNumber(min);
-  });
-});
+    return schema;
+  };
 
 export { createYupSchema };

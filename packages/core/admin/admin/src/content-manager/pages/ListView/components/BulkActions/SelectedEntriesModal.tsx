@@ -471,10 +471,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
 
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
-      const validate = createYupSchema(schema.attributes, components, {
-        isDraft: false,
-        isJSONTestDisabled: true,
-      });
+      const validate = createYupSchema(schema.attributes, components);
       const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
       const rows = data.map((entry) => {
         try {

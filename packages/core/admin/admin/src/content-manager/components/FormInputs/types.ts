@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type { Attribute } from '@strapi/types';
 
 interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
@@ -12,7 +14,7 @@ interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
  */
 interface InputProps {
   disabled?: boolean;
-  hint?: string;
+  hint?: ReactNode;
   label: string;
   name: string;
   placeholder?: string;

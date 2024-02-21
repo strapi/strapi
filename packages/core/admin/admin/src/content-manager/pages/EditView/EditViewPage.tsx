@@ -24,7 +24,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useOnce } from '../../../hooks/useOnce';
-import { Form } from '../../components/Form';
+import { Blocker, Form } from '../../components/Form';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
@@ -32,6 +32,7 @@ import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
+import { createYupSchema } from '../../utils/validation';
 
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
@@ -172,6 +173,7 @@ const EditViewPage = () => {
         disabled={status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
+        validationSchema={createYupSchema(schema?.attributes, components)}
       >
         <Header
           isCreating={isCreatingDocument}
@@ -218,6 +220,7 @@ const EditViewPage = () => {
             </GridItem>
           </Grid>
         </TabGroup>
+        <Blocker />
       </Form>
     </Main>
   );
