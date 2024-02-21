@@ -75,21 +75,25 @@ export async function migrateIsValidAndStatusReleases() {
     const notValidatedActions = actions.filter((action) => action.isEntryValid === null);
 
     for (const action of notValidatedActions) {
-      const populatedEntry = await getPopulatedEntry(action.contentType, action.entry.id, {
-        strapi,
-      });
-
-      if (populatedEntry) {
-        const isEntryValid = getEntryValidStatus(action.contentType, populatedEntry, { strapi });
-
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-          where: {
-            id: action.id,
-          },
-          data: {
-            isEntryValid,
-          },
+      // We need to check the Action is related to a valid entry because we can't assume this is gonna be always the case
+      // example: users could make changes directly to their database, or data could be lost
+      if (action.entry) {
+        const populatedEntry = await getPopulatedEntry(action.contentType, action.entry.id, {
+          strapi,
         });
+
+        if (populatedEntry) {
+          const isEntryValid = getEntryValidStatus(action.contentType, populatedEntry, { strapi });
+
+          await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+            where: {
+              id: action.id,
+            },
+            data: {
+              isEntryValid,
+            },
+          });
+        }
       }
     }
 
