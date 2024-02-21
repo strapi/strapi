@@ -24,6 +24,7 @@ import { useLocation } from 'react-router-dom';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 import { pluginId } from '../pluginId';
+import { getTimezoneOffset } from '../utils/time';
 
 export interface FormValues {
   name: string;
@@ -250,22 +251,7 @@ const getTimezones = (selectedDate: Date) => {
   const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
     // Timezone will be in the format GMT${OFFSET} where offset could be nothing,
     // a four digit string e.g. +05:00 or -08:00
-    const offsetPart = new Intl.DateTimeFormat('en', {
-      timeZone: timezone,
-      timeZoneName: 'longOffset',
-    })
-      .formatToParts(selectedDate)
-      .find((part) => part.type === 'timeZoneName');
-
-    const offset = offsetPart ? offsetPart.value : '';
-
-    // We want to show time based on UTC, not GMT so we swap that.
-    let utcOffset = offset.replace('GMT', 'UTC');
-
-    // For perfect UTC (UTC+0:00) we only get the string UTC, So we need to append the 0's.
-    if (!utcOffset.includes('+') && !utcOffset.includes('-')) {
-      utcOffset = `${utcOffset}+00:00`;
-    }
+    const utcOffset = getTimezoneOffset(timezone, selectedDate);
 
     // Offset and timezone are concatenated with '-', so to split and save the required timezone in DB
     return { offset: utcOffset, value: `${utcOffset}-${timezone}` } satisfies ITimezoneOption;

@@ -32,6 +32,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useTracking,
+  RelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -63,6 +64,7 @@ const LinkCard = styled(Link)`
 
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
 
   if (isError) {
     return <AnErrorOccurred />;
@@ -87,7 +89,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, actions }) => (
+      {releases.map(({ id, name, actions, scheduledAt }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -105,14 +107,25 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               <Typography as="h3" variant="delta" fontWeight="bold">
                 {name}
               </Typography>
-              <Typography variant="pi">
-                {formatMessage(
-                  {
-                    id: 'content-releases.page.Releases.release-item.entries',
-                    defaultMessage:
-                      '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                  },
-                  { number: actions.meta.count }
+              <Typography variant="pi" textColor="neutral600">
+                {IsSchedulingEnabled ? (
+                  scheduledAt ? (
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
+                  ) : (
+                    formatMessage({
+                      id: 'content-releases.pages.Releases.not-scheduled',
+                      defaultMessage: 'Not scheduled',
+                    })
+                  )
+                ) : (
+                  formatMessage(
+                    {
+                      id: 'content-releases.page.Releases.release-item.entries',
+                      defaultMessage:
+                        '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+                    },
+                    { number: actions.meta.count }
+                  )
                 )}
               </Typography>
             </Flex>
