@@ -23,16 +23,16 @@ const handlePrimitive = (
   }
 
   if (isLongHand(relation)) {
-    // { documentId, locale?  }
+    // { documentId, locale? }
     if ('documentId' in relation) {
       return [{ documentId: relation.documentId, locale: relation.locale }];
     }
-    // { id}
+    // { id }
     return [];
   }
 
   if (Array.isArray(relation)) {
-    return relation.map((item) => (isShortHand(item) ? { id: item } : item)); // id[]
+    return relation.map((item) => (isShortHand(item) ? { documentId: item } : item)); // id[]
   }
 
   return [];

@@ -77,26 +77,67 @@ describe('Transform relational data', () => {
     });
   });
 
-  it('Longhand syntax', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: [{ documentId: 'doc1' }, { documentId: 'doc2' }, { documentId: 'doc3' }],
-          category: { documentId: 'doc4' },
+  describe('Longhand syntax', () => {
+    it('Longhand syntax', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ documentId: 'doc1' }, { documentId: 'doc2' }, { documentId: 'doc3' }],
+            category: { documentId: 'doc4' },
+          },
         },
-      },
-      { locale: 'en', isDraft: true }
-    );
+        { locale: 'en', isDraft: true }
+      );
 
-    expect(data).toMatchObject({
-      name: 'test',
-      categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
-      category: { id: 'doc4-en-draft' },
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        category: { id: 'doc4-en-draft' },
+      });
+    });
+
+    it('Longhand syntax with id', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ id: 1 }],
+            category: { id: 2 },
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 1 }],
+        category: { id: 2 },
+      });
+    });
+
+    it('Document id takes priority over id', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ id: 1, documentId: 'doc2' }],
+            category: { id: 2, documentId: 'doc4' },
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 'doc2-en-draft' }],
+        category: { id: 'doc4-en-draft' },
+      });
     });
   });
-
   it('Set', async () => {
     const { data } = await transformParamsDocumentId(
       PRODUCT_UID,

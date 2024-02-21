@@ -34,7 +34,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
   // { id }
   if (isLongHand(relation)) {
     // If the id is already an entry id, return it as is
-    if ('id' in relation) return relation;
+    if (!('documentId' in relation)) return relation;
 
     // @ts-expect-error - TODO: Add relation type
     const entryId = getId(relation.documentId, relation.locale) as T;
