@@ -23,7 +23,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
-  const params = useParams<{ collectionType: string; slug: string }>();
+  const params = useParams<{ collectionType: string; slug: string; singleType: string }>();
 
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
 
@@ -38,7 +38,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
     }
 
     return {
-      pathname: `../${params.collectionType}/${version.contentType}`,
+      pathname: `../${params.singleType}/${version.contentType}`,
       search: pluginsQueryParams,
     };
   };
