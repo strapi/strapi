@@ -192,7 +192,7 @@ describe('Relations, with d&p: %p', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: '/content-manager/relations/api::shop.shop/unkown',
+          url: '/content-manager/relations/api::shop.shop/unknown',
         });
 
         expect(res.status).toBe(400);
@@ -200,7 +200,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: "The relational field unknown doesn't exist on api::shop.shop",
             name: 'BadRequestError',
             status: 400,
           },
@@ -218,7 +218,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: "The relational field name doesn't exist on api::shop.shop",
             name: 'BadRequestError',
             status: 400,
           },
@@ -233,9 +233,8 @@ describe('Relations, with d&p: %p', () => {
       ['products_om', false],
       ['products_mm', false],
       ['products_mw', false],
-      // TODO skipping component relations for now
-      // ['compo_products_ow', true],
-      // ['compo_products_mw', true],
+      ['compo_products_ow', true],
+      ['compo_products_mw', true],
     ])('Relation (%s) (is in component: %s)', (fieldName, isComponent) => {
       let id;
       let idEmptyShop;
@@ -280,7 +279,7 @@ describe('Relations, with d&p: %p', () => {
         expect(res.body.results).toHaveLength(0);
       });
 
-      test("Can retrieve available relation(s) for an entity that don't have relations yet", async () => {
+      test("Can retrieve available relation(s) for an entity that doesn't have relations yet", async () => {
         let res = await rq({
           method: 'GET',
           url: `/content-manager/relations/${modelUID}/${fieldName}`,
@@ -310,13 +309,13 @@ describe('Relations, with d&p: %p', () => {
           method: 'GET',
           url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
-            id,
+            id: idEmptyShop,
             status: 'draft',
             idsToOmit: [data.products[1].id],
           },
         });
 
-        expect(res.body.results).toHaveLength(0);
+        expect(res.body.results).toHaveLength(1);
       });
 
       test('Can retrieve available relation(s) without entity', async () => {
@@ -405,8 +404,7 @@ describe('Relations, with d&p: %p', () => {
       });
     });
 
-    // TODO component relations
-    describe.skip('On a component', () => {
+    describe('On a component', () => {
       test('Fail when the component is not found', async () => {
         const res = await rq({
           method: 'GET',
@@ -439,7 +437,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: "The relational field unknown doesn't exist on default.compo",
             name: 'BadRequestError',
             status: 400,
           },
@@ -457,7 +455,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: "This relational field doesn't exist",
+            message: "The relational field name doesn't exist on default.compo",
             name: 'BadRequestError',
             status: 400,
           },
