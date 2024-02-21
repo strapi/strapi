@@ -13,7 +13,6 @@ const historyVersion: Model = {
       type: 'string',
       column: { notNullable: true },
     },
-    // documentId is a reserved attribute name
     relatedDocumentId: {
       type: 'string',
       column: { notNullable: true },
@@ -33,6 +32,7 @@ const historyVersion: Model = {
     },
     createdAt: {
       type: 'datetime',
+      default: () => new Date(),
     },
     // FIXME: joinTable should be optional
     // @ts-expect-error database model is not yet updated to support useJoinTable
