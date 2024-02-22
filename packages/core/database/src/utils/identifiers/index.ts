@@ -88,6 +88,11 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     }
   });
 
+  const fullLengthName = nameTokens.map((token) => token.name).join(IDENTIFIER_SEPARATOR);
+  if (fullLengthName.length <= maxLength) {
+    return fullLengthName;
+  }
+
   // Split tokens by compressibility
   const { compressible, incompressible } = nameTokens.reduce(
     (acc: { compressible: NameToken[]; incompressible: NameToken[] }, token) => {
@@ -96,11 +101,6 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     },
     { compressible: [], incompressible: [] }
   );
-
-  const fullLengthName = nameTokens.map((token) => token.name).join(IDENTIFIER_SEPARATOR);
-  if (fullLengthName.length <= maxLength) {
-    return fullLengthName;
-  }
 
   const incompressibleLength = incompressible.reduce((sum, token) => sum + token.name.length, 0);
   const separatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
