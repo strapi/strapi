@@ -43,6 +43,7 @@ test.describe('Uniqueness', () => {
   const CREATE_URL =
     /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
   const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
+  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   /**
    * @note the unique content type is set up with every type of document level unique field.
@@ -63,7 +64,8 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
+      await expect(page.getByText('Saved document')).toBeVisible();
+      await expect(page.getByText('Saved document')).not.toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
@@ -78,8 +80,8 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-
-      await expect(page.locator('text=This attribute must be unique').first()).toBeVisible();
+      await expect(page.getByText('This attribute must be unique')).toBeVisible();
+      await expect(page.getByText('This attribute must be unique')).not.toBeVisible();
 
       /**
        * Modify the value and try again, this should save successfully
@@ -95,32 +97,29 @@ test.describe('Uniqueness', () => {
         .fill(newValue);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
+      await expect(page.getByText('Saved document')).toBeVisible();
+      await expect(page.getByText('Saved document')).not.toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
 
       /**
-       * TODO: this is skipped because it requires the ability to change locales in the UI.
-       */
-      /**
        * Change locale and try to create an entry with the same value as our first entry, this should save successfully
        */
-      // await page.getByRole('combobox', { name: 'Select a locale' }).click();
+      await page.getByRole('combobox', { name: 'Select a locale' }).click();
 
-      // await page.getByText('French (fr)').click();
+      await page.getByText('French (fr)').click();
 
-      // await page.getByRole('link', { name: 'Create new entry' }).first().click();
+      await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
-      // await page.waitForURL(EDIT_URL);
+      await page.waitForURL(EDIT_URL);
 
-      // await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+      await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
-      // await clickSave(page);
-      // await expect(page.getByText('Saved').first()).toBeVisible();
-
-      // await page.getByRole('button', { name: 'Publish' }).click();
-      // await expect(page.getByText('Published').first()).toBeVisible();
+      await clickSave(page);
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await expect(page.getByText('Published document')).toBeVisible();
+      await expect(page.getByText('Published document')).not.toBeVisible();
     });
   });
 });
