@@ -13,7 +13,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID: UID.ContentType;
     field: string;
     data: Record<string, any>;
-    locale: string;
+    locale?: string;
   }) {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
@@ -51,7 +51,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
-    locale: string;
+    locale?: string;
   }) {
     const modelKind = strapi.getModel(contentTypeUID)?.kind;
 
@@ -60,18 +60,18 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     if (modelKind === 'singleType') {
       const document = await strapi.documents<Schema.SingleType>(contentTypeUID).find({
         filters: {
-          [field]: value,
+          [field]: { $startsWith: value },
         },
-        locale: locale ?? null,
+        locale,
         status: 'draft',
       });
       foundDocuments = document ? [document] : [];
     } else {
       foundDocuments = await strapi.documents<Schema.CollectionType>(contentTypeUID).findMany({
         filters: {
-          [field]: value,
+          [field]: { $startsWith: value },
         },
-        locale: locale ?? null,
+        locale,
         // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
         // However, when publishing this "available" UID might collide with another published entry
         status: 'draft',
@@ -116,7 +116,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     contentTypeUID: UID.ContentType;
     field: string;
     value: string;
-    locale: string;
+    locale?: string;
   }) {
     let documentCount: number | null;
 
@@ -137,8 +137,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         filters: {
           [field]: value,
         },
-        locale: locale ?? null,
+        locale: locale,
         // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+        // However, when publishing this "available" UID might collide with another published entry
         status: 'draft',
       });
     }

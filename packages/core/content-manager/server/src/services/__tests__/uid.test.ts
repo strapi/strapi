@@ -336,7 +336,7 @@ describe('Test uid service', () => {
 
       expect(findMany).toHaveBeenCalledWith({
         filters: {
-          slug: 'my-test-model',
+          slug: { $startsWith: 'my-test-model' },
         },
         locale: 'en',
         status: 'draft',

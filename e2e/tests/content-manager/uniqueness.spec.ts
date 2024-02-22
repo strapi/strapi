@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 
+type Field = {
+  name: string;
+  value: string;
+  newValue?: string;
+  role?: string;
+};
+
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
@@ -14,7 +21,7 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const FIELDS_TO_TEST: Array<Field> = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
@@ -28,6 +35,9 @@ test.describe('Uniqueness', () => {
     await page.getByRole('button', { name: 'Save' }).click();
   };
 
+  // When we need to adjust the value of a field to test uniqueness
+  // Either take the new value provided in the field object or generate a random
+  // new one based on the type of the field
   const getNewValue = (field: (typeof FIELDS_TO_TEST)[number]) => {
     if ('newValue' in field) {
       return field.newValue;
