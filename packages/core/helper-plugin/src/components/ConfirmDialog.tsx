@@ -17,7 +17,7 @@ import {
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-export interface RootProps extends Partial<FooterProps>, Pick<BoxProps, 'children'> {
+export interface ConfirmDialogRootProps extends Partial<FooterProps>, Pick<BoxProps, 'children'> {
   isOpen: boolean;
   title?: {
     id: string;
@@ -47,7 +47,7 @@ export const Root = ({
   },
   variantRightButton = 'danger-light',
   ...props
-}: RootProps) => {
+}: ConfirmDialogRootProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -76,12 +76,15 @@ export const Root = ({
   );
 };
 
-export interface BodyProps {
+export interface ConfirmDialogBodyProps {
   children: FlexProps['children'];
   iconBody?: DialogBodyProps['icon'];
 }
 
-export const Body = ({ iconBody = <ExclamationMarkCircle />, children }: BodyProps) => {
+export const Body = ({
+  iconBody = <ExclamationMarkCircle />,
+  children,
+}: ConfirmDialogBodyProps) => {
   return (
     <DialogBody icon={iconBody}>
       <Flex direction="column" alignItems="stretch" gap={2}>
@@ -146,7 +149,7 @@ const Footer = ({
   );
 };
 
-export interface ConfirmDialogProps extends Omit<RootProps, 'children'> {
+export interface ConfirmDialogProps extends Omit<ConfirmDialogRootProps, 'children'> {
   bodyText?: {
     id: string;
     defaultMessage: string;
@@ -154,8 +157,8 @@ export interface ConfirmDialogProps extends Omit<RootProps, 'children'> {
 }
 
 interface ConfirmDialogComponent extends React.FC<ConfirmDialogProps> {
-  Root: React.FC<RootProps>;
-  Body: React.FC<BodyProps>;
+  Root: React.FC<ConfirmDialogRootProps>;
+  Body: React.FC<ConfirmDialogBodyProps>;
 }
 const ConfirmDialog: ConfirmDialogComponent = ({
   bodyText = {

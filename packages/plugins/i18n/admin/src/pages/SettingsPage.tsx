@@ -1,74 +1,68 @@
 import * as React from 'react';
 
-import { Button, ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, EmptyStateLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
 import {
+  AnErrorOccurred,
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useAPIErrorHandler,
   useFocusWhenNavigate,
+  useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { CreateModal } from '../components/CreateModal';
-import { DeleteModal } from '../components/DeleteModal';
-import { EditModal } from '../components/EditModal';
-import { LocaleTable, LocaleTableProps } from '../components/LocaleTable';
+import { CreateLocale } from '../components/CreateLocale';
+import { LocaleTable } from '../components/LocaleTable';
 import { PERMISSIONS } from '../constants';
-import { useLocales } from '../hooks/useLocales';
-import { Locale } from '../store/reducers';
+import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 const SettingsPage = () => {
-  const [isOpenedCreateModal, setIsOpenedCreateModal] = React.useState(false);
-  const [localeToDelete, setLocaleToDelete] = React.useState<Locale>();
-  const [localeToEdit, setLocaleToEdit] = React.useState<Locale>();
-  const { locales } = useLocales();
+  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-
+  const toggleNotification = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { data: locales, isLoading: isLoadingLocales, error } = useGetLocalesQuery();
   const {
-    isLoading,
+    isLoading: isLoadingRBAC,
     allowedActions: { canUpdate, canCreate, canDelete },
   } = useRBAC(PERMISSIONS);
 
-  const handleToggleModalCreate = () => {
-    setIsOpenedCreateModal((s) => !s);
-  };
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+    }
+  }, [error, formatAPIError, toggleNotification]);
 
-  useFocusWhenNavigate();
-
-  // Delete actions
-  const closeModalToDelete = () => setLocaleToDelete(undefined);
-  const handleDeleteLocale: LocaleTableProps['onDeleteLocale'] = (locale) => {
-    setLocaleToDelete(locale);
-  };
-
-  // Edit actions
-  const closeModalToEdit = () => setLocaleToEdit(undefined);
-  const handleEditLocale: LocaleTableProps['onEditLocale'] = (locale) => {
-    setLocaleToEdit(locale);
-  };
+  const isLoading = isLoadingLocales || isLoadingRBAC;
 
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return (
+      <Main aria-busy={true}>
+        <LoadingIndicatorPage />
+      </Main>
+    );
+  }
+
+  if (error || !Array.isArray(locales)) {
+    return (
+      <Main height="100%">
+        <Flex alignItems="center" height="100%" justifyContent="center">
+          <AnErrorOccurred />
+        </Flex>
+      </Main>
+    );
   }
 
   return (
     <Main tabIndex={-1}>
       <HeaderLayout
-        primaryAction={
-          <Button
-            disabled={!canCreate}
-            startIcon={<Plus />}
-            onClick={handleToggleModalCreate}
-            size="S"
-          >
-            {formatMessage({
-              id: getTranslation('Settings.list.actions.add'),
-              defaultMessage: 'Add new locale',
-            })}
-          </Button>
-        }
+        primaryAction={<CreateLocale disabled={!canCreate} />}
         title={formatMessage({
           id: getTranslation('plugin.name'),
           defaultMessage: 'Internationalization',
@@ -79,14 +73,8 @@ const SettingsPage = () => {
         })}
       />
       <ContentLayout>
-        {locales?.length > 0 ? (
-          <LocaleTable
-            locales={locales}
-            canDelete={canDelete}
-            canEdit={canUpdate}
-            onDeleteLocale={handleDeleteLocale}
-            onEditLocale={handleEditLocale}
-          />
+        {locales.length > 0 ? (
+          <LocaleTable locales={locales} canDelete={canDelete} canUpdate={canUpdate} />
         ) : (
           <EmptyStateLayout
             icon={<EmptyDocuments width={undefined} height={undefined} />}
@@ -94,28 +82,10 @@ const SettingsPage = () => {
               id: getTranslation('Settings.list.empty.title'),
               defaultMessage: 'There are no locales',
             })}
-            action={
-              <Button
-                disabled={!canCreate}
-                variant="secondary"
-                startIcon={<Plus />}
-                onClick={handleToggleModalCreate}
-              >
-                {formatMessage({
-                  id: getTranslation('Settings.list.actions.add'),
-                  defaultMessage: 'Add new locale',
-                })}
-              </Button>
-            }
+            action={<CreateLocale disabled={!canCreate} variant="secondary" />}
           />
         )}
       </ContentLayout>
-
-      {isOpenedCreateModal && <CreateModal onClose={handleToggleModalCreate} />}
-      {localeToEdit && <EditModal onClose={closeModalToEdit} locale={localeToEdit} />}
-      {localeToDelete && (
-        <DeleteModal localeToDelete={localeToDelete} onClose={closeModalToDelete} />
-      )}
     </Main>
   );
 };

@@ -56,7 +56,7 @@ import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import { FeaturesService, createFeaturesService } from './services/features';
-import { createDocumentService } from './services/document-service/document-service';
+import { createDocumentService } from './services/document-service';
 
 /**
  * Resolve the working directories based on the instance options.

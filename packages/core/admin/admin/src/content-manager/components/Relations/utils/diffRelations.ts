@@ -1,4 +1,9 @@
-import { RelationData } from '../../EditViewDataManagerProvider/reducer';
+import type { Entity } from '@strapi/types';
+
+interface RelationData {
+  id: Entity.ID;
+  __temp_key__: number;
+}
 
 export const diffRelations = (
   browserStateRelations: RelationData[] = [],
