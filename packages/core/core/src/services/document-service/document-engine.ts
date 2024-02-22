@@ -64,8 +64,6 @@ const createDocumentEngine = ({
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
 
-    console.log(query);
-
     return db
       .query(uid)
       .findMany(query)
@@ -315,7 +313,7 @@ const createDocumentEngine = ({
     return this.delete(uid, documentId, {
       ...params,
       lookup: { ...params?.lookup, publishedAt: { $ne: null } },
-    }) as any;
+    }).then(({ deletedEntries }) => ({ versions: deletedEntries })) as any;
   },
 
   /**

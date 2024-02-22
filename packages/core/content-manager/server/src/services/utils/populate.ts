@@ -268,7 +268,7 @@ const getQueryPopulate = async (uid: Common.UID.Schema, query: object): Promise<
 /**
  * When config admin.webhooks.populateRelations is set to true,
  * populated relations will be passed to any webhook event.
- * The entity-manager response will not have the populated relations though.
+ * The document response will not have the populated relations though.
  * For performance reasons, it is recommended to set it to false,
  *
  * See docs: https://docs.strapi.io/dev-docs/configurations/server

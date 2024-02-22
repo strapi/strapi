@@ -1,4 +1,4 @@
-import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
+import type { LoadedStrapi as Strapi, Common, Schema } from '@strapi/types';
 import { groupBy, pick } from 'lodash/fp';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
@@ -125,7 +125,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const status = documents[0].publishedAt !== null ? 'published' : 'draft';
     const otherStatus = status === 'published' ? 'draft' : 'published';
 
-    return strapi.documents(uid).findMany({
+    const modelKind = strapi.getModel(uid)?.kind;
+
+    if (modelKind === 'singleType') {
+      return strapi.documents<Schema.SingleType>(uid).find({
+        status: otherStatus,
+        fields: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+      }) as unknown as DocumentMetadata['availableStatus'];
+    }
+
+    return strapi.documents<Schema.CollectionType>(uid).findMany({
       filters: {
         id: { $in: documents.map((d) => d.id) },
       },

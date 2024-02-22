@@ -66,9 +66,6 @@ describe('Relations', () => {
                 },
               }),
             },
-            'entity-manager': {
-              findOne: jest.fn(() => ({})),
-            },
           },
         },
       },

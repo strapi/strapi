@@ -9,14 +9,15 @@ import { getDocumentDimensions } from './utils/dimensions';
  *
  * @param ctx - Koa context
  * @param opts - Options
- * @param opts.populate - Populate options of the returned document. By default the entityManager will populate all relations.
+ * @param opts.populate - Populate options of the returned document.
+ *                        By default collectionTypes will populate all relations.
  */
 const createDocument = async (ctx: any, opts?: { populate?: object }) => {
   const { userAbility, user } = ctx.state;
   const { model } = ctx.params;
   const { body } = ctx.request;
 
-  const entityManager = getService('entity-manager');
+  const collectionTypes = getService('collection-types');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
   if (permissionChecker.cannot.create()) {
@@ -30,8 +31,8 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   const { locale, status = 'draft' } = getDocumentDimensions(body);
 
-  return entityManager.create(model, {
-    data: sanitizedBody,
+  return collectionTypes.create(model, {
+    data: sanitizedBody as any,
     locale,
     status,
     populate: opts?.populate,
@@ -46,7 +47,8 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
 /**
  * Update a document version.
  * - If the document version exists, it will be updated.
- * - If the document version does not exist, a new document locale will be created. By default the entityManager will populate all relations.
+ * - If the document version does not exist, a new document locale will be created.
+ *   By default collectionTypes will populate all relations.
  *
  * @param ctx - Koa context
  * @param opts - Options
@@ -57,7 +59,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
   const { id, model } = ctx.params;
   const { body } = ctx.request;
 
-  const entityManager = getService('entity-manager');
+  const collectionTypes = getService('collection-types');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
   if (permissionChecker.cannot.update()) {
@@ -66,7 +68,6 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   // Populate necessary fields to check permissions
   const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
-  // @ts-expect-error populate builder needs to be called with a UID
   const populate = await getService('populate-builder')(model)
     .populateFromQuery(permissionQuery)
     .build();
@@ -75,8 +76,8 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
-    entityManager.findOne(id, model, { populate, locale, status: 'draft' }),
-    entityManager.exists(model, id),
+    collectionTypes.findOne(id, model, { populate, locale, status: 'draft' }),
+    collectionTypes.exists(model, id),
   ]);
 
   if (!documentExists) {
@@ -100,8 +101,8 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
   const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  return entityManager.update(documentVersion || { id }, model, {
-    data: sanitizedBody,
+  return collectionTypes.update(documentVersion || { id }, model, {
+    data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
   });
@@ -114,7 +115,7 @@ export default {
     const { query } = ctx.request;
 
     const documentMetadata = getService('document-metadata');
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -123,7 +124,6 @@ export default {
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
@@ -132,7 +132,7 @@ export default {
 
     const { locale, status } = getDocumentDimensions(query);
 
-    const { results: documents, pagination } = await entityManager.findPage(
+    const { results: documents, pagination } = await collectionTypes.findPage(
       { ...permissionQuery, populate, locale, status },
       model
     );
@@ -166,7 +166,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -175,7 +175,6 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
@@ -184,7 +183,7 @@ export default {
 
     const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
 
-    const version = await entityManager.findOne(id, model, {
+    const version = await collectionTypes.findOne(id, model, {
       populate,
       locale,
       status,
@@ -192,7 +191,7 @@ export default {
 
     if (!version) {
       // Check if document exists
-      const exists = await entityManager.exists(model, id);
+      const exists = await collectionTypes.exists(model, id);
       if (!exists) {
         return ctx.notFound();
       }
@@ -262,7 +261,7 @@ export default {
     const { model, sourceId: id } = ctx.params;
     const { body } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -271,13 +270,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.create(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
     const { locale } = getDocumentDimensions(body);
-    const document = await entityManager.findOne(id, model, {
+    const document = await collectionTypes.findOne(id, model, {
       populate,
       locale,
       status: 'draft',
@@ -293,7 +291,7 @@ export default {
     const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await entityManager.clone(document, sanitizedBody, model);
+    const clonedDocument = await collectionTypes.clone(document, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
@@ -326,7 +324,7 @@ export default {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -334,13 +332,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.delete(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
     const { locale } = getDocumentDimensions(ctx.query);
-    const entity = await entityManager.findOne(id, model, { populate, locale });
+    const entity = await collectionTypes.findOne(id, model, { populate, locale });
 
     if (!entity) {
       return ctx.notFound();
@@ -350,7 +347,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const result = await entityManager.delete(entity, model, { locale });
+    const result = await collectionTypes.delete(entity, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
@@ -360,12 +357,12 @@ export default {
    * Supports creating/saving a document and publishing it in one request.
    */
   async publish(ctx: any) {
-    const { userAbility, user } = ctx.state;
+    const { userAbility } = ctx.state;
     // If id does not exist, the document has to be created
     const { id, model } = ctx.params;
     const { body } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -376,7 +373,6 @@ export default {
     const publishedDocument = await strapi.db.transaction(async () => {
       // Create or update document
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-      // @ts-expect-error populate builder needs to be called with a UID
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .populateDeep(Infinity)
@@ -393,9 +389,10 @@ export default {
 
       // TODO: Publish many locales at once
       const { locale } = getDocumentDimensions(body);
-      return entityManager.publish(document, model, {
+      return collectionTypes.publish(document!, model, {
         locale,
-        data: setCreatorFields({ user, isEdition: true })({}),
+        // TODO: Allow setting creator fields on publish
+        // data: setCreatorFields({ user, isEdition: true })({}),
       });
     });
 
@@ -411,7 +408,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -419,14 +416,13 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
       .build();
 
-    const entityPromises = ids.map((id: any) => entityManager.findOne(id, model, { populate }));
+    const entityPromises = ids.map((id: any) => collectionTypes.findOne(id, model, { populate }));
     const entities = await Promise.all(entityPromises);
 
     for (const entity of entities) {
@@ -439,7 +435,8 @@ export default {
       }
     }
 
-    const { count } = await entityManager.publishMany(entities, model);
+    // @ts-expect-error - publish many should not return null
+    const { count } = await collectionTypes.publishMany(entities, model);
     ctx.body = { count };
   },
 
@@ -451,7 +448,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -459,12 +456,11 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
-    const entityPromises = ids.map((id: any) => entityManager.findOne(id, model, { populate }));
+    const entityPromises = ids.map((id: any) => collectionTypes.findOne(id, model, { populate }));
     const entities = await Promise.all(entityPromises);
 
     for (const entity of entities) {
@@ -477,7 +473,8 @@ export default {
       }
     }
 
-    const { count } = await entityManager.unpublishMany(entities, model);
+    // @ts-expect-error - unpublish many should not return null
+    const { count } = await collectionTypes.unpublishMany(entities, model);
     ctx.body = { count };
   },
 
@@ -488,7 +485,7 @@ export default {
       body: { discardDraft, ...body },
     } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -502,13 +499,12 @@ export default {
 
     const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
 
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
     const { locale } = getDocumentDimensions(body);
-    const document = await entityManager.findOne(id, model, {
+    const document = await collectionTypes.findOne(id, model, {
       populate,
       locale,
       status: 'published',
@@ -528,11 +524,11 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await entityManager.discard(document, model, { locale });
+        await collectionTypes.discard(document, model, { locale });
       }
 
       ctx.body = await pipeAsync(
-        (document) => entityManager.unpublish(document, model, { locale }),
+        (document) => collectionTypes.unpublish(document, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
       )(document);
@@ -544,7 +540,7 @@ export default {
     const { id, model } = ctx.params;
     const { body } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -553,13 +549,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.discard(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
     const { locale } = getDocumentDimensions(body);
-    const document = await entityManager.findOne(id, model, {
+    const document = await collectionTypes.findOne(id, model, {
       populate,
       locale,
       status: 'published',
@@ -575,7 +570,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => entityManager.discard(document, model, { locale }),
+      (document) => collectionTypes.discard(document, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )(document);
@@ -589,7 +584,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -607,7 +602,7 @@ export default {
       },
     };
 
-    const { count } = await entityManager.deleteMany(params, model);
+    const { count } = await collectionTypes.deleteMany(params, model);
 
     ctx.body = { count };
   },
@@ -616,7 +611,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -624,13 +619,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .build();
 
     const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
-    const entity = await entityManager.findOne(id, model, { populate, locale, status });
+    const entity = await collectionTypes.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
       return ctx.notFound();
@@ -640,7 +634,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.countDraftRelations(id, model, locale);
+    const number = await collectionTypes.countDraftRelations(id, model, locale);
 
     return {
       data: number,
@@ -649,24 +643,25 @@ export default {
 
   async countManyEntriesDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
-    const ids = ctx.request.query.ids;
+    const ids = ctx.request.query.ids as any;
     const locale = ctx.request.query.locale;
     const { model } = ctx.params;
 
-    const entityManager = getService('entity-manager');
+    const collectionTypes = getService('collection-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
 
-    const entities = await entityManager.find({ ids, locale }, model);
+    // @ts-expect-error - ids are not in .find
+    const entities = await collectionTypes.find({ ids, locale }, model);
 
     if (!entities) {
       return ctx.notFound();
     }
 
-    const number = await entityManager.countManyEntriesDraftRelations(ids, model, locale);
+    const number = await collectionTypes.countManyEntriesDraftRelations(ids, model, locale);
 
     return {
       data: number,
