@@ -6,7 +6,7 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink, type To, useParams, useMatch } from 'react-router-dom';
+import { NavLink, type To, useMatch } from 'react-router-dom';
 
 import { useHistoryContext } from '../pages/History';
 
