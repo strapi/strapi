@@ -14,7 +14,7 @@ const render = (
 ) => {
   const path =
     props.layout.contentType.kind === 'singleType'
-      ? '/:singleType/:slug/history'
+      ? '/:collectionType/:slug/history'
       : '/:collectionType/:slug/:id/history';
 
   return renderRTL(
