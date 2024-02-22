@@ -14,7 +14,7 @@ const render = (
 ) => {
   const path =
     props.layout.contentType.kind === 'singleType'
-      ? '/:collectionType/:slug/history'
+      ? '/:singleType/:slug/history'
       : '/:collectionType/:slug/:id/history';
 
   return renderRTL(
@@ -185,7 +185,7 @@ describe('VersionHeader', () => {
           layout,
         },
         {
-          pathname: '/collection-types/api::homepage.homepage/history',
+          pathname: '/single-types/api::homepage.homepage/history',
           search: '?plugins[i18n][locale]=en',
         }
       );
@@ -196,7 +196,7 @@ describe('VersionHeader', () => {
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::homepage.homepage?plugins[i18n][locale]=en'
+        '/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
       );
     });
   });

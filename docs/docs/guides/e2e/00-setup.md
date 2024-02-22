@@ -29,7 +29,6 @@ This will spawn by default a Strapi instance per testing domain (e.g. content-ma
 
 If you need to clean the test-apps folder because they are not working as expected, you can run `yarn test:e2e clean` which will clean said directory.
 
-
 ## Strapi Templates
 
 The test-app you create uses a [template](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/installation/templates.html) found at `e2e/app-template` in this folder we can store our premade content schemas & any customisations we may need such as other plugins / custom fields / endpoints etc.
