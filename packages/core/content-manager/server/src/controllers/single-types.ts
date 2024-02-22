@@ -1,5 +1,5 @@
 import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
-import { getDocumentDimensions } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './utils/dimensions';
 
 import { getService } from '../utils';
 
@@ -31,7 +31,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
 
   const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
 
-  const { locale } = getDocumentDimensions(body);
+  const { locale } = getDocumentLocaleAndStatus(body);
 
   // Load document version to update
   const [documentVersion, otherDocumentVersion] = await Promise.all([
@@ -54,7 +54,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
 
   if (!documentExists) {
     const sanitizedBody = await sanitizeFn(body);
-    return singleTypes.createOrUpdate(model, {
+    return singleTypes.update(model, {
       data: sanitizedBody,
       ...sanitizedQuery,
       locale,
@@ -72,7 +72,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
   }
 
   const sanitizedBody = await sanitizeFn(body);
-  return singleTypes.createOrUpdate(model, {
+  return singleTypes.update(model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
@@ -93,7 +93,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
-    const { locale, status } = getDocumentDimensions(query);
+    const { locale, status } = getDocumentLocaleAndStatus(query);
 
     const version = await findDocument(permissionQuery, model, { locale, status });
 
@@ -152,7 +152,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.delete(query);
-    const { locale } = getDocumentDimensions(query);
+    const { locale } = getDocumentLocaleAndStatus(query);
 
     const document = await findDocument(sanitizedQuery, model, { locale });
 
@@ -194,7 +194,7 @@ export default {
         throw new errors.ForbiddenError();
       }
 
-      const { locale } = getDocumentDimensions(document);
+      const { locale } = getDocumentLocaleAndStatus(document);
       return singleTypes.publish(model, { locale });
     });
 
@@ -223,7 +223,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale });
 
@@ -241,7 +241,7 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await singleTypes.discard(model, { locale });
+        await singleTypes.discardDraft(model, { locale });
       }
 
       ctx.body = await pipeAsync(
@@ -266,7 +266,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.discard(query);
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale, status: 'published' });
 
@@ -280,7 +280,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      () => singleTypes.discard(model, { locale }),
+      () => singleTypes.discardDraft(model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )();
@@ -293,7 +293,7 @@ export default {
     const singleTypes = getService('single-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const { locale } = getDocumentDimensions(query);
+    const { locale } = getDocumentLocaleAndStatus(query);
 
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();

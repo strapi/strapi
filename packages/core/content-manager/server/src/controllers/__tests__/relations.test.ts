@@ -66,6 +66,9 @@ describe('Relations', () => {
                 },
               }),
             },
+            'collection-types': {
+              findOne: jest.fn(() => ({})),
+            },
           },
         },
       },

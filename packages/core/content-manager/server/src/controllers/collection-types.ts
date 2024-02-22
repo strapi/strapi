@@ -2,7 +2,7 @@ import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
-import { getDocumentDimensions } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './utils/dimensions';
 
 /**
  * Create a new document.
@@ -29,7 +29,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
   const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  const { locale, status = 'draft' } = getDocumentDimensions(body);
+  const { locale, status = 'draft' } = getDocumentLocaleAndStatus(body);
 
   return collectionTypes.create(model, {
     data: sanitizedBody as any,
@@ -72,7 +72,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
     .populateFromQuery(permissionQuery)
     .build();
 
-  const { locale } = getDocumentDimensions(body);
+  const { locale } = getDocumentLocaleAndStatus(body);
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
@@ -130,7 +130,7 @@ export default {
       .countRelations({ toOne: false, toMany: true })
       .build();
 
-    const { locale, status } = getDocumentDimensions(query);
+    const { locale, status } = getDocumentLocaleAndStatus(query);
 
     const { results: documents, pagination } = await collectionTypes.findPage(
       { ...permissionQuery, populate, locale, status },
@@ -181,7 +181,7 @@ export default {
       .countRelations()
       .build();
 
-    const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
+    const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
 
     const version = await collectionTypes.findOne(id, model, {
       populate,
@@ -274,7 +274,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
     const document = await collectionTypes.findOne(id, model, {
       populate,
       locale,
@@ -336,7 +336,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentDimensions(ctx.query);
+    const { locale } = getDocumentLocaleAndStatus(ctx.query);
     const entity = await collectionTypes.findOne(id, model, { populate, locale });
 
     if (!entity) {
@@ -388,7 +388,7 @@ export default {
       }
 
       // TODO: Publish many locales at once
-      const { locale } = getDocumentDimensions(body);
+      const { locale } = getDocumentLocaleAndStatus(body);
       return collectionTypes.publish(document!, model, {
         locale,
         // TODO: Allow setting creator fields on publish
@@ -503,7 +503,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
     const document = await collectionTypes.findOne(id, model, {
       populate,
       locale,
@@ -524,7 +524,7 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await collectionTypes.discard(document, model, { locale });
+        await collectionTypes.discardDraft(document, model, { locale });
       }
 
       ctx.body = await pipeAsync(
@@ -553,7 +553,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
     const document = await collectionTypes.findOne(id, model, {
       populate,
       locale,
@@ -570,7 +570,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => collectionTypes.discard(document, model, { locale }),
+      (document) => collectionTypes.discardDraft(document, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )(document);
@@ -623,7 +623,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale, status = 'draft' } = getDocumentDimensions(ctx.query);
+    const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
     const entity = await collectionTypes.findOne(id, model, { populate, locale, status });
 
     if (!entity) {

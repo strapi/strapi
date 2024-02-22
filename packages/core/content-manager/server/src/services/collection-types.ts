@@ -1,12 +1,7 @@
 import { omit, pipe } from 'lodash/fp';
 import { contentTypes, sanitize, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Schema, Documents } from '@strapi/types';
-import { getService } from '../utils';
-import {
-  getDeepPopulate,
-  getDeepPopulateDraftCount,
-  isWebhooksPopulateRelationsEnabled,
-} from './utils/populate';
+import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
@@ -28,16 +23,6 @@ const emitEvent = async (uid: Common.UID.ContentType, event: string, document: D
     model: modelDef.modelName,
     entry: sanitizedDocument,
   });
-};
-
-const buildDeepPopulate = (uid: Common.UID.CollectionType) => {
-  // User can configure to populate relations, so downstream services can use them.
-  // They will be transformed into counts later if this is set to true.
-
-  return getService('populate-builder')(uid)
-    .populateDeep(Infinity)
-    .countRelationsIf(!isWebhooksPopulateRelationsEnabled())
-    .build();
 };
 
 const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
@@ -291,7 +276,7 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
       return {};
     },
 
-    async discard(
+    async discardDraft(
       document: Document,
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'discardDraft'>[1] = {} as any

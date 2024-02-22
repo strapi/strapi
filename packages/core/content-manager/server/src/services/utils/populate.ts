@@ -1,6 +1,7 @@
 import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import { Common, Attribute, EntityService } from '@strapi/types';
+import { getService } from '../../utils';
 
 const { isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
@@ -280,9 +281,20 @@ const isWebhooksPopulateRelationsEnabled = () => {
   return strapi.config.get('server.webhooks.populateRelations', true);
 };
 
+const buildDeepPopulate = (uid: Common.UID.CollectionType) => {
+  // User can configure to populate relations, so downstream services can use them.
+  // They will be transformed into counts later if this is set to true.
+
+  return getService('populate-builder')(uid)
+    .populateDeep(Infinity)
+    .countRelationsIf(!isWebhooksPopulateRelationsEnabled())
+    .build();
+};
+
 export {
   getDeepPopulate,
   getDeepPopulateDraftCount,
   getQueryPopulate,
   isWebhooksPopulateRelationsEnabled,
+  buildDeepPopulate,
 };

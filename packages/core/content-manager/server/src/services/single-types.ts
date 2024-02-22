@@ -1,12 +1,7 @@
 import { omit, pipe } from 'lodash/fp';
 import { contentTypes, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Schema, Documents } from '@strapi/types';
-import { getService } from '../utils';
-import {
-  getDeepPopulate,
-  getDeepPopulateDraftCount,
-  isWebhooksPopulateRelationsEnabled,
-} from './utils/populate';
+import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
 
 const { ApplicationError } = errors;
@@ -29,26 +24,13 @@ type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[
 //   });
 // };
 
-const buildDeepPopulate = (uid: Common.UID.SingleType) => {
-  // User can configure to populate relations, so downstream services can use them.
-  // They will be transformed into counts later if this is set to true.
-
-  return getService('populate-builder')(uid)
-    .populateDeep(Infinity)
-    .countRelationsIf(!isWebhooksPopulateRelationsEnabled())
-    .build();
-};
-
 const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
   async find(opts: DocServiceParams<'find'>[0], uid: Common.UID.SingleType) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
     return strapi.documents<Schema.SingleType>(uid).find(params);
   },
 
-  async createOrUpdate(
-    uid: Common.UID.SingleType,
-    opts: Parameters<DocService['update']>[0] = {} as any
-  ) {
+  async update(uid: Common.UID.SingleType, opts: Parameters<DocService['update']>[0] = {} as any) {
     const data = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
     const populate = opts.populate ?? (await buildDeepPopulate(uid));
     const params = { ...opts, data, status: 'draft', populate };
@@ -126,7 +108,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     return {};
   },
 
-  async discard(
+  async discardDraft(
     uid: Common.UID.SingleType,
     opts: Parameters<DocService['discardDraft']>[0] = {} as any
   ) {
