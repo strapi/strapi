@@ -41,7 +41,7 @@ To set specific environment variables for your tests, a `.env` file can be creat
 
 ## Running tests with future flags
 
-If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation into consideration, however, the run-e2e-tests script will apply the config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
+If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
 
 ## What is Playwright?
 
