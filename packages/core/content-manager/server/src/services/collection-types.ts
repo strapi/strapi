@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit, pipe } from 'lodash/fp';
 import { contentTypes, sanitize, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Schema, Documents } from '@strapi/types';
 import { getService } from '../utils';
@@ -14,6 +14,7 @@ const { ApplicationError } = errors;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
+const omitIdField = omit('id');
 
 type DocService = Documents.CollectionTypeInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
@@ -91,7 +92,7 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'update'>[1] = {} as any
     ) {
-      const publishData = omitPublishedAtField(opts.data || {});
+      const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
@@ -112,7 +113,7 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
       const populate = await buildDeepPopulate(uid);
       const params = {
         data: {
-          ...body,
+          ...omitIdField(body),
           [PUBLISHED_AT_ATTRIBUTE]: null,
         },
         populate,

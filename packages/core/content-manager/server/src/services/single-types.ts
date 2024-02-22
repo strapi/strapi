@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit, pipe } from 'lodash/fp';
 import { contentTypes, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Schema, Documents } from '@strapi/types';
 import { getService } from '../utils';
@@ -14,6 +14,7 @@ const { ApplicationError } = errors;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
+const omitIdField = omit('id');
 
 type DocService = Documents.SingleTypeInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
@@ -48,7 +49,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     uid: Common.UID.SingleType,
     opts: Parameters<DocService['update']>[0] = {} as any
   ) {
-    const data = omitPublishedAtField(opts.data || {});
+    const data = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
     const populate = opts.populate ?? (await buildDeepPopulate(uid));
     const params = { ...opts, data, status: 'draft', populate };
 
