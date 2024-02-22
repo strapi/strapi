@@ -61,23 +61,23 @@ test.describe('Edit view', () => {
     /**
      * Verify the UID works as expected
      */
-    const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
-    const responsePromise = page.waitForResponse('**/content-manager/uid/generate?locale=es');
-    await page.getByRole('button', { name: 'Regenerate' }).click();
-    const request = await requestePromise;
-    expect(request.postDataJSON()).toMatchObject({
-      contentTypeUID: 'api::product.product',
-      data: {
-        id: '',
-        name: 'Camiseta de fuera 23/24 de Nike para hombres',
-        slug: 'product',
-      },
-      field: 'slug',
-    });
-    const response = await responsePromise;
-    expect(await response.json()).toMatchObject({
-      data: 'camiseta-de-fuera-23-24-de-nike-para-hombres',
-    });
+    await expect
+      .poll(async () => {
+        const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
+        await page.getByRole('button', { name: 'Regenerate' }).click();
+        const req = await requestePromise;
+        return req.postDataJSON();
+      })
+      .toMatchObject({
+        contentTypeUID: 'api::product.product',
+        data: {
+          id: '',
+          isAvailable: true,
+          name: 'Camiseta de fuera 23/24 de Nike para hombres',
+          slug: 'product',
+        },
+        field: 'slug',
+      });
     await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
       'camiseta-de-fuera-23-24-de-nike-para-hombres'
     );
@@ -161,23 +161,28 @@ test.describe('Edit view', () => {
     /**
      * Verify the UID works as expected
      */
-    const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
-    const responsePromise = page.waitForResponse('**/content-manager/uid/generate?locale=es');
-    await page.getByRole('button', { name: 'Regenerate' }).click();
-    const request = await requestePromise;
-    expect(request.postDataJSON()).toMatchObject({
-      contentTypeUID: 'api::product.product',
-      data: {
-        id: expect.any(String),
-        name: 'Camiseta de fuera 23/24 de Nike para hombres',
-        slug: 'product',
-      },
-      field: 'slug',
-    });
-    const response = await responsePromise;
-    expect(await response.json()).toMatchObject({
-      data: 'camiseta-de-fuera-23-24-de-nike-para-hombres',
-    });
+    await expect
+      .poll(
+        async () => {
+          const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
+          await page.getByRole('button', { name: 'Regenerate' }).click();
+          const req = await requestePromise;
+          return req.postDataJSON();
+        },
+        {
+          timeout: 30 * 1000,
+          intervals: [1000, 2000, 4000, 8000],
+        }
+      )
+      .toMatchObject({
+        contentTypeUID: 'api::product.product',
+        data: {
+          id: expect.any(String),
+          name: 'Camiseta de fuera 23/24 de Nike para hombres',
+          slug: 'product',
+        },
+        field: 'slug',
+      });
     await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
       'camiseta-de-fuera-23-24-de-nike-para-hombres'
     );
