@@ -6,14 +6,14 @@ import styled from 'styled-components';
 import { CellContentProps } from './CellContent';
 import { CellValue } from './CellValue';
 
-import type { Attribute } from '@strapi/types';
+import type { Attribute, Common } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * SingleComponent
  * -----------------------------------------------------------------------------------------------*/
 
 interface SingleComponentProps extends Pick<CellContentProps, 'metadatas'> {
-  content: Attribute.GetValue<Attribute.Component>;
+  content: Attribute.GetValue<Attribute.Component<Common.UID.Component, false>>;
 }
 
 const SingleComponent = ({ content, metadatas }: SingleComponentProps) => {
@@ -41,7 +41,7 @@ const SingleComponentTypography = styled(Typography)`
  * -----------------------------------------------------------------------------------------------*/
 
 interface RepeatableComponentProps extends Pick<CellContentProps, 'metadatas'> {
-  content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, true>>;
+  content: Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
 }
 
 const RepeatableComponent = ({ content, metadatas }: RepeatableComponentProps) => {

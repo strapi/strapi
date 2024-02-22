@@ -873,7 +873,7 @@ describe('Core API - Validate', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
             ['Document A', 1],
-            ['OO', 2],
+            [' OO', 2],
             ['Document', documentsLength],
           ])('Successfully applies search: %s', async (search, expectedLength) => {
             const res = await rq.get('/api/documents', { qs: { _q: search } });
@@ -931,6 +931,13 @@ describe('Core API - Validate', () => {
             expect.objectContaining({ data: expect.any(Array) })
           );
         });
+      });
+
+      it('Does not populate private relation', async () => {
+        const populate = { private_relations: true };
+        const res = await rq.get('/api/documents', { qs: { populate } });
+
+        expect(res.status).toBe(400);
       });
 
       it.todo('Populates a nested relation');

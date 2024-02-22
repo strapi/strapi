@@ -171,9 +171,9 @@ describe.skip('x-to-many RF Preview', () => {
       const product = data.product[0];
 
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${product.id}/shops`);
-
       expect(statusCode).toBe(200);
       expect(body.results).toHaveLength(10);
+      expect(body.pagination).toMatchObject({ page: 1, pageSize: 10, pageCount: 2, total: 12 });
       expect(difference(toIds(body.results), toIds(data.shop))).toHaveLength(0);
     });
 
@@ -184,6 +184,7 @@ describe.skip('x-to-many RF Preview', () => {
 
       expect(statusCode).toBe(200);
       expect(body.results).toHaveLength(5);
+      expect(body.pagination).toMatchObject({ page: 1, pageSize: 10, pageCount: 1, total: 5 });
       expect(difference(toIds(body.results), toIds(data.category))).toHaveLength(0);
     });
   });

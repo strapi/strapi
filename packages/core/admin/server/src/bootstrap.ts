@@ -93,6 +93,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   await syncAuthSettings();
   await syncAPITokensPermissions();
 
+  getService('metrics').sendUpdateProjectInformation(strapi);
   getService('metrics').startCron(strapi);
 
   apiTokenService.checkSaltIsDefined();
