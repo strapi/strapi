@@ -60,6 +60,10 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
     border-color: ${({ theme }) => theme.colors.neutral200};
   }
 
+  &[data-checked='false'][data-disabled='false']:hover > label {
+    cursor: pointer;
+  }
+
   &[data-disabled='true'] {
     color: ${({ theme }) => theme.colors.neutral600};
     background-color: ${({ theme }) => theme.colors.neutral150};
