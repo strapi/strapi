@@ -478,6 +478,7 @@ const PublishAction: DocumentActionComponent = ({
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const modified = useForm('PublishAction', ({ modified }) => modified);
+  const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const document = useForm('PublishAction', ({ values }) => values);
   const validate = useForm('PublishAction', (state) => state.validate);
@@ -513,45 +514,51 @@ const PublishAction: DocumentActionComponent = ({
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      const errors = await validate();
+      setSubmitting(true);
 
-      if (errors) {
-        toggleNotification({
-          type: 'warning',
-          message: {
-            id: 'content-manager.validation.error',
-            defaultMessage:
-              'There are validation errors in your document. Please fix them before saving.',
+      try {
+        const errors = await validate();
+
+        if (errors) {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: 'content-manager.validation.error',
+              defaultMessage:
+                'There are validation errors in your document. Please fix them before saving.',
+            },
+          });
+
+          return;
+        }
+
+        const res = await publish(
+          {
+            collectionType,
+            model,
+            id,
+            params,
           },
-        });
+          document
+        );
 
-        return;
-      }
-
-      const res = await publish(
-        {
-          collectionType,
-          model,
-          id,
-          params,
-        },
-        document
-      );
-
-      if ('data' in res && collectionType !== SINGLE_TYPES) {
-        /**
-         * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
-         */
-        navigate({
-          pathname: `../${collectionType}/${model}/${res.data.id}`,
-          search: rawQuery,
-        });
-      } else if (
-        'error' in res &&
-        isBaseQueryError(res.error) &&
-        res.error.name === 'ValidationError'
-      ) {
-        setErrors(formatValidationErrors(res.error));
+        if ('data' in res && collectionType !== SINGLE_TYPES) {
+          /**
+           * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+           */
+          navigate({
+            pathname: `../${collectionType}/${model}/${res.data.id}`,
+            search: rawQuery,
+          });
+        } else if (
+          'error' in res &&
+          isBaseQueryError(res.error) &&
+          res.error.name === 'ValidationError'
+        ) {
+          setErrors(formatValidationErrors(res.error));
+        }
+      } finally {
+        setSubmitting(false);
       }
     },
   };

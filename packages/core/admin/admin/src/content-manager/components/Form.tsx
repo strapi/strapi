@@ -9,7 +9,7 @@ import {
   Icon,
   Typography,
 } from '@strapi/design-system';
-import { useCallbackRef } from '@strapi/helper-plugin';
+import { TranslationMessage, useCallbackRef } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
@@ -151,6 +151,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
      */
     const validate: FormContextValue['validate'] = React.useCallback(
       async (shouldSetErrors: boolean = true) => {
+        setErrors({});
+
         if (!props.validationSchema) {
           return null;
         }
@@ -565,20 +567,28 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
     initialValue,
     /**
      * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     * If it's anything else, we don't return it.
      */
-    error:
-      !error || typeof error === 'string'
-        ? error
-        : formatMessage(
-            {
-              id: error.id,
-              defaultMessage: error.defaultMessage,
-            },
-            error.values
-          ),
+    error: isErrorMessageDescriptor(error)
+      ? formatMessage(
+          {
+            id: error.id,
+            defaultMessage: error.defaultMessage,
+          },
+          error.values
+        )
+      : typeof error === 'string'
+      ? error
+      : undefined,
     onChange: handleChange,
     value: value,
   };
+};
+
+const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
+  return (
+    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -587,10 +597,11 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 const Blocker = () => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
+  const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      modified && currentLocation.pathname !== nextLocation.pathname
+      !isSubmitting && modified && currentLocation.pathname !== nextLocation.pathname
   );
 
   if (blocker.state === 'blocked') {

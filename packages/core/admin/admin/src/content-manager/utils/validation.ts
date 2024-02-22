@@ -2,6 +2,8 @@ import { translatedErrors } from '@strapi/helper-plugin';
 import pipe from 'lodash/fp/pipe';
 import * as yup from 'yup';
 
+import { DOCUMENT_META_FIELDS } from '../constants/attributes';
+
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
 import type { Attribute } from '@strapi/types';
 import type { ObjectShape } from 'yup/lib/object';
@@ -18,85 +20,98 @@ type AnySchema =
  * createYupSchema
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * TODO: should we create a Map to store these based on the hash of the schema?
+ */
 const createYupSchema = (
   attributes: Schema['attributes'] = {},
   components: ComponentsDictionary = {}
 ): yup.ObjectSchema<any> => {
   const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
-    yup.object().shape(
-      Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
-        /**
-         * These validations won't apply to every attribute
-         * and that's okay, in that case we just return the
-         * schema as it was passed.
-         */
-        const validations = [
-          addRequiredValidation,
-          addMinLengthValidation,
-          addMaxLengthValidation,
-          addMinValidation,
-          addMaxValidation,
-          addRegexValidation,
-        ].map((fn) => fn(attribute));
+    yup
+      .object()
+      .shape(
+        Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
+          if (DOCUMENT_META_FIELDS.includes(name)) {
+            return acc;
+          }
 
-        const transformSchema = pipe(...validations);
+          /**
+           * These validations won't apply to every attribute
+           * and that's okay, in that case we just return the
+           * schema as it was passed.
+           */
+          const validations = [
+            addRequiredValidation,
+            addMinLengthValidation,
+            addMaxLengthValidation,
+            addMinValidation,
+            addMaxValidation,
+            addRegexValidation,
+          ].map((fn) => fn(attribute));
 
-        switch (attribute.type) {
-          case 'component': {
-            const { attributes } = components[attribute.component];
+          const transformSchema = pipe(...validations);
 
-            if (attribute.repeatable) {
+          switch (attribute.type) {
+            case 'component': {
+              const { attributes } = components[attribute.component];
+
+              if (attribute.repeatable) {
+                return {
+                  ...acc,
+                  [name]: transformSchema(
+                    yup.array().of(createModelSchema(attributes).nullable(false))
+                  ),
+                };
+              } else {
+                return {
+                  ...acc,
+                  [name]: transformSchema(createModelSchema(attributes)),
+                };
+              }
+            }
+            case 'dynamiczone':
               return {
                 ...acc,
                 [name]: transformSchema(
-                  yup.array().of(createModelSchema(attributes).nullable(false))
+                  yup.array().of(
+                    yup.lazy((data: Attribute.GetValue<Attribute.DynamicZone>[number]) => {
+                      const { attributes } = components[data.__component];
+
+                      return yup
+                        .object()
+                        .shape({
+                          __component: yup.string().required().oneOf(Object.keys(components)),
+                        })
+                        .nullable(false)
+                        .concat(createModelSchema(attributes));
+                    }) as unknown as yup.ObjectSchema<any>
+                  )
                 ),
               };
-            } else {
+            case 'relation':
               return {
                 ...acc,
-                [name]: transformSchema(createModelSchema(attributes)),
+                [name]: transformSchema(
+                  yup.array().of(
+                    yup.object().shape({
+                      id: yup.string().required(),
+                    })
+                  )
+                ),
               };
-            }
+            default:
+              return {
+                ...acc,
+                [name]: transformSchema(createAttributeSchema(attribute)),
+              };
           }
-          case 'dynamiczone':
-            return {
-              ...acc,
-              [name]: transformSchema(
-                yup.array().of(
-                  yup.lazy((data: Attribute.GetValue<Attribute.DynamicZone>[number]) => {
-                    const { attributes } = components[data.__component];
-
-                    return yup
-                      .object()
-                      .shape({
-                        __component: yup.string().required().oneOf(Object.keys(components)),
-                      })
-                      .nullable(false)
-                      .concat(createModelSchema(attributes));
-                  }) as unknown as yup.ObjectSchema<any>
-                )
-              ),
-            };
-          case 'relation':
-            return {
-              ...acc,
-              [name]: transformSchema(
-                yup.array().of(
-                  yup.object().shape({
-                    id: yup.string().required(),
-                  })
-                )
-              ),
-            };
-          default:
-            return {
-              ...acc,
-              [name]: transformSchema(createAttributeSchema(attribute)),
-            };
-        }
-      }, {})
-    );
+        }, {})
+      )
+      /**
+       * TODO: investigate why an undefined object fails a check of `nullable`.
+       */
+      .default(null);
 
   return createModelSchema(attributes);
 };
@@ -127,11 +142,6 @@ const createAttributeSchema = (
           }
         }
       );
-    case 'date':
-    case 'datetime':
-    case 'time':
-    case 'timestamp':
-      return yup.mixed();
     case 'decimal':
     case 'float':
     case 'integer':

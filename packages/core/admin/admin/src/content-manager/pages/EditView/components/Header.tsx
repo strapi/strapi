@@ -17,6 +17,7 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { capitalise } from '../../../../utils/strings';
+import { useForm } from '../../../components/Form';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -447,6 +448,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, docu
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
   const toggleNotification = useNotification();
+  const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
 
   return {
     disabled: !canDelete || !document,
@@ -473,26 +475,31 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, docu
         </Flex>
       ),
       onConfirm: async () => {
-        if (!id && collectionType !== SINGLE_TYPES) {
-          console.error(
-            "You're trying to delete a document without an id, this is likely a bug with Strapi. Please open an issue."
-          );
+        setSubmitting(true);
+        try {
+          if (!id && collectionType !== SINGLE_TYPES) {
+            console.error(
+              "You're trying to delete a document without an id, this is likely a bug with Strapi. Please open an issue."
+            );
 
-          toggleNotification({
-            message: formatMessage({
-              id: 'content-manager.actions.delete.error',
-              defaultMessage: 'An error occurred while trying to delete the document.',
-            }),
-            type: 'warning',
-          });
+            toggleNotification({
+              message: formatMessage({
+                id: 'content-manager.actions.delete.error',
+                defaultMessage: 'An error occurred while trying to delete the document.',
+              }),
+              type: 'warning',
+            });
 
-          return;
-        }
+            return;
+          }
 
-        const res = await deleteAction({ id, model, collectionType });
+          const res = await deleteAction({ id, model, collectionType });
 
-        if (!('error' in res)) {
-          navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });
+          if (!('error' in res)) {
+            navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });
+          }
+        } finally {
+          setSubmitting(false);
         }
       },
     },
