@@ -6,7 +6,7 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink, type To, useParams } from 'react-router-dom';
+import { NavLink, type To, useParams, useMatch } from 'react-router-dom';
 
 import { useHistoryContext } from '../pages/History';
 
@@ -23,22 +23,21 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
-  const params = useParams<{ collectionType: string; slug: string }>();
-
+  const isCollectionType = useMatch('/content-manager/collection-types/:slug/:id/history');
   const mainFieldValue = version.data[layout.contentType.settings.mainField];
 
   const getBackLink = (): To => {
     const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-    if (layout.contentType.kind === 'collectionType') {
+    if (isCollectionType) {
       return {
-        pathname: `../${params.collectionType}/${version.contentType}/${version.relatedDocumentId}`,
+        pathname: `../collection-types/${version.contentType}/${version.relatedDocumentId}`,
         search: pluginsQueryParams,
       };
     }
 
     return {
-      pathname: `../${params.collectionType}/${version.contentType}`,
+      pathname: `../single-types/${version.contentType}`,
       search: pluginsQueryParams,
     };
   };

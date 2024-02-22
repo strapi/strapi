@@ -14,8 +14,8 @@ const render = (
 ) => {
   const path =
     props.layout.contentType.kind === 'singleType'
-      ? '/:collectionType/:slug/history'
-      : '/:collectionType/:slug/:id/history';
+      ? '/content-manager/single-types/:slug/history'
+      : '/content-manager/collection-types/:slug/:id/history';
 
   return renderRTL(
     <HistoryProvider {...props}>
@@ -61,7 +61,7 @@ describe('VersionHeader', () => {
           // @ts-expect-error ignore missing properties
           layout,
         },
-        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
+        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
@@ -89,7 +89,7 @@ describe('VersionHeader', () => {
         },
         {
           pathname:
-            '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history',
+            '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history',
           search: '?plugins[i18n][locale]=en',
         }
       );
@@ -120,7 +120,7 @@ describe('VersionHeader', () => {
             },
           },
         },
-        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
+        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
@@ -161,7 +161,7 @@ describe('VersionHeader', () => {
           // @ts-expect-error ignore missing properties
           layout,
         },
-        '/single-types/api::homepage.homepage/history'
+        '/content-manager/single-types/api::homepage.homepage/history'
       );
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
@@ -185,7 +185,7 @@ describe('VersionHeader', () => {
           layout,
         },
         {
-          pathname: '/single-types/api::homepage.homepage/history',
+          pathname: '/content-manager/single-types/api::homepage.homepage/history',
           search: '?plugins[i18n][locale]=en',
         }
       );
