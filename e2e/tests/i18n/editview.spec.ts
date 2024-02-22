@@ -116,6 +116,9 @@ test.describe('Edit view', () => {
   });
 
   test('As a user I want to add a locale entry to an existing document', async ({ page }) => {
+    // Listen for all console logs
+    page.on('console', (msg) => console.log(msg.text()));
+
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/;
     const EDIT_URL =
       /\/admin\/content-manager\/collection-types\/api::product.product\/[^/]+(\?.*)?/;
@@ -166,11 +169,11 @@ test.describe('Edit view', () => {
         async () => {
           const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
           await page.getByRole('button', { name: 'Regenerate' }).click();
-          const req = await requestePromise;
-          return req.postDataJSON();
+          const body = (await requestePromise).postDataJSON();
+          console.log('posting body', body);
+          return body;
         },
         {
-          timeout: 30 * 1000,
           intervals: [1000, 2000, 4000, 8000],
         }
       )

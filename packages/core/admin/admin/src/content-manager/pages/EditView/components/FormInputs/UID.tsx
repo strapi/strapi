@@ -91,6 +91,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const [generateUID, { isLoading: isGeneratingUID }] = useGenerateUIDMutation();
 
     const handleRegenerateClick = async () => {
+      // eslint-disable-next-line no-console
+      console.log('allFormValues', allFormValues);
       try {
         const res = await generateUID({
           contentTypeUID: model,
