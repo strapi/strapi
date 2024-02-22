@@ -10,6 +10,7 @@
   "content-manager-edit-view.add-to-release.redirect-button": "Open the list of releases",
   "content-manager-edit-view.list-releases.title": "{isPublish, select, true {Will be published in} other {Will be unpublished in}}",
   "content-manager-edit-view.remove-from-release": "Remove from release",
+  "content-manager-edit-view.scheduled.date": "{date} at {time} ({offset})",
   "content-releases.content-manager-edit-view.edit-entry": "Edit entry",
   "content-manager-edit-view.remove-from-release.notification.success": "Entry removed from release",
   "content-manager-edit-view.release-action-menu": "Release action options",
@@ -58,6 +59,7 @@
   "page.Details.button.openContentManager": "Open the Content Manager",
   "pages.Releases.notification.error.title": "Your request could not be processed.",
   "pages.Releases.notification.error.message": "Please try again or open another release.",
+  "pages.Releases.not-scheduled": "Not scheduled",
   "pages.ReleaseDetails.groupBy.label": "Group by {groupBy}",
   "pages.ReleaseDetails.groupBy.aria-label": "Group by",
   "pages.ReleaseDetails.entry-validation.already-published": "Already published",
@@ -66,5 +68,6 @@
   "pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish",
   "pages.ReleaseDetails.groupBy.option.content-type": "Content-Types",
   "pages.ReleaseDetails.groupBy.option.locales": "Locales",
-  "pages.ReleaseDetails.groupBy.option.actions": "Actions"
+  "pages.ReleaseDetails.groupBy.option.actions": "Actions",
+  "pages.ReleaseDetails.header-subtitle.scheduled": "Scheduled for {date} at {time} ({offset})"
 }
