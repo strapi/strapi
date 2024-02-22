@@ -14,7 +14,7 @@ import crypto from 'node:crypto';
 // TODO: Names will not be shortened until this is set to a non-zero number
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
 export const HASH_LENGTH = 2;
-export const HASH_SEPARATOR = 'x';
+export const HASH_SEPARATOR = ''; // no separator is needed, we will just attach hash directly to shortened name
 
 export const ENTITY = 'entity';
 export const ID_COLUMN = 'id';
