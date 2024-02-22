@@ -138,6 +138,11 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
     ) {
       const populate = await buildDeepPopulate(uid);
 
+      // Delete all locales if no locale is specified
+      if (opts.locale === undefined) {
+        opts.locale = '*';
+      }
+
       // @ts-expect-error - change entity to document
       await docService(uid).delete(document.id, { ...opts, populate });
 

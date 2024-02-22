@@ -51,7 +51,11 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.Coll
   }
 
   async function deleteFn(id: string, params = {} as any) {
-    const queryParams = await pipeAsync(omit('status'), i18n.localeToLookup(contentType))(params);
+    const queryParams = await pipeAsync(
+      omit('status'),
+      i18n.defaultLocale(contentType),
+      i18n.multiLocaleToLookup(contentType)
+    )(params);
 
     return documents.delete(uid, id, queryParams);
   }
@@ -149,19 +153,28 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.Coll
   }
 
   async function publish(id: string, params = {} as any) {
-    const queryParams = i18n.localeToLookup(contentType, params);
+    const queryParams = await pipeAsync(
+      i18n.defaultLocale(contentType),
+      i18n.multiLocaleToLookup(contentType)
+    )(params);
 
     return documents.publish(uid, id, queryParams);
   }
 
   async function unpublish(id: string, params = {} as any) {
-    const queryParams = i18n.localeToLookup(contentType, params);
+    const queryParams = await pipeAsync(
+      i18n.defaultLocale(contentType),
+      i18n.multiLocaleToLookup(contentType)
+    )(params);
 
     return documents.unpublish(uid, id, queryParams);
   }
 
   async function discardDraft(id: string, params = {} as any) {
-    const queryParams = i18n.localeToLookup(contentType, params);
+    const queryParams = await pipeAsync(
+      i18n.defaultLocale(contentType),
+      i18n.multiLocaleToLookup(contentType)
+    )(params);
 
     return documents.discardDraft(uid, id, queryParams);
   }
