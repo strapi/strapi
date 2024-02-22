@@ -5,7 +5,10 @@ import { login } from '../../utils/login';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-describeOnCondition(edition === 'EE')('Releases page', () => {
+/**
+ * Skip tests on v5 until Releases + Scheduling are migrated to v5
+ */
+describeOnCondition(/*edition === 'EE'*/ false)('Releases page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
