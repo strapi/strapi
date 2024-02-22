@@ -3,9 +3,8 @@ import type { Common, Schema, UID } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
-  attributes: Record<string, unknown>;
   meta?: Record<string, unknown>;
-};
+} & Record<string, unknown>;
 
 type TransformedComponent = {
   id: string;
@@ -52,14 +51,7 @@ function transformComponent(
     return data.map((datum) => transformComponent(datum, component));
   }
 
-  const res = transformEntry(data, component);
-
-  if (isNil(res)) {
-    return res;
-  }
-
-  const { id, attributes } = res;
-  return { id, ...attributes };
+  return transformEntry(data, component);
 }
 
 function transformEntry<T extends Entry | Entry[] | null>(
@@ -118,7 +110,7 @@ function transformEntry(
 
   return {
     id,
-    attributes: attributeValues,
+    ...attributeValues,
     // NOTE: not necessary for now
     // meta: {},
   };

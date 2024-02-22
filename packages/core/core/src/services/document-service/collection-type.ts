@@ -138,7 +138,12 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.Coll
   }
 
   async function count(params = {} as any) {
-    const queryParams = await pipeAsync(DP.defaultToDraft, i18n.defaultLocale(contentType))(params);
+    const queryParams = await pipeAsync(
+      DP.defaultToDraft,
+      DP.statusToLookup,
+      i18n.defaultLocale(contentType),
+      i18n.localeToLookup(contentType)
+    )(params);
 
     return documents.count(uid, queryParams);
   }

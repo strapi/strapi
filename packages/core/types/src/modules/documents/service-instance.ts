@@ -3,10 +3,12 @@ import type { ID } from './document-engine';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-enigne';
 
-export type ServiceInstance<TContentType extends Schema.SingleType | Schema.CollectionType> =
+export type ServiceInstance<TContentType extends Schema.ContentType = Schema.ContentType> =
   TContentType extends Schema.SingleType
     ? SingleTypeInstance<TContentType['uid']>
-    : CollectionTypeInstance<TContentType['uid']>;
+    : TContentType extends Schema.CollectionType
+    ? CollectionTypeInstance<TContentType['uid']>
+    : SingleTypeInstance<TContentType['uid']> & CollectionTypeInstance<TContentType['uid']>;
 
 export type CollectionTypeInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
