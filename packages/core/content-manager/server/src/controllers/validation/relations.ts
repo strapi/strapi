@@ -11,7 +11,7 @@ const validateFindAvailableSchema = yup
     page: yup.number().integer().min(1),
     pageSize: yup.number().integer().min(1).max(100),
     locale: yup.string().nullable(),
-    status: yup.string().oneOf(['published', 'draft']),
+    status: yup.string().oneOf(['published', 'draft']).nullable(),
   })
   .required();
 
@@ -21,7 +21,7 @@ const validateFindExistingSchema = yup
     page: yup.number().integer().min(1),
     pageSize: yup.number().integer().min(1).max(100),
     locale: yup.string().nullable(),
-    status: yup.string().oneOf(['published', 'draft']),
+    status: yup.string().oneOf(['published', 'draft']).nullable(),
   })
   .required();
 

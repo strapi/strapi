@@ -48,7 +48,7 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
 export default {
   async extractAndValidateRequestInfo(
     ctx: any,
-    status: string,
+    status?: 'draft' | 'published',
     id?: string | number,
     locale?: string
   ) {
@@ -142,7 +142,7 @@ export default {
 
     const { id } = ctx.request.query;
     const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query.status;
+    const status = ctx.request?.query?.status || 'draft';
 
     const validation = await this.extractAndValidateRequestInfo(ctx, status, id, locale);
     if (!validation) {
@@ -245,7 +245,7 @@ export default {
     await validateFindExisting(ctx.request.query);
     const { id } = ctx.params;
     const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query.status;
+    const status = ctx.request?.query?.status || 'draft';
 
     const validation = await this.extractAndValidateRequestInfo(ctx, status, id, locale);
     if (!validation) {

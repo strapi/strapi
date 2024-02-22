@@ -24,7 +24,7 @@ type RelationResponse =
   | {
       results?: never;
       pagination?: never;
-      error?: errors.ApplicationError | errors.YupValidationError;
+      error: errors.ApplicationError | errors.YupValidationError;
     };
 
 /**
@@ -34,11 +34,11 @@ export declare namespace FindAvailable {
   export interface Request {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
+      id: string;
       _q?: string;
       _filter?: string;
-      id: string;
       locale?: string | null;
-      status: Documents.Params.PublicationState.Kind;
+      status?: Documents.Params.PublicationState.Kind;
     };
   }
 
@@ -58,7 +58,7 @@ export declare namespace FindExisting {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       locale?: string | null;
-      status: Documents.Params.PublicationState.Kind;
+      status?: Documents.Params.PublicationState.Kind;
     };
   }
 

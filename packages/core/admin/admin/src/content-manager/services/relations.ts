@@ -71,9 +71,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
         );
       },
       transformResponse: (response: Contracts.Relations.FindExisting.Response) => {
-        if ('data' in response) {
-          return { results: response.data ? [response.data] : [], pagination: null };
-        } else if ('results' in response) {
+        if ('results' in response && response.results) {
           return {
             ...response,
             results: response.results.reverse(),
