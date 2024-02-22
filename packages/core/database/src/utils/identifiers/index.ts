@@ -89,7 +89,9 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   const separatorsLength = HASH_SEPARATOR.length * (nameTokens.length - 1);
   let available = maxLength - incompressibleLength - separatorsLength;
 
-  if (available <= 0) return ''; // Not enough space, needs handling
+  if (available <= 0) {
+    throw new Error('Not enough space available to shorten identifier');
+  }
 
   // Calculate initial available length per compressible token
   let availablePerToken = available / compressible.length;
