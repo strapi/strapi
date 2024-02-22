@@ -926,6 +926,7 @@
   "content-manager.utils.data-loaded": "The {number, plural, =1 {entry has} other {entries have}} successfully been loaded",
   "content-manager.listView.validation.errors.title": "Action required",
   "content-manager.listView.validation.errors.message": "Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)",
+  "content-manager.validation.error": "There are validation errors in your document. Please fix them before saving.",
   "dark": "Dark",
   "form.button.continue": "Continue",
   "form.button.done": "Done",
