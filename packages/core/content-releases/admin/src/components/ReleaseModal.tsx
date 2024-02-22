@@ -63,7 +63,7 @@ export const ReleaseModal = ({
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
     const formattedDate = parse(time, 'HH:mm', new Date(date));
-    const timezoneWithoutOffset = timezone.split('-')[1];
+    const timezoneWithoutOffset = timezone.split('_')[1];
     return zonedTimeToUtc(formattedDate, timezoneWithoutOffset);
   };
 
@@ -72,7 +72,7 @@ export const ReleaseModal = ({
    */
   const getTimezoneWithOffset = () => {
     const currentTimezone = timezoneList.find(
-      (timezone) => timezone.value.split('-')[1] === initialValues.timezone
+      (timezone) => timezone.value.split('_')[1] === initialValues.timezone
     );
     return currentTimezone?.value || systemTimezone.value;
   };
@@ -95,7 +95,7 @@ export const ReleaseModal = ({
         onSubmit={(values) => {
           handleSubmit({
             ...values,
-            timezone: values.timezone ? values.timezone.split('-')[1] : null,
+            timezone: values.timezone ? values.timezone.split('_')[1] : null,
             scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
           });
         }}
@@ -124,37 +124,39 @@ export const ReleaseModal = ({
                 {/* Remove future flag check after Scheduling Beta release */}
                 {IsSchedulingEnabled && (
                   <>
-                    <Checkbox
-                      name="isScheduled"
-                      value={values.isScheduled}
-                      onChange={(event) => {
-                        setFieldValue('isScheduled', event.target.checked);
-                        if (!event.target.checked) {
-                          // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
-                          setFieldValue('date', null);
-                          setFieldValue('time', '');
-                          setFieldValue('timezone', null);
-                        } else {
-                          // On ticking back schedule release date, time and timezone should be restored to the initial state
-                          setFieldValue('date', initialValues.date);
-                          setFieldValue('time', initialValues.time);
-                          setFieldValue(
-                            'timezone',
-                            initialValues.timezone ?? systemTimezone?.value
-                          );
-                        }
-                      }}
-                    >
-                      <Typography
-                        textColor={values.isScheduled ? 'primary600' : 'neutral800'}
-                        fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
+                    <Box width="max-content">
+                      <Checkbox
+                        name="isScheduled"
+                        value={values.isScheduled}
+                        onChange={(event) => {
+                          setFieldValue('isScheduled', event.target.checked);
+                          if (!event.target.checked) {
+                            // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
+                            setFieldValue('date', null);
+                            setFieldValue('time', '');
+                            setFieldValue('timezone', null);
+                          } else {
+                            // On ticking back schedule release date, time and timezone should be restored to the initial state
+                            setFieldValue('date', initialValues.date);
+                            setFieldValue('time', initialValues.time);
+                            setFieldValue(
+                              'timezone',
+                              initialValues.timezone ?? systemTimezone?.value
+                            );
+                          }
+                        }}
                       >
-                        {formatMessage({
-                          id: 'modal.form.input.label.schedule-release',
-                          defaultMessage: 'Schedule release',
-                        })}
-                      </Typography>
-                    </Checkbox>
+                        <Typography
+                          textColor={values.isScheduled ? 'primary600' : 'neutral800'}
+                          fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
+                        >
+                          {formatMessage({
+                            id: 'modal.form.input.label.schedule-release',
+                            defaultMessage: 'Schedule release',
+                          })}
+                        </Typography>
+                      </Checkbox>
+                    </Box>
                     {values.isScheduled && (
                       <>
                         <Flex gap={4} alignItems="start">
@@ -267,12 +269,12 @@ const getTimezones = (selectedDate: Date) => {
       utcOffset = `${utcOffset}+00:00`;
     }
 
-    // Offset and timezone are concatenated with '-', so to split and save the required timezone in DB
-    return { offset: utcOffset, value: `${utcOffset}-${timezone}` } satisfies ITimezoneOption;
+    // Offset and timezone are concatenated with '_', so to split and save the required timezone in DB
+    return { offset: utcOffset, value: `${utcOffset}_${timezone}` } satisfies ITimezoneOption;
   });
 
   const systemTimezone = timezoneList.find(
-    (timezone) => timezone.value.split('-')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
+    (timezone) => timezone.value.split('_')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
   return { timezoneList, systemTimezone };
@@ -291,7 +293,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
 
       const updatedTimezone =
         values.timezone &&
-        timezoneList.find((tz) => tz.value.split('-')[1] === values.timezone!.split('-')[1]);
+        timezoneList.find((tz) => tz.value.split('_')[1] === values.timezone!.split('_')[1]);
       if (updatedTimezone) {
         setFieldValue('timezone', updatedTimezone!.value);
       }
@@ -306,7 +308,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
       })}
       name="timezone"
       value={values.timezone || undefined}
-      textValue={values.timezone ? values.timezone.replace('-', ' ') : undefined} // textValue is required to show the updated DST timezone
+      textValue={values.timezone ? values.timezone.replace('_', ' ') : undefined} // textValue is required to show the updated DST timezone
       onChange={(timezone) => {
         setFieldValue('timezone', timezone);
       }}
@@ -318,7 +320,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
     >
       {timezoneList.map((timezone) => (
         <ComboboxOption key={timezone.value} value={timezone.value}>
-          {timezone.value.replace('-', ' ')}
+          {timezone.value.replace('_', ' ')}
         </ComboboxOption>
       ))}
     </Combobox>
