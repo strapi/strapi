@@ -14,6 +14,7 @@ describe('useDocumentLayout', () => {
         "components": {},
         "layout": [],
         "metadatas": {},
+        "options": {},
         "settings": {
           "bulkable": false,
           "defaultSortBy": "",
@@ -280,6 +281,7 @@ describe('useDocumentLayout', () => {
       {
         "layout": [],
         "metadatas": {},
+        "options": {},
         "settings": {
           "bulkable": false,
           "defaultSortBy": "",

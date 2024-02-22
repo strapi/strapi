@@ -2,9 +2,10 @@ import * as React from 'react';
 
 import { Button, Flex } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useNotification, useStrapiApp } from '@strapi/helper-plugin';
+import { useNotification, useStrapiApp, useQueryParams } from '@strapi/helper-plugin';
 import { Duplicate, Pencil } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -84,6 +85,7 @@ const EditAction: DocumentActionComponent = ({ id }) => {
   const { formatMessage } = useIntl();
   const { canRead } = useDocumentRBAC('EditAction', ({ canRead }) => ({ canRead }));
   const toggleNotification = useNotification();
+  const [{ query }] = useQueryParams<{ plugins?: object }>();
 
   return {
     disabled: !canRead,
@@ -110,7 +112,12 @@ const EditAction: DocumentActionComponent = ({ id }) => {
         return;
       }
 
-      navigate(id);
+      navigate({
+        pathname: id,
+        search: stringify({
+          plugins: query.plugins,
+        }),
+      });
     },
   };
 };

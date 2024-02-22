@@ -29,6 +29,7 @@ describe('Header', () => {
                   getInjectedComponents: jest.fn(),
                   apis: {
                     getDocumentActions: () => [],
+                    getHeaderActions: () => [],
                   },
                 },
               }}

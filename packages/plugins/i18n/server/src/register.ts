@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Strapi } from '@strapi/types';
+import type { Strapi } from '@strapi/strapi';
 
 import validateLocaleCreation from './controllers/validate-locale-creation';
 import { getService } from './utils';
