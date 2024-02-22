@@ -102,7 +102,9 @@ describe('Edit Locale', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-      expect(await screen.findByText('Please give the locale a display name')).toBeInTheDocument();
+      expect(
+        await screen.findByText('The locale display name can only be less than 50 characters.')
+      ).toBeInTheDocument();
     });
 
     it('should handle validation errors from the server', async () => {

@@ -66,7 +66,8 @@ interface ListLayout {
   options: LayoutOptions;
   settings: LayoutSettings;
 }
-interface EditFieldSharedProps extends Omit<InputProps, 'type'> {
+interface EditFieldSharedProps extends Omit<InputProps, 'hint' | 'type'> {
+  hint?: string;
   mainField?: string;
   size: number;
   unique?: boolean;

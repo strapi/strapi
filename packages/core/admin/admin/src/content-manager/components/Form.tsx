@@ -1,10 +1,21 @@
 import * as React from 'react';
 
-import { useCallbackRef } from '@strapi/helper-plugin';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Flex,
+  Icon,
+  Typography,
+} from '@strapi/design-system';
+import { TranslationMessage, useCallbackRef } from '@strapi/helper-plugin';
+import { ExclamationMarkCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
+import { useBlocker } from 'react-router-dom';
 
 import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
@@ -38,8 +49,9 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
+  setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
-  validate: (setErrors?: boolean) => Promise<FormErrors<TFormValues> | null>;
+  validate: () => Promise<FormErrors<TFormValues> | null>;
 }
 
 /**
@@ -67,6 +79,9 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
     throw new Error(ERR_MSG);
   },
   removeFieldRow: () => {
+    throw new Error(ERR_MSG);
+  },
+  setErrors: () => {
     throw new Error(ERR_MSG);
   },
   setSubmitting: () => {
@@ -124,54 +139,63 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       }
     }, [props.initialValues]);
 
-    /**
-     * Uses the provided validation schema
-     */
-    const validate: FormContextValue['validate'] = React.useCallback(async () => {
-      if (!props.validationSchema) {
-        return null;
-      }
-
-      try {
-        await props.validationSchema.validate(state.values, { abortEarly: false });
-
-        return null;
-      } catch (err) {
-        if (isErrorYupValidationError(err)) {
-          let errors: FormErrors = {};
-
-          if (err.inner) {
-            if (err.inner.length === 0) {
-              return setIn(errors, err.path!, err.message);
-            }
-            for (const error of err.inner) {
-              if (!getIn(errors, error.path!)) {
-                errors = setIn(errors, error.path!, error.message);
-              }
-            }
-          }
-
-          return errors;
-        } else {
-          // We throw any other errors
-          if (process.env.NODE_ENV !== 'production') {
-            console.warn(
-              `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
-              err
-            );
-          }
-
-          throw err;
-        }
-      }
-    }, [props, state.values]);
-
     const setErrors = React.useCallback((errors: FormErrors) => {
       dispatch({
         type: 'SET_ERRORS',
         payload: errors,
       });
     }, []);
+
+    /**
+     * Uses the provided validation schema
+     */
+    const validate: FormContextValue['validate'] = React.useCallback(
+      async (shouldSetErrors: boolean = true) => {
+        setErrors({});
+
+        if (!props.validationSchema) {
+          return null;
+        }
+
+        try {
+          await props.validationSchema.validate(state.values, { abortEarly: false });
+
+          return null;
+        } catch (err) {
+          if (isErrorYupValidationError(err)) {
+            let errors: FormErrors = {};
+
+            if (err.inner) {
+              if (err.inner.length === 0) {
+                return setIn(errors, err.path!, err.message);
+              }
+              for (const error of err.inner) {
+                if (!getIn(errors, error.path!)) {
+                  errors = setIn(errors, error.path!, error.message);
+                }
+              }
+            }
+
+            if (shouldSetErrors) {
+              setErrors(errors);
+            }
+
+            return errors;
+          } else {
+            // We throw any other errors
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(
+                `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+                err
+              );
+            }
+
+            throw err;
+          }
+        }
+      },
+      [props, setErrors, state.values]
+    );
 
     const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
       e.stopPropagation();
@@ -330,6 +354,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           addFieldRow={addFieldRow}
           moveFieldRow={moveFieldRow}
           removeFieldRow={removeFieldRow}
+          setErrors={setErrors}
           setSubmitting={setSubmitting}
           validate={validate}
           {...state}
@@ -514,7 +539,6 @@ const reducer = <TFormValues extends FormValues = FormValues>(
 /* -------------------------------------------------------------------------------------------------
  * useField
  * -----------------------------------------------------------------------------------------------*/
-
 interface FieldValue<TValue = any> {
   error?: string;
   initialValue: TValue;
@@ -543,14 +567,90 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
     initialValue,
     /**
      * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     * If it's anything else, we don't return it.
      */
-    error: !error || typeof error === 'string' ? error : formatMessage(error),
+    error: isErrorMessageDescriptor(error)
+      ? formatMessage(
+          {
+            id: error.id,
+            defaultMessage: error.defaultMessage,
+          },
+          error.values
+        )
+      : typeof error === 'string'
+      ? error
+      : undefined,
     onChange: handleChange,
     value: value,
   };
 };
 
-export { Form, useField, useForm };
+const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
+  return (
+    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Blocker
+ * -----------------------------------------------------------------------------------------------*/
+const Blocker = () => {
+  const { formatMessage } = useIntl();
+  const modified = useForm('Blocker', (state) => state.modified);
+  const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !isSubmitting && modified && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  if (blocker.state === 'blocked') {
+    return (
+      <Dialog
+        isOpen
+        title={formatMessage({
+          id: 'app.components.ConfirmDialog.title',
+          defaultMessage: 'Confirmation',
+        })}
+        onClose={() => blocker.reset()}
+      >
+        <DialogBody>
+          <Flex direction="column" gap={2}>
+            <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+            <Typography as="p" variant="omega" textAlign="center">
+              {formatMessage({
+                id: 'global.prompt.unsaved',
+                defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+              })}
+            </Typography>
+          </Flex>
+        </DialogBody>
+        <DialogFooter
+          startAction={
+            <Button onClick={() => blocker.reset()} variant="tertiary">
+              {formatMessage({
+                id: 'app.components.Button.cancel',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          }
+          endAction={
+            <Button onClick={() => blocker.proceed()} variant="danger">
+              {formatMessage({
+                id: 'app.components.Button.confirm',
+                defaultMessage: 'Confirm',
+              })}
+            </Button>
+          }
+        />
+      </Dialog>
+    );
+  }
+
+  return null;
+};
+
+export { Form, Blocker, useField, useForm };
 export type {
   FormHelpers,
   FormProps,

@@ -6,7 +6,7 @@ import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
 import { createContext } from '../../../../../../components/Context';
-import { useField, useForm } from '../../../../../components/Form';
+import { InputProps, useField, useForm } from '../../../../../components/Form';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
@@ -32,7 +32,8 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 );
 
 interface DynamicZoneProps
-  extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size'> {}
+  extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
+    Pick<InputProps, 'hint'> {}
 
 const DynamicZone = ({
   attribute,
@@ -85,8 +86,6 @@ const DynamicZone = ({
   const toggleNotification = useNotification();
 
   const dynamicDisplayedComponentsLength = value.length;
-
-  const missingComponentNumber = min - dynamicDisplayedComponentsLength;
 
   const handleAddComponent = (uid: string, position?: number) => {
     setAddComponentIsOpen(false);

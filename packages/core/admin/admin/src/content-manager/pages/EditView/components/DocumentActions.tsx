@@ -17,13 +17,14 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
+import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { useForm } from '../../../components/Form';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -462,9 +463,11 @@ const PublishAction: DocumentActionComponent = ({
   model,
   collectionType,
   meta,
-  document: documentData,
+  document,
 }) => {
   const navigate = useNavigate();
+  const toggleNotification = useNotification();
+  const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
   const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
@@ -475,13 +478,16 @@ const PublishAction: DocumentActionComponent = ({
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const modified = useForm('PublishAction', ({ modified }) => modified);
+  const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
-  const document = useForm('PublishAction', ({ values }) => values);
+  const validate = useForm('PublishAction', (state) => state.validate);
+  const setErrors = useForm('PublishAction', (state) => state.setErrors);
+  const formValues = useForm('PublishAction', ({ values }) => values);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
-    documentData?.status !== 'modified';
+    document?.status !== 'modified';
 
   return {
     /**
@@ -500,32 +506,59 @@ const PublishAction: DocumentActionComponent = ({
       isSubmitting ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
-      (!modified && !document.id) ||
+      (!modified && !document?.id) ||
       !canPublish ||
-      Boolean((!document.id && !canCreate) || (document.id && !canUpdate)),
+      Boolean((!document?.id && !canCreate) || (document?.id && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      const res = await publish(
-        {
-          collectionType,
-          model,
-          id,
-          params,
-        },
-        document
-      );
+      setSubmitting(true);
 
-      if ('data' in res && collectionType !== SINGLE_TYPES) {
-        /**
-         * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
-         */
-        navigate({
-          pathname: `../${collectionType}/${model}/${res.data.id}`,
-          search: rawQuery,
-        });
+      try {
+        const errors = await validate();
+
+        if (errors) {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: 'content-manager.validation.error',
+              defaultMessage:
+                'There are validation errors in your document. Please fix them before saving.',
+            },
+          });
+
+          return;
+        }
+
+        const res = await publish(
+          {
+            collectionType,
+            model,
+            id,
+            params,
+          },
+          formValues
+        );
+
+        if ('data' in res && collectionType !== SINGLE_TYPES) {
+          /**
+           * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+           */
+          navigate({
+            pathname: `../${collectionType}/${model}/${res.data.id}`,
+            search: rawQuery,
+          });
+        } else if (
+          'error' in res &&
+          isBaseQueryError(res.error) &&
+          res.error.name === 'ValidationError'
+        ) {
+          setErrors(formatValidationErrors(res.error));
+        }
+      } finally {
+        setSubmitting(false);
       }
     },
   };
@@ -535,6 +568,8 @@ PublishAction.type = 'publish';
 
 const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
   const navigate = useNavigate();
+  const toggleNotification = useNotification();
+  const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
@@ -550,6 +585,8 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const setSubmitting = useForm('UpdateAction', ({ setSubmitting }) => setSubmitting);
   const document = useForm('UpdateAction', ({ values }) => values);
+  const validate = useForm('UpdateAction', (state) => state.validate);
+  const setErrors = useForm('UpdateAction', (state) => state.setErrors);
 
   return {
     /**
@@ -572,6 +609,21 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
     onClick: async () => {
       setSubmitting(true);
       try {
+        const errors = await validate();
+
+        if (errors) {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: 'content-manager.validation.error',
+              defaultMessage:
+                'There are validation errors in your document. Please fix them before saving.',
+            },
+          });
+
+          return;
+        }
+
         if (isCloning) {
           const res = await clone(
             {
@@ -590,9 +642,15 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
               pathname: `../${collectionType}/${model}/${res.data.id}`,
               search: rawQuery,
             });
+          } else if (
+            'error' in res &&
+            isBaseQueryError(res.error) &&
+            res.error.name === 'ValidationError'
+          ) {
+            setErrors(formatValidationErrors(res.error));
           }
         } else if (id || collectionType === SINGLE_TYPES) {
-          await update(
+          const res = await update(
             {
               collectionType,
               model,
@@ -601,6 +659,14 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
             },
             document
           );
+
+          if (
+            'error' in res &&
+            isBaseQueryError(res.error) &&
+            res.error.name === 'ValidationError'
+          ) {
+            setErrors(formatValidationErrors(res.error));
+          }
         } else {
           const res = await create(
             {
@@ -618,6 +684,12 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
               pathname: `../${collectionType}/${model}/${res.data.id}`,
               search: rawQuery,
             });
+          } else if (
+            'error' in res &&
+            isBaseQueryError(res.error) &&
+            res.error.name === 'ValidationError'
+          ) {
+            setErrors(formatValidationErrors(res.error));
           }
         }
       } finally {

@@ -350,7 +350,7 @@ const RelationInputDataManager = ({
     (!isFieldAllowed && isCreatingEntry) ||
     (!isCreatingEntry && !isFieldAllowed && !isFieldReadable)
   ) {
-    return <NotAllowedInput name={name} intlLabel={intlLabel} labelAction={labelAction} />;
+    return <NotAllowedInput name={name} label={formatMessage(intlLabel)} type="relation" />;
   }
 
   /**
