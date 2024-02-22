@@ -82,7 +82,7 @@ const ListViewPage = () => {
 
   const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
 
-  const { model, schema } = useDoc();
+  const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
   const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
 
@@ -441,7 +441,11 @@ const ListViewPage = () => {
                           );
                         }
                         if (typeof cellFormatter === 'function') {
-                          return <Td key={header.name}>{cellFormatter(rowData, header)}</Td>;
+                          return (
+                            <Td key={header.name}>
+                              {cellFormatter(rowData, header, { collectionType, model })}
+                            </Td>
+                          );
                         }
                         return (
                           <Td key={header.name}>

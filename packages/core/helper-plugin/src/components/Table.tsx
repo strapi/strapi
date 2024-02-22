@@ -229,9 +229,11 @@ interface HeaderCellProps {
    */
   cellFormatter?: (
     data: {
+      id: string;
       [key: string]: any;
     },
-    header: Omit<HeaderCellProps, 'cellFormatter'>
+    header: Omit<HeaderCellProps, 'cellFormatter'>,
+    meta: { collectionType: string; model: string }
   ) => React.ReactNode;
   label: string | MessageDescriptor;
   /**
