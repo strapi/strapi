@@ -88,7 +88,7 @@ function transformEntry(
         strapi.contentType(attribute.target as Common.UID.ContentType)
       );
 
-      attributeValues[key] = { data };
+      attributeValues[key] = data;
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
       attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
     } else if (attribute && attribute.type === 'dynamiczone' && isDZEntries(property)) {
@@ -102,7 +102,7 @@ function transformEntry(
     } else if (attribute && attribute.type === 'media' && isEntry(property)) {
       const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
 
-      attributeValues[key] = { data };
+      attributeValues[key] = data;
     } else {
       attributeValues[key] = property;
     }

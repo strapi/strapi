@@ -3,8 +3,12 @@ import uidServiceLoader from '../uid';
 describe('Test uid service', () => {
   describe('generateUIDField', () => {
     const baseStrapi = {
+      getModel() {
+        return this.contentTypes['my-model'];
+      },
       documents() {
         return {
+          find: async () => [],
           findMany: async () => [],
         };
       },
@@ -16,6 +20,7 @@ describe('Test uid service', () => {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
+            kind: 'collectionType',
             attributes: {
               slug: {
                 type: 'uid',
@@ -84,6 +89,7 @@ describe('Test uid service', () => {
       });
 
       let strapi = {
+        ...baseStrapi,
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -260,6 +266,9 @@ describe('Test uid service', () => {
 
   describe('findUniqueUID', () => {
     const baseStrapi = {
+      getModel() {
+        return this.contentTypes['my-model'];
+      },
       contentTypes: {
         'my-model': {
           modelName: 'myTestModel',
@@ -340,6 +349,17 @@ describe('Test uid service', () => {
       const count = jest.fn(async () => 0);
 
       const strapi = {
+        getModel() {
+          return {
+            modelName: 'myTestModel',
+            kind: 'collectionType',
+            attributes: {
+              slug: {
+                type: 'uid',
+              },
+            },
+          };
+        },
         documents() {
           return {
             count,
@@ -359,8 +379,8 @@ describe('Test uid service', () => {
       expect(count).toHaveBeenCalledWith({
         filters: {
           slug: 'my-test-model',
-          locale: 'en',
         },
+        locale: 'en',
         status: 'draft',
       });
       expect(isAvailable).toBe(true);
