@@ -376,7 +376,7 @@ export const CMReleasesContainer = () => {
                             timeZone: release.timezone,
                           }),
                           time: formatTime(new Date(release.scheduledAt), {
-                            hour12: false,
+                            hourCycle: 'h23',
                             timeZone: release.timezone,
                           }),
                           offset: getTimezoneOffset(

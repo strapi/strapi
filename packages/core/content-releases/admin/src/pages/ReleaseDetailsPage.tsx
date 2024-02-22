@@ -330,8 +330,8 @@ export const ReleaseDetailsLayout = ({
             timeZone: release.timezone!,
           }),
           time: formatTime(new Date(release.scheduledAt!), {
-            hour12: false,
             timeZone: release.timezone!,
+            hourCycle: 'h23',
           }),
           offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
         }
@@ -343,7 +343,7 @@ export const ReleaseDetailsLayout = ({
       <HeaderLayout
         title={release.name}
         subtitle={
-          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? `- ${scheduledText}` : '')
+          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
         }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
