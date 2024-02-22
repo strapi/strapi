@@ -128,7 +128,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           [field]: value,
         },
         fields: ['id'],
-        locale: locale ?? null,
+        locale,
         status: 'draft',
       });
       documentCount = document ? 1 : 0;
@@ -137,7 +137,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         filters: {
           [field]: value,
         },
-        locale: locale,
+        locale,
         // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
         // However, when publishing this "available" UID might collide with another published entry
         status: 'draft',
