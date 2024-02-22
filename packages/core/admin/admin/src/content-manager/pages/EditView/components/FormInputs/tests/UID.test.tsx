@@ -72,7 +72,7 @@ describe('UIDInput', () => {
     expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('regenerated');
   });
 
-  test.only('If the field is required and the value is empty it should automatically fill it', async () => {
+  test('If the field is required and the value is empty it should automatically fill it', async () => {
     render({
       initialValues: {},
       required: true,
