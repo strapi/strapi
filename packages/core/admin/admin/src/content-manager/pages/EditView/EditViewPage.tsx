@@ -39,9 +39,6 @@ import { Panels } from './components/Panels';
 import { transformDocument } from './utils/data';
 import { createDefaultForm } from './utils/forms';
 
-// TODO: this seems suspicious
-// const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
-
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
@@ -239,7 +236,7 @@ const StatusTab = styled(Tab)`
 const getDocumentStatus = (
   document: ReturnType<UseDocument>['document'],
   meta: ReturnType<UseDocument>['meta']
-): 'draft' | 'published' => {
+): 'draft' | 'published' | 'modified' => {
   const docStatus = document?.status;
   const statuses = meta?.availableStatus ?? [];
 

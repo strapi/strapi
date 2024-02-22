@@ -17,7 +17,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -30,6 +30,7 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH } from '../../../router';
+import { buildValidParams } from '../../../utils/api';
 
 /* -------------------------------------------------------------------------------------------------
  * Types
@@ -455,7 +456,14 @@ const DocumentActionModal = ({
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collectionType, meta }) => {
+const PublishAction: DocumentActionComponent = ({
+  activeTab,
+  id,
+  model,
+  collectionType,
+  meta,
+  document: documentData,
+}) => {
   const navigate = useNavigate();
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
@@ -464,13 +472,16 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
   );
   const { publish } = useDocumentActions();
-  const modified = useForm('UpdateAction', ({ modified }) => modified);
+  const [{ query, rawQuery }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const modified = useForm('PublishAction', ({ modified }) => modified);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
-  const document = useForm('UpdateAction', ({ values }) => values);
+  const document = useForm('PublishAction', ({ values }) => values);
 
   const isDocumentPublished =
-    document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
-    meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null);
+    (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
+      meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
+    documentData?.status !== 'modified';
 
   return {
     /**
@@ -502,6 +513,7 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
           collectionType,
           model,
           id,
+          params,
         },
         document
       );
@@ -512,6 +524,7 @@ const PublishAction: DocumentActionComponent = ({ activeTab, id, model, collecti
          */
         navigate({
           pathname: `../${collectionType}/${model}/${res.data.id}`,
+          search: rawQuery,
         });
       }
     },
@@ -525,11 +538,13 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { canCreate, canUpdate } = useDocumentRBAC('PublishAction', ({ canCreate, canUpdate }) => ({
+  const { canCreate, canUpdate } = useDocumentRBAC('UpdateAction', ({ canCreate, canUpdate }) => ({
     canCreate,
     canUpdate,
   }));
   const { create, update, clone } = useDocumentActions();
+  const [{ query, rawQuery }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -562,6 +577,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
             {
               model,
               id: cloneMatch.params.origin!,
+              params,
             },
             document
           );
@@ -572,6 +588,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
              */
             navigate({
               pathname: `../${collectionType}/${model}/${res.data.id}`,
+              search: rawQuery,
             });
           }
         } else if (id || collectionType === SINGLE_TYPES) {
@@ -580,6 +597,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
               collectionType,
               model,
               id,
+              params,
             },
             document
           );
@@ -587,6 +605,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
           const res = await create(
             {
               model,
+              params,
             },
             document
           );
@@ -597,6 +616,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
              */
             navigate({
               pathname: `../${collectionType}/${model}/${res.data.id}`,
+              search: rawQuery,
             });
           }
         }
@@ -622,8 +642,10 @@ const UnpublishAction: DocumentActionComponent = ({
   document,
 }) => {
   const { formatMessage } = useIntl();
-  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
+  const canPublish = useDocumentRBAC('UnpublishAction', ({ canPublish }) => canPublish);
   const { unpublish } = useDocumentActions();
+  const [{ query }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
   const toggleNotification = useNotification();
   const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
 
@@ -675,6 +697,7 @@ const UnpublishAction: DocumentActionComponent = ({
         collectionType,
         model,
         id,
+        params,
       });
     },
     dialog: isDocumentModified
@@ -747,6 +770,7 @@ const UnpublishAction: DocumentActionComponent = ({
                 collectionType,
                 model,
                 id,
+                params,
               },
               !shouldKeepDraft
             );
@@ -768,8 +792,10 @@ const DiscardAction: DocumentActionComponent = ({
   document,
 }) => {
   const { formatMessage } = useIntl();
-  const canUpdate = useDocumentRBAC('PublishAction', ({ canUpdate }) => canUpdate);
+  const canUpdate = useDocumentRBAC('DiscardAction', ({ canUpdate }) => canUpdate);
   const { discard } = useDocumentActions();
+  const [{ query }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
 
   return {
     disabled: !canUpdate || activeTab === 'published' || document?.status !== 'modified',
@@ -802,6 +828,7 @@ const DiscardAction: DocumentActionComponent = ({
           collectionType,
           model,
           id,
+          params,
         });
       },
     },

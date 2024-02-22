@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-import { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
+import { LoadedStrapi as Strapi, UID, Attribute, Schema } from '@strapi/types';
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   async generateUIDField({
@@ -53,36 +53,51 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     value: string;
     locale: string;
   }) {
-    const foundDocuments = await strapi.documents(contentTypeUID).findMany({
-      filters: {
-        [field]: value,
-      },
-      locale: locale ?? null,
-      // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
-      // However, when publishing this "available" UID might collide with another published entry
-      status: 'draft',
-    });
+    const modelKind = strapi.getModel(contentTypeUID)?.kind;
+
+    let foundDocuments;
+
+    if (modelKind === 'singleType') {
+      const document = await strapi.documents<Schema.SingleType>(contentTypeUID).find({
+        filters: {
+          [field]: value,
+        },
+        locale: locale ?? null,
+        status: 'draft',
+      });
+      foundDocuments = document ? [document] : [];
+    } else {
+      foundDocuments = await strapi.documents<Schema.CollectionType>(contentTypeUID).findMany({
+        filters: {
+          [field]: value,
+        },
+        locale: locale ?? null,
+        // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+        // However, when publishing this "available" UID might collide with another published entry
+        status: 'draft',
+      });
+    }
 
     if (!foundDocuments || foundDocuments.length === 0) {
       // If there are no documents found we can return the value as is
       return value;
     }
 
-    let possibleColisions: string[];
+    let possibleCollisions: string[];
     if (!Array.isArray(foundDocuments)) {
-      possibleColisions = [foundDocuments[field]];
+      possibleCollisions = [foundDocuments[field]];
     } else {
-      possibleColisions = foundDocuments.map((doc: any) => doc[field]);
+      possibleCollisions = foundDocuments.map((doc: any) => doc[field]);
     }
 
     // If there are no documents sharing the proposed UID, we can return the value as is
-    if (!possibleColisions.includes(value)) {
+    if (!possibleCollisions.includes(value)) {
       return value;
     }
 
     let i = 1;
     let tmpUId = `${value}-${i}`;
-    while (possibleColisions.includes(tmpUId)) {
+    while (possibleCollisions.includes(tmpUId)) {
       // While there are documents sharing the proposed UID, we need to find a new one
       // by incrementing the suffix until we find a unique one
       i += 1;
@@ -103,15 +118,30 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     value: string;
     locale: string;
   }) {
-    const documentCount = await strapi.documents(contentTypeUID).count({
-      filters: {
-        [field]: value,
+    let documentCount: number | null;
+
+    const modelKind = strapi.getModel(contentTypeUID)?.kind;
+
+    if (modelKind === 'singleType') {
+      const document = await strapi.documents<Schema.SingleType>(contentTypeUID).find({
+        filters: {
+          [field]: value,
+        },
+        fields: ['id'],
         locale: locale ?? null,
-      },
-      // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
-      // However, when publishing this "available" UID might collide with another published entry
-      status: 'draft',
-    });
+        status: 'draft',
+      });
+      documentCount = document ? 1 : 0;
+    } else {
+      documentCount = await strapi.documents<Schema.CollectionType>(contentTypeUID).count({
+        filters: {
+          [field]: value,
+        },
+        locale: locale ?? null,
+        // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+        status: 'draft',
+      });
+    }
 
     if (documentCount && documentCount > 0) {
       // If there are documents sharing the proposed UID, we can return false

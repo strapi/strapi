@@ -1,10 +1,9 @@
 import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
-import { getDocumentDimensions } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './utils/dimensions';
 
 import { getService } from '../utils';
 
 const buildPopulateFromQuery = async (query: any, model: any) => {
-  // @ts-expect-error populate builder needs to be called with a UID
   return getService('populate-builder')(model)
     .populateFromQuery(query)
     .populateDeep(Infinity)
@@ -13,9 +12,9 @@ const buildPopulateFromQuery = async (query: any, model: any) => {
 };
 
 const findDocument = async (query: any, model: any, opts: any = {}) => {
-  const entityManager = getService('entity-manager');
+  const singleTypes = getService('single-types');
   const populate = await buildPopulateFromQuery(query, model);
-  return entityManager.find(query, model, { ...opts, populate });
+  return singleTypes.find({ ...opts, populate }, model);
 };
 
 const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => {
@@ -23,7 +22,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
   const { model } = ctx.params;
   const { body, query } = ctx.request;
 
-  const entityManager = getService('entity-manager');
+  const singleTypes = getService('single-types');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
   if (permissionChecker.cannot.create() && permissionChecker.cannot.update()) {
@@ -32,7 +31,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
 
   const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
 
-  const { locale } = getDocumentDimensions(body);
+  const { locale } = getDocumentLocaleAndStatus(body);
 
   // Load document version to update
   const [documentVersion, otherDocumentVersion] = await Promise.all([
@@ -55,7 +54,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
 
   if (!documentExists) {
     const sanitizedBody = await sanitizeFn(body);
-    return entityManager.create(model, {
+    return singleTypes.update(model, {
       data: sanitizedBody,
       ...sanitizedQuery,
       locale,
@@ -73,8 +72,8 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
   }
 
   const sanitizedBody = await sanitizeFn(body);
-  return entityManager.update(documentVersion || { id: otherDocumentVersion.documentId }, model, {
-    data: sanitizedBody,
+  return singleTypes.update(model, {
+    data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
   });
@@ -94,7 +93,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
-    const { locale, status } = getDocumentDimensions(query);
+    const { locale, status } = getDocumentLocaleAndStatus(query);
 
     const version = await findDocument(permissionQuery, model, { locale, status });
 
@@ -145,7 +144,7 @@ export default {
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const entityManager = getService('single-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -153,7 +152,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.delete(query);
-    const { locale } = getDocumentDimensions(query);
+    const { locale } = getDocumentLocaleAndStatus(query);
 
     const document = await findDocument(sanitizedQuery, model, { locale });
 
@@ -165,7 +164,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const deletedEntity = await entityManager.delete(document, model, { locale });
+    const deletedEntity = await entityManager.delete(model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(deletedEntity);
   },
@@ -175,7 +174,7 @@ export default {
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const singleTypes = getService('single-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -195,8 +194,8 @@ export default {
         throw new errors.ForbiddenError();
       }
 
-      const { locale } = getDocumentDimensions(document);
-      return entityManager.publish(document, model, { locale });
+      const { locale } = getDocumentLocaleAndStatus(document);
+      return singleTypes.publish(model, { locale });
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
@@ -211,7 +210,7 @@ export default {
       query = {},
     } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const singleTypes = getService('single-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -224,7 +223,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale });
 
@@ -242,14 +241,14 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await entityManager.discard(document, model, { locale });
+        await singleTypes.discardDraft(model, { locale });
       }
 
       ctx.body = await pipeAsync(
-        (document) => entityManager.unpublish(document, model, { locale }),
+        () => singleTypes.unpublish(model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
-      )(document);
+      )();
     });
   },
 
@@ -258,7 +257,7 @@ export default {
     const { model } = ctx.params;
     const { body, query = {} } = ctx.request;
 
-    const entityManager = getService('entity-manager');
+    const singleTypes = getService('single-types');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -267,7 +266,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.discard(query);
-    const { locale } = getDocumentDimensions(body);
+    const { locale } = getDocumentLocaleAndStatus(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale, status: 'published' });
 
@@ -281,18 +280,20 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => entityManager.discard(document, model, { locale }),
+      () => singleTypes.discardDraft(model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
-    )(document);
+    )();
   },
 
   async countDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-
-    const entityManager = getService('entity-manager');
+    const { query } = ctx.request;
+    const singleTypes = getService('single-types');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    const { locale } = getDocumentLocaleAndStatus(query);
 
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
@@ -307,7 +308,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.countDraftRelations(document.id, model);
+    const number = await singleTypes.countDraftRelations(model, locale);
 
     return {
       data: number,

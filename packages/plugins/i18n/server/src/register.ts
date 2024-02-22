@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Strapi } from '@strapi/types';
+import type { Strapi } from '@strapi/strapi';
 
 import validateLocaleCreation from './controllers/validate-locale-creation';
 import { getService } from './utils';
@@ -28,7 +28,7 @@ const addContentManagerLocaleMiddleware = (strapi: Strapi) => {
   });
 
   strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
-    if (ctx.method === 'PUT') {
+    if (ctx.method === 'POST' || ctx.method === 'PUT') {
       return validateLocaleCreation(ctx, next);
     }
 
