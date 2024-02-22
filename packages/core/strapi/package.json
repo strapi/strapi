@@ -79,6 +79,13 @@
       "require": "./dist/utils/ee.js",
       "default": "./dist/utils/ee.js"
     },
+    "./dist/factories": {
+      "types": "./dist/factories.d.ts",
+      "source": "./src/factories.ts",
+      "import": "./dist/factories.mjs",
+      "require": "./dist/factories.js",
+      "default": "./dist/factories.js"
+    },
     "./admin": {
       "types": "./dist/admin.d.ts",
       "source": "./src/admin.ts",
