@@ -64,8 +64,6 @@ const createDocumentEngine = ({
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
 
-    console.log(query);
-
     return db
       .query(uid)
       .findMany(query)

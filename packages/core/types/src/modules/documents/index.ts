@@ -10,7 +10,7 @@ export * from './result';
 export * from './service-instance';
 
 export type Service = {
-  <TContentType extends Schema.SingleType | Schema.CollectionType>(
+  <TContentType extends Schema.ContentType = Schema.ContentType>(
     uid: TContentType['uid']
   ): ServiceInstance<TContentType>;
 

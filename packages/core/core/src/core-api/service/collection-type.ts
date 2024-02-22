@@ -1,6 +1,6 @@
-import { CoreApi, Schema, Documents } from '@strapi/types';
+import type { CoreApi, Schema, Documents } from '@strapi/types';
 
-import { getPaginationInfo /* shouldCount, transformPaginationResponse */ } from './pagination';
+import { getPaginationInfo, shouldCount, transformPaginationResponse } from './pagination';
 
 import { CoreService } from './core-service';
 
@@ -25,20 +25,20 @@ export class CollectionTypeService extends CoreService implements CoreApi.Servic
       ...paginationInfo,
     });
 
-    // if (shouldCount(fetchParams)) {
-    //   const count = await strapi
-    //     .documents<Schema.CollectionType>(uid)
-    //     .count({ ...fetchParams, ...paginationInfo });
+    if (shouldCount(fetchParams)) {
+      const count = await strapi
+        .documents<Schema.CollectionType>(uid)
+        .count({ ...fetchParams, ...paginationInfo });
 
-    //   if (typeof count !== 'number') {
-    //     throw new Error('Count should be a number');
-    //   }
+      if (typeof count !== 'number') {
+        throw new Error('Count should be a number');
+      }
 
-    //   return {
-    //     results,
-    //     pagination: transformPaginationResponse(paginationInfo, count),
-    //   };
-    // }
+      return {
+        results,
+        pagination: transformPaginationResponse(paginationInfo, count),
+      };
+    }
 
     return {
       results,

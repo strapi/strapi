@@ -39,7 +39,6 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
       i18n.localeToData(contentType)
     )(params);
 
-    // TODO: post v5 optimize with a find many and a or query
     const existingDoc = await strapi.db.query(contentType.uid).findOne();
     let doc: Documents.AnyDocument | null;
 
@@ -83,7 +82,6 @@ export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleTy
 
     // always delete both draft & published
     const queryParams = await pipeAsync(omit('status'), i18n.localeToLookup(contentType))(params);
-
     const existingDoc = await strapi.db.query(contentType.uid).findOne();
     return documents.delete(uid, existingDoc.documentId, queryParams);
   }

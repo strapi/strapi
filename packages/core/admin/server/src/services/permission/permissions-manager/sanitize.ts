@@ -131,7 +131,6 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove unallowed fields from admin::user relations
-      // @ts-expect-error lodash types
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
@@ -149,7 +148,6 @@ export default ({ action, ability, model }: any) => {
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
-      // @ts-expect-error lodash types
       traverseEntity(removeDisallowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles

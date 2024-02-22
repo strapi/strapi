@@ -125,7 +125,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     opts: Parameters<Documents.ServiceInstance['create']>[0] = {} as any
   ) {
     const populate = opts.populate ?? (await buildDeepPopulate(uid));
-    const params = { ...opts, status: 'draft', populate };
+    const params = { ...opts, status: 'draft' as const, populate };
 
     const document = await strapi
       .documents(uid)
