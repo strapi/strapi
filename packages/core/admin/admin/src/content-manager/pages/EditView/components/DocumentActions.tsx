@@ -463,7 +463,7 @@ const PublishAction: DocumentActionComponent = ({
   model,
   collectionType,
   meta,
-  document: documentData,
+  document,
 }) => {
   const navigate = useNavigate();
   const toggleNotification = useNotification();
@@ -480,14 +480,14 @@ const PublishAction: DocumentActionComponent = ({
   const modified = useForm('PublishAction', ({ modified }) => modified);
   const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
-  const document = useForm('PublishAction', ({ values }) => values);
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
+  const formValues = useForm('PublishAction', ({ values }) => values);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
-    documentData?.status !== 'modified';
+    document?.status !== 'modified';
 
   return {
     /**
@@ -506,9 +506,9 @@ const PublishAction: DocumentActionComponent = ({
       isSubmitting ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
-      (!modified && !document.id) ||
+      (!modified && !document?.id) ||
       !canPublish ||
-      Boolean((!document.id && !canCreate) || (document.id && !canUpdate)),
+      Boolean((!document?.id && !canCreate) || (document?.id && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -539,7 +539,7 @@ const PublishAction: DocumentActionComponent = ({
             id,
             params,
           },
-          document
+          formValues
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {

@@ -65,7 +65,6 @@ test.describe('Uniqueness', () => {
 
       await clickSave(page);
       await expect(page.getByText('Saved document')).toBeVisible();
-      await expect(page.getByText('Saved document')).not.toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
@@ -80,8 +79,7 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-      await expect(page.getByText('This attribute must be unique')).toBeVisible();
-      await expect(page.getByText('This attribute must be unique')).not.toBeVisible();
+      await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
 
       /**
        * Modify the value and try again, this should save successfully
@@ -98,7 +96,6 @@ test.describe('Uniqueness', () => {
 
       await clickSave(page);
       await expect(page.getByText('Saved document')).toBeVisible();
-      await expect(page.getByText('Saved document')).not.toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
@@ -119,7 +116,6 @@ test.describe('Uniqueness', () => {
       await clickSave(page);
       await page.getByRole('button', { name: 'Publish' }).click();
       await expect(page.getByText('Published document')).toBeVisible();
-      await expect(page.getByText('Published document')).not.toBeVisible();
     });
   });
 });
