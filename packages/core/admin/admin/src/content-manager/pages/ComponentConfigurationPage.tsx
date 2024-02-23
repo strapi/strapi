@@ -122,15 +122,14 @@ const ComponentConfigurationPage = () => {
             layout: [],
             components: {},
             metadatas: {},
+            options: {},
             settings: DEFAULT_SETTINGS,
           } as EditLayout),
     [data, isLoading, schema, components]
   );
 
   const [updateConfiguration] = useUpdateComponentConfigurationMutation();
-  const handleSubmit: ConfigurationFormProps['onSubmit'] = async (formData, event) => {
-    event.preventDefault();
-
+  const handleSubmit: ConfigurationFormProps['onSubmit'] = async (formData) => {
     try {
       /**
        * We reconstruct the metadatas object by taking the existing list metadatas
@@ -265,6 +264,10 @@ const formatEditLayout = (
     layout: [editAttributes],
     components: componentEditAttributes,
     metadatas: editMetadatas,
+    options: {
+      ...schema?.options,
+      ...schema?.pluginOptions,
+    },
     settings: {
       ...data.component.settings,
       displayName: schema?.info.displayName,

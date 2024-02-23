@@ -12,7 +12,7 @@ describe('<NotAllowedInput />', () => {
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
-    } = render(<NotAllowedInput name="test" intlLabel={{ id: 'test', defaultMessage: 'test' }} />, {
+    } = render(<NotAllowedInput name="test" label="test" type="string" />, {
       wrapper: ({ children }) => (
         <ThemeProvider theme={lightTheme}>
           <IntlProvider locale="en" messages={messages} defaultLocale="en">

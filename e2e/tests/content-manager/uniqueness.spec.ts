@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 
+type Field = {
+  name: string;
+  value: string;
+  newValue?: string;
+  role?: string;
+};
+
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
@@ -14,7 +21,7 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const FIELDS_TO_TEST: Array<Field> = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
@@ -28,6 +35,9 @@ test.describe('Uniqueness', () => {
     await page.getByRole('button', { name: 'Save' }).click();
   };
 
+  // When we need to adjust the value of a field to test uniqueness
+  // Either take the new value provided in the field object or generate a random
+  // new one based on the type of the field
   const getNewValue = (field: (typeof FIELDS_TO_TEST)[number]) => {
     if ('newValue' in field) {
       return field.newValue;
@@ -43,6 +53,7 @@ test.describe('Uniqueness', () => {
   const CREATE_URL =
     /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
   const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
+  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   /**
    * @note the unique content type is set up with every type of document level unique field.
@@ -63,7 +74,7 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
+      await expect(page.getByText('Saved document')).toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
@@ -78,8 +89,7 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-
-      await expect(page.locator('text=This attribute must be unique').first()).toBeVisible();
+      await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
 
       /**
        * Modify the value and try again, this should save successfully
@@ -95,7 +105,7 @@ test.describe('Uniqueness', () => {
         .fill(newValue);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
+      await expect(page.getByText('Saved document')).toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
@@ -110,17 +120,15 @@ test.describe('Uniqueness', () => {
 
       // await page.getByText('French (fr)').click();
 
-      // await page.getByRole('link', { name: 'Create new entry' }).first().click();
+      await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
-      // await page.waitForURL(EDIT_URL);
+      await page.waitForURL(EDIT_URL);
 
-      // await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+      await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
-      // await clickSave(page);
-      // await expect(page.getByText('Saved').first()).toBeVisible();
-
-      // await page.getByRole('button', { name: 'Publish' }).click();
-      // await expect(page.getByText('Published').first()).toBeVisible();
+      await clickSave(page);
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await expect(page.getByText('Published document')).toBeVisible();
     });
   });
 });

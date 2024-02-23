@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Flex, Icon, Status, Typography } from '@strapi/design-system';
+import {
+  Flex,
+  Icon,
+  SingleSelect,
+  SingleSelectOption,
+  Status,
+  Typography,
+} from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { RelativeTime, useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
@@ -10,6 +17,7 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { capitalise } from '../../../../utils/strings';
+import { useForm } from '../../../components/Form';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -30,7 +38,6 @@ import { DocumentActionsMenu } from './DocumentActions';
 import type {
   ContentManagerPlugin,
   DocumentActionComponent,
-  DocumentActionProps,
 } from '../../../../core/apis/content-manager';
 
 /* -------------------------------------------------------------------------------------------------
@@ -80,7 +87,7 @@ const Header = ({
         <Typography variant="alpha" as="h1">
           {title}
         </Typography>
-        <HeaderActions />
+        <HeaderToolbar />
       </Flex>
       <Status showBullet={false} size={'S'} variant={isCloning ? 'primary' : statusVariant}>
         <Typography as="span" variant="omega" fontWeight="bold">
@@ -92,14 +99,41 @@ const Header = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
- * HeaderActions
+ * HeaderToolbar
  * -----------------------------------------------------------------------------------------------*/
+
+interface HeaderButtonAction {
+  disabled?: boolean;
+  label: string;
+  icon?: React.ReactNode;
+  /**
+   * @default 'default'
+   */
+  type?: 'icon' | 'default';
+  onClick?: (event: React.SyntheticEvent) => void;
+}
+
+interface HeaderSelectAction {
+  disabled?: boolean;
+  label: string;
+  options: Array<{
+    disabled?: boolean;
+    label: string;
+    startIcon?: React.ReactNode;
+    textValue?: string;
+    value: string;
+  }>;
+  onSelect?: (value: string) => void;
+  value?: string;
+}
+
+type HeaderActionDescription = HeaderButtonAction | HeaderSelectAction;
 
 /**
  * @description Contains the document actions that have `position: header`, if there are
  * none we still render the menu because we render the information about the document there.
  */
-const HeaderActions = () => {
+const HeaderToolbar = () => {
   const { formatMessage } = useIntl();
   const isCloning = useMatch(CLONE_PATH) !== null;
   const [
@@ -110,19 +144,38 @@ const HeaderActions = () => {
   const { model, id, document, meta, collectionType } = useDoc();
   const { plugins } = useStrapiApp();
 
-  const props = {
-    activeTab: status,
-    model,
-    id,
-    document: isCloning ? undefined : document,
-    meta: isCloning ? undefined : meta,
-    collectionType,
-  } satisfies DocumentActionProps;
-
   return (
     <Flex gap={2}>
       <DescriptionComponentRenderer
-        props={props}
+        props={{
+          activeTab: status,
+          model,
+          id,
+          document: isCloning ? undefined : document,
+          meta: isCloning ? undefined : meta,
+          collectionType,
+        }}
+        descriptions={(
+          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+        ).getHeaderActions()}
+      >
+        {(actions) => {
+          if (actions.length > 0) {
+            return <HeaderActions actions={actions} />;
+          } else {
+            return null;
+          }
+        }}
+      </DescriptionComponentRenderer>
+      <DescriptionComponentRenderer
+        props={{
+          activeTab: status,
+          model,
+          id,
+          document,
+          meta,
+          collectionType,
+        }}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getDocumentActions()}
@@ -289,6 +342,45 @@ const Information = ({ activeTab }: InformationProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * HeaderActions
+ * -----------------------------------------------------------------------------------------------*/
+
+interface HeaderActionsProps {
+  actions: Array<HeaderActionDescription & { id: string }>;
+}
+
+const HeaderActions = ({ actions }: HeaderActionsProps) => {
+  return (
+    <Flex>
+      {actions.map((action) => {
+        if ('options' in action) {
+          return (
+            <SingleSelect
+              key={action.id}
+              size="S"
+              disabled={action.disabled}
+              aria-label={action.label}
+              // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
+              onChange={action.onSelect}
+              value={action.value}
+            >
+              {action.options.map(({ label, ...option }) => (
+                <SingleSelectOption key={option.value} {...option}>
+                  {label}
+                </SingleSelectOption>
+              ))}
+            </SingleSelect>
+          );
+        } else {
+          // TODO: add button handler
+          return null;
+        }
+      })}
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
@@ -356,6 +448,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, docu
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
   const toggleNotification = useNotification();
+  const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
 
   return {
     disabled: !canDelete || !document,
@@ -382,26 +475,31 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, docu
         </Flex>
       ),
       onConfirm: async () => {
-        if (!id && collectionType !== SINGLE_TYPES) {
-          console.error(
-            "You're trying to delete a document without an id, this is likely a bug with Strapi. Please open an issue."
-          );
+        setSubmitting(true);
+        try {
+          if (!id && collectionType !== SINGLE_TYPES) {
+            console.error(
+              "You're trying to delete a document without an id, this is likely a bug with Strapi. Please open an issue."
+            );
 
-          toggleNotification({
-            message: formatMessage({
-              id: 'content-manager.actions.delete.error',
-              defaultMessage: 'An error occurred while trying to delete the document.',
-            }),
-            type: 'warning',
-          });
+            toggleNotification({
+              message: formatMessage({
+                id: 'content-manager.actions.delete.error',
+                defaultMessage: 'An error occurred while trying to delete the document.',
+              }),
+              type: 'warning',
+            });
 
-          return;
-        }
+            return;
+          }
 
-        const res = await deleteAction({ id, model, collectionType });
+          const res = await deleteAction({ id, model, collectionType });
 
-        if (!('error' in res)) {
-          navigate(`../${collectionType}/${model}`, { replace: true });
+          if (!('error' in res)) {
+            navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });
+          }
+        } finally {
+          setSubmitting(false);
         }
       },
     },
@@ -425,4 +523,4 @@ const StyledTrash = styled(Trash)`
 const DEFAULT_HEADER_ACTIONS = [EditTheModelAction, ConfigureTheViewAction, DeleteAction];
 
 export { Header, DEFAULT_HEADER_ACTIONS };
-export type { HeaderProps };
+export type { HeaderProps, HeaderActionDescription };

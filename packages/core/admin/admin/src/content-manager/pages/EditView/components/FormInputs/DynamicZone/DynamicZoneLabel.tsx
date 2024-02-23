@@ -9,7 +9,7 @@ interface DynamicZoneLabelProps {
   name: string;
   numberOfComponents?: number;
   required?: boolean;
-  hint?: string;
+  hint?: React.ReactNode;
 }
 
 const DynamicZoneLabel = ({

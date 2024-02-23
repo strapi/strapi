@@ -73,6 +73,7 @@ type UseDocumentActions = () => {
       collectionType: string;
       model: string;
       id?: string;
+      params?: object;
     },
     trackerProperty?: Extract<
       TrackingEvent,
@@ -118,6 +119,7 @@ type UseDocumentActions = () => {
       collectionType: string;
       model: string;
       id?: string;
+      params?: object;
     },
     discardDraft?: boolean
   ) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
@@ -155,7 +157,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [deleteDocument] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
-    async ({ collectionType, model, id }, trackerProperty) => {
+    async ({ collectionType, model, id, params }, trackerProperty) => {
       try {
         trackUsage('willDeleteEntry', trackerProperty);
 
@@ -163,6 +165,7 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           id,
+          params,
         });
 
         if ('error' in res) {
@@ -326,7 +329,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
   const unpublish: IUseDocumentActs['unpublish'] = React.useCallback(
-    async ({ collectionType, model, id }, discardDraft = false) => {
+    async ({ collectionType, model, id, params }, discardDraft = false) => {
       try {
         trackUsage('willUnpublishEntry');
 
@@ -334,6 +337,7 @@ const useDocumentActions: UseDocumentActions = () => {
           collectionType,
           model,
           id,
+          params,
           data: {
             discardDraft,
           },

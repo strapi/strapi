@@ -38,7 +38,7 @@ describe.skip('Document Service', () => {
       createdCategory = category;
 
       expect(async () => {
-        await strapi.documents(CATEGORY_UID).update(category.documentId, {
+        await strapi.documents(CATEGORY_UID).update(category.id, {
           data: { name: testName },
         });
       }).rejects.toThrow();
@@ -50,7 +50,7 @@ describe.skip('Document Service', () => {
       const category = await strapi.documents(CATEGORY_UID).create({ data: { name } });
 
       // Publish that category
-      const publishRes = strapi.documents(CATEGORY_UID).publish(category.documentId);
+      const publishRes = strapi.documents(CATEGORY_UID).publish(category.id);
       await expect(publishRes).resolves.not.toThrowError();
 
       // Reset the name of the draft category

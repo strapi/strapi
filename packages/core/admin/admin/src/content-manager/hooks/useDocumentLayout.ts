@@ -12,12 +12,25 @@ import { HOOKS } from '../../constants';
 import { BaseQueryError } from '../../utils/baseQuery';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 
-import { ComponentsDictionary, Schema, useDoc, useDocument } from './useDocument';
+import {
+  type ComponentsDictionary,
+  type Document,
+  type Schema,
+  useDoc,
+  useDocument,
+} from './useDocument';
 
 import type { InputProps } from '../components/FormInputs/types';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';
+
+type LayoutOptions = Schema['options'] & Schema['pluginOptions'] & object;
+
+interface LayoutSettings extends Contracts.ContentTypes.Settings {
+  displayName?: string;
+  icon?: never;
+}
 
 interface ListFieldLayout {
   /**
@@ -28,8 +41,9 @@ interface ListFieldLayout {
    * Typically used by plugins to render a custom cell
    */
   cellFormatter?: (
-    data: { [key: string]: unknown },
-    header: Omit<ListFieldLayout, 'cellFormatter'>
+    data: Document,
+    header: Omit<ListFieldLayout, 'cellFormatter'>,
+    { collectionType, model }: { collectionType: string; model: string }
   ) => React.ReactNode;
   label: string | MessageDescriptor;
   /**
@@ -49,9 +63,11 @@ interface ListLayout {
   metadatas: {
     [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['list'];
   };
-  settings: Contracts.ContentTypes.Settings & { displayName?: string };
+  options: LayoutOptions;
+  settings: LayoutSettings;
 }
-interface EditFieldSharedProps extends Omit<InputProps, 'type'> {
+interface EditFieldSharedProps extends Omit<InputProps, 'hint' | 'type'> {
+  hint?: string;
   mainField?: string;
   size: number;
   unique?: boolean;
@@ -83,7 +99,8 @@ interface EditLayout {
   metadatas: {
     [K in keyof Contracts.ContentTypes.Metadatas]: Contracts.ContentTypes.Metadatas[K]['edit'];
   };
-  settings: Contracts.ContentTypes.Settings & { displayName?: string };
+  options: LayoutOptions;
+  settings: LayoutSettings;
 }
 
 type UseDocumentLayout = (model: string) => {
@@ -154,8 +171,9 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
         : ({
             layout: [],
             components: {},
-            settings: DEFAULT_SETTINGS,
             metadatas: {},
+            options: {},
+            settings: DEFAULT_SETTINGS,
           } as EditLayout),
     [data, schema, components]
   );
@@ -167,6 +185,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
         : ({
             layout: [],
             metadatas: {},
+            options: {},
             settings: DEFAULT_SETTINGS,
           } as ListLayout),
     [data, schema]
@@ -276,6 +295,10 @@ const formatEditLayout = (
       ...data.contentType.settings,
       displayName: schema?.info.displayName,
     },
+    options: {
+      ...schema?.options,
+      ...schema?.pluginOptions,
+    },
   };
 };
 
@@ -365,6 +388,10 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
     layout: listAttributes,
     settings: { ...data.contentType.settings, displayName: schema?.info.displayName },
     metadatas: listMetadatas,
+    options: {
+      ...schema?.options,
+      ...schema?.pluginOptions,
+    },
   };
 };
 

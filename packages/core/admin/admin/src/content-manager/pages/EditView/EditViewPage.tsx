@@ -24,7 +24,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useOnce } from '../../../hooks/useOnce';
-import { Form } from '../../components/Form';
+import { Blocker, Form } from '../../components/Form';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
@@ -32,15 +32,13 @@ import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
+import { createYupSchema } from '../../utils/validation';
 
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
 import { transformDocument } from './utils/data';
 import { createDefaultForm } from './utils/forms';
-
-// TODO: this seems suspicious
-// const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -175,6 +173,7 @@ const EditViewPage = () => {
         disabled={status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
+        validationSchema={createYupSchema(schema?.attributes, components)}
       >
         <Header
           isCreating={isCreatingDocument}
@@ -221,6 +220,7 @@ const EditViewPage = () => {
             </GridItem>
           </Grid>
         </TabGroup>
+        <Blocker />
       </Form>
     </Main>
   );
@@ -239,7 +239,7 @@ const StatusTab = styled(Tab)`
 const getDocumentStatus = (
   document: ReturnType<UseDocument>['document'],
   meta: ReturnType<UseDocument>['meta']
-): 'draft' | 'published' => {
+): 'draft' | 'published' | 'modified' => {
   const docStatus = document?.status;
   const statuses = meta?.availableStatus ?? [];
 
