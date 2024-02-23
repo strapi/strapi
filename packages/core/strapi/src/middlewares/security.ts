@@ -1,4 +1,4 @@
-import { defaultsDeep, merge } from 'lodash/fp';
+import { defaultsDeep, mergeWith } from 'lodash/fp';
 import helmet, { KoaHelmet } from 'koa-helmet';
 
 import type { Common } from '@strapi/types';
@@ -29,6 +29,14 @@ const defaults: Config = {
   },
 };
 
+const mergeConfig = (existingConfig: Config, newConfig: Config) => {
+  return mergeWith(
+    (obj, src) => (Array.isArray(obj) && Array.isArray(src) ? obj.concat(src) : undefined),
+    existingConfig,
+    newConfig
+  );
+};
+
 export const security: Common.MiddlewareFactory<Config> =
   (config, { strapi }) =>
   (ctx, next) => {
@@ -42,7 +50,7 @@ export const security: Common.MiddlewareFactory<Config> =
     }
 
     if (ctx.method === 'GET' && specialPaths.some((str) => ctx.path.startsWith(str))) {
-      helmetConfig = merge(helmetConfig, {
+      helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
             'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
@@ -53,7 +61,7 @@ export const security: Common.MiddlewareFactory<Config> =
     }
 
     if (ctx.method === 'GET' && ['/admin'].some((str) => ctx.path.startsWith(str))) {
-      helmetConfig = merge(helmetConfig, {
+      helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
             'script-src': ["'self'", "'unsafe-inline'"],
