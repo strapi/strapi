@@ -6,7 +6,7 @@ import {
   createHash,
   getNameFromTokens,
   tokenWithHash,
-} from '..';
+} from '../shortener';
 
 describe('identifiers', () => {
   describe('constants', () => {
