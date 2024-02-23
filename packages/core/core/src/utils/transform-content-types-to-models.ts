@@ -24,13 +24,7 @@ export const getComponentJoinTableName = (collectionName: string) =>
 export const getDzJoinTableName = (collectionName: string) =>
   identifiers.getTableName(collectionName, { suffix: DZ_JOIN_TABLE_SUFFIX });
 
-const {
-  ID_COLUMN: id,
-  ORDER_COLUMN: orderColumnName,
-  FIELD_COLUMN: field,
-  ORDER_COLUMN: order,
-  ENTITY: entity,
-} = identifiers;
+const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order, ENTITY: entity } = identifiers;
 
 export type LoadedContentTypeModel = Schema.ContentType &
   Required<Pick<Schema.ContentType, 'collectionName' | 'uid' | 'modelName'>>;
@@ -77,7 +71,7 @@ export const transformAttribute = (
           on: {
             field: name,
           },
-          orderColumnName,
+          orderColumnName: order,
           orderBy: {
             order: 'asc',
           },
