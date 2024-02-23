@@ -10,9 +10,7 @@ export * from './result';
 export * from './service-instance';
 
 export type Service = {
-  <TContentType extends Schema.ContentType = Schema.ContentType>(
-    uid: TContentType['uid']
-  ): ServiceInstance<TContentType>;
+  (uid: Schema.CollectionType['uid']): ServiceInstance<Schema.CollectionType>;
 
   /** Add a middleware for all uid's and a specific action
    *  @example - Add a default locale
@@ -22,4 +20,6 @@ export type Service = {
    *  })
    */
   use: (cb: Middleware.Middleware) => Service;
+  singleType: (uid: Schema.SingleType['uid']) => ServiceInstance<Schema.SingleType>;
+  collectionType: (uid: Schema.CollectionType['uid']) => ServiceInstance<Schema.CollectionType>;
 };

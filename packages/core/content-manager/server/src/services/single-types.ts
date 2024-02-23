@@ -27,7 +27,7 @@ type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[
 const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
   async find(opts: DocServiceParams<'find'>[0], uid: Common.UID.SingleType) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
-    return strapi.documents<Schema.SingleType>(uid).find(params);
+    return strapi.documents.singleType(uid).find(params);
   },
 
   async update(uid: Common.UID.SingleType, opts: Parameters<DocService['update']>[0] = {} as any) {
@@ -35,7 +35,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     const populate = opts.populate ?? (await buildDeepPopulate(uid));
     const params = { ...opts, data, status: 'draft', populate };
 
-    const document = await strapi.documents<Schema.SingleType>(uid).update(params);
+    const document = await strapi.documents.singleType(uid).update(params);
 
     // if (isWebhooksPopulateRelationsEnabled()) {
     //   return getDeepRelationsCount(document, uid);
@@ -62,7 +62,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
   async delete(uid: Common.UID.ContentType, opts: Parameters<DocService['delete']>[0] = {} as any) {
     const populate = await buildDeepPopulate(uid);
 
-    await strapi.documents<Schema.SingleType>(uid).delete({ ...opts, populate });
+    await strapi.documents.singleType(uid).delete({ ...opts, populate });
 
     // TODO: Return all deleted versions?
     return {};
@@ -75,9 +75,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     const populate = await buildDeepPopulate(uid);
     const params = { ...opts, populate };
 
-    const { versions: publishedDocuments } = await strapi
-      .documents<Schema.SingleType>(uid)
-      .publish(params);
+    const { versions: publishedDocuments } = await strapi.documents.singleType(uid).publish(params);
 
     // TODO: Publish many versions at once
     const publishedDocument = publishedDocuments.at(0);
@@ -98,7 +96,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     const params = { ...opts, populate };
 
     // TODO: What if we publish many versions at once?
-    await strapi.documents<Schema.SingleType>(uid).unpublish(params);
+    await strapi.documents.singleType(uid).unpublish(params);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     // if (unpublishedDocument && isWebhooksPopulateRelationsEnabled()) {
@@ -115,8 +113,8 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     const populate = await buildDeepPopulate(uid);
     const params = { ...opts, populate };
 
-    const { versions: discardedDocuments } = await strapi
-      .documents<Schema.SingleType>(uid)
+    const { versions: discardedDocuments } = await strapi.documents
+      .singleType(uid)
       .discardDraft(params);
 
     // We only discard one document at a time
@@ -136,7 +134,7 @@ const singleTypes = ({ strapi }: { strapi: Strapi }) => ({
     if (!hasRelations) {
       return 0;
     }
-    const document = await strapi.documents<Schema.SingleType>(uid).find({ populate, locale });
+    const document = await strapi.documents.singleType(uid).find({ populate, locale });
 
     if (!document) {
       throw new ApplicationError(

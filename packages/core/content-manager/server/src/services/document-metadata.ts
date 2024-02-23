@@ -118,23 +118,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: Common.UID.ContentType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(uid: Common.UID.SingleType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
     // The status of all documents should be the same
     const status = documents[0].publishedAt !== null ? 'published' : 'draft';
     const otherStatus = status === 'published' ? 'draft' : 'published';
 
-    const modelKind = strapi.getModel(uid)?.kind;
-
-    if (modelKind === 'singleType') {
-      return strapi.documents<Schema.SingleType>(uid).find({
-        status: otherStatus,
-        fields: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
-      }) as unknown as DocumentMetadata['availableStatus'];
-    }
-
-    return strapi.documents<Schema.CollectionType>(uid).findMany({
+    return strapi.documents(uid).findMany({
       filters: {
         id: { $in: documents.map((d) => d.id) },
       },

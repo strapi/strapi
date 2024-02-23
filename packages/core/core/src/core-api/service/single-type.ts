@@ -13,19 +13,19 @@ export class SingleTypeService extends CoreService implements CoreApi.Service.Si
   async find(params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents<Schema.SingleType>(uid).find(this.getFetchParams(params));
+    return strapi.documents.singleType(uid).find(this.getFetchParams(params));
   }
 
   async createOrUpdate(params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents<Schema.SingleType>(uid).update(this.getFetchParams(params));
+    return strapi.documents.singleType(uid).update(this.getFetchParams(params));
   }
 
   async delete(params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents<Schema.SingleType>(uid).delete(this.getFetchParams(params));
+    return strapi.documents.singleType(uid).delete(this.getFetchParams(params));
   }
 }
 

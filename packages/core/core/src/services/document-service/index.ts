@@ -1,7 +1,8 @@
 import { Strapi, Documents, Schema } from '@strapi/types';
 
-import { createContentTypeRepository } from './repository-factory';
+import { createContentTypeRepository } from './repositories/repository-factory';
 import { createMiddlewareManager } from './middlewares';
+import { createSingleTypeRepository } from './repositories/single-type';
 
 /**
  * Repository to :
@@ -33,7 +34,7 @@ export const createDocumentService = (strapi: Strapi): Documents.Service => {
     }
 
     const contentType = strapi.contentType(uid);
-    const repository = createContentTypeRepository(contentType);
+    const repository = createContentTypeRepository(uid);
 
     repositories.set(uid, middlewares.wrapObject(repository, { contentType }));
 
@@ -42,5 +43,7 @@ export const createDocumentService = (strapi: Strapi): Documents.Service => {
 
   return Object.assign(factory, {
     use: middlewares.use.bind(middlewares),
+    singleType: createSingleTypeRepository,
+    collectionType: createContentTypeRepository,
   });
 };

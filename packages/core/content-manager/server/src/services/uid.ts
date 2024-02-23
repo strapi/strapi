@@ -53,30 +53,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     value: string;
     locale?: string;
   }) {
-    const modelKind = strapi.getModel(contentTypeUID)?.kind;
-
-    let foundDocuments;
-
-    if (modelKind === 'singleType') {
-      const document = await strapi.documents<Schema.SingleType>(contentTypeUID).find({
-        filters: {
-          [field]: { $startsWith: value },
-        },
-        locale,
-        status: 'draft',
-      });
-      foundDocuments = document ? [document] : [];
-    } else {
-      foundDocuments = await strapi.documents<Schema.CollectionType>(contentTypeUID).findMany({
-        filters: {
-          [field]: { $startsWith: value },
-        },
-        locale,
-        // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
-        // However, when publishing this "available" UID might collide with another published entry
-        status: 'draft',
-      });
-    }
+    const foundDocuments = await strapi.documents(contentTypeUID).findMany({
+      filters: {
+        [field]: { $startsWith: value },
+      },
+      locale,
+      // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+      // However, when publishing this "available" UID might collide with another published entry
+      status: 'draft',
+    });
 
     if (!foundDocuments || foundDocuments.length === 0) {
       // If there are no documents found we can return the value as is
@@ -118,31 +103,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     value: string;
     locale?: string;
   }) {
-    let documentCount: number | null;
-
-    const modelKind = strapi.getModel(contentTypeUID)?.kind;
-
-    if (modelKind === 'singleType') {
-      const document = await strapi.documents<Schema.SingleType>(contentTypeUID).find({
-        filters: {
-          [field]: value,
-        },
-        fields: ['id'],
-        locale,
-        status: 'draft',
-      });
-      documentCount = document ? 1 : 0;
-    } else {
-      documentCount = await strapi.documents<Schema.CollectionType>(contentTypeUID).count({
-        filters: {
-          [field]: value,
-        },
-        locale,
-        // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
-        // However, when publishing this "available" UID might collide with another published entry
-        status: 'draft',
-      });
-    }
+    const documentCount = await strapi.documents(contentTypeUID).count({
+      filters: {
+        [field]: value,
+      },
+      locale,
+      // TODO: Check UX. When modifying an entry, it only makes sense to check for collisions with other drafts
+      // However, when publishing this "available" UID might collide with another published entry
+      status: 'draft',
+    });
 
     if (documentCount && documentCount > 0) {
       // If there are documents sharing the proposed UID, we can return false

@@ -3,16 +3,15 @@ import { omit } from 'lodash/fp';
 import type { Documents, Schema } from '@strapi/types';
 import { pipeAsync } from '@strapi/utils';
 
-import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
-import createDocumentEngine from './document-engine';
-import * as DP from './draft-and-publish';
-import * as i18n from './internationalization';
+import { wrapInTransaction, type RepositoryFactoryMethod } from '../common';
+import createDocumentEngine from '../document-engine';
+import * as DP from '../draft-and-publish';
+import * as i18n from '../internationalization';
 
-export const createSingleTypeRepository: RepositoryFactoryMethod<Schema.SingleType> = (
-  contentType
+export const createSingleTypeRepository: RepositoryFactoryMethod = (
+  uid
 ): Documents.ServiceInstance<Schema.SingleType> => {
-  const { uid } = contentType;
-
+  const contentType = strapi.contentType(uid);
   // TODO: move the code back into here instead of using the document-engine
   const documents = createDocumentEngine({ strapi, db: strapi?.db });
 
