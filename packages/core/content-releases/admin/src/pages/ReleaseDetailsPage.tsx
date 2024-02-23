@@ -58,6 +58,7 @@ import {
   releaseApi,
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
+import { getTimezoneOffset } from '../utils/time';
 
 import type {
   ReleaseAction,
@@ -200,7 +201,7 @@ export const ReleaseDetailsLayout = ({
   toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const {
     data,
@@ -305,17 +306,45 @@ export const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
+  const isScheduled = release.scheduledAt && release.timezone;
+  const numberOfEntriesText = formatMessage(
+    {
+      id: 'content-releases.pages.Details.header-subtitle',
+      defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+    },
+    { number: totalEntries }
+  );
+  const scheduledText = isScheduled
+    ? formatMessage(
+        {
+          id: 'content-releases.pages.ReleaseDetails.header-subtitle.scheduled',
+          defaultMessage: 'Scheduled for {date} at {time} ({offset})',
+        },
+        {
+          date: formatDate(new Date(release.scheduledAt!), {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: release.timezone!,
+          }),
+          time: formatTime(new Date(release.scheduledAt!), {
+            timeZone: release.timezone!,
+            hourCycle: 'h23',
+          }),
+          offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
+        }
+      )
+    : '';
+
   return (
     <Main aria-busy={isLoadingDetails}>
       <HeaderLayout
         title={release.name}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Details.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-          },
-          { number: totalEntries }
-        )}
+        subtitle={
+          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
+        }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
             {formatMessage({
