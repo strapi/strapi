@@ -189,7 +189,7 @@ describe('Relations', () => {
           data: null,
           error: {
             details: {},
-            message: 'Not Found',
+            message: 'Entity not found',
             name: 'NotFoundError',
             status: 404,
           },
@@ -211,7 +211,7 @@ describe('Relations', () => {
           error: {
             details: {},
             message: `The relational field unkown doesn't exist on ${shopUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
@@ -232,7 +232,7 @@ describe('Relations', () => {
           error: {
             details: {},
             message: `The relational field name doesn't exist on ${shopUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
@@ -333,7 +333,7 @@ describe('Relations', () => {
           data: null,
           error: {
             details: {},
-            message: 'Not Found',
+            message: 'Entity not found',
             name: 'NotFoundError',
             status: 404,
           },
@@ -352,7 +352,7 @@ describe('Relations', () => {
           error: {
             details: {},
             message: `The relational field unknown doesn't exist on ${compoUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
@@ -370,7 +370,7 @@ describe('Relations', () => {
           error: {
             details: {},
             message: `The relational field name doesn't exist on ${compoUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });

@@ -1,5 +1,7 @@
 import { prop, uniq, flow, sortBy } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
+import { type Common } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
@@ -73,12 +75,14 @@ export default {
 
     const sourceSchema = strapi.getModel(model);
     if (!sourceSchema) {
-      return ctx.badRequest(`The model ${model} doesn't exist`);
+      throw new errors.ValidationError(`The model ${model} doesn't exist`);
     }
 
     const attribute: any = sourceSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest(`The relational field ${targetField} doesn't exist on ${model}`);
+      throw new errors.ValidationError(
+        `The relational field ${targetField} doesn't exist on ${model}`
+      );
     }
 
     const isSourceComponent = sourceSchema.modelType === 'component';
@@ -109,7 +113,7 @@ export default {
       // and if the user has the permission to read it in this way
 
       if (!currentEntity) {
-        return ctx.notFound();
+        throw new errors.NotFoundError();
       }
 
       if (!isSourceComponent) {
@@ -119,11 +123,11 @@ export default {
         });
 
         if (permissionChecker.cannot.read(null, targetField)) {
-          return ctx.forbidden();
+          throw new errors.ForbiddenError();
         }
 
         if (permissionChecker.cannot.read(currentEntity, targetField)) {
-          return ctx.forbidden();
+          throw new errors.ForbiddenError();
         }
       }
     }
@@ -246,7 +250,10 @@ export default {
 
     // We find a page of the targeted model (relation) to display in the
     // relation select component in the CM edit view
-    const res = await strapi.entityService.findPage(targetUid, queryParams);
+    const res = await strapi.entityService.findPage(
+      targetUid as Common.UID.ContentType,
+      queryParams
+    );
 
     ctx.body = {
       ...res,

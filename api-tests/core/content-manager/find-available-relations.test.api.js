@@ -186,7 +186,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: 'Not Found',
+            message: 'Entity not found',
             name: 'NotFoundError',
             status: 404,
           },
@@ -205,7 +205,7 @@ describe('Relations, with d&p: %p', () => {
           error: {
             details: {},
             message: `The relational field unknown doesn't exist on ${shopUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
@@ -223,7 +223,7 @@ describe('Relations, with d&p: %p', () => {
           error: {
             details: {},
             message: `The relational field name doesn't exist on ${shopUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
@@ -423,7 +423,7 @@ describe('Relations, with d&p: %p', () => {
           data: null,
           error: {
             details: {},
-            message: 'Not Found',
+            message: 'Entity not found',
             name: 'NotFoundError',
             status: 404,
           },
@@ -442,7 +442,7 @@ describe('Relations, with d&p: %p', () => {
           error: {
             details: {},
             message: `The relational field unknown doesn't exist on ${compoUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
@@ -460,7 +460,7 @@ describe('Relations, with d&p: %p', () => {
           error: {
             details: {},
             message: `The relational field name doesn't exist on ${compoUid}`,
-            name: 'BadRequestError',
+            name: 'ValidationError',
             status: 400,
           },
         });
