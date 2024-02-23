@@ -121,10 +121,11 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     { compressible: [], incompressible: [] }
   );
 
-  const totalIncompressibleLength = incompressible.reduce(
-    (sum, token) => sum + token.name.length,
-    0
+  // Calculate total length of incompressible tokens using lodash/fp _.sumBy
+  const totalIncompressibleLength = _.sumBy((token: NameToken) => token.name.length)(
+    incompressible
   );
+
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   if (totalIncompressibleLength + totalSeparatorsLength > maxLength) {
     throw new Error('incompressible string length greater than maxLength');
