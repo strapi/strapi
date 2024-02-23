@@ -13,11 +13,11 @@ const protocolForPath = (filepath: string) => {
 
 function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
   if (isLocal) {
+    // Todo: handle errors
     return createReadStream(filepath);
   }
 
   const readableStream = new PassThrough();
-
   protocolForPath(filepath)
     .get(filepath, (res) => {
       if (res.statusCode !== 200) {
