@@ -16,6 +16,12 @@ type NameOptions = {
 };
 
 // Generic name handler that must be used by all helper functions
+/**
+ * TODO: we should be requiring snake_case inputs for all names here, but we
+ * aren't and it will require some refactoring to make it work. Currently if
+ * we get names 'myModel' and 'my_model' they would be converted to the same
+ * final string my_model which generally works but is not entirely safe
+ * */
 export const getName = (names: NameInput, options: NameOptions = {}) => {
   const tokens = _.castArray(names).map((name) => {
     return {
