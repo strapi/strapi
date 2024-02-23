@@ -89,7 +89,9 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   });
 
   const fullLengthName = nameTokens.map((token) => token.name).join(IDENTIFIER_SEPARATOR);
-  if (fullLengthName.length <= maxLength) {
+
+  // if it fits, or maxLength is disabled, return full length string
+  if (fullLengthName.length <= maxLength || maxLength === 0) {
     return fullLengthName;
   }
 
