@@ -108,8 +108,7 @@ const createEntry = async (uid, data) => {
   return body;
 };
 
-// TODO: Fix relations
-describe.skip('Relations, with d&p: %p', () => {
+describe('Relations, with d&p: %p', () => {
   const builder = createTestBuilder();
   const addPublishedAtCheck = (value) => {
     publishedAt: value;
@@ -127,14 +126,14 @@ describe.skip('Relations, with d&p: %p', () => {
     const createdProduct2 = await createEntry('api::product.product', { name: 'Candle' });
 
     await rq({
-      url: `/content-manager/collection-types/api::product.product/${createdProduct1.id}/actions/publish`,
+      url: `/content-manager/collection-types/api::product.product/${createdProduct1.data.id}/actions/publish`,
       method: 'POST',
     });
 
-    data.products.push(createdProduct1);
-    data.products.push(createdProduct2);
+    data.products.push(createdProduct1.data);
+    data.products.push(createdProduct2.data);
 
-    const id1 = createdProduct1.id;
+    const id1 = createdProduct1.data.id;
 
     const createdShop1 = await createEntry('api::shop.shop', {
       name: 'Cazotte Shop',
@@ -157,8 +156,8 @@ describe.skip('Relations, with d&p: %p', () => {
       },
     });
 
-    data.shops.push(createdShop1);
-    data.shops.push(createdShop2);
+    data.shops.push(createdShop1.data);
+    data.shops.push(createdShop2.data);
   });
 
   afterAll(async () => {
@@ -173,7 +172,8 @@ describe.skip('Relations, with d&p: %p', () => {
           method: 'GET',
           url: '/content-manager/relations/api::shop.shop/products_ow',
           qs: {
-            entityId: 99999,
+            id: 99999,
+            status: 'draft',
           },
         });
 
@@ -226,13 +226,193 @@ describe.skip('Relations, with d&p: %p', () => {
       });
     });
 
-    describe('On a component', () => {
+    describe.each([
+      ['products_ow', false],
+      ['products_oo', false],
+      ['products_mo', false],
+      ['products_om', false],
+      ['products_mm', false],
+      ['products_mw', false],
+      // TODO skipping component relations for now
+      // ['compo_products_ow', true],
+      // ['compo_products_mw', true],
+    ])('Relation (%s) (is in component: %s)', (fieldName, isComponent) => {
+      let id;
+      let idEmptyShop;
+      let modelUID;
+
+      beforeAll(() => {
+        id = isComponent ? data.shops[0].myCompo.id : data.shops[0].id;
+        idEmptyShop = isComponent ? data.shops[1].myCompo.id : data.shops[1].id;
+        modelUID = isComponent ? 'default.compo' : 'api::shop.shop';
+      });
+
+      test('Can retrieve available relation(s) for an entity that have some relations', async () => {
+        let res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id,
+            status: 'draft',
+          },
+        });
+        expect(res.status).toBe(200);
+
+        expect(res.body.results).toMatchObject([
+          {
+            id: expect.any(String),
+            name: 'Candle',
+            ...addPublishedAtCheck(null),
+          },
+        ]);
+
+        // can omitIds
+        res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id,
+            status: 'draft',
+            idsToOmit: [data.products[1].id],
+          },
+        });
+
+        expect(res.body.results).toHaveLength(0);
+      });
+
+      test("Can retrieve available relation(s) for an entity that don't have relations yet", async () => {
+        let res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id: idEmptyShop,
+            status: 'draft',
+          },
+        });
+
+        expect(res.status).toBe(200);
+
+        expect(res.body.results).toMatchObject([
+          {
+            id: expect.any(String),
+            name: 'Candle',
+            ...addPublishedAtCheck(null),
+          },
+          {
+            id: expect.any(String),
+            name: 'Skate',
+            ...addPublishedAtCheck(expect.any(String)),
+          },
+        ]);
+
+        // can omitIds
+        res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id,
+            status: 'draft',
+            idsToOmit: [data.products[1].id],
+          },
+        });
+
+        expect(res.body.results).toHaveLength(0);
+      });
+
+      test('Can retrieve available relation(s) without entity', async () => {
+        let res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+        });
+
+        expect(res.status).toBe(200);
+
+        expect(res.body.results).toMatchObject([
+          {
+            id: expect.any(String),
+            name: 'Candle',
+            ...addPublishedAtCheck(null),
+          },
+          {
+            id: expect.any(String),
+            name: 'Skate',
+            ...addPublishedAtCheck(expect.any(String)),
+          },
+        ]);
+
+        // can omitIds
+        res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            status: 'draft',
+            idsToOmit: [data.products[0].id],
+          },
+        });
+
+        expect(res.body.results).toMatchObject([
+          {
+            id: expect.any(String),
+            name: 'Candle',
+            ...addPublishedAtCheck(null),
+          },
+        ]);
+      });
+
+      describe.each([['with'], ['without']])('Can search %s entity', (withOrWithout) => {
+        const withEntity = withOrWithout === 'with';
+
+        test("search ''", async () => {
+          const res = await rq({
+            method: 'GET',
+            url: `/content-manager/relations/${modelUID}/${fieldName}`,
+            qs: {
+              _q: '',
+              ...(withEntity ? { id } : {}),
+              status: 'draft',
+            },
+          });
+
+          expect(res.status).toBe(200);
+          expect(res.body.results).toHaveLength(withEntity ? 1 : 2);
+          expect(res.body.results[0]).toMatchObject({
+            id: expect.any(String),
+            name: 'Candle',
+            ...addPublishedAtCheck(null),
+          });
+        });
+
+        test("search 'Can'", async () => {
+          const res = await rq({
+            method: 'GET',
+            url: `/content-manager/relations/${modelUID}/${fieldName}`,
+            qs: {
+              _q: 'Can',
+              ...(withEntity ? { id } : {}),
+              status: 'draft',
+            },
+          });
+
+          expect(res.status).toBe(200);
+          expect(res.body.results).toMatchObject([
+            {
+              id: expect.any(String),
+              name: 'Candle',
+              ...addPublishedAtCheck(null),
+            },
+          ]);
+        });
+      });
+    });
+
+    // TODO component relations
+    describe.skip('On a component', () => {
       test('Fail when the component is not found', async () => {
         const res = await rq({
           method: 'GET',
           url: '/content-manager/relations/default.compo/compo_products_ow',
           qs: {
-            entityId: 99999,
+            id: 99999,
           },
         });
 
@@ -281,177 +461,6 @@ describe.skip('Relations, with d&p: %p', () => {
             name: 'BadRequestError',
             status: 400,
           },
-        });
-      });
-    });
-
-    describe.each([
-      ['products_ow', false],
-      ['products_oo', false],
-      ['products_mo', false],
-      ['products_om', false],
-      ['products_mm', false],
-      ['products_mw', false],
-      ['compo_products_ow', true],
-      ['compo_products_mw', true],
-    ])('Relation (%s) (is in component: %s)', (fieldName, isComponent) => {
-      let entityId;
-      let entityIdEmptyShop;
-      let modelUID;
-
-      beforeAll(() => {
-        entityId = isComponent ? data.shops[0].myCompo.id : data.shops[0].id;
-        entityIdEmptyShop = isComponent ? data.shops[1].myCompo.id : data.shops[1].id;
-        modelUID = isComponent ? 'default.compo' : 'api::shop.shop';
-      });
-
-      test('Can retrieve available relation(s) for an entity that have some relations', async () => {
-        let res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            entityId,
-          },
-        });
-        expect(res.status).toBe(200);
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(Number),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-        ]);
-
-        // can omitIds
-        res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            entityId,
-            idsToOmit: [data.products[1].id],
-          },
-        });
-
-        expect(res.body.results).toHaveLength(0);
-      });
-
-      test("Can retrieve available relation(s) for an entity that don't have relations yet", async () => {
-        let res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            entityId: entityIdEmptyShop,
-          },
-        });
-
-        expect(res.status).toBe(200);
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(Number),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-          {
-            id: expect.any(Number),
-            name: 'Skate',
-            ...addPublishedAtCheck(expect.any(String)),
-          },
-        ]);
-
-        // can omitIds
-        res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            entityId,
-            idsToOmit: [data.products[1].id],
-          },
-        });
-
-        expect(res.body.results).toHaveLength(0);
-      });
-
-      test('Can retrieve available relation(s) without entity', async () => {
-        let res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-        });
-
-        expect(res.status).toBe(200);
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(Number),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-          {
-            id: expect.any(Number),
-            name: 'Skate',
-            ...addPublishedAtCheck(expect.any(String)),
-          },
-        ]);
-
-        // can omitIds
-        res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            idsToOmit: [data.products[0].id],
-          },
-        });
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(Number),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-        ]);
-      });
-
-      describe.each([['with'], ['without']])('Can search %s entity', (withOrWithout) => {
-        const withEntity = withOrWithout === 'with';
-
-        test("search ''", async () => {
-          const res = await rq({
-            method: 'GET',
-            url: `/content-manager/relations/${modelUID}/${fieldName}`,
-            qs: {
-              _q: '',
-              ...(withEntity ? { entityId } : {}),
-            },
-          });
-
-          expect(res.status).toBe(200);
-          expect(res.body.results).toHaveLength(withEntity ? 1 : 2);
-          expect(res.body.results[0]).toMatchObject({
-            id: expect.any(Number),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          });
-        });
-
-        test("search 'Can'", async () => {
-          const res = await rq({
-            method: 'GET',
-            url: `/content-manager/relations/${modelUID}/${fieldName}`,
-            qs: {
-              _q: 'Can',
-              ...(withEntity ? { entityId } : {}),
-            },
-          });
-
-          expect(res.status).toBe(200);
-          expect(res.body.results).toMatchObject([
-            {
-              id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
-            },
-          ]);
         });
       });
     });
