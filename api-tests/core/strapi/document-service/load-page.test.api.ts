@@ -19,7 +19,7 @@ describe('Document Service', () => {
 
       const documents = await strapi.documents.loadPages(
         ARTICLE_UID,
-        articlesDb.map((document) => document.documentId),
+        articlesDb.map((document) => document.id),
         'relations'
       );
 

@@ -8,7 +8,11 @@
     "description": ""
   },
   "options": {},
-  "pluginOptions": {},
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "title": {
       "type": "string"
@@ -21,6 +25,10 @@
       "relation": "manyToMany",
       "target": "api::author.author",
       "inversedBy": "articles"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
     }
   }
 }

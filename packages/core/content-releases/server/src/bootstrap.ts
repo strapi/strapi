@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
 
-import { RELEASE_ACTION_MODEL_UID } from './constants';
+import { ALLOWED_WEBHOOK_EVENTS, RELEASE_ACTION_MODEL_UID } from './constants';
+import { getService } from './utils';
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
@@ -11,7 +12,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         const { model, result } = event;
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+        if (model.kind === 'collectionType') {
           const { id } = result;
           strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
             where: {
@@ -28,7 +29,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       async beforeDeleteMany(event) {
         const { model, params } = event;
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+        if (model.kind === 'collectionType') {
           const { where } = params;
           const entriesToDelete = await strapi.db
             .query(model.uid)
@@ -55,5 +56,21 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         }
       },
     });
+
+    if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+      getService('scheduling', { strapi })
+        .syncFromDatabase()
+        .catch((err: Error) => {
+          strapi.log.error(
+            'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
+          );
+
+          throw err;
+        });
+
+      Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+        strapi.webhookStore.addAllowedEvent(key, value);
+      });
+    }
   }
 };

@@ -45,3 +45,7 @@ export const ACTIONS = [
     pluginName: 'content-releases',
   },
 ];
+
+export const ALLOWED_WEBHOOK_EVENTS = {
+  RELEASES_PUBLISH: 'releases.publish',
+};

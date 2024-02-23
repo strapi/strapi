@@ -4,7 +4,7 @@ import { type BaseEditor } from 'slate';
 import { type HistoryEditor } from 'slate-history';
 import { type ReactEditor } from 'slate-react';
 
-import { type LinkEditor } from '../../admin/src/content-manager/components/BlocksInput/plugins/withLinks';
+import { type LinkEditor } from '../../admin/src/content-manager/pages/EditView/components/FormInputs/BlocksInput/plugins/withLinks';
 
 declare module 'styled-components' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface

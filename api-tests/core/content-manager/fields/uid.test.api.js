@@ -42,7 +42,7 @@ describe('Test type UID', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: 'valid-uid',
       });
     });
@@ -56,7 +56,7 @@ describe('Test type UID', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: 'duplicate-uid',
       });
 
@@ -77,7 +77,7 @@ describe('Test type UID', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: null,
       });
     });
@@ -141,7 +141,7 @@ describe('Test type UID', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: value,
       });
 
@@ -201,7 +201,7 @@ describe('Test type UID', () => {
       );
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: 'valid-uid',
       });
     });
@@ -218,7 +218,7 @@ describe('Test type UID', () => {
       );
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
+      expect(res.body.data).toMatchObject({
         slug: 'duplicate-uid',
       });
 
@@ -234,7 +234,7 @@ describe('Test type UID', () => {
       expect(conflicting.statusCode).toBe(400);
     });
 
-    // TODO: Fix uniqueness and validations in document service
+    // TODO: Fix uniqueness and validations in document service -
     test.skip('Cannot set value to be null', async () => {
       const createRes = await rq.post(
         '/content-manager/collection-types/api::withrequireduid.withrequireduid',
@@ -246,7 +246,7 @@ describe('Test type UID', () => {
       );
 
       const res = await rq.post(
-        `/content-manager/collection-types/api::withrequireduid.withrequireduid/${createRes.body.id}/actions/publish`
+        `/content-manager/collection-types/api::withrequireduid.withrequireduid/${createRes.body.data.id}/actions/publish`
       );
 
       expect(res.statusCode).toBe(400);
