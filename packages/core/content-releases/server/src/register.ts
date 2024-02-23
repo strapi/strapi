@@ -6,6 +6,7 @@ import {
   deleteActionsOnDeleteContentType,
   deleteActionsOnDisableDraftAndPublish,
   migrateIsValidAndStatusReleases,
+  revalidateChangedContentTypes,
 } from './migrations';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
@@ -18,6 +19,7 @@ export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
     strapi
       .hook('strapi::content-types.afterSync')
       .register(deleteActionsOnDeleteContentType)
+      .register(revalidateChangedContentTypes)
       .register(migrateIsValidAndStatusReleases);
   }
 };

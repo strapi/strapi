@@ -1,5 +1,6 @@
-import type { Schema } from '@strapi/types';
+import type { Schema, Common } from '@strapi/types';
 import { contentTypes as contentTypesUtils, mapAsync } from '@strapi/utils';
+import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
@@ -117,6 +118,69 @@ export async function migrateIsValidAndStatusReleases() {
       data: {
         status: 'done',
       },
+    });
+  });
+}
+
+export async function revalidateChangedContentTypes({ oldContentTypes, contentTypes }: Input) {
+  const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes).filter(
+    (uid) => oldContentTypes[uid]?.options?.draftAndPublish
+  );
+  const releasesAffected = new Set();
+
+  mapAsync(contentTypesWithDraftAndPublish, async (contentTypeUID) => {
+    const oldContentType = oldContentTypes[contentTypeUID];
+    const contentType = contentTypes[contentTypeUID];
+
+    // If attributes have changed, we need to revalidate actions because maybe validations rules are different
+    if (!isEqual(oldContentType.attributes, contentType.attributes)) {
+      const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+        where: {
+          contentType: contentTypeUID,
+        },
+        populate: {
+          entry: true,
+          release: true,
+        },
+      });
+
+      await mapAsync(actions, async (action) => {
+        if (action.entry) {
+          const populatedEntry = await getPopulatedEntry(
+            contentTypeUID as Common.UID.ContentType,
+            action.entry.id,
+            {
+              strapi,
+            }
+          );
+
+          if (populatedEntry) {
+            const isEntryValid = await getEntryValidStatus(
+              contentTypeUID as Common.UID.ContentType,
+              populatedEntry,
+              {
+                strapi,
+              }
+            );
+
+            releasesAffected.add(action.release.id);
+
+            await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+              where: {
+                id: action.id,
+              },
+              data: {
+                isEntryValid,
+              },
+            });
+          }
+        }
+      });
+    }
+  }).then(() => {
+    // We need to update the status of the releases affected
+    mapAsync(releasesAffected, async (releaseId) => {
+      return getService('release', { strapi }).updateReleaseStatus(releaseId);
     });
   });
 }
