@@ -15,7 +15,7 @@
  */
 
 import crypto from 'node:crypto';
-import _ from 'lodash/fp';
+import { partition, isInteger, snakeCase, sumBy } from 'lodash/fp';
 
 // TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
@@ -52,7 +52,7 @@ type NameTokenWithAllocation = NameToken & { allocatedLength: number };
  * @internal
  */
 export function createHash(data: string, len: number): string {
-  if (!_.isInteger(len) || len <= 0) {
+  if (!isInteger(len) || len <= 0) {
     throw new Error(`createHash length must be a positive integer, received ${len}`);
   }
 
@@ -78,7 +78,7 @@ export function createHash(data: string, len: number): string {
  * @throws Error if the length is not a positive integer, or if the length is too short for the token.
  */
 export function getShortenedName(name: string, len: number) {
-  if (!_.isInteger(len) || len <= 0) {
+  if (!isInteger(len) || len <= 0) {
     throw new Error(`tokenWithHash length must be a positive integer, received ${len}`);
   }
   if (name.length <= len) {
@@ -101,13 +101,13 @@ export function getShortenedName(name: string, len: number) {
 }
 
 function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: number) {
-  if (!_.isInteger(maxLength) || maxLength < 0) {
+  if (!isInteger(maxLength) || maxLength < 0) {
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
 
   // Ensure all tokens are in snake_case
   nameTokens.forEach((token) => {
-    if (token.name !== _.snakeCase(token.name)) {
+    if (token.name !== snakeCase(token.name)) {
       throw new Error(`all names must already be in snake_case; received ${token.name}`);
     }
   });
@@ -124,15 +124,13 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   }
 
   // Split tokens by compressibility
-  const [compressible, incompressible] = _.partition(
+  const [compressible, incompressible] = partition(
     (token: NameToken) => token.compressible,
     nameTokens
   );
 
   // Calculate total length of incompressible tokens using lodash/fp _.sumBy
-  const totalIncompressibleLength = _.sumBy((token: NameToken) => token.name.length)(
-    incompressible
-  );
+  const totalIncompressibleLength = sumBy((token: NameToken) => token.name.length)(incompressible);
 
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   if (totalIncompressibleLength + totalSeparatorsLength > maxLength) {
