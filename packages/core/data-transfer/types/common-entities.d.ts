@@ -130,6 +130,7 @@ export interface IConfiguration<T = unknown> {
 }
 
 interface IFile {
+  id: number;
   name: string;
   alternativeText?: string;
   caption?: string;
@@ -146,7 +147,6 @@ interface IFile {
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   type?: string;
-  mainHash?: string;
 }
 export interface IAsset {
   filename: string;

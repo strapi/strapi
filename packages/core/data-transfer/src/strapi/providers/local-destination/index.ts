@@ -291,6 +291,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const strapi = this.strapi;
     const transaction = this.transaction;
     const backupDirectory = this.uploadsBackupDirectoryName;
+    const fileEntitiesMapper = this.#entitiesMapper['plugin::upload.file'];
 
     const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
 
@@ -357,14 +358,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { hash: uploadData.mainHash },
+                where: { id: fileEntitiesMapper[uploadData.id] },
               });
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
               }
               await strapi.db.query('plugin::upload.file').update({
-                where: { hash: uploadData.mainHash },
+                where: { id: entry.id },
                 data: {
                   formats: entry.formats,
                   provider,
@@ -373,11 +374,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               return callback();
             }
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { hash: uploadData.hash },
+              where: { id: fileEntitiesMapper[uploadData.id] },
             });
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({
-              where: { hash: uploadData.hash },
+              where: { id: entry.id },
               data: {
                 url: entry.url,
                 provider,
