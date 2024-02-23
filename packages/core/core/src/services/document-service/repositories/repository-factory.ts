@@ -1,4 +1,4 @@
-import type { Schema, Documents } from '@strapi/types';
+import type { Schema, Documents, Common } from '@strapi/types';
 
 import { createDefaultRepository } from './default';
 
@@ -7,7 +7,7 @@ import { createDefaultRepository } from './default';
  * Unused at the moment, until we decide the best way to expose the document service.
  */
 export const createContentTypeRepository = (
-  contentType: Schema.SingleType | Schema.CollectionType
+  uid: Common.UID.CollectionType
 ): Documents.ServiceInstance<Schema.CollectionType> => {
-  return createDefaultRepository(contentType);
+  return createDefaultRepository(uid);
 };

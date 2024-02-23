@@ -1,5 +1,3 @@
-import type { Schema } from '@strapi/types';
-
 import { type RepositoryFactoryMethod } from '../common';
 import { createCollectionTypeRepository } from './collection-type';
 
@@ -10,12 +8,7 @@ import { createCollectionTypeRepository } from './collection-type';
  *
  * TODO: Prevent mutating single types into a bad state
  */
-export const createDefaultRepository: RepositoryFactoryMethod<Schema.ContentType> = (
-  contentType
-) => {
-  const collectionTypeRepository = createCollectionTypeRepository(
-    contentType as Schema.CollectionType
-  );
-
-  return collectionTypeRepository;
+export const createDefaultRepository: RepositoryFactoryMethod = (uid) => {
+  const defaultRepository = createCollectionTypeRepository(uid);
+  return defaultRepository;
 };
