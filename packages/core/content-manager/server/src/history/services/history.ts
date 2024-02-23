@@ -1,16 +1,45 @@
 import type { LoadedStrapi } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
+
+import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../constants';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
 
+const DEFAULT_RETENTION_DAYS = 90;
+
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
+  const state: {
+    deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
+  } = {
+    deleteExpiredJob: null,
+  };
+
   /**
    * Use the query engine API, not the document service,
    * since we'll refactor history version to be just a model instead of a content type.
    * TODO: remove this comment once the refactor is done.
    */
   const query = strapi.db.query(HISTORY_VERSION_UID);
+
+  const getRetentionDays = (strapi: LoadedStrapi) => {
+    const licenseRetentionDays =
+      strapi.ee.features.get('cms-content-history')?.options.retentionDays;
+    const userRetentionDays = strapi.config.get('admin.history.retentionDays');
+
+    // For enterprise plans, use 90 days by default, but allow users to override it
+    if (licenseRetentionDays == null) {
+      return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
+    }
+
+    // Allow users to override the license retention days, but not to increase it
+    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+      return userRetentionDays;
+    }
+
+    // User didn't provide a retention days value, use the license one
+    return licenseRetentionDays;
+  };
 
   let isInitialized = false;
 
@@ -69,7 +98,28 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         return result;
       });
 
+      const retentionDays = getRetentionDays(strapi);
+      // Schedule a job to delete expired history versions every day at midnight
+      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
+        const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
+        const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
+
+        query.deleteMany({
+          where: {
+            created_at: {
+              $lt: expirationDate.toISOString(),
+            },
+          },
+        });
+      });
+
       isInitialized = true;
+    },
+
+    async destroy() {
+      if (state.deleteExpiredJob) {
+        state.deleteExpiredJob.cancel();
+      }
     },
 
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {

@@ -1,10 +1,15 @@
 import type { UID } from '@strapi/types';
+import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
 
 const createMock = jest.fn();
 const userId = 'user-id';
 const fakeDate = new Date('1970-01-01T00:00:00.000Z');
+
+jest.mock('node-schedule', () => ({
+  scheduleJob: jest.fn(),
+}));
 
 const mockGetRequestContext = jest.fn(() => {
   return {
@@ -33,6 +38,15 @@ const mockStrapi = {
       };
       return cb(opt);
     },
+  },
+  ee: {
+    features: {
+      isEnabled: jest.fn().mockReturnValue(false),
+      get: jest.fn(),
+    },
+  },
+  config: {
+    get: () => undefined,
   },
   requestContext: {
     get: mockGetRequestContext,
@@ -177,5 +191,17 @@ describe('history-version service', () => {
         createdAt: fakeDate,
       },
     });
+  });
+
+  it('should create a cron job that runs once a day', async () => {
+    // @ts-expect-error - this is a mock
+    const mockScheduleJob = scheduleJob.mockImplementationOnce(
+      jest.fn((rule, callback) => callback())
+    );
+
+    await historyService.init();
+
+    expect(mockScheduleJob).toHaveBeenCalledTimes(1);
+    expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
   });
 });

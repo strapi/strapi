@@ -20,6 +20,9 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
         // Start recording history and saving history versions
         getService(strapi, 'history').init();
       },
+      destroy({ strapi }) {
+        getService(strapi, 'history').destroy();
+      },
       controllers,
       services,
       routes,
