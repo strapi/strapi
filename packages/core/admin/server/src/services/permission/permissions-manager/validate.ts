@@ -37,8 +37,11 @@ const COMPONENT_FIELDS = ['__component'];
 
 const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
-const throwInvalidParam = ({ key }: any) => {
-  throw new ValidationError(`Invalid parameter ${key}`);
+const throwInvalidParam = ({ key, path }: { key: string; path?: string | null }) => {
+  const msg =
+    path && path !== key ? `Invalid parameter ${key} at ${path}` : `Invalid parameter ${key}`;
+
+  throw new ValidationError(msg);
 };
 
 export default ({ action, ability, model }: any) => {
@@ -55,9 +58,9 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
       traverse.traverseQueryFilters(throwPassword, { schema }),
       traverse.traverseQueryFilters(
-        ({ key, value }) => {
+        ({ key, value, path }) => {
           if (isObject(value) && isEmpty(value)) {
-            throwInvalidParam({ key });
+            throwInvalidParam({ key, path: path.attribute });
           }
         },
         { schema }
@@ -69,9 +72,9 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
       traverse.traverseQuerySort(throwPassword, { schema }),
       traverse.traverseQuerySort(
-        ({ key, attribute, value }) => {
+        ({ key, attribute, value, path }) => {
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
-            throwInvalidParam({ key });
+            throwInvalidParam({ key, path: path.attribute });
           }
         },
         { schema }
@@ -81,6 +84,13 @@ export default ({ action, ability, model }: any) => {
     const validateFields = pipeAsync(
       traverse.traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFields(throwPassword, { schema })
+    );
+
+    const validatePopulate = pipeAsync(
+      traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), { schema }),
+      traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, { schema }),
+      traverse.traverseQueryPopulate(throwHiddenFields, { schema }),
+      traverse.traverseQueryPopulate(throwPassword, { schema })
     );
 
     return async (query: any) => {
@@ -94,6 +104,11 @@ export default ({ action, ability, model }: any) => {
 
       if (query.fields) {
         await validateFields(query.fields);
+      }
+
+      // a wildcard is always valid; its conversion will be handled by the entity service and can be optimized with sanitizer
+      if (query.populate && query.populate !== '*') {
+        await validatePopulate(query.populate);
       }
 
       return true;
@@ -119,7 +134,7 @@ export default ({ action, ability, model }: any) => {
   const wrapValidate = (createValidateFunction: any) => {
     // TODO
     // @ts-expect-error define the correct return type
-    const wrappedValidate = async (data, options = {}) => {
+    const wrappedValidate = async (data, options = {}): Promise<unknown> => {
       if (isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedValidate(entity, options)));
       }
@@ -165,20 +180,20 @@ export default ({ action, ability, model }: any) => {
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
-  const throwHiddenFields = ({ key, schema }: any) => {
+  const throwHiddenFields = ({ key, schema, path }: any) => {
     const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
 
     if (isHidden) {
-      throwInvalidParam({ key });
+      throwInvalidParam({ key, path: path.attribute });
     }
   };
 
   /**
    * Visitor used to omit disallowed fields from the admin users entities & avoid leaking sensitive information
    */
-  const throwDisallowedAdminUserFields = ({ key, attribute, schema }: any) => {
+  const throwDisallowedAdminUserFields = ({ key, attribute, schema, path }: any) => {
     if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
-      throwInvalidParam({ key });
+      throwInvalidParam({ key, path: path.attribute });
     }
   };
 
@@ -188,12 +203,7 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
-    ]);
+    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
   };
 
   const getQueryFields = (fields = []) => {

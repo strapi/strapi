@@ -44,6 +44,10 @@ const createAuthorizeMiddleware =
       }
 
       if (error instanceof errors.ForbiddenError) {
+        // allow PolicyError as an exception to throw a publicly visible message in the API
+        if (error instanceof errors.PolicyError) {
+          throw error;
+        }
         return ctx.forbidden();
       }
 

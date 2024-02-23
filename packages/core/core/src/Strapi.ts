@@ -56,7 +56,7 @@ import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import { FeaturesService, createFeaturesService } from './services/features';
-import { createDocumentService } from './services/document-service/document-service';
+import { createDocumentService } from './services/document-service';
 
 /**
  * Resolve the working directories based on the instance options.
@@ -215,7 +215,14 @@ class Strapi extends Container implements StrapiI {
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = utils.createStartupLogger(this);
-    this.log = createLogger(this.config.get('logger', { level: 'info' }));
+
+    // We will continue to support 'logger' to prevent unnecessary deprecations but prioritize server.logger.config
+    // So we find: server.logger.config || logger || 'info'
+    const logLevel = this.config.get(
+      'server.logger.config',
+      this.config.get('logger', { level: 'info' })
+    );
+    this.log = createLogger(logLevel);
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;

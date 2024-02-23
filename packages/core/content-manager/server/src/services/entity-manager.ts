@@ -55,12 +55,6 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mapEntity<T = any>(entity: any, uid?: Common.UID.ContentType): T {
-    // Map documentId to id
-    // TODO: remove this when we change documentId to id in database
-    if (entity?.documentId) {
-      entity.id = entity.documentId;
-      delete entity.documentId;
-    }
     return entity;
   },
 
@@ -81,14 +75,17 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     return this.mapEntity(entities, uid);
   },
 
-  async find(opts: Parameters<typeof strapi.documents.findMany>[1], uid: Common.UID.ContentType) {
+  async find(
+    opts: Parameters<Documents.ServiceInstance['findMany']>[0],
+    uid: Common.UID.ContentType
+  ) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
     const entities = await strapi.documents(uid).findMany(params);
     return this.mapEntitiesResponse(entities, uid);
   },
 
   async findPage(
-    opts: Parameters<typeof strapi.documents.findMany>[1],
+    opts: Parameters<Documents.ServiceInstance['findMany']>[0],
     uid: Common.UID.ContentType
   ) {
     // Pagination
@@ -127,7 +124,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     uid: Common.UID.ContentType,
     opts: Parameters<Documents.ServiceInstance['create']>[0] = {} as any
   ) {
-    const populate = await buildDeepPopulate(uid);
+    const populate = opts.populate ?? (await buildDeepPopulate(uid));
     const params = { ...opts, status: 'draft', populate };
 
     const document = await strapi
@@ -148,7 +145,7 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     opts: Parameters<Documents.ServiceInstance['update']>[1] = {} as any
   ) {
     const publishData = omitPublishedAtField(opts.data || {});
-    const populate = await buildDeepPopulate(uid);
+    const populate = opts.populate ?? (await buildDeepPopulate(uid));
 
     // TODO: Remove this once we change documentId to id in database
     delete publishData.id;
@@ -351,6 +348,32 @@ const entityManager = ({ strapi }: { strapi: Strapi }) => ({
     // TODO: What if we publish many versions at once?
     const unpublishedDocument = unpublishedDocuments.at(0);
     const mappedEntity = await this.mapEntity(unpublishedDocument, uid);
+
+    // If relations were populated, relations count will be returned instead of the array of relations.
+    if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {
+      return getDeepRelationsCount(mappedEntity, uid);
+    }
+
+    return mappedEntity;
+  },
+
+  async discard(
+    document: Entity,
+    uid: Common.UID.ContentType,
+    opts: Parameters<Documents.ServiceInstance['discardDraft']>[1] = {} as any
+  ) {
+    const populate = await buildDeepPopulate(uid);
+    const params = { ...opts, populate };
+
+    const { versions: discardedDocuments } = await strapi.documents(uid).discardDraft(
+      // @ts-expect-error - Change entity to document
+      document.id,
+      params
+    );
+
+    // We only discard one document at a time
+    const discardedDocument = discardedDocuments.at(0);
+    const mappedEntity = await this.mapEntity(discardedDocument, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (mappedEntity && isWebhooksPopulateRelationsEnabled()) {

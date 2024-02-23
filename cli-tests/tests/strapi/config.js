@@ -2,6 +2,6 @@
 
 module.exports = () => {
   return {
-    testApps: 2,
+    testApps: 1,
   };
 };

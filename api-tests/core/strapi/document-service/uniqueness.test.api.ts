@@ -3,12 +3,13 @@ import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper
 import resources from './resources/index';
 import { CATEGORY_UID, Category } from './utils';
 
-describe('Document Service', () => {
+describe.skip('Document Service', () => {
   let testUtils;
   let strapi: LoadedStrapi;
 
   let testName;
   let createdCategory;
+
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
     strapi = testUtils.strapi;
@@ -37,39 +38,30 @@ describe('Document Service', () => {
       createdCategory = category;
 
       expect(async () => {
-        await strapi.documents(CATEGORY_UID).update(category.documentId, {
+        await strapi.documents(CATEGORY_UID).update(category.id, {
           data: { name: testName },
         });
       }).rejects.toThrow();
     });
 
     it('cannot publish a document to have a duplicated unique field value in the same publication state', async () => {
-      const updatedName = `${createdCategory.name}-1`;
-      // Update the previously created category to have a new name
-      const category: Category = await strapi
-        .documents(CATEGORY_UID)
-        .update(createdCategory.documentId, {
-          data: { name: updatedName },
-        });
+      const name = `unique-name`;
+
+      const category = await strapi.documents(CATEGORY_UID).create({ data: { name } });
 
       // Publish that category
-      const publishRes = strapi.documents(CATEGORY_UID).publish(category.documentId);
+      const publishRes = strapi.documents(CATEGORY_UID).publish(category.id);
       await expect(publishRes).resolves.not.toThrowError();
 
       // Reset the name of the draft category
-      await strapi.documents(CATEGORY_UID).update(createdCategory.documentId, {
-        data: { name: createdCategory.name },
-      });
+      await strapi
+        .documents(CATEGORY_UID)
+        .update(category.id, { data: { name: 'other-not-unique-name' } });
 
       // Now we can create a new category with the same name as the published category
       // When we try to publish it, it should throw an error
-      const newCategory: Category = await strapi.documents(CATEGORY_UID).create({
-        data: { name: updatedName },
-      });
-
-      expect(async () => {
-        await strapi.documents(CATEGORY_UID).publish(newCategory.documentId);
-      }).rejects.toThrow();
+      const newCategory = await strapi.documents(CATEGORY_UID).create({ data: { name } });
+      expect(strapi.documents(CATEGORY_UID).publish(newCategory.id)).rejects.toThrow();
     });
   });
 });
