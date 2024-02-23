@@ -100,7 +100,7 @@ export function getShortenedName(name: string, len: number) {
   return `${name.substring(0, availableLength)}${HASH_SEPARATOR}${createHash(name, HASH_LENGTH)}`;
 }
 
-export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_IDENTIFIER_LENGTH) {
+function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: number) {
   if (!_.isInteger(maxLength) || maxLength < 0) {
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
@@ -111,6 +111,10 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
       throw new Error(`all names must already be in snake_case; received ${token.name}`);
     }
   });
+}
+
+export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_IDENTIFIER_LENGTH) {
+  validateGetNameFromTokensInput(nameTokens, maxLength);
 
   const fullLengthName = nameTokens.map((token) => token.name).join(IDENTIFIER_SEPARATOR);
 
@@ -120,12 +124,9 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   }
 
   // Split tokens by compressibility
-  const { compressible, incompressible } = nameTokens.reduce(
-    (acc: { compressible: NameToken[]; incompressible: NameToken[] }, token) => {
-      acc[token.compressible ? 'compressible' : 'incompressible'].push(token);
-      return acc;
-    },
-    { compressible: [], incompressible: [] }
+  const [compressible, incompressible] = _.partition(
+    (token: NameToken) => token.compressible,
+    nameTokens
   );
 
   // Calculate total length of incompressible tokens using lodash/fp _.sumBy
