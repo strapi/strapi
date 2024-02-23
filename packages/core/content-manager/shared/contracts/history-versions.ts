@@ -33,7 +33,8 @@ export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, '
   locale: Locale | null;
 }
 
-interface Pagination {
+// Export to prevent the TS "cannot be named" error in the history service
+export interface Pagination {
   page: number;
   pageSize: number;
   pageCount: number;
