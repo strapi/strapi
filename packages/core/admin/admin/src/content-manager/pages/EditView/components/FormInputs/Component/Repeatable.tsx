@@ -187,22 +187,6 @@ const RepeatableComponent = ({
     );
   };
 
-  // let errorMessage = formErrors[name];
-
-  // if (hasMinError) {
-  //   errorMessage = {
-  //     id: getTranslation('components.DynamicZone.missing-components'),
-  //     defaultMessage:
-  //       'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
-  //     values: { number: missingComponentsValue },
-  //   };
-  // } else if (componentErrorKeys.some((error) => error.split('.').length > 1) && !hasMinError) {
-  //   errorMessage = {
-  //     id: getTranslation('components.RepeatableComponent.error-message'),
-  //     defaultMessage: 'The component(s) contain error(s)',
-  //   };
-  // }
-
   const ariaDescriptionId = React.useId();
 
   if (value.length === 0) {
