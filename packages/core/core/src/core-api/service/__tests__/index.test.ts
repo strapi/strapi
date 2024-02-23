@@ -45,12 +45,13 @@ describe('Default Service', () => {
 
     describe('Passes the logic down to the entityService', () => {
       test('Creates data when no entity is found', async () => {
+        const singleTypeUpdate = jest.fn(() => Promise.resolve({ id: 1 }));
         const documentService = {
-          update: jest.fn(() => Promise.resolve({ id: 1 })),
+          singleType: () => ({ update: singleTypeUpdate }),
         };
 
         const strapi = {
-          documents: jest.fn(() => documentService),
+          documents: documentService,
           query() {
             return { count() {} };
           },
@@ -58,10 +59,12 @@ describe('Default Service', () => {
 
         global.strapi = strapi;
 
-        const contentType: Schema.ContentType = {
+        const contentType: Schema.SingleType = {
           kind: 'singleType',
           modelType: 'contentType',
-          uid: 'testModel',
+          uid: 'api::testModel.testModel',
+          globalId: 'TestModel',
+          modelName: 'testModel',
           attributes: {},
           info: {
             singularName: 'test-model',
@@ -70,24 +73,25 @@ describe('Default Service', () => {
           },
         };
 
-        const service = createService({ contentType });
+        const service = createService<Schema.SingleType>({ contentType });
 
         const input = {};
         await service.createOrUpdate({ data: input });
 
-        expect(documentService.update).toHaveBeenCalledWith({
+        expect(singleTypeUpdate).toHaveBeenCalledWith({
           data: input,
           status: 'published',
         });
       });
 
       test('Updates data when entity is found', async () => {
+        const singleTypeUpdate = jest.fn(() => Promise.resolve({ id: 1 }));
         const documentService = {
-          update: jest.fn(() => Promise.resolve({ id: 1 })),
+          singleType: () => ({ update: singleTypeUpdate }),
         };
 
         const strapi = {
-          documents: jest.fn(() => documentService),
+          documents: documentService,
           query() {
             return { count() {} };
           },
@@ -112,19 +116,20 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate({ data: input });
 
-        expect(documentService.update).toHaveBeenCalledWith({
+        expect(singleTypeUpdate).toHaveBeenCalledWith({
           data: input,
           status: 'published',
         });
       });
 
       test('Delete data when entity is found', async () => {
+        const singleTypeDelete = jest.fn(() => Promise.resolve({ id: 1 }));
         const documentService = {
-          delete: jest.fn(() => Promise.resolve({ id: 1 })),
+          singleType: () => ({ delete: singleTypeDelete }),
         };
 
         const strapi = {
-          documents: jest.fn(() => documentService),
+          documents: documentService,
         };
 
         global.strapi = strapi;
@@ -144,7 +149,7 @@ describe('Default Service', () => {
 
         await service.delete();
 
-        expect(documentService.delete).toHaveBeenCalledWith({
+        expect(singleTypeDelete).toHaveBeenCalledWith({
           status: 'published',
         });
       });
