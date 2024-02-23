@@ -185,6 +185,18 @@ Exposes validation functions to run before performing operations on a Release
 packages/core/content-releases/server/src/services/validation.ts
 ```
 
+### Scheduling
+
+:::caution
+Scheduling is still under development, but you can try it **at your own risk** with future flags. The future flag to enable scheduling is `contentReleasesScheduling`.
+:::
+
+Exposes methods to schedule release date for releases.
+
+```
+packages/core/content-releases/server/src/services/scheduling.ts
+```
+
 ## Migrations
 
 We have two migrations that we run every time we sync the content types.

@@ -3,14 +3,14 @@ import isNaN from 'lodash/isNaN';
 const getFieldName = (stringName: string) =>
   stringName.split('.').filter((string) => isNaN(parseInt(string, 10)));
 
-const getMaxTempKey = (arr: Array<{ __temp_key__?: number }>) => {
+const getMaxTempKey = (arr: Array<{ __temp_key__?: number; id?: number }>) => {
   if (arr.length === 0) {
     return -1;
   }
 
-  const maxTempKey = Math.max(...arr.map((o) => o.__temp_key__ ?? 0));
+  const maxValue = Math.max(...arr.map((o) => Number(o.id ?? o.__temp_key__ ?? 0)));
 
-  return Number.isNaN(maxTempKey) ? -1 : maxTempKey;
+  return Number.isNaN(maxValue) ? -1 : maxValue;
 };
 
 const isFieldTypeNumber = (type: string) => {
