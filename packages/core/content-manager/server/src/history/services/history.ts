@@ -107,8 +107,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
-          page: 1,
-          pageSize: 10,
+          ...params,
           where: {
             $and: [
               { contentType: params.contentType },

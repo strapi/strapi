@@ -52,7 +52,7 @@ export declare namespace GetHistoryVersions {
       contentType: UID.ContentType;
       documentId?: Entity.ID;
       locale?: string;
-    };
+    } & Partial<Pick<Pagination, 'page' | 'pageSize'>>;
   }
 
   export interface Response {

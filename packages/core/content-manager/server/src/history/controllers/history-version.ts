@@ -18,20 +18,21 @@ const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
         throw new errors.ForbiddenError('contentType and documentId are required');
       }
 
-      const params = ctx.query as HistoryVersions.GetHistoryVersions.Request['query'];
-
       /**
        * There are no permissions specifically for history versions,
        * but we need to check that the user can read the content type
        */
       const permissionChecker = getContentManagerService('permission-checker').create({
         userAbility: ctx.state.userAbility,
-        model: params.contentType,
+        model: ctx.query.contentType,
       });
 
       if (permissionChecker.cannot.read()) {
         return ctx.forbidden();
       }
+
+      const params: HistoryVersions.GetHistoryVersions.Request['query'] =
+        await permissionChecker.sanitizeQuery(ctx.query);
 
       const { results, pagination } = await getService(strapi, 'history').findVersionsPage(params);
 
