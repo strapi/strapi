@@ -135,7 +135,7 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
       const contentType = contentTypes[contentTypeUID];
 
       // If attributes have changed, we need to revalidate actions because maybe validations rules are different
-      if (!isEqual(oldContentType.attributes, contentType.attributes)) {
+      if (!isEqual(oldContentType?.attributes, contentType?.attributes)) {
         const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
           where: {
             contentType: contentTypeUID,
