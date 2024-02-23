@@ -10,8 +10,8 @@
  *
  * If there are any test failures after updating this code, it means there is a breaking change that
  * will cause data loss, so beware; do not update the test to match your changes
- 
- * @module utils/identifiers/shortener
+ *
+ * @internal
  */
 
 import crypto from 'node:crypto';
@@ -76,6 +76,7 @@ export function createHash(data: string, len: number): string {
  * @param len - The desired length of the token.
  * @returns The generated token with hash.
  * @throws Error if the length is not a positive integer, or if the length is too short for the token.
+ * @internal
  */
 export function getShortenedName(name: string, len: number) {
   if (!isInteger(len) || len <= 0) {
@@ -100,6 +101,15 @@ export function getShortenedName(name: string, len: number) {
   return `${name.substring(0, availableLength)}${HASH_SEPARATOR}${createHash(name, HASH_LENGTH)}`;
 }
 
+/**
+ * Validates the inputs for the `getNameFromTokens` function. It checks that `maxLength` is a positive integer or zero (indicating no limit)
+ * and verifies that all name tokens are in snake_case format. If any of these validations fail, an error is thrown.
+ *
+ * @param {NameToken[]} nameTokens - Array of name tokens
+ * @param {number} maxLength - The maximum allowed length for the name string; must be a positive integer or 0 for no limit.
+ * @throws {Error} If `maxLength` is not a positive integer or 0, or if any name token is not in snake_case.
+ * @internal
+ */
 function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: number) {
   if (!isInteger(maxLength) || maxLength < 0) {
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
@@ -113,6 +123,19 @@ function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: numb
   });
 }
 
+/**
+ * Constructs a name from an array of name tokens within a specified maximum length. It ensures the final name does not exceed
+ * this limit by selectively compressing tokens marked as compressible. If the name exceeds the maximum length and cannot be
+ * compressed sufficiently, an error is thrown. This function supports dynamic adjustment of token lengths to fit within the
+ * maxLength constraint (that is, it will always make use of all available space), while also ensuring the preservation of
+ * incompressible tokens.
+ *
+ * @param {NameToken[]} nameTokens - Array of name tokens
+ * @param {number} [maxLength=MAX_DB_IDENTIFIER_LENGTH] - Maximum length for the final name string.
+ * @returns {string} The generated name string within maxLength.
+ * @throws {Error} If the name cannot be shortened to meet maxLength.
+ * @internal
+ */
 export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_IDENTIFIER_LENGTH) {
   validateGetNameFromTokensInput(nameTokens, maxLength);
 
