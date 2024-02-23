@@ -8,19 +8,13 @@ const { features } = require('@strapi/strapi/dist/utils/ee');
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (features.isEnabled('cms-content-releases')) {
-    const contentTypeWithDraftAndPublish = (
-      Object.keys(strapi.contentTypes) as Array<Common.UID.ContentType>
-    ).reduce((acc, contentTypeUid) => {
-      const contentType = strapi.contentTypes[contentTypeUid];
-      if (contentType.options?.draftAndPublish) {
-        acc.push(contentTypeUid);
-      }
-      return acc;
-    }, [] as Array<Common.UID.ContentType>);
+    const contentTypesWithDraftAndPublish = Object.keys(strapi.contentTypes).filter(
+      (uid) => strapi.contentTypes[uid]?.options?.draftAndPublish
+    );
 
     // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
-      models: contentTypeWithDraftAndPublish,
+      models: contentTypesWithDraftAndPublish,
 
       async afterDelete(event) {
         try {
