@@ -389,6 +389,7 @@ export const CMReleasesContainer = () => {
                   )}
                   <CheckPermissions permissions={PERMISSIONS.deleteAction}>
                     <ReleaseActionMenu.Root hasTriggerBorder>
+                      <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
                       <ReleaseActionMenu.DeleteReleaseActionItem
                         releaseId={release.id}
                         actionId={release.action.id}
