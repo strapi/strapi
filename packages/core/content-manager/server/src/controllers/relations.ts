@@ -1,4 +1,4 @@
-import { prop, uniq, flow, sortBy, omit } from 'lodash/fp';
+import { prop, uniq, flow, sortBy } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -9,11 +9,8 @@ const { isOneToAny } = relations;
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
-  if (params.filters.$and) {
-    params.filters.$and.push(filtersClause);
-  } else {
-    params.filters.$and = [filtersClause];
-  }
+  params.filters.$and = params.filters.$and || [];
+  params.filters.$and.push(filtersClause);
 };
 
 const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
@@ -43,6 +40,25 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   }
 
   return mainField;
+};
+
+const isNumeric = (value: any): value is number => {
+  const parsed = parseInt(value, 10);
+  return !Number.isNaN(parsed);
+};
+
+/**
+ *
+ */
+const mapResults = (results: Array<any>) => {
+  return results.map((result: any) => {
+    if (result.documentId !== undefined) {
+      result.id = result.documentId;
+      delete result.documentId;
+    }
+
+    return result;
+  });
 };
 
 export default {
@@ -76,9 +92,9 @@ export default {
     let currentEntity = { id: null };
     if (id) {
       // The Id we receive can be a documentId or a numerical entity id
-      if (Number(id)) {
+      if (isNumeric(id)) {
         // TODO is there a better way to distinguish between the two?
-        where.id = Number(id);
+        where.id = id;
       } else {
         where.documentId = id;
       }
@@ -125,6 +141,9 @@ export default {
     )(modelConfig);
 
     const fieldsToSelect = uniq([mainField, PUBLISHED_AT_ATTRIBUTE, 'documentId']);
+    if (locale) {
+      fieldsToSelect.push('locale');
+    }
 
     return {
       attribute,
@@ -171,7 +190,7 @@ export default {
     const queryParams = {
       sort: mainField,
       // cannot select other fields as the user may not have the permissions
-      fields: locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect,
+      fields: fieldsToSelect,
       ...permissionQuery,
     };
 
@@ -231,13 +250,7 @@ export default {
 
     ctx.body = {
       ...res,
-      results: res.results.map((result: any) => {
-        if (result.documentId === undefined) {
-          return result;
-        }
-
-        return { ...omit(['documentId'], result), id: result.documentId };
-      }),
+      results: mapResults(res.results),
     };
   },
 
@@ -337,13 +350,7 @@ export default {
 
     ctx.body = {
       ...page,
-      results: results.map((result: any) => {
-        if (result.documentId === undefined) {
-          return result;
-        }
-
-        return { ...omit(['documentId'], result), id: result.documentId };
-      }),
+      results: mapResults(results),
     };
   },
 };

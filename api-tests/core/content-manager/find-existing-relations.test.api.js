@@ -238,7 +238,7 @@ describe('Relations', () => {
         });
       });
 
-      describe.only.each([
+      describe.each([
         ['products_ow', false],
         ['products_oo', false],
         ['products_om', true],
