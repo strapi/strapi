@@ -1,7 +1,8 @@
-import { Strapi, Documents, Common } from '@strapi/types';
+import { Strapi, Documents, Schema } from '@strapi/types';
 
-import { createContentTypeRepository } from './repository-factory';
+import { createContentTypeRepository } from './repositories/repository-factory';
 import { createMiddlewareManager } from './middlewares';
+import { createSingleTypeRepository } from './repositories/single-type';
 
 /**
  * Repository to :
@@ -20,26 +21,29 @@ import { createMiddlewareManager } from './middlewares';
  *
  */
 // TODO: support global document service middleware & per repo middlewares
-export const createDocumentService = (strapi: Strapi): any => {
-  const repositories = new Map<string, Documents.ServiceInstance>();
+export const createDocumentService = (strapi: Strapi): Documents.Service => {
+  const repositories = new Map<
+    string,
+    Documents.ServiceInstance<Schema.SingleType | Schema.CollectionType>
+  >();
   const middlewares = createMiddlewareManager();
 
-  function factory<TUID extends Common.UID.ContentType>(
-    uid: TUID
-  ): Documents.ServiceInstance<TUID> {
+  const factory = function factory(uid) {
     if (repositories.has(uid)) {
       return repositories.get(uid)!;
     }
 
     const contentType = strapi.contentType(uid);
-    const repository = createContentTypeRepository(contentType);
+    const repository = createContentTypeRepository(uid);
 
     repositories.set(uid, middlewares.wrapObject(repository, { contentType }));
 
     return repository;
-  }
+  } as Documents.Service;
 
   return Object.assign(factory, {
     use: middlewares.use.bind(middlewares),
+    singleType: createSingleTypeRepository,
+    collectionType: createContentTypeRepository,
   });
 };

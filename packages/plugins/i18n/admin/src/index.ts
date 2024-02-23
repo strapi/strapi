@@ -69,25 +69,25 @@ export default {
       return actions;
     });
 
-    // app.injectContentManagerComponent('listView', 'actions', {
-    //   name: 'i18n-locale-filter',
-    //   Component: LocalePicker,
-    // });
+    app.injectContentManagerComponent('listView', 'actions', {
+      name: 'i18n-locale-filter',
+      Component: LocalePicker,
+    });
 
-    // app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-    //   name: 'i18n-delete-bullets-in-modal',
-    //   Component: DeleteModalAdditionalInfo,
-    // });
+    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: DeleteModalAdditionalInfo,
+    });
 
-    // app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
-    //   name: 'i18n-publish-bullets-in-modal',
-    //   Component: PublishModalAdditionalInfo,
-    // });
+    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+      name: 'i18n-publish-bullets-in-modal',
+      Component: PublishModalAdditionalInfo,
+    });
 
-    // app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
-    //   name: 'i18n-unpublish-bullets-in-modal',
-    //   Component: UnpublishModalAdditionalInfo,
-    // });
+    app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
+      name: 'i18n-unpublish-bullets-in-modal',
+      Component: UnpublishModalAdditionalInfo,
+    });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
 

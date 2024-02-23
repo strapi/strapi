@@ -1,9 +1,16 @@
-import type { Common } from '../..';
+import type { Common, Documents, Schema } from '../..';
 import type { ID } from './document-engine';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-enigne';
 
-export type ServiceInstance<
+export type ServiceInstance<TContentType extends Schema.ContentType = Schema.ContentType> =
+  TContentType extends Schema.SingleType
+    ? SingleTypeInstance<TContentType['uid']>
+    : TContentType extends Schema.CollectionType
+    ? CollectionTypeInstance<TContentType['uid']>
+    : SingleTypeInstance<TContentType['uid']> & CollectionTypeInstance<TContentType['uid']>;
+
+export type CollectionTypeInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
 > = {
   findMany: <TParams extends Params.FindMany<TContentTypeUID>>(
@@ -22,11 +29,7 @@ export type ServiceInstance<
   delete: <TParams extends Params.Delete<TContentTypeUID>>(
     documentId: ID,
     params?: TParams
-  ) => Result.Delete<TContentTypeUID, TParams>;
-
-  deleteMany: <TParams extends Params.DeleteMany<TContentTypeUID>>(
-    params: TParams
-  ) => Result.DeleteMany;
+  ) => Result.Delete;
 
   create: <TParams extends Params.Create<TContentTypeUID>>(
     params: TParams
@@ -59,3 +62,31 @@ export type ServiceInstance<
     params?: TParams
   ) => Result.DiscardDraft<TContentTypeUID, TParams>;
 };
+
+export type SingleTypeInstance<
+  TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
+> = {
+  find: <TParams extends Params.FindOne<TContentTypeUID>>(
+    params?: TParams
+  ) => Promise<Documents.Result<TContentTypeUID, TParams>>;
+
+  delete: <TParams extends Params.Delete<TContentTypeUID>>(params?: TParams) => Result.Delete;
+
+  update: <TParams extends Params.Update<TContentTypeUID>>(
+    params: TParams
+  ) => Promise<Documents.Result<TContentTypeUID, TParams>>;
+
+  publish: <TParams extends Params.Publish<TContentTypeUID>>(
+    params?: TParams
+  ) => Promise<Documents.Result<TContentTypeUID, TParams>>;
+
+  unpublish: <TParams extends Params.Unpublish<TContentTypeUID>>(
+    params?: TParams
+  ) => Promise<Documents.Result<TContentTypeUID, TParams>>;
+
+  discardDraft: <TParams extends Params.DiscardDraft<TContentTypeUID>>(
+    params?: TParams
+  ) => Promise<Documents.Result<TContentTypeUID, TParams>>;
+};
+
+export type Any = SingleTypeInstance<any> | CollectionTypeInstance<any>;

@@ -1,4 +1,4 @@
-import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
+import type { LoadedStrapi as Strapi, Common, Schema } from '@strapi/types';
 import { groupBy, pick } from 'lodash/fp';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
@@ -118,7 +118,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: Common.UID.ContentType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(uid: Common.UID.SingleType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
     // The status of all documents should be the same

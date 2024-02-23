@@ -1,54 +1,90 @@
-import type { Schema } from '@strapi/types';
+import type { Schema, Documents } from '@strapi/types';
+import { curry, assoc } from 'lodash/fp';
 
-export const defaultLocale = (
+type Transform = (
   contentType: Schema.SingleType | Schema.CollectionType,
-  params: any
-) => {
+  params: Documents.Params.All
+) => Documents.Params.All;
+
+type AsyncTransform = (
+  contentType: Schema.SingleType | Schema.CollectionType,
+  params: Documents.Params.All
+) => Promise<Documents.Params.All>;
+
+const getDefaultLocale = async (): Promise<string> => {
+  return strapi.plugin('i18n').service('locales').getDefaultLocale();
+};
+
+const defaultLocale: AsyncTransform = async (contentType, params) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
-    return;
+    return params;
   }
 
   if (!params.locale) {
-    // Default to en (TODO: Load default locale from db in i18n)
-    params.locale = 'en';
+    // TODO: Load default locale from db in i18n
+    return assoc('locale', await getDefaultLocale(), params);
   }
+
+  return params;
 };
 
 /**
  * Add locale lookup query to the params
  */
-export const localeToLookup = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: any
-) => {
+const localeToLookup: Transform = (contentType, params) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
-    return;
+    return params;
   }
-
-  const lookup = params.lookup || {};
 
   if (params.locale) {
-    lookup.locale = params.locale;
-    params.lookup = lookup;
+    return assoc(['lookup', 'locale'], params.locale, params);
   }
+
+  return params;
+};
+
+/**
+ * Add locale lookup query to the params
+ */
+const multiLocaleToLookup: Transform = (contentType, params) => {
+  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+    return params;
+  }
+
+  if (params.locale) {
+    if (params.locale === '*') {
+      return params;
+    }
+
+    return assoc(['lookup', 'locale'], params.locale, params);
+  }
+
+  return params;
 };
 
 /**
  * Translate locale status parameter into the data that will be saved
  */
-export const localeToData = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: any
-) => {
+const localeToData: Transform = (contentType, params) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
-    return;
+    return params;
   }
-
-  const data = params.data || {};
 
   if (params.locale) {
-    data.locale = params.locale;
+    return assoc(['data', 'locale'], params.locale, params);
   }
 
-  params.data = data;
+  return params;
+};
+
+const defaultLocaleCurry = curry(defaultLocale);
+const localeToLookupCurry = curry(localeToLookup);
+const multiLocaleToLookupCurry = curry(multiLocaleToLookup);
+const localeToDataCurry = curry(localeToData);
+
+export {
+  defaultLocaleCurry as defaultLocale,
+  localeToLookupCurry as localeToLookup,
+  localeToDataCurry as localeToData,
+  multiLocaleToLookupCurry as multiLocaleToLookup,
 };

@@ -42,10 +42,36 @@ async function initDefaultWorkflow({ workflowsService, stagesService }: any) {
   }
 }
 
+const setRelation = (attributeName: any, target: any) => (contentType: any) => {
+  Object.assign(contentType.attributes, {
+    [attributeName]: {
+      writable: true,
+      private: false,
+      configurable: false,
+      visible: false,
+      useJoinTable: true, // We want a join table to persist data when downgrading to CE
+      type: 'relation',
+      relation: 'oneToOne',
+      target,
+    },
+  });
+
+  return contentType;
+};
+
+const setStageAttribute = setRelation(ENTITY_STAGE_ATTRIBUTE, STAGE_MODEL_UID);
+const setAssigneeAttribute = setRelation(ENTITY_ASSIGNEE_ATTRIBUTE, 'admin::user');
+
+const setReviewWorkflowAttributes = (contentType: any) => {
+  setStageAttribute(contentType);
+  setAssigneeAttribute(contentType);
+};
+
 function extendReviewWorkflowContentTypes({ strapi }: { strapi: Strapi }) {
   const extendContentType = (contentTypeUID: any) => {
     const assertContentTypeCompatibility = (contentType: any) =>
       contentType.collectionName.length <= MAX_CONTENT_TYPE_NAME_LEN;
+
     const incompatibleContentTypeAlert = (contentType: any) => {
       strapi.log.warn(
         `Review Workflow cannot be activated for the content type with the name '${contentType.info.displayName}' because the name exceeds the maximum length of ${MAX_CONTENT_TYPE_NAME_LEN} characters.`
@@ -53,27 +79,11 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Strapi }) {
       return contentType;
     };
 
-    const setRelation = (path: any, target: any) =>
-      set(path, {
-        writable: true,
-        private: false,
-        configurable: false,
-        visible: false,
-        useJoinTable: true, // We want a join table to persist data when downgrading to CE
-        type: 'relation',
-        relation: 'oneToOne',
-        target,
-      });
-
-    const setReviewWorkflowAttributes = pipe([
-      setRelation(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, STAGE_MODEL_UID),
-      setRelation(`attributes.${ENTITY_ASSIGNEE_ATTRIBUTE}`, 'admin::user'),
-    ]);
-
     const extendContentTypeIfCompatible = cond([
       [assertContentTypeCompatibility, setReviewWorkflowAttributes],
       [stubTrue, incompatibleContentTypeAlert],
     ]);
+
     strapi.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
   };
 

@@ -111,14 +111,11 @@ test.describe('Uniqueness', () => {
       await page.waitForURL(LIST_URL);
 
       /**
-       * TODO: this is skipped because it requires the ability to change locales in the UI.
-       */
-      /**
        * Change locale and try to create an entry with the same value as our first entry, this should save successfully
        */
-      // await page.getByRole('combobox', { name: 'Select a locale' }).click();
+      await page.getByRole('combobox', { name: 'Select a locale' }).click();
 
-      // await page.getByText('French (fr)').click();
+      await page.getByText('French (fr)').click();
 
       await page.getByRole('link', { name: 'Create new entry' }).first().click();
 

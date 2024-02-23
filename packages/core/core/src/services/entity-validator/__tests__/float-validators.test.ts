@@ -25,9 +25,11 @@ describe('Float validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: () => ({
-        findFirst: fakeFindFirst,
-      }),
+      db: {
+        query: () => ({
+          findOne: fakeFindFirst,
+        }),
+      },
     } as any;
 
     afterEach(() => {
@@ -154,9 +156,11 @@ describe('Float validator', () => {
       await validator(4);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrFloatUnique: 4 },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrFloatUnique: 4,
+        },
       });
     });
 
@@ -178,14 +182,14 @@ describe('Float validator', () => {
       await validator(5);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: {
+        where: {
           attrFloatUnique: 5,
           id: {
             $ne: 1,
           },
+          locale: 'en',
+          publishedAt: null,
         },
-        locale: 'en',
-        status: 'draft',
       });
     });
   });
