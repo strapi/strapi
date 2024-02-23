@@ -1,11 +1,54 @@
 import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
-import type { DocumentMetadata } from '../../../shared/contracts/collection-types-v5';
+import { groupBy, pick } from 'lodash/fp';
+import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
-export interface DocumentVersionSelector {
+export interface DocumentVersion {
   id: string;
   locale: string;
+  updatedAt: string | null | Date;
   publishedAt: string | null | Date;
-  status?: string;
+}
+
+const AVAILABLE_STATUS_FIELDS = [
+  'id',
+  'locale',
+  'updatedAt',
+  'createdAt',
+  'publishedAt',
+  'createdBy',
+  'updatedBy',
+  'status',
+];
+const AVAILABLE_LOCALES_FIELDS = ['id', 'locale', 'updatedAt', 'createdAt', 'status'];
+
+const CONTENT_MANAGER_STATUS = {
+  PUBLISHED: 'published',
+  DRAFT: 'draft',
+  MODIFIED: 'modified',
+};
+
+/**
+ * TODO: Remove this and make updatedAt dates be equal when publishing on the document-engine
+ * Compares two dates and returns true if the absolute difference between them is less than or equal to the specified threshold.
+ * @param date1 The first date to compare.
+ * @param date2 The second date to compare.
+ * @param threshold The threshold in milliseconds.
+ * @returns True if the absolute difference between the dates is less than or equal to the threshold, false otherwise.
+ */
+function areDatesEqual(
+  date1: Date | string | null,
+  date2: Date | string | null,
+  threshold: number
+): boolean {
+  if (!date1 || !date2) {
+    return false;
+  }
+
+  const time1 = new Date(date1).getTime();
+  const time2 = new Date(date2).getTime();
+  const difference = Math.abs(time1 - time2);
+
+  return difference <= threshold;
 }
 
 /**
@@ -26,55 +69,119 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  async getAvailableLocales(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
-    if (!document.locale) return [];
+  async getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
+    // Group all versions by locale
+    const versionsByLocale = groupBy('locale', allVersions);
 
-    // TODO: Use document service instead of query engine
-    // Find other locales of the document in the same status
-    return strapi.db.query(uid).findMany({
-      where: {
-        documentId: document.id,
-        // Omit current one
-        locale: { $ne: document.locale },
-        // Find locales of the same status
-        publishedAt: document.status === 'published' ? { $ne: null } : null,
+    // Delete the current locale
+    delete versionsByLocale[version.locale];
+
+    // For each locale, get the ones with the same status
+    return Object.values(versionsByLocale).map((localeVersions: DocumentVersion[]) => {
+      const draftVersion = localeVersions.find((v) => v.publishedAt === null);
+      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
+
+      if (!draftVersion) return;
+
+      return {
+        ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
+        status: this.getStatus(draftVersion, otherVersions as any),
+      };
+    });
+  },
+
+  /**
+   * Returns available status of a document for the current locale
+   */
+  async getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
+    // Find the other status of the document
+    const status =
+      version.publishedAt !== null
+        ? CONTENT_MANAGER_STATUS.DRAFT
+        : CONTENT_MANAGER_STATUS.PUBLISHED;
+
+    // Get version that match the current locale and not match the current status
+    const availableStatus = allVersions.find((v) => {
+      const matchLocale = v.locale === version.locale;
+      const matchStatus = status === 'published' ? v.publishedAt !== null : v.publishedAt === null;
+      return matchLocale && matchStatus;
+    });
+
+    if (!availableStatus) return availableStatus;
+
+    // Pick status fields (at fields, status, by fields), use lodash fp
+    return pick(AVAILABLE_STATUS_FIELDS, availableStatus);
+  },
+  /**
+   * Get the available status of many documents, useful for batch operations
+   * @param uid
+   * @param documents
+   * @returns
+   */
+  async getManyAvailableStatus(uid: Common.UID.ContentType, documents: DocumentVersion[]) {
+    if (!documents.length) return [];
+
+    // The status of all documents should be the same
+    const status = documents[0].publishedAt !== null ? 'published' : 'draft';
+    const otherStatus = status === 'published' ? 'draft' : 'published';
+
+    return strapi.documents(uid).findMany({
+      filters: {
+        id: { $in: documents.map((d) => d.id) },
       },
-      select: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
-    }) as unknown as DocumentMetadata['availableLocales'];
-  },
-
-  async getAvailableStatus(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
-    if (!document.locale) return null;
-
-    // Find if the other status of the document is available
-    const otherStatus = document.status === 'published' ? 'draft' : 'published';
-
-    return strapi.documents(uid).findOne(document.id, {
-      locale: document.locale,
       status: otherStatus,
-      fields: ['id', 'updatedAt', 'createdAt', 'publishedAt'],
-    }) as unknown as DocumentMetadata['availableStatus'][0] | null;
+      fields: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+    }) as unknown as DocumentMetadata['availableStatus'];
   },
 
-  // TODO: Modified status
-  async getStatus(uid: Common.UID.ContentType, document: DocumentVersionSelector) {
-    if (document.publishedAt) return 'published';
-    return 'draft';
+  getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
+    const isDraft = version.publishedAt === null;
+
+    // It can only be a draft if there are no other versions
+    if (!otherDocumentStatuses?.length) {
+      return CONTENT_MANAGER_STATUS.DRAFT;
+    }
+
+    // Check if there is only a draft version
+    if (isDraft) {
+      const publishedVersion = otherDocumentStatuses?.find((d) => d.publishedAt !== null);
+      if (!publishedVersion) {
+        return CONTENT_MANAGER_STATUS.DRAFT;
+      }
+    }
+
+    // The draft version is the same as the published version
+    if (areDatesEqual(version.updatedAt, otherDocumentStatuses.at(0)?.updatedAt, 500)) {
+      return CONTENT_MANAGER_STATUS.PUBLISHED;
+    }
+
+    // The draft version is newer than the published version
+    return CONTENT_MANAGER_STATUS.MODIFIED;
   },
 
   async getMetadata(
     uid: Common.UID.ContentType,
-    document: DocumentVersionSelector,
+    version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
-    const documentWithMetadata = {
-      ...document,
-      status: await this.getStatus(uid, document),
-    } as any;
+    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if i18n is disabled
+    // TODO: Sanitize createdBy
+    const versions = await strapi.db.query(uid).findMany({
+      where: { documentId: version.id },
+      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt'],
+      populate: {
+        createdBy: {
+          select: ['id', 'firstname', 'lastname', 'email'],
+        },
+        updatedBy: {
+          select: ['id', 'firstname', 'lastname', 'email'],
+        },
+      },
+    });
 
     const [availableLocalesResult, availableStatusResult] = await Promise.all([
-      availableLocales ? this.getAvailableLocales(uid, documentWithMetadata) : [],
-      availableStatus ? this.getAvailableStatus(uid, documentWithMetadata) : null,
+      availableLocales ? this.getAvailableLocales(version, versions) : [],
+      availableStatus ? this.getAvailableStatus(version, versions) : null,
     ]);
 
     return {
@@ -90,15 +197,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    */
   async formatDocumentWithMetadata(
     uid: Common.UID.ContentType,
-    document: DocumentVersionSelector,
+    document: DocumentVersion,
     opts: GetMetadataOptions = {}
   ) {
     if (!document) return document;
 
-    // TODO: Sanitize output of metadata
-    // @ts-expect-error -  TODO: Return { data, meta } format when UI is ready
-    document.__meta__ = await this.getMetadata(uid, document, opts);
+    const meta = await this.getMetadata(uid, document, opts);
 
-    return document;
+    // TODO: Sanitize output of metadata
+    return {
+      data: {
+        ...document,
+        // Add status to the document
+        status: this.getStatus(document, meta.availableStatus as any),
+      },
+      meta,
+    };
   },
 });

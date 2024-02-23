@@ -6,7 +6,7 @@ export default (restrictedFields: string[] | null = null): Visitor =>
   ({ key, path: { attribute: path } }) => {
     // all fields
     if (restrictedFields === null) {
-      throwInvalidParam({ key });
+      throwInvalidParam({ key, path });
     }
 
     // Throw on invalid formats
@@ -18,7 +18,7 @@ export default (restrictedFields: string[] | null = null): Visitor =>
 
     // if an exact match was found
     if (restrictedFields.includes(path as string)) {
-      throwInvalidParam({ key });
+      throwInvalidParam({ key, path });
     }
 
     // nested matches
@@ -26,6 +26,6 @@ export default (restrictedFields: string[] | null = null): Visitor =>
       path?.toString().startsWith(`${allowedPath}.`)
     );
     if (isRestrictedNested) {
-      throwInvalidParam({ key });
+      throwInvalidParam({ key, path });
     }
   };

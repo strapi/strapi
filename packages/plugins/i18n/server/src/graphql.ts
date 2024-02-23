@@ -1,6 +1,6 @@
 import { prop, propEq, identity, merge } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Strapi } from '@strapi/strapi';
 
 const { ValidationError } = errors;
 

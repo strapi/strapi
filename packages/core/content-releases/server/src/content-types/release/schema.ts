@@ -26,6 +26,12 @@ export default {
     releasedAt: {
       type: 'datetime',
     },
+    scheduledAt: {
+      type: 'datetime',
+    },
+    timezone: {
+      type: 'string',
+    },
     actions: {
       type: 'relation',
       relation: 'oneToMany',

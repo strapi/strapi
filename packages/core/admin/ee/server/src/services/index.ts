@@ -2,6 +2,7 @@ import auth from './auth';
 import passport from './passport';
 import role from './role';
 import user from './user';
+import metrics from './metrics';
 import seatEnforcement from './seat-enforcement';
 import workflows from './review-workflows/workflows';
 import stages from './review-workflows/stages';
@@ -18,6 +19,7 @@ export default {
   passport,
   role,
   user,
+  metrics,
   'seat-enforcement': seatEnforcement,
   workflows,
   stages,

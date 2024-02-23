@@ -8,7 +8,7 @@ const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constant
 type MorphArray = Array<{ __type: string }>;
 
 export default (auth: unknown): Visitor =>
-  async ({ data, key, attribute, schema }) => {
+  async ({ data, key, attribute, schema, path }) => {
     if (!attribute) {
       return;
     }
@@ -25,7 +25,7 @@ export default (auth: unknown): Visitor =>
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
         if (!isAllowed) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       }
     };
@@ -37,7 +37,7 @@ export default (auth: unknown): Visitor =>
 
       // If the authenticated user don't have access to any of the scopes
       if (!isAllowed) {
-        throwInvalidParam({ key });
+        throwInvalidParam({ key, path: path.attribute });
       }
     };
 
