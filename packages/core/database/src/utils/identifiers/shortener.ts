@@ -1,7 +1,8 @@
-import crypto from 'node:crypto';
-import _ from 'lodash/fp';
-
 /**
+ * @fileoverview This file contains utility functions for shortening identifiers for use in a database schema.
+ * The functions in this file are used to generate shorter names for database tables and columns
+ * to avoid breaking the constraints of databases.
+ *
  * IMPORTANT
  * Any changes here that result in a different output string from any of the naming methods will
  * cause the schema creation on Strapi bootstrap to delete data it doesn't recognize because the name
@@ -9,7 +10,12 @@ import _ from 'lodash/fp';
  *
  * If there are any test failures after updating this code, it means there is a breaking change that
  * will cause data loss, so beware; do not update the test to match your changes
+ 
+ * @module utils/identifiers/shortener
  */
+
+import crypto from 'node:crypto';
+import _ from 'lodash/fp';
 
 // TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
