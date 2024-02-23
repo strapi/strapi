@@ -113,9 +113,31 @@ describe('identifiers', () => {
       expect(name).toEqual('1234567890_12345_links');
     });
 
+    test('supports strings with separator in them already', () => {
+      const name = getNameFromTokens(
+        [
+          { name: '1234_56789', compressible: true },
+          { name: '123_4', compressible: true },
+          { name: 'links', compressible: false },
+        ],
+        22
+      );
+      expect(name).toEqual('1234_56789_123_4_links');
+    });
+
     test('shortens string that does not fit in min length (one compressible)', () => {
       const name = getNameFromTokens([{ name: '123456789012345', compressible: true }], 13);
       expect(name).toEqual('1234567878db8');
+    });
+
+    test('shortens strings with separator in them already (last char before hash)', () => {
+      const name = getNameFromTokens([{ name: '1234567_9012345', compressible: true }], 13);
+      expect(name).toEqual('1234567_47b4e');
+    });
+
+    test('shortens strings with separator in them already (past the hash)', () => {
+      const name = getNameFromTokens([{ name: '12345678_012345', compressible: true }], 13);
+      expect(name).toEqual('12345678867f6');
     });
 
     test('returns original string when it fits (one compressible)', () => {
@@ -200,7 +222,7 @@ describe('identifiers', () => {
 
     test('throws when incompressible string cannot fit', () => {
       expect(() => getNameFromTokens([{ name: '123456', compressible: false }], 5)).toThrow(
-        'incompressible string length greater than maxLength'
+        'sum of length of incompressible strings length is greater than maxLength'
       );
     });
 
@@ -213,7 +235,7 @@ describe('identifiers', () => {
           ],
           12
         )
-      ).toThrow('incompressible string length greater than maxLength');
+      ).toThrow('sum of length of incompressible strings length is greater than maxLength');
     });
 
     test('shortens strings that result in exactly maxLength (three compressible, suffix)', () => {

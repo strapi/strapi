@@ -118,7 +118,7 @@ function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: numb
   // Ensure all tokens are in snake_case
   nameTokens.forEach((token) => {
     if (token.name !== snakeCase(token.name)) {
-      throw new Error(`all names must already be in snake_case; received ${token.name}`);
+      throw new Error(`all names must be valid snake_case; received ${token.name}`);
     }
   });
 }
