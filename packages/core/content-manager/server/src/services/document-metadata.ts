@@ -4,6 +4,7 @@ import type { DocumentMetadata } from '../../../shared/contracts/collection-type
 
 export interface DocumentVersion {
   id: string;
+  documentId: string;
   locale: string;
   updatedAt: string | null | Date;
   publishedAt: string | null | Date;
@@ -79,7 +80,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     // For each locale, get the ones with the same status
     return Object.values(versionsByLocale).map((localeVersions: DocumentVersion[]) => {
       const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
+      const otherVersions = localeVersions.filter((v) => v.documentId !== draftVersion?.documentId);
 
       if (!draftVersion) return;
 
@@ -127,7 +128,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return strapi.documents(uid).findMany({
       filters: {
-        id: { $in: documents.map((d) => d.id) },
+        id: { $in: documents.map((d) => d.documentId) },
       },
       status: otherStatus,
       fields: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
@@ -167,8 +168,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if i18n is disabled
     // TODO: Sanitize createdBy
     const versions = await strapi.db.query(uid).findMany({
-      where: { documentId: version.id },
-      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt'],
+      where: { documentId: version.documentId },
+      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt', 'documentId'],
       populate: {
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],

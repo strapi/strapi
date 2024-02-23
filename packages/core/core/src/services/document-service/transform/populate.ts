@@ -22,7 +22,7 @@ export const transformPopulate = async (data: Data, opts: Options) => {
 
       /*
         If the attribute is a relation
-        Look for filters or fields in the value 
+        Look for filters or fields in the value
         and apply the relevant transformation to these objects
       */
       if ('filters' in value) {

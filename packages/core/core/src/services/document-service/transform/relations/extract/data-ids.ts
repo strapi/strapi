@@ -6,8 +6,6 @@ import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
 
-type ExtractedId = LongHandDocument;
-
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
@@ -43,7 +41,7 @@ const handlePrimitive = (
  */
 const extractRelationIds = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>
-): ExtractedId[] => {
+): LongHandDocument[] => {
   const ids = handlePrimitive(relation);
   if (!isObject(relation)) return ids;
 

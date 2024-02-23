@@ -43,7 +43,7 @@ export const transformFilters = async (data: Data, opts: Options) => {
           and the value is an object
           and the object contains an id field
           then we replace the value with the documentId
-  
+
           If the value is an array of objects
           we apply the same logic to each object in the array
         */
