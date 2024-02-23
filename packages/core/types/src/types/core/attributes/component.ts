@@ -3,7 +3,7 @@ import type { Utils } from '../..';
 
 export interface ComponentProperties<
   TComponentUID extends Common.UID.Component,
-  TRepeatable extends Utils.Expression.BooleanValue = Utils.Expression.False
+  TRepeatable extends Utils.Expression.BooleanValue = Utils.Expression.BooleanValue
 > {
   component: TComponentUID;
   repeatable?: TRepeatable;
@@ -11,7 +11,7 @@ export interface ComponentProperties<
 
 export type Component<
   TComponentUID extends Common.UID.Component = Common.UID.Component,
-  TRepeatable extends Utils.Expression.BooleanValue = Utils.Expression.False
+  TRepeatable extends Utils.Expression.BooleanValue = Utils.Expression.BooleanValue
 > = Attribute.OfType<'component'> &
   // Component Properties
   ComponentProperties<TComponentUID, TRepeatable> &
@@ -27,7 +27,16 @@ export type ComponentValue<
   TComponentUID extends Common.UID.Component,
   TRepeatable extends Utils.Expression.BooleanValue
 > = Attribute.GetValues<TComponentUID> extends infer TValues
-  ? Utils.Expression.If<TRepeatable, TValues[], TValues>
+  ? Utils.Expression.MatchFirst<
+      [
+        // Repeatable component
+        [Utils.Expression.IsTrue<TRepeatable>, TValues[]],
+        // Single component
+        [Utils.Expression.IsFalse<TRepeatable>, TValues]
+      ],
+      // If TRepeatable is neither true nor false, then return every possible types
+      TValues[] | TValues
+    >
   : never;
 
 export type GetComponentValue<TAttribute extends Attribute.Attribute> =

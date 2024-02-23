@@ -61,7 +61,6 @@ export const getName = (names: NameInput, options: NameOptions = {}) => {
  * TABLES
  */
 
-// Get a base table name for a model
 export const getTableName = (name: string, options?: NameOptions) => {
   const tokens = [
     {
@@ -159,6 +158,7 @@ export const getOrderFkIndexName = (names: NameInput) => {
 export const getOrderInverseFkIndexName = (names: NameInput) => {
   return getName(names, { suffix: 'order_inv_fk' });
 };
+
 export const getUniqueIndexName = (names: NameInput) => {
   return getName(names, { suffix: 'unique' });
 };

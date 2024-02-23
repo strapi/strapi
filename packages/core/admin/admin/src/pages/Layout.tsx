@@ -135,8 +135,8 @@ const AdminLayout = () => {
     return <LoadingIndicatorPage />;
   }
 
-  const refetchPermissions = () => {
-    refetch();
+  const refetchPermissions = async () => {
+    await refetch();
   };
 
   return (

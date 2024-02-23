@@ -59,9 +59,7 @@ yargs
          * Publishing all packages to the yalc store
          */
         console.log('Running yalc...');
-        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')], {
-          stdio: 'inherit',
-        });
+        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')]);
         console.log('Complete');
 
         const loadDomainConfigs = async (domain) => {
@@ -108,7 +106,9 @@ yargs
         let currentTestApps = [];
 
         try {
-          currentTestApps = await fs.readdir(testAppDirectory);
+          currentTestApps = await fs
+            .readdir(testAppDirectory)
+            .then((paths) => paths.map((appPath) => path.join(testAppDirectory, appPath)));
         } catch (err) {
           // no test apps exist, okay to fail silently
         }
@@ -120,16 +120,17 @@ yargs
          */
         if (setup || currentTestApps.length < testAppsRequired) {
           /**
-           * this will effectively clean the entire directory before hand
+           * this will effectively clean the entire directory beforehand
            * as opposed to cleaning the ones we aim to spawn.
            */
           await Promise.all(
-            currentTestApps.map(async (testAppName) => {
-              const appPath = path.join(testAppDirectory, testAppName);
+            currentTestApps.map(async (appPath) => {
               console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
               await cleanTestApp(appPath);
             })
           );
+
+          currentTestApps = [];
 
           /**
            * Generate the test apps and modify the configuration as needed
@@ -160,6 +161,8 @@ yargs
               const envFile = (await fs.readFile(pathToEnv)).toString();
               const envWithoutPort = envFile.replace('PORT=1337', '');
               await fs.writeFile(pathToEnv, envWithoutPort);
+
+              currentTestApps.push(appPath);
             })
           );
 
@@ -188,13 +191,14 @@ yargs
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
+          let failingTests = 0;
           await Promise.all(
             batch.map(async (domain) => {
               const config = domainConfigs[domain];
 
               if (availableTestApps.length < config.testApps) {
                 console.error('Not enough test apps available; aborting');
-                process.exit();
+                process.exit(1);
               }
 
               // claim testApps for this domain to use
@@ -208,32 +212,43 @@ yargs
               try {
                 const env = {
                   TEST_APPS: testApps.join(','),
+                  JWT_SECRET: 'test-jwt-secret',
                 };
-                const domainDir = path.join(testsDir, domain);
-                console.log('Running jest for domain', domain, 'with env', env, 'in', domainDir);
-                // run the command 'jest --rootDir <domainDir>'
-                const { stdout, stderr } = await execa('jest', ['--rootDir', domainDir], {
-                  cwd: domainDir, // run from the domain directory
-                  env, // pass it our custom env values
-                });
 
-                // TODO: determine the best way to log this for the CI (stream it rather than wait for completion)
-                if (stdout) {
-                  console.log(stdout);
-                }
-                if (stderr) {
-                  console.log(stderr);
-                }
+                const domainDir = path.join(testsDir, domain);
+                console.log('Running jest for domain', domain, 'in', domainDir);
+                // run the command 'jest --rootDir <domainDir>'
+                await execa(
+                  'jest',
+                  [
+                    '--config',
+                    '../../../jest.config.cli.js',
+                    '--rootDir',
+                    domainDir,
+                    '--color',
+                    '--verbose',
+                    '--runInBand', // tests must not run concurrently
+                  ],
+                  {
+                    stdio: 'inherit',
+                    cwd: domainDir, // run from the domain directory
+                    env, // pass it our custom env values
+                    timeout: 2 * 60 * 1000, // 2 minutes
+                  }
+                );
               } catch (err) {
                 // If any tests fail
                 console.error('Test suite failed for', domain);
-                // TODO: determine how to integrate this with the CI, probably ending the process and returning an error exit code
+                failingTests += 1;
               }
 
               // make them available again for the next batch
               availableTestApps.push(...testApps);
             })
           );
+          if (failingTests > 0) {
+            throw new Error(`${failingTests} tests failed`);
+          }
         }
       } catch (err) {
         console.error(chalk.red('Error running CLI tests:'));

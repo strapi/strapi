@@ -340,8 +340,6 @@ describe('metadata', () => {
           } catch (createError) {
             error = createError;
           }
-          // const mapAsArray = Array.from(results.entries());
-          // console.log('metadata', JSON.stringify(mapAsArray, null, 2));
         });
 
         test('does not throw on valid data', () => {

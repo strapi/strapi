@@ -17,18 +17,22 @@ import type { Entity } from '@strapi/types';
  * RelationSingle
  * -----------------------------------------------------------------------------------------------*/
 
-interface RelationSingleProps extends Pick<CellContentProps, 'metadatas' | 'content'> {}
+interface RelationSingleProps extends Pick<CellContentProps, 'mainField' | 'content'> {}
 
-const RelationSingle = ({ metadatas, content }: RelationSingleProps) => {
-  return (
-    <TypographyMaxWidth textColor="neutral800" ellipsis>
-      <CellValue
-        // integer is default because that's what the id will be.
-        type={metadatas.mainField?.type ?? 'integer'}
-        value={metadatas.mainField?.name ? content[metadatas.mainField?.name] : content.id}
-      />
-    </TypographyMaxWidth>
-  );
+/**
+ * TODO: fix this component – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
+ */
+const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
+  return null;
+  // return (
+  //   <TypographyMaxWidth textColor="neutral800" ellipsis>
+  //     <CellValue
+  //       // integer is default because that's what the id will be.
+  //       type={metadatas.mainField?.type ?? 'integer'}
+  //       value={metadatas.mainField?.name ? content[metadatas.mainField?.name] : content.id}
+  //     />
+  //   </TypographyMaxWidth>
+  // );
 };
 
 const TypographyMaxWidth = styled(Typography)`
@@ -39,108 +43,113 @@ const TypographyMaxWidth = styled(Typography)`
  * RelationMultiple
  * -----------------------------------------------------------------------------------------------*/
 
-interface RelationMultipleProps extends Pick<CellContentProps, 'metadatas' | 'name' | 'content'> {
+interface RelationMultipleProps extends Pick<CellContentProps, 'mainField' | 'name' | 'content'> {
   entityId: Entity.ID;
   uid: string;
 }
 
-const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationMultipleProps) => {
-  const { formatMessage } = useIntl();
-  const { notifyStatus } = useNotifyAT();
-  const [isOpen, setIsOpen] = React.useState(false);
+/**
+ * TODO: fix this component – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
+ */
+const RelationMultiple = ({ mainField, name, entityId, content, uid }: RelationMultipleProps) => {
+  return null;
 
-  const [fieldName] = name.split('.');
+  // const { formatMessage } = useIntl();
+  // const { notifyStatus } = useNotifyAT();
+  // const [isOpen, setIsOpen] = React.useState(false);
 
-  const { data, isLoading } = useGetRelationsQuery(
-    {
-      model: uid,
-      id: entityId.toString(),
-      targetField: fieldName,
-    },
-    {
-      skip: !isOpen,
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  // const [fieldName] = name.split('.');
 
-  React.useEffect(() => {
-    if (data) {
-      notifyStatus(
-        formatMessage({
-          id: getTranslation('DynamicTable.relation-loaded'),
-          defaultMessage: 'Relations have been loaded',
-        })
-      );
-    }
-  }, [data, formatMessage, notifyStatus]);
+  // const { data, isLoading } = useGetRelationsQuery(
+  //   {
+  //     model: uid,
+  //     id: entityId.toString(),
+  //     targetField: fieldName,
+  //   },
+  //   {
+  //     skip: !isOpen,
+  //     refetchOnMountOrArgChange: true,
+  //   }
+  // );
 
-  return (
-    <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
-      <MenuTrigger onClick={(e) => e.stopPropagation()}>
-        <Flex gap={1} wrap="nowrap">
-          <Badge>{content.count}</Badge>
-          {formatMessage(
-            {
-              id: 'content-manager.containers.ListPage.items',
-              defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
-            },
-            { number: content.count }
-          )}
-        </Flex>
-      </MenuTrigger>
-      <Menu.Content>
-        {isLoading && (
-          <Menu.Item disabled>
-            <Loader small>
-              {formatMessage({
-                id: getTranslation('ListViewTable.relation-loading'),
-                defaultMessage: 'Relations are loading',
-              })}
-            </Loader>
-          </Menu.Item>
-        )}
+  // React.useEffect(() => {
+  //   if (data) {
+  //     notifyStatus(
+  //       formatMessage({
+  //         id: getTranslation('DynamicTable.relation-loaded'),
+  //         defaultMessage: 'Relations have been loaded',
+  //       })
+  //     );
+  //   }
+  // }, [data, formatMessage, notifyStatus]);
 
-        {data?.results && (
-          <>
-            {data.results.map((entry) => (
-              <Menu.Item key={entry.id} disabled>
-                <TypographyMaxWidth ellipsis>
-                  <CellValue
-                    type={metadatas.mainField?.type ?? 'integer'}
-                    // @ts-expect-error – can't use a string to index the RelationResult object.
-                    value={metadatas.mainField?.name ? entry[metadatas.mainField.name] : entry.id}
-                  />
-                </TypographyMaxWidth>
-              </Menu.Item>
-            ))}
+  // return (
+  //   <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
+  //     <MenuTrigger onClick={(e) => e.stopPropagation()}>
+  //       <Flex gap={1} wrap="nowrap">
+  //         <Badge>{content.count}</Badge>
+  //         {formatMessage(
+  //           {
+  //             id: 'content-manager.containers.list.items',
+  //             defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
+  //           },
+  //           { number: content.count }
+  //         )}
+  //       </Flex>
+  //     </MenuTrigger>
+  //     <Menu.Content>
+  //       {isLoading && (
+  //         <Menu.Item disabled>
+  //           <Loader small>
+  //             {formatMessage({
+  //               id: getTranslation('ListViewTable.relation-loading'),
+  //               defaultMessage: 'Relations are loading',
+  //             })}
+  //           </Loader>
+  //         </Menu.Item>
+  //       )}
 
-            {data?.pagination && data?.pagination.total > 10 && (
-              <Menu.Item
-                aria-disabled
-                aria-label={formatMessage({
-                  id: getTranslation('ListViewTable.relation-more'),
-                  defaultMessage: 'This relation contains more entities than displayed',
-                })}
-              >
-                <Typography>…</Typography>
-              </Menu.Item>
-            )}
-          </>
-        )}
-      </Menu.Content>
-    </Menu.Root>
-  );
+  //       {data?.results && (
+  //         <>
+  //           {data.results.map((entry) => (
+  //             <Menu.Item key={entry.id} disabled>
+  //               <TypographyMaxWidth ellipsis>
+  //                 <CellValue
+  //                   type={metadatas.mainField?.type ?? 'integer'}
+  //                   // @ts-expect-error – can't use a string to index the RelationResult object.
+  //                   value={metadatas.mainField?.name ? entry[metadatas.mainField.name] : entry.id}
+  //                 />
+  //               </TypographyMaxWidth>
+  //             </Menu.Item>
+  //           ))}
+
+  //           {data?.pagination && data?.pagination.total > 10 && (
+  //             <Menu.Item
+  //               aria-disabled
+  //               aria-label={formatMessage({
+  //                 id: getTranslation('ListViewTable.relation-more'),
+  //                 defaultMessage: 'This relation contains more entities than displayed',
+  //               })}
+  //             >
+  //               <Typography>…</Typography>
+  //             </Menu.Item>
+  //           )}
+  //         </>
+  //       )}
+  //     </Menu.Content>
+  //   </Menu.Root>
+  // );
 };
 
 /**
  * TODO: this needs to be solved in the Design-System
  */
-const MenuTrigger = styled(Menu.Trigger)`
-  svg {
-    width: ${6 / 16}rem;
-    height: ${4 / 16}rem;
-  }
-`;
+// const MenuTrigger = styled(Menu.Trigger)`
+//   svg {
+//     width: ${6 / 16}rem;
+//     height: ${4 / 16}rem;
+//   }
+// `;
 
 export { RelationSingle, RelationMultiple };
 export type { RelationSingleProps, RelationMultipleProps };

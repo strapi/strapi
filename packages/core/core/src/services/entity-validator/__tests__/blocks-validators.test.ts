@@ -21,6 +21,16 @@ const validParagraph = [
         url: 'https://strapi.io',
         children: [{ type: 'text', text: 'Strapi' }],
       },
+      {
+        type: 'link',
+        url: '/strapi',
+        children: [{ type: 'text', text: 'Strapi relative link' }],
+      },
+      {
+        type: 'link',
+        url: 'mailto:info@strapi.io',
+        children: [{ type: 'text', text: 'Strapi Email' }],
+      },
     ],
   },
 ];
