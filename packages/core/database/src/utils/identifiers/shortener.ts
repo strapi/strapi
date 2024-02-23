@@ -71,6 +71,7 @@ export function createHash(data: string, len: number): string {
  * @returns The generated token with hash.
  * @throws Error if the length is not a positive integer, or if the length is too short for the token.
  */
+export function getShortenedName(name: string, len: number) {
   if (!_.isInteger(len) || len <= 0) {
     throw new Error(`tokenWithHash length must be a positive integer, received ${len}`);
   }
@@ -197,7 +198,7 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   const shortenedName = nameTokens
     .map((token) => {
       if (token.compressible && 'allocatedLength' in token && token.allocatedLength !== undefined) {
-        return tokenWithHash(token.name, token.allocatedLength);
+        return getShortenedName(token.name, token.allocatedLength);
       }
       return token.name;
     })

@@ -5,7 +5,7 @@ import {
   MIN_TOKEN_LENGTH,
   createHash,
   getNameFromTokens,
-  tokenWithHash,
+  getShortenedName,
 } from '../shortener';
 
 describe('identifiers', () => {
@@ -52,37 +52,39 @@ describe('identifiers', () => {
 
   describe('tokenWithHash', () => {
     test('does not add hash when len == input length', () => {
-      const res = tokenWithHash('1234567890', 10);
+      const res = getShortenedName('1234567890', 10);
       expect(res).toEqual('1234567890');
     });
     test('returns original string when len > input length', () => {
-      const res = tokenWithHash('1234567890', 100);
+      const res = getShortenedName('1234567890', 100);
       expect(res).toEqual('1234567890');
     });
     test('throws when len < HASH_LENGTH + MIN_TOKEN_LENGTH', () => {
-      expect(() => tokenWithHash('1234567890', HASH_LENGTH + MIN_TOKEN_LENGTH - 1)).toThrow(
+      expect(() => getShortenedName('1234567890', HASH_LENGTH + MIN_TOKEN_LENGTH - 1)).toThrow(
         'length for part of identifier too short, minimum is hash length (5) plus min token length (3), received 7'
       );
     });
     test('adds hash when len < input length (with correct length)', () => {
       const len = 9;
-      const res = tokenWithHash('1234567890', len);
+      const res = getShortenedName('1234567890', len);
       expect(res).toEqual('1234cd65a');
       expect(res.length).toBe(len);
     });
     test('adds hash when len == HASH_LENGTH + MIN_TOKEN_LENGTH', () => {
-      const res = tokenWithHash('1234567890', 9);
+      const res = getShortenedName('1234567890', 9);
       expect(res).toEqual('1234cd65a');
     });
     test('throws when len === 0', () => {
-      expect(() => tokenWithHash('1234567890', 0)).toThrow('length must be a positive integer');
+      expect(() => getShortenedName('1234567890', 0)).toThrow('length must be a positive integer');
     });
     test('throws when len < 0', () => {
-      expect(() => tokenWithHash('1234567890', -3)).toThrow('length must be a positive integer');
+      expect(() => getShortenedName('1234567890', -3)).toThrow('length must be a positive integer');
     });
     test('throws when len invalid data type', () => {
       // @ts-expect-error test bad input type
-      expect(() => tokenWithHash('1234567890', '10')).toThrow('length must be a positive integer');
+      expect(() => getShortenedName('1234567890', '10')).toThrow(
+        'length must be a positive integer'
+      );
     });
   });
   describe('getNameFromTokens', () => {
