@@ -15,7 +15,7 @@
  */
 
 import crypto from 'node:crypto';
-import { partition, isInteger, sumBy } from 'lodash/fp';
+import { partition, isInteger, sumBy, snakeCase } from 'lodash/fp';
 
 // TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
@@ -119,7 +119,9 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
 
-  const fullLengthName = nameTokens.map((token) => token.name).join(IDENTIFIER_SEPARATOR);
+  const fullLengthName = nameTokens
+    .map((token) => snakeCase(token.name))
+    .join(IDENTIFIER_SEPARATOR);
 
   // if it fits, or maxLength is disabled, return full length string
   if (fullLengthName.length <= maxLength || maxLength === 0) {
