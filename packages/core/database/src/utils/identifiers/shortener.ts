@@ -5,7 +5,7 @@
  *
  * IMPORTANT
  * Any changes here that result in a different output string from any of the naming methods will
- * cause the schema creation on Strapi bootstrap to delete data it doesn't recognize because the name
+ * cause the schema creation to delete data it doesn't recognize because the name
  * is different.
  *
  * If there are any test failures after updating this code, it means there is a breaking change that
