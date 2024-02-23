@@ -157,7 +157,7 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
 
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   if (totalIncompressibleLength + totalSeparatorsLength > maxLength) {
-    throw new Error('incompressible string length greater than maxLength');
+    throw new Error('sum of length of incompressible strings length is greater than maxLength');
   }
 
   const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
