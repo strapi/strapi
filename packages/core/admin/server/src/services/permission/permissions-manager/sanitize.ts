@@ -21,7 +21,7 @@ import { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } from '@st
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const {
-  visitors: { removePassword },
+  visitors: { removePassword, expandWildcardPopulate },
 } = sanitize;
 
 const {
@@ -86,6 +86,7 @@ export default ({ action, ability, model }: any) => {
     );
 
     const sanitizePopulate = pipeAsync(
+      traverse.traverseQueryPopulate(expandWildcardPopulate, { schema }),
       traverse.traverseQueryPopulate(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
       traverse.traverseQueryPopulate(omitHiddenFields, { schema }),
@@ -242,12 +243,7 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
-    ]);
+    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
   };
 
   const getOutputFields = (fields = []) => {

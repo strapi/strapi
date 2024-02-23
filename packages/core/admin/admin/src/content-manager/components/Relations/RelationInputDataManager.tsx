@@ -236,7 +236,7 @@ const RelationInputDataManager = ({
 
   const handleRelationConnect = (relation: Contracts.Relations.RelationResult) => {
     /**
-     * Any relation being added to the store should be normalized so it has it's link.
+     * Any relation being added to the store should be normalized so it has its link.
      */
     const normalizedRelation = normalizeRelation(relation, {
       mainFieldName: mainField.name,
@@ -350,7 +350,7 @@ const RelationInputDataManager = ({
     (!isFieldAllowed && isCreatingEntry) ||
     (!isCreatingEntry && !isFieldAllowed && !isFieldReadable)
   ) {
-    return <NotAllowedInput name={name} intlLabel={intlLabel} labelAction={labelAction} />;
+    return <NotAllowedInput name={name} label={formatMessage(intlLabel)} type="relation" />;
   }
 
   /**

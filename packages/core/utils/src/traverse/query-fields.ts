@@ -6,7 +6,7 @@ const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
 const fields = traverseFactory()
-  // Interecept array of strings
+  // Intercept array of strings
   .intercept(isStringArray, async (visitor, options, fields, { recurse }) => {
     return Promise.all(fields.map((field) => recurse(visitor, options, field)));
   })

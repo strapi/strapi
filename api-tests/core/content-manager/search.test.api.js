@@ -131,7 +131,7 @@ const bedFixtures = [
   },
 ];
 
-const bedAttrs = describe('Search query', () => {
+describe('Search query', () => {
   beforeAll(async () => {
     await builder.addContentType(bedModel).addFixtures(bedModel.singularName, bedFixtures).build();
 

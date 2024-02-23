@@ -19,7 +19,7 @@ const sendDidChangeInterfaceLanguage = async () => {
   strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
 };
 
-const sendUpdateProjectInformation = async () => {
+const sendUpdateProjectInformation = async (strapi: Strapi) => {
   const numberOfActiveAdminUsers = await getService('user').count({ isActive: true });
   const numberOfAdminUsers = await getService('user').count();
 
@@ -30,7 +30,7 @@ const sendUpdateProjectInformation = async () => {
 
 const startCron = (strapi: Strapi) => {
   strapi.cron.add({
-    '0 0 0 * * *': () => sendUpdateProjectInformation(),
+    '0 0 0 * * *': () => sendUpdateProjectInformation(strapi),
   });
 };
 

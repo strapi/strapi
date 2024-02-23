@@ -144,6 +144,10 @@
     "cats": {
       "type": "dynamiczone",
       "components": ["basic.relation", "basic.simple"]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "short_text"
     }
   }
 }

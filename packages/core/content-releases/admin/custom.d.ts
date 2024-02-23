@@ -16,6 +16,7 @@ declare global {
       };
       flags: {
         nps?: boolean;
+        promoteEE?: boolean;
       };
       projectType: 'Community' | 'Enterprise';
       telemetryDisabled: boolean;

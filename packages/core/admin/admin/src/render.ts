@@ -7,7 +7,10 @@ import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 import type { FeaturesService } from '@strapi/types';
 
 interface RenderAdminArgs {
-  customisations: StrapiAppConstructorArgs['adminConfig'];
+  customisations: {
+    bootstrap?: (app: StrapiApp) => Promise<void> | void;
+    config?: StrapiAppConstructorArgs['config'];
+  };
   plugins: StrapiAppConstructorArgs['appPlugins'];
   features?: FeaturesService['config'];
 }
@@ -85,14 +88,13 @@ const renderAdmin = async (
   }
 
   const app = new StrapiApp({
-    adminConfig: customisations,
+    config: customisations?.config,
     appPlugins: plugins,
   });
 
-  await app.bootstrapAdmin();
-  await app.initialize();
-  await app.bootstrap();
-  await app.loadTrads();
+  await app.register();
+  await app.bootstrap(customisations?.bootstrap);
+  await app.loadTrads(customisations?.config?.translations);
 
   createRoot(mountNode).render(app.render());
 

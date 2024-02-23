@@ -50,6 +50,9 @@ describe('CRUD locales', () => {
   afterAll(async () => {
     await localeService.setDefaultLocale({ code: 'en' });
 
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -395,7 +398,9 @@ describe('CRUD locales', () => {
     });
 
     test('Delete a locale and entities in this locale', async () => {
-      const { body: frenchProduct } = await rq({
+      const {
+        body: { data: frenchProduct },
+      } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
         qs: { locale: 'fr-FR' },

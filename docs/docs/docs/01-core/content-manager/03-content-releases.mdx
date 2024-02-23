@@ -1,0 +1,20 @@
+---
+title: Content Releases
+description: Guide for content releases in the content-manager.
+tags:
+  - content-manager
+  - content-releases
+---
+
+## Summary
+
+Content releases is an enterprise feature so you need a valid license.
+Additionally, your user role must be granted specific Permissions, such as `plugin::content-releases.read` and `plugin::content-releases.create-action`. You can modify these permissions in the Settings section. The capability to add entries to a release within the content manager is available through the content-manager edit view.
+
+### Edit view
+
+If the feature is enabled with the correct license, and the user has the necessary permissions enabled, a 'Releases' section will appear on the right side of the Edit View. The 'Releases' section has an 'Add to release' button. Clicking this button opens a modal allowing you to assign the entry to a specific release and specify the desired action (Publish/Unpublish).
+
+In the event that no releases are present, users need to create a release first, which can be done on the [Content Releases](../content-releases/00-intro.md) page.
+
+If the user's permissions also includes the `plugin::content-releases.delete-action`, the user can access additional options by clicking the 'More' button (represented by three dots) in the releases sidebar. This will reveal the 'Remove from release' button, providing the ability to detach the entry from the selected release.
