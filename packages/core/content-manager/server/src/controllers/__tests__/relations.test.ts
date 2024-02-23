@@ -35,7 +35,7 @@ describe('Relations', () => {
         return contentTypes[uid];
       }),
       entityService: {
-        findPage: jest.fn(),
+        findPage: jest.fn(() => ({ results: [] })),
         load: jest.fn(),
       },
       plugins: {
@@ -72,6 +72,11 @@ describe('Relations', () => {
           },
         },
       },
+      db: {
+        query: jest.fn().mockReturnValue({
+          findOne: jest.fn(() => ({ id: 1 })),
+        }),
+      },
     } as any;
   });
 
@@ -106,9 +111,10 @@ describe('Relations', () => {
         'target',
         expect.objectContaining({
           sort: 'myField',
-          fields: ['id', 'myField', 'publishedAt'],
+          fields: ['myField', 'publishedAt', 'documentId'],
           filters: {
             $and: [
+              { publishedAt: null },
               {
                 myField: {
                   $containsi: 'foobar',
@@ -146,9 +152,10 @@ describe('Relations', () => {
         'targetWithHidden',
         expect.objectContaining({
           sort: 'id',
-          fields: ['id', 'publishedAt'],
+          fields: ['id', 'publishedAt', 'documentId'],
           filters: {
             $and: [
+              { publishedAt: null },
               {
                 id: {
                   $containsi: 'foobar',
@@ -196,12 +203,12 @@ describe('Relations', () => {
 
       await relations.findExisting(ctx);
 
-      expect(strapi.entityService.load).toHaveBeenCalledWith(
-        'main',
-        { id: 1 },
-        'relation',
+      expect(strapi.entityService.findPage).toHaveBeenCalledWith(
+        'target',
         expect.objectContaining({
-          fields: ['id', 'myField', 'publishedAt'],
+          sort: ['myField:ASC', 'documentId:ASC'],
+          fields: ['myField', 'publishedAt', 'documentId'],
+          filters: { target: { $and: [{ id: 1 }, { locale: null }, { publishedAt: null }] } },
         })
       );
     });
@@ -226,59 +233,87 @@ describe('Relations', () => {
 
       await relations.findExisting(ctx);
 
-      expect(strapi.entityService.load).toHaveBeenCalledWith(
-        'main',
-        { id: 1 },
-        'relationWithHidden',
+      expect(strapi.entityService.findPage).toHaveBeenCalledWith(
+        'targetWithHidden',
         expect.objectContaining({
-          fields: ['id', 'publishedAt'],
+          fields: ['id', 'publishedAt', 'documentId'],
+          filters: {
+            targetWithHidden: {
+              $and: [
+                {
+                  id: 1,
+                },
+                {
+                  locale: null,
+                },
+                {
+                  publishedAt: null,
+                },
+              ],
+            },
+          },
+          sort: ['documentId:ASC'],
         })
       );
     });
-  });
 
-  test('Replace mainField by id when mainField is not accessible with RBAC', async () => {
-    global.strapi.plugins['content-manager'].services['permission-checker'].create
-      .mockReturnValueOnce({
-        cannot: {
-          read: jest.fn().mockReturnValue(false),
-        },
-        sanitizedQuery: {
-          read: jest.fn().mockReturnValue({}),
-        },
-      })
-      .mockReturnValueOnce({
-        cannot: {
-          read: jest.fn().mockReturnValue(true),
-        },
-      });
+    test('Replace mainField by id when mainField is not accessible with RBAC', async () => {
+      global.strapi.plugins['content-manager'].services['permission-checker'].create
+        .mockReturnValueOnce({
+          cannot: {
+            read: jest.fn().mockReturnValue(false),
+          },
+          sanitizedQuery: {
+            read: jest.fn().mockReturnValue({}),
+          },
+        })
+        .mockReturnValueOnce({
+          cannot: {
+            read: jest.fn().mockReturnValue(true),
+          },
+        });
 
-    const ctx = createContext(
-      {
-        params: {
-          model: 'main',
-          targetField: 'relationWithHidden',
-          id: 1,
-        },
-      },
-      {
-        state: {
-          userAbility: {
-            can: jest.fn().mockReturnValue(true),
+      const ctx = createContext(
+        {
+          params: {
+            model: 'main',
+            targetField: 'relationWithHidden',
+            id: 1,
           },
         },
-      }
-    );
+        {
+          state: {
+            userAbility: {
+              can: jest.fn().mockReturnValue(true),
+            },
+          },
+        }
+      );
 
-    await relations.findExisting(ctx);
+      await relations.findExisting(ctx);
 
-    expect(strapi.entityService.load).toHaveBeenCalledWith(
-      'main',
-      { id: 1 },
-      'relationWithHidden',
-      expect.objectContaining({
-        fields: ['id', 'publishedAt'],
-      })
-    );
+      expect(strapi.entityService.findPage).toHaveBeenCalledWith(
+        'targetWithHidden',
+        expect.objectContaining({
+          fields: ['id', 'publishedAt', 'documentId'],
+          filters: {
+            targetWithHidden: {
+              $and: [
+                {
+                  id: 1,
+                },
+                {
+                  locale: null,
+                },
+                {
+                  publishedAt: null,
+                },
+              ],
+            },
+          },
+          sort: ['documentId:ASC'],
+        })
+      );
+    });
   });
 });

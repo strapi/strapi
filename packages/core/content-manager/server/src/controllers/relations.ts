@@ -250,7 +250,7 @@ export default {
 
     ctx.body = {
       ...res,
-      results: mapResults(res.results),
+      results: Array.isArray(res.results) ? mapResults(res.results) : [],
     };
   },
 
@@ -288,15 +288,20 @@ export default {
       // Filtering for those related to the current entity
 
       modelUid = targetUid;
-      filters = {
-        [attribute?.mappedBy ?? attribute?.inversedBy]: {
-          $and: [
-            { id: currentEntityId },
-            { locale },
-            { publishedAt: status === 'published' ? { $ne: null } : null },
-          ],
-        },
-      };
+      if (attribute?.mappedBy ?? attribute?.inversedBy ?? attribute?.target) {
+        filters = {
+          [attribute?.mappedBy ?? attribute?.inversedBy ?? attribute?.target]: {
+            $and: [
+              { id: currentEntityId },
+              { locale },
+              { publishedAt: status === 'published' ? { $ne: null } : null },
+            ],
+          },
+        };
+      } else {
+        filters = {};
+      }
+
       sort = fields
         .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
         .map((field: any) => `${field}:ASC`);
@@ -350,7 +355,7 @@ export default {
 
     ctx.body = {
       ...page,
-      results: mapResults(results),
+      results: Array.isArray(results) ? mapResults(results) : [],
     };
   },
 };
