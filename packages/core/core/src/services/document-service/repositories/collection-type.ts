@@ -3,10 +3,10 @@ import { omit } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
 import { pipeAsync } from '@strapi/utils';
 
-import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
-import createDocumentEngine from './document-engine';
-import * as DP from './draft-and-publish';
-import * as i18n from './internationalization';
+import { wrapInTransaction, type RepositoryFactoryMethod } from '../common';
+import createDocumentEngine from '../document-engine';
+import * as DP from '../draft-and-publish';
+import * as i18n from '../internationalization';
 
 export const createCollectionTypeRepository: RepositoryFactoryMethod<Schema.CollectionType> = (
   contentType

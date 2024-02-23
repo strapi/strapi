@@ -20,14 +20,14 @@ export class CollectionTypeService extends CoreService implements CoreApi.Servic
 
     const paginationInfo = getPaginationInfo(fetchParams);
 
-    const results = await strapi.documents<Schema.CollectionType>(uid).findMany({
+    const results = await strapi.documents.collectionType(uid).findMany({
       ...fetchParams,
       ...paginationInfo,
     });
 
     if (shouldCount(fetchParams)) {
-      const count = await strapi
-        .documents<Schema.CollectionType>(uid)
+      const count = await strapi.documents
+        .collectionType(uid)
         .count({ ...fetchParams, ...paginationInfo });
 
       if (typeof count !== 'number') {
@@ -49,27 +49,25 @@ export class CollectionTypeService extends CoreService implements CoreApi.Servic
   findOne(documentId: Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi
-      .documents<Schema.CollectionType>(uid)
-      .findOne(documentId, this.getFetchParams(params));
+    return strapi.documents.collectionType(uid).findOne(documentId, this.getFetchParams(params));
   }
 
   async create(params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents<Schema.CollectionType>(uid).create(this.getFetchParams(params));
+    return strapi.documents.collectionType(uid).create(this.getFetchParams(params));
   }
 
   update(docId: Documents.ID, params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents<Schema.CollectionType>(uid).update(docId, this.getFetchParams(params));
+    return strapi.documents.collectionType(uid).update(docId, this.getFetchParams(params));
   }
 
   async delete(docId: Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents<Schema.CollectionType>(uid).delete(docId, this.getFetchParams(params));
+    return strapi.documents.collectionType(uid).delete(docId, this.getFetchParams(params));
   }
 }
 
