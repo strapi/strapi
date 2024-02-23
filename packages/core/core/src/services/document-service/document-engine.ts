@@ -23,9 +23,8 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';
-import { transformParamsDocumentId, transformOutputDocumentId } from './transform/id-transform';
+import { transformParamsDocumentId } from './transform/id-transform';
 import { getDeepPopulate } from './utils/populate';
-import { transformOutputIds } from './transform/relations/transform/output-ids';
 import { transformData } from './transform/data';
 
 const { transformParamsToQuery } = convertQueryParams;
@@ -69,25 +68,16 @@ const createDocumentEngine = ({
     )(params || {});
 
     if (kind === 'singleType') {
-      return db
-        .query(uid)
-        .findOne(query)
-        .then((doc) => transformOutputDocumentId(uid, doc));
+      return db.query(uid).findOne(query);
     }
 
-    return db
-      .query(uid)
-      .findMany(query)
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).findMany(query);
   },
 
   async findFirst(uid, params) {
     const query = await pipeAsync((params) => transformParamsToQuery(uid, params))(params || {});
 
-    return db
-      .query(uid)
-      .findOne({ ...query, where: { ...params?.lookup, ...query.where } })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).findOne({ ...query, where: { ...params?.lookup, ...query.where } });
   },
 
   async findOne(uid, documentId, params) {
@@ -95,8 +85,7 @@ const createDocumentEngine = ({
 
     return db
       .query(uid)
-      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } });
   },
 
   async delete(uid, documentId, params = {} as any) {
@@ -119,16 +108,16 @@ const createDocumentEngine = ({
     });
 
     // TODO: Change return value to actual count
-    return { versions: await transformOutputDocumentId(uid, entriesToDelete) };
+    return { versions: entriesToDelete };
   },
 
   // TODO: should we provide two separate methods?
   async deleteMany(uid, paramsOrIds) {
     const query = await pipeAsync(
       // Transform ids to query if needed
+      (params) => (isArray(params) ? { filter: { documentID: { $in: params } } } : params),
       (params) => transformParamsToQuery(uid, params)
     )(paramsOrIds || {});
-      (params) => (isArray(params) ? { filter: { documentID: { $in: params } } } : params),
 
     return db.query(uid).deleteMany(query);
   },
@@ -199,10 +188,7 @@ const createDocumentEngine = ({
       { contentType: model }
     );
 
-    return db
-      .query(uid)
-      .update({ ...query, where: { id: entryToUpdate.id }, data: entryData })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   },
 
   async count(uid, params = undefined) {
@@ -255,14 +241,11 @@ const createDocumentEngine = ({
       );
 
       // TODO: Transform params to query
-      return db
-        .query(uid)
-        .clone(entryToClone.id, {
-          ...query,
-          // Allows entityData to override the documentId (e.g. when publishing)
-          data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
-        })
-        .then((doc) => transformOutputDocumentId(uid, doc));
+      return db.query(uid).clone(entryToClone.id, {
+        ...query,
+        // Allows entityData to override the documentId (e.g. when publishing)
+        data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
+      });
     });
 
     return { documentId: newDocumentId, versions };
