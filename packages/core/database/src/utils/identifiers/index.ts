@@ -18,9 +18,6 @@ type NameOptions = {
 // Generic name handler that must be used by all helper functions
 export const getName = (names: NameInput, options: NameOptions = {}) => {
   const tokens = _.castArray(names).map((name) => {
-    if (name !== _.snakeCase(name)) {
-      throw new Error(`all name tokens must already be in snake_case; received ${name}`);
-    }
     return {
       name,
       compressible: true,

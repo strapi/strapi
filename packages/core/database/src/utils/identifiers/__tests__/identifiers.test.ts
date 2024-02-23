@@ -88,19 +88,6 @@ describe('identifiers', () => {
     });
   });
   describe('getNameFromTokens', () => {
-    test('throws when a name is not in snake_case', () => {
-      expect(() =>
-        getNameFromTokens(
-          [
-            { name: 'myName', compressible: true },
-            { name: '12345', compressible: true },
-            { name: 'links', compressible: false },
-          ],
-          23
-        )
-      ).toThrow('snake_case');
-    });
-
     test('does not shorten strings that fit in min length', () => {
       const name = getNameFromTokens(
         [

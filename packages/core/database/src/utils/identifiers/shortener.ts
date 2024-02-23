@@ -15,7 +15,7 @@
  */
 
 import crypto from 'node:crypto';
-import { partition, isInteger, snakeCase, sumBy } from 'lodash/fp';
+import { partition, isInteger, sumBy } from 'lodash/fp';
 
 // TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
@@ -102,28 +102,6 @@ export function getShortenedName(name: string, len: number) {
 }
 
 /**
- * Validates the inputs for the `getNameFromTokens` function. It checks that `maxLength` is a positive integer or zero (indicating no limit)
- * and verifies that all name tokens are in snake_case format. If any of these validations fail, an error is thrown.
- *
- * @param {NameToken[]} nameTokens - Array of name tokens
- * @param {number} maxLength - The maximum allowed length for the name string; must be a positive integer or 0 for no limit.
- * @throws {Error} If `maxLength` is not a positive integer or 0, or if any name token is not in snake_case.
- * @internal
- */
-function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: number) {
-  if (!isInteger(maxLength) || maxLength < 0) {
-    throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
-  }
-
-  // Ensure all tokens are in snake_case
-  nameTokens.forEach((token) => {
-    if (token.name !== snakeCase(token.name)) {
-      throw new Error(`all names must be valid snake_case; received ${token.name}`);
-    }
-  });
-}
-
-/**
  * Constructs a name from an array of name tokens within a specified maximum length. It ensures the final name does not exceed
  * this limit by selectively compressing tokens marked as compressible. If the name exceeds the maximum length and cannot be
  * compressed sufficiently, an error is thrown. This function supports dynamic adjustment of token lengths to fit within the
@@ -137,7 +115,9 @@ function validateGetNameFromTokensInput(nameTokens: NameToken[], maxLength: numb
  * @internal
  */
 export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_IDENTIFIER_LENGTH) {
-  validateGetNameFromTokensInput(nameTokens, maxLength);
+  if (!isInteger(maxLength) || maxLength < 0) {
+    throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
+  }
 
   const fullLengthName = nameTokens.map((token) => token.name).join(IDENTIFIER_SEPARATOR);
 
