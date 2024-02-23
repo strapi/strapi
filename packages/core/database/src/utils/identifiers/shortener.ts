@@ -175,7 +175,8 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     if (token.allocatedLength < token.name.length && surplus > 0) {
       token.allocatedLength += 1;
       surplus -= 1;
-      return true; // Keep this token in the deficits array for the next round
+      // if it hasn't reached its full length, keep it in array for next round
+      return token.allocatedLength < token.name.length;
     }
     return false; // Remove this token from the deficits array
   }
