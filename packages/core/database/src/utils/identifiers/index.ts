@@ -11,11 +11,10 @@ import crypto from 'node:crypto';
  * will cause data loss, so beware; do not update the test to match your changes
  */
 
-// TODO: Names will not be shortened until this is set to a non-zero number
+// TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
 
-// We will have 55 total length available
-// That means we can accept a number of compressible tokens up to:
+// We can accept a number of compressible tokens up to:
 // tokens accepted = (MAX_LENGTH / (HASH_LENGTH + MIN_TOKEN_LENGTH) + (tokens * IDENTIFIER_SEPARATER.length))
 export const HASH_LENGTH = 5;
 export const HASH_SEPARATOR = ''; // no separator is needed, we will just attach hash directly to shortened name
@@ -33,6 +32,8 @@ type NameToken = {
   compressible: boolean;
 };
 
+type NameTokenWithAllocation = NameToken & { allocatedLength: number };
+
 type NameInput = string | string[];
 
 type NameOptions = {
@@ -41,6 +42,10 @@ type NameOptions = {
   maxLength?: number;
 };
 
+/**
+ * @internal
+ * @description takes a string of a DB table and hashes it down to a shorter length to not break the constraints of DBs. This is typically done only when a schema is named or renamed.
+ */
 // returns a hash of length len
 export function createHash(data: string, len: number): string {
   if (!_.isInteger(len) || len <= 0) {
@@ -53,6 +58,10 @@ export function createHash(data: string, len: number): string {
   return hash.digest('hex').substring(0, len);
 }
 
+/**
+ * @internal
+ * @description takes a string of a DB table and hashes it down to a shorter length to not break the constraints of DBs. This is typically done only when a schema is named or renamed.
+ */
 export function tokenWithHash(name: string, len: number) {
   if (!_.isInteger(len) || len <= 0) {
     throw new Error(`tokenWithHash length must be a positive integer, received ${len}`);
@@ -78,7 +87,7 @@ export function tokenWithHash(name: string, len: number) {
 
 export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_IDENTIFIER_LENGTH) {
   if (!_.isInteger(maxLength) || maxLength < 0) {
-    throw new Error('maxLength must be a positive integer or 0 to disable');
+    throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
 
   // Ensure all tokens are in snake_case
@@ -104,13 +113,16 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     { compressible: [], incompressible: [] }
   );
 
-  const incompressibleLength = incompressible.reduce((sum, token) => sum + token.name.length, 0);
-  const separatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
-  if (incompressibleLength + separatorsLength > maxLength) {
+  const totalIncompressibleLength = incompressible.reduce(
+    (sum, token) => sum + token.name.length,
+    0
+  );
+  const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
+  if (totalIncompressibleLength + totalSeparatorsLength > maxLength) {
     throw new Error('incompressible string length greater than maxLength');
   }
 
-  const available = maxLength - incompressibleLength - separatorsLength;
+  const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
 
   // Calculate available length per compressible token
   const availablePerToken = Math.floor(available / compressible.length);
@@ -119,12 +131,13 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   let surplus = available % compressible.length;
 
   // Check that it's even possible to proceed
+  const minHashedLength = HASH_LENGTH + HASH_SEPARATOR.length + MIN_TOKEN_LENGTH;
   const totalLength = nameTokens.reduce((total, token) => {
     if (token.compressible) {
       if (token.name.length < availablePerToken) {
         return total + token.name.length;
       }
-      return total + HASH_LENGTH + MIN_TOKEN_LENGTH;
+      return total + minHashedLength;
     }
     return total + token.name.length;
   }, nameTokens.length * IDENTIFIER_SEPARATOR.length - 1);
@@ -135,7 +148,7 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   }
 
   // Calculate total surplus length from shorter strings and total deficit length from longer strings
-  let deficits: NameToken[] = [];
+  let deficits: NameTokenWithAllocation[] = [];
   compressible.forEach((token) => {
     const actualLength = token.name.length;
     if (actualLength < availablePerToken) {
@@ -143,15 +156,15 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
       token.allocatedLength = actualLength;
     } else {
       token.allocatedLength = availablePerToken;
-      deficits.push(token);
+      deficits.push(token as NameTokenWithAllocation);
     }
   });
 
   // Redistribute surplus length to longer strings, one character at a time
   // This way we avoid issues with greed and trying to handle floating points by dividing available length
-  function filterAndIncreaseLength(token: NameToken) {
-    if (token.allocatedLength! < token.name.length && surplus > 0) {
-      token.allocatedLength! += 1;
+  function filterAndIncreaseLength(token: NameTokenWithAllocation) {
+    if (token.allocatedLength < token.name.length && surplus > 0) {
+      token.allocatedLength += 1;
       surplus -= 1;
       return true; // Keep this token in the deficits array for the next round
     }
@@ -163,7 +176,7 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   while (surplus > 0 && deficits.length > 0) {
     deficits = deficits.filter((token) => filterAndIncreaseLength(token));
 
-    // infinite loop protection; if the surplus hasn't changed, there's nothing left to distribute it to
+    // infinite loop protection; if the surplus hasn't changed, there was nothing left to distribute it to
     if (surplus === previousSurplus) {
       break;
     }
@@ -173,12 +186,8 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
   // Build final string
   const shortenedName = nameTokens
     .map((token) => {
-      if (token.compressible && 'allocatedLength' in token) {
-        return tokenWithHash(token.name, token.allocatedLength!);
-      }
-      if (token.compressible) {
-        // Use remaining available length for the last compressible token
-        return tokenWithHash(token.name, Math.floor(available + availablePerToken));
+      if (token.compressible && 'allocatedLength' in token && token.allocatedLength !== undefined) {
+        return tokenWithHash(token.name, token.allocatedLength);
       }
       return token.name;
     })
