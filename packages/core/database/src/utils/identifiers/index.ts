@@ -39,7 +39,6 @@ export const getName = (names: NameInput, options: NameOptions = {}) => {
  * TABLES
  */
 
-// Get a base table name for a model
 export const getTableName = (name: string, options?: NameOptions) => {
   const tokens = [
     {
