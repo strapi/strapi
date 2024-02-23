@@ -32,10 +32,19 @@ type NameToken = {
 type NameTokenWithAllocation = NameToken & { allocatedLength: number };
 
 /**
+ * Creates a hash of the given data with the specified string length as a string of hex characters
+ *
+ * @example
+ * createHash("myData", 5); // "03f85"
+ * createHash("myData", 2); // "03"
+ * createHash("myData", 1); // "0"
+ *
+ * @param data - The data to be hashed
+ * @param len - The length of the hash
+ * @returns The generated hash
+ * @throws Error if the length is not a positive integer
  * @internal
- * @description takes a string of a DB table and hashes it down to a shorter length to not break the constraints of DBs. This is typically done only when a schema is named or renamed.
  */
-// returns a hash of length len
 export function createHash(data: string, len: number): string {
   if (!_.isInteger(len) || len <= 0) {
     throw new Error(`createHash length must be a positive integer, received ${len}`);
@@ -48,10 +57,20 @@ export function createHash(data: string, len: number): string {
 }
 
 /**
- * @internal
- * @description takes a string of a DB table and hashes it down to a shorter length to not break the constraints of DBs. This is typically done only when a schema is named or renamed.
+ * Generates a string with a max length, appending a hash at the end if necessary to keep it unique
+ *
+ * @example
+ * // if we have strings such as "longstring1" and "longstring2" with a max length of 9,
+ * // we don't want to end up with "longstrin" and "longstrin"
+ * // we want something such as    "longs0b23" and "longs953f"
+ * const token1 = generateToken("longstring1", 9); // "longs0b23"
+ * const token2 = generateToken("longstring2", 9); // "longs953f"
+ *
+ * @param name - The base name
+ * @param len - The desired length of the token.
+ * @returns The generated token with hash.
+ * @throws Error if the length is not a positive integer, or if the length is too short for the token.
  */
-export function tokenWithHash(name: string, len: number) {
   if (!_.isInteger(len) || len <= 0) {
     throw new Error(`tokenWithHash length must be a positive integer, received ${len}`);
   }
@@ -182,6 +201,7 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     })
     .join(IDENTIFIER_SEPARATOR);
 
+  // this should be unreachable, but add a final check for potential edge cases we missed
   if (shortenedName.length > maxLength) {
     throw new Error(
       `name shortening failed to generate a name of the correct maxLength; name ${shortenedName}`
