@@ -80,6 +80,14 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'No entry yet. Click on the' }).click();
     await page.getByRole('textbox', { name: 'title' }).nth(1).fill('Negozio sportivo');
     await page.getByRole('checkbox', { name: 'indexable' }).click();
+    await page.getByRole('button', { name: 'There are 2 missing components' }).click();
+    await page.getByRole('button', { name: 'Product carousel' }).click();
+    await page
+      .getByRole('region', { name: /Product carousel/ })
+      .getByRole('textbox', { name: 'title' })
+      .fill('Magliette');
+    await page.getByRole('button', { name: 'There is 1 missing component' }).click();
+    await page.getByRole('button', { name: 'Hero image' }).click();
     await page.getByRole('button', { name: 'Publish' }).click();
     await expect(page.getByText('Success:Published')).toBeVisible();
   });

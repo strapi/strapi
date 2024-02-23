@@ -58,7 +58,7 @@ const DynamicZone = ({
     })
   );
 
-  const { value = [] } =
+  const { value = [], error } =
     useField<Array<Attribute.GetValue<Attribute.DynamicZone>[number] & { __temp_key__: number }>>(
       name
     );
@@ -180,28 +180,34 @@ const DynamicZone = ({
     removeFieldRow(name, currentIndex);
   };
 
+  const hasError =
+    error !== undefined ||
+    dynamicDisplayedComponentsLength < min ||
+    dynamicDisplayedComponentsLength > max;
+
   const renderButtonLabel = () => {
     if (addComponentIsOpen) {
       return formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
     }
 
-    // if (hasError && dynamicZoneError.id?.includes('max')) {
-    //   return formatMessage({
-    //     id: 'components.Input.error.validation.max',
-    //     defaultMessage: 'The value is too high.',
-    //   });
-    // }
+    if (hasError && dynamicDisplayedComponentsLength > max) {
+      return formatMessage({
+        id: getTranslation(`components.DynamicZone.extra-components`),
+        defaultMessage:
+          'There {number, plural, =0 {are # extra components} one {is # extra component} other {are # extra components}}',
+      });
+    }
 
-    // if (hasError && dynamicZoneError.id?.includes('min')) {
-    //   return formatMessage(
-    //     {
-    //       id: getTranslation(`components.DynamicZone.missing-components`),
-    //       defaultMessage:
-    //         'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
-    //     },
-    //     { number: missingComponentNumber }
-    //   );
-    // }
+    if (hasError && dynamicDisplayedComponentsLength < min) {
+      return formatMessage(
+        {
+          id: getTranslation(`components.DynamicZone.missing-components`),
+          defaultMessage:
+            'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
+        },
+        { number: min - dynamicDisplayedComponentsLength }
+      );
+    }
 
     return formatMessage(
       {
@@ -256,7 +262,7 @@ const DynamicZone = ({
         )}
         <Flex justifyContent="center">
           <AddComponentButton
-            // hasError={hasError}
+            hasError={hasError}
             isDisabled={disabled}
             isOpen={addComponentIsOpen}
             onClick={handleClickOpenPicker}
