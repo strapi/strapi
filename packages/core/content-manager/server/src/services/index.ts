@@ -8,16 +8,14 @@ import permission from './permission';
 import populateBuilder from './populate-builder';
 import uid from './uid';
 import documentMetadata from './document-metadata';
-import collectionTypes from './collection-types';
-import singleTypes from './single-types';
+import documentManager from './document-manager';
 
 export default {
   components,
   'content-types': contentTypes,
   'data-mapper': dataMapper,
   'document-metadata': documentMetadata,
-  'collection-types': collectionTypes,
-  'single-types': singleTypes,
+  'document-manager': documentManager,
   'field-sizes': fieldSizes,
   metrics,
   'permission-checker': permissionChecker,

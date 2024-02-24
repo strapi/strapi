@@ -35,7 +35,7 @@ const createSingleTypeController = ({
      * create or update single type content.
      */
     async update(ctx) {
-      const { query, body = {} } = ctx.request;
+      const { query, body = {} as any } = ctx.request;
 
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');

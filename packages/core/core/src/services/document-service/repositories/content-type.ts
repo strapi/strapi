@@ -7,7 +7,7 @@ import createDocumentEngine from '../document-engine';
 import * as DP from '../draft-and-publish';
 import * as i18n from '../internationalization';
 
-export const createCollectionTypeRepository: RepositoryFactoryMethod = (uid) => {
+export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
 
   // TODO: move the code back into here instead of using the document-engine
@@ -73,7 +73,7 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod = (uid) => 
         ...queryParams,
         data: {
           ...queryParams.data,
-          documentId: doc.id,
+          documentId: doc.documentId,
           publishedAt: params?.data?.publishedAt ?? new Date(),
         },
       });
@@ -129,7 +129,7 @@ export const createCollectionTypeRepository: RepositoryFactoryMethod = (uid) => 
         ...queryParams,
         data: {
           ...queryParams.data,
-          documentId: updatedDraft.id,
+          documentId: updatedDraft.documentId,
           publishedAt: params?.data?.publishedAt ?? new Date(),
         },
       });

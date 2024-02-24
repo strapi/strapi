@@ -1,16 +1,9 @@
-import type { Common, Documents, Schema } from '../..';
+import type { Common, Documents } from '../..';
 import type { ID } from './document-engine';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-enigne';
 
-export type ServiceInstance<TContentType extends Schema.ContentType = Schema.ContentType> =
-  TContentType extends Schema.SingleType
-    ? SingleTypeInstance<TContentType['uid']>
-    : TContentType extends Schema.CollectionType
-    ? CollectionTypeInstance<TContentType['uid']>
-    : SingleTypeInstance<TContentType['uid']> & CollectionTypeInstance<TContentType['uid']>;
-
-export type CollectionTypeInstance<
+export type ServiceInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
 > = {
   findMany: <TParams extends Params.FindMany<TContentTypeUID>>(
@@ -88,5 +81,3 @@ export type SingleTypeInstance<
     params?: TParams
   ) => Promise<Documents.Result<TContentTypeUID, TParams>>;
 };
-
-export type Any = SingleTypeInstance<any> | CollectionTypeInstance<any>;

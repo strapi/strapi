@@ -1,4 +1,4 @@
-import type { LoadedStrapi as Strapi, Common, Schema } from '@strapi/types';
+import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
 import { groupBy, pick } from 'lodash/fp';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 

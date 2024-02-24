@@ -10,14 +10,14 @@ import { getDocumentLocaleAndStatus } from './utils/dimensions';
  * @param ctx - Koa context
  * @param opts - Options
  * @param opts.populate - Populate options of the returned document.
- *                        By default collectionTypes will populate all relations.
+ *                        By default documentManager will populate all relations.
  */
 const createDocument = async (ctx: any, opts?: { populate?: object }) => {
   const { userAbility, user } = ctx.state;
   const { model } = ctx.params;
   const { body } = ctx.request;
 
-  const collectionTypes = getService('collection-types');
+  const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
   if (permissionChecker.cannot.create()) {
@@ -31,7 +31,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   const { locale, status = 'draft' } = getDocumentLocaleAndStatus(body);
 
-  return collectionTypes.create(model, {
+  return documentManager.create(model, {
     data: sanitizedBody as any,
     locale,
     status,
@@ -48,7 +48,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
  * Update a document version.
  * - If the document version exists, it will be updated.
  * - If the document version does not exist, a new document locale will be created.
- *   By default collectionTypes will populate all relations.
+ *   By default documentManager will populate all relations.
  *
  * @param ctx - Koa context
  * @param opts - Options
@@ -59,7 +59,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
   const { id, model } = ctx.params;
   const { body } = ctx.request;
 
-  const collectionTypes = getService('collection-types');
+  const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
   if (permissionChecker.cannot.update()) {
@@ -76,8 +76,8 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
-    collectionTypes.findOne(id, model, { populate, locale, status: 'draft' }),
-    collectionTypes.exists(model, id),
+    documentManager.findOne(id, model, { populate, locale, status: 'draft' }),
+    documentManager.exists(model, id),
   ]);
 
   if (!documentExists) {
@@ -101,7 +101,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
   const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  return collectionTypes.update(documentVersion || { id }, model, {
+  return documentManager.update(documentVersion?.documentId || id, model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
@@ -115,7 +115,7 @@ export default {
     const { query } = ctx.request;
 
     const documentMetadata = getService('document-metadata');
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -132,7 +132,7 @@ export default {
 
     const { locale, status } = getDocumentLocaleAndStatus(query);
 
-    const { results: documents, pagination } = await collectionTypes.findPage(
+    const { results: documents, pagination } = await documentManager.findPage(
       { ...permissionQuery, populate, locale, status },
       model
     );
@@ -168,7 +168,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -185,7 +185,7 @@ export default {
 
     const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
 
-    const version = await collectionTypes.findOne(id, model, {
+    const version = await documentManager.findOne(id, model, {
       populate,
       locale,
       status,
@@ -193,7 +193,7 @@ export default {
 
     if (!version) {
       // Check if document exists
-      const exists = await collectionTypes.exists(model, id);
+      const exists = await documentManager.exists(model, id);
       if (!exists) {
         return ctx.notFound();
       }
@@ -263,7 +263,7 @@ export default {
     const { model, sourceId: id } = ctx.params;
     const { body } = ctx.request;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -277,7 +277,7 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(body);
-    const document = await collectionTypes.findOne(id, model, {
+    const document = await documentManager.findOne(id, model, {
       populate,
       locale,
       status: 'draft',
@@ -293,7 +293,7 @@ export default {
     const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await collectionTypes.clone(document, sanitizedBody, model);
+    const clonedDocument = await documentManager.clone(document, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
@@ -326,7 +326,7 @@ export default {
     const { userAbility } = ctx.state;
     const { id, model } = ctx.params;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -339,7 +339,7 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(ctx.query);
-    const entity = await collectionTypes.findOne(id, model, { populate, locale });
+    const entity = await documentManager.findOne(id, model, { populate, locale });
 
     if (!entity) {
       return ctx.notFound();
@@ -349,7 +349,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const result = await collectionTypes.delete(entity, model, { locale });
+    const result = await documentManager.delete(entity, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
@@ -364,7 +364,7 @@ export default {
     const { id, model } = ctx.params;
     const { body } = ctx.request;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -391,7 +391,7 @@ export default {
 
       // TODO: Publish many locales at once
       const { locale } = getDocumentLocaleAndStatus(body);
-      return collectionTypes.publish(document!, model, {
+      return documentManager.publish(document!, model, {
         locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
@@ -410,7 +410,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -424,7 +424,7 @@ export default {
       .countRelations()
       .build();
 
-    const entityPromises = ids.map((id: any) => collectionTypes.findOne(id, model, { populate }));
+    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
     const entities = await Promise.all(entityPromises);
 
     for (const entity of entities) {
@@ -438,7 +438,7 @@ export default {
     }
 
     // @ts-expect-error - publish many should not return null
-    const { count } = await collectionTypes.publishMany(entities, model);
+    const { count } = await documentManager.publishMany(entities, model);
     ctx.body = { count };
   },
 
@@ -450,7 +450,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -462,7 +462,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const entityPromises = ids.map((id: any) => collectionTypes.findOne(id, model, { populate }));
+    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
     const entities = await Promise.all(entityPromises);
 
     for (const entity of entities) {
@@ -476,7 +476,7 @@ export default {
     }
 
     // @ts-expect-error - unpublish many should not return null
-    const { count } = await collectionTypes.unpublishMany(entities, model);
+    const { count } = await documentManager.unpublishMany(entities, model);
     ctx.body = { count };
   },
 
@@ -487,7 +487,7 @@ export default {
       body: { discardDraft, ...body },
     } = ctx.request;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -506,7 +506,7 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(body);
-    const document = await collectionTypes.findOne(id, model, {
+    const document = await documentManager.findOne(id, model, {
       populate,
       locale,
       status: 'published',
@@ -526,11 +526,11 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await collectionTypes.discardDraft(document, model, { locale });
+        await documentManager.discardDraft(document, model, { locale });
       }
 
       ctx.body = await pipeAsync(
-        (document) => collectionTypes.unpublish(document, model, { locale }),
+        (document) => documentManager.unpublish(document, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
       )(document);
@@ -542,7 +542,7 @@ export default {
     const { id, model } = ctx.params;
     const { body } = ctx.request;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -556,7 +556,7 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(body);
-    const document = await collectionTypes.findOne(id, model, {
+    const document = await documentManager.findOne(id, model, {
       populate,
       locale,
       status: 'published',
@@ -572,7 +572,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => collectionTypes.discardDraft(document, model, { locale }),
+      (document) => documentManager.discardDraft(document, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )(document);
@@ -586,7 +586,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -604,7 +604,7 @@ export default {
       },
     };
 
-    const { count } = await collectionTypes.deleteMany(params, model);
+    const { count } = await documentManager.deleteMany(params, model);
 
     ctx.body = { count };
   },
@@ -613,7 +613,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -626,7 +626,7 @@ export default {
       .build();
 
     const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
-    const entity = await collectionTypes.findOne(id, model, { populate, locale, status });
+    const entity = await documentManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
       return ctx.notFound();
@@ -636,7 +636,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await collectionTypes.countDraftRelations(id, model, locale);
+    const number = await documentManager.countDraftRelations(id, model, locale);
 
     return {
       data: number,
@@ -649,7 +649,7 @@ export default {
     const locale = ctx.request.query.locale;
     const { model } = ctx.params;
 
-    const collectionTypes = getService('collection-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -657,13 +657,13 @@ export default {
     }
 
     // @ts-expect-error - ids are not in .find
-    const entities = await collectionTypes.find({ ids, locale }, model);
+    const entities = await documentManager.findMany({ ids, locale }, model);
 
     if (!entities) {
       return ctx.notFound();
     }
 
-    const number = await collectionTypes.countManyEntriesDraftRelations(ids, model, locale);
+    const number = await documentManager.countManyEntriesDraftRelations(ids, model, locale);
 
     return {
       data: number,
