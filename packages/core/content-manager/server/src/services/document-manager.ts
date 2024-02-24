@@ -1,19 +1,22 @@
 import { omit, pipe } from 'lodash/fp';
+
 import { contentTypes, sanitize, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Documents } from '@strapi/types';
+
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
+type DocService = Documents.CollectionTypeInstance;
+type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
+export type Document = Documents.Result<Common.UID.ContentType>;
+
 const { ApplicationError } = errors;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
+
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 const omitIdField = omit('id');
-
-type DocService = Documents.CollectionTypeInstance;
-type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
-export type Document = Documents.Result<Common.UID.SingleType>;
 
 const emitEvent = async (uid: Common.UID.ContentType, event: string, document: Document) => {
   const modelDef = strapi.getModel(uid);
@@ -25,9 +28,13 @@ const emitEvent = async (uid: Common.UID.ContentType, event: string, document: D
   });
 };
 
-const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
+const documentManager = ({ strapi }: { strapi: Strapi }) => {
   return {
-    async find(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
+    async findOne(id: string, uid: Common.UID.CollectionType, opts = {}) {
+      return strapi.documents(uid).findOne(id, opts);
+    },
+
+    async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
       return strapi.documents(uid).findMany(params);
     },
@@ -53,10 +60,6 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
       };
     },
 
-    async findOne(id: string, uid: Common.UID.CollectionType, opts = {}) {
-      return strapi.documents(uid).findOne(id, opts);
-    },
-
     async create(uid: Common.UID.CollectionType, opts: DocServiceParams<'create'>[0] = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, status: 'draft' as const, populate };
@@ -71,7 +74,7 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async update(
-      document: Document,
+      id: Documents.ID,
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'update'>[1] = {} as any
     ) {
@@ -79,7 +82,7 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
-      const updatedDocument = await strapi.documents(uid).update(document.id as string, params);
+      const updatedDocument = await strapi.documents(uid).update(id as string, params);
 
       // if (isWebhooksPopulateRelationsEnabled()) {
       //   return getDeepRelationsCount(updatedDocument, uid);
@@ -149,7 +152,6 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
       //   return getDeepRelationsCount(deletedEntity, uid);
       // }
 
-      // TODO: Return all deleted versions?
       return {};
     },
 
@@ -343,6 +345,6 @@ const collectionTypes = ({ strapi }: { strapi: Strapi }) => {
   };
 };
 
-export type CollectionTypesService = typeof collectionTypes;
+export type DocumentManagerService = typeof documentManager;
 
-export default collectionTypes;
+export default documentManager;

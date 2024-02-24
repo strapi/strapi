@@ -1,11 +1,8 @@
 import '@strapi/types';
-import { CollectionTypesService } from 'src/services/collection-types';
-import { SingleTypesService } from 'src/services/single-types';
+import { DocumentManagerService } from 'src/services/document-manager';
 
 type Services = {
-  'collection-types': CollectionTypesService;
-  'single-types': SingleTypesService;
-  // TODO: Add rest of service
+  'document-manager': DocumentManagerService;
   [key: string]: any;
 };
 

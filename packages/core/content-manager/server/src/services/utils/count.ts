@@ -1,6 +1,6 @@
 import { Common, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import type { Document } from '../collection-types';
+import type { Document } from '../document-manager';
 
 const { isVisibleAttribute } = contentTypes;
 
