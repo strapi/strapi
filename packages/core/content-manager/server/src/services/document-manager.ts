@@ -7,7 +7,7 @@ import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from '.
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
-type DocService = Documents.CollectionTypeInstance;
+type DocService = Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
 export type Document = Documents.Result<Common.UID.ContentType>;
 

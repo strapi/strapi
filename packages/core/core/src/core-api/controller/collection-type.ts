@@ -51,7 +51,7 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const { body = {} } = ctx.request;
+      const { body = {} as any } = ctx.request;
 
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
@@ -77,7 +77,7 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const { body = {} } = ctx.request;
+      const { body = {} as any } = ctx.request;
 
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
