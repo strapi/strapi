@@ -42,7 +42,7 @@ export type Pick<
     // Publication State
     [HasMember<TKind, 'status'>, PublicationState.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: string }],
+    [HasMember<TKind, 'locale'>, { locale?: Attribute.Locale }],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data

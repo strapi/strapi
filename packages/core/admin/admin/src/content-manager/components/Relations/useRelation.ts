@@ -123,8 +123,6 @@ const useRelation = ({ relation, search }: UseRelationArgs) => {
         ? searchRes.data?.pagination.page < searchRes.data?.pagination.pageCount
         : false,
       fetchNextPage: () => {
-        // @ts-expect-error TODO id can be undefined as per the search params type in
-        // this file but not in the contract
         setSearchQueryParams((s) => {
           const page = s?.params.page ?? Math.floor((searchRes.data?.results?.length ?? 1) / 10);
           return {

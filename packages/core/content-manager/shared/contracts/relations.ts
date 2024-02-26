@@ -34,10 +34,10 @@ export declare namespace FindAvailable {
   export interface Request {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
-      id: string;
+      id?: Entity.ID;
       _q?: string;
       _filter?: string;
-      locale?: string | null;
+      locale?: Documents.Params.Attribute.Locale;
       status?: Documents.Params.PublicationState.Kind;
     };
   }
@@ -65,7 +65,7 @@ export declare namespace FindExisting {
   export interface Params {
     model: string;
     targetField: string;
-    id: string;
+    id?: Entity.ID;
   }
 
   export type Response = RelationResponse;

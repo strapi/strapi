@@ -1,6 +1,6 @@
 import { prop, uniq, flow } from 'lodash/fp';
 import { isOperatorOfType, contentTypes } from '@strapi/utils';
-import { type Common } from '@strapi/types';
+import { type Common, type Entity, type Documents } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -43,14 +43,6 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
-const isNumeric = (value: any): value is number => {
-  const parsed = parseInt(value, 10);
-  return !Number.isNaN(parsed);
-};
-
-/**
- *
- */
 const mapResults = (results: Array<any>) => {
   return results.map((result: any) => {
     if (result.documentId !== undefined) {
@@ -65,9 +57,9 @@ const mapResults = (results: Array<any>) => {
 export default {
   async extractAndValidateRequestInfo(
     ctx: any,
-    status?: 'draft' | 'published',
-    id?: string | number,
-    locale?: string
+    id?: Entity.ID,
+    status?: Documents.Params.PublicationState.Kind,
+    locale?: Documents.Params.Attribute.Locale
   ) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
@@ -94,12 +86,10 @@ export default {
 
     let currentEntity = { id: null };
     if (id) {
-      // The Id we receive can be a documentId or a numerical entity id
-      if (isNumeric(id)) {
-        // TODO is there a better way to distinguish between the two?
-        where.id = id;
-      } else {
+      if (!isSourceComponent) {
         where.documentId = id;
+      } else {
+        where.id = id;
       }
 
       currentEntity = await strapi.db.query(model).findOne({
@@ -166,7 +156,7 @@ export default {
     const locale = ctx.request?.query?.locale || null;
     const status = ctx.request?.query?.status || 'draft';
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, status, id, locale);
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
     if (!validation) {
       // If validation of the request has failed the error has already been sent
       // to the ctx
@@ -266,7 +256,7 @@ export default {
     const locale = ctx.request?.query?.locale || null;
     const status = ctx.request?.query?.status || 'draft';
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, status, id, locale);
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
     if (!validation) {
       // If validation of the request has failed the error has already been sent
       // to the ctx
