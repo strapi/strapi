@@ -134,18 +134,17 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
     nameTokens
   );
 
-  // Calculate total length of incompressible tokens using lodash/fp _.sumBy
   const totalIncompressibleLength = sumBy((token: NameToken) => token.name.length)(incompressible);
-
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
-  if (totalIncompressibleLength + totalSeparatorsLength > maxLength) {
-    throw new Error('sum of length of incompressible strings length is greater than maxLength');
-  }
-
   const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
-
-  // Calculate available length per compressible token
   const availablePerToken = Math.floor(available / compressible.length);
+
+  if (
+    totalIncompressibleLength + totalSeparatorsLength > maxLength ||
+    availablePerToken < MIN_TOKEN_LENGTH
+  ) {
+    throw new Error('Maximum length is too small to accommodate all tokens');
+  }
 
   // Calculate the remainder from the division and add it to the surplus
   let surplus = available % compressible.length;
