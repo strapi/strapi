@@ -211,7 +211,7 @@ describe('identifiers', () => {
 
     test('throws when incompressible string cannot fit', () => {
       expect(() => getNameFromTokens([{ name: '123456', compressible: false }], 5)).toThrow(
-        'sum of length of incompressible strings length is greater than maxLength'
+        'Maximum length is too small to accommodate all tokens'
       );
     });
 
@@ -224,7 +224,7 @@ describe('identifiers', () => {
           ],
           12
         )
-      ).toThrow('sum of length of incompressible strings length is greater than maxLength');
+      ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
     test('shortens strings that result in exactly maxLength (three compressible, suffix)', () => {
