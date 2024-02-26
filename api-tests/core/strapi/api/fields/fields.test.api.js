@@ -14,8 +14,9 @@ const data = { product: [] };
 const getProductDataFields = (fields) => {
   return data.product.map((product) => {
     return {
-      ...product,
-      attributes: fields.length > 0 ? _.pick(product.attributes, fields) : product.attributes,
+      id: product.id,
+      documentId: product.documentId,
+      ...(fields.length > 0 ? _.pick(product, fields) : product),
     };
   });
 };
@@ -105,10 +106,7 @@ describe('Field selection API', () => {
 
     const sanitizedFixtures = await builder.sanitizedFixtures(strapi);
 
-    Object.assign(
-      data,
-      _.mapValues(sanitizedFixtures, (value) => transformToRESTResource(value))
-    );
+    Object.assign(data, sanitizedFixtures);
   });
 
   afterAll(async () => {

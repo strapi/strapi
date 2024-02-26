@@ -70,7 +70,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  async getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
 
@@ -80,7 +80,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     // For each locale, get the ones with the same status
     return Object.values(versionsByLocale).map((localeVersions: DocumentVersion[]) => {
       const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-      const otherVersions = localeVersions.filter((v) => v.documentId !== draftVersion?.documentId);
+      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
 
       if (!draftVersion) return;
 
@@ -94,7 +94,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Returns available status of a document for the current locale
    */
-  async getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
     // Find the other status of the document
     const status =
       version.publishedAt !== null
@@ -128,10 +128,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return strapi.documents(uid).findMany({
       filters: {
-        id: { $in: documents.map((d) => d.documentId) },
+        documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
       },
       status: otherStatus,
-      fields: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+      fields: ['documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     }) as unknown as DocumentMetadata['availableStatus'];
   },
 
@@ -180,10 +180,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     });
 
-    const [availableLocalesResult, availableStatusResult] = await Promise.all([
-      availableLocales ? this.getAvailableLocales(version, versions) : [],
-      availableStatus ? this.getAvailableStatus(version, versions) : null,
-    ]);
+    const availableLocalesResult = availableLocales
+      ? this.getAvailableLocales(version, versions)
+      : [];
+
+    const availableStatusResult = availableStatus
+      ? this.getAvailableStatus(version, versions)
+      : null;
 
     return {
       availableLocales: availableLocalesResult,

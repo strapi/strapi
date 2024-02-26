@@ -50,7 +50,7 @@ describe('Document Service relations', () => {
       });
 
       // TODO: Category id should be the document id
-      // expect(article.categories[0].id).toBe('Cat2-En');
+      // expect(article.categories[0].documentId).toBe('Cat2-En');
     });
   });
 

@@ -151,7 +151,7 @@ export default {
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
-    const entityManager = getService('single-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -171,7 +171,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const deletedEntity = await entityManager.delete(document.documentId, model, { locale });
+    const deletedEntity = await documentManager.delete(document.documentId, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(deletedEntity);
   },
@@ -181,7 +181,7 @@ export default {
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
-    const singleTypes = getService('single-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -203,7 +203,7 @@ export default {
       }
 
       const { locale } = getDocumentLocaleAndStatus(document);
-      return singleTypes.publish(document.documentId, model, { locale });
+      return documentManager.publish(document.documentId, model, { locale });
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);

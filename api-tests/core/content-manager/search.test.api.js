@@ -195,7 +195,7 @@ describe('Search query', () => {
       expect(res.body.results.length).toBe(data.beds.length);
       // TODO V5: Filter out i18n fields if content type is not localized
       expect(
-        res.body.results.map(omit([...CREATOR_FIELDS, 'localizations', 'status', 'entryId']))
+        res.body.results.map(omit([...CREATOR_FIELDS, 'localizations', 'status', 'documentId']))
       ).toEqual(expect.arrayContaining(data.beds));
     });
 

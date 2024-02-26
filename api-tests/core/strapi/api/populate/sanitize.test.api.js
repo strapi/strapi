@@ -137,9 +137,9 @@ describe('Sanitize populated entries', () => {
       );
 
       expect(status).toBe(200);
-      expect(body.data[0].attributes.cover).toBeDefined();
-      expect(body.data[0].attributes.cover.data.attributes.createdBy).toBeUndefined();
-      expect(body.data[0].attributes.cover.data.attributes.updatedBy).toBeUndefined();
+      expect(body.data[0].cover).toBeDefined();
+      expect(body.data[0].cover.createdBy).toBeUndefined();
+      expect(body.data[0].cover.updatedBy).toBeUndefined();
     });
 
     test("Media's relations (from related) can be populated without restricted attributes", async () => {
@@ -164,7 +164,11 @@ describe('Sanitize populated entries', () => {
 
   describe('Wildcard Populate', () => {
     test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
-      const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
+      let populate = {};
+      strapi.documents.use((ctx, next) => {
+        populate = ctx.args[0]?.populate;
+        return next();
+      });
 
       const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
         qs: { fields: ['id'], populate: '*' },
@@ -172,12 +176,12 @@ describe('Sanitize populated entries', () => {
 
       expect(status).toBe(200);
       // Make sure the wildcard populate is transformed to an exhaustive list
-      expect(findManyMock).toHaveBeenCalledWith(
-        'api::b.b',
-        expect.objectContaining({
-          populate: expect.objectContaining({ relA: true, cp: true, dz: true, img: true }),
-        })
-      );
+      expect(populate).toMatchObject({
+        relA: true,
+        cp: true,
+        dz: true,
+        img: true,
+      });
     });
   });
 });
