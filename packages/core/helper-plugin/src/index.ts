@@ -33,18 +33,6 @@ export * from './components/SettingsPageTitle';
 export * from './components/Status';
 
 /* -------------------------------------------------------------------------------------------------
- * Content Manager
- * -----------------------------------------------------------------------------------------------*/
-
-export {
-  useCMEditViewDataManager,
-  ContentManagerEditViewDataManagerContext,
-  type CMEditViewDataManagerContextValue,
-  type ContentType,
-} from './content-manager/CMEditViewDataManager';
-export * from './content-manager/utils/getAttributeInfos';
-
-/* -------------------------------------------------------------------------------------------------
  * Features
  * -----------------------------------------------------------------------------------------------*/
 
@@ -89,8 +77,6 @@ export * from './icons/SortIcon';
  * Utils
  * -----------------------------------------------------------------------------------------------*/
 
-export * from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
-export * from './content-manager/utils/formatContentTypeData';
 export * from './utils/auth';
 export * from './utils/awaitToJs';
 export * from './utils/difference';
