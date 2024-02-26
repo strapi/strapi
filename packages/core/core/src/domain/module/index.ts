@@ -43,7 +43,10 @@ export interface Module {
   controllers: Record<string, Common.Controller>;
 }
 
-const uidToPath = (uid: string) => uid.replace('::', '.');
+// Convert uids to config dot-delimited format and namespace them into 'config'
+// to avoid conflicts with Strapi configs.
+// For example, an api named "rest" will be found in config.get('config.rest')
+const uidToPath = (uid: string) => `configs.${uid.replace('::', '.')}`;
 
 // Removes the namespace from a map with keys prefixed with a namespace
 const removeNamespacedKeys = <T extends Record<string, unknown>>(map: T, namespace: string) => {
@@ -100,20 +103,7 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       strapi.get('policies').add(namespace, rawModule.policies);
       strapi.get('middlewares').add(namespace, rawModule.middlewares);
       strapi.get('controllers').add(namespace, rawModule.controllers);
-
-      // We need to move user apis to a custom namespace to avoid conflicts with Strapi api
-      // For example, an api named "rest" will be found in config.get('api.custom.rest')
-      const normalizedNamespace = namespace.toLowerCase();
-      if (normalizedNamespace.startsWith('api::')) {
-        // insert 'custom' after api::
-        const safeNamespace = `${namespace.substring(
-          0,
-          namespace.indexOf('::') + 2
-        )}custom.${namespace.substring(namespace.indexOf('::') + 2)}`;
-        strapi.container.get('config').set(uidToPath(safeNamespace), rawModule.config);
-      } else {
-        strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
-      }
+      strapi.get('config').set(uidToPath(namespace), rawModule.config);
     },
     get routes() {
       return rawModule.routes ?? {};
