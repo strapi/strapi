@@ -4,6 +4,7 @@ import {
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
+  getMetadata,
 } from '../../../../__tests__/test-utils';
 
 afterEach(() => {
@@ -173,6 +174,7 @@ describe('Local Strapi Source Destination', () => {
               transacting: jest.fn().mockReturnThis(),
             }),
           }),
+          metadata: getMetadata(),
         },
         ...strapiCommonProperties,
       })();

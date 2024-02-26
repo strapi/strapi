@@ -4,6 +4,7 @@ import {
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
+  getMetadata,
 } from '../../../../__tests__/test-utils';
 import { IConfiguration } from '../../../../../types';
 
@@ -64,12 +65,15 @@ const query = jest.fn((uid) => {
 });
 
 describe('Restore ', () => {
-  test('Should delete all contentTypes', async () => {
+  test('Should delete all models and contentTypes', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       query,
       getModel,
-      db: { query },
+      db: {
+        query,
+        metadata: getMetadata(),
+      },
     })();
 
     setGlobalStrapi(strapi);
@@ -78,12 +82,15 @@ describe('Restore ', () => {
     expect(count).toBe(entities.length);
   });
 
-  test('Should only delete chosen contentType', async () => {
+  test('Should only delete chosen model or contentType', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       query,
       getModel,
-      db: { query },
+      db: {
+        query,
+        metadata: getMetadata(),
+      },
     })();
 
     setGlobalStrapi(strapi);

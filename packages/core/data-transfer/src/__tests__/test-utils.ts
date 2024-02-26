@@ -50,6 +50,20 @@ export const getContentTypes = (): {
 });
 
 /**
+ * Factory to get default metadata test values
+ */
+export const getMetadata = () => ({
+  values: () => ({
+    foo: {
+      uid: 'foo',
+    },
+    bar: {
+      uid: 'bar',
+    },
+  }),
+});
+
+/**
  * Create a factory of readable streams (wrapped with a jest mock function)
  */
 export const createMockedReadableFactory = <T extends string = ContentType>(source: {
