@@ -71,7 +71,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
       if (error) {
         await this.#respond(uuid);
-        // await this.#endStep(stage);
         stream.destroy(error);
         return;
       }

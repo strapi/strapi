@@ -357,6 +357,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
+              // Support usage of main hash for older versions
               const condition = uploadData?.id
                 ? { id: fileEntitiesMapper[uploadData.id] }
                 : { hash: uploadData.mainHash };
