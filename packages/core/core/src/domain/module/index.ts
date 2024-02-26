@@ -46,7 +46,14 @@ export interface Module {
 // Convert uids to config dot-delimited format and namespace them into 'config'
 // to avoid conflicts with Strapi configs.
 // For example, an api named "rest" will be found in config.get('config.rest')
-const uidToPath = (uid: string) => `configs.${uid.replace('::', '.')}`;
+const uidToPath = (uid: string) => {
+  // TODO: resolve with
+  // Plugin namespace is put into plugin
+  if (uid.startsWith('plugin::')) {
+    return uid.replace('::', '.');
+  }
+  return `configs.${uid.replace('::', '.')}`;
+};
 
 // Removes the namespace from a map with keys prefixed with a namespace
 const removeNamespacedKeys = <T extends Record<string, unknown>>(map: T, namespace: string) => {

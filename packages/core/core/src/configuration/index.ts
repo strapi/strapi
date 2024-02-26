@@ -68,6 +68,7 @@ export default (dirs: { app: string; dist: string }, initialConfig: any = {}) =>
     },
   };
 
+  // See packages/core/core/src/domain/module/index.ts for plugin config loading
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later
 
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV as string);
