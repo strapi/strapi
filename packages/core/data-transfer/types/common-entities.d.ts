@@ -147,6 +147,7 @@ interface IFile {
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   type?: string;
+  mainHash?: string;
 }
 export interface IAsset {
   filename: string;

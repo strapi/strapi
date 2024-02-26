@@ -357,8 +357,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
+              const condition = uploadData?.id
+                ? { id: fileEntitiesMapper[uploadData.id] }
+                : { hash: uploadData.mainHash };
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { id: fileEntitiesMapper[uploadData.id] },
+                where: condition,
               });
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
