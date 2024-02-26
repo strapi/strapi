@@ -13,7 +13,6 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  Form,
   auth,
   getYupInnerErrors,
   translatedErrors,
@@ -24,7 +23,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import omit from 'lodash/omit';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';

@@ -1,7 +1,7 @@
 import { render as renderRTL, waitFor, act, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { Form } from '../../../../../components/Form';
+import { Form } from '../../../../../../components/Form';
 import { UIDInput, UIDInputProps } from '../UID';
 
 const render = ({

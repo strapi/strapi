@@ -4,9 +4,9 @@ import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { useCollator } from '@strapi/helper-plugin';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
+import { useForm, type InputProps } from '../../../../components/Form';
+import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
-import { useForm, type InputProps } from '../../../components/Form';
-import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { useDoc } from '../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';

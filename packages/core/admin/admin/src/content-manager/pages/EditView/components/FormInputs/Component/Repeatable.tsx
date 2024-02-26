@@ -20,12 +20,12 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useField, useForm } from '../../../../../components/Form';
+import { useField, useForm } from '../../../../../../components/Form';
+import { getIn } from '../../../../../../utils/object';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
-import { getIn } from '../../../../../utils/object';
 import { useComposedRefs } from '../../../../../utils/refs';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';

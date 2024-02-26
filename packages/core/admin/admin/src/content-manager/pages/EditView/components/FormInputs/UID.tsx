@@ -12,8 +12,8 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
+import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { type InputProps, useField, useForm } from '../../../../components/Form';
 import { useDoc } from '../../../../hooks/useDocument';
 import {
   useGenerateUIDMutation,

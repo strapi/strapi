@@ -3,7 +3,6 @@ import * as React from 'react';
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  Form,
   SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -13,7 +12,7 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 

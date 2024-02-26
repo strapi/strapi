@@ -5,7 +5,7 @@ import { useFocusInputField } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useComposedRefs } from '../../utils/refs';
+import { useComposedRefs } from '../../content-manager/utils/refs';
 import { useField } from '../Form';
 
 import { InputProps } from './types';

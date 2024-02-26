@@ -11,13 +11,13 @@ import {
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
+import { Form, FormProps } from '../../../components/Form';
 import { useTypedSelector } from '../../../core/store/hooks';
-import { Form, FormProps } from '../../components/Form';
+import { setIn } from '../../../utils/object';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { useDoc } from '../../hooks/useDocument';
 import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
-import { setIn } from '../../utils/object';
 
 import { Header } from './components/Header';
 import { Settings } from './components/Settings';

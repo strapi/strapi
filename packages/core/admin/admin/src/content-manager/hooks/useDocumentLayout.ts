@@ -20,7 +20,7 @@ import {
   useDocument,
 } from './useDocument';
 
-import type { InputProps } from '../components/FormInputs/types';
+import type { InputProps } from '../../components/FormInputs/types';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';

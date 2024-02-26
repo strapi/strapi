@@ -1,35 +1,33 @@
 import { forwardRef } from 'react';
 
-import { TextInput } from '@strapi/design-system';
+import { Textarea } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 
-import { useComposedRefs } from '../../utils/refs';
+import { useComposedRefs } from '../../content-manager/utils/refs';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-/**
- * TODO: fix the ref type when the design system is fixed.
- */
-export const StringInput = forwardRef<any, InputProps>(
-  ({ disabled, label, hint, name, placeholder, required }, ref) => {
+export const TextareaInput = forwardRef<any, InputProps>(
+  ({ name, disabled, hint, label, placeholder, required }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <TextInput
+      <Textarea
         ref={composedRefs}
         disabled={disabled}
-        hint={hint}
-        label={label}
-        name={name}
-        error={field.error}
         defaultValue={field.initialValue}
+        error={field.error}
+        label={label}
+        id={name}
+        hint={hint}
+        name={name}
         onChange={field.onChange}
-        placeholder={placeholder}
         required={required}
+        placeholder={placeholder}
         value={field.value ?? ''}
       />
     );

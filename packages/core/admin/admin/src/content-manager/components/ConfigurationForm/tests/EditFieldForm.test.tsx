@@ -1,6 +1,6 @@
 import { fireEvent, render as renderRTL, screen } from '@tests/utils';
 
-import { Form } from '../../Form';
+import { Form } from '../../../../components/Form';
 import { EditFieldForm, EditFieldFormProps } from '../EditFieldForm';
 import { ConfigurationFormData } from '../Form';
 

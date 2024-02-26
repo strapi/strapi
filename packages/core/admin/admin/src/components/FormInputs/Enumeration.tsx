@@ -3,7 +3,7 @@ import { forwardRef } from 'react';
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 
-import { useComposedRefs } from '../../utils/refs';
+import { useComposedRefs } from '../../content-manager/utils/refs';
 import { useField } from '../Form';
 
 import { EnumerationProps } from './types';

@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { Form, translatedErrors, useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
+import { translatedErrors, useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

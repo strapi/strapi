@@ -18,13 +18,12 @@ import {
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
-  Form,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { NavLink, useMatch } from 'react-router-dom';
@@ -110,7 +109,7 @@ export const EditPage = () => {
           <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
-                !isLoadingPlugins && (
+                !isLoadingPlugins ? (
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     type="submit"
@@ -122,7 +121,7 @@ export const EditPage = () => {
                       defaultMessage: 'Save',
                     })}
                   </Button>
-                )
+                ) : null
               }
               title={role.name}
               subtitle={role.description}

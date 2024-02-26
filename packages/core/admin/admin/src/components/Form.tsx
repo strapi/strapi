@@ -17,8 +17,9 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
-import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
+
+import { createContext } from './Context';
 
 import type { InputProps as InputPropsImpl, EnumerationProps } from './FormInputs/types';
 import type * as Yup from 'yup';
