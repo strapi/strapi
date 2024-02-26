@@ -1,5 +1,5 @@
-import { prop, uniq, flow, sortBy } from 'lodash/fp';
-import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
+import { prop, uniq, flow } from 'lodash/fp';
+import { isOperatorOfType, contentTypes } from '@strapi/utils';
 import { type Common } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
@@ -7,7 +7,6 @@ import { validateFindAvailable, validateFindExisting } from './validation/relati
 import { isListable } from '../services/utils/configuration/attributes';
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
-const { isOneToAny } = relations;
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
@@ -274,95 +273,52 @@ export default {
       return;
     }
 
-    const { model } = ctx.params;
     const {
       targetField,
-      attribute,
       fieldsToSelect,
-      sourceSchema: { modelType: sourceModelType },
+      sourceSchema: { uid: sourceUid },
       targetSchema: { uid: targetUid },
       currentEntityId,
     } = validation;
 
-    // TODO type modelUid = ContentType
-    let modelUid: any = '';
-    let fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
-    let filters;
-    let sort = null;
-    let populate = null;
-    if (!isOneToAny(attribute)) {
-      // If it is a many to any relation, we query for the target (relation) content type
-      // Filtering for those related to the current entity
+    const entity = await strapi.entityService.findOne(
+      sourceUid as Common.UID.ContentType,
+      // TODO
+      currentEntityId as unknown as number,
+      {
+        fields: ['id'],
+        populate: { [targetField]: { fields: ['id'] } },
+      }
+    );
 
-      modelUid = targetUid;
-      if (attribute?.mappedBy ?? attribute?.inversedBy ?? attribute?.target) {
-        filters = {
-          [attribute?.mappedBy ?? attribute?.inversedBy ?? attribute?.target]: {
-            $and: [
-              { id: currentEntityId },
-              { locale },
-              { publishedAt: status === 'published' ? { $ne: null } : null },
-            ],
-          },
-        };
+    let resultIds = [];
+
+    if (entity?.[targetField]) {
+      if (Array.isArray(entity?.[targetField])) {
+        resultIds = entity?.[targetField]?.map((result: any) => result.id);
       } else {
-        filters = {};
+        resultIds = [entity?.[targetField]?.id] ?? [];
       }
-
-      sort = fields
-        .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
-        .map((field: any) => `${field}:ASC`);
-    } else {
-      // If it is a one to any relation, we query for the source content type
-      // This could be a component or a content type
-      modelUid = model;
-      filters = { id: currentEntityId };
-
-      if (sourceModelType === 'component') {
-        // If the source is a component, remove fields that are not present for components
-        fields = fields.filter(
-          (field: string) => !['documentId', 'locale', PUBLISHED_AT_ATTRIBUTE].includes(field)
-        );
-      }
-
-      populate = { [targetField]: { fields } };
     }
 
-    const queryParams: Record<string, any> = {
+    const fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
+    const sort = fields
+      .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
+      .map((field: any) => `${field}:ASC`);
+
+    const page = await strapi.entityService.findPage(targetUid as Common.UID.ContentType, {
       fields,
-      filters,
+      filters: {
+        id: { $in: resultIds },
+      },
       sort,
-      populate,
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
-    };
-
-    const page = await strapi.entityService.findPage(modelUid, queryParams);
-
-    // TODO simplify isOneToAny conditions
-    let results;
-    if (isOneToAny(attribute) && page.results.length === 1) {
-      let targetResult = page.results[0][targetField];
-      if (!targetResult) {
-        targetResult = [];
-      } else if (!Array.isArray(targetResult)) {
-        targetResult = [targetResult];
-      }
-
-      const getSortedResults = flow(
-        sortBy(
-          (value: any) => `${fieldsToSelect.map((field: any) => value?.[field] ?? null).join('-')}`
-        )
-      );
-
-      results = getSortedResults(targetResult);
-    } else {
-      results = page.results;
-    }
+    });
 
     ctx.body = {
       ...page,
-      results: Array.isArray(results) ? mapResults(results) : [],
+      results: Array.isArray(page.results) ? mapResults(page.results) : [],
     };
   },
 };

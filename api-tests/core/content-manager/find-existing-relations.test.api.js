@@ -391,12 +391,12 @@ describe('Relations', () => {
           if (isManyRelation) {
             expect(res.body.results).toMatchObject([
               {
-                id: expect.any(Number),
+                id: expect.any(String),
                 name: 'Candle',
                 ...addPublishedAtCheck(null),
               },
               {
-                id: expect.any(Number),
+                id: expect.any(String),
                 name: 'Skate',
                 ...addPublishedAtCheck(expect.any(String)),
               },
@@ -404,7 +404,7 @@ describe('Relations', () => {
           } else {
             expect(res.body.results).toMatchObject([
               {
-                id: expect.any(Number),
+                id: expect.any(String),
                 name: 'Skate',
                 ...addPublishedAtCheck(expect.any(String)),
               },
