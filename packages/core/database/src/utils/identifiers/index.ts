@@ -1,17 +1,11 @@
 import _ from 'lodash/fp';
+import { getNameFromTokens } from './shortener';
 
-// TODO: Names will not be shortened until this is set to a non-zero number
-export const MAX_DB_IDENTIFIER_LENGTH = 0;
-
+// Constants for column names used in naming methods
 export const ENTITY = 'entity';
 export const ID_COLUMN = 'id';
 export const ORDER_COLUMN = 'order';
 export const FIELD_COLUMN = 'field';
-
-type NameToken = {
-  name: string;
-  compressible: boolean;
-};
 
 type NameInput = string | string[];
 
@@ -21,23 +15,13 @@ type NameOptions = {
   maxLength?: number;
 };
 
-export const getNameFromTokens = (tokens: NameToken[], max: number = MAX_DB_IDENTIFIER_LENGTH) => {
-  const fullLength = tokens
-    .map((token) => {
-      return _.snakeCase(token.name);
-    })
-    .join('_');
-
-  if (!max || fullLength.length <= max) {
-    return fullLength;
-  }
-
-  // TODO: this is where the shortening algorithm goes
-
-  return fullLength;
-};
-
-// Generic name handler used by all helper functions
+// Generic name handler that must be used by all helper functions
+/**
+ * TODO: we should be requiring snake_case inputs for all names here, but we
+ * aren't and it will require some refactoring to make it work. Currently if
+ * we get names 'myModel' and 'my_model' they would be converted to the same
+ * final string my_model which generally works but is not entirely safe
+ * */
 export const getName = (names: NameInput, options: NameOptions = {}) => {
   const tokens = _.castArray(names).map((name) => {
     return {

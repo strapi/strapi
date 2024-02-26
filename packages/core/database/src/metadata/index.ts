@@ -57,7 +57,6 @@ export const createMetadata = (models: Model[] = []): Metadata => {
 
         createAttribute(attributeName, attribute);
       } catch (error) {
-        console.log(error);
         if (error instanceof Error) {
           throw new Error(
             `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
