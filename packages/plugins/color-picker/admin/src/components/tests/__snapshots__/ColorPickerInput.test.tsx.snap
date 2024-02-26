@@ -159,59 +159,64 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 <div>
-  <div
-    class=""
+  <form
+    method="POST"
+    novalidate=""
   >
     <div
-      class="c0"
+      class=""
     >
-      <label
-        class="c1 c2"
-        for="color"
+      <div
+        class="c0"
       >
-        color-picker
-      </label>
-      <button
-        aria-controls="color-picker-value"
-        aria-disabled="false"
-        aria-expanded="false"
-        aria-haspopup="dialog"
-        aria-label="Color picker toggle"
-        class="c3 c4 c5 c6"
-        type="button"
-      >
-        <div
-          class="c4"
+        <label
+          class="c1 c2"
+          for="color"
+        >
+          color-picker
+        </label>
+        <button
+          aria-controls="color-picker-value"
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Color picker toggle"
+          class="c3 c4 c5 c6"
+          type="button"
         >
           <div
-            class="c7"
-            color="#000000"
-          />
-          <span
-            class="c8"
-            style="text-transform: uppercase;"
+            class="c4"
           >
-            #000000
-          </span>
-        </div>
-        <svg
-          aria-hidden="true"
-          fill="none"
-          height="1rem"
-          viewBox="0 0 14 8"
-          width="1rem"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            clip-rule="evenodd"
-            d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-            fill="#32324D"
-            fill-rule="evenodd"
-          />
-        </svg>
-      </button>
+            <div
+              class="c7"
+              color="#000000"
+            />
+            <span
+              class="c8"
+              style="text-transform: uppercase;"
+            >
+              #000000
+            </span>
+          </div>
+          <svg
+            aria-hidden="true"
+            fill="none"
+            height="1rem"
+            viewBox="0 0 14 8"
+            width="1rem"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+              fill="#32324D"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
-  </div>
+  </form>
   <div
     class="c9"
   >

@@ -21,7 +21,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
 import { PERMISSIONS } from '../src/constants';
-import { reducers } from '../src/store/reducers';
+import { i18nApi } from '../src/services/api';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -49,16 +49,18 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
   const store = configureStore({
     preloadedState: initialState,
     reducer: combineReducers({
-      ...reducers,
+      [i18nApi.reducerPath]: i18nApi.reducer,
       admin_app: (state = initialState) => state,
       rbacProvider: (state = initialState) => state,
     }),
-    middleware: (getDefaultMiddleware: any) =>
-      getDefaultMiddleware({
+    middleware: (getDefaultMiddleware: any) => [
+      ...getDefaultMiddleware({
         // Disable timing checks for test env
         immutableCheck: false,
         serializableCheck: false,
       }),
+      i18nApi.middleware,
+    ],
   });
 
   const i18nPermissions = Object.values(PERMISSIONS).flat();

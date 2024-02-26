@@ -11,6 +11,7 @@ import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
+import * as identifiers from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -168,5 +169,7 @@ class Database {
   }
 }
 
-export { Database, errors };
+const utils = { identifiers };
+
+export { Database, errors, utils };
 export type { Model };

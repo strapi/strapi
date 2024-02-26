@@ -9,28 +9,22 @@ jest.mock('../../hooks/useQueryParams', () => ({
 
 const mockHeaders = [
   {
-    key: '__id_key__',
     name: 'id',
-    fieldSchema: {
+    label: 'id',
+    searchable: true,
+    sortable: true,
+    attribute: {
       type: 'integer',
-    },
-    metadatas: {
-      label: 'id',
-      searchable: true,
-      sortable: true,
     },
   },
   {
-    key: '__short_text_key__',
     name: 'short_text',
-    fieldSchema: {
+    attribute: {
       type: 'string',
     },
-    metadatas: {
-      label: 'short_text',
-      searchable: true,
-      sortable: true,
-    },
+    label: 'short_text',
+    searchable: true,
+    sortable: true,
   },
 ] as const;
 
@@ -85,14 +79,8 @@ describe('Table', () => {
           <Table.Head>
             {/* Bulk action select all checkbox */}
             <Table.HeaderCheckboxCell />
-            {mockHeaders.map(({ fieldSchema, key, name, metadatas }) => (
-              <Table.HeaderCell
-                key={key}
-                name={name}
-                fieldSchemaType={fieldSchema.type}
-                isSortable={metadatas.sortable}
-                label={metadatas.label}
-              />
+            {mockHeaders.map((header) => (
+              <Table.HeaderCell key={header.name} {...header} />
             ))}
             {/* Visually hidden header for actions */}
             <Table.HeaderHiddenActionsCell />

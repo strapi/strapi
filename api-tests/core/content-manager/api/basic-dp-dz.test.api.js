@@ -81,9 +81,9 @@ describe('CM API - Basic + dz', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDzAndDP.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDzAndDP.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
@@ -93,8 +93,8 @@ describe('CM API - Basic + dz', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithDzAndDP[0]);
-    expect(res.body.publishedAt).toBeNull();
+    expect(res.body.data).toMatchObject(data.productsWithDzAndDP[0]);
+    expect(res.body.data.publishedAt).toBeNull();
   });
 
   test('Update product with compo', async () => {
@@ -116,10 +116,10 @@ describe('CM API - Basic + dz', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithDzAndDP[0].id);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDzAndDP[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.id).toEqual(data.productsWithDzAndDP[0].id);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDzAndDP[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {
@@ -152,16 +152,16 @@ describe('CM API - Basic + dz', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/clone/${createdProduct.data.id}`,
       body: {
         publishedAt: new Date().toISOString(),
       },
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
+    expect(res.body.data).toMatchObject(product);
     // When cloning the new entry must be a draft
-    expect(res.body.publishedAt).toBeNull();
+    expect(res.body.data.publishedAt).toBeNull();
   });
 
   describe('validation', () => {
@@ -181,8 +181,8 @@ describe('CM API - Basic + dz', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
+        expect(res.body.data).toMatchObject(product);
+        data.productsWithDzAndDP.push(res.body.data);
       });
 
       test(`Can ${method} product with compo - minLength`, async () => {
@@ -206,8 +206,8 @@ describe('CM API - Basic + dz', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
+        expect(res.body.data).toMatchObject(product);
+        data.productsWithDzAndDP.push(res.body.data);
       });
 
       test(`Cannot ${method} product with compo - maxLength`, async () => {
@@ -270,8 +270,8 @@ describe('CM API - Basic + dz', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
+        expect(res.body.data).toMatchObject(product);
+        data.productsWithDzAndDP.push(res.body.data);
       });
 
       test(`Cannot ${method} product with compo - missing __component`, async () => {

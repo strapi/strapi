@@ -228,7 +228,7 @@
   "content-manager.containers.Home.pluginHeaderDescription": "Керуйте своїми записами за допомогою потужного та красивого інтерфейсу.",
   "content-manager.containers.Home.pluginHeaderTitle": "Контент-менеджер",
   "content-manager.containers.List.errorFetchRecords": "Помилка",
-  "content-manager.containers.ListPage.displayedFields": "Показувати поля",
+  "content-manager.containers.list.displayedFields": "Показувати поля",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Налаштуйте підпис",
   "content-manager.containers.SettingPage.add.field": "Додати ще одне поле",
   "content-manager.containers.SettingPage.attributes": "Поля атрибутів",

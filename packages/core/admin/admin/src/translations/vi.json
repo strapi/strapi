@@ -201,7 +201,7 @@
   "content-manager.containers.Home.pluginHeaderDescription": "Quản lý các bản ghi thông qua một giao diện mạnh và đẹp.",
   "content-manager.containers.Home.pluginHeaderTitle": "Quản Lý Nội Dung",
   "content-manager.containers.List.errorFetchRecords": "Lỗi",
-  "content-manager.containers.ListPage.displayedFields": "Các trường đã được trình bày",
+  "content-manager.containers.list.displayedFields": "Các trường đã được trình bày",
   "content-manager.containers.SettingPage.attributes": "Các trường thuộc tính",
   "content-manager.containers.SettingPage.attributes.description": "Định nghĩa thứ tự các thuộc tính",
   "content-manager.containers.SettingPage.editSettings.description": "Kéo & thả các trường để xây dựng bố cục",
