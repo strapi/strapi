@@ -434,12 +434,14 @@ const createJoinTable = (
 
   const joinTableName = identifiers.getJoinTableName(meta.tableName, attributeName);
 
-  const joinColumnName = identifiers.getJoinColumnIdName(meta.singularName);
-  let inverseJoinColumnName = identifiers.getJoinColumnIdName(targetMeta.singularName);
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(meta.singularName);
+  let inverseJoinColumnName = identifiers.getJoinColumnAttributeIdName(targetMeta.singularName);
 
   // if relation is self referencing
   if (joinColumnName === inverseJoinColumnName) {
-    inverseJoinColumnName = identifiers.getInverseJoinColumnIdName(targetMeta.singularName);
+    inverseJoinColumnName = identifiers.getInverseJoinColumnAttributeIdName(
+      targetMeta.singularName
+    );
   }
 
   const orderColumnName = identifiers.getOrderColumnName(targetMeta.singularName);
