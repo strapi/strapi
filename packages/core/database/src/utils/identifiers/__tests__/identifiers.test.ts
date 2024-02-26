@@ -157,14 +157,11 @@ describe('identifiers', () => {
           ],
           21
         )
-      ).toThrow(
-        'Maximum length is too small to accommodate all tokens'
-        // This means that it's trying to call createHash('1234567890', 7) because: 21 - 5 (links length) - 2 (separators length) = 14, 14/2 = 7
-        // 'length for part of identifier too short, minimum is hash length (5) plus min token length (3), received 7 for token 1234567890'
-      );
+      ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
     test('shortens two long strings when maxLength is the shortest possible', () => {
+      // TODO: make this clearer, what is 2 and 5?
       const len = (MIN_TOKEN_LENGTH + HASH_LENGTH) * 2 + 5 + IDENTIFIER_SEPARATOR.length * 2;
       expect(len).toBe(23);
 
