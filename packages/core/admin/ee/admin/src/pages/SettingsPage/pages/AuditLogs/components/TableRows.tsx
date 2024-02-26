@@ -4,13 +4,33 @@ import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-syst
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
 import { Attribute, Entity } from '@strapi/types';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { ListLayoutRow } from '../../../../../../../../admin/src/content-manager/utils/layouts';
 import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
 import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
+
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+
+type MainField = Attribute.Any & {
+  name: string;
+};
+
+interface Metadata {
+  edit: Contracts.ContentTypes.Metadatas[string]['edit'] & {
+    mainField?: MainField;
+  };
+  list: Contracts.ContentTypes.Metadatas[string]['list'] & {
+    mainField?: MainField;
+  };
+}
+
+interface ListLayoutRow {
+  key: string;
+  name: string;
+  fieldSchema: Attribute.Any | { type: 'custom' };
+  metadatas: Metadata['list'];
+}
 
 export interface TableHeader extends Omit<ListLayoutRow, 'metadatas' | 'fieldSchema' | 'name'> {
   metadatas: Omit<ListLayoutRow['metadatas'], 'label'> & {
@@ -27,7 +47,7 @@ type TableRowsProps = {
   onOpenModal: (id: Entity.ID) => void;
 };
 
-export const TableRows = ({ headers, rows, onOpenModal }: TableRowsProps) => {
+export const TableRows = ({ headers, rows = [], onOpenModal }: TableRowsProps) => {
   const { formatMessage } = useIntl();
   const formatTimeStamp = useFormatTimeStamp();
 
@@ -95,14 +115,4 @@ export const TableRows = ({ headers, rows, onOpenModal }: TableRowsProps) => {
       })}
     </Tbody>
   );
-};
-
-TableRows.defaultProps = {
-  rows: [],
-};
-
-TableRows.propTypes = {
-  headers: PropTypes.array.isRequired,
-  rows: PropTypes.array,
-  onOpenModal: PropTypes.func.isRequired,
 };

@@ -327,7 +327,7 @@ describe('Test uid service', () => {
 
       expect(findMany).toHaveBeenCalledWith({
         filters: {
-          slug: 'my-test-model',
+          slug: { $startsWith: 'my-test-model' },
         },
         locale: 'en',
         status: 'draft',
@@ -359,8 +359,8 @@ describe('Test uid service', () => {
       expect(count).toHaveBeenCalledWith({
         filters: {
           slug: 'my-test-model',
-          locale: 'en',
         },
+        locale: 'en',
         status: 'draft',
       });
       expect(isAvailable).toBe(true);

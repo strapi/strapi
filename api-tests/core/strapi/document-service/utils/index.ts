@@ -16,11 +16,13 @@ export type Category = Attribute.GetValues<
 };
 
 export const findArticleDb = async (where: any) => {
-  return (await strapi.query(ARTICLE_UID).findOne({ where })) as Article | undefined;
+  const article = (await strapi.query(ARTICLE_UID).findOne({ where })) as Article | undefined;
+  return switchIdForDocumentId(article);
 };
 
 export const findArticlesDb = async (where: any) => {
-  return (await strapi.query(ARTICLE_UID).findMany({ where })) as Article[];
+  const articles = (await strapi.query(ARTICLE_UID).findMany({ where })) as Article[];
+  return articles.map(switchIdForDocumentId);
 };
 
 export const findPublishedArticlesDb = async (documentId) => {
@@ -28,13 +30,23 @@ export const findPublishedArticlesDb = async (documentId) => {
 };
 
 export const findAuthorDb = async (where: any) => {
-  return (await strapi.query(AUTHOR_UID).findOne({ where })) as Author | undefined;
+  const author = (await strapi.query(AUTHOR_UID).findOne({ where })) as Author | undefined;
+  return switchIdForDocumentId(author);
 };
 
 export const findAuthorsDb = async (where: any) => {
-  return (await strapi.query(AUTHOR_UID).findMany({ where })) as Author[];
+  const authors = (await strapi.query(AUTHOR_UID).findMany({ where })) as Author[];
+  return authors.map(switchIdForDocumentId);
 };
 
 export const findPublishedAuthorsDb = async (documentId) => {
   return findAuthorsDb({ documentId, publishedAt: { $notNull: true } });
+};
+
+export const switchIdForDocumentId = <T extends Record<string, any>>(
+  output: T
+): Omit<T, 'documentId' | 'id'> & { id: string } => {
+  if (!output) return output as any;
+  const { id, documentId, ...rest } = output;
+  return { ...rest, id: documentId };
 };

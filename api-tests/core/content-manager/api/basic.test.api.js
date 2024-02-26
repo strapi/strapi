@@ -68,10 +68,10 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
-    expect(res.body).not.toHaveProperty('hiddenAttribute');
-    expect(res.body.publishedAt).toBeDefined();
-    data.products.push(res.body);
+    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).not.toHaveProperty('hiddenAttribute');
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.products.push(res.body.data);
   });
 
   test('Read product', async () => {
@@ -107,10 +107,10 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
-    expect(res.body.id).toEqual(data.products[0].id);
-    expect(res.body.publishedAt).toBeDefined();
-    data.products[0] = res.body;
+    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data.id).toEqual(data.products[0].id);
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.products[0] = res.body.data;
   });
 
   test('Delete product', async () => {
@@ -137,12 +137,12 @@ describe('CM API - Basic', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.id}`,
       body: {},
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
   });
 
   test('Clone and update product', async () => {
@@ -159,14 +159,14 @@ describe('CM API - Basic', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.id}`,
       body: {
         name: 'Product 1 updated',
       },
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       name: 'Product 1 updated',
       description: 'Product description',
     });
