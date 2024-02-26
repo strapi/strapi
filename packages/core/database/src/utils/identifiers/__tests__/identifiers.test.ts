@@ -161,15 +161,20 @@ describe('identifiers', () => {
     });
 
     test('shortens two long strings when maxLength is the shortest possible', () => {
-      // TODO: make this clearer, what is 2 and 5?
-      const len = (MIN_TOKEN_LENGTH + HASH_LENGTH) * 2 + 5 + IDENTIFIER_SEPARATOR.length * 2;
+      const separatorsNeeded = 2;
+      const incompressibleString = 'links';
+      const compressibleStrings = 2;
+      const len =
+        (MIN_TOKEN_LENGTH + HASH_LENGTH) * compressibleStrings +
+        incompressibleString.length +
+        IDENTIFIER_SEPARATOR.length * separatorsNeeded;
       expect(len).toBe(23);
 
       const name = getNameFromTokens(
         [
           { name: '1234567890', compressible: true },
           { name: '1234567890', compressible: true },
-          { name: 'links', compressible: false },
+          { name: incompressibleString, compressible: false },
         ],
         len
       );
