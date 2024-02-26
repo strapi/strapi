@@ -99,7 +99,10 @@ const setup = (props?: Partial<RelationInputProps>) => ({
   user: userEvent.setup(),
 });
 
-describe('Content-Manager || RelationInput', () => {
+/**
+ * TODO: re-enable with V5 contracts when BE has introduced relations again.
+ */
+describe.skip('RelationInput', () => {
   test('should render and match snapshot', () => {
     const { container, getByText, getByRole } = setup();
 

@@ -79,9 +79,9 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeDefined();
-    data.productsWithCompo.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.productsWithCompo.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
@@ -91,8 +91,8 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.publishedAt).toBeDefined();
+    expect(res.body.data).toMatchObject(data.productsWithCompo[0]);
+    expect(res.body.data.publishedAt).toBeDefined();
   });
 
   test('Update product with compo', async () => {
@@ -113,10 +113,10 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.publishedAt).toBeDefined();
-    data.productsWithCompo[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.id).toEqual(data.productsWithCompo[0].id);
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.productsWithCompo[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {

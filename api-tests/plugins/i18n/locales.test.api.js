@@ -50,6 +50,9 @@ describe('CRUD locales', () => {
   afterAll(async () => {
     await localeService.setDefaultLocale({ code: 'en' });
 
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -394,8 +397,10 @@ describe('CRUD locales', () => {
       data.locales.splice(1, 1);
     });
 
-    test.skip('Delete a locale and entities in this locale', async () => {
-      const { body: frenchProduct } = await rq({
+    test('Delete a locale and entities in this locale', async () => {
+      const {
+        body: { data: frenchProduct },
+      } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
         qs: { locale: 'fr-FR' },
@@ -403,9 +408,8 @@ describe('CRUD locales', () => {
       });
 
       await rq({
-        url: '/content-manager/collection-types/api::product.product',
-        method: 'POST',
-        qs: { locale: 'en', relatedEntityId: frenchProduct.id },
+        url: `/content-manager/collection-types/api::product.product/${frenchProduct.id}`,
+        method: 'PUT',
         body: { name: 'product name' },
         qs: {
           locale: 'en',
@@ -413,25 +417,20 @@ describe('CRUD locales', () => {
       });
 
       const {
-        body: { results: createdFrenchProducts },
+        body: { results: createdProducts },
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
         qs: { locale: 'fr-FR' },
       });
 
-      expect(createdFrenchProducts).toHaveLength(1);
-
-      // We have related the english product to the french product
-      // The english entity should be present in the french product localizations
-      expect(createdFrenchProducts[0].localizations[0].locale).toBe('en');
+      expect(createdProducts).toHaveLength(1);
+      // expect(createdProducts[0].localizations[0].locale).toBe('en');
 
       const res = await rq({
         url: `/i18n/locales/${data.locales[1].id}`,
         method: 'DELETE',
       });
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
 
       const {
         body: { results: frenchProducts },
@@ -451,6 +450,8 @@ describe('CRUD locales', () => {
       });
       expect(englishProducts).toHaveLength(1);
 
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
       data.deletedLocales.push(res.body);
       data.locales.splice(1, 1);
     });

@@ -24,10 +24,10 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ name: 'Article1' });
         const article = await strapi
           .documents(ARTICLE_UID)
-          .deleteMany({ filters: { id: { $eq: articleDb.documentId } } });
+          .deleteMany({ filters: { id: { $eq: articleDb.id } } });
 
         const articles = await findArticlesDb({
-          documentId: articleDb.documentId,
+          documentId: articleDb.id,
         });
 
         expect(articles).toHaveLength(0);
@@ -37,15 +37,15 @@ describe('Document Service', () => {
     it.skip(
       'delete all documents of a locale',
       testInTransaction(async () => {
-        const articleDb = await findArticlesDb({ locale: 'fr' });
-        const deleted = await strapi.documents(ARTICLE_UID).deleteMany({ locale: 'fr' });
+        const articleDb = await findArticlesDb({ locale: 'nl' });
+        const deleted = await strapi.documents(ARTICLE_UID).deleteMany({ locale: 'nl' });
 
         expect(deleted).toEqual({ count: articleDb.length });
 
         const enArticles = await findArticlesDb({ locale: 'en' });
-        const frArticles = await findArticlesDb({ locale: 'fr' });
+        const nlArticles = await findArticlesDb({ locale: 'nl' });
 
-        expect(frArticles).toBe(undefined);
+        expect(nlArticles).toBe(undefined);
         expect(enArticles.length).toBeGreaterThan(0);
       })
     );
@@ -59,10 +59,10 @@ describe('Document Service', () => {
         expect(async () => {
           const article = await strapi
             .documents(ARTICLE_UID)
-            .deleteMany({ filters: { id: { $eq: articleDb.documentId } }, status: 'draft' });
+            .deleteMany({ filters: { id: { $eq: articleDb.id } }, status: 'draft' });
         }).rejects.toThrow();
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+        const articles = await findArticlesDb({ documentId: articleDb.id });
 
         expect(articles.length).toBe(1);
       })
