@@ -256,7 +256,7 @@ export const CMReleasesContainer = () => {
     slug: string;
     collectionType: string;
   }>();
-  const isCreatingEntry = id !== 'create';
+  const isCreatingEntry = id === 'create';
 
   const contentTypeUid = slug as Common.UID.ContentType;
 

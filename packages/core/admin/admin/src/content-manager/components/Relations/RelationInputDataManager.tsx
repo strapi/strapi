@@ -66,6 +66,7 @@ const RelationInputDataManager = ({
   size,
   targetModel,
 }: RelationInputDataManagerProps) => {
+  return null;
   // const {
   //   isCreatingEntry,
   //   createActionAllowedFields,

@@ -17,6 +17,48 @@ import { DateTimePicker } from '@strapi/helper-plugin';
 import { DateTimePicker } from '@strapi/design-system';
 ```
 
+### Link
+
+This was aliasing the design-system and using the `as` prop with `react-router-dom`. You should import the component from there:
+
+```ts
+// Before
+import { Link } from '@strapi/helper-plugin';
+
+// After
+import { Link } from '@strapi/design-system/v2';
+import { NavLink } from 'react-router-dom';
+
+const MyLink = () => {
+  return (
+    <Link as={NavLink} to="/my-link">
+      My Link
+    </Link>
+  );
+};
+```
+
+### LinkButton
+
+This was aliasing the design-system and using the `as` prop with `react-router-dom`. You should import the component from there:
+
+```ts
+// Before
+import { LinkButton } from '@strapi/helper-plugin';
+
+// After
+import { LinkButton } from '@strapi/design-system/v2';
+import { NavLink } from 'react-router-dom';
+
+const MyLink = () => {
+  return (
+    <LinkButton as={NavLink} to="/my-link">
+      My Link
+    </LinkButton>
+  );
+};
+```
+
 ## Content Manager
 
 ### contentManagementUtilRemoveFieldsFromData

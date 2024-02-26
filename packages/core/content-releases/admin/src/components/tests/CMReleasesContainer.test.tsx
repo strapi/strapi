@@ -1,7 +1,7 @@
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { screen, within } from '@testing-library/react';
-import { render, server, waitFor } from '@tests/utils';
+import { render as renderRTL, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
+import { Route, Routes } from 'react-router-dom';
 
 import { CMReleasesContainer } from '../CMReleasesContainer';
 
@@ -9,66 +9,33 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
-  useCMEditViewDataManager: jest.fn().mockReturnValue({
-    isCreatingEntry: false,
-    hasDraftAndPublish: true,
-    initialData: { id: 1 },
-    slug: 'api::article.article',
-  }),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockReturnValue({ id: '1' }),
-}));
+const render = (
+  initialEntries: string[] = ['/content-manager/collection-types/api::article.article/12345']
+) =>
+  renderRTL(<CMReleasesContainer />, {
+    renderOptions: {
+      wrapper: ({ children }) => (
+        <Routes>
+          <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
+        </Routes>
+      ),
+    },
+    initialEntries,
+  });
 
 describe('CMReleasesContainer', () => {
-  beforeEach(() => {
-    // @ts-expect-error - Ignore error
-    useCMEditViewDataManager.mockReturnValue({
-      isCreatingEntry: false,
-      hasDraftAndPublish: true,
-      initialData: { id: 1 },
-      slug: 'api::article.article',
-    });
-  });
-
   it('should not render the container when creating an entry', async () => {
-    // @ts-expect-error - Ignore error
-    useCMEditViewDataManager.mockReturnValue({
-      isCreatingEntry: true,
-      hasDraftAndPublish: true,
-      initialData: { id: 1 },
-      slug: 'api::article.article',
-    });
+    render(['/content-manager/collection-types/api::article.article/create']);
 
-    render(<CMReleasesContainer />);
-
-    await waitFor(() => {
-      const informationBox = screen.queryByRole('complementary', { name: 'Releases' });
-      expect(informationBox).not.toBeInTheDocument();
-    });
-  });
-
-  it('should not render the container without draft and publish enabled', async () => {
-    // @ts-expect-error - Ignore error
-    useCMEditViewDataManager.mockReturnValue({
-      isCreatingEntry: true,
-      hasDraftAndPublish: false,
-      initialData: { id: 1 },
-      slug: 'api::article.article',
-    });
-
-    render(<CMReleasesContainer />);
-
-    await waitFor(() => {
-      const informationBox = screen.queryByRole('complementary', { name: 'Releases' });
-      expect(informationBox).not.toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.queryByRole('complementary', { name: 'Releases' })).not.toBeInTheDocument()
+    );
   });
 
   it('should render the container', async () => {
-    render(<CMReleasesContainer />);
+    render();
 
     const informationBox = screen.getByRole('complementary', { name: 'Releases' });
     const addToReleaseButton = await screen.findByRole('button', { name: 'Add to release' });
@@ -77,7 +44,7 @@ describe('CMReleasesContainer', () => {
   });
 
   it('should open and close the add to release modal', async () => {
-    const { user } = render(<CMReleasesContainer />);
+    const { user } = render();
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     await user.click(addToReleaseButton);
@@ -101,7 +68,7 @@ describe('CMReleasesContainer', () => {
       })
     );
 
-    const { user } = render(<CMReleasesContainer />);
+    const { user } = render();
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     await user.click(addToReleaseButton);
@@ -130,7 +97,7 @@ describe('CMReleasesContainer', () => {
       })
     );
 
-    render(<CMReleasesContainer />);
+    render();
 
     const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
     const release1 = await within(informationBox).findByText('release1');
