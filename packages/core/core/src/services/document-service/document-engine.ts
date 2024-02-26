@@ -58,6 +58,7 @@ const createDocumentEngine = ({
 }): Documents.Engine => ({
   async findMany(uid, params) {
     const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: params.status === 'draft' }),
       (params) => transformParamsToQuery(uid, params),
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
@@ -66,13 +67,19 @@ const createDocumentEngine = ({
   },
 
   async findFirst(uid, params) {
-    const query = await pipeAsync((params) => transformParamsToQuery(uid, params))(params || {});
+    const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: params.status === 'draft' }),
+      (params) => transformParamsToQuery(uid, params)
+    )(params || {});
 
     return db.query(uid).findOne({ ...query, where: { ...params?.lookup, ...query.where } });
   },
 
   async findOne(uid, documentId, params) {
-    const query = await pipeAsync((params) => transformParamsToQuery(uid, params))(params || {});
+    const query = await pipeAsync(
+      (params) => transformParamsDocumentId(uid, params, { isDraft: params.status === 'draft' }),
+      (params) => transformParamsToQuery(uid, params)
+    )(params || {});
 
     return db
       .query(uid)

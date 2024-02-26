@@ -1,12 +1,15 @@
-import { EntityService, Attribute, Common } from '@strapi/types';
-import { traverseEntity } from '@strapi/utils';
 import { isObject, isNil } from 'lodash/fp';
+
+import { EntityService, Attribute, Common } from '@strapi/types';
+import { traverseEntity, errors } from '@strapi/utils';
+
 import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 
 const isNumeric = (value: any): value is number => {
+  if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
   const parsed = parseInt(value, 10);
   return !Number.isNaN(parsed);
 };
@@ -150,7 +153,7 @@ const transformDataIdsVisitor = (
           if (entryId) return entryId;
           if (opts.allowMissingId) return null;
 
-          throw new Error(`Document with id "${documentId}" not found`);
+          throw new errors.ValidationError(`Document with id "${documentId}" not found`);
         };
 
         const newRelation = transformRelationIdsVisitor(value as any, getId);

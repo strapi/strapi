@@ -55,25 +55,47 @@ describe('Transform relational data', () => {
     ]);
   });
 
-  it('Shorthand syntax', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: ['doc1', 'doc2', 'doc3'],
-          category: 'doc4',
-          relatedProducts: ['doc1', 'doc2', 'doc3'],
+  describe('Shorthand syntax', () => {
+    it('Shorthand syntax', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: ['doc1', 'doc2', 'doc3'],
+            category: 'doc4',
+            relatedProducts: ['doc1', 'doc2', 'doc3'],
+          },
         },
-      },
-      { locale: 'en', isDraft: true }
-    );
+        { locale: 'en', isDraft: true }
+      );
 
-    expect(data).toEqual({
-      name: 'test',
-      categories: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-      category: 'doc4-en-draft',
-      relatedProducts: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+      expect(data).toEqual({
+        name: 'test',
+        categories: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+        category: 'doc4-en-draft',
+        relatedProducts: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+      });
+    });
+
+    it('Should ignore number values', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [1, 2, 'doc1'],
+            category: 4,
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(data).toEqual({
+        name: 'test',
+        categories: [1, 2, 'doc1-en-draft'],
+        category: 4,
+      });
     });
   });
 
