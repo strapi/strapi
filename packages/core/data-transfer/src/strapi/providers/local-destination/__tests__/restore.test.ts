@@ -37,6 +37,14 @@ const entities = [
     entity: { id: 9, age: 0 },
     contentType: { uid: 'bar' },
   },
+  {
+    entity: { id: 10, age: 0 },
+    model: { uid: 'model::foo' },
+  },
+  {
+    entity: { id: 11, age: 0 },
+    model: { uid: 'model::bar' },
+  },
 ];
 
 afterEach(() => {
@@ -45,11 +53,25 @@ afterEach(() => {
 
 const deleteMany = (uid: string) =>
   jest.fn(async () => ({
-    count: entities.filter((entity) => entity.contentType.uid === uid).length,
+    count: entities.filter((entity) => {
+      if (entity.model) {
+        return entity.model.uid === uid;
+      }
+
+      return entity.contentType.uid === uid;
+    }).length,
   }));
 
 const findMany = (uid: string) => {
-  return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
+  return jest.fn(async () =>
+    entities.filter((entity) => {
+      if (entity.model) {
+        return entity.model.uid === uid;
+      }
+
+      return entity.contentType.uid === uid;
+    })
+  );
 };
 
 const create = jest.fn((data) => data);
@@ -82,7 +104,7 @@ describe('Restore ', () => {
     expect(count).toBe(entities.length);
   });
 
-  test('Should only delete chosen model or contentType', async () => {
+  test('Should only delete chosen contentType', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       query,
@@ -101,6 +123,28 @@ describe('Restore ', () => {
       },
     });
     expect(count).toBe(3);
+  });
+
+  test('Should only delete chosen model ', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      query,
+      getModel,
+      db: {
+        query,
+        metadata: getMetadata(),
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        include: ['model::foo'],
+      },
+    });
+
+    expect(count).toBe(1);
   });
 
   test('Should add core store data', async () => {

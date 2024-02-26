@@ -52,16 +52,14 @@ export const getContentTypes = (): {
 /**
  * Factory to get default metadata test values
  */
-export const getMetadata = () => ({
-  values: () => ({
-    foo: {
-      uid: 'foo',
-    },
-    bar: {
-      uid: 'bar',
-    },
-  }),
-});
+export const getMetadata = () => {
+  const testValues: readonly [string, { uid: string }][] = [
+    ['model::foo', { uid: 'model::foo' }],
+    ['model::bar', { uid: 'model::bar' }],
+  ];
+
+  return new Map<string, { uid: string }>(testValues);
+};
 
 /**
  * Create a factory of readable streams (wrapped with a jest mock function)
