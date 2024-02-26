@@ -135,3 +135,7 @@ export const getOrderInverseFkIndexName = (names: NameInput, options?: NameOptio
 export const getUniqueIndexName = (names: NameInput, options?: NameOptions) => {
   return getName(names, { suffix: 'unique', ...options });
 };
+
+export const getPrimaryIndexName = (names: NameInput) => {
+  return getName(names, { suffix: 'primary' });
+};
