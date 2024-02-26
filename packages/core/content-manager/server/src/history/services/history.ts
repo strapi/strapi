@@ -22,52 +22,52 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       }
 
       // TODO: replace by strapi.documents.use once it supports multiple actions at once
-      strapi.documents?.middlewares.add('_all', '_all', async (context, next) => {
-        // Ignore actions that don't mutate documents
-        if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
-          return next(context);
-        }
+      // strapi.documents?.middlewares.add('_all', '_all', async (context, next) => {
+      //   // Ignore actions that don't mutate documents
+      //   if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
+      //     return next(context);
+      //   }
 
-        // Ignore content types not created by the user
-        if (!context.uid.startsWith('api::')) {
-          return next(context);
-        }
+      //   // Ignore content types not created by the user
+      //   if (!context.uid.startsWith('api::')) {
+      //     return next(context);
+      //   }
 
-        const fieldsToIgnore = [
-          'createdAt',
-          'updatedAt',
-          'publishedAt',
-          'createdBy',
-          'updatedBy',
-          'localizations',
-          'locale',
-          'strapi_stage',
-          'strapi_assignee',
-        ];
+      //   const fieldsToIgnore = [
+      //     'createdAt',
+      //     'updatedAt',
+      //     'publishedAt',
+      //     'createdBy',
+      //     'updatedBy',
+      //     'localizations',
+      //     'locale',
+      //     'strapi_stage',
+      //     'strapi_assignee',
+      //   ];
 
-        /**
-         * Await the middleware stack because for create actions,
-         * the document ID only exists after the creation, which is later in the stack.
-         */
-        const result = await next(context);
+      //   /**
+      //    * Await the middleware stack because for create actions,
+      //    * the document ID only exists after the creation, which is later in the stack.
+      //    */
+      //   const result = await next(context);
 
-        // Prevent creating a history version for an action that wasn't actually executed
-        await strapi.db.transaction(async ({ onCommit }) => {
-          onCommit(() => {
-            this.createVersion({
-              contentType: context.uid,
-              relatedDocumentId: result.documentId,
-              locale: context.params.locale,
-              // TODO: check if drafts should should be "modified" once D&P is ready
-              status: context.params.status,
-              data: omit(fieldsToIgnore, context.params.data),
-              schema: omit(fieldsToIgnore, strapi.contentType(context.uid).attributes),
-            });
-          });
-        });
+      //   // Prevent creating a history version for an action that wasn't actually executed
+      //   await strapi.db.transaction(async ({ onCommit }) => {
+      //     onCommit(() => {
+      //       this.createVersion({
+      //         contentType: context.uid,
+      //         relatedDocumentId: result.documentId,
+      //         locale: context.params.locale,
+      //         // TODO: check if drafts should should be "modified" once D&P is ready
+      //         status: context.params.status,
+      //         data: omit(fieldsToIgnore, context.params.data),
+      //         schema: omit(fieldsToIgnore, strapi.contentType(context.uid).attributes),
+      //       });
+      //     });
+      //   });
 
-        return result;
-      });
+      //   return result;
+      // });
 
       isInitialized = true;
     },

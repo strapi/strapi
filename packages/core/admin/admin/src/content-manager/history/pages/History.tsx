@@ -9,9 +9,9 @@ import { useIntl } from 'react-intl';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
-import { buildValidGetParams } from '../../utils/api';
-import { type FormattedLayouts } from '../../utils/layouts';
+import { COLLECTION_TYPES } from '../../constants/collections';
+import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
@@ -26,7 +26,7 @@ import type { UID } from '@strapi/types';
 interface HistoryContextValue {
   contentType: UID.ContentType;
   id?: string; // null for single types
-  layout: FormattedLayouts;
+  layout: EditLayout['layout'];
   selectedVersion: Contracts.HistoryVersions.HistoryVersionDataResponse;
   versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
   page: number;
@@ -42,12 +42,23 @@ const HistoryPage = () => {
   const headerId = React.useId();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const { slug, id: documentId } = useParams<{
+  const {
+    slug,
+    id: documentId,
+    collectionType,
+  } = useParams<{
+    collectionType: string;
     slug: UID.ContentType;
     id: string;
   }>();
 
-  const { layout } = useContentTypeLayout(slug);
+  const {
+    isLoading: isLoadingLayout,
+    edit: {
+      layout,
+      settings: { displayName },
+    },
+  } = useDocumentLayout(slug!);
 
   // Parse state from query params
   const [{ query }] = useQueryParams<{
@@ -56,7 +67,7 @@ const HistoryPage = () => {
     plugins?: Record<string, unknown>;
   }>();
   const { id: selectedVersionId, ...queryWithoutId } = query;
-  const validQueryParamsWithoutId = buildValidGetParams(queryWithoutId);
+  const validQueryParamsWithoutId = buildValidParams(queryWithoutId);
   const page = validQueryParamsWithoutId.page ? Number(validQueryParamsWithoutId.page) : 1;
 
   const versionsResponse = useGetHistoryVersionsQuery(
@@ -78,11 +89,11 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  if (!layout || versionsResponse.isLoading) {
+  if (isLoadingLayout || versionsResponse.isLoading) {
     return <LoadingIndicatorPage />;
   }
 
-  if (!slug || (!documentId && layout?.contentType.kind === 'collectionType')) {
+  if (!slug || (!documentId && collectionType === COLLECTION_TYPES)) {
     return <Navigate to="/content-manager" />;
   }
 
@@ -109,7 +120,7 @@ const HistoryPage = () => {
             defaultMessage: '{contentType} history',
           },
           {
-            contentType: layout.contentType.info.displayName,
+            contentType: displayName,
           }
         )}
       />
