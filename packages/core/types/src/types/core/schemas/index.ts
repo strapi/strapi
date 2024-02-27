@@ -92,7 +92,6 @@ export interface Options {
   populateCreatorFields?: boolean;
   comment?: string;
   version?: string;
-  withDraftAndPublish?: boolean;
 }
 
 export interface PluginOptions {}
