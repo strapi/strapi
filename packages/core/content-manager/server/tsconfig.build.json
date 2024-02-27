@@ -6,5 +6,5 @@
     "outDir": "./dist"
   },
   "include": ["./src", "../shared"],
-  "exclude": ["*.test.*"]
+  "exclude": ["**/*.test.*"]
 }

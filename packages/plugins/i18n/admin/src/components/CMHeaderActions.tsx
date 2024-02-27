@@ -124,7 +124,12 @@ const getDocumentStatus = (
  * DeleteLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
-const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, collectionType }) => {
+const DeleteLocaleAction: DocumentActionComponent = ({
+  document,
+  documentId,
+  model,
+  collectionType,
+}) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const toggleNotification = useNotification();
@@ -162,7 +167,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, coll
         </Flex>
       ),
       onConfirm: async () => {
-        if (!id || !document?.locale) {
+        if (!documentId || !document?.locale) {
           console.error(
             "You're trying to delete a document without an id or locale, this is likely a bug with Strapi. Please open an issue."
           );
@@ -179,7 +184,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, coll
         }
 
         const res = await deleteAction({
-          id,
+          documentId,
           model,
           collectionType,
           params: { locale: document.locale },

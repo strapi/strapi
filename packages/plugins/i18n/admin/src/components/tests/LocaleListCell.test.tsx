@@ -21,7 +21,7 @@ describe('LocaleListCell', () => {
   it('renders a button with all the names of the locales that are available for the document', async () => {
     render(
       <LocaleListCell
-        id="12345"
+        documentId="12345"
         collectionType="collection-types"
         locale="en"
         model="api::address.address"
@@ -38,7 +38,7 @@ describe('LocaleListCell', () => {
   it('renders a list of the locales available on the document when the button is clicked', async () => {
     const { user } = render(
       <LocaleListCell
-        id="12345"
+        documentId="12345"
         collectionType="collection-types"
         locale="en"
         model="api::address.address"

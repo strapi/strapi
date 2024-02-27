@@ -18,8 +18,8 @@ jest.mock('../SelectedEntriesModal', () => ({
 }));
 
 const DEFAULT_DATA = [
-  { id: 1, publishedAt: null },
-  { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
+  { documentId: '1234', id: 1, publishedAt: null },
+  { documentId: '5678', id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
 ];
 
 describe('BulkActionsBar', () => {

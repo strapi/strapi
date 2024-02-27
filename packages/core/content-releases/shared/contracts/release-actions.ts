@@ -1,10 +1,10 @@
-import { Attribute, Common, Schema } from '@strapi/types';
+import { Attribute, Common, Documents, Schema } from '@strapi/types';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
-export type ReleaseActionEntry = Entity & {
+export type ReleaseActionEntry = Documents.AnyDocument & {
   // Entity attributes
   [key: string]: Attribute.Any;
 } & {

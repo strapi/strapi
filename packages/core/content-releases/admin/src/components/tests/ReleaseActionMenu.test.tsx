@@ -16,7 +16,7 @@ describe('ReleaseActionMenu', () => {
         <ReleaseActionMenu.ReleaseActionEntryLinkItem
           contentTypeUid="api::category.category"
           locale="en"
-          entryId="1"
+          entryId={1}
         />
       </ReleaseActionMenu.Root>
     );

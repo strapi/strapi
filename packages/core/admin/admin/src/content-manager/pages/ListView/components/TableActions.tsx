@@ -30,11 +30,10 @@ import type {
  * -----------------------------------------------------------------------------------------------*/
 
 interface TableActionsProps {
-  id: Document['id'];
   document: Document;
 }
 
-const TableActions = ({ id, document }: TableActionsProps) => {
+const TableActions = ({ document }: TableActionsProps) => {
   const { formatMessage } = useIntl();
   const { model, collectionType } = useDoc();
   const { plugins } = useStrapiApp();
@@ -42,8 +41,7 @@ const TableActions = ({ id, document }: TableActionsProps) => {
   const props: DocumentActionProps = {
     activeTab: null,
     model,
-    // @ts-expect-error – this will be solved when we make `id` only a string.
-    id,
+    documentId: document.documentId,
     collectionType,
     document,
   };
@@ -80,7 +78,7 @@ const TableActions = ({ id, document }: TableActionsProps) => {
  * TableActionComponents
  * -----------------------------------------------------------------------------------------------*/
 
-const EditAction: DocumentActionComponent = ({ id }) => {
+const EditAction: DocumentActionComponent = ({ documentId }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { canRead } = useDocumentRBAC('EditAction', ({ canRead }) => ({ canRead }));
@@ -96,7 +94,7 @@ const EditAction: DocumentActionComponent = ({ id }) => {
     }),
     position: 'table-row',
     onClick: async () => {
-      if (!id) {
+      if (!documentId) {
         console.error(
           "You're trying to edit a document without an id, this is likely a bug with Strapi. Please open an issue."
         );
@@ -113,7 +111,7 @@ const EditAction: DocumentActionComponent = ({ id }) => {
       }
 
       navigate({
-        pathname: id,
+        pathname: documentId,
         search: stringify({
           plugins: query.plugins,
         }),
@@ -134,7 +132,7 @@ const StyledPencil = styled(Pencil)`
   }
 `;
 
-const CloneAction: DocumentActionComponent = ({ model, id }) => {
+const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { canCreate } = useDocumentRBAC('CloneAction', ({ canCreate }) => ({ canCreate }));
@@ -153,7 +151,7 @@ const CloneAction: DocumentActionComponent = ({ model, id }) => {
     }),
     position: 'table-row',
     onClick: async () => {
-      if (!id) {
+      if (!documentId) {
         console.error(
           "You're trying to clone a document in the table without an id, this is likely a bug with Strapi. Please open an issue."
         );
@@ -169,11 +167,10 @@ const CloneAction: DocumentActionComponent = ({ model, id }) => {
         return;
       }
 
-      const res = await autoClone({ model, sourceId: id });
+      const res = await autoClone({ model, sourceId: documentId });
 
       if ('data' in res) {
-        // @ts-expect-error – IDs could still be numbers at this point, this will change soon.
-        navigate(res.data.id);
+        navigate(res.data.documentId);
 
         /**
          * We return true because we don't need to show a modal anymore.
@@ -214,7 +211,7 @@ const CloneAction: DocumentActionComponent = ({ model, id }) => {
               as={NavLink}
               // @ts-expect-error – the DS LinkButton can't infer props from the `as` prop component
               to={{
-                pathname: `clone/${id}`,
+                pathname: `clone/${documentId}`,
               }}
             >
               {formatMessage({
