@@ -119,9 +119,6 @@ test.describe('Edit view', () => {
     browser,
     page,
   }) => {
-    // Listen for all console logs
-    page.on('console', (msg) => console.log(msg.text()));
-
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/;
     const EDIT_URL =
       /\/admin\/content-manager\/collection-types\/api::product.product\/[^/]+(\?.*)?/;
@@ -161,6 +158,10 @@ test.describe('Edit view', () => {
     expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
 
+    /**
+     * This is here because the `fill` method below doesn't immediately update the value
+     * in webkit.
+     */
     if (browser.browserType().name() === 'webkit') {
       await page.getByRole('textbox', { name: 'name' }).press('s');
       await page.getByRole('textbox', { name: 'name' }).press('Delete');
@@ -171,7 +172,8 @@ test.describe('Edit view', () => {
       .fill('Camiseta de fuera 23/24 de Nike para hombres');
 
     /**
-     * Verify the UID works as expected
+     * Verify the UID works as expected due to issues with webkit above,
+     * this has been kept.
      */
     await expect
       .poll(
@@ -179,7 +181,6 @@ test.describe('Edit view', () => {
           const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
           await page.getByRole('button', { name: 'Regenerate' }).click();
           const body = (await requestePromise).postDataJSON();
-          console.log('posting body', body);
           return body;
         },
         {
@@ -195,6 +196,7 @@ test.describe('Edit view', () => {
         },
         field: 'slug',
       });
+
     await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
       'camiseta-de-fuera-23-24-de-nike-para-hombres'
     );

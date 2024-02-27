@@ -436,8 +436,6 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.isSubmitting = false;
         break;
       case 'SET_FIELD_VALUE':
-        // eslint-disable-next-line no-console
-        console.log('setting value', action.payload.field, action.payload.value);
         draft.values = setIn(state.values, action.payload.field, action.payload.value);
         break;
       case 'ADD_FIELD_ROW': {
