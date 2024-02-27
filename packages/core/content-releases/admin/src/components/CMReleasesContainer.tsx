@@ -19,15 +19,15 @@ import {
   CheckPermissions,
   NoContent,
   useAPIErrorHandler,
-  useCMEditViewDataManager,
   useNotification,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink } from 'react-router-dom';
+import { Link as ReactRouterLink, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
@@ -100,7 +100,8 @@ const AddActionToReleaseModal = ({
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { modifiedData } = useCMEditViewDataManager();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const locale = query.plugins?.i18n?.locale;
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
@@ -113,7 +114,6 @@ const AddActionToReleaseModal = ({
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
   const handleSubmit = async (values: FormValues) => {
-    const locale = modifiedData.locale as string | undefined;
     const releaseActionEntry = {
       contentType: contentTypeUid,
       id: entryId,
@@ -250,19 +250,21 @@ const AddActionToReleaseModal = ({
 export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
-  const {
-    isCreatingEntry,
-    initialData: { id: entryId },
-    slug,
-  } = useCMEditViewDataManager();
+  const { id, slug } = useParams<{
+    id: string;
+    origin: string;
+    slug: string;
+    collectionType: string;
+  }>();
+  const isCreatingEntry = id === 'create';
 
   const contentTypeUid = slug as Common.UID.ContentType;
 
-  const canFetch = entryId != null && contentTypeUid != null;
+  const canFetch = id != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
         contentTypeUid: contentTypeUid,
-        entryId: entryId,
+        entryId: id,
         hasEntryAttached: true,
       }
     : skipToken;
@@ -390,7 +392,7 @@ export const CMReleasesContainer = () => {
           <AddActionToReleaseModal
             handleClose={toggleModal}
             contentTypeUid={contentTypeUid}
-            entryId={entryId}
+            entryId={id}
           />
         )}
       </Box>

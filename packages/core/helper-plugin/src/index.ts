@@ -7,7 +7,6 @@ export * from './components/CheckPagePermissions';
 export * from './components/CheckPermissions';
 export * from './components/ConfirmDialog';
 export * from './components/ContentBox';
-export * from './components/DateTimePicker';
 export * from './components/DynamicTable';
 export * from './components/Table';
 export * from './components/EmptyStateLayout';
@@ -17,8 +16,6 @@ export * from './components/FilterPopoverURLQuery';
 export * from './components/Form';
 export * from './components/GenericInput';
 export * from './components/InjectionZone';
-export * from './components/Link';
-export * from './components/LinkButton';
 export * from './components/LoadingIndicatorPage';
 export * from './components/NoContent';
 export * from './components/NoMedia';
@@ -31,18 +28,6 @@ export * from './components/RelativeTime';
 export * from './components/SearchURLQuery';
 export * from './components/SettingsPageTitle';
 export * from './components/Status';
-
-/* -------------------------------------------------------------------------------------------------
- * Content Manager
- * -----------------------------------------------------------------------------------------------*/
-
-export {
-  useCMEditViewDataManager,
-  ContentManagerEditViewDataManagerContext,
-  type CMEditViewDataManagerContextValue,
-  type ContentType,
-} from './content-manager/CMEditViewDataManager';
-export * from './content-manager/utils/getAttributeInfos';
 
 /* -------------------------------------------------------------------------------------------------
  * Features
@@ -89,8 +74,6 @@ export * from './icons/SortIcon';
  * Utils
  * -----------------------------------------------------------------------------------------------*/
 
-export * from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
-export * from './content-manager/utils/formatContentTypeData';
 export * from './utils/auth';
 export * from './utils/awaitToJs';
 export * from './utils/difference';
