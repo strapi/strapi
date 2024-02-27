@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { omit, difference, isNil, isEmpty, map, isArray, uniq } from 'lodash/fp';
+import { omit, difference, isNil, isEmpty, map, isArray, uniq, isNumber } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
 import constants from './constants';
@@ -138,14 +138,14 @@ const hash = (accessKey: string) => {
 
 const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = Number.isFinite(lifespan) && (lifespan as number) > 0;
+  const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
   return {
     lifespan: lifespan || null,
-    expiresAt: lifespan ? Date.now() + (lifespan as number) : null,
+    expiresAt: lifespan ? Date.now() + lifespan : null,
   };
 };
 

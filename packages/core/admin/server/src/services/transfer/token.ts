@@ -283,7 +283,7 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
 
 const getExpirationFields = (
   lifespan: number | null
-): { lifespan: null | number; expiresAt: null | number } => {
+): { lifespan: number | null; expiresAt: null | number } => {
   // it must be nil or a finite number >= 0
   const isValidNumber = Number.isFinite(lifespan) && lifespan !== null && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
