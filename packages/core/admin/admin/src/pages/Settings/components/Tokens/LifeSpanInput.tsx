@@ -50,25 +50,25 @@ export const LifeSpanInput = ({
         disabled={!isCreating}
         placeholder="Select"
       >
-        <SingleSelectOption value={604800000}>
+        <SingleSelectOption value="604800000">
           {formatMessage({
             id: 'Settings.tokens.duration.7-days',
             defaultMessage: '7 days',
           })}
         </SingleSelectOption>
-        <SingleSelectOption value={2592000000}>
+        <SingleSelectOption value="2592000000">
           {formatMessage({
             id: 'Settings.tokens.duration.30-days',
             defaultMessage: '30 days',
           })}
         </SingleSelectOption>
-        <SingleSelectOption value={7776000000}>
+        <SingleSelectOption value="7776000000">
           {formatMessage({
             id: 'Settings.tokens.duration.90-days',
             defaultMessage: '90 days',
           })}
         </SingleSelectOption>
-        <SingleSelectOption value={0}>
+        <SingleSelectOption value="0">
           {formatMessage({
             id: 'Settings.tokens.duration.unlimited',
             defaultMessage: 'Unlimited',
