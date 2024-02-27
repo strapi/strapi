@@ -130,41 +130,43 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     const pass = new PassThrough({ objectMode: true });
 
     stream
-      .on('data', async (payload: Protocol.Client.TransferAssetFlow) => {
-        const { action } = payload;
+      .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
+        for (const item of payload) {
+          const { action } = item;
 
-        // Creates the stream to send the incoming asset through
-        if (action === 'start') {
-          // Each asset has its own stream identified by its assetID
-          assets[payload.assetID] = { ...payload.data, stream: new PassThrough() };
-          await this.writeAsync(pass, assets[payload.assetID]);
-        }
+          // Creates the stream to send the incoming asset through
+          if (action === 'start') {
+            // Each asset has its own stream identified by its assetID
+            assets[item.assetID] = { ...item.data, stream: new PassThrough() };
+            await this.writeAsync(pass, assets[item.assetID]);
+          }
 
-        // Writes the asset data to the created stream
-        else if (action === 'stream') {
-          // Converts data into buffer
-          const rawBuffer = payload.data as unknown as {
-            type: 'Buffer';
-            data: Uint8Array;
-          };
-          const chunk = Buffer.from(rawBuffer.data);
+          // Writes the asset data to the created stream
+          else if (action === 'stream') {
+            // Converts data into buffer
+            const rawBuffer = item.data as unknown as {
+              type: 'Buffer';
+              data: Uint8Array;
+            };
+            const chunk = Buffer.from(rawBuffer.data);
 
-          await this.writeAsync(assets[payload.assetID].stream, chunk);
-        }
+            await this.writeAsync(assets[item.assetID].stream, chunk);
+          }
 
-        // The asset has been transferred
-        else if (action === 'end') {
-          await new Promise<void>((resolve, reject) => {
-            const { stream: assetStream } = assets[payload.assetID];
-            assetStream
-              .on('close', () => {
-                // Deletes the stream for the asset
-                delete assets[payload.assetID];
-                resolve();
-              })
-              .on('error', reject)
-              .end();
-          });
+          // The asset has been transferred
+          else if (action === 'end') {
+            await new Promise<void>((resolve, reject) => {
+              const { stream: assetStream } = assets[item.assetID];
+              assetStream
+                .on('close', () => {
+                  // Deletes the stream for the asset
+                  delete assets[item.assetID];
+                  resolve();
+                })
+                .on('error', reject)
+                .end();
+            });
+          }
         }
       })
       .on('close', () => {

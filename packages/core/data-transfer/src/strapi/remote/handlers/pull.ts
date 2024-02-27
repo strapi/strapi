@@ -167,7 +167,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         } else {
           await this.confirm({
             type: 'transfer',
-            data: chunk,
+            data: [chunk],
             ended: false,
             error: null,
             id,
