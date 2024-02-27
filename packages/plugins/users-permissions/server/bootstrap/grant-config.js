@@ -84,6 +84,13 @@ module.exports = (baseURL) => ({
     callback: `${baseURL}/linkedin/callback`,
     scope: ['r_liteprofile', 'r_emailaddress'],
   },
+  linkedin_openid: {
+    enabled: false,
+    icon: 'linkedin',
+    key: '',
+    secret: '',
+    callback: `${baseURL}/linkedin_openid/callback`,
+  },    
   cognito: {
     enabled: false,
     icon: 'aws',

@@ -230,6 +230,17 @@ const getInitialProviders = ({ purest }) => ({
       email: email.emailAddress,
     };
   },
+  async linkedin_openid({ accessToken }) {
+    const linkedIn = purest({ provider: 'linkedin' });
+    const {
+      body: { given_name, email },
+    } = await linkedIn.get('userinfo').auth(accessToken).request()
+
+    return {
+      username: given_name,
+      email: email,
+    };
+  },
   async reddit({ accessToken }) {
     const reddit = purest({
       provider: 'reddit',
