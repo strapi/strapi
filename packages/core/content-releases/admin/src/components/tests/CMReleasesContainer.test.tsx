@@ -33,6 +33,18 @@ describe('CMReleasesContainer', () => {
     });
   });
 
+  beforeAll(() => {
+    window.strapi.future = {
+      isEnabled: () => true,
+    };
+  });
+
+  afterAll(() => {
+    window.strapi.future = {
+      isEnabled: () => false,
+    };
+  });
+
   it('should not render the container when creating an entry', async () => {
     // @ts-expect-error - Ignore error
     useCMEditViewDataManager.mockReturnValue({
@@ -137,5 +149,32 @@ describe('CMReleasesContainer', () => {
     const release2 = await within(informationBox).findByText('release2');
     expect(release1).toBeInTheDocument();
     expect(release2).toBeInTheDocument();
+  });
+
+  it('should show the scheduled date for a release', async () => {
+    // Mock the response from the server
+    server.use(
+      rest.get('/content-releases', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [
+              {
+                name: 'release1',
+                id: '1',
+                action: { type: 'publish' },
+                scheduledAt: '2024-01-01T10:00:00.000Z',
+                timezone: 'Europe/Paris',
+              },
+            ],
+          })
+        );
+      })
+    );
+
+    render(<CMReleasesContainer />);
+
+    const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
+    const release1 = await within(informationBox).findByText('01/01/2024 at 11:00 (UTC+01:00)');
+    expect(release1).toBeInTheDocument();
   });
 });

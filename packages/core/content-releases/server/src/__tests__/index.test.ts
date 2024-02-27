@@ -84,6 +84,17 @@ describe('bootstrap', () => {
     log: {
       error: jest.fn(),
     },
+    contentTypes: {
+      contentTypeA: {
+        uid: 'contentTypeA',
+      },
+      contentTypeB: {
+        uid: 'contentTypeB',
+      },
+    },
+    webhookStore: {
+      addAllowedEvent: jest.fn(),
+    },
   };
 
   beforeEach(() => {

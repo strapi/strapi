@@ -17,7 +17,7 @@ export interface ReleaseAction extends Entity {
   contentType: Common.UID.ContentType;
   locale?: string;
   release: Release;
-  isValid: boolean;
+  isEntryValid: boolean;
 }
 
 export interface FormattedReleaseAction extends Entity {

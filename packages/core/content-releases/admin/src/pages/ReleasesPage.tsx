@@ -33,6 +33,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useTracking,
+  RelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -63,54 +64,35 @@ const LinkCard = styled(Link)`
 `;
 
 const getBadgeProps = (status: Release['status']) => {
+  let color;
   switch (status) {
     case 'ready':
-      return {
-        textColor: 'success600',
-        backgroundColor: 'success100',
-        borderColor: 'success200',
-      };
-
+      color = 'success';
+      break;
     case 'blocked':
-      return {
-        textColor: 'warning600',
-        backgroundColor: 'warning100',
-        borderColor: 'warning200',
-      };
-
+      color = 'warning';
+      break;
     case 'failed':
-      return {
-        textColor: 'danger600',
-        backgroundColor: 'danger100',
-        borderColor: 'danger200',
-      };
-
-    case 'failed':
-      return {
-        textColor: 'danger600',
-        backgroundColor: 'danger100',
-        borderColor: 'danger200',
-      };
-
+      color = 'danger';
+      break;
     case 'done':
-      return {
-        textColor: 'primary600',
-        backgroundColor: 'primary100',
-        borderColor: 'primary200',
-      };
-
+      color = 'primary';
+      break;
     case 'empty':
     default:
-      return {
-        textColor: 'neutral600',
-        backgroundColor: 'neutral100',
-        borderColor: 'neutral200',
-      };
+      color = 'neutral';
   }
+
+  return {
+    textColor: `${color}600`,
+    backgroundColor: `${color}100`,
+    borderColor: `${color}200`,
+  };
 };
 
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
 
   if (isError) {
     return <AnErrorOccurred />;
@@ -135,7 +117,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, status = 'empty' }) => (
+      {releases.map(({ id, name, actions, scheduledAt, status = 'empty' }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -152,6 +134,27 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
             >
               <Typography as="h3" variant="delta" fontWeight="bold">
                 {name}
+              </Typography>
+              <Typography variant="pi" textColor="neutral600">
+                {IsSchedulingEnabled ? (
+                  scheduledAt ? (
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
+                  ) : (
+                    formatMessage({
+                      id: 'content-releases.pages.Releases.not-scheduled',
+                      defaultMessage: 'Not scheduled',
+                    })
+                  )
+                ) : (
+                  formatMessage(
+                    {
+                      id: 'content-releases.page.Releases.release-item.entries',
+                      defaultMessage:
+                        '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+                    },
+                    { number: actions.meta.count }
+                  )
+                )}
               </Typography>
               <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
@@ -180,6 +183,12 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
+  date: null,
+  time: '',
+  // Remove future flag check after Scheduling Beta release and replace with true as creating new release should include scheduling by default
+  isScheduled: window.strapi.future.isEnabled('contentReleasesScheduling'),
+  scheduledAt: null,
+  timezone: null,
 } satisfies FormValues;
 
 const ReleasesPage = () => {
@@ -257,9 +266,11 @@ const ReleasesPage = () => {
     });
   };
 
-  const handleAddRelease = async (values: FormValues) => {
+  const handleAddRelease = async ({ name, scheduledAt, timezone }: FormValues) => {
     const response = await createRelease({
-      name: values.name,
+      name,
+      scheduledAt,
+      timezone,
     });
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
