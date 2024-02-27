@@ -8,17 +8,27 @@ import { VersionHeader } from '../VersionHeader';
 
 import type { UID } from '@strapi/types';
 
+const useDocumentLayoutMock = jest.fn();
+jest.mock('../../../hooks/useDocumentLayout', () => ({
+  useDocumentLayout: () => useDocumentLayoutMock(),
+}));
+
+const useDocumentMock = jest.fn();
+jest.mock('../../../hooks/useDocument', () => ({
+  useDocument: () => useDocumentMock(),
+}));
+
 const render = (
-  props: HistoryContextValue,
+  context: Partial<HistoryContextValue>,
+  kind: 'singleType' | 'collectionType',
   initialEntry: Exclude<RenderOptions['initialEntries'], undefined>[number]
 ) => {
   const path =
-    props.layout.contentType.kind === 'singleType'
-      ? '/:collectionType/:slug/history'
-      : '/:collectionType/:slug/:id/history';
+    kind === 'singleType' ? '/:collectionType/:slug/history' : '/:collectionType/:slug/:id/history';
 
   return renderRTL(
-    <HistoryProvider {...props}>
+    // @ts-expect-error ignore missing properties
+    <HistoryProvider {...context}>
       <Routes>
         <Route path={path} element={<VersionHeader headerId="123" />} />
       </Routes>
@@ -28,19 +38,13 @@ const render = (
 };
 
 describe('VersionHeader', () => {
+  afterEach(() => {
+    useDocumentLayoutMock.mockReset();
+    useDocumentMock.mockReset();
+  });
+
   describe('collection types', () => {
     // Mocks
-    const layout = {
-      contentType: {
-        kind: 'collectionType',
-        info: {
-          singularName: 'kitchensink',
-        },
-        settings: {
-          mainField: 'title',
-        },
-      },
-    };
     const selectedVersion = {
       id: '26',
       contentType: 'api::kitchensink.kitchensink' as UID.ContentType,
@@ -54,13 +58,30 @@ describe('VersionHeader', () => {
       },
     };
 
+    beforeEach(() => {
+      useDocumentMock.mockReturnValue({
+        isLoading: false,
+        schema: {
+          info: {
+            singularName: 'kitchensink',
+          },
+        },
+      });
+
+      useDocumentLayoutMock.mockReturnValue({
+        isLoading: false,
+        edit: {
+          settings: {
+            mainField: 'title',
+          },
+        },
+      });
+    });
+
     it('should display the correct title and subtitle for a non-localized entry', () => {
       render(
-        {
-          selectedVersion,
-          // @ts-expect-error ignore missing properties
-          layout,
-        },
+        { selectedVersion },
+        'collectionType',
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -84,9 +105,8 @@ describe('VersionHeader', () => {
               name: 'English (en)',
             },
           },
-          // @ts-expect-error ignore missing properties
-          layout,
         },
+        'collectionType',
         {
           pathname:
             '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history',
@@ -105,21 +125,19 @@ describe('VersionHeader', () => {
     });
 
     it('should display the correct subtitle without an entry title (mainField)', () => {
-      render(
-        {
-          selectedVersion,
-          layout: {
-            ...layout,
-            contentType: {
-              ...layout.contentType,
-              // @ts-expect-error ignore missing properties
-              settings: {
-                ...layout.contentType.settings,
-                mainField: 'id', // id or null does will not return a value from version.data
-              },
-            },
+      useDocumentLayoutMock.mockReturnValue({
+        isLoading: false,
+        edit: {
+          settings: {
+            // id or null will not return a value from version.data
+            mainField: 'id',
           },
         },
+      });
+
+      render(
+        { selectedVersion },
+        'collectionType',
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -130,17 +148,6 @@ describe('VersionHeader', () => {
 
   describe('single types', () => {
     // Mocks
-    const layout = {
-      contentType: {
-        kind: 'singleType',
-        info: {
-          singularName: 'homepage',
-        },
-        settings: {
-          mainField: 'title',
-        },
-      },
-    };
     const selectedVersion = {
       id: '26',
       contentType: 'api::homepage.homepage' as UID.ContentType,
@@ -154,15 +161,28 @@ describe('VersionHeader', () => {
       },
     };
 
-    it('should display the correct title and subtitle for a non-localized entry', () => {
-      render(
-        {
-          selectedVersion,
-          // @ts-expect-error ignore missing properties
-          layout,
+    beforeEach(() => {
+      useDocumentMock.mockReturnValue({
+        isLoading: false,
+        schema: {
+          info: {
+            singularName: 'homepage',
+          },
         },
-        '/single-types/api::homepage.homepage/history'
-      );
+      });
+
+      useDocumentLayoutMock.mockReturnValue({
+        isLoading: false,
+        edit: {
+          settings: {
+            mainField: 'title',
+          },
+        },
+      });
+    });
+
+    it('should display the correct title and subtitle for a non-localized entry', () => {
+      render({ selectedVersion }, 'singleType', '/single-types/api::homepage.homepage/history');
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
       expect(screen.getByText('Test Title (homepage)')).toBeInTheDocument();
@@ -181,11 +201,10 @@ describe('VersionHeader', () => {
               name: 'English (en)',
             },
           },
-          // @ts-expect-error ignore missing properties
-          layout,
         },
+        'singleType',
         {
-          pathname: '/collection-types/api::homepage.homepage/history',
+          pathname: '/single-types/api::homepage.homepage/history',
           search: '?plugins[i18n][locale]=en',
         }
       );
@@ -196,7 +215,7 @@ describe('VersionHeader', () => {
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::homepage.homepage?plugins[i18n][locale]=en'
+        '/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
       );
     });
   });

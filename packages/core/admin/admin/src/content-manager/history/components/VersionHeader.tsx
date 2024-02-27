@@ -21,7 +21,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { version } = useHistoryContext('VersionHeader', (state) => ({
     version: state.selectedVersion,
-    layout: state.layout,
   }));
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
