@@ -36,9 +36,6 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       return document.map((doc: Document) => mapDocument(uid, doc));
     }
 
-    // Temporary to not break CM, TODO: Do the same with relations
-    document.id = document.documentId;
-
     return document;
   };
 
