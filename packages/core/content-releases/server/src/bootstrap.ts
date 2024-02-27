@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
+import type { Common, LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
 
-import { RELEASE_ACTION_MODEL_UID } from './constants';
-import { getService } from './utils';
+import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from './constants';
+import { getEntryValidStatus, getService } from './utils';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
 
@@ -10,18 +10,33 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (features.isEnabled('cms-content-releases')) {
     // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
-      afterDelete(event) {
+      async afterDelete(event) {
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         const { model, result } = event;
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
           const { id } = result;
-          strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+
+          const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+            where: {
+              actions: {
+                target_type: model.uid,
+                target_id: id,
+              },
+            },
+          });
+
+          await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
             where: {
               target_type: model.uid,
               target_id: id,
             },
           });
+
+          // We update the status of each release after delete the actions
+          for (const release of releases) {
+            getService('release', { strapi }).updateReleaseStatus(release.id);
+          }
         }
       },
       /**
@@ -47,6 +62,17 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
         const { model, state } = event;
         const entriesToDelete = state.entriesToDelete;
         if (entriesToDelete) {
+          const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+            where: {
+              actions: {
+                target_type: model.uid,
+                target_id: {
+                  $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
+                },
+              },
+            },
+          });
+
           await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
             where: {
               target_type: model.uid,
@@ -55,6 +81,45 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
               },
             },
           });
+
+          // We update the status of each release after delete the actions
+          for (const release of releases) {
+            getService('release', { strapi }).updateReleaseStatus(release.id);
+          }
+        }
+      },
+
+      async afterUpdate(event) {
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+        const { model, result } = event;
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+          const isValid = getEntryValidStatus(model.uid as Common.UID.ContentType, result, {
+            strapi,
+          });
+
+          await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+            where: {
+              target_type: model.uid,
+              target_id: result.id,
+            },
+            data: {
+              isValid,
+            },
+          });
+
+          const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+            where: {
+              actions: {
+                target_type: model.uid,
+                target_id: result.id,
+              },
+            },
+          });
+
+          for (const release of releases) {
+            getService('release', { strapi }).updateReleaseStatus(release.id);
+          }
         }
       },
     });

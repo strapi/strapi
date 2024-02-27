@@ -5,6 +5,7 @@ import { ACTIONS } from './constants';
 import {
   deleteActionsOnDeleteContentType,
   deleteActionsOnDisableDraftAndPublish,
+  migrateIsValidAndStatusReleases,
 } from './migrations';
 
 const { features } = require('@strapi/strapi/dist/utils/ee');
@@ -14,6 +15,9 @@ export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
     await strapi.admin.services.permission.actionProvider.registerMany(ACTIONS);
 
     strapi.hook('strapi::content-types.beforeSync').register(deleteActionsOnDisableDraftAndPublish);
-    strapi.hook('strapi::content-types.afterSync').register(deleteActionsOnDeleteContentType);
+    strapi
+      .hook('strapi::content-types.afterSync')
+      .register(deleteActionsOnDeleteContentType)
+      .register(migrateIsValidAndStatusReleases);
   }
 };
