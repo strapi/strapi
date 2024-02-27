@@ -86,7 +86,7 @@ const ComponentInput = ({
           <NonRepeatableComponent attribute={attribute} name={name} {...props} />
         ) : null}
         {attribute.repeatable && (
-          <RepeatableComponent attribute={attribute} name={name} {...props} />
+          <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props} />
         )}
       </Flex>
     </Box>
