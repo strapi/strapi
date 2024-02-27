@@ -1,7 +1,7 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
-const { omit, pick } = require('lodash/fp');
+const { omit } = require('lodash/fp');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -139,9 +139,6 @@ describe('Search query', () => {
     rq = await createAuthRequest({ strapi });
 
     data.beds = await builder.sanitizedFixturesFor(bedModel.singularName, strapi);
-    // FIX V5: Once fixtures are created through the document service, this won't be necessary anymore.
-    // Change documentId to id
-    data.beds = data.beds.map(({ documentId, ...bed }) => ({ ...bed, id: documentId }));
   });
 
   afterAll(async () => {
@@ -194,9 +191,9 @@ describe('Search query', () => {
       expect(Array.isArray(res.body.results)).toBe(true);
       expect(res.body.results.length).toBe(data.beds.length);
       // TODO V5: Filter out i18n fields if content type is not localized
-      expect(
-        res.body.results.map(omit([...CREATOR_FIELDS, 'localizations', 'status', 'documentId']))
-      ).toEqual(expect.arrayContaining(data.beds));
+      expect(res.body.results.map(omit([...CREATOR_FIELDS, 'localizations', 'status']))).toEqual(
+        expect.arrayContaining(data.beds)
+      );
     });
 
     test('search with special characters', async () => {

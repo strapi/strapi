@@ -163,7 +163,7 @@ describe('i18n - Content API', () => {
       // Can find it
       const locale = await rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::category.category/${res.body.data.id}`,
+        url: `/content-manager/collection-types/api::category.category/${res.body.data.documentId}`,
         qs: {
           locale: 'es-AR',
         },

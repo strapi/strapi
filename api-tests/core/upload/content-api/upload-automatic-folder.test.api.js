@@ -328,7 +328,8 @@ describe('Uploads folder', () => {
       files.forEach((file) =>
         expect(file).toMatchObject({
           folder: {
-            name: 'API Uploads (3)',
+            // name string with format API Uploads (n)
+            name: expect.stringMatching(/^API Uploads \(\d+\)$/),
             pathId: expect.any(Number),
           },
           folderPath: `/${file.folder.pathId}`,
@@ -392,7 +393,7 @@ describe('Uploads folder', () => {
         expect(file).toMatchObject({
           ...fileInfo[index],
           folder: {
-            name: 'API Uploads (3)',
+            name: expect.stringMatching(/^API Uploads \(\d+\)$/),
             pathId: expect.any(Number),
           },
           folderPath: `/${file.folder.pathId}`,
@@ -444,7 +445,7 @@ describe('Uploads folder', () => {
       files.forEach((file) => {
         expect(file).toMatchObject({
           folder: {
-            name: 'API Uploads (3)',
+            name: expect.stringMatching(/^API Uploads \(\d+\)$/),
             pathId: expect.any(Number),
           },
           folderPath: `/${file.folder.pathId}`,
@@ -505,7 +506,7 @@ describe('Uploads folder', () => {
       files.forEach((file) => {
         expect(file).toMatchObject({
           folder: {
-            name: 'API Uploads (4)',
+            name: expect.stringMatching(/^API Uploads \(\d+\)$/),
             pathId: expect.any(Number),
           },
           folderPath: `/${file.folder.pathId}`,

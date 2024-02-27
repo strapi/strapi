@@ -92,7 +92,7 @@ describe('Test type biginteger', () => {
 
     const newVal = '9882823782712112';
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withbiginteger.withbiginteger/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withbiginteger.withbiginteger/${res.body.data.documentId}`,
       {
         body: {
           field: newVal,
@@ -102,7 +102,7 @@ describe('Test type biginteger', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: newVal,
     });
   });

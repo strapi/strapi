@@ -36,6 +36,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       return document.map((doc: Document) => mapDocument(uid, doc));
     }
 
+    // document.id = document.documentId;
+
     return document;
   };
 

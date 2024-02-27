@@ -180,7 +180,7 @@ describe('Not required dynamiczone', () => {
       const newMediaId = newImgRes.body[0].id;
       const updateRes = await rq({
         method: 'PUT',
-        url: `/${res.body.data.id}`,
+        url: `/${res.body.data.documentId}`,
         body: {
           field: [
             {
@@ -252,7 +252,7 @@ describe('Not required dynamiczone', () => {
 
       const getRes = await rq({
         method: 'GET',
-        url: `/${res.body.data.id}`,
+        url: `/${res.body.data.documentId}`,
         qs: {
           populate: ['field'],
         },
