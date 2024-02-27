@@ -25,7 +25,7 @@ const { id, model, collectionType } = useParams<{
 if (!model || !collectionType) return null;
 
 const { document, isLoading, validate } = useDocument({
-  id,
+  documentId: id,
   model,
   collectionType,
   params: { locale: 'en-GB' },
@@ -39,7 +39,7 @@ const onSubmit = async (entity: Entity) => {
     // handle errors
   }
 
-  await update({ collectionType, model, id }, entity);
+  await update({ collectionType, model, documentId: id }, entity);
 };
 ```
 
@@ -55,20 +55,20 @@ getting the params each time and validating that they are not `undefined`.
 ```ts
 import type { Attribute } from '@strapi/strapi';
 
-interface Entity {
-  id: string;
+interface Document {
+  documentId: string;
   [key: string]: Attribute.GetValue<Attribute.Any>;
 }
 
 interface UseDocumentArgs {
   collectionType: string;
   model: string;
-  id?: string;
+  documentId?: string;
   params?: object;
 }
 
 type UseDocument = (args: UseDocumentArgs) => {
-  document?: Entity;
+  document?: Document;
   isLoading: boolean;
   validate: (entity: Entity) => null | Record<string, TranslationMessage>;
 };
