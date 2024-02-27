@@ -22,7 +22,8 @@ describe('useDocument', () => {
     expect(result.current.document).toMatchInlineSnapshot(`
       {
         "createdAt": "",
-        "id": "12345",
+        "documentId": "12345",
+        "id": 1,
         "name": "Entry 1",
         "publishedAt": "",
         "updatedAt": "",
@@ -328,7 +329,8 @@ describe('useDoc', () => {
     expect(result.current.document).toMatchInlineSnapshot(`
       {
         "createdAt": "",
-        "id": "12345",
+        "documentId": "12345",
+        "id": 1,
         "name": "Entry 1",
         "publishedAt": "",
         "updatedAt": "",

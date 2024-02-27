@@ -48,7 +48,8 @@ describe('useDocumentActions', () => {
         {
           "data": {
             "content": "the brown fox jumps over the lazy dog",
-            "id": "67890",
+            "documentId": "12345",
+            "id": 2,
             "title": "test",
           },
         }
@@ -122,14 +123,15 @@ describe('useDocumentActions', () => {
       });
 
       expect(response).toMatchInlineSnapshot(`
-          {
-            "data": {
-              "content": "the brown fox jumps over the lazy dog",
-              "id": "12345",
-              "title": "test",
-            },
-          }
-        `);
+        {
+          "data": {
+            "content": "the brown fox jumps over the lazy dog",
+            "documentId": "12345",
+            "id": 1,
+            "title": "test",
+          },
+        }
+      `);
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -194,7 +196,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "title": "test",
         }
       `);
@@ -258,7 +261,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "title": "test",
         }
       `);
@@ -322,7 +326,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "title": "test",
         }
       `);
@@ -391,7 +396,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "publishedAt": "2024-01-23T16:23:38.948Z",
           "title": "test",
         }
@@ -470,7 +476,8 @@ describe('useDocumentActions', () => {
           "data": {
             "content": "the brown fox jumps over the lazy dog",
             "createdAt": "",
-            "id": "12345",
+            "documentId": "12345",
+            "id": 1,
             "name": "Entry 1",
             "publishedAt": "",
             "updatedAt": "",
@@ -543,7 +550,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "publishedAt": null,
           "title": "test",
         }
