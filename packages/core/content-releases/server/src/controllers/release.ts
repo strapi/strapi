@@ -62,13 +62,13 @@ const releaseController = {
         };
       });
 
-      const countPendingReleases = await strapi.query(RELEASE_MODEL_UID).count({
+      const pendingReleasesCount = await strapi.query(RELEASE_MODEL_UID).count({
         where: {
           releasedAt: null,
         },
       });
 
-      ctx.body = { data, meta: { pagination, countPendingReleases } };
+      ctx.body = { data, meta: { pagination, pendingReleasesCount } };
     }
   },
 

@@ -44,7 +44,7 @@ export declare namespace GetReleases {
     data: ReleaseDataResponse[];
     meta: {
       pagination?: Pagination;
-      countPendingReleases?: number;
+      pendingReleasesCount?: number;
     };
     error?: errors.ApplicationError;
   }

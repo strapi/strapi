@@ -221,7 +221,7 @@ const ReleasesPage = () => {
     );
   }
 
-  const totalPendingReleases = (isSuccess && response.currentData?.meta?.countPendingReleases) || 0;
+  const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;
   const hasReachedMaximumPendingReleases = totalPendingReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
