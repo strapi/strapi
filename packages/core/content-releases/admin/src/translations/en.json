@@ -11,6 +11,7 @@
   "content-manager-edit-view.list-releases.title": "{isPublish, select, true {Will be published in} other {Will be unpublished in}}",
   "content-manager-edit-view.remove-from-release": "Remove from release",
   "content-manager-edit-view.scheduled.date": "{date} at {time} ({offset})",
+  "content-manager-edit-view.edit-release": "Edit release",
   "content-releases.content-manager-edit-view.edit-entry": "Edit entry",
   "content-manager-edit-view.remove-from-release.notification.success": "Entry removed from release",
   "content-manager-edit-view.release-action-menu": "Release action options",
