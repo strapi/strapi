@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty } from 'lodash/fp';
+import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
@@ -285,7 +285,7 @@ const getExpirationFields = (
   lifespan: number | null
 ): { lifespan: number | null; expiresAt: null | number } => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = Number.isFinite(lifespan) && lifespan !== null && lifespan > 0;
+  const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
