@@ -61,14 +61,25 @@ const assertCustomTokenPermissionsValidity = (
 };
 
 /**
- * Assert that a token's lifespan is valid
+ * Check if a token's lifespan is valid
  */
-const assertValidLifespan = (lifespan: ApiTokenBody['lifespan']) => {
+const isValidLifespan = (lifespan: unknown) => {
   if (isNil(lifespan)) {
-    return;
+    return true;
   }
 
-  if (!Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan as number)) {
+  if (!isNumber(lifespan) || !Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan)) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Assert that a token's lifespan is valid
+ */
+const assertValidLifespan = (lifespan: unknown) => {
+  if (!isValidLifespan(lifespan)) {
     throw new ValidationError(
       `lifespan must be one of the following values: 
       ${Object.values(constants.API_TOKEN_LIFESPANS).join(', ')}`

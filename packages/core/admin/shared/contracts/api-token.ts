@@ -8,7 +8,7 @@ export type ApiToken = {
   expiresAt: string;
   id: Entity.ID;
   lastUsedAt: string | null;
-  lifespan: number | null;
+  lifespan: string | number | null;
   name: string;
   permissions: string[];
   type: 'custom' | 'full-access' | 'read-only';

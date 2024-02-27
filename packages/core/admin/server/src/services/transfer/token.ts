@@ -79,7 +79,7 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
   delete attributes.accessKey;
 
   assertTokenPermissionsValidity(attributes);
-  assertValidLifespan(attributes);
+  assertValidLifespan(attributes.lifespan);
 
   const result = (await strapi.db.transaction(async () => {
     const transferToken = await strapi.query(TRANSFER_TOKEN_UID).create({
@@ -131,7 +131,7 @@ const update = async (
   }
 
   assertTokenPermissionsValidity(attributes);
-  assertValidLifespan(attributes);
+  assertValidLifespan(attributes.lifespan);
 
   return strapi.db.transaction(async () => {
     const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
@@ -281,9 +281,7 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
   };
 };
 
-const getExpirationFields = (
-  lifespan: number | null
-): { lifespan: number | null; expiresAt: null | number } => {
+const getExpirationFields = (lifespan: TransferToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
@@ -359,14 +357,28 @@ const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
 };
 
 /**
- * Assert that a token's lifespan is valid
+ * Check if a token's lifespan is valid
  */
-const assertValidLifespan = ({ lifespan }: { lifespan?: TransferToken['lifespan'] }) => {
+const isValidLifespan = (lifespan: unknown) => {
   if (isNil(lifespan)) {
-    return;
+    return true;
   }
 
-  if (!Object.values(constants.TRANSFER_TOKEN_LIFESPANS).includes(lifespan)) {
+  if (
+    !isNumber(lifespan) ||
+    !Object.values(constants.TRANSFER_TOKEN_LIFESPANS).includes(lifespan)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Assert that a token's lifespan is valid
+ */
+const assertValidLifespan = (lifespan: unknown) => {
+  if (!isValidLifespan(lifespan)) {
     throw new ValidationError(
       `lifespan must be one of the following values: 
       ${Object.values(constants.TRANSFER_TOKEN_LIFESPANS).join(', ')}`
