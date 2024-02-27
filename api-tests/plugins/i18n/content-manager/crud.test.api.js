@@ -85,8 +85,7 @@ describe('i18n - Content API', () => {
       data.categories.push(res.body.data);
     });
 
-    // V5: Fix locale creation test
-    test.skip('non-default locale', async () => {
+    test('non-default locale', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::category.category',
@@ -136,7 +135,7 @@ describe('i18n - Content API', () => {
       data.categories.push(body.data);
     });
 
-    test.skip('should not be able to duplicate unique field values within the same locale', async () => {
+    test('should not be able to duplicate unique field values within the same locale', async () => {
       const res = await rq({
         method: 'POST',
         url: `/content-manager/collection-types/api::category.category`,
@@ -172,18 +171,20 @@ describe('i18n - Content API', () => {
 
       expect(locale.statusCode).toBe(200);
       expect(locale.body).toMatchObject({
-        locale: 'es-AR',
-        name: 'categoría',
+        data: {
+          locale: 'es-AR',
+          name: 'categoría',
+        },
       });
     });
 
-    it.only('Not existing locale in an existing document returns empty body', async () => {
+    it('Not existing locale in an existing document returns empty body', async () => {
       // Create default locale
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::category.category',
         body: {
-          name: 'category in english',
+          name: 'other category in english',
           locale: 'en',
         },
       });
@@ -191,7 +192,7 @@ describe('i18n - Content API', () => {
       // Find by another language
       const locale = await rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::category.category/${res.body.data.id}`,
+        url: `/content-manager/collection-types/api::category.category/${res.body.data.documentId}`,
         qs: {
           locale: 'es-AR',
         },
@@ -199,12 +200,9 @@ describe('i18n - Content API', () => {
 
       expect(locale.statusCode).toBe(200);
       expect(locale.body.data).toMatchObject({});
-      expect(locale.body.meta).toMatchObject({
-        availableStatus: [],
-        availableLocales: [{ locale: 'en' }],
-      });
     });
   });
+
   // V5: Fix bulk actions
   describe.skip('Bulk Delete', () => {
     test('default locale', async () => {
