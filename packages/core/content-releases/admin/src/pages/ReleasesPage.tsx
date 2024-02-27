@@ -250,8 +250,8 @@ const ReleasesPage = () => {
     );
   }
 
-  const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
-  const hasReachedMaximumPendingReleases = totalReleases >= maximumReleases;
+  const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;
+  const hasReachedMaximumPendingReleases = totalPendingReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -307,13 +307,10 @@ const ReleasesPage = () => {
           id: 'content-releases.pages.Releases.title',
           defaultMessage: 'Releases',
         })}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Releases.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-          },
-          { number: totalReleases }
-        )}
+        subtitle={formatMessage({
+          id: 'content-releases.pages.Releases.header-subtitle',
+          defaultMessage: 'Create and manage content updates',
+        })}
         primaryAction={
           <CheckPermissions permissions={PERMISSIONS.create}>
             <Button
@@ -331,7 +328,7 @@ const ReleasesPage = () => {
       />
       <ContentLayout>
         <>
-          {activeTab === 'pending' && hasReachedMaximumPendingReleases && (
+          {hasReachedMaximumPendingReleases && (
             <StyledAlert
               marginBottom={6}
               action={
@@ -372,10 +369,15 @@ const ReleasesPage = () => {
             <Box paddingBottom={8}>
               <Tabs>
                 <Tab>
-                  {formatMessage({
-                    id: 'content-releases.pages.Releases.tab.pending',
-                    defaultMessage: 'Pending',
-                  })}
+                  {formatMessage(
+                    {
+                      id: 'content-releases.pages.Releases.tab.pending',
+                      defaultMessage: 'Pending ({count})',
+                    },
+                    {
+                      count: totalPendingReleases,
+                    }
+                  )}
                 </Tab>
                 <Tab>
                   {formatMessage({
@@ -405,7 +407,7 @@ const ReleasesPage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {totalReleases > 0 && (
+          {response.currentData?.meta?.pagination?.total ? (
             <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
               <PageSizeURLQuery
                 options={['8', '16', '32', '64']}
@@ -417,7 +419,7 @@ const ReleasesPage = () => {
                 }}
               />
             </Flex>
-          )}
+          ) : null}
         </>
       </ContentLayout>
       {releaseModalShown && (
