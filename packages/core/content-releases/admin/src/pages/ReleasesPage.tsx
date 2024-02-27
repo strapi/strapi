@@ -117,7 +117,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, actions, scheduledAt, status = 'empty' }) => (
+      {releases.map(({ id, name, actions, scheduledAt, status }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
