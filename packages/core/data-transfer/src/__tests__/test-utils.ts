@@ -50,7 +50,7 @@ export const getContentTypes = (): {
 });
 
 /**
- * Factory to get default metadata test values
+ * Factory to get default strapi models test values
  */
 export const getStrapiModels = () => {
   return [{ uid: 'model::foo' }, { uid: 'model::bar' }];
