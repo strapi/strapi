@@ -280,7 +280,7 @@ export declare namespace Discard {
 export declare namespace BulkDelete {
   export interface Request {
     body: {
-      documentIds: string[];
+      documentIds: Documents.ID[];
     };
     query: {};
   }
@@ -324,7 +324,7 @@ export declare namespace BulkPublish {
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      documentIds: number[];
+      documentIds: Documents.ID[];
     };
     query: {};
   }
@@ -369,7 +369,7 @@ export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
     body: {};
     query: {
-      documentIds?: Array<Document['documentId']>;
+      documentIds?: Documents.ID[];
       locale?: string;
     };
   }
