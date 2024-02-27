@@ -28,7 +28,7 @@ import type { Attribute } from '@strapi/types';
 interface UseDocumentArgs {
   collectionType: string;
   model: string;
-  id?: string;
+  documentId?: string;
   params?: object;
 }
 
@@ -74,7 +74,7 @@ type UseDocument = (
  *
  * if(!model || !collectionType) return null;
  *
- * const { document, isLoading, validate } = useDocument({ id, model, collectionType, params: { locale: 'en-GB' } })
+ * const { document, isLoading, validate } = useDocument({ documentId: id, model, collectionType, params: { locale: 'en-GB' } })
  * const { update } = useDocumentActions()
  *
  * const onSubmit = async (document: Document) => {
@@ -217,7 +217,7 @@ const useDoc = () => {
     model: slug,
     id: origin || id === 'create' ? undefined : id,
     ...useDocument(
-      { id: origin || id, model: slug, collectionType, params },
+      { documentId: origin || id, model: slug, collectionType, params },
       {
         skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
       }

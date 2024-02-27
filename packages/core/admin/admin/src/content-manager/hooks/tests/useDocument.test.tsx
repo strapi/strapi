@@ -13,7 +13,7 @@ describe('useDocument', () => {
       useDocument({
         collectionType: 'collection-types',
         model: mockData.contentManager.contentType,
-        id: '12345',
+        documentId: '12345',
       })
     );
 
@@ -46,7 +46,7 @@ describe('useDocument', () => {
       useDocument({
         collectionType: 'collection-types',
         model: mockData.contentManager.contentType,
-        id: '12345',
+        documentId: '12345',
       })
     );
 
@@ -62,7 +62,7 @@ describe('useDocument', () => {
       useDocument({
         collectionType: 'collection-types',
         model: mockData.contentManager.contentType,
-        id: '12345',
+        documentId: '12345',
       })
     );
 
@@ -72,7 +72,8 @@ describe('useDocument', () => {
 
     expect(
       result.current.validate({
-        id: '12345',
+        documentId: '12345',
+        id: 1,
         postal_code: 'N2',
         notrepeat_req: {},
         city: 'London',
@@ -82,7 +83,8 @@ describe('useDocument', () => {
 
     expect(
       result.current.validate({
-        id: '12345',
+        documentId: '12345',
+        id: 1,
         notrepeat_req: {},
         postal_code: 12,
         city: 'London',
@@ -112,14 +114,14 @@ describe('useDocument', () => {
       useDocument({
         collectionType: 'collection-types',
         model: mockData.contentManager.contentType,
-        id: '12345',
+        documentId: '12345',
       })
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(() =>
-      result.current.validate({ id: '12345', postal_code: 'N227SN' })
+      result.current.validate({ documentId: '12345', id: 1, postal_code: 'N227SN' })
     ).toThrowErrorMatchingInlineSnapshot(
       `"There is no validation schema generated, this is likely due to the schema not being loaded yet."`
     );
@@ -130,7 +132,7 @@ describe('useDocument', () => {
       useDocument({
         collectionType: 'collection-types',
         model: mockData.contentManager.contentType,
-        id: '12345',
+        documentId: '12345',
       })
     );
 
@@ -264,7 +266,7 @@ describe('useDocument', () => {
       useDocument({
         collectionType: 'collection-types',
         model: mockData.contentManager.contentType,
-        id: '12345',
+        documentId: '12345',
       })
     );
 

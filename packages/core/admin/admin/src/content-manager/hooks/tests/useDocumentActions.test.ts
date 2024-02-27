@@ -32,10 +32,10 @@ describe('useDocumentActions', () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -75,10 +75,10 @@ describe('useDocumentActions', () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -186,7 +186,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -220,7 +220,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -250,7 +250,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -284,7 +284,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -314,7 +314,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -348,7 +348,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -379,7 +379,7 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
             title: 'Entry 1',
@@ -419,7 +419,7 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
             title: 'Entry 1',
@@ -454,10 +454,10 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             content: 'the brown fox jumps over the lazy dog',
           }
         );
@@ -500,10 +500,10 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             content: 'the brown fox jumps over the lazy dog',
           }
         );
@@ -535,7 +535,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -570,7 +570,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;

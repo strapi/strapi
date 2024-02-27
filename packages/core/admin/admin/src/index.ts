@@ -32,5 +32,3 @@ export type {
 } from './core/apis/content-manager';
 
 export * from './content-manager/exports';
-
-export * from './content-manager/exports';

@@ -48,7 +48,7 @@ type UseDocumentActions = () => {
   clone: (
     args: {
       model: string;
-      id: string;
+      documentId: string;
       params?: object;
     },
     document: Omit<Document, 'id'>,
@@ -72,7 +72,7 @@ type UseDocumentActions = () => {
     args: {
       collectionType: string;
       model: string;
-      id?: string;
+      documentId?: string;
       params?: object;
     },
     trackerProperty?: Extract<
@@ -83,20 +83,20 @@ type UseDocumentActions = () => {
   discard: (args: {
     collectionType: string;
     model: string;
-    id?: string;
+    documentId?: string;
     params?: object;
   }) => Promise<OperationResponse<Contracts.CollectionTypes.Discard.Response>>;
   getDocument: (args: {
     collectionType: string;
     model: string;
-    id?: string;
+    documentId?: string;
     params?: object;
   }) => Promise<Contracts.CollectionTypes.FindOne.Response | undefined>;
   publish: (
     args: {
       collectionType: string;
       model: string;
-      id?: string;
+      documentId?: string;
       params?: object;
     },
     document: Partial<Document>
@@ -105,7 +105,7 @@ type UseDocumentActions = () => {
     args: {
       collectionType: string;
       model: string;
-      id?: string;
+      documentId?: string;
       params?: object;
     },
     document: Partial<Document>,
@@ -118,7 +118,7 @@ type UseDocumentActions = () => {
     args: {
       collectionType: string;
       model: string;
-      id?: string;
+      documentId?: string;
       params?: object;
     },
     discardDraft?: boolean
@@ -142,7 +142,7 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  * const { update } = useDocumentActions();
  *
  * const handleSubmit = async (data) => {
- *  await update({ collectionType, model, id }, data);
+ *  await update({ collectionType, model, documentId: id }, data);
  * }
  *
  * return <Form method="PUT" onSubmit={handleSubmit} />
@@ -157,14 +157,14 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [deleteDocument] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
-    async ({ collectionType, model, id, params }, trackerProperty) => {
+    async ({ collectionType, model, documentId, params }, trackerProperty) => {
       try {
         trackUsage('willDeleteEntry', trackerProperty);
 
         const res = await deleteDocument({
           collectionType,
           model,
-          id,
+          documentId,
           params,
         });
 
@@ -204,12 +204,12 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [discardDocument] = useDiscardDocumentMutation();
   const discard: IUseDocumentActs['discard'] = React.useCallback(
-    async ({ collectionType, model, id }) => {
+    async ({ collectionType, model, documentId }) => {
       try {
         const res = await discardDocument({
           collectionType,
           model,
-          id,
+          documentId,
         });
 
         if ('error' in res) {
@@ -244,14 +244,14 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [publishDocument] = usePublishDocumentMutation();
   const publish: IUseDocumentActs['publish'] = React.useCallback(
-    async ({ collectionType, model, id, params }, data) => {
+    async ({ collectionType, model, documentId, params }, data) => {
       try {
         trackUsage('willPublishEntry');
 
         const res = await publishDocument({
           collectionType,
           model,
-          id,
+          documentId,
           data,
           params,
         });
@@ -286,14 +286,14 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [updateDocument] = useUpdateDocumentMutation();
   const update: IUseDocumentActs['update'] = React.useCallback(
-    async ({ collectionType, model, id, params }, data, trackerProperty) => {
+    async ({ collectionType, model, documentId, params }, data, trackerProperty) => {
       try {
         trackUsage('willEditEntry', trackerProperty);
 
         const res = await updateDocument({
           collectionType,
           model,
-          id,
+          documentId,
           data,
           params,
         });
@@ -329,14 +329,14 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
   const unpublish: IUseDocumentActs['unpublish'] = React.useCallback(
-    async ({ collectionType, model, id, params }, discardDraft = false) => {
+    async ({ collectionType, model, documentId, params }, discardDraft = false) => {
       try {
         trackUsage('willUnpublishEntry');
 
         const res = await unpublishDocument({
           collectionType,
           model,
-          id,
+          documentId,
           params,
           data: {
             discardDraft,
@@ -450,7 +450,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [cloneDocument] = useCloneDocumentMutation();
   const clone: IUseDocumentActs['clone'] = React.useCallback(
-    async ({ model, id, params }, body, trackerProperty) => {
+    async ({ model, documentId, params }, body, trackerProperty) => {
       try {
         const { id: _id, ...restBody } = body;
 
@@ -461,7 +461,7 @@ const useDocumentActions: UseDocumentActions = () => {
          */
         const res = await cloneDocument({
           model,
-          sourceId: id,
+          sourceId: documentId,
           data: restBody,
           params,
         });
