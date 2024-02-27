@@ -293,7 +293,7 @@ export default {
     const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await documentManager.clone(document.id, sanitizedBody, model);
+    const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
@@ -349,7 +349,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const result = await documentManager.delete(document.id, model, { locale });
+    const result = await documentManager.delete(document.documentId, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
@@ -391,7 +391,7 @@ export default {
 
       // TODO: Publish many locales at once
       const { locale } = getDocumentLocaleAndStatus(body);
-      return documentManager.publish(document!.id, model, {
+      return documentManager.publish(document!.documentId, model, {
         locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
@@ -526,11 +526,11 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await documentManager.discardDraft(document.id, model, { locale });
+        await documentManager.discardDraft(document.documentId, model, { locale });
       }
 
       ctx.body = await pipeAsync(
-        (document) => documentManager.unpublish(document.id, model, { locale }),
+        (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
       )(document);
@@ -572,7 +572,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => documentManager.discardDraft(document.id, model, { locale }),
+      (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )(document);
