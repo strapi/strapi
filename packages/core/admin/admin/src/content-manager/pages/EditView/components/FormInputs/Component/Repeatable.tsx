@@ -22,11 +22,11 @@ import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
 import { getIn } from '../../../../../../utils/object';
+import { useComposedRefs } from '../../../../../../utils/refs';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
-import { useComposedRefs } from '../../../../../utils/refs';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';

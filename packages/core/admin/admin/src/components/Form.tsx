@@ -18,6 +18,7 @@ import { useIntl } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
 import { getIn, setIn } from '../utils/object';
+import { useComposedRefs } from '../utils/refs';
 
 import { createContext } from './Context';
 
@@ -119,6 +120,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
   ({ disabled = false, method, onSubmit, ...props }, ref) => {
+    const formRef = React.useRef<HTMLFormElement>(null!);
     const initialValues = React.useRef(props.initialValues ?? {});
     const [state, dispatch] = React.useReducer(reducer, {
       errors: {},
@@ -141,6 +143,17 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     }, [props.initialValues]);
 
     const setErrors = React.useCallback((errors: FormErrors) => {
+      const [firstError] = formRef.current.querySelectorAll('[data-strapi-field-error]');
+
+      if (firstError) {
+        const errorId = firstError.getAttribute('id');
+        const formElementInError = formRef.current.querySelector(`[aria-describedby="${errorId}"]`);
+
+        if (formElementInError && formElementInError instanceof HTMLElement) {
+          formElementInError.focus();
+        }
+      }
+
       dispatch({
         type: 'SET_ERRORS',
         payload: errors,
@@ -345,8 +358,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       dispatch({ type: 'SET_ISSUBMITTING', payload: isSubmitting });
     }, []);
 
+    const composedRefs = useComposedRefs(formRef, ref);
+
     return (
-      <form ref={ref} method={method} noValidate onSubmit={handleSubmit}>
+      <form ref={composedRefs} method={method} noValidate onSubmit={handleSubmit}>
         <FormProvider
           disabled={disabled}
           onChange={handleChange}

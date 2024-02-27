@@ -14,6 +14,7 @@ import styled, { keyframes } from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+import { useComposedRefs } from '../../../../../utils/refs';
 import { useDoc } from '../../../../hooks/useDocument';
 import {
   useGenerateUIDMutation,
@@ -21,7 +22,6 @@ import {
   useGetDefaultUIDQuery,
 } from '../../../../services/uid';
 import { buildValidParams } from '../../../../utils/api';
-import { useComposedRefs } from '../../../../utils/refs';
 
 import type { Attribute } from '@strapi/types';
 

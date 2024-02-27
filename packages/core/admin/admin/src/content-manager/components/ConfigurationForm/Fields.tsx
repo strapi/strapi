@@ -10,9 +10,9 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../components/Form';
+import { useComposedRefs } from '../../../utils/refs';
 import { ItemTypes } from '../../constants/dragAndDrop';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
-import { useComposedRefs } from '../../utils/refs';
 import { getTranslation } from '../../utils/translations';
 import { ComponentIcon } from '../ComponentIcon';
 
