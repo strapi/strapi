@@ -20,11 +20,16 @@ jest.mock('../../../hooks/useDocument', () => ({
 
 const render = (
   context: Partial<HistoryContextValue>,
-  kind: 'singleType' | 'collectionType',
   initialEntry: Exclude<RenderOptions['initialEntries'], undefined>[number]
 ) => {
-  const path =
-    kind === 'singleType' ? '/:collectionType/:slug/history' : '/:collectionType/:slug/:id/history';
+  const isSingleType =
+    typeof initialEntry === 'string'
+      ? initialEntry.startsWith('/single-types')
+      : initialEntry.pathname!.startsWith('/single-types');
+
+  const path = isSingleType
+    ? '/:collectionType/:slug/history'
+    : '/:collectionType/:slug/:id/history';
 
   return renderRTL(
     // @ts-expect-error ignore missing properties
@@ -81,7 +86,6 @@ describe('VersionHeader', () => {
     it('should display the correct title and subtitle for a non-localized entry', () => {
       render(
         { selectedVersion },
-        'collectionType',
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -106,7 +110,6 @@ describe('VersionHeader', () => {
             },
           },
         },
-        'collectionType',
         {
           pathname:
             '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history',
@@ -137,7 +140,6 @@ describe('VersionHeader', () => {
 
       render(
         { selectedVersion },
-        'collectionType',
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -182,7 +184,7 @@ describe('VersionHeader', () => {
     });
 
     it('should display the correct title and subtitle for a non-localized entry', () => {
-      render({ selectedVersion }, 'singleType', '/single-types/api::homepage.homepage/history');
+      render({ selectedVersion }, '/single-types/api::homepage.homepage/history');
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
       expect(screen.getByText('Test Title (homepage)')).toBeInTheDocument();
@@ -202,7 +204,6 @@ describe('VersionHeader', () => {
             },
           },
         },
-        'singleType',
         {
           pathname: '/single-types/api::homepage.homepage/history',
           search: '?plugins[i18n][locale]=en',
