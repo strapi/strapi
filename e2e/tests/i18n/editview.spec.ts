@@ -115,7 +115,10 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
   });
 
-  test('As a user I want to add a locale entry to an existing document', async ({ page }) => {
+  test('As a user I want to add a locale entry to an existing document', async ({
+    browser,
+    page,
+  }) => {
     // Listen for all console logs
     page.on('console', (msg) => console.log(msg.text()));
 
@@ -157,6 +160,12 @@ test.describe('Edit view', () => {
      */
     expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+
+    if (browser.browserType().name() === 'webkit') {
+      await page.getByRole('textbox', { name: 'name' }).press('s');
+      await page.getByRole('textbox', { name: 'name' }).press('Delete');
+    }
+
     await page
       .getByRole('textbox', { name: 'name' })
       .fill('Camiseta de fuera 23/24 de Nike para hombres');
