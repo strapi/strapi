@@ -4,7 +4,7 @@ import {
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
-  getMetadata,
+  getStrapiModels,
 } from '../../../../__tests__/test-utils';
 
 afterEach(() => {
@@ -141,15 +141,37 @@ describe('Local Strapi Source Destination', () => {
           entity: { id: 9, age: 0 },
           contentType: { uid: 'bar' },
         },
+        {
+          entity: { id: 10, age: 0 },
+          model: { uid: 'model::foo' },
+        },
+        {
+          entity: { id: 11, age: 0 },
+          model: { uid: 'model::bar' },
+        },
       ];
 
       const deleteMany = (uid: string) =>
         jest.fn(async () => ({
-          count: entities.filter((entity) => entity.contentType.uid === uid).length,
+          count: entities.filter((entity) => {
+            if (entity.model) {
+              return entity.model.uid === uid;
+            }
+
+            return entity.contentType.uid === uid;
+          }).length,
         }));
 
       const findMany = (uid: string) => {
-        return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
+        return jest.fn(async () =>
+          entities.filter((entity) => {
+            if (entity.model) {
+              return entity.model.uid === uid;
+            }
+
+            return entity.contentType.uid === uid;
+          })
+        );
       };
 
       const query = jest.fn((uid) => {
@@ -165,6 +187,13 @@ describe('Local Strapi Source Destination', () => {
         contentTypes: getContentTypes(),
         query,
         getModel,
+        get() {
+          return {
+            get() {
+              return getStrapiModels();
+            },
+          };
+        },
         db: {
           query,
           transaction,
@@ -174,7 +203,6 @@ describe('Local Strapi Source Destination', () => {
               transacting: jest.fn().mockReturnThis(),
             }),
           }),
-          metadata: getMetadata(),
         },
         ...strapiCommonProperties,
       })();

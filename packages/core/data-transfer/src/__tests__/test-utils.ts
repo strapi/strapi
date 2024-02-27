@@ -52,13 +52,8 @@ export const getContentTypes = (): {
 /**
  * Factory to get default metadata test values
  */
-export const getMetadata = () => {
-  const testValues: readonly [string, { uid: string }][] = [
-    ['model::foo', { uid: 'model::foo' }],
-    ['model::bar', { uid: 'model::bar' }],
-  ];
-
-  return new Map<string, { uid: string }>(testValues);
+export const getStrapiModels = () => {
+  return [{ uid: 'model::foo' }, { uid: 'model::bar' }];
 };
 
 /**

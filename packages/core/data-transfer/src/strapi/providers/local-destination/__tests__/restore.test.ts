@@ -4,7 +4,7 @@ import {
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
-  getMetadata,
+  getStrapiModels,
 } from '../../../../__tests__/test-utils';
 import { IConfiguration } from '../../../../../types';
 
@@ -92,9 +92,15 @@ describe('Restore ', () => {
       contentTypes: getContentTypes(),
       query,
       getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
       db: {
         query,
-        metadata: getMetadata(),
       },
     })();
 
@@ -109,9 +115,15 @@ describe('Restore ', () => {
       contentTypes: getContentTypes(),
       query,
       getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
       db: {
         query,
-        metadata: getMetadata(),
       },
     })();
 
@@ -130,9 +142,15 @@ describe('Restore ', () => {
       contentTypes: getContentTypes(),
       query,
       getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
       db: {
         query,
-        metadata: getMetadata(),
       },
     })();
 
