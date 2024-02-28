@@ -11,8 +11,10 @@ const DEFAULT_RETENTION_DAYS = 90;
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const state: {
     deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
+    isInitialized: boolean;
   } = {
     deleteExpiredJob: null,
+    isInitialized: false,
   };
 
   /**
@@ -25,28 +27,21 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const getRetentionDays = (strapi: LoadedStrapi) => {
     const licenseRetentionDays =
       strapi.ee.features.get('cms-content-history')?.options.retentionDays;
-    const userRetentionDays = strapi.config.get('admin.history.retentionDays');
-
-    // For enterprise plans, use 90 days by default, but allow users to override it
-    if (licenseRetentionDays == null) {
-      return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
-    }
+    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
 
     // Allow users to override the license retention days, but not to increase it
     if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
       return userRetentionDays;
     }
 
-    // User didn't provide a retention days value, use the license one
-    return licenseRetentionDays;
+    // User didn't provide retention days value, use the license or fallback to default
+    return licenseRetentionDays ?? DEFAULT_RETENTION_DAYS;
   };
 
-  let isInitialized = false;
-
   return {
-    async init() {
+    async bootstrap() {
       // Prevent initializing the service twice
-      if (isInitialized) {
+      if (state.isInitialized) {
         return;
       }
 
@@ -113,7 +108,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         });
       });
 
-      isInitialized = true;
+      state.isInitialized = true;
     },
 
     async destroy() {

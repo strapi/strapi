@@ -78,8 +78,8 @@ describe('history-version service', () => {
   });
 
   it('inits service only once', () => {
-    historyService.init();
-    historyService.init();
+    historyService.bootstrap();
+    historyService.bootstrap();
     expect(mockStrapi.documents.middlewares.add).toHaveBeenCalledTimes(1);
   });
 
@@ -93,7 +93,7 @@ describe('history-version service', () => {
     };
 
     const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
-    await historyService.init();
+    await historyService.bootstrap();
     const historyMiddlewareFunction = mockStrapi.documents.middlewares.add.mock.calls[0][2];
 
     // Check that we don't break the middleware chain
@@ -199,7 +199,7 @@ describe('history-version service', () => {
       jest.fn((rule, callback) => callback())
     );
 
-    await historyService.init();
+    await historyService.bootstrap();
 
     expect(mockScheduleJob).toHaveBeenCalledTimes(1);
     expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
