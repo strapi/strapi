@@ -4,19 +4,30 @@ import { rest } from 'msw';
 
 import { DeleteLocale } from '../DeleteLocale';
 
+import type { Locale } from '../../../../shared/contracts/locales';
+
+const LOCALE: Locale = {
+  id: 1,
+  code: 'en',
+  isDefault: false,
+  name: 'English',
+  createdAt: '',
+  updatedAt: '',
+};
+
 describe('DeleteLocale', () => {
   it('should render an icon button by default', () => {
-    render(<DeleteLocale id="1" />);
+    render(<DeleteLocale {...LOCALE} />);
 
-    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete English locale' })).toBeInTheDocument();
   });
 
   it('should render a confirmation dialog when the icon button is clicked', async () => {
-    const { user } = render(<DeleteLocale id="1" />);
+    const { user } = render(<DeleteLocale {...LOCALE} />);
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(screen.getByRole('button', { name: 'Delete English locale' }));
 
     expect(screen.getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
@@ -28,9 +39,9 @@ describe('DeleteLocale', () => {
   });
 
   it('should allow you to delete a locale', async () => {
-    const { user } = render(<DeleteLocale id="1" />);
+    const { user } = render(<DeleteLocale {...LOCALE} />);
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(screen.getByRole('button', { name: 'Delete English locale' }));
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     await screen.findByText('Deleted locale');
@@ -48,9 +59,9 @@ describe('DeleteLocale', () => {
       })
     );
 
-    const { user } = render(<DeleteLocale id="1" />);
+    const { user } = render(<DeleteLocale {...LOCALE} />);
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(screen.getByRole('button', { name: 'Delete English locale' }));
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(await screen.findByText('Could not delete locale')).toBeInTheDocument();

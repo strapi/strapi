@@ -211,7 +211,7 @@ const Information = ({ activeTab }: InformationProps) => {
   const { formatMessage } = useIntl();
   const { document, meta } = useDoc();
 
-  if (!document) {
+  if (!document || !document.id) {
     return null;
   }
 

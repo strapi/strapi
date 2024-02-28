@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Flex, Icon, Status, Typography } from '@strapi/design-system';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
@@ -28,23 +30,41 @@ const LocalePickerAction: HeaderActionComponent = ({ document, meta }) => {
   const { hasI18n, canCreate, canRead } = useI18n();
   const { data: locales = [] } = useGetLocalesQuery();
 
+  const handleSelect = React.useCallback(
+    (value: string) => {
+      setQuery({
+        plugins: {
+          ...query.plugins,
+          i18n: {
+            locale: value,
+          },
+        },
+      });
+    },
+    [query.plugins, setQuery]
+  );
+
+  React.useEffect(() => {
+    if (!Array.isArray(locales) || !hasI18n) {
+      return;
+    }
+    /**
+     * Handle the case where the current locale query param doesn't exist
+     * in the list of available locales, so we redirect to the default locale.
+     */
+    const currentDesiredLocale = query.plugins?.i18n?.locale;
+    const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
+    const defaultLocale = locales.find((locale) => locale.isDefault);
+    if (!doesLocaleExist && defaultLocale?.code) {
+      handleSelect(defaultLocale.code);
+    }
+  }, [handleSelect, hasI18n, locales, query.plugins?.i18n?.locale]);
+
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
     return null;
   }
 
-  const defaultLocale = locales.find((loc) => loc.isDefault)!;
-  const currentLocale = query.plugins?.i18n?.locale || defaultLocale.code;
-
-  const handleSelect = (value: string) => {
-    setQuery({
-      plugins: {
-        ...query.plugins,
-        i18n: {
-          locale: value,
-        },
-      },
-    });
-  };
+  const currentLocale = query.plugins?.i18n?.locale || locales.find((loc) => loc.isDefault)?.code;
 
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale },
@@ -136,7 +156,8 @@ const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, coll
   }
 
   return {
-    disabled: (document?.locale && !canDelete.includes(document.locale)) || !document,
+    disabled:
+      (document?.locale && !canDelete.includes(document.locale)) || !document || !document.id,
     position: ['header', 'table-row'],
     label: formatMessage({
       id: getTranslation('actions.delete.label'),
@@ -152,7 +173,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({ document, id, model, coll
       }),
       content: (
         <Flex direction="column" gap={2}>
-          <Icon as={ExclamationMarkCircle} width={6} height={6} color="danger600" />
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
           <Typography as="p" variant="omega" textAlign="center">
             {formatMessage({
               id: getTranslation('actions.delete.dialog.body'),
