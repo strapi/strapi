@@ -69,8 +69,8 @@
     "@storybook/builder-vite": "7.5.3",
     "@storybook/react-vite": "7.5.3",
     "@strapi/admin-test-utils": "4.20.2",
-    "@strapi/design-system": "1.14.1",
-    "@strapi/icons": "1.14.1",
+    "@strapi/design-system": "1.15.0",
+    "@strapi/icons": "1.15.0",
     "@strapi/pack-up": "4.20.2",
     "@strapi/types": "4.20.2",
     "@testing-library/react": "14.0.0",
@@ -90,8 +90,8 @@
     "yup": "0.32.9"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.14.1",
-    "@strapi/icons": "1.14.1",
+    "@strapi/design-system": "1.15.0",
+    "@strapi/icons": "1.15.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.2.0",
