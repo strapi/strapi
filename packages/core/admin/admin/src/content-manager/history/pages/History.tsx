@@ -10,6 +10,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
 import { COLLECTION_TYPES } from '../../constants/collections';
+import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
@@ -153,7 +154,9 @@ const HistoryPage = () => {
         <Flex direction="row" alignItems="flex-start">
           <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
-            <VersionContent permissions={permissions} />
+            <DocumentRBAC permissions={permissions}>
+              <VersionContent />
+            </DocumentRBAC>
           </Main>
           <VersionsList />
         </Flex>
