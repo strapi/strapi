@@ -10,6 +10,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
+import { Release } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 import { useTypedSelector } from '../store/hooks';
@@ -180,6 +181,35 @@ const ReleaseActionEntryLinkItem = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * EditReleaseItem
+ * -----------------------------------------------------------------------------------------------*/
+interface EditReleaseItemProps {
+  releaseId: Release['id'];
+}
+
+const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <StyledMenuItem>
+      <Link
+        as={NavLink}
+        // @ts-expect-error TODO: This component from DS is not using types from NavLink
+        to={`/plugins/content-releases/${releaseId}`}
+        startIcon={<Icon as={Pencil} width={3} height={3} />}
+      >
+        <Typography variant="omega">
+          {formatMessage({
+            id: 'content-releases.content-manager-edit-view.edit-release',
+            defaultMessage: 'Edit release',
+          })}
+        </Typography>
+      </Link>
+    </StyledMenuItem>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
@@ -225,6 +255,7 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
 
 export const ReleaseActionMenu = {
   Root,
+  EditReleaseItem,
   DeleteReleaseActionItem,
   ReleaseActionEntryLinkItem,
 };

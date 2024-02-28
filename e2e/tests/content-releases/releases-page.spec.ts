@@ -25,13 +25,11 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Navigate to the releases page
     await page.getByRole('link', { name: 'Releases' }).click();
 
-    await expect(
-      page.getByRole('link', { name: `Trent Crimm: The Independent 6 entries` })
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: `Trent Crimm: The Independent` })).toBeVisible();
 
     // Open the 'Done' tab panel
     await page.getByRole('tab', { name: 'Done' }).click();
-    await expect(page.getByRole('link', { name: `Nate: A wonder kid 2 entries` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `Nate: A wonder kid` })).toBeVisible();
 
     // Open the create release dialog
     await page.getByRole('button', { name: 'New release' }).click();
@@ -49,7 +47,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Navigate back to the release page to see the newly created release
     await page.getByRole('link', { name: 'Releases' }).click();
-    await expect(page.getByRole('link', { name: `${newReleaseName} No entries` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
   test('A user should be able to create a release with scheduling info and view their pending and done releases', async ({
@@ -88,6 +86,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Navigate back to the release page to see the newly created release
     await page.getByRole('link', { name: 'Releases' }).click();
-    await expect(page.getByRole('link', { name: `${newReleaseName} No entries` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 });

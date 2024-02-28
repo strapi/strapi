@@ -42,5 +42,8 @@ export default {
       target: RELEASE_MODEL_UID,
       inversedBy: 'actions',
     },
+    isEntryValid: {
+      type: 'boolean',
+    },
   },
 };
