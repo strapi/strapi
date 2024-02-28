@@ -394,7 +394,7 @@ export const CMReleasesContainer = () => {
             handleClose={toggleModal}
             contentTypeUid={contentTypeUid}
             // @ts-expect-error – we'll fix this when we fix content-releases for v5
-            entryId={entryId}
+            entryId={id}
           />
         )}
       </Box>

@@ -14,9 +14,9 @@ import type { Locale } from '../../../shared/contracts/locales';
  * DeleteLocale
  * -----------------------------------------------------------------------------------------------*/
 
-interface DeleteLocaleProps extends Pick<Locale, 'id'> {}
+interface DeleteLocaleProps extends Locale {}
 
-const DeleteLocale = ({ id }: DeleteLocaleProps) => {
+const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -56,10 +56,15 @@ const DeleteLocale = ({ id }: DeleteLocaleProps) => {
     <>
       <IconButton
         onClick={() => setVisible(true)}
-        label={formatMessage({
-          id: getTranslation('Settings.list.actions.delete'),
-          defaultMessage: 'Delete',
-        })}
+        label={formatMessage(
+          {
+            id: getTranslation('Settings.list.actions.delete'),
+            defaultMessage: 'Delete {name} locale',
+          },
+          {
+            name,
+          }
+        )}
         icon={<Trash />}
         borderWidth={0}
       />
