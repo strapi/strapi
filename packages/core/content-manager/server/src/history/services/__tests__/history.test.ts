@@ -38,9 +38,7 @@ const mockStrapi = {
     get: mockGetRequestContext,
   },
   documents: {
-    middlewares: {
-      add: jest.fn(),
-    },
+    use: jest.fn(),
   },
   contentType(uid: UID.ContentType) {
     if (uid === 'api::article.article') {
@@ -66,21 +64,25 @@ describe('history-version service', () => {
   it('inits service only once', () => {
     historyService.init();
     historyService.init();
-    expect(mockStrapi.documents.middlewares.add).toHaveBeenCalledTimes(1);
+    expect(mockStrapi.documents.use).toHaveBeenCalledTimes(1);
   });
 
   it('saves relevant document actions in history', async () => {
     const context = {
       action: 'create',
-      uid: 'api::article.article',
-      params: {
-        locale: 'fr',
+      contentType: {
+        uid: 'api::article.article',
       },
+      args: [
+        {
+          locale: 'fr',
+        },
+      ],
     };
 
     const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
     await historyService.init();
-    const historyMiddlewareFunction = mockStrapi.documents.middlewares.add.mock.calls[0][2];
+    const historyMiddlewareFunction = mockStrapi.documents.use.mock.calls[0][0];
 
     // Check that we don't break the middleware chain
     await historyMiddlewareFunction(context, next);
@@ -110,7 +112,7 @@ describe('history-version service', () => {
 
     // Non-api content types should be ignored
     createMock.mockClear();
-    context.uid = 'plugin::upload.file';
+    context.contentType.uid = 'plugin::upload.file';
     context.action = 'create';
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(0);

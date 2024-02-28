@@ -16,6 +16,7 @@ const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
     const fieldRef = useFocusInputField(name);
 
     const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
+    const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
 
     return (
       <DateTimePicker
@@ -33,7 +34,7 @@ const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
         onClear={() => field.onChange(name, undefined)}
         placeholder={placeholder}
         required={required}
-        value={field.value}
+        value={value}
       />
     );
   }

@@ -10,13 +10,13 @@ import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from '../components/DragLayer';
-import { useIsHistoryRoute } from '../history/routes';
 
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
 import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPreview';
 import { RelationDragPreview } from './components/DragPreviews/RelationDragPreview';
 import { LeftMenu } from './components/LeftMenu';
 import { ItemTypes } from './constants/dragAndDrop';
+import { useIsHistoryRoute } from './history/routes';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
 import { getTranslation } from './utils/translations';
 

@@ -9,9 +9,12 @@ import { useIntl } from 'react-intl';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
-import { useContentTypeLayout } from '../../hooks/useLayouts';
-import { buildValidGetParams } from '../../utils/api';
-import { type FormattedLayouts } from '../../utils/layouts';
+import { COLLECTION_TYPES } from '../../constants/collections';
+import { DocumentRBAC } from '../../features/DocumentRBAC';
+import { useDocument } from '../../hooks/useDocument';
+import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useSyncRbac } from '../../hooks/useSyncRbac';
+import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
@@ -26,10 +29,12 @@ import type { UID } from '@strapi/types';
 interface HistoryContextValue {
   contentType: UID.ContentType;
   id?: string; // null for single types
-  layout: FormattedLayouts;
+  layout: EditLayout['layout'];
   selectedVersion: Contracts.HistoryVersions.HistoryVersionDataResponse;
   versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
   page: number;
+  mainField: string;
+  schema: Contracts.ContentTypes.ContentType;
 }
 
 const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>('HistoryPage');
@@ -42,12 +47,28 @@ const HistoryPage = () => {
   const headerId = React.useId();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const { slug, id: documentId } = useParams<{
+  const {
+    slug,
+    id: documentId,
+    collectionType,
+  } = useParams<{
+    collectionType: string;
     slug: UID.ContentType;
     id: string;
   }>();
 
-  const { layout } = useContentTypeLayout(slug);
+  const { isLoading: isLoadingDocument, schema } = useDocument({
+    collectionType: collectionType!,
+    model: slug!,
+  });
+
+  const {
+    isLoading: isLoadingLayout,
+    edit: {
+      layout,
+      settings: { displayName, mainField },
+    },
+  } = useDocumentLayout(slug!);
 
   // Parse state from query params
   const [{ query }] = useQueryParams<{
@@ -56,7 +77,7 @@ const HistoryPage = () => {
     plugins?: Record<string, unknown>;
   }>();
   const { id: selectedVersionId, ...queryWithoutId } = query;
-  const validQueryParamsWithoutId = buildValidGetParams(queryWithoutId);
+  const validQueryParamsWithoutId = buildValidParams(queryWithoutId);
   const page = validQueryParamsWithoutId.page ? Number(validQueryParamsWithoutId.page) : 1;
 
   const versionsResponse = useGetHistoryVersionsQuery(
@@ -78,16 +99,23 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  if (!layout || versionsResponse.isLoading) {
+  const { permissions, isLoading: isLoadingPermissions } = useSyncRbac(slug!, query, 'History');
+
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || isLoadingPermissions) {
     return <LoadingIndicatorPage />;
   }
 
-  if (!slug || (!documentId && layout?.contentType.kind === 'collectionType')) {
+  /**
+   * Ensure that we have the necessary data to render the page:
+   * - slug for single types
+   * - slug _and_ documentId for collection types
+   */
+  if (!slug || (!documentId && collectionType === COLLECTION_TYPES)) {
     return <Navigate to="/content-manager" />;
   }
 
   // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout) {
+  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema || !permissions) {
     return null;
   }
 
@@ -109,22 +137,26 @@ const HistoryPage = () => {
             defaultMessage: '{contentType} history',
           },
           {
-            contentType: layout.contentType.info.displayName,
+            contentType: displayName,
           }
         )}
       />
       <HistoryProvider
         contentType={slug}
         id={documentId}
+        schema={schema}
         layout={layout}
         selectedVersion={selectedVersion}
         versions={versionsResponse.data}
         page={page}
+        mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
           <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
-            <VersionContent />
+            <DocumentRBAC permissions={permissions}>
+              <VersionContent />
+            </DocumentRBAC>
           </Main>
           <VersionsList />
         </Flex>
