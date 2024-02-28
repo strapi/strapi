@@ -18,6 +18,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
  * Match urls for model creation
  *  /content-manager/collection-types/api::category.category/
  *  /content-manager/collection-types/api::category.category
+ *
  * And not match:
  *  /content-manager/collection-types/api::category.category/1
  *  /content-manager/collection-types/api::category.category/1/actions/publish
