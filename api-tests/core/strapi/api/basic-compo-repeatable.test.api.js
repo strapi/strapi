@@ -87,11 +87,11 @@ describe('Core API - Basic + compo', () => {
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: product,
+      documentId: expect.anything(),
+      ...product,
     });
 
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.publishedAt).toBeDefined();
     data.productsWithCompo.push(body.data);
   });
 
@@ -110,7 +110,7 @@ describe('Core API - Basic + compo', () => {
     expect(body.data[0]).toMatchObject(data.productsWithCompo[0]);
 
     body.data.forEach((p) => {
-      expect(p.attributes.publishedAt).toBeDefined();
+      expect(p.publishedAt).toBeDefined();
     });
   });
 
@@ -128,7 +128,7 @@ describe('Core API - Basic + compo', () => {
 
     const { statusCode, body } = await rq({
       method: 'PUT',
-      url: `/product-with-compos/${data.productsWithCompo[0].id}`,
+      url: `/product-with-compos/${data.productsWithCompo[0].documentId}`,
       body: {
         data: product,
       },
@@ -140,20 +140,20 @@ describe('Core API - Basic + compo', () => {
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject({
-      id: data.productsWithCompo[0].id,
-      attributes: product,
+      documentId: data.productsWithCompo[0].documentId,
+      ...product,
     });
 
-    expect(body.data.attributes.publishedAt).toBeDefined();
-    expect(body.data.publishedAt).toBeUndefined();
+    expect(body.data.publishedAt).toBeDefined();
 
     data.productsWithCompo[0] = body.data;
   });
 
-  test('Delete product with compo', async () => {
+  // TODO V5: Decide response of delete
+  test.skip('Delete product with compo', async () => {
     const { statusCode, body } = await rq({
       method: 'DELETE',
-      url: `/product-with-compos/${data.productsWithCompo[0].id}`,
+      url: `/product-with-compos/${data.productsWithCompo[0].documentId}`,
       qs: {
         populate: ['compo'],
       },
@@ -162,7 +162,7 @@ describe('Core API - Basic + compo', () => {
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject(data.productsWithCompo[0]);
 
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.publishedAt).toBeDefined();
     data.productsWithCompo.shift();
   });
 
@@ -302,12 +302,12 @@ describe('Core API - Basic + compo', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'compo[0].name must be defined.',
+          message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
           details: {
             errors: [
               {
                 path: ['compo', '0', 'name'],
-                message: 'compo[0].name must be defined.',
+                message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],

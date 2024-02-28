@@ -151,7 +151,7 @@ export default {
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
-    const entityManager = getService('single-types');
+    const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.delete()) {
@@ -171,7 +171,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const deletedEntity = await entityManager.delete(document.id, model, { locale });
+    const deletedEntity = await documentManager.delete(document.documentId, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(deletedEntity);
   },
@@ -181,7 +181,7 @@ export default {
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
-    const singleTypes = getService('single-types');
+    const documentManager = getService('document-manager');
     const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -203,7 +203,7 @@ export default {
       }
 
       const { locale } = getDocumentLocaleAndStatus(document);
-      return singleTypes.publish(document.id, model, { locale });
+      return documentManager.publish(document.documentId, model, { locale });
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
@@ -249,11 +249,11 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await documentManager.discardDraft(document.id, model, { locale });
+        await documentManager.discardDraft(document.documentId, model, { locale });
       }
 
       ctx.body = await pipeAsync(
-        (document) => documentManager.unpublish(document.id, model, { locale }),
+        (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
       )(document);
@@ -288,7 +288,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => documentManager.discardDraft(document.id, model, { locale }),
+      (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )(document);
@@ -316,7 +316,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const number = await documentManager.countDraftRelations(document.id, model, locale);
+    const number = await documentManager.countDraftRelations(document.documentId, model, locale);
 
     return {
       data: number,

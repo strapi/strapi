@@ -34,7 +34,7 @@ export type Clone<
   TContentTypeUID extends Common.UID.ContentType,
   TParams extends Params.Clone<TContentTypeUID>
 > = Promise<{
-  id: string;
+  documentId: string;
   versions: Result<TContentTypeUID, TParams>[];
 } | null>;
 

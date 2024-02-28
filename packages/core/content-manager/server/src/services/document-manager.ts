@@ -29,14 +29,32 @@ const emitEvent = async (uid: Common.UID.ContentType, event: string, document: D
 };
 
 const documentManager = ({ strapi }: { strapi: Strapi }) => {
+  const mapDocument = (uid: Common.UID.CollectionType, document: any): any => {
+    if (!document) return document;
+
+    if (Array.isArray(document)) {
+      return document.map((doc: Document) => mapDocument(uid, doc));
+    }
+
+    // document.id = document.documentId;
+
+    return document;
+  };
+
   return {
     async findOne(id: string, uid: Common.UID.CollectionType, opts = {}) {
-      return strapi.documents(uid).findOne(id, opts);
+      return strapi
+        .documents(uid)
+        .findOne(id, opts)
+        .then((doc) => mapDocument(uid, doc));
     },
 
     async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
-      return strapi.documents(uid).findMany(params);
+      return strapi
+        .documents(uid)
+        .findMany(params)
+        .then((doc) => mapDocument(uid, doc));
     },
 
     async findPage(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
@@ -50,7 +68,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       ]);
 
       return {
-        results: documents,
+        results: mapDocument(uid, documents),
         pagination: {
           page,
           pageSize,
@@ -70,7 +88,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       //   return getDeepRelationsCount(document, uid);
       // }
 
-      return document;
+      return mapDocument(uid, document);
     },
 
     async update(
@@ -82,17 +100,17 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
-      const updatedDocument = await strapi.documents(uid).update(id as string, params);
+      const updatedDocument = await strapi.documents(uid).update(id, params);
 
       // if (isWebhooksPopulateRelationsEnabled()) {
       //   return getDeepRelationsCount(updatedDocument, uid);
       // }
 
-      return updatedDocument;
+      return mapDocument(uid, updatedDocument);
     },
 
     async clone(
-      document: Document,
+      id: Documents.ID,
       body: Partial<Documents.Params.Data.Input<Common.UID.CollectionType>>,
       uid: Common.UID.CollectionType
     ) {
@@ -105,8 +123,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         populate,
       };
 
-      // @ts-expect-error - change entity to document
-      const result = await strapi.documents(uid).clone(document.id, params);
+      const result = await strapi.documents(uid).clone(id, params);
 
       const clonedEntity = result?.versions.at(0);
       // If relations were populated, relations count will be returned instead of the array of relations.
@@ -114,7 +131,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       //   return getDeepRelationsCount(clonedEntity, uid);
       // }
 
-      return clonedEntity;
+      return mapDocument(uid, clonedEntity);
     },
 
     /**
@@ -133,7 +150,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async delete(
-      document: Document,
+      id: Documents.ID,
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'delete'>[1] = {} as any
     ) {
@@ -144,8 +161,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         opts.locale = '*';
       }
 
-      // @ts-expect-error - change entity to document
-      await strapi.documents(uid).delete(document.id, { ...opts, populate });
+      await strapi.documents(uid).delete(id, { ...opts, populate });
 
       // If relations were populated, relations count will be returned instead of the array of relations.
       // if (deletedDocument && isWebhooksPopulateRelationsEnabled()) {
@@ -164,16 +180,14 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async publish(
-      document: Document,
+      id: Documents.ID,
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'publish'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
-      const { versions: publishedDocuments } = await strapi
-        .documents(uid)
-        .publish(document.id as string, params);
+      const { versions: publishedDocuments } = await strapi.documents(uid).publish(id, params);
 
       // TODO: What if we publish many versions at once?
       const publishedDocument = publishedDocuments.at(0);
@@ -183,7 +197,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       //   return getDeepRelationsCount(publishedDocument, uid);
       // }
 
-      return publishedDocument;
+      return mapDocument(uid, publishedDocument);
     },
 
     async publishMany(entities: Document[], uid: Common.UID.ContentType) {
@@ -260,17 +274,14 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async unpublish(
-      document: Document,
+      id: Documents.ID,
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'unpublish'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
-      await strapi
-        .documents(uid)
-        // @ts-expect-error - Change entity to document
-        .unpublish(document.id, params);
+      await strapi.documents(uid).unpublish(id, params);
 
       // If relations were populated, relations count will be returned instead of the array of relations.
       // if (unpublishedDocument && isWebhooksPopulateRelationsEnabled()) {
@@ -281,16 +292,14 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async discardDraft(
-      document: Document,
+      id: Documents.ID,
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'discardDraft'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
-      const { versions: discardedDocuments } = await strapi
-        .documents(uid)
-        .discardDraft(document.id as string, params);
+      const { versions: discardedDocuments } = await strapi.documents(uid).discardDraft(id, params);
 
       // We only discard one document at a time
       const discardedDocument = discardedDocuments.at(0);
@@ -300,7 +309,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       //   return getDeepRelationsCount(discardedDocument, uid);
       // }
 
-      return discardedDocument;
+      return mapDocument(uid, discardedDocument);
     },
 
     async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {

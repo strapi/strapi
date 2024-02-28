@@ -22,9 +22,8 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { applyTransforms } from '../entity-service/attributes';
 import entityValidator from '../entity-validator';
 import { pickSelectionParams } from './params';
-import { transformParamsDocumentId, transformOutputDocumentId } from './transform/id-transform';
+import { transformParamsDocumentId } from './transform/id-transform';
 import { getDeepPopulate } from './utils/populate';
-import { transformOutputIds } from './transform/relations/transform/output-ids';
 import { transformData } from './transform/data';
 
 const { transformParamsToQuery } = convertQueryParams;
@@ -59,45 +58,36 @@ const createDocumentEngine = ({
 }): Documents.Engine => ({
   async findMany(uid, params) {
     const query = await pipeAsync(
-      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsDocumentId(uid, params, { isDraft: params.status === 'draft' }),
       (params) => transformParamsToQuery(uid, params),
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
 
-    return db
-      .query(uid)
-      .findMany(query)
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).findMany(query);
   },
 
   async findFirst(uid, params) {
     const query = await pipeAsync(
-      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsDocumentId(uid, params, { isDraft: params.status === 'draft' }),
       (params) => transformParamsToQuery(uid, params)
     )(params || {});
 
-    return db
-      .query(uid)
-      .findOne({ ...query, where: { ...params?.lookup, ...query.where } })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).findOne({ ...query, where: { ...params?.lookup, ...query.where } });
   },
 
   async findOne(uid, documentId, params) {
     const query = await pipeAsync(
-      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
+      (params) => transformParamsDocumentId(uid, params, { isDraft: params.status === 'draft' }),
       (params) => transformParamsToQuery(uid, params)
     )(params || {});
 
     return db
       .query(uid)
-      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+      .findOne({ ...query, where: { ...params?.lookup, ...query.where, documentId } });
   },
 
   async delete(uid, documentId, params = {} as any) {
     const query = await pipeAsync(
-      // TODO: What if we are deleting more than one locale / publication state?
-      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
       (params) => transformParamsToQuery(uid, params),
       (query) => set('where', { ...params?.lookup, ...query.where, documentId }, query)
     )(params);
@@ -154,17 +144,11 @@ const createDocumentEngine = ({
       { contentType }
     );
 
-    return db
-      .query(uid)
-      .create({ ...query, data: entryData })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).create({ ...query, data: entryData });
   },
 
   // NOTE: What happens if user doesn't provide specific publications state and locale to update?
   async update(uid, documentId, params) {
-    // TODO: Prevent updating a published document
-    // TODO: File upload
-
     // Param parsing
     const { data, ...restParams } = await transformParamsDocumentId(uid, params || {}, {
       isDraft: true,
@@ -197,15 +181,11 @@ const createDocumentEngine = ({
       { contentType: model }
     );
 
-    return db
-      .query(uid)
-      .update({ ...query, where: { id: entryToUpdate.id }, data: entryData })
-      .then((doc) => transformOutputDocumentId(uid, doc));
+    return db.query(uid).update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   },
 
   async count(uid, params = undefined) {
     const query = await pipeAsync(
-      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
       (params) => transformParamsToQuery(uid, params),
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
@@ -214,13 +194,12 @@ const createDocumentEngine = ({
   },
 
   async clone(uid, documentId, params) {
-    // TODO: File upload
-    // Param parsing
     const { data, ...restParams } = await transformParamsDocumentId(uid, params || {}, {
       isDraft: true,
       locale: params?.locale,
     });
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any);
+    // Param parsing
 
     // Validation
     const model = strapi.contentType(uid);
@@ -255,17 +234,14 @@ const createDocumentEngine = ({
       );
 
       // TODO: Transform params to query
-      return db
-        .query(uid)
-        .clone(entryToClone.id, {
-          ...query,
-          // Allows entityData to override the documentId (e.g. when publishing)
-          data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
-        })
-        .then((doc) => transformOutputDocumentId(uid, doc));
+      return db.query(uid).clone(entryToClone.id, {
+        ...query,
+        // Allows entityData to override the documentId (e.g. when publishing)
+        data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
+      });
     });
 
-    return { id: newDocumentId, versions };
+    return { documentId: newDocumentId, versions };
   },
 
   // TODO: Handle relations so they target the published version
@@ -293,9 +269,7 @@ const createDocumentEngine = ({
         set('publishedAt', new Date()),
         set('documentId', documentId),
         omit('id'),
-        // draft entryId -> documentId
-        (entry) => transformOutputIds(uid, entry),
-        // documentId -> published entryId
+        // Transform relations to target published versions
         (entry) => {
           const opts = { uid, locale: entry.locale, isDraft: false, allowMissingId: true };
           return transformData(entry, opts);
@@ -349,9 +323,7 @@ const createDocumentEngine = ({
         set('publishedAt', null),
         set('documentId', documentId),
         omit('id'),
-        // published entryId -> document
-        (entry) => transformOutputIds(uid, entry),
-        // documentId -> draft entryId
+        // Transform relations to target draft versions
         (entry) => {
           const opts = { uid, locale: entry.locale, isDraft: true, allowMissingId: true };
           return transformData(entry, opts);

@@ -101,7 +101,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
   const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  return documentManager.update(documentVersion?.id || id, model, {
+  return documentManager.update(documentVersion?.documentId || id, model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
@@ -145,7 +145,9 @@ export default {
 
     const setStatus = (document: any) => {
       // Available status of document
-      const availableStatuses = documentsAvailableStatus.filter((d: any) => d.id === document.id);
+      const availableStatuses = documentsAvailableStatus.filter(
+        (d: any) => d.documentId === document.documentId
+      );
       // Compute document version status
       document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
@@ -291,7 +293,7 @@ export default {
     const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await documentManager.clone(document, sanitizedBody, model);
+    const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
@@ -337,17 +339,17 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(ctx.query);
-    const entity = await documentManager.findOne(id, model, { populate, locale });
+    const document = await documentManager.findOne(id, model, { populate, locale });
 
-    if (!entity) {
+    if (!document) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.delete(entity)) {
+    if (permissionChecker.cannot.delete(document)) {
       return ctx.forbidden();
     }
 
-    const result = await documentManager.delete(entity, model, { locale });
+    const result = await documentManager.delete(document.documentId, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
@@ -389,7 +391,7 @@ export default {
 
       // TODO: Publish many locales at once
       const { locale } = getDocumentLocaleAndStatus(body);
-      return documentManager.publish(document!, model, {
+      return documentManager.publish(document!.documentId, model, {
         locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
@@ -524,11 +526,11 @@ export default {
 
     await strapi.db.transaction(async () => {
       if (discardDraft) {
-        await documentManager.discardDraft(document, model, { locale });
+        await documentManager.discardDraft(document.documentId, model, { locale });
       }
 
       ctx.body = await pipeAsync(
-        (document) => documentManager.unpublish(document, model, { locale }),
+        (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
       )(document);
@@ -570,7 +572,7 @@ export default {
     }
 
     ctx.body = await pipeAsync(
-      (document) => documentManager.discardDraft(document, model, { locale }),
+      (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)
     )(document);

@@ -6,7 +6,7 @@ const { isVisibleAttribute } = contentTypes;
 
 function getCountForRelation(
   attributeName: string,
-  entity: Document[string],
+  entity: any,
   model: Schema.ContentType | Schema.Component
 ) {
   // do not count createdBy, updatedBy, localizations etc.
@@ -21,7 +21,7 @@ function getCountForRelation(
   return entity ? { count: 1 } : { count: 0 };
 }
 
-function getCountForDZ(entity: Document[string]) {
+function getCountForDZ(entity: any) {
   return entity.map((component: any) => {
     return getDeepRelationsCount(component, component.__component);
   });
@@ -29,7 +29,7 @@ function getCountForDZ(entity: Document[string]) {
 
 function getCountFor(
   attributeName: string,
-  entity: Document[string],
+  entity: any,
   model: Schema.ContentType | Schema.Component
 ): any {
   const attribute = model.attributes[attributeName];
@@ -52,7 +52,7 @@ function getCountFor(
   }
 }
 
-const getDeepRelationsCount = (entity: Document, uid: Common.UID.Schema): Document => {
+const getDeepRelationsCount = (entity: any, uid: Common.UID.Schema): Document => {
   const model = strapi.getModel(uid);
 
   return Object.keys(entity).reduce<Document>(

@@ -150,7 +150,7 @@ const HeaderToolbar = () => {
         props={{
           activeTab: status,
           model,
-          id,
+          documentId: id,
           document: isCloning ? undefined : document,
           meta: isCloning ? undefined : meta,
           collectionType,
@@ -171,9 +171,9 @@ const HeaderToolbar = () => {
         props={{
           activeTab: status,
           model,
-          id,
-          document,
-          meta,
+          documentId: id,
+          document: isCloning ? undefined : document,
+          meta: isCloning ? undefined : meta,
           collectionType,
         }}
         descriptions={(
@@ -442,7 +442,7 @@ const StyledPencil = styled(Pencil)`
   }
 `;
 
-const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, document }) => {
+const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
@@ -477,7 +477,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, docu
       onConfirm: async () => {
         setSubmitting(true);
         try {
-          if (!id && collectionType !== SINGLE_TYPES) {
+          if (!documentId && collectionType !== SINGLE_TYPES) {
             console.error(
               "You're trying to delete a document without an id, this is likely a bug with Strapi. Please open an issue."
             );
@@ -493,7 +493,7 @@ const DeleteAction: DocumentActionComponent = ({ id, model, collectionType, docu
             return;
           }
 
-          const res = await deleteAction({ id, model, collectionType });
+          const res = await deleteAction({ documentId, model, collectionType });
 
           if (!('error' in res)) {
             navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });

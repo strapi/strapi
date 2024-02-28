@@ -30,9 +30,11 @@ const dogModel = {
 const dogs = [
   {
     name: 'Atos',
+    publishedAt: null,
   },
   {
     name: 'Atos',
+    publishedAt: null,
   },
 ];
 
@@ -42,8 +44,7 @@ const restart = async () => {
   rq = await createAuthRequest({ strapi });
 };
 
-// V5: Fix unique field validations
-describe.skip('Migration - unique attribute', () => {
+describe('Migration - unique attribute', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
@@ -71,11 +72,11 @@ describe.skip('Migration - unique attribute', () => {
     test('Cannot create a duplicated entry after migration', async () => {
       // remove duplicated values otherwise the migration would fail
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].id}`,
+        url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].documentId}`,
         method: 'PUT',
         body: { name: 'Nelson' },
       });
-      data.dogs[0] = body;
+      data.dogs[0] = body.data;
 
       // migration
       const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
@@ -110,8 +111,7 @@ describe.skip('Migration - unique attribute', () => {
         body: { name: data.dogs[0].name },
       });
 
-      expect(res.body).toMatchObject({ name: data.dogs[0].name });
-      data.dogs.push(res.body);
+      expect(res.body.data).toMatchObject({ name: data.dogs[0].name });
     });
   });
 });

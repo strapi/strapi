@@ -69,14 +69,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const doc = await documents.create(uid, queryParams);
 
     if (params.status === 'published') {
-      return documents.create(uid, {
-        ...queryParams,
-        data: {
-          ...queryParams.data,
-          documentId: doc.id,
-          publishedAt: params?.data?.publishedAt ?? new Date(),
-        },
-      });
+      return publish(doc.documentId, params).then((doc) => doc.versions[0]);
     }
 
     return doc;
@@ -103,7 +96,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.localeToData(contentType)
     )(params);
 
-    let updatedDraft = await documents.update(uid, id, queryParams);
+    let updatedDraft: any = await documents.update(uid, id, queryParams);
 
     if (!updatedDraft) {
       const documentExists = await strapi.db
@@ -119,20 +112,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     }
 
     if (updatedDraft && params.status === 'published') {
-      await documents.delete(uid, id, {
-        ...queryParams,
-        status: 'published',
-        lookup: { ...params?.lookup, publishedAt: { $notNull: true } },
-      });
-
-      return documents.create(uid, {
-        ...queryParams,
-        data: {
-          ...queryParams.data,
-          documentId: updatedDraft.id,
-          publishedAt: params?.data?.publishedAt ?? new Date(),
-        },
-      });
+      return publish(id, params).then((doc) => doc.versions[0]);
     }
 
     return updatedDraft;
