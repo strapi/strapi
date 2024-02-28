@@ -191,11 +191,16 @@ const DynamicZone = ({
     }
 
     if (hasError && dynamicDisplayedComponentsLength > max) {
-      return formatMessage({
-        id: getTranslation(`components.DynamicZone.extra-components`),
-        defaultMessage:
-          'There {number, plural, =0 {are # extra components} one {is # extra component} other {are # extra components}}',
-      });
+      return formatMessage(
+        {
+          id: getTranslation(`components.DynamicZone.extra-components`),
+          defaultMessage:
+            'There {number, plural, =0 {are # extra components} one {is # extra component} other {are # extra components}}',
+        },
+        {
+          number: dynamicDisplayedComponentsLength - max,
+        }
+      );
     }
 
     if (hasError && dynamicDisplayedComponentsLength < min) {
