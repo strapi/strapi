@@ -103,6 +103,7 @@ export default {
       }
 
       const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+      // @ts-expect-error populate builder needs to be called with a UID
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .build();
