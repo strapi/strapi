@@ -47,7 +47,7 @@ test.describe('Transfer Tokens', () => {
     });
   }
 
-  test.only('Created tokens list page should be correct', async ({ page }) => {
+  test('Created tokens list page should be correct', async ({ page }) => {
     await createTransferToken(page, 'my test token', 'unlimited', 'Full access');
 
     // if the above happens in less than 1s, we see "NaN" for the createdAt timestamp
