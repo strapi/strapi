@@ -9,16 +9,31 @@ import { VersionHeader } from '../VersionHeader';
 import type { UID } from '@strapi/types';
 
 const render = (
-  props: HistoryContextValue,
+  context: Partial<HistoryContextValue>,
   initialEntry: Exclude<RenderOptions['initialEntries'], undefined>[number]
 ) => {
-  const path =
-    props.layout.contentType.kind === 'singleType'
-      ? '/:collectionType/:slug/history'
-      : '/:collectionType/:slug/:id/history';
+  const isSingleType =
+    typeof initialEntry === 'string'
+      ? initialEntry.startsWith('/single-types')
+      : initialEntry.pathname!.startsWith('/single-types');
+
+  const path = isSingleType
+    ? '/:collectionType/:slug/history'
+    : '/:collectionType/:slug/:id/history';
+
+  const contextWithSchema: Partial<HistoryContextValue> = {
+    ...context,
+    schema: {
+      // @ts-expect-error ignore missing properties
+      info: {
+        singularName: isSingleType ? 'homepage' : 'kitchensink',
+      },
+    },
+  };
 
   return renderRTL(
-    <HistoryProvider {...props}>
+    // @ts-expect-error ignore missing properties
+    <HistoryProvider {...contextWithSchema}>
       <Routes>
         <Route path={path} element={<VersionHeader headerId="123" />} />
       </Routes>
@@ -30,17 +45,6 @@ const render = (
 describe('VersionHeader', () => {
   describe('collection types', () => {
     // Mocks
-    const layout = {
-      contentType: {
-        kind: 'collectionType',
-        info: {
-          singularName: 'kitchensink',
-        },
-        settings: {
-          mainField: 'title',
-        },
-      },
-    };
     const selectedVersion = {
       id: '26',
       contentType: 'api::kitchensink.kitchensink' as UID.ContentType,
@@ -58,8 +62,7 @@ describe('VersionHeader', () => {
       render(
         {
           selectedVersion,
-          // @ts-expect-error ignore missing properties
-          layout,
+          mainField: 'title',
         },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
@@ -84,8 +87,7 @@ describe('VersionHeader', () => {
               name: 'English (en)',
             },
           },
-          // @ts-expect-error ignore missing properties
-          layout,
+          mainField: 'title',
         },
         {
           pathname:
@@ -106,20 +108,7 @@ describe('VersionHeader', () => {
 
     it('should display the correct subtitle without an entry title (mainField)', () => {
       render(
-        {
-          selectedVersion,
-          layout: {
-            ...layout,
-            contentType: {
-              ...layout.contentType,
-              // @ts-expect-error ignore missing properties
-              settings: {
-                ...layout.contentType.settings,
-                mainField: 'id', // id or null does will not return a value from version.data
-              },
-            },
-          },
-        },
+        { selectedVersion, mainField: 'id' },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -130,17 +119,6 @@ describe('VersionHeader', () => {
 
   describe('single types', () => {
     // Mocks
-    const layout = {
-      contentType: {
-        kind: 'singleType',
-        info: {
-          singularName: 'homepage',
-        },
-        settings: {
-          mainField: 'title',
-        },
-      },
-    };
     const selectedVersion = {
       id: '26',
       contentType: 'api::homepage.homepage' as UID.ContentType,
@@ -156,11 +134,7 @@ describe('VersionHeader', () => {
 
     it('should display the correct title and subtitle for a non-localized entry', () => {
       render(
-        {
-          selectedVersion,
-          // @ts-expect-error ignore missing properties
-          layout,
-        },
+        { selectedVersion, mainField: 'title' },
         '/single-types/api::homepage.homepage/history'
       );
 
@@ -181,11 +155,10 @@ describe('VersionHeader', () => {
               name: 'English (en)',
             },
           },
-          // @ts-expect-error ignore missing properties
-          layout,
+          mainField: 'title',
         },
         {
-          pathname: '/collection-types/api::homepage.homepage/history',
+          pathname: '/single-types/api::homepage.homepage/history',
           search: '?plugins[i18n][locale]=en',
         }
       );
@@ -196,7 +169,7 @@ describe('VersionHeader', () => {
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::homepage.homepage?plugins[i18n][locale]=en'
+        '/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
       );
     });
   });

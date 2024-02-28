@@ -17,7 +17,7 @@ describe('Document Service', () => {
     it.skip('load a document', async () => {
       const articleDb = await findArticleDb({ name: '3 Document A' });
 
-      const relations = await strapi.documents.load(ARTICLE_UID, articleDb.documentId, 'relations');
+      const relations = await strapi.documents.load(ARTICLE_UID, articleDb.id, 'relations');
 
       expect(relations).toMatchObject(testUtils.fixtures.relations);
     });

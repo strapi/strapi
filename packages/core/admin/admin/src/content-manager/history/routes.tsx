@@ -16,7 +16,7 @@ const routes: RouteObject[] = [
     },
   },
   {
-    path: ':singleType/:slug/history',
+    path: ':collectionType/:slug/history',
     lazy: async () => {
       const { HistoryPage } = await import('./pages/History');
 

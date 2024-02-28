@@ -1,4 +1,4 @@
-import { Entity } from '@strapi/types';
+import { Entity } from '@strapi/strapi';
 import { errors } from '@strapi/utils';
 
 /**

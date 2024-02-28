@@ -4,11 +4,11 @@ import { Cross, Drag, Pencil } from '@strapi/icons';
 import styled from 'styled-components';
 
 interface CardDragPreviewProps {
-  labelField: string;
+  label: string;
   isSibling?: boolean;
 }
 
-const CardDragPreview = ({ labelField, isSibling = false }: CardDragPreviewProps) => {
+const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => {
   return (
     <FieldContainer
       background={isSibling ? 'neutral100' : 'primary100'}
@@ -30,7 +30,7 @@ const CardDragPreview = ({ labelField, isSibling = false }: CardDragPreviewProps
           fontWeight="bold"
           ellipsis
         >
-          {labelField}
+          {label}
         </TypographyMaxWidth>
       </Flex>
 

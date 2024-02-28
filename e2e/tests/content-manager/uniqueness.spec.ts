@@ -2,10 +2,16 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 
+type Field = {
+  name: string;
+  value: string;
+  newValue?: string;
+  role?: string;
+};
+
 test.describe('Uniqueness', () => {
   test.beforeEach(async ({ page }) => {
     // Reset the DB and also specify that we are wiping all entries of the unique content type each time
-    // TODO: the default should be to wipe all entries, but we need to fix the import script first
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
 
     await page.goto('/admin');
@@ -15,23 +21,39 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const FIELDS_TO_TEST: Array<Field> = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique' },
-  ];
+  ] as const;
 
   const clickSave = async (page) => {
-    let isSaveable = await page.getByRole('button', { name: 'Save' }).isEnabled();
-    if (!isSaveable) {
-      // A fix for the date field, it needs to lose focus for the save button to be enabled
-      await page.getByText('Create an entry').click();
-    }
-
+    await page.getByRole('button', { name: 'Save' }).isEnabled();
+    await page.getByRole('tab', { name: 'Draft' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
   };
+
+  // When we need to adjust the value of a field to test uniqueness
+  // Either take the new value provided in the field object or generate a random
+  // new one based on the type of the field
+  const getNewValue = (field: (typeof FIELDS_TO_TEST)[number]) => {
+    if ('newValue' in field) {
+      return field.newValue;
+    }
+
+    if (isNaN(Number(field.value))) {
+      return String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1);
+    }
+
+    return `${Number(field.value) + 10}`;
+  };
+
+  const CREATE_URL =
+    /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
+  const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
+  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   /**
    * @note the unique content type is set up with every type of document level unique field.
@@ -41,59 +63,52 @@ test.describe('Uniqueness', () => {
     test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and locale. Validation should not happen across locales`, async ({
       page,
     }) => {
-      await page.locator('text=Create new entry').first().click();
+      await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
-      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
+      await page.waitForURL(CREATE_URL);
 
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
        */
-      const fieldRole = field?.role ?? 'textbox';
-      // @ts-expect-error – wants a const string
+      const fieldRole = 'role' in field ? field.role : 'textbox';
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
+      await expect(page.getByText('Saved document')).toBeVisible();
 
-      await page.getByText('Back', { exact: true }).click();
+      await page.getByRole('link', { name: 'Unique' }).click();
+      await page.waitForURL(LIST_URL);
 
       /**
        * Try to create another entry with the same value, the validation should fail
        */
+      await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
-      await page.locator('text=Create new entry').first().click();
+      await page.waitForURL(CREATE_URL);
 
-      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
-
-      // @ts-expect-error – wants a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-
-      await expect(page.locator('text=This attribute must be unique').first()).toBeVisible();
+      await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
 
       /**
        * Modify the value and try again, this should save successfully
        * Either take the new value provided in the field object or generate a random new one
        */
-      // TODO find a better way to generate random values for all field types
-      const newValue =
-        field?.newValue ||
-        (isNaN(Number(field.value))
-          ? String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1)
-          : `${Number(field.value) + 10}`);
+      // TODO: find a better way to generate random values for all field types
+      const newValue = getNewValue(field);
 
       await page
-        // @ts-expect-error – wants a const string
         .getByRole(fieldRole, {
           name: field.name,
         })
         .fill(newValue);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
+      await expect(page.getByText('Saved document')).toBeVisible();
 
-      await page.getByText('Back', { exact: true }).click();
+      await page.getByRole('link', { name: 'Unique' }).click();
+      await page.waitForURL(LIST_URL);
 
       /**
        * Change locale and try to create an entry with the same value as our first entry, this should save successfully
@@ -102,18 +117,15 @@ test.describe('Uniqueness', () => {
 
       await page.getByText('French (fr)').click();
 
-      await page.locator('text=Create new entry').first().click();
+      await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
-      await page.waitForURL('**/content-manager/collection-types/api::unique.unique/create?**');
+      await page.waitForURL(EDIT_URL);
 
-      // @ts-expect-error – wants a const string
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-      await expect(page.getByText('Saved').first()).toBeVisible();
-
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Published').first()).toBeVisible();
+      await expect(page.getByText('Published document')).toBeVisible();
     });
   });
 });

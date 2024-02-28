@@ -24,7 +24,7 @@ interface Permission {
 
 export type RBACContextValue = {
   allPermissions: Permission[]; // The permissions of the current user.
-  refetchPermissions: () => void;
+  refetchPermissions: () => Promise<void>;
 };
 
 const RBACContext = React.createContext<RBACContextValue>({
