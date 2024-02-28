@@ -63,9 +63,9 @@ test.describe('Edit view', () => {
      */
     await expect
       .poll(async () => {
-        const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
+        const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
         await page.getByRole('button', { name: 'Regenerate' }).click();
-        const req = await requestePromise;
+        const req = await requestPromise;
         return req.postDataJSON();
       })
       .toMatchObject({
@@ -178,9 +178,9 @@ test.describe('Edit view', () => {
     await expect
       .poll(
         async () => {
-          const requestePromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
+          const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
           await page.getByRole('button', { name: 'Regenerate' }).click();
-          const body = (await requestePromise).postDataJSON();
+          const body = (await requestPromise).postDataJSON();
           return body;
         },
         {
