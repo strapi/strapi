@@ -50,7 +50,7 @@ test.describe('Transfer Tokens', () => {
   test('Created tokens list page should be correct', async ({ page }) => {
     await createTransferToken(page, 'my test token', 'unlimited', 'Full access');
 
-    // if the above happens in less than 1s, we see "NaN" for the createdAt timestamp
+    // if we don't wait until createdAt is at least 1s, we see "NaN" for the timestamp
     // TODO: fix the bug and remove this
     await delay(1100);
 
