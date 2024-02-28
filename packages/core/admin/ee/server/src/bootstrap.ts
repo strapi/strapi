@@ -8,10 +8,12 @@ export default async (args: any) => {
   if (strapi.ee.features.isEnabled('sso')) {
     await actionProvider.registerMany(actions.sso);
   }
+
   if (strapi.ee.features.isEnabled('audit-logs')) {
     await persistTablesWithPrefix('strapi_audit_logs');
     await actionProvider.registerMany(actions.auditLogs);
   }
+
   if (strapi.ee.features.isEnabled('review-workflows')) {
     await persistTablesWithPrefix('strapi_workflows');
     const { bootstrap: rwBootstrap } = getService('review-workflows');

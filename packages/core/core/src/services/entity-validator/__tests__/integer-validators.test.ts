@@ -25,9 +25,11 @@ describe('Integer validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: () => ({
-        findFirst: fakeFindFirst,
-      }),
+      db: {
+        query: () => ({
+          findOne: fakeFindFirst,
+        }),
+      },
     } as any;
 
     afterEach(() => {
@@ -155,9 +157,11 @@ describe('Integer validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrIntegerUnique: valueToCheck },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrIntegerUnique: valueToCheck,
+        },
       });
     });
 
@@ -180,14 +184,14 @@ describe('Integer validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: {
+        where: {
           attrIntegerUnique: valueToCheck,
           id: {
             $ne: 1,
           },
+          locale: 'en',
+          publishedAt: null,
         },
-        locale: 'en',
-        status: 'draft',
       });
     });
   });

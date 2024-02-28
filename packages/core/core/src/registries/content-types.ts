@@ -78,8 +78,7 @@ const contentTypesRegistry = () => {
         throw new Error(`Content-Type ${ctUID} doesn't exist`);
       }
 
-      const newContentType = extendFn(currentContentType);
-      contentTypes[ctUID] = newContentType;
+      extendFn(currentContentType);
 
       return this;
     },

@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Documents, Schema, Strapi, Shared, Common } from '@strapi/types';
+import type { Documents, Schema, Strapi } from '@strapi/types';
 import {
   contentTypes as contentTypesUtils,
   convertQueryParams,
@@ -7,8 +7,7 @@ import {
   pipeAsync,
 } from '@strapi/utils';
 
-import { isArray, omit, set } from 'lodash/fp';
-import uploadFiles from '../utils/upload-files';
+import { omit, set } from 'lodash/fp';
 
 import {
   cloneComponents,
@@ -35,7 +34,7 @@ const { transformParamsToQuery } = convertQueryParams;
  * TODO: i18n - Move logic to i18n package
  * TODO: Webhooks
  * TODO: Audit logs
- * TODO: File upload
+ * TODO: replace 'any'
  * TODO: availableLocales
  *
  */
@@ -58,23 +57,12 @@ const createDocumentEngine = ({
   strapi: Strapi;
   db: Database;
 }): Documents.Engine => ({
-  uploadFiles,
-
   async findMany(uid, params) {
-    const { kind } = strapi.getModel(uid);
-
     const query = await pipeAsync(
       (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
       (params) => transformParamsToQuery(uid, params),
       (query) => set('where', { ...params?.lookup, ...query.where }, query)
     )(params || {});
-
-    if (kind === 'singleType') {
-      return db
-        .query(uid)
-        .findOne(query)
-        .then((doc) => transformOutputDocumentId(uid, doc));
-    }
 
     return db
       .query(uid)
@@ -122,25 +110,18 @@ const createDocumentEngine = ({
 
     // Delete all matched entries and its components
     await mapAsync(entriesToDelete, async (entryToDelete: any) => {
-      const componentsToDelete = await getComponents(uid, entryToDelete);
-      await db.query(uid).delete({ where: { id: entryToDelete.id } });
-      await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
+      await this.deleteEntry(uid, entryToDelete.id);
     });
 
-    // TODO: Change return value to actual count
-    return { versions: await transformOutputDocumentId(uid, entriesToDelete) };
+    return { deletedEntries: entriesToDelete.length };
   },
 
-  // TODO: should we provide two separate methods?
-  async deleteMany(uid, paramsOrIds) {
-    const query = await pipeAsync(
-      // Transform ids to query if needed
-      (params) => (isArray(params) ? { filter: { documentID: { $in: params } } } : params),
-      (params) => transformParamsDocumentId(uid, params, { isDraft: true, locale: params.locale }),
-      (params) => transformParamsToQuery(uid, params)
-    )(paramsOrIds || {});
+  async deleteEntry(uid, entryId) {
+    const componentsToDelete = await getComponents(uid, { id: entryId });
 
-    return db.query(uid).deleteMany(query);
+    await db.query(uid).delete({ where: { id: entryId } });
+
+    await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
   },
 
   async create(uid, params) {
@@ -151,6 +132,7 @@ const createDocumentEngine = ({
       // User can not set publishedAt on create, but other methods in the engine can (publish)
       isDraft: !params.data?.publishedAt,
     });
+
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation
@@ -158,9 +140,9 @@ const createDocumentEngine = ({
       throw new Error('Create requires data attribute');
     }
 
-    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
+    const contentType = strapi.contentType(uid);
 
-    const validData = await entityValidator.validateEntityCreation(model, data, {
+    const validData = await entityValidator.validateEntityCreation(contentType, data, {
       isDraft: !data.publishedAt,
       locale: params?.locale,
     });
@@ -168,8 +150,8 @@ const createDocumentEngine = ({
     // Component handling
     const componentData = await createComponents(uid, validData as any);
     const entryData = createPipeline(
-      Object.assign(omitComponentData(model, validData), componentData),
-      { contentType: model }
+      Object.assign(omitComponentData(contentType, validData), componentData),
+      { contentType }
     );
 
     return db
@@ -191,7 +173,7 @@ const createDocumentEngine = ({
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
-    const model = strapi.getModel(uid);
+    const model = strapi.contentType(uid);
     // Find if document exists
     const entryToUpdate = await db
       .query(uid)
@@ -241,7 +223,7 @@ const createDocumentEngine = ({
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any);
 
     // Validation
-    const model = strapi.getModel(uid);
+    const model = strapi.contentType(uid);
     // Find all locales of the document
     const entries = await db.query(uid).findMany({
       ...query,
@@ -331,7 +313,7 @@ const createDocumentEngine = ({
     return this.delete(uid, documentId, {
       ...params,
       lookup: { ...params?.lookup, publishedAt: { $ne: null } },
-    }) as any;
+    }).then(({ deletedEntries }) => ({ versions: deletedEntries })) as any;
   },
 
   /**

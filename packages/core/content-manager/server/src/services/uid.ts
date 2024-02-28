@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-import { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
+import { LoadedStrapi as Strapi, UID, Attribute, Schema } from '@strapi/types';
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   async generateUIDField({
@@ -68,21 +68,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return value;
     }
 
-    let possibleColisions: string[];
+    let possibleCollisions: string[];
     if (!Array.isArray(foundDocuments)) {
-      possibleColisions = [foundDocuments[field]];
+      possibleCollisions = [foundDocuments[field]];
     } else {
-      possibleColisions = foundDocuments.map((doc: any) => doc[field]);
+      possibleCollisions = foundDocuments.map((doc: any) => doc[field]);
     }
 
     // If there are no documents sharing the proposed UID, we can return the value as is
-    if (!possibleColisions.includes(value)) {
+    if (!possibleCollisions.includes(value)) {
       return value;
     }
 
     let i = 1;
     let tmpUId = `${value}-${i}`;
-    while (possibleColisions.includes(tmpUId)) {
+    while (possibleCollisions.includes(tmpUId)) {
       // While there are documents sharing the proposed UID, we need to find a new one
       // by incrementing the suffix until we find a unique one
       i += 1;
