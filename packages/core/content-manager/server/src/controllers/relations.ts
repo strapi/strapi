@@ -76,7 +76,17 @@ export default {
       );
     }
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model,
+    });
+
     const isSourceComponent = sourceSchema.modelType === 'component';
+    if (!isSourceComponent) {
+      if (permissionChecker.cannot.read(null, targetField)) {
+        return ctx.forbidden();
+      }
+    }
 
     const where: Record<string, any> = {};
     if (!isSourceComponent) {
@@ -92,29 +102,24 @@ export default {
         where.id = id;
       }
 
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
       currentEntity = await strapi.db.query(model).findOne({
         where,
-        select: ['id'],
+        populate,
       });
 
       // If an Id is provided we are asking to find the relations (available or
       // existing) on an existing entity. We need to check if the entity exists
       // and if the user has the permission to read it in this way
-
       if (!currentEntity) {
         throw new errors.NotFoundError();
       }
 
       if (!isSourceComponent) {
-        const permissionChecker = getService('permission-checker').create({
-          userAbility,
-          model,
-        });
-
-        if (permissionChecker.cannot.read(null, targetField)) {
-          throw new errors.ForbiddenError();
-        }
-
         if (permissionChecker.cannot.read(currentEntity, targetField)) {
           throw new errors.ForbiddenError();
         }
@@ -288,7 +293,7 @@ export default {
       if (Array.isArray(entity?.[targetField])) {
         resultIds = entity?.[targetField]?.map((result: any) => result.id);
       } else {
-        resultIds = [entity?.[targetField]?.id] ?? [];
+        resultIds = entity?.[targetField]?.id ? [entity[targetField].id] : [];
       }
     }
 
