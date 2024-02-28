@@ -8,11 +8,6 @@ import { VersionHeader } from '../VersionHeader';
 
 import type { UID } from '@strapi/types';
 
-const useDocumentLayoutMock = jest.fn();
-jest.mock('../../../hooks/useDocumentLayout', () => ({
-  useDocumentLayout: () => useDocumentLayoutMock(),
-}));
-
 const useDocumentMock = jest.fn();
 jest.mock('../../../hooks/useDocument', () => ({
   useDocument: () => useDocumentMock(),
@@ -44,7 +39,6 @@ const render = (
 
 describe('VersionHeader', () => {
   afterEach(() => {
-    useDocumentLayoutMock.mockReset();
     useDocumentMock.mockReset();
   });
 
@@ -72,20 +66,11 @@ describe('VersionHeader', () => {
           },
         },
       });
-
-      useDocumentLayoutMock.mockReturnValue({
-        isLoading: false,
-        edit: {
-          settings: {
-            mainField: 'title',
-          },
-        },
-      });
     });
 
     it('should display the correct title and subtitle for a non-localized entry', () => {
       render(
-        { selectedVersion },
+        { selectedVersion, mainField: 'title' },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -109,6 +94,7 @@ describe('VersionHeader', () => {
               name: 'English (en)',
             },
           },
+          mainField: 'title',
         },
         {
           pathname:
@@ -128,18 +114,8 @@ describe('VersionHeader', () => {
     });
 
     it('should display the correct subtitle without an entry title (mainField)', () => {
-      useDocumentLayoutMock.mockReturnValue({
-        isLoading: false,
-        edit: {
-          settings: {
-            // id or null will not return a value from version.data
-            mainField: 'id',
-          },
-        },
-      });
-
       render(
-        { selectedVersion },
+        { selectedVersion, mainField: 'id' },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -172,19 +148,13 @@ describe('VersionHeader', () => {
           },
         },
       });
-
-      useDocumentLayoutMock.mockReturnValue({
-        isLoading: false,
-        edit: {
-          settings: {
-            mainField: 'title',
-          },
-        },
-      });
     });
 
     it('should display the correct title and subtitle for a non-localized entry', () => {
-      render({ selectedVersion }, '/single-types/api::homepage.homepage/history');
+      render(
+        { selectedVersion, mainField: 'title' },
+        '/single-types/api::homepage.homepage/history'
+      );
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
       expect(screen.getByText('Test Title (homepage)')).toBeInTheDocument();
@@ -203,6 +173,7 @@ describe('VersionHeader', () => {
               name: 'English (en)',
             },
           },
+          mainField: 'title',
         },
         {
           pathname: '/single-types/api::homepage.homepage/history',

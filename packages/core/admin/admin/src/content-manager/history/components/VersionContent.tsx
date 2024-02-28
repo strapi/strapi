@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
 
 import { Form } from '../../components/Form';
 import { DocumentRBAC } from '../../features/DocumentRBAC';

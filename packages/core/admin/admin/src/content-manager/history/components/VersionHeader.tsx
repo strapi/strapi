@@ -10,7 +10,6 @@ import { NavLink, type To, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocument } from '../../hooks/useDocument';
-import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useHistoryContext } from '../pages/History';
 
 interface VersionHeaderProps {
@@ -19,27 +18,21 @@ interface VersionHeaderProps {
 
 export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
-  const { version } = useHistoryContext('VersionHeader', (state) => ({
+  const { version, mainField } = useHistoryContext('VersionHeader', (state) => ({
     version: state.selectedVersion,
+    mainField: state.mainField,
   }));
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
   const { collectionType } = useParams<{ collectionType: string }>();
 
-  const {
-    isLoading: isLoadingLayout,
-    edit: {
-      settings: { mainField },
-    },
-  } = useDocumentLayout(version.contentType);
-
   const { isLoading: isLoadingDocument, schema } = useDocument({
     collectionType: collectionType!,
     model: version.contentType,
   });
 
-  if (isLoadingLayout || isLoadingDocument) {
+  if (isLoadingDocument) {
     return <LoadingIndicatorPage />;
   }
 

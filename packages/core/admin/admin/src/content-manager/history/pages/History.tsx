@@ -30,6 +30,7 @@ interface HistoryContextValue {
   selectedVersion: Contracts.HistoryVersions.HistoryVersionDataResponse;
   versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
   page: number;
+  mainField: string;
 }
 
 const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>('HistoryPage');
@@ -56,7 +57,7 @@ const HistoryPage = () => {
     isLoading: isLoadingLayout,
     edit: {
       layout,
-      settings: { displayName },
+      settings: { displayName, mainField },
     },
   } = useDocumentLayout(slug!);
 
@@ -136,6 +137,7 @@ const HistoryPage = () => {
         selectedVersion={selectedVersion}
         versions={versionsResponse.data}
         page={page}
+        mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
           <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
