@@ -294,6 +294,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
       const { entry, type } = action;
 
       const populatedEntry = await getPopulatedEntry(entry.contentType, entry.id, { strapi });
+      // @ts-expect-error – TODO: fix this error where populatedEntry _could_ be `null`.
       const isEntryValid = await getEntryValidStatus(entry.contentType, populatedEntry, { strapi });
 
       const releaseAction = await strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
