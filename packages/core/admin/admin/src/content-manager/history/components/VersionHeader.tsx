@@ -18,23 +18,15 @@ interface VersionHeaderProps {
 
 export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
-  const { version, mainField } = useHistoryContext('VersionHeader', (state) => ({
+  const { version, mainField, schema } = useHistoryContext('VersionHeader', (state) => ({
     version: state.selectedVersion,
     mainField: state.mainField,
+    schema: state.schema,
   }));
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
   const { collectionType } = useParams<{ collectionType: string }>();
-
-  const { isLoading: isLoadingDocument, schema } = useDocument({
-    collectionType: collectionType!,
-    model: version.contentType,
-  });
-
-  if (isLoadingDocument) {
-    return <LoadingIndicatorPage />;
-  }
 
   const mainFieldValue = version.data[mainField];
 
@@ -74,7 +66,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
             },
             {
               hasLocale: Boolean(version.locale),
-              subtitle: `${mainFieldValue || ''} (${schema!.info.singularName})`.trim(),
+              subtitle: `${mainFieldValue || ''} (${schema.info.singularName})`.trim(),
               locale: version.locale?.name,
             }
           )}

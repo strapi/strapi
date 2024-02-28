@@ -10,6 +10,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
 import { COLLECTION_TYPES } from '../../constants/collections';
+import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
@@ -31,6 +32,7 @@ interface HistoryContextValue {
   versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
   page: number;
   mainField: string;
+  schema: Contracts.ContentTypes.ContentType;
 }
 
 const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>('HistoryPage');
@@ -52,6 +54,11 @@ const HistoryPage = () => {
     slug: UID.ContentType;
     id: string;
   }>();
+
+  const { isLoading: isLoadingDocument, schema } = useDocument({
+    collectionType: collectionType!,
+    model: slug!,
+  });
 
   const {
     isLoading: isLoadingLayout,
@@ -90,7 +97,7 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  if (isLoadingLayout || versionsResponse.isLoading) {
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
     return <LoadingIndicatorPage />;
   }
 
@@ -104,7 +111,7 @@ const HistoryPage = () => {
   }
 
   // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout) {
+  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema) {
     return null;
   }
 
@@ -133,6 +140,7 @@ const HistoryPage = () => {
       <HistoryProvider
         contentType={slug}
         id={documentId}
+        schema={schema}
         layout={layout}
         selectedVersion={selectedVersion}
         versions={versionsResponse.data}

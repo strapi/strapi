@@ -8,11 +8,6 @@ import { VersionHeader } from '../VersionHeader';
 
 import type { UID } from '@strapi/types';
 
-const useDocumentMock = jest.fn();
-jest.mock('../../../hooks/useDocument', () => ({
-  useDocument: () => useDocumentMock(),
-}));
-
 const render = (
   context: Partial<HistoryContextValue>,
   initialEntry: Exclude<RenderOptions['initialEntries'], undefined>[number]
@@ -26,9 +21,19 @@ const render = (
     ? '/:collectionType/:slug/history'
     : '/:collectionType/:slug/:id/history';
 
+  const contextWithSchema: Partial<HistoryContextValue> = {
+    ...context,
+    schema: {
+      // @ts-expect-error ignore missing properties
+      info: {
+        singularName: isSingleType ? 'homepage' : 'kitchensink',
+      },
+    },
+  };
+
   return renderRTL(
     // @ts-expect-error ignore missing properties
-    <HistoryProvider {...context}>
+    <HistoryProvider {...contextWithSchema}>
       <Routes>
         <Route path={path} element={<VersionHeader headerId="123" />} />
       </Routes>
@@ -38,10 +43,6 @@ const render = (
 };
 
 describe('VersionHeader', () => {
-  afterEach(() => {
-    useDocumentMock.mockReset();
-  });
-
   describe('collection types', () => {
     // Mocks
     const selectedVersion = {
@@ -57,20 +58,12 @@ describe('VersionHeader', () => {
       },
     };
 
-    beforeEach(() => {
-      useDocumentMock.mockReturnValue({
-        isLoading: false,
-        schema: {
-          info: {
-            singularName: 'kitchensink',
-          },
-        },
-      });
-    });
-
     it('should display the correct title and subtitle for a non-localized entry', () => {
       render(
-        { selectedVersion, mainField: 'title' },
+        {
+          selectedVersion,
+          mainField: 'title',
+        },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -138,17 +131,6 @@ describe('VersionHeader', () => {
         title: 'Test Title',
       },
     };
-
-    beforeEach(() => {
-      useDocumentMock.mockReturnValue({
-        isLoading: false,
-        schema: {
-          info: {
-            singularName: 'homepage',
-          },
-        },
-      });
-    });
 
     it('should display the correct title and subtitle for a non-localized entry', () => {
       render(
