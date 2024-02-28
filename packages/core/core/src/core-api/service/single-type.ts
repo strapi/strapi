@@ -1,73 +1,55 @@
-import { propOr } from 'lodash/fp';
-import type { CoreApi, Schema, Common } from '@strapi/types';
-import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
-import { getFetchParams } from './get-fetch-params';
+import type { Schema, CoreApi } from '@strapi/types';
+import { CoreService } from './core-service';
 
-const {
-  constants: { PUBLISHED_AT_ATTRIBUTE },
-} = contentTypeUtils;
+export class SingleTypeService extends CoreService implements CoreApi.Service.SingleType {
+  private contentType: Schema.SingleType;
 
-const setPublishedAt = (data: Record<string, unknown>) => {
-  data[PUBLISHED_AT_ATTRIBUTE] = propOr(new Date(), PUBLISHED_AT_ATTRIBUTE, data);
+  constructor(contentType: Schema.SingleType) {
+    super();
+
+    this.contentType = contentType;
+  }
+
+  async getDocumentId(opts = {}) {
+    const { uid } = this.contentType;
+
+    return strapi
+      .documents(uid)
+      .findFirst(opts)
+      .then((document) => document?.documentId as string);
+  }
+
+  async find(params = {}) {
+    const { uid } = this.contentType;
+
+    return strapi.documents(uid).findFirst(this.getFetchParams(params));
+  }
+
+  async createOrUpdate(params = {}) {
+    const { uid } = this.contentType;
+
+    const fetchParams = this.getFetchParams(params);
+    const documentId = await this.getDocumentId({ status: fetchParams.status });
+
+    if (documentId) {
+      return strapi.documents(uid).update(documentId, this.getFetchParams(params));
+    }
+
+    return strapi.documents(uid).create(this.getFetchParams(params));
+  }
+
+  async delete(params = {}) {
+    const { uid } = this.contentType;
+
+    const documentId = await this.getDocumentId();
+    if (!documentId) return { deletedEntries: 0 };
+
+    return strapi.documents(uid).delete(documentId, this.getFetchParams(params));
+  }
+}
+
+const createSingleTypeService = (contentType: Schema.SingleType): CoreApi.Service.SingleType => {
+  return new SingleTypeService(contentType);
 };
 
-/**
- * Returns a single type service to handle default core-api actions
- */
-const createSingleTypeService = ({
-  contentType,
-}: {
-  contentType: Schema.SingleType;
-}): CoreApi.Service.SingleType => {
-  const { uid } = contentType;
-
-  return <any>{
-    getFetchParams,
-    /**
-     * Returns singleType content
-     */
-    find(params = {}) {
-      return (
-        strapi.entityService?.findMany(uid as Common.UID.SingleType, this.getFetchParams(params)) ??
-        null
-      );
-    },
-
-    /**
-     * Creates or updates a singleType content
-     *
-     * @return {Promise}
-     */
-    async createOrUpdate({ data, ...params } = { data: {} }) {
-      const entity = await this.find({ ...params, publicationState: 'preview' });
-
-      if (!entity) {
-        const count = await strapi.query(uid).count();
-        if (count >= 1) {
-          throw new errors.ValidationError('singleType.alreadyExists');
-        }
-
-        setPublishedAt(data);
-
-        return strapi.entityService?.create(uid, { ...params, data });
-      }
-
-      return strapi.entityService?.update(uid, entity.id, { ...params, data });
-    },
-
-    /**
-     * Deletes the singleType content
-     *
-     * @return {Promise}
-     */
-    async delete(params = {}) {
-      const entity = await this.find(params);
-
-      if (!entity) return;
-
-      return strapi.entityService?.delete(uid, entity.id);
-    },
-  };
-};
-
-export default createSingleTypeService;
+export { createSingleTypeService };

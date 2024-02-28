@@ -2,7 +2,9 @@ import type { Attribute, Common, Utils } from '../../../../types';
 import type { ID } from './id';
 
 type ShortHand = ID;
-type LongHand = { id: ID };
+type LongHandEntity = { id: ID };
+type LongHandDocument = { documentId: ID; locale?: string };
+type LongHand = LongHandEntity | LongHandDocument;
 
 interface PositionalArguments {
   before?: ID;

@@ -128,7 +128,11 @@ const EditViewPage = () => {
       return undefined;
     }
 
-    const form = document ?? createDefaultForm(schema, components);
+    /**
+     * Check that we have an ID so we know the
+     * document has been created in some way.
+     */
+    const form = document?.id ? document : createDefaultForm(schema, components);
 
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, isSingleType, schema, components]);

@@ -79,7 +79,7 @@ describe('Test type decimal', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withdecimal.withdecimal/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withdecimal.withdecimal/${res.body.data.documentId}`,
       {
         body: {
           field: 14,
@@ -89,7 +89,7 @@ describe('Test type decimal', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: 14.0,
     });
   });

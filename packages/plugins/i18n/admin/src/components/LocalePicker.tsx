@@ -1,4 +1,6 @@
-import { SingleSelect, SingleSelectOption, SingleSelectProps } from '@strapi/design-system';
+import * as React from 'react';
+
+import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
@@ -21,6 +23,32 @@ const LocalePicker = () => {
     skip: !hasI18n,
   });
 
+  const handleChange = React.useCallback(
+    (code: string) => {
+      setQuery({
+        page: 1,
+        plugins: { ...query.plugins, i18n: { locale: code } },
+      });
+    },
+    [query.plugins, setQuery]
+  );
+
+  React.useEffect(() => {
+    if (!Array.isArray(locales) || !hasI18n) {
+      return;
+    }
+    /**
+     * Handle the case where the current locale query param doesn't exist
+     * in the list of available locales, so we redirect to the default locale.
+     */
+    const currentDesiredLocale = query.plugins?.i18n?.locale;
+    const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
+    const defaultLocale = locales.find((locale) => locale.isDefault);
+    if (!doesLocaleExist && defaultLocale?.code) {
+      handleChange(defaultLocale.code);
+    }
+  }, [hasI18n, handleChange, locales, query.plugins?.i18n?.locale]);
+
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
     return null;
   }
@@ -34,14 +62,6 @@ const LocalePicker = () => {
     return canCreate.includes(locale.code) || canRead.includes(locale.code);
   });
 
-  // @ts-expect-error – This can be removed in V2 of the DS.
-  const handleChange: SingleSelectProps['onChange'] = (code: string) => {
-    setQuery({
-      page: 1,
-      plugins: { ...query.plugins, i18n: { locale: code } },
-    });
-  };
-
   return (
     <SingleSelect
       size="S"
@@ -50,6 +70,7 @@ const LocalePicker = () => {
         defaultMessage: 'Select locale',
       })}
       value={query.plugins?.i18n?.locale || locales.find((locale) => locale.isDefault)?.code}
+      // @ts-expect-error – This can be removed in V2 of the DS.
       onChange={handleChange}
     >
       {displayedLocales.map((locale) => (

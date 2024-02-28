@@ -86,7 +86,7 @@ describe('Lifecycle - beforeDelete', () => {
 
     await rq({
       method: 'DELETE',
-      url: '/product-with-compos/1',
+      url: `/product-with-compos/${data.productsWithCompo[0].documentId}`,
     });
 
     expect(beforeDelete.mock.calls.length).toBe(1);

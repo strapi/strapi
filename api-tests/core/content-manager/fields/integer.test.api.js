@@ -78,7 +78,7 @@ describe('Test type integer', () => {
     });
 
     const updatedRes = await rq.put(
-      `/content-manager/collection-types/api::withinteger.withinteger/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withinteger.withinteger/${res.body.data.documentId}`,
       {
         body: {
           field: 543,
@@ -88,7 +88,7 @@ describe('Test type integer', () => {
 
     expect(updatedRes.statusCode).toBe(200);
     expect(updatedRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: 543,
     });
   });

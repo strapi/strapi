@@ -408,7 +408,7 @@ describe('CRUD locales', () => {
       });
 
       await rq({
-        url: `/content-manager/collection-types/api::product.product/${frenchProduct.id}`,
+        url: `/content-manager/collection-types/api::product.product/${frenchProduct.documentId}`,
         method: 'PUT',
         body: { name: 'product name' },
         qs: {

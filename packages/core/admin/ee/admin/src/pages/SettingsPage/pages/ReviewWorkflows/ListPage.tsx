@@ -14,10 +14,9 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
   ConfirmDialog,
-  Link,
-  LinkButton,
   onRowClick,
   pxToRem,
   useAPIErrorHandler,
@@ -329,6 +328,7 @@ export const ReviewWorkflowsListView = () => {
                   <Td>
                     <Flex alignItems="center" justifyContent="end">
                       <ActionLink
+                        // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
                         to={`/settings/review-workflows/${workflow.id}`}
                         aria-label={formatMessage(
                           {

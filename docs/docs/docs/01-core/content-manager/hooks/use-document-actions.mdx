@@ -28,7 +28,7 @@ const { id, model, collectionType } = useParams<{
 const { update } = useDocumentActions();
 
 const handleSubmit = async (data) => {
-  await update({ collectionType, model, id }, data);
+  await update({ collectionType, model, documentId: id }, data);
 };
 
 return <Form method="PUT" onSubmit={handleSubmit} />;
@@ -45,10 +45,10 @@ type UseDocumentActions = () => {
   clone: (
     args: {
       model: string;
-      id: string;
+      documentId: string;
       params: object;
     },
-    document: Omit<Document, 'id'>,
+    document: Omit<Document, 'documentId'>,
     trackerProperty?: Extract<
       TrackingEvent,
       { name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry' }
@@ -59,7 +59,7 @@ type UseDocumentActions = () => {
       model: string;
       params?: object;
     },
-    document: Omit<Document, 'id'>,
+    document: Omit<Document, 'documentId'>,
     trackerProperty?: Extract<
       TrackingEvent,
       { name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry' }
@@ -69,7 +69,7 @@ type UseDocumentActions = () => {
     args: {
       collectionType: string;
       model: string;
-      id: string;
+      documentId: string;
     },
     trackerProperty?: Extract<
       TrackingEvent,
@@ -79,23 +79,19 @@ type UseDocumentActions = () => {
   getDocument: (args: {
     collectionType: string;
     model: string;
-    id?: string;
+    documentId?: string;
     params?: object;
   }) => Promise<Contracts.CollectionTypes.FindOne.Response | undefined>;
-  publish: ({
-    collectionType,
-    model,
-    id,
-  }: {
+  publish: (args: {
     collectionType: string;
     model: string;
-    id: string;
+    documentId: string;
   }) => Promise<OperationResponse<Contracts.CollectionTypes.Publish.Response>>;
   update: (
     args: {
       collectionType: string;
       model: string;
-      id: string;
+      documentId: string;
       params: object;
     },
     document: Document,
@@ -107,7 +103,7 @@ type UseDocumentActions = () => {
   unpublish: (args: {
     collectionType: string;
     model: string;
-    id: string;
+    documentId: string;
   }) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
 };
 ```

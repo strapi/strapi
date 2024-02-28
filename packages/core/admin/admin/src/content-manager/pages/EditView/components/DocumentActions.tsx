@@ -459,7 +459,7 @@ const DocumentActionModal = ({
 
 const PublishAction: DocumentActionComponent = ({
   activeTab,
-  id,
+  documentId,
   model,
   collectionType,
   meta,
@@ -506,9 +506,9 @@ const PublishAction: DocumentActionComponent = ({
       isSubmitting ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
-      (!modified && !document?.id) ||
+      (!modified && !document?.documentId) ||
       !canPublish ||
-      Boolean((!document?.id && !canCreate) || (document?.id && !canUpdate)),
+      Boolean((!document?.documentId && !canCreate) || (document?.documentId && !canUpdate)),
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -536,7 +536,7 @@ const PublishAction: DocumentActionComponent = ({
           {
             collectionType,
             model,
-            id,
+            documentId,
             params,
           },
           formValues
@@ -544,10 +544,10 @@ const PublishAction: DocumentActionComponent = ({
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
           /**
-           * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+           * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
            */
           navigate({
-            pathname: `../${collectionType}/${model}/${res.data.id}`,
+            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
             search: rawQuery,
           });
         } else if (
@@ -566,7 +566,12 @@ const PublishAction: DocumentActionComponent = ({
 
 PublishAction.type = 'publish';
 
-const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectionType }) => {
+const UpdateAction: DocumentActionComponent = ({
+  activeTab,
+  documentId,
+  model,
+  collectionType,
+}) => {
   const navigate = useNavigate();
   const toggleNotification = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -601,7 +606,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
       isSubmitting ||
       (!modified && !isCloning) ||
       activeTab === 'published' ||
-      Boolean((!id && !canCreate) || (id && !canUpdate)),
+      Boolean((!documentId && !canCreate) || (documentId && !canUpdate)),
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',
@@ -628,7 +633,7 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
           const res = await clone(
             {
               model,
-              id: cloneMatch.params.origin!,
+              documentId: cloneMatch.params.origin!,
               params,
             },
             document
@@ -636,10 +641,10 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
 
           if ('data' in res) {
             /**
-             * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
              */
             navigate({
-              pathname: `../${collectionType}/${model}/${res.data.id}`,
+              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
               search: rawQuery,
             });
           } else if (
@@ -649,12 +654,12 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
           ) {
             setErrors(formatValidationErrors(res.error));
           }
-        } else if (id || collectionType === SINGLE_TYPES) {
+        } else if (documentId || collectionType === SINGLE_TYPES) {
           const res = await update(
             {
               collectionType,
               model,
-              id,
+              documentId,
               params,
             },
             document
@@ -678,10 +683,10 @@ const UpdateAction: DocumentActionComponent = ({ activeTab, id, model, collectio
 
           if ('data' in res && collectionType !== SINGLE_TYPES) {
             /**
-             * TODO: refactor the router so we can just do `../${res.data.id}` instead of this.
+             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
              */
             navigate({
-              pathname: `../${collectionType}/${model}/${res.data.id}`,
+              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
               search: rawQuery,
             });
           } else if (
@@ -708,7 +713,7 @@ const UNPUBLISH_DRAFT_OPTIONS = {
 
 const UnpublishAction: DocumentActionComponent = ({
   activeTab,
-  id,
+  documentId,
   model,
   collectionType,
   document,
@@ -746,8 +751,8 @@ const UnpublishAction: DocumentActionComponent = ({
        * for either collection type because we use a dialog to handle the process in
        * the latter case.
        */
-      if ((!id && collectionType !== SINGLE_TYPES) || isDocumentModified) {
-        if (!id) {
+      if ((!documentId && collectionType !== SINGLE_TYPES) || isDocumentModified) {
+        if (!documentId) {
           // This should never, ever, happen.
           console.error(
             "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
@@ -768,7 +773,7 @@ const UnpublishAction: DocumentActionComponent = ({
       await unpublish({
         collectionType,
         model,
-        id,
+        documentId,
         params,
       });
     },
@@ -822,7 +827,7 @@ const UnpublishAction: DocumentActionComponent = ({
             </Flex>
           ),
           onConfirm: async () => {
-            if (!id && collectionType !== SINGLE_TYPES) {
+            if (!documentId && collectionType !== SINGLE_TYPES) {
               // This should never, ever, happen.
               console.error(
                 "You're trying to unpublish a document without an id, this is likely a bug with Strapi. Please open an issue."
@@ -841,7 +846,7 @@ const UnpublishAction: DocumentActionComponent = ({
               {
                 collectionType,
                 model,
-                id,
+                documentId,
                 params,
               },
               !shouldKeepDraft
@@ -858,7 +863,7 @@ UnpublishAction.type = 'unpublish';
 
 const DiscardAction: DocumentActionComponent = ({
   activeTab,
-  id,
+  documentId,
   model,
   collectionType,
   document,
@@ -899,7 +904,7 @@ const DiscardAction: DocumentActionComponent = ({
         await discard({
           collectionType,
           model,
-          id,
+          documentId,
           params,
         });
       },

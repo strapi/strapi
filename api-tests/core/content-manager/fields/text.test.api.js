@@ -62,14 +62,14 @@ describe('Test type text', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withtext.withtext/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withtext.withtext/${res.body.data.documentId}`,
       {
         body: { field: 'Updated \nstring' },
       }
     );
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: 'Updated \nstring',
     });
   });

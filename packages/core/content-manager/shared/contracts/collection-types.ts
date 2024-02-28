@@ -51,7 +51,7 @@ export declare namespace FindOne {
 
   export interface Params {
     model: string;
-    id: Documents.ID;
+    documentId: Documents.ID;
   }
 
   export interface Response {
@@ -144,7 +144,7 @@ export declare namespace Update {
 
   export interface Params {
     model: string;
-    id: Documents.ID;
+    documentId: Documents.ID;
   }
 
   export interface Response {
@@ -167,7 +167,7 @@ export declare namespace Delete {
 
   export interface Params {
     model: string;
-    id: Documents.ID;
+    documentId: Documents.ID;
   }
 
   export interface Response {
@@ -212,7 +212,7 @@ export declare namespace Publish {
 
   export interface Params {
     model: string;
-    id: Documents.ID;
+    documentId: Documents.ID;
   }
 
   export interface Response {
@@ -241,7 +241,7 @@ export declare namespace Unpublish {
 
   export interface Params {
     model: string;
-    id: Documents.ID;
+    documentId: Documents.ID;
   }
 
   export interface Response {
@@ -264,7 +264,7 @@ export declare namespace Discard {
 
   export interface Params {
     model: string;
-    id: Documents.ID;
+    documentId: Documents.ID;
   }
 
   export interface Response {
@@ -280,7 +280,7 @@ export declare namespace Discard {
 export declare namespace BulkDelete {
   export interface Request {
     body: {
-      ids: string[];
+      documentIds: Documents.ID[];
     };
     query: {};
   }
@@ -303,7 +303,7 @@ export declare namespace BulkDelete {
 export declare namespace BulkPublish {
   export interface Request {
     body: {
-      ids: Documents.ID[];
+      documentIds: Documents.ID[];
     };
     query: {};
   }
@@ -324,7 +324,7 @@ export declare namespace BulkPublish {
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      ids: number[];
+      documentIds: Documents.ID[];
     };
     query: {};
   }
@@ -369,7 +369,7 @@ export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
     body: {};
     query: {
-      ids?: Array<Document['id']>;
+      documentIds?: Documents.ID[];
       locale?: string;
     };
   }

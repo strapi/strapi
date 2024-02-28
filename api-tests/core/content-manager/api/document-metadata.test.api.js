@@ -170,9 +170,7 @@ describe('CM API - Document metadata', () => {
 
       expect(data.status).toBe('modified');
       expect(meta.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
-      // expect(meta.availableStatus).toMatchObject([
-      //   { status: 'modified' },
-      // ]);
+      // expect(meta.availableStatus).toMatchObject([{ status: 'modified' }]);
 
       const publishedProduct = await getProduct('product', 'en', 'published');
       const { data: dataPublished, meta: metaPublished } = await formatDocument(
