@@ -6,7 +6,10 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { Form } from '../../components/Form';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
-import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
+import {
+  InputRenderer,
+  type InputRendererProps,
+} from '../../pages/EditView/components/InputRenderer';
 import { useHistoryContext } from '../pages/History';
 
 /* -------------------------------------------------------------------------------------------------
@@ -16,7 +19,7 @@ import { useHistoryContext } from '../pages/History';
 // The renderers for these types will be added in future PRs, they need special handling
 const UNSUPPORTED_TYPES = ['media', 'relation'];
 
-const CustomInputRenderer = (props: React.ComponentPropsWithoutRef<typeof InputRenderer>) => {
+const CustomInputRenderer = (props: InputRendererProps) => {
   if (UNSUPPORTED_TYPES.includes(props.type)) {
     return <Typography>TODO: support {props.type}</Typography>;
   }

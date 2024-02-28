@@ -93,6 +93,11 @@ const HistoryPage = () => {
     return <LoadingIndicatorPage />;
   }
 
+  /**
+   * Ensure that we have the necessary data to render the page:
+   * - slug for single types
+   * - slug _and_ documentId for collection types
+   */
   if (!slug || (!documentId && collectionType === COLLECTION_TYPES)) {
     return <Navigate to="/content-manager" />;
   }
