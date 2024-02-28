@@ -27,11 +27,11 @@ const isUrlForCreation = (url: string) => {
 
   // Split path and remove empty strings
   // [ 'content-manager', 'collection-types', 'api::category.category' ]
-  const splittedUrl = url.split('/').filter(Boolean);
+  const splitUrl = url.split('/').filter(Boolean);
 
   // Get the last element of the array
   // api::category.category / 1 / publish
-  const model = splittedUrl[splittedUrl.length - 1];
+  const model = splitUrl[splittedUrl.length - 1];
 
   // If the model contains :: it means it's a uid
   return model.includes('::');
