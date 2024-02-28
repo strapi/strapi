@@ -39,10 +39,8 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "build-storybook": "storybook build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --ext .js,.jsx,.tsx,.ts",
-    "storybook": "storybook dev -p 6006",
     "test:front": "run -T jest --config ./jest.config.front.js",
     "test:front:cov": "run -T jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "run -T jest --config ./jest.config.front.js --watchAll",
@@ -62,12 +60,6 @@
     "react-select": "5.7.0"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "7.5.3",
-    "@storybook/addon-essentials": "7.5.3",
-    "@storybook/addon-links": "7.5.3",
-    "@storybook/addon-mdx-gfm": "7.5.3",
-    "@storybook/builder-vite": "7.5.3",
-    "@storybook/react-vite": "7.5.3",
     "@strapi/admin-test-utils": "4.20.1",
     "@strapi/design-system": "1.14.1",
     "@strapi/icons": "1.14.1",
@@ -84,7 +76,6 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "6.21.1",
     "rimraf": "3.0.2",
-    "storybook": "7.5.3",
     "styled-components": "5.3.3",
     "typescript": "5.3.2",
     "vite": "5.0.11",
@@ -101,14 +92,5 @@
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{projectRoot}/build"
-        ]
-      }
-    }
   }
 }

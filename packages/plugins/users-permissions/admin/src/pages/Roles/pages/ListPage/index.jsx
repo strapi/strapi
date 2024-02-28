@@ -14,12 +14,12 @@ import {
   useNotifyAT,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   CheckPermissions,
   ConfirmDialog,
   EmptyStateLayout,
-  LinkButton,
   LoadingIndicatorPage,
   NoPermissions,
   SearchURLQuery,
@@ -35,6 +35,7 @@ import {
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
+import { NavLink } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../../../constants';
 import { getTrad } from '../../../../utils';
@@ -148,6 +149,7 @@ export const RolesListPage = () => {
             <CheckPermissions permissions={PERMISSIONS.createRole}>
               <LinkButton
                 to="new"
+                as={NavLink}
                 onClick={() => trackUsage('willCreateRole')}
                 startIcon={<Plus />}
                 size="S"
