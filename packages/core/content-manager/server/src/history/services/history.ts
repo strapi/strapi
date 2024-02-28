@@ -17,11 +17,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     isInitialized: false,
   };
 
-  /**
-   * Use the query engine API, not the document service,
-   * since we'll refactor history version to be just a model instead of a content type.
-   * TODO: remove this comment once the refactor is done.
-   */
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
   const getRetentionDays = (strapi: LoadedStrapi) => {
@@ -35,7 +30,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     }
 
     // User didn't provide retention days value, use the license or fallback to default
-    return licenseRetentionDays ?? DEFAULT_RETENTION_DAYS;
+    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
   return {
