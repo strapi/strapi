@@ -1,11 +1,10 @@
 import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { type Permission } from '@strapi/helper-plugin';
 
 import { Form } from '../../components/Form';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
-import { useSyncRbac } from '../../hooks/useSyncRbac';
 import {
   InputRenderer,
   type InputRendererProps,
@@ -31,13 +30,15 @@ const CustomInputRenderer = (props: InputRendererProps) => {
  * VersionContent
  * -----------------------------------------------------------------------------------------------*/
 
-const VersionContent = () => {
-  const [{ query }] = useQueryParams();
+interface VersionContentProps {
+  permissions: Permission[];
+}
+
+const VersionContent = ({ permissions }: VersionContentProps) => {
   const { version, layout } = useHistoryContext('VersionContent', (state) => ({
     version: state.selectedVersion,
     layout: state.layout,
   }));
-  const { permissions = [] } = useSyncRbac(version.contentType, query, 'VersionContent');
 
   return (
     <ContentLayout>

@@ -2,14 +2,13 @@ import * as React from 'react';
 
 import { HeaderLayout, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQueryParams, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, type To, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
-import { useDocument } from '../../hooks/useDocument';
 import { useHistoryContext } from '../pages/History';
 
 interface VersionHeaderProps {

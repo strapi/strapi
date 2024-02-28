@@ -12,6 +12,7 @@ import { createContext } from '../../../components/Context';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';
@@ -97,7 +98,9 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
+  const { permissions, isLoading: isLoadingPermissions } = useSyncRbac(slug!, query, 'History');
+
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || isLoadingPermissions) {
     return <LoadingIndicatorPage />;
   }
 
@@ -111,7 +114,7 @@ const HistoryPage = () => {
   }
 
   // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema) {
+  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema || !permissions) {
     return null;
   }
 
@@ -150,7 +153,7 @@ const HistoryPage = () => {
         <Flex direction="row" alignItems="flex-start">
           <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
-            <VersionContent />
+            <VersionContent permissions={permissions} />
           </Main>
           <VersionsList />
         </Flex>
