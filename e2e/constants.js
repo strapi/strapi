@@ -4,6 +4,8 @@ const ALLOWED_CONTENT_TYPES = [
   'admin::user',
   'admin::role',
   'admin::permission',
+  'admin::api-token',
+  'admin::transfer-token',
   'api::article.article',
   'api::author.author',
   'api::homepage.homepage',
