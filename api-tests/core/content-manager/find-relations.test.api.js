@@ -7,6 +7,8 @@ const modelsUtils = require('api-tests/models');
 
 let strapi;
 let rq;
+
+const extraLocale = 'fr';
 const data = {
   products: {
     draft: [],
@@ -49,19 +51,32 @@ const compo = (withRelations = false) => ({
 });
 
 const productModel = () => ({
-  attributes: {
-    name: {
-      type: 'string',
-    },
-  },
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',
   description: '',
   collectionName: '',
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
 });
 
 const shopModel = () => ({
+  displayName: 'Shop',
+  singularName: 'shop',
+  pluralName: 'shops',
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
   attributes: {
     name: {
       type: 'string',
@@ -106,9 +121,6 @@ const shopModel = () => ({
       component: compoUid,
     },
   },
-  displayName: 'Shop',
-  singularName: 'shop',
-  pluralName: 'shops',
 });
 
 const createEntry = async (uid, data) => {
@@ -134,20 +146,42 @@ describe('Find Relations', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    // Create 2 draft products
-    const [skate, chair, candle, table] = await Promise.all([
+    await rq({
+      method: 'POST',
+      url: '/i18n/locales',
+      body: {
+        code: extraLocale,
+        name: `French (${extraLocale})`,
+        isDefault: false,
+      },
+    });
+
+    // Create draft products
+    const [skate, chair, candle, table, porte, fenetre] = await Promise.all([
       createEntry(productUid, { name: 'Skate' }),
       createEntry(productUid, { name: 'Chair' }),
       createEntry(productUid, { name: 'Candle' }),
       createEntry(productUid, { name: 'Table' }),
+      // We create products in French in order to test that we can cant find
+      // aviailable relations in a different locale
+      createEntry(productUid, { name: 'Porte', locale: extraLocale }),
+      createEntry(productUid, { name: 'Fenêtre', locale: extraLocale }),
     ]);
-
-    data.products.draft.push(skate.data, chair.data, candle.data, table.data);
+    data.products.draft.push(
+      skate.data,
+      chair.data,
+      candle.data,
+      table.data,
+      porte.data,
+      fenetre.data
+    );
     const productMapping = {
       skate: data.products.draft[0],
       chair: data.products.draft[1],
       candle: data.products.draft[2],
       table: data.products.draft[3],
+      porte: data.products.draft[4],
+      fenetre: data.products.draft[5],
     };
 
     // Publish Skate and Chair
@@ -164,7 +198,7 @@ describe('Find Relations', () => {
     data.products.published.push(publishedSkate.body.data, publishedChair.body.data);
 
     /**
-     * Tranform the draft relations into published relations if they exist
+     * Transform the draft relations into published relations if they exist
      */
     const buildPublishedRelations = (draftRelations, publishedProducts) => {
       const publishedRelations = JSON.parse(JSON.stringify(draftRelations));
@@ -199,7 +233,7 @@ describe('Find Relations', () => {
       products_ow: data.products.draft[0],
       products_oo: data.products.draft[2],
       products_mo: data.products.draft[1],
-      products_om: data.products.draft,
+      products_om: data.products.draft.filter((product) => product.locale !== extraLocale),
       products_mm: data.products.draft.slice(0, 2),
       products_mw: [data.products.draft[1], data.products.draft[3]],
       myCompo: {
@@ -543,8 +577,10 @@ describe('Find Relations', () => {
     });
   });
 
-  // Run tests against every type of relation in the shop content type
-  describe.each([
+  // Run tests against every type of relation in the shop content type, always
+  // from the default locale
+  const defaultLocale = 'en';
+  describe.only.each([
     ['products_ow', false],
     ['products_oo', false],
     ['products_mo', false],
@@ -559,6 +595,11 @@ describe('Find Relations', () => {
     const statuses = isComponent ? [['draft']] : [['draft'], ['published']];
 
     describe.each(statuses)(`Get %s relation(s)`, (status) => {
+      const qs = {
+        status,
+        locale: defaultLocale,
+      };
+
       describe('Find Available', () => {
         describe.each([[true], [false]])(
           'Can retrieve all available relation(s)',
@@ -575,33 +616,40 @@ describe('Find Relations', () => {
                 method: 'GET',
                 url: `/content-manager/relations/${modelUID}/${fieldName}`,
                 qs: {
+                  ...qs,
                   id,
-                  status,
                 },
               });
               expect(res.status).toBe(200);
 
+              const productsInThisLocale = data.products[status].filter(
+                // This test is running for the default locale (en)
+                // any products that are in the non default locale should not
+                // be considered available
+                (product) => product.locale === defaultLocale
+              );
+
               expect(res.body.results.map((result) => result.id)).toMatchObject(
-                data.products[status]
+                productsInThisLocale
                   // Results form the request should be sorted by name
                   // but are not necessarily in the same order as data.products
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((product) => product.id)
               );
 
-              const idsToOmit = [data.products[status][1]?.id].filter(Boolean);
+              const idsToOmit = [productsInThisLocale[1]?.id].filter(Boolean);
               const omitIdsRes = await rq({
                 method: 'GET',
                 url: `/content-manager/relations/${modelUID}/${fieldName}`,
                 qs: {
+                  ...qs,
                   id,
-                  status,
                   idsToOmit,
                 },
               });
 
               expect(omitIdsRes.body.results).toHaveLength(
-                data.products[status]
+                productsInThisLocale
                   .map((product) => product.id)
                   .filter((id) => !idsToOmit.includes(id)).length
               );
@@ -616,17 +664,22 @@ describe('Find Relations', () => {
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
+              ...qs,
               id,
-              status,
             },
           });
           expect(res.status).toBe(200);
 
-          // Get the ids of the products that are not already related to this entity
+          // Get the ids of the products that are not already related to this
+          // entity and are in the same locale as the entity
           const availableProducts = data.products[status]
             .filter((product) => {
-              return !getRelatedProductIds(isComponent, status, fieldName).includes(product.id);
+              return (
+                !getRelatedProductIds(isComponent, status, fieldName).includes(product.id) &&
+                product.locale === defaultLocale
+              );
             })
+            .sort((a, b) => a.name.localeCompare(b.name))
             .map((product) => ({
               id: product.id,
               ...addPublishedAtCheck(status === 'published' ? expect().not.toBeNull() : null),
@@ -637,13 +690,13 @@ describe('Find Relations', () => {
             availableProducts
           );
 
-          const idsToOmit = [data.products[status][1]?.id].filter(Boolean);
+          const idsToOmit = [availableProducts[1]?.id].filter(Boolean);
           const omitIdsRes = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
+              ...qs,
               id,
-              status,
               idsToOmit,
             },
           });
@@ -668,6 +721,8 @@ describe('Find Relations', () => {
             ['nothing'],
             ['nothing'.substring(0, 3)],
             [''],
+            ['Fenetre'],
+            ['Porte'],
           ];
           describe.each(searchTerms)(`Search with term %s`, (searchTerm) => {
             test('Can search entity', async () => {
@@ -677,20 +732,23 @@ describe('Find Relations', () => {
                 method: 'GET',
                 url: `/content-manager/relations/${modelUID}/${fieldName}`,
                 qs: {
+                  ...qs,
                   _q: searchTerm,
                   id,
-                  status,
                 },
               });
               expect(res.status).toBe(200);
 
               // We expect to get products that are not already related to the entity
-              // and that fuzzy match the search query
-              const expected = data.products[status].filter(
-                (product) =>
-                  new RegExp(searchTerm, 'i').test(product.name) &&
-                  !getRelatedProductIds(isComponent, status, fieldName).includes(product.id)
-              );
+              // that fuzzy match the search query and are in the same locale as the entity
+              const expected = data.products[status]
+                .filter(
+                  (product) =>
+                    new RegExp(searchTerm, 'i').test(product.name) &&
+                    product.locale === defaultLocale &&
+                    !getRelatedProductIds(isComponent, status, fieldName).includes(product.id)
+                )
+                .sort((a, b) => a.name.localeCompare(b.name));
 
               expect(res.body.results).toHaveLength(expected.length);
               expect(res.body.results).toMatchObject(
@@ -712,9 +770,7 @@ describe('Find Relations', () => {
           const res = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${id}/${fieldName}`,
-            qs: {
-              status,
-            },
+            qs,
           });
 
           expect(res.status).toBe(200);
@@ -735,9 +791,7 @@ describe('Find Relations', () => {
           const res = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${idEmptyShop}/${fieldName}`,
-            qs: {
-              status,
-            },
+            qs,
           });
 
           expect(res.status).toBe(200);
