@@ -31,7 +31,7 @@ const isUrlForCreation = (url: string) => {
 
   // Get the last element of the array
   // api::category.category / 1 / publish
-  const model = splitUrl[splittedUrl.length - 1];
+  const model = splitUrl[splitUrl.length - 1];
 
   // If the model contains :: it means it's a uid
   return model.includes('::');
