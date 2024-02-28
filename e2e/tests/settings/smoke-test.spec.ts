@@ -20,7 +20,7 @@ test.describe('Settings', () => {
 
   test('every expected feature is displayed', async ({ page }) => {
     await page.getByRole('link', { name: 'Settings' }).click();
-    expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
 
     await page.getByRole('link', { name: 'API Tokens' }).click();
     expect(await headerVisible(page, 'API Tokens')).toBe(true);
