@@ -8,8 +8,16 @@ const modelsUtils = require('api-tests/models');
 let strapi;
 let rq;
 const data = {
-  products: [],
-  shops: [],
+  products: {
+    draft: [],
+    published: [],
+  },
+  shops: {
+    draft: [],
+    published: [],
+  },
+  shopRelations: {},
+  testData: {},
 };
 
 const productUid = 'api::product.product';
@@ -112,7 +120,7 @@ const createEntry = async (uid, data) => {
   return body;
 };
 
-describe('Relations, with d&p: %p', () => {
+describe('Relations: Find Available', () => {
   const builder = createTestBuilder();
   const addPublishedAtCheck = (value) => {
     publishedAt: value;
@@ -126,42 +134,144 @@ describe('Relations, with d&p: %p', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    const createdProduct1 = await createEntry(productUid, { name: 'Skate' });
-    const createdProduct2 = await createEntry(productUid, { name: 'Candle' });
+    // Create 2 draft products
+    const [skate, chair, candle, table] = await Promise.all([
+      createEntry(productUid, { name: 'Skate' }),
+      createEntry(productUid, { name: 'Chair' }),
+      createEntry(productUid, { name: 'Candle' }),
+      createEntry(productUid, { name: 'Table' }),
+    ]);
 
-    await rq({
-      url: `/content-manager/collection-types/${productUid}/${createdProduct1.data.id}/actions/publish`,
-      method: 'POST',
-    });
+    data.products.draft.push(skate.data, chair.data, candle.data, table.data);
+    const productMapping = {
+      skate: data.products.draft[0],
+      chair: data.products.draft[1],
+      candle: data.products.draft[2],
+      table: data.products.draft[3],
+    };
 
-    data.products.push(createdProduct1.data);
-    data.products.push(createdProduct2.data);
+    // Publish Skate and Chair
+    const [publishedSkate, publishedChair] = await Promise.all([
+      rq({
+        url: `/content-manager/collection-types/${productUid}/${productMapping.skate.id}/actions/publish`,
+        method: 'POST',
+      }),
+      rq({
+        url: `/content-manager/collection-types/${productUid}/${productMapping.chair.id}/actions/publish`,
+        method: 'POST',
+      }),
+    ]);
+    data.products.published.push(publishedSkate.body.data, publishedChair.body.data);
 
-    const id1 = createdProduct1.data.id;
+    /**
+     * Tranform the draft relations into published relations if they exist
+     */
+    const buildPublishedRelations = (draftRelations, publishedProducts) => {
+      const publishedRelations = JSON.parse(JSON.stringify(draftRelations));
 
-    const createdShop1 = await createEntry(shopUid, {
-      name: 'Cazotte Shop',
-      products_ow: id1,
-      products_oo: id1,
-      products_mo: id1,
-      products_om: [id1],
-      products_mm: [id1],
-      products_mw: [id1],
+      const replaceWithPublished = (draftProduct) => {
+        const published = publishedProducts.find(
+          (publishedProduct) => publishedProduct.id === draftProduct.id
+        );
+
+        return published || undefined;
+      };
+
+      // Iterate over relations and replace products with their published counterparts
+      for (const key in publishedRelations) {
+        if (Array.isArray(publishedRelations[key])) {
+          publishedRelations[key] = publishedRelations[key]
+            .map(replaceWithPublished)
+            .filter(Boolean);
+        } else if (
+          typeof publishedRelations[key] === 'object' &&
+          publishedRelations[key] !== null
+        ) {
+          publishedRelations[key] = replaceWithPublished(publishedRelations[key]);
+        }
+      }
+
+      return publishedRelations;
+    };
+
+    // Define the relations between the shops and the products
+    const draftRelations = {
+      products_ow: data.products.draft[0],
+      products_oo: data.products.draft[2],
+      products_mo: data.products.draft[1],
+      products_om: data.products.draft,
+      products_mm: data.products.draft.slice(0, 2),
+      products_mw: [data.products.draft[1], data.products.draft[3]],
       myCompo: {
-        compo_products_ow: id1,
-        compo_products_mw: [id1],
+        compo_products_ow: data.products.draft[2],
+        compo_products_mw: [data.products.draft[0]],
       },
-    });
-    const createdShop2 = await createEntry(shopUid, {
-      name: 'Empty Shop',
-      myCompo: {
-        compo_products_ow: null,
-        compo_products_mw: [],
-      },
-    });
+    };
+    const publishedRelations = buildPublishedRelations(draftRelations, data.products.published);
 
-    data.shops.push(createdShop1.data);
-    data.shops.push(createdShop2.data);
+    const shopRelations = {
+      draft: draftRelations,
+      published: publishedRelations,
+    };
+    data.shopRelations = shopRelations;
+
+    // Create 2 draft shops
+    const [draftShop, draftEmptyShop] = await Promise.all([
+      createEntry(shopUid, {
+        name: 'Cazotte Shop',
+        products_ow: shopRelations.draft.products_ow.id,
+        products_oo: shopRelations.draft.products_oo.id,
+        products_mo: shopRelations.draft.products_mo.id,
+        products_om: shopRelations.draft.products_om.map((product) => product.id),
+        products_mm: shopRelations.draft.products_mm.map((product) => product.id),
+        products_mw: shopRelations.draft.products_mw.map((product) => product.id),
+        myCompo: {
+          compo_products_ow: shopRelations.draft.myCompo.compo_products_ow.id,
+          compo_products_mw: shopRelations.draft.myCompo.compo_products_mw.map(
+            (product) => product.id
+          ),
+        },
+      }),
+      createEntry(shopUid, {
+        name: 'Empty Shop',
+        myCompo: {
+          compo_products_ow: null,
+          compo_products_mw: [],
+        },
+      }),
+    ]);
+    data.shops.draft.push(draftShop.data, draftEmptyShop.data);
+
+    // Publish both shops
+    const [publishedShop, publishedEmptyShop] = await Promise.all([
+      rq({
+        url: `/content-manager/collection-types/${shopUid}/${data.shops.draft[0].id}/actions/publish`,
+        method: 'POST',
+      }),
+      rq({
+        url: `/content-manager/collection-types/${shopUid}/${data.shops.draft[1].id}/actions/publish`,
+        method: 'POST',
+      }),
+    ]);
+    data.shops.published.push(publishedShop.body.data, publishedEmptyShop.body.data);
+
+    // Define the ids of the shops we will use for testing
+    const testData = {
+      component: {
+        // If the target attribute represents a component, the id we use to
+        // query for relations is the id of the component, not the id of the
+        // parent entity
+        modelUID: compoUid,
+        id: data.shops.draft[0].myCompo.id,
+        idEmptyShop: data.shops.draft[1].myCompo.id,
+      },
+      entity: {
+        modelUID: shopUid,
+        id: data.shops.draft[0].id,
+        idEmptyShop: data.shops.draft[1].id,
+      },
+    };
+    data.testData = testData;
   });
 
   afterAll(async () => {
@@ -169,300 +279,295 @@ describe('Relations, with d&p: %p', () => {
     await builder.cleanup();
   });
 
-  describe('findAvailable', () => {
-    describe('On a content-type', () => {
-      test('Fail when entity is not found', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${shopUid}/products_ow`,
-          qs: {
-            id: 99999,
-            status: 'draft',
-          },
-        });
+  /**
+   * Find all the ids of the products that are related to the entity
+   */
+  const getRelatedProductIds = (isComponent, status, fieldName) => {
+    let relatedProductIds;
+    if (isComponent) {
+      relatedProductIds = data.shopRelations[status].myCompo[fieldName];
+    } else {
+      relatedProductIds = data.shopRelations[status][fieldName];
+    }
 
-        expect(res.status).toBe(404);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: 'Entity not found',
-            name: 'NotFoundError',
-            status: 404,
-          },
-        });
+    if (Array.isArray(relatedProductIds)) {
+      relatedProductIds = relatedProductIds.map((relation) => relation?.id);
+    } else {
+      relatedProductIds = [relatedProductIds?.id];
+    }
+
+    return relatedProductIds;
+  };
+
+  describe('Content type failure cases', () => {
+    test('Fail when entity is not found', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/relations/${shopUid}/products_ow`,
+        qs: {
+          id: 'docIdDoesntExist',
+          status: 'draft',
+        },
       });
 
-      test("Fail when the field doesn't exist", async () => {
-        const res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${shopUid}/unknown`,
-        });
-
-        expect(res.status).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: `The relational field unknown doesn't exist on ${shopUid}`,
-            name: 'ValidationError',
-            status: 400,
-          },
-        });
-      });
-
-      test('Fail when the field exists but is not a relational field', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${shopUid}/name`,
-        });
-
-        expect(res.status).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: `The relational field name doesn't exist on ${shopUid}`,
-            name: 'ValidationError',
-            status: 400,
-          },
-        });
+      expect(res.status).toBe(404);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {},
+          message: 'Entity not found',
+          name: 'NotFoundError',
+          status: 404,
+        },
       });
     });
 
-    describe.each([
-      ['products_ow', false],
-      ['products_oo', false],
-      ['products_mo', false],
-      ['products_om', false],
-      ['products_mm', false],
-      ['products_mw', false],
-      ['compo_products_ow', true],
-      ['compo_products_mw', true],
-    ])('Relation (%s) (is in component: %s)', (fieldName, isComponent) => {
-      let id;
-      let idEmptyShop;
-      let modelUID;
-
-      beforeAll(() => {
-        id = isComponent ? data.shops[0].myCompo.id : data.shops[0].id;
-        idEmptyShop = isComponent ? data.shops[1].myCompo.id : data.shops[1].id;
-        modelUID = isComponent ? compoUid : shopUid;
+    test("Fail when the field doesn't exist", async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/relations/${shopUid}/unknown_field`,
       });
 
-      test('Can retrieve available relation(s) for an entity that have some relations', async () => {
-        let res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            id,
-            status: 'draft',
-          },
-        });
-        expect(res.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {},
+          message: `The relational field unknown_field doesn't exist on ${shopUid}`,
+          name: 'ValidationError',
+          status: 400,
+        },
+      });
+    });
 
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(String),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-        ]);
-
-        // can omitIds
-        res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            id,
-            status: 'draft',
-            idsToOmit: [data.products[1].id],
-          },
-        });
-
-        expect(res.body.results).toHaveLength(0);
+    test('Fail when the field exists but is not a relational field', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/relations/${shopUid}/name`,
       });
 
-      test("Can retrieve available relation(s) for an entity that doesn't have relations yet", async () => {
-        let res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            id: idEmptyShop,
-            status: 'draft',
-          },
-        });
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {},
+          message: `The relational field name doesn't exist on ${shopUid}`,
+          name: 'ValidationError',
+          status: 400,
+        },
+      });
+    });
+  });
 
-        expect(res.status).toBe(200);
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(String),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-          {
-            id: expect.any(String),
-            name: 'Skate',
-            ...addPublishedAtCheck(expect.any(String)),
-          },
-        ]);
-
-        // can omitIds
-        res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            id: idEmptyShop,
-            status: 'draft',
-            idsToOmit: [data.products[1].id],
-          },
-        });
-
-        expect(res.body.results).toHaveLength(1);
+  describe('Component failure cases', () => {
+    test('Fail when the component is not found', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/relations/${compoUid}/compo_products_ow`,
+        qs: {
+          id: 99999,
+        },
       });
 
-      test('Can retrieve available relation(s) without entity', async () => {
-        let res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-        });
+      expect(res.status).toBe(404);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {},
+          message: 'Entity not found',
+          name: 'NotFoundError',
+          status: 404,
+        },
+      });
+    });
 
-        expect(res.status).toBe(200);
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(String),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-          {
-            id: expect.any(String),
-            name: 'Skate',
-            ...addPublishedAtCheck(expect.any(String)),
-          },
-        ]);
-
-        // can omitIds
-        res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${modelUID}/${fieldName}`,
-          qs: {
-            status: 'draft',
-            idsToOmit: [data.products[0].id],
-          },
-        });
-
-        expect(res.body.results).toMatchObject([
-          {
-            id: expect.any(String),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          },
-        ]);
+    test("Fail when the field doesn't exist", async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/relations/${compoUid}/unknown`,
       });
 
-      describe.each([['with'], ['without']])('Can search %s entity', (withOrWithout) => {
-        const withEntity = withOrWithout === 'with';
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {},
+          message: `The relational field unknown doesn't exist on ${compoUid}`,
+          name: 'ValidationError',
+          status: 400,
+        },
+      });
+    });
 
-        test("search ''", async () => {
+    test('Fail when the field exists but is not a relational field', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/content-manager/relations/${compoUid}/name`,
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {},
+          message: `The relational field name doesn't exist on ${compoUid}`,
+          name: 'ValidationError',
+          status: 400,
+        },
+      });
+    });
+  });
+
+  // Run tests against every type of relations in the shop content type
+  describe.only.each([
+    ['products_ow', false],
+    ['products_oo', false],
+    ['products_mo', false],
+    ['products_om', false],
+    ['products_mm', false],
+    ['products_mw', false],
+    ['compo_products_ow', true],
+    ['compo_products_mw', true],
+  ])('Relational field (%s) (is in component: %s)', (fieldName, isComponent) => {
+    // Perform the same tests for both draft and published entities
+    // Components don't have a published status
+    const statuses = isComponent ? [['draft']] : [['draft'], ['published']];
+
+    describe.each(statuses)(`Get Available %s relation(s)`, (status) => {
+      describe.each([[true], [false]])('Can retrieve all available relation(s)', (useEmptyShop) => {
+        test(`when entity ID is ${!useEmptyShop ? 'undefined' : 'an empty entity'}`, async () => {
+          const { modelUID, idEmptyShop } = isComponent
+            ? data.testData.component
+            : data.testData.entity;
+          const id = useEmptyShop ? idEmptyShop : undefined;
+
           const res = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
-              _q: '',
-              ...(withEntity ? { id } : {}),
-              status: 'draft',
+              id,
+              status,
             },
           });
-
           expect(res.status).toBe(200);
-          expect(res.body.results).toHaveLength(withEntity ? 1 : 2);
-          expect(res.body.results[0]).toMatchObject({
-            id: expect.any(String),
-            name: 'Candle',
-            ...addPublishedAtCheck(null),
-          });
-        });
 
-        test("search 'Can'", async () => {
-          const res = await rq({
+          expect(res.body.results.map((result) => result.id)).toMatchObject(
+            data.products[status]
+              // Results form the request should be sorted by name
+              // but are not necessarily in the same order as data.products
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((product) => product.id)
+          );
+
+          const idsToOmit = [data.products[status][1]?.id].filter(Boolean);
+          const omitIdsRes = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
-              _q: 'Can',
-              ...(withEntity ? { id } : {}),
-              status: 'draft',
+              id,
+              status,
+              idsToOmit,
             },
           });
 
-          expect(res.status).toBe(200);
-          expect(res.body.results).toMatchObject([
-            {
-              id: expect.any(String),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
-            },
-          ]);
+          expect(omitIdsRes.body.results).toHaveLength(
+            data.products[status]
+              .map((product) => product.id)
+              .filter((id) => !idsToOmit.includes(id)).length
+          );
         });
       });
-    });
 
-    describe('On a component', () => {
-      test('Fail when the component is not found', async () => {
+      test(`Get relations for ${fieldName}`, async () => {
+        const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${compoUid}/compo_products_ow`,
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
-            id: 99999,
+            id,
+            status,
+          },
+        });
+        expect(res.status).toBe(200);
+
+        // Get the ids of the products that are not already related to this entity
+        const availableProductIds = data.products[status]
+          .filter((product) => {
+            return !getRelatedProductIds(isComponent, status, fieldName).includes(product.id);
+          })
+          .map((product) => product.id);
+
+        expect(res.body.results.map((result) => result.id)).toMatchObject(
+          // The results should be the products that are not already related to the shop
+          // TODO is matching the ids enough?
+          availableProductIds
+        );
+
+        const idsToOmit = [data.products[status][1]?.id].filter(Boolean);
+        const omitIdsRes = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id,
+            status,
+            idsToOmit,
           },
         });
 
-        expect(res.status).toBe(404);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: 'Entity not found',
-            name: 'NotFoundError',
-            status: 404,
-          },
-        });
+        expect(omitIdsRes.body.results).toHaveLength(
+          availableProductIds.filter((id) => !idsToOmit.includes(id)).length
+        );
       });
 
-      test("Fail when the field doesn't exist", async () => {
-        const res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${compoUid}/unknown`,
-        });
+      describe.only('Search', () => {
+        const searchTerms = [
+          ['Skate'],
+          ['Candle'],
+          ['Chair'],
+          ['Table'],
+          ['skate'],
+          ['candle'],
+          ['Skate'.substring(0, 3)],
+          ['Candle'.substring(0, 3)],
+          ['Chair'.substring(3)],
+          ['table'.substring(2)],
+          ['nothing'],
+          ['nothing'.substring(0, 3)],
+          [''],
+        ];
+        describe.each(searchTerms)(`Search with term %s`, (searchTerm) => {
+          test('Can search entity', async () => {
+            const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
 
-        expect(res.status).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: `The relational field unknown doesn't exist on ${compoUid}`,
-            name: 'ValidationError',
-            status: 400,
-          },
-        });
-      });
+            const res = await rq({
+              method: 'GET',
+              url: `/content-manager/relations/${modelUID}/${fieldName}`,
+              qs: {
+                _q: searchTerm,
+                id,
+                status,
+              },
+            });
+            expect(res.status).toBe(200);
 
-      test('Fail when the field exists but is not a relational field', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: `/content-manager/relations/${compoUid}/name`,
-        });
+            // We expect to get products that are not already related to the entity
+            // and that fuzzy match the search query
+            const expected = data.products[status].filter(
+              (product) =>
+                new RegExp(searchTerm, 'i').test(product.name) &&
+                !getRelatedProductIds(isComponent, status, fieldName).includes(product.id)
+            );
 
-        expect(res.status).toBe(400);
-        expect(res.body).toMatchObject({
-          data: null,
-          error: {
-            details: {},
-            message: `The relational field name doesn't exist on ${compoUid}`,
-            name: 'ValidationError',
-            status: 400,
-          },
+            expect(res.body.results).toHaveLength(expected.length);
+            expect(res.body.results).toMatchObject(
+              expected.map((product) => ({
+                id: product.id,
+                name: product.name,
+                ...addPublishedAtCheck(status === 'published' ? expect().not.toBeNull() : null),
+              }))
+            );
+          });
         });
       });
     });

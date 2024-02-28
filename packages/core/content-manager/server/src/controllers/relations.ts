@@ -187,9 +187,10 @@ export default {
       ...permissionQuery,
     };
 
+    const isPublished = status === 'published';
     // Only ever findAvailable (e.g. populate relation select) on a draft entry
     addFiltersClause(queryParams, {
-      [PUBLISHED_AT_ATTRIBUTE]: null,
+      [PUBLISHED_AT_ATTRIBUTE]: isPublished ? { $ne: null } : null,
     });
 
     // We are looking for available content type relations and should be
@@ -210,8 +211,8 @@ export default {
     if (currentEntityId) {
       // If we have been given an entity id, we need to filter out the
       // relations that are already linked to the current entity
-
       const subQuery = strapi.db.queryBuilder(sourceUid);
+
       // The alias refers to the DB table of the target model
       const alias = subQuery.getAlias();
 
@@ -220,7 +221,7 @@ export default {
         [`${alias}.id`]: { $notNull: true },
         // Always find available draft entries, as we will be potentially
         // connecting them from the CM edit view
-        [`${alias}.published_at`]: { $notNull: false },
+        [`${alias}.published_at`]: isPublished ? { $notNull: true } : { $notNull: false },
       };
 
       const stringIdsToInclude = idsToInclude?.filter((id: any) => !Number(id));
