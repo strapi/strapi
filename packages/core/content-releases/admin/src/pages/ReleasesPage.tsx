@@ -63,6 +63,10 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
+const CapitalizeRelativeTime = styled(RelativeTime)`
+  text-transform: capitalize;
+`;
+
 const getBadgeProps = (status: Release['status']) => {
   let color;
   switch (status) {
@@ -132,30 +136,32 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               alignItems="start"
               gap={4}
             >
-              <Typography as="h3" variant="delta" fontWeight="bold">
-                {name}
-              </Typography>
-              <Typography variant="pi" textColor="neutral600">
-                {IsSchedulingEnabled ? (
-                  scheduledAt ? (
-                    <RelativeTime timestamp={new Date(scheduledAt)} />
+              <Flex direction="column" alignItems="start" gap={1}>
+                <Typography as="h3" variant="delta" fontWeight="bold">
+                  {name}
+                </Typography>
+                <Typography variant="pi" textColor="neutral600">
+                  {IsSchedulingEnabled ? (
+                    scheduledAt ? (
+                      <CapitalizeRelativeTime timestamp={new Date(scheduledAt)} />
+                    ) : (
+                      formatMessage({
+                        id: 'content-releases.pages.Releases.not-scheduled',
+                        defaultMessage: 'Not scheduled',
+                      })
+                    )
                   ) : (
-                    formatMessage({
-                      id: 'content-releases.pages.Releases.not-scheduled',
-                      defaultMessage: 'Not scheduled',
-                    })
-                  )
-                ) : (
-                  formatMessage(
-                    {
-                      id: 'content-releases.page.Releases.release-item.entries',
-                      defaultMessage:
-                        '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                    },
-                    { number: actions.meta.count }
-                  )
-                )}
-              </Typography>
+                    formatMessage(
+                      {
+                        id: 'content-releases.page.Releases.release-item.entries',
+                        defaultMessage:
+                          '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+                      },
+                      { number: actions.meta.count }
+                    )
+                  )}
+                </Typography>
+              </Flex>
               <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
