@@ -4,6 +4,7 @@ import { setupServer } from 'msw/node';
 import * as qs from 'qs';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../src/content-manager/constants/collections';
+import { historyHandlers } from '../src/content-manager/history/tests/server';
 
 import { MockData, mockData } from './mockData';
 
@@ -464,9 +465,14 @@ export const server = setupServer(
       return res(ctx.status(200));
     }),
     rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+      const configuration =
+        req.params.model === 'api::homepage.homepage'
+          ? mockData.contentManager.singleTypeConfiguration
+          : mockData.contentManager.collectionTypeConfiguration;
+
       return res(
         ctx.json({
-          data: mockData.contentManager.configuration,
+          data: configuration,
         })
       );
     }),
