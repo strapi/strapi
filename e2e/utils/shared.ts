@@ -23,7 +23,3 @@ export const navToHeader = async (page: Page, navItems: string[], headerText: st
   await expect(header).toBeVisible();
   return header;
 };
-
-export const delay = async (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
-import { navToHeader, delay } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../scripts/dts-import';
+import { navToHeader, delay } from '../../../utils/shared';
 
 const createTransferToken = async (page, tokenName, duration, type) => {
   await navToHeader(
@@ -24,6 +24,7 @@ const createTransferToken = async (page, tokenName, duration, type) => {
   await expect(page.getByText(/copy this token/)).toBeVisible();
   await expect(page.getByText('Expiration date:')).toBeVisible();
 };
+
 test.describe('Transfer Tokens', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
@@ -52,7 +53,7 @@ test.describe('Transfer Tokens', () => {
 
     // if we don't wait until createdAt is at least 1s, we see "NaN" for the timestamp
     // TODO: fix the bug and remove this
-    await delay(1100);
+    await page.waitForTimeout(1100);
 
     await navToHeader(page, ['Settings', 'Transfer Tokens'], 'Transfer Tokens');
 
