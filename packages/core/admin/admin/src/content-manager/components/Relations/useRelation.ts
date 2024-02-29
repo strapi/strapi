@@ -103,6 +103,7 @@ const useRelation = ({ relation, search }: UseRelationArgs) => {
       ...search.searchParams,
       params: {
         ...options,
+        id: relation.params?.id ?? '',
         _q: term,
         _filter: '$containsi',
       },

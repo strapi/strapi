@@ -1,19 +1,17 @@
-import { prop, isEmpty, uniq, flow, uniqBy, concat } from 'lodash/fp';
-import { isOperatorOfType, contentTypes, relations } from '@strapi/utils';
+import { prop, uniq, flow } from 'lodash/fp';
+import { isOperatorOfType, contentTypes } from '@strapi/utils';
+import { type Common, type Entity, type Documents } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
-const { isAnyToMany } = relations;
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
-  if (params.filters.$and) {
-    params.filters.$and.push(filtersClause);
-  } else {
-    params.filters.$and = [filtersClause];
-  }
+  params.filters.$and = params.filters.$and || [];
+  params.filters.$and.push(filtersClause);
 };
 
 const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
@@ -45,117 +43,189 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
+const mapResults = (results: Array<any>) => {
+  return results.map((result: any) => {
+    if (result.documentId !== undefined) {
+      result.id = result.documentId;
+      delete result.documentId;
+    }
+
+    return result;
+  });
+};
+
 export default {
-  async findAvailable(ctx: any) {
+  async extractAndValidateRequestInfo(
+    ctx: any,
+    id?: Entity.ID,
+    status?: Documents.Params.PublicationState.Kind,
+    locale?: Documents.Params.Locale
+  ) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 
-    await validateFindAvailable(ctx.request.query);
-
-    // idsToOmit: used to exclude relations that the front already added but that were not saved yet
-    // idsToInclude: used to include relations that the front removed but not saved yes
-    const { entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
-
-    const modelSchema = strapi.getModel(model);
-    if (!modelSchema) {
-      return ctx.badRequest("The model doesn't exist");
+    const sourceSchema = strapi.getModel(model);
+    if (!sourceSchema) {
+      throw new errors.ValidationError(`The model ${model} doesn't exist`);
     }
 
-    const attribute: any = modelSchema.attributes[targetField];
+    const attribute: any = sourceSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest("This relational field doesn't exist");
+      throw new errors.ValidationError(
+        `The relational field ${targetField} doesn't exist on ${model}`
+      );
     }
 
-    const isComponent = modelSchema.modelType === 'component';
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model,
+    });
 
-    if (!isComponent) {
-      const permissionChecker = getService('permission-checker').create({
-        userAbility,
-        model,
-      });
-
+    const isSourceComponent = sourceSchema.modelType === 'component';
+    if (!isSourceComponent) {
       if (permissionChecker.cannot.read(null, targetField)) {
         return ctx.forbidden();
       }
+    }
 
-      if (entityId) {
-        const entityManager = getService('entity-manager');
+    const where: Record<string, any> = {};
+    if (!isSourceComponent) {
+      where.locale = locale;
+      where.publishedAt = status === 'published' ? { $ne: null } : null;
+    }
 
-        const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-        // @ts-expect-error populate builder needs to be called with a UID
-        const populate = await getService('populate-builder')(model)
-          .populateFromQuery(permissionQuery)
-          .build();
-
-        const entity = await entityManager.findOne(entityId, model, { populate });
-
-        if (!entity) {
-          return ctx.notFound();
-        }
-
-        if (permissionChecker.cannot.read(entity, targetField)) {
-          return ctx.forbidden();
-        }
+    let currentEntity = { id: null };
+    if (id) {
+      if (!isSourceComponent) {
+        where.documentId = id;
+      } else {
+        where.id = id;
       }
-    } else {
-      // eslint-disable-next-line no-lonely-if
-      if (entityId) {
-        const entity = await strapi.entityService.findOne(model, entityId);
 
-        if (!entity) {
-          return ctx.notFound();
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+      // @ts-expect-error populate builder needs to be called with a UID
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
+      currentEntity = await strapi.db.query(model).findOne({
+        where,
+        populate,
+      });
+
+      // If an Id is provided we are asking to find the relations (available or
+      // existing) on an existing entity. We need to check if the entity exists
+      // and if the user has the permission to read it in this way
+      if (!currentEntity) {
+        throw new errors.NotFoundError();
+      }
+
+      if (!isSourceComponent) {
+        if (permissionChecker.cannot.read(currentEntity, targetField)) {
+          throw new errors.ForbiddenError();
         }
       }
     }
 
-    const targetedModel: any = strapi.getModel(attribute.target);
+    const modelConfig = isSourceComponent
+      ? await getService('components').findConfiguration(sourceSchema)
+      : await getService('content-types').findConfiguration(sourceSchema);
 
-    const modelConfig = isComponent
-      ? await getService('components').findConfiguration(modelSchema)
-      : await getService('content-types').findConfiguration(modelSchema);
+    const targetSchema = strapi.getModel(attribute.target);
 
     const mainField = flow(
       prop(`metadatas.${targetField}.edit.mainField`),
       (mainField) => mainField || 'id',
-      (mainField) => sanitizeMainField(targetedModel, mainField, userAbility)
+      (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq(['id', mainField, PUBLISHED_AT_ATTRIBUTE]);
+    const fieldsToSelect = uniq([mainField, PUBLISHED_AT_ATTRIBUTE, 'documentId']);
+    if (locale) {
+      fieldsToSelect.push('locale');
+    }
+
+    return {
+      attribute,
+      fieldsToSelect,
+      mainField,
+      sourceSchema,
+      targetSchema,
+      targetField,
+      currentEntityId: currentEntity?.id,
+    };
+  },
+
+  async findAvailable(ctx: any) {
+    await validateFindAvailable(ctx.request.query);
+
+    const { id } = ctx.request.query;
+    const locale = ctx.request?.query?.locale || null;
+    const status = ctx.request?.query?.status || 'draft';
+
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
+
+    const {
+      targetField,
+      fieldsToSelect,
+      mainField,
+      sourceSchema: { uid: sourceUid },
+      targetSchema: { uid: targetUid },
+      currentEntityId,
+    } = validation;
+
+    const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
     const permissionChecker = getService('permission-checker').create({
-      userAbility,
-      model: targetedModel.uid,
+      userAbility: ctx.state.userAbility,
+      model: targetUid,
     });
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
     const queryParams = {
       sort: mainField,
-      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
+      // cannot select other fields as the user may not have the permissions
+      fields: fieldsToSelect,
       ...permissionQuery,
     };
 
-    if (!isEmpty(idsToOmit)) {
-      addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
+    const isPublished = status === 'published';
+    // Only ever findAvailable (e.g. populate relation select) on a draft entry
+    addFiltersClause(queryParams, {
+      [PUBLISHED_AT_ATTRIBUTE]: isPublished ? { $ne: null } : null,
+    });
+
+    // We are looking for available content type relations and should be
+    // filtering by valid documentIds only
+    if (idsToOmit?.length > 0) {
+      addFiltersClause(queryParams, {
+        documentId: { $notIn: uniq(idsToOmit) },
+      });
     }
 
-    // searching should be allowed only on mainField for permission reasons
     if (_q) {
+      // searching should be allowed only on mainField for permission reasons
       const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
       addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
     }
 
-    if (entityId) {
-      const subQuery = strapi.db.queryBuilder(modelSchema.uid);
+    if (currentEntityId) {
+      // If we have been given an entity id, we need to filter out the
+      // relations that are already linked to the current entity
+      const subQuery = strapi.db.queryBuilder(sourceUid);
 
+      // The alias refers to the DB table of the target model
       const alias = subQuery.getAlias();
 
-      const where = {
-        id: entityId,
+      const where: Record<string, any> = {
+        id: currentEntityId,
         [`${alias}.id`]: { $notNull: true },
+        // Always find available draft entries, as we will be potentially
+        // connecting them from the CM edit view
+        [`${alias}.published_at`]: { $notNull: isPublished },
       };
 
-      if (!isEmpty(idsToInclude)) {
-        where[`${alias}.id`].$notIn = idsToInclude;
+      if ((idsToInclude?.length ?? 0) !== 0) {
+        where[`${alias}.document_id`].$notIn = idsToInclude;
       }
 
       const knexSubQuery = subQuery
@@ -167,133 +237,71 @@ export default {
       addFiltersClause(queryParams, { id: { $notIn: knexSubQuery } });
     }
 
-    ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
+    // We find a page of the targeted model (relation) to display in the
+    // relation select component in the CM edit view
+    const res = await strapi.entityService.findPage(
+      targetUid as Common.UID.ContentType,
+      queryParams
+    );
+
+    ctx.body = {
+      ...res,
+      results: Array.isArray(res.results) ? mapResults(res.results) : [],
+    };
   },
 
   async findExisting(ctx: any) {
-    const { userAbility } = ctx.state;
-    const { model, id, targetField } = ctx.params;
-
     await validateFindExisting(ctx.request.query);
+    const { id } = ctx.params;
+    const locale = ctx.request?.query?.locale || null;
+    const status = ctx.request?.query?.status || 'draft';
 
-    const modelSchema = strapi.getModel(model);
-    if (!modelSchema) {
-      return ctx.badRequest("The model doesn't exist");
-    }
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
 
-    const attribute: any = modelSchema.attributes[targetField];
-    if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest("This relational field doesn't exist");
-    }
+    const {
+      targetField,
+      fieldsToSelect,
+      sourceSchema: { uid: sourceUid },
+      targetSchema: { uid: targetUid },
+      currentEntityId,
+    } = validation;
 
-    const isComponent = modelSchema.modelType === 'component';
-
-    if (!isComponent) {
-      const entityManager = getService('entity-manager');
-      const permissionChecker = getService('permission-checker').create({
-        userAbility,
-        model,
-      });
-
-      if (permissionChecker.cannot.read(null, targetField)) {
-        return ctx.forbidden();
-      }
-
-      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-      // @ts-expect-error populate builder needs to be called with a UID
-      const populate = await getService('populate-builder')(model)
-        .populateFromQuery(permissionQuery)
-        .build();
-
-      const entity = await entityManager.findOne(id, model, { populate });
-
-      if (!entity) {
-        return ctx.notFound();
-      }
-
-      if (permissionChecker.cannot.read(entity, targetField)) {
-        return ctx.forbidden();
-      }
-    } else {
-      const entity = await strapi.entityService.findOne(model, id);
-
-      if (!entity) {
-        return ctx.notFound();
-      }
-    }
-
-    const targetedModel = strapi.getModel(attribute.target);
-
-    const modelConfig = isComponent
-      ? await getService('components').findConfiguration(modelSchema)
-      : await getService('content-types').findConfiguration(modelSchema);
-
-    const mainField = flow(
-      prop(`metadatas.${targetField}.edit.mainField`),
-      (mainField) => mainField || 'id',
-      (mainField) => sanitizeMainField(targetedModel, mainField, userAbility)
-    )(modelConfig);
-
-    const fieldsToSelect = uniq(['id', mainField, PUBLISHED_AT_ATTRIBUTE]);
-
-    const queryParams = {
-      fields: fieldsToSelect,
-    };
-
-    const permissionChecker = getService('permission-checker').create({
-      userAbility,
-      model: targetedModel.uid,
+    const entity = await strapi.db.query(sourceUid).findOne({
+      where: { id: currentEntityId },
+      select: ['id'],
+      populate: { [targetField]: { fields: ['id'] } },
     });
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
 
-    if (isAnyToMany(attribute)) {
-      const res = await strapi.entityService.loadPages(
-        model,
-        { id },
-        targetField,
-        {
-          fields: ['id'],
-          ordering: 'desc',
-        } as any,
-        {
-          page: ctx.request.query.page,
-          pageSize: ctx.request.query.pageSize,
-        }
-      );
-      const ids = res.results.map((item: any) => item.id);
-
-      addFiltersClause(permissionQuery, { id: { $in: ids } });
-
-      const sanitizedRes = await strapi.entityService.loadPages(
-        model,
-        { id },
-        targetField,
-        {
-          ...permissionQuery,
-          ordering: 'desc',
-        } as any,
-        {
-          page: ctx.request.query.page,
-          pageSize: ctx.request.query.pageSize,
-        }
-      );
-
-      res.results = uniqBy('id', concat(sanitizedRes.results, res.results));
-
-      ctx.body = res;
-    } else {
-      const [resWithOnlyId, res] = await Promise.all([
-        strapi.entityService.load(model, { id }, targetField, {
-          fields: ['id'],
-        }),
-        strapi.entityService.load(model, { id }, targetField, {
-          ...permissionQuery,
-        }),
-      ]);
-      const result = res || resWithOnlyId;
-      ctx.body = {
-        data: result,
-      };
+    // Collect all the entity IDs relations in the targetField
+    let resultEntityIds = [];
+    if (entity?.[targetField]) {
+      if (Array.isArray(entity?.[targetField])) {
+        resultEntityIds = entity?.[targetField]?.map((result: any) => result.id);
+      } else {
+        resultEntityIds = entity?.[targetField]?.id ? [entity[targetField].id] : [];
+      }
     }
+
+    const fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
+    const sort = fields
+      .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
+      .map((field: any) => field);
+
+    const page = await strapi.db.query(targetUid).findPage({
+      select: fields,
+      filters: {
+        // The existing relations will be entries of the target model who's
+        // entity ID is in the list of entity IDs related to the source entity
+        id: { $in: resultEntityIds },
+      },
+      orderBy: sort,
+      page: ctx.request.query.page,
+      pageSize: ctx.request.query.pageSize,
+    });
+
+    ctx.body = {
+      ...page,
+      results: Array.isArray(page.results) ? mapResults(page.results) : [],
+    };
   },
 };

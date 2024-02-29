@@ -54,11 +54,17 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
 const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>,
   getId: GetId
-): EntityService.Params.Attribute.RelationInputValue<T> => {
+): EntityService.Params.Attribute.RelationInputValue<T> | undefined => {
   const map = transformPrimitive(relation as any, getId);
   if (map) return map;
 
   if (!isObject(relation)) return relation;
+
+  if (!('set' in relation) && !('disconnect' in relation) && !('connect' in relation)) {
+    // The entry id couldn't be found and there are no connection properties in
+    // the relation, therefore we want to remove the relation
+    return undefined;
+  }
 
   // set: id[]
   // what if result of mapPrimitive is undefined?
@@ -152,6 +158,8 @@ const transformDataIdsVisitor = (
           throw new Error(`Document with id "${documentId}" not found`);
         };
 
+        // TODO if its a something to one relation then we cannot allow a
+        // missing id
         const newRelation = transformRelationIdsVisitor(value as any, getId);
         set(key, newRelation as any);
       }

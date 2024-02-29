@@ -14,6 +14,8 @@ import type * as Search from './search';
 // Utils
 import type * as Attribute from './attributes';
 
+export type Locale = string;
+
 export type Pick<
   TSchemaUID extends Common.UID.Schema,
   TKind extends Kind
@@ -42,7 +44,7 @@ export type Pick<
     // Publication State
     [HasMember<TKind, 'status'>, PublicationState.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: string }],
+    [HasMember<TKind, 'locale'>, { locale?: Locale }],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
