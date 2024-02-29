@@ -21,6 +21,7 @@ export const EmailInput = forwardRef<any, InputProps>(
         autoComplete="email"
         disabled={disabled}
         error={field.error}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         id={name}
         hint={hint}

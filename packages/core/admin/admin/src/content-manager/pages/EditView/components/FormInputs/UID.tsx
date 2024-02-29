@@ -246,6 +246,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           </Flex>
         }
         hint={hint}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         name={name}
         onChange={field.onChange}

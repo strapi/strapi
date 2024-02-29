@@ -23,6 +23,7 @@ export const StringInput = forwardRef<any, InputProps>(
         ref={composedRefs}
         disabled={disabled}
         hint={hint}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         name={name}
         error={field.error}

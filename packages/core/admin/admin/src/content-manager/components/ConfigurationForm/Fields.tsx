@@ -226,7 +226,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             </Menu.Trigger>
             <Menu.Content>
               {remainingFields.map((field) => (
-                <Menu.Item key={field.label} onSelect={handleAddField(field)}>
+                <Menu.Item key={field.name} onSelect={handleAddField(field)}>
                   {field.label}
                 </Menu.Item>
               ))}
