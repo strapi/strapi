@@ -1,13 +1,18 @@
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { generateNKeysBetween } from 'fractional-indexing';
 
 import { contentManagerApi } from './api';
 
 import type { EntityService } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 
+interface RelationResult extends Contracts.Relations.RelationResult {
+  __temp_key__: string;
+}
+
 type GetRelationsResponse =
   | {
-      results: Contracts.Relations.RelationResult[];
+      results: Array<RelationResult>;
       pagination: {
         page: NonNullable<EntityService.Params.Pagination.PageNotation['page']>;
         pageSize: NonNullable<EntityService.Params.Pagination.PageNotation['pageSize']>;
@@ -55,17 +60,17 @@ const relationsApi = contentManagerApi.injectEndpoints({
              * Relations will always have unique IDs, so we can therefore assume
              * that we only need to push the new items to the cache.
              */
-            const existingIds = currentCache.results.map((item) => item.id);
+            const existingIds = currentCache.results.map((item) => item.documentId);
             const uniqueNewItems = newItems.results.filter(
-              (item) => !existingIds.includes(item.id)
+              (item) => !existingIds.includes(item.documentId)
             );
-            currentCache.results.push(...uniqueNewItems);
+            currentCache.results.push(...prepareTempKeys(uniqueNewItems, currentCache.results));
             currentCache.pagination = newItems.pagination;
           } else if (newItems.pagination.page === 1) {
             /**
              * We're resetting the relations
              */
-            currentCache.results = newItems.results;
+            currentCache.results = prepareTempKeys(newItems.results);
             currentCache.pagination = newItems.pagination;
           }
         }
@@ -84,7 +89,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
         if ('results' in response && response.results) {
           return {
             ...response,
-            results: response.results,
+            results: prepareTempKeys(response.results.toReversed()),
           };
         } else {
           return response;
@@ -124,9 +129,9 @@ const relationsApi = contentManagerApi.injectEndpoints({
              * Relations will always have unique IDs, so we can therefore assume
              * that we only need to push the new items to the cache.
              */
-            const existingIds = currentCache.results.map((item) => item.id);
+            const existingIds = currentCache.results.map((item) => item.documentId);
             const uniqueNewItems = newItems.results.filter(
-              (item) => !existingIds.includes(item.id)
+              (item) => !existingIds.includes(item.documentId)
             );
             currentCache.results.push(...uniqueNewItems);
             currentCache.pagination = newItems.pagination;
@@ -163,6 +168,26 @@ const relationsApi = contentManagerApi.injectEndpoints({
   }),
 });
 
+/**
+ * @internal
+ * @description Adds a `__temp_key__` to each component and dynamiczone item. This gives us
+ * a stable identifier regardless of it's ids etc. that we can then use for drag and drop.
+ */
+const prepareTempKeys = (
+  relations: Contracts.Relations.RelationResult[],
+  existingRelations: RelationResult[] = []
+) => {
+  const [firstItem] = existingRelations.slice(0);
+
+  const keys = generateNKeysBetween(null, firstItem?.__temp_key__ ?? null, relations.length);
+
+  return relations.map((datum, index) => ({
+    ...datum,
+    __temp_key__: keys[index],
+  }));
+};
+
 const { useGetRelationsQuery, useLazySearchRelationsQuery } = relationsApi;
 
 export { useGetRelationsQuery, useLazySearchRelationsQuery };
+export type { RelationResult };

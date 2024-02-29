@@ -1,7 +1,14 @@
-import { prop, uniq, flow } from 'lodash/fp';
-import { isOperatorOfType, contentTypes } from '@strapi/utils';
-import { type Common, type Entity, type Documents } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { prop, uniq, uniqBy, concat, flow } from 'lodash/fp';
+
+import {
+  isOperatorOfType,
+  contentTypes,
+  relations,
+  convertQueryParams,
+  errors,
+} from '@strapi/utils';
+import type { Entity, Documents, Common } from '@strapi/types';
+
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
@@ -51,6 +58,26 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
+const addStatusToRelations = async (uid: Common.UID.ContentType, relations: RelationEntity[]) => {
+  if (!contentTypes.hasDraftAndPublish(strapi.contentTypes[uid])) {
+    return relations;
+  }
+
+  const documentMetadata = getService('document-metadata');
+  const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(uid, relations);
+
+  return relations.map((relation: RelationEntity) => {
+    const availableStatuses = documentsAvailableStatus.filter(
+      (availableDocument: RelationEntity) => availableDocument.documentId === relation.documentId
+    );
+
+    return {
+      ...relation,
+      status: documentMetadata.getStatus(relation, availableStatuses),
+    };
+  });
+};
+
 export default {
   async extractAndValidateRequestInfo(
     ctx: any,
@@ -78,17 +105,19 @@ export default {
       model,
     });
 
-    const isSourceComponent = sourceSchema.modelType === 'component';
-    if (!isSourceComponent) {
+    const isComponent = sourceSchema.modelType === 'component';
+    if (!isComponent) {
       if (permissionChecker.cannot.read(null, targetField)) {
         return ctx.forbidden();
       }
     }
 
+    let entryId: string | number | null = null;
+
     if (id) {
       const where: Record<string, any> = {};
 
-      if (!isSourceComponent) {
+      if (!isComponent) {
         where.documentId = id;
 
         if (status) {
@@ -126,14 +155,16 @@ export default {
         throw new errors.NotFoundError();
       }
 
-      if (!isSourceComponent) {
+      if (!isComponent) {
         if (permissionChecker.cannot.read(currentEntity, targetField)) {
           throw new errors.ForbiddenError();
         }
       }
+
+      entryId = currentEntity.id;
     }
 
-    const modelConfig = isSourceComponent
+    const modelConfig = isComponent
       ? await getService('components').findConfiguration(sourceSchema)
       : await getService('content-types').findConfiguration(sourceSchema);
 
@@ -157,11 +188,13 @@ export default {
       .service('content-types')
       .isLocalizedContentType(targetSchema);
 
+    // TODO: Locale is always present, should we set it regardless?
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
     }
 
     return {
+      entryId,
       attribute,
       fieldsToSelect,
       mainField,
@@ -173,11 +206,17 @@ export default {
     };
   },
 
-  async find(ctx: any, id: Entity.ID, available: boolean = true) {
+  /**
+   * Used to find new relations to add in a relational field.
+   *
+   * Component and document relations are dealt a bit differently (they don't have a document_id).
+   */
+  async findAvailable(ctx: any) {
+    const { id } = ctx.request.query;
     const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status || null;
+    const status = ctx.request?.query?.status;
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
+    await validateFindAvailable(ctx.request.query);
 
     const {
       targetField,
@@ -190,7 +229,7 @@ export default {
         schema: { uid: targetUid },
         isLocalized: isTargetLocalized,
       },
-    } = validation;
+    } = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
 
     const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
@@ -220,17 +259,12 @@ export default {
     }
 
     if (id) {
-      // If finding available relations we want to exclude the
-      // ids of entities that are already related to the source.
-
-      // If finding existing we want to include the ids of entities that are
-      // already related to the source.
-
-      // We specify the source by entityId for components and by documentId for
-      // content types.
-
-      // We also optionally filter the target relations by the requested
-      // status and locale if provided.
+      /**
+       * Exclude the relations that are already related to the source
+       *
+       * We also optionally filter the target relations by the requested
+       * status and locale if provided.
+       */
       const subQuery = strapi.db.queryBuilder(sourceUid);
 
       // The alias refers to the DB table of the target content type model
@@ -241,18 +275,17 @@ export default {
         [`${alias}.document_id`]: { $notNull: true },
       };
 
-      const isSourceComponent = sourceModelType === 'component';
-      if (isSourceComponent) {
-        // If the source is a component, we need to filter by the component's
-        // numeric entity id
-        where.id = id;
-      } else {
-        // If the source is a content type, we need to filter by document id
+      /**
+       * Content Types -> Specify document id
+       * Components    -> Specify entity id (they don't have a document id)
+       */
+      if (sourceModelType === 'contentType') {
         where.document_id = id;
+      } else {
+        where.id = id;
       }
 
-      // If a status or locale is requested from the source, we need to only
-      // ever find relations that match that status or locale.
+      // Add the status and locale filters if they are provided
       if (status) {
         where[`${alias}.published_at`] = status === 'published' ? { $ne: null } : null;
       }
@@ -260,6 +293,11 @@ export default {
         where[`${alias}.locale`] = locale;
       }
 
+      /**
+       * UI can provide a list of ids to omit,
+       * those are the relations user set in the UI but has not persisted.
+       * We don't want to include them in the available relations.
+       */
       if ((idsToInclude?.length ?? 0) !== 0) {
         where[`${alias}.document_id`].$notIn = idsToInclude;
       }
@@ -271,15 +309,15 @@ export default {
         .getKnexQuery();
 
       addFiltersClause(queryParams, {
-        // We change the operator based on whether we are looking for available or
-        // existing relations
-        id: available ? { $notIn: knexSubQuery } : { $in: knexSubQuery },
+        id: { $notIn: knexSubQuery },
       });
     }
 
+    /**
+     * Apply a filter to the mainField based on the search query and filter operator
+     * searching should be allowed only on mainField for permission reasons
+     */
     if (_q) {
-      // Apply a filter to the mainField based on the search query and filter operator
-      // searching should be allowed only on mainField for permission reasons
       const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
       addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
     }
@@ -291,64 +329,93 @@ export default {
       });
     }
 
-    const res = await strapi.entityService.findPage(
-      targetUid as Common.UID.ContentType,
-      queryParams
-    );
-
-    if (status) {
-      // The result will contain all relations in the requested status, and we don't need to find
-      // the latest status for each.
-
-      ctx.body = {
-        ...res,
-        results: res.results.map((relation) => {
-          return {
-            ...relation,
-            status,
-          };
-        }),
-      };
-      return;
-    }
-
-    // No specific status was requested, we should find the latest available status for each relation
-    const documentMetadata = getService('document-metadata');
-
-    // Get any available statuses for the returned relations
-    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
-      targetUid,
-      res.results
-    );
+    const res = await strapi.db
+      .query(targetUid)
+      .findPage(convertQueryParams.transformParamsToQuery(targetUid, queryParams));
 
     ctx.body = {
       ...res,
-      results: res.results.map((relation) => {
-        const availableStatuses =
-          documentsAvailableStatus.filter(
-            (availableDocument: RelationEntity) =>
-              availableDocument.documentId === relation.documentId
-          ) ?? [];
-
-        return {
-          ...relation,
-          status: documentMetadata.getStatus(relation, availableStatuses),
-        };
-      }),
+      results: await addStatusToRelations(targetUid, res.results),
     };
   },
 
-  async findAvailable(ctx: any) {
-    const { id } = ctx.request.query;
-
-    await validateFindAvailable(ctx.request.query);
-    await this.find(ctx, id, true);
-  },
-
   async findExisting(ctx: any) {
+    const { userAbility } = ctx.state;
     const { id } = ctx.params;
 
     await validateFindExisting(ctx.request.query);
-    await this.find(ctx, id, false);
+
+    const locale = ctx.request?.query?.locale || null;
+    const status = ctx.request?.query?.status;
+
+    const {
+      entryId,
+      attribute,
+      targetField,
+      fieldsToSelect,
+      source: {
+        schema: { uid: sourceUid },
+      },
+      target: {
+        schema: { uid: targetUid },
+      },
+    } = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
+
+    const permissionQuery = await getService('permission-checker')
+      .create({ userAbility, model: targetUid })
+      .sanitizedQuery.read({ fields: fieldsToSelect });
+
+    /**
+     * loadPages can not be used for single relations,
+     * this unifies the loading regardless of it's type
+     *
+     * NOTE: Relations need to be loaded using any db.query method
+     *       to ensure the proper ordering is applied
+     */
+    const dbQuery = strapi.db.query(sourceUid);
+    const loadRelations = relations.isAnyToMany(attribute)
+      ? (...args: Parameters<typeof dbQuery.loadPages>) => dbQuery.loadPages(...args)
+      : (...args: Parameters<typeof dbQuery.load>) =>
+          dbQuery
+            .load(...args)
+            // Ensure response is an array
+            .then((res) => ({ results: res ? [res] : [] }));
+
+    /**
+     * If user does not have access to specific relations (custom conditions),
+     * only the ids of the relations are returned.
+     *
+     * - First query loads all the ids.
+     * - Second one also loads the main field, and excludes forbidden relations.
+     *
+     * The response contains the union of the two queries.
+     */
+    const res = await loadRelations({ id: entryId }, targetField, {
+      select: ['id', 'documentId', 'locale', 'publishedAt'],
+      ordering: 'desc',
+      page: ctx.request.query.page,
+      pageSize: ctx.request.query.pageSize,
+    });
+
+    /**
+     * Add all ids to load in permissionQuery
+     * If any of the relations are not accessible, the permissionQuery will exclude them
+     */
+    const loadedIds = res.results.map((item: any) => item.id);
+    addFiltersClause(permissionQuery, { id: { $in: loadedIds } });
+
+    const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
+      ...convertQueryParams.transformParamsToQuery(targetUid, permissionQuery),
+      ordering: 'desc',
+      page: ctx.request.query.page,
+      pageSize: ctx.request.query.pageSize,
+    });
+
+    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
+
+    ctx.body = {
+      pagination: res.pagination,
+      results: await addStatusToRelations(targetUid, relationsUnion),
+    };
   },
 };
