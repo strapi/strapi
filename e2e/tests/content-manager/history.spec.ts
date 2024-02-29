@@ -16,14 +16,16 @@ describeOnCondition(hasFutureFlag)('History', () => {
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
+      const CREATE_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
+      const HISTORY_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
       // Navigate to the content-manager - collection type - article
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('combobox', { name: 'Select a locale' }).click();
       await page.getByRole('option', { name: 'French (fr)' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
-      await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article/create?plugins\\[i18n\\]\\[locale\\]=fr'
-      );
+      await page.waitForURL(CREATE_URL);
 
       /**
        * Create
@@ -35,18 +37,14 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
       await page.getByRole('link', { name: 'History' }).click();
-      await page.waitForURL(
-        `**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=fr`
-      );
+      await page.waitForURL(HISTORY_URL);
       await expect(titleInput).toHaveValue(frenchTitle);
 
       // Go back to the CM to create a new english entry
       await page.goto('/admin');
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
-      await page.waitForURL(
-        '**/content-manager/collection-types/api::article.article/create?plugins\\[i18n\\]\\[locale\\]=en'
-      );
+      await page.waitForURL(CREATE_URL);
 
       // Create an english version
       const englishTitle = 'Being from Kansas is a pity';
@@ -54,9 +52,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
       await page.getByRole('link', { name: 'History' }).click();
-      await page.waitForURL(
-        `**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=en`
-      );
+      await page.waitForURL(HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
       // Assert the id was added after page load
@@ -128,24 +124,42 @@ describeOnCondition(hasFutureFlag)('History', () => {
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
-      /**
-       * TODO: Test version locales when saving single type locales works
-       */
+      const CREATE_URL =
+        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/create(\?.*)?/;
+      const HISTORY_URL =
+        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
 
       // Navigate to the content-manager - single type - homepage
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Homepage' }).click();
-      await page.waitForURL('**/content-manager/single-types/api::homepage.homepage');
+      await page.getByRole('combobox', { name: 'Locales' }).click();
+      await page.getByRole('option', { name: 'French (fr)' }).click();
 
       /**
        * Create
        */
       const titleInput = await page.getByRole('textbox', { name: 'title' });
-      await titleInput.fill('AFC Richmond');
+      // Create a french version
+      const frenchTitle = 'Paris Saint-Germain';
+      await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
       await page.getByRole('link', { name: 'History' }).click();
-      await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
+      await page.waitForURL(HISTORY_URL);
+      await expect(titleInput).toHaveValue(frenchTitle);
+
+      // Go back to the CM to create a new english entry
+      await page.getByRole('link', { name: 'Back' }).click();
+      await page.getByRole('combobox', { name: 'Locales' }).click();
+      await page.getByRole('option', { name: 'English (en)' }).click();
+
+      // Create an english version
+      const englishTitle = 'AFC Richmond';
+      await titleInput.fill(englishTitle);
+      await page.getByRole('button', { name: 'Save' }).click();
+      // Go to the history page
+      await page.getByRole('link', { name: 'History' }).click();
+      await page.waitForURL(HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
       // Assert the id was added after page load
@@ -156,7 +170,9 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(currentVersion.getByText('(current)')).toBeVisible();
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toBeDisabled();
-      await expect(titleInput).toHaveValue('AFC Richmond');
+      await expect(titleInput).toHaveValue(englishTitle);
+      // Assert only the english versions are available
+      await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
       // Go back to the entry
       await page.getByRole('link', { name: 'Back' }).click();
