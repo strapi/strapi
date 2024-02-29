@@ -98,6 +98,10 @@ const MyLink = () => {
 };
 ```
 
+### NoMedia
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
 ### NotAllowedInput
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase. You can easily replicate this in your own project by using the `TextInput` from `@strapi/design-system`:

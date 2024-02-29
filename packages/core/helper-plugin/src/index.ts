@@ -15,7 +15,6 @@ export * from './components/FilterPopoverURLQuery';
 export * from './components/GenericInput';
 export * from './components/LoadingIndicatorPage';
 export * from './components/NoContent';
-export * from './components/NoMedia';
 export * from './components/NoPermissions';
 export * from './components/PageSizeURLQuery';
 export * from './components/PaginationURLQuery';
