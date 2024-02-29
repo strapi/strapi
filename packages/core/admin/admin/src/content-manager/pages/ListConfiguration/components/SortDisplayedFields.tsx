@@ -5,7 +5,7 @@ import { Menu } from '@strapi/design-system/v2';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useForm } from '../../../components/Form';
+import { useForm } from '../../../../components/Form';
 import { useDoc } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';

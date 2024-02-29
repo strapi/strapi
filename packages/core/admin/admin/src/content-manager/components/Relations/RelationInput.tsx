@@ -23,6 +23,7 @@ import { useIntl } from 'react-intl';
 import { FixedSizeList, FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
+import { composeRefs } from '../../../utils/refs';
 import { ItemTypes } from '../../constants/dragAndDrop';
 import {
   UseDragAndDropOptions,
@@ -30,7 +31,6 @@ import {
   DROP_SENSITIVITY,
 } from '../../hooks/useDragAndDrop';
 import { usePrev } from '../../hooks/usePrev';
-import { composeRefs } from '../../utils/refs';
 import { getTranslation } from '../../utils/translations';
 
 import type { NormalizedRelation } from './utils/normalizeRelations';

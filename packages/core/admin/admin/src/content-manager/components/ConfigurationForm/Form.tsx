@@ -19,11 +19,11 @@ import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import { Form, FormProps, useForm } from '../../../components/Form';
+import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { capitalise } from '../../../utils/strings';
 import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
 import { getTranslation } from '../../utils/translations';
-import { Form, FormProps, useForm } from '../Form';
-import { InputRenderer } from '../FormInputs/Renderer';
 
 import { Fields, FieldsProps, TEMP_FIELD_NAME } from './Fields';
 

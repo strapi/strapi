@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-system';
 
-import { useField } from '../../../../../components/Form';
-import { InputProps } from '../../../../../components/FormInputs/types';
+import { useField } from '../../../../../../components/Form';
+import { InputProps } from '../../../../../../components/FormInputs/types';
 
 import { BlocksEditor } from './BlocksEditor';
 

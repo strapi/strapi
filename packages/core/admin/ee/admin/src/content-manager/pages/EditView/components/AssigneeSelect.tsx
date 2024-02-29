@@ -2,7 +2,7 @@ import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
 import { useAPIErrorHandler, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { useField } from '../../../../../../../admin/src/content-manager/components/Form';
+import { useField } from '../../../../../../../admin/src/components/Form';
 import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
 import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';

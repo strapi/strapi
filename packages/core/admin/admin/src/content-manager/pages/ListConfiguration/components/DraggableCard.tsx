@@ -6,10 +6,10 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import { useComposedRefs } from '../../../../utils/refs';
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../constants/dragAndDrop';
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
-import { useComposedRefs } from '../../../utils/refs';
 import { getTranslation } from '../../../utils/translations';
 
 import { EditFieldForm } from './EditFieldForm';

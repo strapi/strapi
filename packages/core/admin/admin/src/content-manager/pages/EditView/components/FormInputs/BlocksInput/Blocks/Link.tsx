@@ -14,7 +14,7 @@ import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
-import { composeRefs } from '../../../../../../utils/refs';
+import { composeRefs } from '../../../../../../../utils/refs';
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
 import { isLinkNode, type Block } from '../utils/types';

@@ -13,7 +13,6 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  Form,
   GenericInput,
   LoadingIndicatorPage,
   SettingsPageTitle,
@@ -25,8 +24,7 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Formik, FormikHelpers } from 'formik';
-import omit from 'lodash/omit';
+import { Formik, Form, FormikHelpers } from 'formik';
 import pick from 'lodash/pick';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useLocation, useMatch, useNavigate } from 'react-router-dom';
@@ -177,13 +175,10 @@ const EditPage = () => {
     confirmPassword: '',
   } satisfies InitialData;
 
-  /**
-   * TODO: Convert this to react-query.
-   */
   const handleSubmit = async (body: InitialData, actions: FormikHelpers<InitialData>) => {
     lockApp?.();
 
-    const { confirmPassword, password, ...bodyRest } = body;
+    const { confirmPassword: _confirmPassword, password, ...bodyRest } = body;
 
     const res = await updateUser({
       id,

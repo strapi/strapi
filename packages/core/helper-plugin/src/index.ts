@@ -13,7 +13,6 @@ export * from './components/EmptyStateLayout';
 export * from './components/EmptyBodyTable';
 export * from './components/FilterListURLQuery';
 export * from './components/FilterPopoverURLQuery';
-export * from './components/Form';
 export * from './components/GenericInput';
 export * from './components/InjectionZone';
 export * from './components/LoadingIndicatorPage';
