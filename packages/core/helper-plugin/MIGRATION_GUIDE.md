@@ -35,6 +35,27 @@ import { Form } from '@strapi/strapi/admin';
 
 Users should note that any use of the Formik library will no longer work & insted should look at the documentation for the `Form` component.
 
+### InjectionZone
+
+This component has been removed and not replaced. However, you can easily replicate this in your own project by using the `useStrapiApp` hook:
+
+```tsx
+const MyComponent = ({ area, ...compProps }) => {
+  const { getPlugin } = useStrapiApp();
+
+  const [pluginName, page, position] = area.split('.');
+
+  const plugin = getPlugin(pluginName);
+  const components = plugin?.getInjectedComponents(page, position);
+
+  if (!plugin || !components) {
+    return null;
+  }
+
+  return components.map(({ name, Component }) => <Component key={name} {...props} />);
+};
+```
+
 ### Link
 
 This was aliasing the design-system and using the `as` prop with `react-router-dom`. You should import the component from there:
