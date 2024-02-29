@@ -6,7 +6,7 @@ import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
 import { createContext } from '../../../../../../components/Context';
-import { InputProps, useField, useForm } from '../../../../../components/Form';
+import { InputProps, useField, useForm } from '../../../../../../components/Form';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';

@@ -16,7 +16,6 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
   translatedErrors,
@@ -27,7 +26,7 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 

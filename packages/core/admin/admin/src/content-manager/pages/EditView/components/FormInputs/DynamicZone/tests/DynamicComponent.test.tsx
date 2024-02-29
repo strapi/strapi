@@ -1,7 +1,7 @@
 import { screen, fireEvent, render as renderRTL } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { Form } from '../../../../../../components/Form';
+import { Form } from '../../../../../../../components/Form';
 import { DynamicComponent, DynamicComponentProps } from '../DynamicComponent';
 
 import { dynamicComponentsByCategory } from './fixtures';

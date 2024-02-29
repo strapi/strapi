@@ -23,8 +23,8 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { Blocker, Form } from '../../../components/Form';
 import { useOnce } from '../../../hooks/useOnce';
-import { Blocker, Form } from '../../components/Form';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';

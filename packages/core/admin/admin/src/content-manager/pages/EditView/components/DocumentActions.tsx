@@ -23,9 +23,9 @@ import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
 
+import { useForm } from '../../../../components/Form';
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
-import { useForm } from '../../../components/Form';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';

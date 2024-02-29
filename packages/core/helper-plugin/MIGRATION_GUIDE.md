@@ -17,6 +17,20 @@ import { DateTimePicker } from '@strapi/helper-plugin';
 import { DateTimePicker } from '@strapi/design-system';
 ```
 
+### Form
+
+This component aliased `Formik`, something we're working towards removing. The `Form` component and it's sibling exports from `@strapi/strapi/admin` should be used instead:
+
+```ts
+// Before
+import { Form } from '@strapi/helper-plugin';
+
+// After
+import { Form } from '@strapi/strapi/admin';
+```
+
+Users should note that any use of the Formik library will no longer work & insted should look at the documentation for the `Form` component.
+
 ### Link
 
 This was aliasing the design-system and using the `as` prop with `react-router-dom`. You should import the component from there:

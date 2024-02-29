@@ -8,7 +8,10 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-export const EmailInput = forwardRef<any, InputProps>(
+/**
+ * TODO: fix the ref type when the design system is fixed.
+ */
+export const StringInput = forwardRef<any, InputProps>(
   ({ disabled, label, hint, name, placeholder, required }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField(name);
@@ -18,19 +21,17 @@ export const EmailInput = forwardRef<any, InputProps>(
     return (
       <TextInput
         ref={composedRefs}
-        autoComplete="email"
         disabled={disabled}
-        error={field.error}
-        label={label}
-        id={name}
         hint={hint}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
+        label={label}
         name={name}
+        error={field.error}
+        defaultValue={field.initialValue}
         onChange={field.onChange}
         placeholder={placeholder}
         required={required}
-        type="email"
-        defaultValue={field.initialValue}
-        value={field.value}
+        value={field.value ?? ''}
       />
     );
   }

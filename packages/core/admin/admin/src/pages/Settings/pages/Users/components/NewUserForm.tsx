@@ -14,7 +14,6 @@ import {
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import {
-  Form,
   GenericInput,
   useNotification,
   useOverlayBlocker,
@@ -22,7 +21,7 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 

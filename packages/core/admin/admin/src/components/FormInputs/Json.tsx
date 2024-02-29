@@ -21,6 +21,7 @@ export const JsonInput = forwardRef<any, InputProps>(
     return (
       <JSONInputImpl
         ref={composedRefs}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         value={field.value}
         error={field.error}

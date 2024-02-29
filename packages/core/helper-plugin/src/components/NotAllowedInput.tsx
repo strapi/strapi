@@ -10,7 +10,7 @@ import type { Attribute } from '@strapi/types';
 interface NotAllowedInputProps {
   disabled?: boolean;
   hint?: ReactNode;
-  label: string;
+  label: ReactNode;
   name: string;
   placeholder?: string;
   required?: boolean;
@@ -29,6 +29,7 @@ const NotAllowedInput = ({ hint, label, required, name }: NotAllowedInputProps) 
   return (
     <TextInput
       disabled
+      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
       label={label}
       id={name}
       hint={hint}

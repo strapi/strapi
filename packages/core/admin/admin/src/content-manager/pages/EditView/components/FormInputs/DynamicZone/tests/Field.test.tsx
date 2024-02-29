@@ -1,7 +1,7 @@
 import { act, render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { Form } from '../../../../../../components/Form';
+import { Form } from '../../../../../../../components/Form';
 import { DynamicZone, DynamicZoneProps } from '../Field';
 
 const TEST_NAME = 'DynamicZoneComponent';

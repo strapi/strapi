@@ -23,6 +23,7 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
         checked={field.value === null ? null : field.value || false}
         disabled={disabled}
         hint={hint}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         error={field.error}
         /**

@@ -6,7 +6,7 @@ import { PlusCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useField } from '../../../../../components/Form';
+import { useField } from '../../../../../../components/Form';
 import { getTranslation } from '../../../../../utils/translations';
 
 interface InitializerProps {
