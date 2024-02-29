@@ -8,6 +8,29 @@ const getEnvNum = (envVar, defaultValue) => {
   return defaultValue;
 };
 
+const getEnvString = (envVar, defaultValue) => {
+  if (envVar?.trim().length) {
+    return envVar;
+  }
+
+  return defaultValue;
+};
+
+const getEnvBool = (envVar, defaultValue) => {
+  if (!envVar) {
+    return defaultValue;
+  }
+  const val = envVar.toLowerCase();
+  if (['true', 't', '1', 'on'].includes(val)) {
+    return true;
+  }
+  if (['false', 'f', '0', 'off'].includes(val)) {
+    return false;
+  }
+
+  return defaultValue;
+};
+
 /**
  * @typedef ConfigOptions
  * @type {{ port: number; testDir: string; appDir: string }}
@@ -28,7 +51,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 30 * 1000),
+    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 10 * 1000),
   },
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -46,13 +69,22 @@ const createConfig = ({ port, testDir, appDir }) => ({
     baseURL: `http://127.0.0.1:${port}`,
 
     /* Default time each action such as `click()` can take to 20s */
-    actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
+    actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 15 * 1000),
 
     /* Collect trace when a test failed on the CI. See https://playwright.dev/docs/trace-viewer
        Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
        because the Strapi server restarts every time a new file (trace) is created.
     */
-    trace: process.env.CI ? 'retain-on-failure' : 'off',
+    trace: 'retain-on-failure',
+    video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
+      ? {
+          mode: 'retain-on-failure', // 'retain-on-failure' to save videos only for failed tests
+          size: {
+            width: 1280,
+            height: 720,
+          },
+        }
+      : 'off',
   },
 
   /* Configure projects for major browsers */
@@ -80,7 +112,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
   ],
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  outputDir: 'test-results/',
+  outputDir: getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../test-results/'), // in the test-apps/e2e dir, to avoid writing files to the running Strapi project dir
 
   /* Run your local dev server before starting the tests */
   webServer: {
