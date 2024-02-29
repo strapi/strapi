@@ -77,6 +77,18 @@ const MyLink = () => {
 };
 ```
 
+### Status
+
+This component should be imported from the `@strapi/design-system` package:
+
+```ts
+// Before
+import { Status } from '@strapi/helper-plugin';
+
+// After
+import { Status } from '@strapi/design-system';
+```
+
 ## Content Manager
 
 ### contentManagementUtilRemoveFieldsFromData

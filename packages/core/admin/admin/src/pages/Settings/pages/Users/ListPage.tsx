@@ -8,6 +8,7 @@ import {
   Flex,
   Typography,
   Box,
+  Status,
 } from '@strapi/design-system';
 import {
   DynamicTable,
@@ -18,7 +19,6 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
-  Status,
   PageSizeURLQuery,
   PaginationURLQuery,
   CheckPagePermissions,
@@ -280,15 +280,20 @@ const TABLE_HEADERS = [
     cellFormatter({ isActive }, { formatMessage }) {
       return (
         <Flex>
-          <Status variant={isActive ? 'success' : 'danger'} />
-          <Typography textColor="neutral800">
+          <Status
+            size="S"
+            borderWidth={0}
+            background="transparent"
+            color="neutral800"
+            variant={isActive ? 'success' : 'danger'}
+          >
             {formatMessage({
               id: isActive
                 ? 'Settings.permissions.users.active'
                 : 'Settings.permissions.users.inactive',
               defaultMessage: isActive ? 'Active' : 'Inactive',
             })}
-          </Typography>
+          </Status>
         </Flex>
       );
     },

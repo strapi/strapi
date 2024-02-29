@@ -25,7 +25,6 @@ export * from './components/ReactSelect';
 export * from './components/RelativeTime';
 export * from './components/SearchURLQuery';
 export * from './components/SettingsPageTitle';
-export * from './components/Status';
 
 /* -------------------------------------------------------------------------------------------------
  * Features
