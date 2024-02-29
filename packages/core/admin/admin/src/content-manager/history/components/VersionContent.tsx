@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 
-import { Form } from '../../components/Form';
+import { Form } from '../../../components/Form';
 import {
   InputRenderer,
   type InputRendererProps,
