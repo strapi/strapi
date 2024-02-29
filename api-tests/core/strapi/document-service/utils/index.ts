@@ -38,11 +38,3 @@ export const findAuthorsDb = async (where: any) => {
 export const findPublishedAuthorsDb = async (documentId) => {
   return findAuthorsDb({ documentId, publishedAt: { $notNull: true } });
 };
-
-export const switchIdForDocumentId = <T extends Record<string, any>>(
-  output: T
-): Omit<T, 'documentId' | 'id'> & { id: string } => {
-  if (!output) return output as any;
-  const { id, documentId, ...rest } = output;
-  return { ...rest, id: documentId };
-};
