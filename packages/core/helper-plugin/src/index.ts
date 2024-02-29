@@ -6,7 +6,6 @@ export * from './components/AnErrorOccurred';
 export * from './components/CheckPagePermissions';
 export * from './components/CheckPermissions';
 export * from './components/ConfirmDialog';
-export * from './components/ContentBox';
 export * from './components/DynamicTable';
 export * from './components/Table';
 export * from './components/EmptyStateLayout';

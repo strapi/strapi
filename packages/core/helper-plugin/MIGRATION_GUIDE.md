@@ -5,6 +5,10 @@ It is written in alphabetical order grouped by domain based on _every_ export th
 
 ## Components
 
+### ContentBox
+
+This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
+
 ### DateTimePicker
 
 This was aliasing the design-system. You should import the component from there:
