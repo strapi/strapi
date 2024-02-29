@@ -1,5 +1,6 @@
 // @ts-check
 const { devices } = require('@playwright/test');
+const { parseType } = require('@strapi/utils');
 
 const getEnvNum = (envVar, defaultValue) => {
   if (envVar !== undefined && envVar !== null) {
@@ -20,15 +21,8 @@ const getEnvBool = (envVar, defaultValue) => {
   if (!envVar) {
     return defaultValue;
   }
-  const val = envVar.toLowerCase();
-  if (['true', 't', '1', 'on'].includes(val)) {
-    return true;
-  }
-  if (['false', 'f', '0', 'off'].includes(val)) {
-    return false;
-  }
 
-  return defaultValue;
+  return parseType({ type: 'boolean', value: envVar.toLowerCase() });
 };
 
 /**
