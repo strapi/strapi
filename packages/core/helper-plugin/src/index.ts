@@ -19,7 +19,6 @@ export * from './components/NoMedia';
 export * from './components/NoPermissions';
 export * from './components/PageSizeURLQuery';
 export * from './components/PaginationURLQuery';
-export * from './components/ReactSelect';
 export * from './components/RelativeTime';
 export * from './components/SearchURLQuery';
 

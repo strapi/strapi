@@ -112,6 +112,10 @@ const MyComponent = (props) => {
 };
 ```
 
+### ReactSelect
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
 ### SettingsPageTitle
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
