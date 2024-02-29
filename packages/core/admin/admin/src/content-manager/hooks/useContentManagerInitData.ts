@@ -57,7 +57,7 @@ const useContentManagerInitData = () => {
       } = await get<Contracts.Init.GetInitData.Response>('/content-manager/init');
       notifyStatus(
         formatMessage({
-          id: getTranslation('App.schemas.data-loaded'),
+          id: getTranslation('content-manager.App.schemas.data-loaded'),
           defaultMessage: 'The schemas have been successfully loaded.',
         })
       );

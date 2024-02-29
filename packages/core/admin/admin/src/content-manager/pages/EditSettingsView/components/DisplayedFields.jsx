@@ -21,7 +21,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
           <Box>
             <Typography fontWeight="bold">
               {formatMessage({
-                id: getTranslation('containers.ListPage.displayedFields'),
+                id: getTranslation('content-manager.containers.ListPage.displayedFields'),
                 defaultMessage: 'Displayed fields',
               })}
             </Typography>
@@ -51,7 +51,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
               variant="secondary"
             >
               {formatMessage({
-                id: getTranslation('containers.SettingPage.add.field'),
+                id: getTranslation('content-manager.containers.SettingPage.add.field'),
                 defaultMessage: 'Insert another field',
               })}
             </Menu.Trigger>

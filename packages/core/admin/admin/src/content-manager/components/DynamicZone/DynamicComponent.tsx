@@ -90,7 +90,7 @@ const DynamicComponent = ({
 
   if (fieldsErrors.length > 0) {
     errorMessage = formatMessage({
-      id: getTranslation('components.DynamicZone.error-message'),
+      id: getTranslation('content-manager.components.DynamicZone.error-message'),
       defaultMessage: 'The component contains error(s)',
     });
   }
@@ -126,7 +126,7 @@ const DynamicComponent = ({
         noBorder
         label={formatMessage(
           {
-            id: getTranslation('components.DynamicZone.delete-label'),
+            id: getTranslation('content-manager.components.DynamicZone.delete-label'),
             defaultMessage: 'Delete {name}',
           },
           { name: friendlyName }
@@ -144,7 +144,7 @@ const DynamicComponent = ({
         data-handler-id={handlerId}
         ref={dragRef}
         label={formatMessage({
-          id: getTranslation('components.DragHandle-label'),
+          id: getTranslation('content-manager.components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
         onKeyDown={handleKeyDown}

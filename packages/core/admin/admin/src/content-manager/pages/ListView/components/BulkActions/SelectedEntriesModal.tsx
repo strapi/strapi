@@ -326,7 +326,7 @@ const SelectedEntriesModalContent = ({
     if (publishedCount) {
       return formatMessage(
         {
-          id: getTranslation('containers.ListPage.selectedEntriesModal.publishedCount'),
+          id: getTranslation('content-manager.containers.ListPage.selectedEntriesModal.publishedCount'),
           defaultMessage:
             '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
         },
@@ -340,7 +340,7 @@ const SelectedEntriesModalContent = ({
 
     return formatMessage(
       {
-        id: getTranslation('containers.ListPage.selectedEntriesModal.selectedCount'),
+        id: getTranslation('content-manager.containers.ListPage.selectedEntriesModal.selectedCount'),
         defaultMessage:
           '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
       },
@@ -366,7 +366,7 @@ const SelectedEntriesModalContent = ({
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
+            id: getTranslation('content-manager.containers.ListPage.selectedEntriesModal.title'),
             defaultMessage: 'Publish entries',
           })}
         </Typography>

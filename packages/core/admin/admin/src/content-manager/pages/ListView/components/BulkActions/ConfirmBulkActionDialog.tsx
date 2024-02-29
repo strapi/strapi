@@ -157,7 +157,7 @@ const ConfirmDialogPublishAll = ({
             {countDraftRelations > 0 &&
               formatMessage(
                 {
-                  id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
+                  id: getTranslation(`content-manager.popUpwarning.warning.bulk-has-draft-relations.message`),
                   defaultMessage:
                     '<b>{count} {count, plural, one { relation } other { relations } } out of {entities} { entities, plural, one { entry } other { entries } } {count, plural, one { is } other { are } }</b> not published yet and might lead to unexpected behavior. ',
                 },
@@ -168,7 +168,7 @@ const ConfirmDialogPublishAll = ({
                 }
               )}
             {formatMessage({
-              id: getTranslation('popUpWarning.bodyMessage.contentType.publish.all'),
+              id: getTranslation('content-manager.popUpWarning.bodyMessage.contentType.publish.all'),
               defaultMessage: 'Are you sure you want to publish these entries?',
             })}
           </Typography>

@@ -195,7 +195,7 @@ const DraggableCard = ({
               as="span"
               aria-label={formatMessage(
                 {
-                  id: getTranslation('components.DraggableCard.move.field'),
+                  id: getTranslation('content-manager.components.DraggableCard.move.field'),
                   defaultMessage: 'Move {item}',
                 },
                 { item: labelField }
@@ -217,7 +217,7 @@ const DraggableCard = ({
               }}
               aria-label={formatMessage(
                 {
-                  id: getTranslation('components.DraggableCard.edit.field'),
+                  id: getTranslation('content-manager.components.DraggableCard.edit.field'),
                   defaultMessage: 'Edit {item}',
                 },
                 { item: labelField }
@@ -231,7 +231,7 @@ const DraggableCard = ({
               data-testid={`delete-${name}`}
               aria-label={formatMessage(
                 {
-                  id: getTranslation('components.DraggableCard.delete.field'),
+                  id: getTranslation('content-manager.components.DraggableCard.delete.field'),
                   defaultMessage: 'Delete {item}',
                 },
                 { item: labelField }

@@ -63,7 +63,7 @@ const DeleteLink = ({ onDelete }: DeleteLinkProps) => {
     <>
       <Button onClick={toggleWarningDelete} size="S" startIcon={<Trash />} variant="danger-light">
         {formatMessage({
-          id: getTranslation('containers.Edit.delete-entry'),
+          id: getTranslation('content-manager.containers.Edit.delete-entry'),
           defaultMessage: 'Delete this entry',
         })}
       </Button>

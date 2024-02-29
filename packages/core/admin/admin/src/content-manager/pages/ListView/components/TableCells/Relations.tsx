@@ -116,7 +116,7 @@ const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationM
           <Menu.Item disabled>
             <Loader small>
               {formatMessage({
-                id: getTranslation('ListViewTable.relation-loading'),
+                id: getTranslation('content-manager.ListViewTable.relation-loading'),
                 defaultMessage: 'Relations are loading',
               })}
             </Loader>
@@ -141,7 +141,7 @@ const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationM
               <Menu.Item
                 aria-disabled
                 aria-label={formatMessage({
-                  id: getTranslation('ListViewTable.relation-more'),
+                  id: getTranslation('content-manager.ListViewTable.relation-more'),
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >

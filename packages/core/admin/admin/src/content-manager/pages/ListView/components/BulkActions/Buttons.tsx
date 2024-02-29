@@ -34,7 +34,7 @@ const ConfirmDialogUnpublishAll = ({
         <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: getTranslation('popUpWarning.bodyMessage.contentType.unpublish.all'),
+              id: getTranslation('content-manager.popUpWarning.bodyMessage.contentType.unpublish.all'),
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
@@ -78,7 +78,7 @@ const ConfirmDialogDeleteAll = ({
         <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: getTranslation('popUpWarning.bodyMessage.contentType.delete.all'),
+              id: getTranslation('content-manager.popUpWarning.bodyMessage.contentType.delete.all'),
               defaultMessage: 'Are you sure you want to delete these entries?',
             })}
           </Typography>

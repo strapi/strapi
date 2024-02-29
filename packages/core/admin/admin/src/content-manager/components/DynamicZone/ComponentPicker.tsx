@@ -57,7 +57,7 @@ const ComponentPicker = ({
       <Flex justifyContent="center">
         <Typography fontWeight="bold" textColor="neutral600">
           {formatMessage({
-            id: getTranslation('components.DynamicZone.ComponentPicker-label'),
+            id: getTranslation('content-manager.components.DynamicZone.ComponentPicker-label'),
             defaultMessage: 'Pick one component',
           })}
         </Typography>

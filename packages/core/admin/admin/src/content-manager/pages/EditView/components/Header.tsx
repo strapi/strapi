@@ -49,7 +49,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
     (isCreatingEntry && Object.keys(modifiedData).length > 0);
 
   const createEntryIntlTitle = formatMessage({
-    id: getTranslation('containers.Edit.pluginHeader.title.new'),
+    id: getTranslation('content-manager.containers.Edit.pluginHeader.title.new'),
     defaultMessage: 'Create an entry',
   });
 
@@ -75,7 +75,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
         )}
         <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
           {formatMessage({
-            id: getTranslation('containers.Edit.submit'),
+            id: getTranslation('content-manager.content-manager.containers.Edit.submit'),
             defaultMessage: 'Save',
           })}
         </Button>
@@ -111,7 +111,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
         <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
           <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
             {formatMessage({
-              id: getTranslation('containers.Edit.submit'),
+              id: getTranslation('content-manager.content-manager.containers.Edit.submit'),
               defaultMessage: 'Save',
             })}
           </Button>
@@ -128,7 +128,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
   };
 
   const subtitle = `${formatMessage({
-    id: getTranslation('api.id'),
+    id: getTranslation('content-manager.api.id'),
     defaultMessage: 'API ID',
     // @ts-expect-error – issue comes from the context not having the correct layout from the admin.
   })}: ${layout?.apiID}`;
@@ -172,7 +172,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage({
-                  id: getTranslation('popUpWarning.warning.unpublish'),
+                  id: getTranslation('content-manager.popUpWarning.warning.unpublish'),
                   defaultMessage: 'Unpublish this content will automatically change it to a draft.',
                 })}
               </Typography>
@@ -180,7 +180,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage({
-                  id: getTranslation('popUpWarning.warning.unpublish-question'),
+                  id: getTranslation('content-manager.content-manager.popUpWarning.warning.unpublish-question'),
                   defaultMessage: 'Are you sure you want to unpublish it?',
                 })}
               </Typography>
@@ -210,7 +210,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
         // @ts-expect-error – Context issue with it living in the helper-plugin
         onClose={onPublishPromptDismissal}
         title={formatMessage({
-          id: getTranslation(`popUpWarning.warning.has-draft-relations.title`),
+          id: getTranslation(`content-manager.popUpWarning.warning.has-draft-relations.title`),
           defaultMessage: 'Confirmation',
         })}
         labelledBy="confirmation"
@@ -225,7 +225,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
               {/* @ts-expect-error – this is an issue with rendering a component with the formatMessage helper, perhaps a mis-match in types? */}
               {formatMessage(
                 {
-                  id: getTranslation(`popUpwarning.warning.has-draft-relations.message`),
+                  id: getTranslation(`content-manager.popUpwarning.warning.has-draft-relations.message`),
                   defaultMessage:
                     '<b>{count, plural, one { relation is} other { relations are}}</b> not published yet and might lead to unexpected behavior.',
                 },
@@ -237,7 +237,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
             </Typography>
             <Typography textAlign="center" id="confirm-description">
               {formatMessage({
-                id: getTranslation('popUpWarning.warning.publish-question'),
+                id: getTranslation('content-manager.popUpWarning.warning.publish-question'),
                 defaultMessage: 'Do you still want to publish?',
               })}
             </Typography>
@@ -255,7 +255,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
           endAction={
             <Button variant="success" onClick={onPublish}>
               {formatMessage({
-                id: getTranslation('popUpwarning.warning.has-draft-relations.button-confirm'),
+                id: getTranslation('content-manager.popUpwarning.warning.has-draft-relations.button-confirm'),
                 defaultMessage: 'Publish',
               })}
             </Button>

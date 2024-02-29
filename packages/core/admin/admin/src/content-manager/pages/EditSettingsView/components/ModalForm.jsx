@@ -86,7 +86,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
             meta === 'mainField'
               ? formatMessage({
                   id: getTranslation(
-                    'containers.SettingPage.editSettings.relation-field.description'
+                    'content-manager.containers.SettingPage.editSettings.relation-field.description'
                   ),
                 })
               : ''

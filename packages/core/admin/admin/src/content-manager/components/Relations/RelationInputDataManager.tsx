@@ -272,7 +272,7 @@ const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.reorder'),
+          id: getTranslation('components.Blocks.dnd.reorder'),
           defaultMessage: '{item}, moved. New position in list: {position}.',
         },
         {
@@ -295,7 +295,7 @@ const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.grab-item'),
+          id: getTranslation('content-manager.dnd.grab-item'),
           defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
         },
         {
@@ -312,7 +312,7 @@ const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.drop-item'),
+          id: getTranslation('content-manager.dnd.drop-item'),
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
@@ -329,7 +329,7 @@ const RelationInputDataManager = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.cancel-item'),
+          id: getTranslation('content-manager.dnd.cancel-item'),
           defaultMessage: '{item}, dropped. Re-order cancelled.',
         },
         {
@@ -375,7 +375,7 @@ const RelationInputDataManager = ({
       description={description}
       disabled={isDisabled}
       iconButtonAriaLabel={formatMessage({
-        id: getTranslation('components.RelationInput.icon-button-aria-label'),
+        id: getTranslation('content-manager.components.RelationInput.icon-button-aria-label'),
         defaultMessage: 'Drag',
       })}
       id={name}
@@ -387,27 +387,27 @@ const RelationInputDataManager = ({
       labelLoadMore={
         !isCreatingEntry || isCloningEntry
           ? formatMessage({
-              id: getTranslation('relation.loadMore'),
+              id: getTranslation('content-manager.relation.loadMore'),
               defaultMessage: 'Load More',
             })
           : undefined
       }
       labelDisconnectRelation={formatMessage({
-        id: getTranslation('relation.disconnect'),
+        id: getTranslation('content-manager.relation.disconnect'),
         defaultMessage: 'Remove',
       })}
       listAriaDescription={formatMessage({
-        id: getTranslation('dnd.instructions'),
+        id: getTranslation('content-manager.dnd.instructions'),
         defaultMessage: `Press spacebar to grab and re-order`,
       })}
       liveText={liveText}
       loadingMessage={formatMessage({
-        id: getTranslation('relation.isLoading'),
+        id: getTranslation('content-manager.relation.isLoading'),
         defaultMessage: 'Relations are loading',
       })}
       name={name}
       noRelationsMessage={formatMessage({
-        id: getTranslation('relation.notAvailable'),
+        id: getTranslation('content-manager.relation.notAvailable'),
         defaultMessage: 'No relations available',
       })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
@@ -422,18 +422,18 @@ const RelationInputDataManager = ({
       onSearchNextPage={() => handleSearchMore()}
       placeholder={formatMessage(
         placeholder || {
-          id: getTranslation('relation.add'),
+          id: getTranslation('content-manager.relation.add'),
           defaultMessage: 'Add relation',
         }
       )}
       publicationStateTranslations={{
         [PUBLICATION_STATES.DRAFT]: formatMessage({
-          id: getTranslation('relation.publicationState.draft'),
+          id: getTranslation('content-manager.relation.publicationState.draft'),
           defaultMessage: 'Draft',
         }),
 
         [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-          id: getTranslation('relation.publicationState.published'),
+          id: getTranslation('content-manager.relation.publicationState.published'),
           defaultMessage: 'Published',
         }),
       }}

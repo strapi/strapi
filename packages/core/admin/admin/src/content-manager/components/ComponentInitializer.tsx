@@ -37,7 +37,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }: ComponentInitializ
           <Flex justifyContent="center">
             <Typography textColor="primary600" variant="pi" fontWeight="bold">
               {formatMessage({
-                id: getTranslation('components.empty-repeatable'),
+                id: getTranslation('content-manager.components.empty-repeatable'),
                 defaultMessage: 'No entry yet. Click on the button below to add one.',
               })}
             </Typography>

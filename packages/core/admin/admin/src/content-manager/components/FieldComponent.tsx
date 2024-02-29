@@ -178,7 +178,7 @@ const FieldComponent = ({
         {showResetComponent && (
           <IconButton
             label={formatMessage({
-              id: getTranslation('components.reset-entry'),
+              id: getTranslation('content-manager.components.reset-entry'),
               defaultMessage: 'Reset Entry',
             })}
             icon={<Trash />}

@@ -268,7 +268,7 @@ const ContentTypeFormWrapper = ({
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.delete') },
+          message: { id: getTranslation('content-manager.success.record.delete') },
         });
 
         trackUsage('didDeleteEntry', trackerProperty);
@@ -335,7 +335,7 @@ const ContentTypeFormWrapper = ({
         trackUsage('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          message: { id: getTranslation('content-manager.content-manager.success.record.save') },
         });
 
         setCurrentStep('contentManager.success');
@@ -437,7 +437,7 @@ const ContentTypeFormWrapper = ({
 
       toggleNotification({
         type: 'success',
-        message: { id: getTranslation('success.record.publish') },
+        message: { id: getTranslation('content-manager.success.record.publish') },
       });
 
       return Promise.resolve(data);
@@ -482,7 +482,7 @@ const ContentTypeFormWrapper = ({
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save') },
+          message: { id: getTranslation('content-manager.content-manager.success.record.save') },
         });
 
         // TODO: need to find a better place, or a better abstraction
@@ -539,7 +539,7 @@ const ContentTypeFormWrapper = ({
       trackUsage('didUnpublishEntry');
       toggleNotification({
         type: 'success',
-        message: { id: getTranslation('success.record.unpublish') },
+        message: { id: getTranslation('content-manager.success.record.unpublish') },
       });
 
       dispatch(submitSucceeded(cleanReceivedData(data)));

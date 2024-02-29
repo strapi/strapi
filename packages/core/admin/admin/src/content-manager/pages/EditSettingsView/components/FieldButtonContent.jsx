@@ -31,7 +31,7 @@ const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children })
           <CustomIconButton
             label={formatMessage(
               {
-                id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
+                id: getTranslation('content-manager.containers.ListSettingsView.modal-form.edit-label'),
                 defaultMessage: `Edit {fieldName}`,
               },
               { fieldName: children }

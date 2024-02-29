@@ -388,11 +388,11 @@ const Option = ({
   if (publicationState) {
     const isDraft = publicationState === 'draft';
     const draftMessage = {
-      id: getTranslation('components.Select.draft-info-title'),
+      id: getTranslation('content-manager.components.Select.draft-info-title'),
       defaultMessage: 'State: Draft',
     };
     const publishedMessage = {
-      id: getTranslation('components.Select.publish-info-title'),
+      id: getTranslation('content-manager.components.Select.publish-info-title'),
       defaultMessage: 'State: Published',
     };
     const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);

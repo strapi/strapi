@@ -21,7 +21,7 @@ const getInputProps = (fieldName) => {
 
   const labelId =
     fieldName === 'mainField'
-      ? getTranslation('containers.SettingPage.editSettings.entry.title')
+      ? getTranslation('content-manager.containers.SettingPage.editSettings.entry.title')
       : getTranslation(`form.Input.${fieldName}`);
 
   return { type, label: { id: labelId } };

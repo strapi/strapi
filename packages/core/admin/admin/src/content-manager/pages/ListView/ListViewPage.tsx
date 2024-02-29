@@ -374,7 +374,7 @@ const ListViewPage = ({
 
         toggleNotification({
           type: 'warning',
-          message: { id: getTranslation('error.model.fetch') },
+          message: { id: getTranslation('content-manager.error.model.fetch') },
         });
       },
       onSuccess({ pagination, results }) {
@@ -397,7 +397,7 @@ const ListViewPage = ({
         notifyStatus(
           formatMessage(
             {
-              id: getTranslation('utils.data-loaded'),
+              id: getTranslation('content-manager.utils.data-loaded'),
               defaultMessage:
                 '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
             },
@@ -483,7 +483,7 @@ const ListViewPage = ({
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.delete') },
+          message: { id: getTranslation('content-manager.success.record.delete') },
         });
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -504,7 +504,7 @@ const ListViewPage = ({
   };
 
   const defaultHeaderLayoutTitle = formatMessage({
-    id: getTranslation('header.name'),
+    id: getTranslation('list.table.header.name'),
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
@@ -530,11 +530,11 @@ const ListViewPage = ({
           metadatas: {
             ...header.metadatas,
             label: formatMessage({
-              id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
+              id: getTranslation(`containers.ListPage.table-headers.${list.table.header.name}`),
               defaultMessage: header.metadatas.label,
             }),
           },
-          name: `${header.name}.${header.metadatas.mainField?.name ?? ''}`,
+          name: `${list.table.header.name}.${header.metadatas.mainField?.name ?? ''}`,
         } satisfies TableHeader;
       }
 
@@ -543,7 +543,7 @@ const ListViewPage = ({
         metadatas: {
           ...header.metadatas,
           label: formatMessage({
-            id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
+            id: getTranslation(`containers.ListPage.table-headers.${list.table.header.name}`),
             defaultMessage: header.metadatas.label,
           }),
         },
@@ -559,7 +559,7 @@ const ListViewPage = ({
         },
         metadatas: {
           label: formatMessage({
-            id: getTranslation(`containers.ListPage.table-headers.publishedAt`),
+            id: getTranslation(`content-manager.containers.ListPage.table-headers.publishedAt`),
             defaultMessage: 'publishedAt',
           }),
           searchable: false,
@@ -652,7 +652,7 @@ const ListViewPage = ({
           canRead
             ? formatMessage(
                 {
-                  id: getTranslation('pages.ListView.header-subtitle'),
+                  id: getTranslation('content-manager.pages.ListView.header-subtitle'),
                   defaultMessage:
                     '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
                 },
@@ -928,7 +928,7 @@ const CreateButton = ({ hasDraftAndPublish = false, params = '', variant }: Crea
       }}
     >
       {formatMessage({
-        id: getTranslation('HeaderLayout.button.label-add-entry'),
+        id: getTranslation('content-manager.HeaderLayout.button.label-add-entry'),
         defaultMessage: 'Create new entry',
       })}
     </Button>

@@ -54,7 +54,7 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type, custo
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {
-                  id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
+                  id: getTranslation('content-manager.containers.ListSettingsView.modal-form.edit-label'),
                   defaultMessage: 'Edit {fieldName}',
                 },
                 { fieldName: upperFirst(selectedField) }

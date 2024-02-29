@@ -129,7 +129,7 @@ const RepeatableComponent = ({
       } else if (componentValueLength >= max) {
         toggleNotification({
           type: 'info',
-          message: { id: getTranslation('components.notification.info.maximum-requirement') },
+          message: { id: getTranslation('content-manager.components.notification.info.maximum-requirement') },
         });
       }
     }
@@ -142,7 +142,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.reorder'),
+          id: getTranslation('components.Blocks.dnd.reorder'),
           defaultMessage: '{item}, moved. New position in list: {position}.',
         },
         {
@@ -176,7 +176,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.cancel-item'),
+          id: getTranslation('content-manager.dnd.cancel-item'),
           defaultMessage: '{item}, dropped. Re-order cancelled.',
         },
         {
@@ -190,7 +190,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.grab-item'),
+          id: getTranslation('content-manager.dnd.grab-item'),
           defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
         },
         {
@@ -205,7 +205,7 @@ const RepeatableComponent = ({
     setLiveText(
       formatMessage(
         {
-          id: getTranslation('dnd.drop-item'),
+          id: getTranslation('content-manager.dnd.drop-item'),
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
@@ -220,14 +220,14 @@ const RepeatableComponent = ({
 
   if (hasMinError) {
     errorMessage = {
-      id: getTranslation('components.DynamicZone.missing-components'),
+      id: getTranslation('content-manager.components.DynamicZone.missing-components'),
       defaultMessage:
         'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
       values: { number: missingComponentsValue },
     };
   } else if (componentErrorKeys.some((error) => error.split('.').length > 1) && !hasMinError) {
     errorMessage = {
-      id: getTranslation('components.RepeatableComponent.error-message'),
+      id: getTranslation('content-manager.components.RepeatableComponent.error-message'),
       defaultMessage: 'The component(s) contain error(s)',
     };
   }
@@ -244,7 +244,7 @@ const RepeatableComponent = ({
     <Box hasRadius>
       <VisuallyHidden id={ariaDescriptionId}>
         {formatMessage({
-          id: getTranslation('dnd.instructions'),
+          id: getTranslation('content-manager.dnd.instructions'),
           defaultMessage: `Press spacebar to grab and re-order`,
         })}
       </VisuallyHidden>
@@ -274,7 +274,7 @@ const RepeatableComponent = ({
           <Flex justifyContent="center" height="48px" background="neutral0">
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
               {formatMessage({
-                id: getTranslation('containers.EditView.add.new-entry'),
+                id: getTranslation('content-manager.containers.EditView.add.new-entry'),
                 defaultMessage: 'Add an entry',
               })}
             </TextButtonCustom>
@@ -504,7 +504,7 @@ const Component = ({
                       toggleCollapses();
                     }}
                     label={formatMessage({
-                      id: getTranslation('containers.Edit.delete'),
+                      id: getTranslation('content-manager.containers.Edit.delete'),
                       defaultMessage: 'Delete',
                     })}
                     icon={<Trash />}
@@ -519,7 +519,7 @@ const Component = ({
                     onClick={(e) => e.stopPropagation()}
                     data-handler-id={handlerId}
                     label={formatMessage({
-                      id: getTranslation('components.DragHandle-label'),
+                      id: getTranslation('content-manager.components.DragHandle-label'),
                       defaultMessage: 'Drag',
                     })}
                     onKeyDown={handleKeyDown}

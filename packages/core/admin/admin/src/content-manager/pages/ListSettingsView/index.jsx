@@ -93,7 +93,7 @@ export const ListSettingsView = ({ layout, slug }) => {
     if (displayedFields.length === 1) {
       toggleNotification({
         type: 'info',
-        message: { id: getTranslation('notification.info.minimumFields') },
+        message: { id: getTranslation('content-manager.notification.info.minimumFields') },
       });
     } else {
       dispatch({
@@ -214,13 +214,13 @@ export const ListSettingsView = ({ layout, slug }) => {
             }
             subtitle={formatMessage({
               id: getTranslation(
-                'components.SettingsViewWrapper.pluginHeader.description.list-settings'
+                'content-manager.components.SettingsViewWrapper.pluginHeader.description.list-settings'
               ),
               defaultMessage: 'Define the settings of the list view.',
             })}
             title={formatMessage(
               {
-                id: getTranslation('components.SettingsViewWrapper.pluginHeader.title'),
+                id: getTranslation('content-manager.components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
               { name: upperFirst(modifiedData.info.displayName) }

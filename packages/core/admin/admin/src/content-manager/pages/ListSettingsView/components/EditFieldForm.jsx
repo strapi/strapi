@@ -57,7 +57,7 @@ export const EditFieldForm = ({
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {
-                  id: getTranslation('containers.ListSettingsView.modal-form.edit-label'),
+                  id: getTranslation('content-manager.containers.ListSettingsView.modal-form.edit-label'),
                   defaultMessage: 'Edit {fieldName}',
                 },
                 { fieldName: upperFirst(fieldToEdit) }
@@ -71,14 +71,14 @@ export const EditFieldForm = ({
               <TextInput
                 id="label-input"
                 label={formatMessage({
-                  id: getTranslation('form.Input.label'),
+                  id: getTranslation('content-manager.form.Input.label'),
                   defaultMessage: 'Label',
                 })}
                 name="label"
                 onChange={(e) => onChangeEditLabel(e)}
                 value={fieldForm.label}
                 hint={formatMessage({
-                  id: getTranslation('form.Input.label.inputDescription'),
+                  id: getTranslation('content-manager.content-manager.form.Input.label.inputDescription'),
                   defaultMessage: "This value overrides the label displayed in the table's head",
                 })}
               />
@@ -89,7 +89,7 @@ export const EditFieldForm = ({
                   data-testid="Enable sort on this field"
                   checked={fieldForm.sortable}
                   label={formatMessage({
-                    id: getTranslation('form.Input.sort.field'),
+                    id: getTranslation('content-manager.form.Input.sort.field'),
                     defaultMessage: 'Enable sort on this field',
                   })}
                   name="sortable"

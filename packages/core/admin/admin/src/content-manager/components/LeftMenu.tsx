@@ -36,7 +36,7 @@ const LeftMenu = () => {
         {
           id: 'collectionTypes',
           title: formatMessage({
-            id: getTranslation('components.LeftMenu.collection-types'),
+            id: getTranslation('content-manager.components.LeftMenu.collection-types'),
             defaultMessage: 'Collection Types',
           }),
           searchable: true,
@@ -45,7 +45,7 @@ const LeftMenu = () => {
         {
           id: 'singleTypes',
           title: formatMessage({
-            id: getTranslation('components.LeftMenu.single-types'),
+            id: getTranslation('content-manager.components.LeftMenu.single-types'),
             defaultMessage: 'Single Types',
           }),
           searchable: true,
@@ -84,7 +84,7 @@ const LeftMenu = () => {
   };
 
   const label = formatMessage({
-    id: getTranslation('header.name'),
+    id: getTranslation('list.table.header.name'),
     defaultMessage: 'Content',
   });
 

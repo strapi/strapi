@@ -67,7 +67,7 @@ const App = () => {
         />
         <HeaderLayout
           title={formatMessage({
-            id: getTranslation('header.name'),
+            id: getTranslation('list.table.header.name'),
             defaultMessage: 'Content',
           })}
         />

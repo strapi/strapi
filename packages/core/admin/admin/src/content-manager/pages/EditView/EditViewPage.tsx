@@ -310,7 +310,7 @@ const EditViewPage = ({
                                 variant="secondary"
                               >
                                 {formatMessage({
-                                  id: getTranslation('link-to-ctb'),
+                                  id: getTranslation('content-manager.link-to-ctb'),
                                   defaultMessage: 'Edit the model',
                                 })}
                               </LinkButton>

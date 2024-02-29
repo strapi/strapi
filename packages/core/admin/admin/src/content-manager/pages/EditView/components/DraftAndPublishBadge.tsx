@@ -52,7 +52,7 @@ const DraftAndPublishBadge = () => {
         <Box paddingLeft={3}>
           <Typography textColor={colorProps.textColor}>
             {formatMessage({
-              id: getTranslation('containers.Edit.information.editing'),
+              id: getTranslation('content-manager.containers.Edit.information.editing'),
               defaultMessage: 'Editing',
             })}
             &nbsp;
@@ -60,12 +60,12 @@ const DraftAndPublishBadge = () => {
           <Typography fontWeight="bold" textColor={colorProps.textColor}>
             {isPublished &&
               formatMessage({
-                id: getTranslation('containers.Edit.information.publishedVersion'),
+                id: getTranslation('content-manager.containers.Edit.information.publishedVersion'),
                 defaultMessage: 'published version',
               })}
             {!isPublished &&
               formatMessage({
-                id: getTranslation('containers.Edit.information.draftVersion'),
+                id: getTranslation('content-manager.containers.Edit.information.draftVersion'),
                 defaultMessage: 'draft version',
               })}
           </Typography>

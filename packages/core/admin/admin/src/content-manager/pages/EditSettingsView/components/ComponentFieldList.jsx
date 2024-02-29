@@ -46,7 +46,7 @@ const ComponentFieldList = ({ componentUid }) => {
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
           {formatMessage({
-            id: getTranslation('components.FieldItem.linkToComponentLayout'),
+            id: getTranslation('content-manager.components.FieldItem.linkToComponentLayout'),
             defaultMessage: "Set the component's layout",
           })}
         </Link>

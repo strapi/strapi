@@ -22,12 +22,12 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
 
   const stateMessage = {
     [PUBLICATION_STATES.DRAFT]: formatMessage({
-      id: getTranslation('relation.publicationState.draft'),
+      id: getTranslation('content-manager.relation.publicationState.draft'),
       defaultMessage: 'Draft',
     }),
 
     [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-      id: getTranslation('relation.publicationState.published'),
+      id: getTranslation('content-manager.relation.publicationState.published'),
       defaultMessage: 'Published',
     }),
   };

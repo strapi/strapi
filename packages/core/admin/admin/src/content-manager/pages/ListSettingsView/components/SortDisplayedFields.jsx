@@ -44,7 +44,7 @@ export const SortDisplayedFields = ({
     <Flex alignItems="stretch" direction="column" gap={4}>
       <Typography variant="delta" as="h2">
         {formatMessage({
-          id: getTranslation('containers.SettingPage.view'),
+          id: getTranslation('content-manager.containers.SettingPage.view'),
           defaultMessage: 'View',
         })}
       </Typography>
@@ -79,7 +79,7 @@ export const SortDisplayedFields = ({
           >
             <VisuallyHidden as="span">
               {formatMessage({
-                id: getTranslation('components.FieldSelect.label'),
+                id: getTranslation('content-manager.components.FieldSelect.label'),
                 defaultMessage: 'Add a field',
               })}
             </VisuallyHidden>
