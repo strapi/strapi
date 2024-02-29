@@ -210,16 +210,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 }
 
 .c67 {
-  background: #d9d8ff;
-}
-
-.c69 {
   background: #eaeaef;
 }
 
-.c71 {
+.c69 {
   background: #f0f0ff;
   padding: 20px;
+}
+
+.c71 {
+  background: #d9d8ff;
 }
 
 .c5 {
@@ -613,7 +613,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c70 {
+.c68 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -644,7 +644,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c73 {
+.c72 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -662,16 +662,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c73 svg {
+.c72 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c73 svg path {
+.c72 svg path {
   fill: #4945ff;
 }
 
-.c72 {
+.c70 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
@@ -969,33 +969,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c44 svg path {
   fill: #666687;
-}
-
-.c68 {
-  height: 1.5rem;
-  width: 1.5rem;
-  border-radius: 50%;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c68 svg {
-  height: 0.625rem;
-  width: 0.625rem;
-}
-
-.c68 svg path {
-  fill: #4945ff;
 }
 
 .c42 {
@@ -3776,41 +3749,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                       <tbody />
                                     </table>
                                   </div>
-                                  <button
-                                    class="c41 c42"
-                                    type="button"
-                                  >
-                                    <div
-                                      class="c7"
-                                    >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c67 c68"
-                                      >
-                                        <svg
-                                          fill="none"
-                                          height="1rem"
-                                          viewBox="0 0 24 24"
-                                          width="1rem"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                                            fill="#212134"
-                                          />
-                                        </svg>
-                                      </div>
-                                      <div
-                                        class="c45"
-                                      >
-                                        <span
-                                          class="c3 c54"
-                                        >
-                                          Add another field
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -3842,41 +3780,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                       <tbody />
                                     </table>
                                   </div>
-                                  <button
-                                    class="c41 c42"
-                                    type="button"
-                                  >
-                                    <div
-                                      class="c7"
-                                    >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c67 c68"
-                                      >
-                                        <svg
-                                          fill="none"
-                                          height="1rem"
-                                          viewBox="0 0 24 24"
-                                          width="1rem"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                                            fill="#212134"
-                                          />
-                                        </svg>
-                                      </div>
-                                      <div
-                                        class="c45"
-                                      >
-                                        <span
-                                          class="c3 c54"
-                                        >
-                                          Add another field
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -3908,41 +3811,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                       <tbody />
                                     </table>
                                   </div>
-                                  <button
-                                    class="c41 c42"
-                                    type="button"
-                                  >
-                                    <div
-                                      class="c7"
-                                    >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c67 c68"
-                                      >
-                                        <svg
-                                          fill="none"
-                                          height="1rem"
-                                          viewBox="0 0 24 24"
-                                          width="1rem"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                                            fill="#212134"
-                                          />
-                                        </svg>
-                                      </div>
-                                      <div
-                                        class="c45"
-                                      >
-                                        <span
-                                          class="c3 c54"
-                                        >
-                                          Add another field
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -3974,41 +3842,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                       <tbody />
                                     </table>
                                   </div>
-                                  <button
-                                    class="c41 c42"
-                                    type="button"
-                                  >
-                                    <div
-                                      class="c7"
-                                    >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c67 c68"
-                                      >
-                                        <svg
-                                          fill="none"
-                                          height="1rem"
-                                          viewBox="0 0 24 24"
-                                          width="1rem"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                                            fill="#212134"
-                                          />
-                                        </svg>
-                                      </div>
-                                      <div
-                                        class="c45"
-                                      >
-                                        <span
-                                          class="c3 c54"
-                                        >
-                                          Add another field
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -4023,17 +3856,17 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           </div>
           <div>
             <hr
-              class="c69 c70"
+              class="c67 c68"
             />
             <button
-              class="c71 c72"
+              class="c69 c70"
             >
               <div
                 class="c7"
               >
                 <div
                   aria-hidden="true"
-                  class="c67 c73"
+                  class="c71 c72"
                 >
                   <svg
                     fill="none"
