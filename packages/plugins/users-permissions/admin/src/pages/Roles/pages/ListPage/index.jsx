@@ -23,7 +23,6 @@ import {
   LoadingIndicatorPage,
   NoPermissions,
   SearchURLQuery,
-  SettingsPageTitle,
   useCollator,
   useFilter,
   useFocusWhenNavigate,
@@ -33,6 +32,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { NavLink } from 'react-router-dom';
@@ -134,7 +134,12 @@ export const RolesListPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle name={pageTitle} />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: pageTitle }
+        )}
+      />
       <Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({

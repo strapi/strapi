@@ -9,12 +9,12 @@ import {
 import {
   AnErrorOccurred,
   DynamicTable,
-  SettingsPageTitle,
   useFocusWhenNavigate,
   useQueryParams,
   useRBAC,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
@@ -108,11 +108,16 @@ const ListPage = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: 'global.auditLogs',
-          defaultMessage: 'Audit Logs',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: 'global.auditLogs',
+              defaultMessage: 'Audit Logs',
+            }),
+          }
+        )}
       />
       <HeaderLayout
         title={formatMessage({

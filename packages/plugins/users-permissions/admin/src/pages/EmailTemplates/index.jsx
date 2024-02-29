@@ -4,7 +4,6 @@ import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-s
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -13,6 +12,7 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -121,35 +121,18 @@ const EmailTemplatesPage = () => {
     submitMutation.mutate(editedTemplates);
   };
 
-  if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
-  }
-
   return (
     <Main aria-busy={submitMutation.isLoading}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.emailTemplates'),
-          defaultMessage: 'Email templates',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.emailTemplates'),
+              defaultMessage: 'Email templates',
+            }),
+          }
+        )}
       />
       <HeaderLayout
         title={formatMessage({
@@ -158,13 +141,19 @@ const EmailTemplatesPage = () => {
         })}
       />
       <ContentLayout>
-        <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
-        {isModalOpen && (
-          <EmailForm
-            template={data[templateToEdit]}
-            onToggle={handleToggle}
-            onSubmit={handleSubmit}
-          />
+        {isLoading ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <>
+            <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
+            {isModalOpen && (
+              <EmailForm
+                template={data[templateToEdit]}
+                onToggle={handleToggle}
+                onSubmit={handleSubmit}
+              />
+            )}
+          </>
         )}
       </ContentLayout>
     </Main>

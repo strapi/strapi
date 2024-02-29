@@ -14,7 +14,6 @@ import {
   DynamicTable,
   NoPermissions,
   SearchURLQuery,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
@@ -25,6 +24,7 @@ import {
   TableHeader,
 } from '@strapi/helper-plugin';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
@@ -98,7 +98,14 @@ const ListPageCE = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle name="Users" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Users',
+          }
+        )}
+      />
       <HeaderLayout
         primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}

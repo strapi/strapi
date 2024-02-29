@@ -18,7 +18,6 @@ import {
   CheckPagePermissions,
   GenericInput,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -28,6 +27,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -121,136 +121,123 @@ const AdvancedSettingsPage = () => {
     });
   };
 
-  if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
-  }
-
   return (
     <Main aria-busy={isSubmittingForm}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.advancedSettings'),
-          defaultMessage: 'Advanced Settings',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.advancedSettings'),
+              defaultMessage: 'Advanced Settings',
+            }),
+          }
+        )}
       />
-      <Formik
-        onSubmit={handleSubmit}
-        initialValues={data.settings}
-        validateOnChange={false}
-        validationSchema={schema}
-        enableReinitialize
-      >
-        {({ errors, values, handleChange, isSubmitting, dirty }) => {
-          return (
-            <Form>
-              <HeaderLayout
-                title={formatMessage({
-                  id: getTrad('HeaderNav.link.advancedSettings'),
-                  defaultMessage: 'Advanced Settings',
-                })}
-                primaryAction={
-                  <Button
-                    loading={isSubmitting}
-                    type="submit"
-                    disabled={canUpdate ? !dirty : !canUpdate}
-                    startIcon={<Check />}
-                    size="S"
+      {isLoading ? (
+        <LoadingIndicatorPage />
+      ) : (
+        <Formik
+          onSubmit={handleSubmit}
+          initialValues={data.settings}
+          validateOnChange={false}
+          validationSchema={schema}
+          enableReinitialize
+        >
+          {({ errors, values, handleChange, isSubmitting, dirty }) => {
+            return (
+              <Form>
+                <HeaderLayout
+                  title={formatMessage({
+                    id: getTrad('HeaderNav.link.advancedSettings'),
+                    defaultMessage: 'Advanced Settings',
+                  })}
+                  primaryAction={
+                    <Button
+                      loading={isSubmitting}
+                      type="submit"
+                      disabled={canUpdate ? !dirty : !canUpdate}
+                      startIcon={<Check />}
+                      size="S"
+                    >
+                      {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                    </Button>
+                  }
+                />
+                <ContentLayout>
+                  <Box
+                    background="neutral0"
+                    hasRadius
+                    shadow="filterShadow"
+                    paddingTop={6}
+                    paddingBottom={6}
+                    paddingLeft={7}
+                    paddingRight={7}
                   >
-                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                  </Button>
-                }
-              />
-              <ContentLayout>
-                <Box
-                  background="neutral0"
-                  hasRadius
-                  shadow="filterShadow"
-                  paddingTop={6}
-                  paddingBottom={6}
-                  paddingLeft={7}
-                  paddingRight={7}
-                >
-                  <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Typography variant="delta" as="h2">
-                      {formatMessage({
-                        id: 'global.settings',
-                        defaultMessage: 'Settings',
-                      })}
-                    </Typography>
-                    <Grid gap={6}>
-                      <GridItem col={6} s={12}>
-                        <Select
-                          label={formatMessage({
-                            id: getTrad('EditForm.inputSelect.label.role'),
-                            defaultMessage: 'Default role for authenticated users',
-                          })}
-                          value={values.default_role}
-                          hint={formatMessage({
-                            id: getTrad('EditForm.inputSelect.description.role'),
-                            defaultMessage:
-                              'It will attach the new authenticated user to the selected role.',
-                          })}
-                          onChange={(e) =>
-                            handleChange({ target: { name: 'default_role', value: e } })
+                    <Flex direction="column" alignItems="stretch" gap={4}>
+                      <Typography variant="delta" as="h2">
+                        {formatMessage({
+                          id: 'global.settings',
+                          defaultMessage: 'Settings',
+                        })}
+                      </Typography>
+                      <Grid gap={6}>
+                        <GridItem col={6} s={12}>
+                          <Select
+                            label={formatMessage({
+                              id: getTrad('EditForm.inputSelect.label.role'),
+                              defaultMessage: 'Default role for authenticated users',
+                            })}
+                            value={values.default_role}
+                            hint={formatMessage({
+                              id: getTrad('EditForm.inputSelect.description.role'),
+                              defaultMessage:
+                                'It will attach the new authenticated user to the selected role.',
+                            })}
+                            onChange={(e) =>
+                              handleChange({ target: { name: 'default_role', value: e } })
+                            }
+                          >
+                            {data.roles.map((role) => {
+                              return (
+                                <Option key={role.type} value={role.type}>
+                                  {role.name}
+                                </Option>
+                              );
+                            })}
+                          </Select>
+                        </GridItem>
+                        {layout.map((input) => {
+                          let value = values[input.name];
+
+                          if (!value) {
+                            value = input.type === 'bool' ? false : '';
                           }
-                        >
-                          {data.roles.map((role) => {
-                            return (
-                              <Option key={role.type} value={role.type}>
-                                {role.name}
-                              </Option>
-                            );
-                          })}
-                        </Select>
-                      </GridItem>
-                      {layout.map((input) => {
-                        let value = values[input.name];
 
-                        if (!value) {
-                          value = input.type === 'bool' ? false : '';
-                        }
-
-                        return (
-                          <GridItem key={input.name} {...input.size}>
-                            <GenericInput
-                              {...input}
-                              value={value}
-                              error={errors[input.name]}
-                              disabled={
-                                input.name === 'email_confirmation_redirection' &&
-                                values.email_confirmation === false
-                              }
-                              onChange={handleChange}
-                            />
-                          </GridItem>
-                        );
-                      })}
-                    </Grid>
-                  </Flex>
-                </Box>
-              </ContentLayout>
-            </Form>
-          );
-        }}
-      </Formik>
+                          return (
+                            <GridItem key={input.name} {...input.size}>
+                              <GenericInput
+                                {...input}
+                                value={value}
+                                error={errors[input.name]}
+                                disabled={
+                                  input.name === 'email_confirmation_redirection' &&
+                                  values.email_confirmation === false
+                                }
+                                onChange={handleChange}
+                              />
+                            </GridItem>
+                          );
+                        })}
+                      </Grid>
+                    </Flex>
+                  </Box>
+                </ContentLayout>
+              </Form>
+            );
+          }}
+        </Formik>
+      )}
     </Main>
   );
 };

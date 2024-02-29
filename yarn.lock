@@ -7500,6 +7500,7 @@ __metadata:
     msw: "npm:1.3.0"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
+    react-helmet: "npm:6.1.0"
     react-intl: "npm:6.4.1"
     react-query: "npm:3.39.3"
     react-router-dom: "npm:6.21.1"

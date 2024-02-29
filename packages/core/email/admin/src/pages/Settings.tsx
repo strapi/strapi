@@ -18,13 +18,13 @@ import {
   CheckPagePermissions,
   getYupInnerErrors,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import styled from 'styled-components';
@@ -137,13 +137,17 @@ const SettingsPage = () => {
 
   return (
     <Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: 'email.Settings.email.plugin.title',
-          defaultMessage: 'Configuration',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: 'email.Settings.email.plugin.title',
+              defaultMessage: 'Configuration',
+            }),
+          }
+        )}
       />
-
       <HeaderLayout
         id="title"
         title={formatMessage({

@@ -5,7 +5,6 @@ import {
   CheckPagePermissions,
   NoContent,
   NoPermissions,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -16,6 +15,7 @@ import {
 import { Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -159,8 +159,12 @@ export const ListView = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="API Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'API Tokens' }
+        )}
+      />
       <HeaderLayout
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
         subtitle={formatMessage({

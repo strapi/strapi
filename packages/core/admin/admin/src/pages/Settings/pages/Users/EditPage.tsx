@@ -15,7 +15,6 @@ import { Link } from '@strapi/design-system/v2';
 import {
   GenericInput,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -26,6 +25,7 @@ import {
 import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import pick from 'lodash/pick';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -131,7 +131,14 @@ const EditPage = () => {
   if (isLoading) {
     return (
       <Main aria-busy="true">
-        <SettingsPageTitle name="Users" />
+        <Helmet
+          title={formatMessage(
+            { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+            {
+              name: 'Users',
+            }
+          )}
+        />
         <HeaderLayout
           primaryAction={
             <Button disabled startIcon={<Check />} type="button" size="L">
@@ -215,7 +222,14 @@ const EditPage = () => {
 
   return (
     <Main>
-      <SettingsPageTitle name="Users" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Users',
+          }
+        )}
+      />
       <Formik
         onSubmit={handleSubmit}
         initialValues={initialData}

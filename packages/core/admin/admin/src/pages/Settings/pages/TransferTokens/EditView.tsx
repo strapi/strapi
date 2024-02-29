@@ -14,7 +14,6 @@ import {
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -26,6 +25,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
@@ -245,7 +245,14 @@ const EditView = () => {
 
   return (
     <Main>
-      <SettingsPageTitle name="Transfer Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Transfer Tokens',
+          }
+        )}
+      />
       <Formik
         validationSchema={schema}
         validateOnChange={false}
@@ -452,7 +459,14 @@ export const LoadingView = ({ transferTokenName }: LoadingViewProps) => {
 
   return (
     <Main aria-busy="true">
-      <SettingsPageTitle name="Transfer Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Transfer Tokens',
+          }
+        )}
+      />
       <HeaderLayout
         primaryAction={
           <Button disabled startIcon={<Check />} type="button" size="L">

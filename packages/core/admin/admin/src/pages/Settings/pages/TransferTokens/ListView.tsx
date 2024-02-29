@@ -5,7 +5,6 @@ import {
   CheckPagePermissions,
   NoContent,
   NoPermissions,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
@@ -15,6 +14,7 @@ import {
 import { Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -161,7 +161,14 @@ const ListView = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle name="Transfer Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Transfer Tokens',
+          }
+        )}
+      />
       <HeaderLayout
         title={formatMessage({
           id: 'Settings.transferTokens.title',

@@ -7,7 +7,7 @@ It is written in alphabetical order grouped by domain based on _every_ export th
 
 ### ContentBox
 
-This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
 
 ### DateTimePicker
 
@@ -76,6 +76,10 @@ const MyLink = () => {
   );
 };
 ```
+
+### SettingsPageTitle
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
 
 ### Status
 

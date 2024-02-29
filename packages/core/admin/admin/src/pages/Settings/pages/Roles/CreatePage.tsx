@@ -17,7 +17,6 @@ import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -27,6 +26,7 @@ import {
 import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
@@ -175,7 +175,14 @@ const CreatePage = () => {
 
   return (
     <Main>
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Roles',
+          }
+        )}
+      />
       <Formik
         initialValues={
           {

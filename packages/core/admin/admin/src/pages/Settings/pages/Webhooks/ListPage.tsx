@@ -29,13 +29,13 @@ import {
   CheckPagePermissions,
   ConfirmDialog,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
@@ -160,7 +160,14 @@ const ListPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle name="Webhooks" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Webhooks',
+          }
+        )}
+      />
       <Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
