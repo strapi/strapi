@@ -151,3 +151,13 @@ const {
   edit: { layout, components },
 } = useDocumentLayout();
 ```
+
+## Icons
+
+### SortIcon
+
+This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
+
+### RemoveRoundedButton
+
+This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
