@@ -40,7 +40,7 @@ describe('Test type integer', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 123456,
     });
   });
@@ -54,7 +54,7 @@ describe('Test type integer', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 123456,
     });
   });
@@ -78,7 +78,7 @@ describe('Test type integer', () => {
     });
 
     const updatedRes = await rq.put(
-      `/content-manager/collection-types/api::withinteger.withinteger/${res.body.id}`,
+      `/content-manager/collection-types/api::withinteger.withinteger/${res.body.data.id}`,
       {
         body: {
           field: 543,
@@ -87,8 +87,8 @@ describe('Test type integer', () => {
     );
 
     expect(updatedRes.statusCode).toBe(200);
-    expect(updatedRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updatedRes.body.data).toMatchObject({
+      id: res.body.data.id,
       field: 543,
     });
   });

@@ -1,7 +1,9 @@
+import { errors } from '@strapi/utils';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import * as qs from 'qs';
 
+import { COLLECTION_TYPES, SINGLE_TYPES } from '../src/content-manager/constants/collections';
 import { historyHandlers } from '../src/content-manager/history/tests/server';
 
 import { MockData, mockData } from './mockData';
@@ -459,18 +461,207 @@ export const server = setupServer(
      * CONTENT_MANAGER
      *
      */
-    rest.put('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
+    rest.put('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
       return res(ctx.status(200));
     }),
-    rest.get('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
-      const layout =
-        req.params.contentType === 'api::homepage.homepage'
-          ? mockData.contentManager.singleTypeLayout
-          : mockData.contentManager.collectionTypeLayout;
+    rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
+      const configuration =
+        req.params.model === 'api::homepage.homepage'
+          ? mockData.contentManager.singleTypeConfiguration
+          : mockData.contentManager.collectionTypeConfiguration;
 
       return res(
         ctx.json({
-          data: layout,
+          data: configuration,
+        })
+      );
+    }),
+    rest.get('/content-manager/:collectionType/:uid/:id', (req, res, ctx) => {
+      const { id, collectionType, uid } = req.params;
+
+      if (id === 'configuration') {
+        return;
+      }
+
+      if (
+        id === '12345' &&
+        collectionType === COLLECTION_TYPES &&
+        uid === mockData.contentManager.contentType
+      ) {
+        return res(
+          ctx.json({
+            data: {
+              id,
+              name: 'Entry 1',
+              createdAt: '',
+              updatedAt: '',
+              publishedAt: '',
+            },
+          })
+        );
+      } else {
+        return res(
+          ctx.status(404),
+          ctx.json({ error: new errors.NotFoundError('Document not found') })
+        );
+      }
+    }),
+    rest.put('/content-manager/:collectionType/:uid/:id', async (req, res, ctx) => {
+      const { id, collectionType, uid } = req.params;
+      const data = await req.json();
+
+      if (
+        id === '12345' &&
+        collectionType === COLLECTION_TYPES &&
+        uid === mockData.contentManager.contentType
+      ) {
+        return res(
+          ctx.json({
+            data: {
+              id,
+              name: 'Entry 1',
+              ...data,
+              createdAt: '',
+              updatedAt: '',
+              publishedAt: '',
+            },
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
+    }),
+    rest.post('/content-manager/:collectionType/:uid', async (req, res, ctx) => {
+      const data = await req.json();
+
+      if (
+        req.params.collectionType !== SINGLE_TYPES &&
+        req.params.collectionType !== COLLECTION_TYPES
+      ) {
+        return;
+      }
+
+      return res(
+        ctx.json({
+          data: {
+            id: '12345',
+            ...data,
+          },
+        })
+      );
+    }),
+    rest.post('/content-manager/:collectionType/:uid/clone/:id', async (req, res, ctx) => {
+      const data = await req.json();
+
+      return res(
+        ctx.json({
+          data: {
+            id: '67890',
+            ...data,
+          },
+        })
+      );
+    }),
+    rest.post('/content-manager/:collectionType/:uid/:id/actions/discard', (req, res, ctx) => {
+      const { id } = req.params;
+
+      if (id === '12345') {
+        return res(
+          ctx.status(200),
+          ctx.json({
+            id: '12345',
+            title: 'test',
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
+    }),
+    rest.post(
+      '/content-manager/:collectionType/:uid/:id/actions/publish',
+      async (req, res, ctx) => {
+        const { id } = req.params;
+
+        if (id === '12345') {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              id: '12345',
+              title: 'test',
+              publishedAt: '2024-01-23T16:23:38.948Z',
+            })
+          );
+        }
+
+        return res(
+          ctx.status(404),
+          ctx.json({
+            error: new errors.NotFoundError('Document not found'),
+          })
+        );
+      }
+    ),
+    rest.post(
+      '/content-manager/:collectionType/:uid/:id/actions/unpublish',
+      async (req, res, ctx) => {
+        const { id } = req.params;
+
+        if (id === '12345') {
+          return res(
+            ctx.status(200),
+            ctx.json({
+              id: '12345',
+              title: 'test',
+              publishedAt: null,
+            })
+          );
+        }
+
+        return res(
+          ctx.status(404),
+          ctx.json({
+            error: new errors.NotFoundError('Document not found'),
+          })
+        );
+      }
+    ),
+    rest.delete('/content-manager/:collectionType/:uid/:id', (req, res, ctx) => {
+      const { id } = req.params;
+
+      if (id === '12345') {
+        return res(
+          ctx.status(200),
+          ctx.json({
+            id: '12345',
+            title: 'test',
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
+    }),
+    rest.get('/content-manager/init', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: mockData.contentManager.contentTypes,
+          },
         })
       );
     }),
@@ -500,22 +691,25 @@ export const server = setupServer(
               id: 1,
               name: 'Entry 1',
               publishedAt: null,
+              notrepeat_req: {},
             },
             {
               id: 2,
               name: 'Entry 2',
               publishedAt: null,
+              notrepeat_req: {},
             },
             {
               id: 3,
               name: 'Entry 3',
               publishedAt: null,
+              notrepeat_req: {},
             },
           ],
         })
       );
     }),
-    rest.get('*/content-manager/content-types', (req, res, ctx) =>
+    rest.get('/content-manager/content-types', (req, res, ctx) =>
       res(
         ctx.json({
           data: [
@@ -548,7 +742,7 @@ export const server = setupServer(
         })
       )
     ),
-    rest.get('*/content-manager/components', (req, res, ctx) =>
+    rest.get('/content-manager/components', (req, res, ctx) =>
       res(
         ctx.json({
           data: [

@@ -5,8 +5,8 @@ export default {
   schemas: require('./schemas'),
   fixtures: require('./fixtures'),
   locales: [
-    { name: 'fr', code: 'fr' },
-    { name: 'it', code: 'it' },
-    { name: 'es', code: 'es' },
+    { name: 'nl', code: 'nl' }, // Dutch
+    { name: 'it', code: 'it' }, // Italian
+    { name: 'es', code: 'es' }, // Spanish
   ],
 };

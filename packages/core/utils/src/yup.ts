@@ -105,19 +105,19 @@ export class StrapiIDSchema extends yup.MixedSchema {
 declare module 'yup' {
   const strapiID: () => InstanceType<typeof StrapiIDSchema>;
 
-  interface BaseSchema {
+  export interface BaseSchema {
     isFunction(message?: string): this;
     notNil(message?: string): this;
     notNull(message?: string): this;
   }
 
-  interface StringSchema {
+  export interface StringSchema {
     isCamelCase(message?: string): this;
     isKebabCase(message?: string): this;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ObjectSchema<TShape> {
+  export interface ObjectSchema<TShape> {
     onlyContainsFunctions(message?: string): this;
   }
 }

@@ -6,7 +6,7 @@ import { useLocation, type RouteObject, matchRoutes } from 'react-router-dom';
  */
 const routes: RouteObject[] = [
   {
-    path: 'collection-types/:slug/:id/history',
+    path: ':collectionType/:slug/:id/history',
     lazy: async () => {
       const { HistoryPage } = await import('./pages/History');
 
@@ -16,7 +16,7 @@ const routes: RouteObject[] = [
     },
   },
   {
-    path: 'single-types/:slug/history',
+    path: ':collectionType/:slug/history',
     lazy: async () => {
       const { HistoryPage } = await import('./pages/History');
 

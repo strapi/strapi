@@ -35,14 +35,8 @@ const render = (ui: React.ReactElement) =>
 describe('VersionsList', () => {
   it('renders a list of history versions', async () => {
     render(
-      <HistoryProvider
-        page={1}
-        contentType="api::kitchensink.kitchensink"
-        // @ts-expect-error – we don't need to bother formatting the layout
-        layout={mockData.contentManager.collectionTypeLayout}
-        versions={mockHistoryVersionsData.historyVersions}
-        selectedVersion={mockHistoryVersionsData.historyVersions.data[0]}
-      >
+      // @ts-expect-error we don't need all the context
+      <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
         <VersionsList />
       </HistoryProvider>
     );

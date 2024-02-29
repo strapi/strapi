@@ -311,7 +311,7 @@
   "content-manager.containers.Home.pluginHeaderDescription": "จัดการรายการของคุณโดยใช้อินเตอร์เฟสที่ทรงพลังและสวยงาม",
   "content-manager.containers.Home.pluginHeaderTitle": "ตัวจัดการเนื้อหา",
   "content-manager.containers.List.errorFetchRecords": "ข้อผิดพลาด",
-  "content-manager.containers.ListPage.displayedFields": "ฟิลด์ที่แสดง",
+  "content-manager.containers.list.displayedFields": "ฟิลด์ที่แสดง",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "แก้ไขเลเบล",
   "content-manager.containers.SettingPage.add.field": "แทรกฟิลด์อื่น",
   "content-manager.containers.SettingPage.attributes": "ฟิลด์ Attributes",

@@ -6,8 +6,9 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink, type To, useMatch } from 'react-router-dom';
+import { NavLink, useParams, type To } from 'react-router-dom';
 
+import { COLLECTION_TYPES } from '../../constants/collections';
 import { useHistoryContext } from '../pages/History';
 
 interface VersionHeaderProps {
@@ -16,28 +17,30 @@ interface VersionHeaderProps {
 
 export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const { formatMessage, formatDate } = useIntl();
-  const { version, layout } = useHistoryContext('VersionHeader', (state) => ({
+  const { version, mainField, schema } = useHistoryContext('VersionHeader', (state) => ({
     version: state.selectedVersion,
-    layout: state.layout,
+    mainField: state.mainField,
+    schema: state.schema,
   }));
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
-  const isCollectionType = useMatch('/content-manager/collection-types/:slug/:id/history');
-  const mainFieldValue = version.data[layout.contentType.settings.mainField];
+  const { collectionType } = useParams<{ collectionType: string }>();
+
+  const mainFieldValue = version.data[mainField];
 
   const getBackLink = (): To => {
     const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-    if (isCollectionType) {
+    if (collectionType === COLLECTION_TYPES) {
       return {
-        pathname: `../collection-types/${version.contentType}/${version.relatedDocumentId}`,
+        pathname: `../${collectionType}/${version.contentType}/${version.relatedDocumentId}`,
         search: pluginsQueryParams,
       };
     }
 
     return {
-      pathname: `../single-types/${version.contentType}`,
+      pathname: `../${collectionType}/${version.contentType}`,
       search: pluginsQueryParams,
     };
   };
@@ -62,7 +65,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
             },
             {
               hasLocale: Boolean(version.locale),
-              subtitle: `${mainFieldValue || ''} (${layout.contentType.info.singularName})`.trim(),
+              subtitle: `${mainFieldValue || ''} (${schema.info.singularName})`.trim(),
               locale: version.locale?.name,
             }
           )}

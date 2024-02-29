@@ -1,35 +1,58 @@
 import type { LoadedStrapi } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
+
+import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../constants';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
 
+const DEFAULT_RETENTION_DAYS = 90;
+
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
-  /**
-   * Use the query engine API, not the document service,
-   * since we'll refactor history version to be just a model instead of a content type.
-   * TODO: remove this comment once the refactor is done.
-   */
+  const state: {
+    deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
+    isInitialized: boolean;
+  } = {
+    deleteExpiredJob: null,
+    isInitialized: false,
+  };
+
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
-  let isInitialized = false;
+  const getRetentionDays = (strapi: LoadedStrapi) => {
+    const licenseRetentionDays =
+      strapi.ee.features.get('cms-content-history')?.options.retentionDays;
+    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
+
+    // Allow users to override the license retention days, but not to increase it
+    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+      return userRetentionDays;
+    }
+
+    // User didn't provide retention days value, use the license or fallback to default
+    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
+  };
 
   return {
-    async init() {
+    async bootstrap() {
       // Prevent initializing the service twice
-      if (isInitialized) {
+      if (state.isInitialized) {
         return;
       }
-
-      // TODO: replace by strapi.documents.use once it supports multiple actions at once
-      strapi.documents?.middlewares.add('_all', '_all', async (context, next) => {
+      /**
+       * TODO: Fix the types for the middleware
+       */
+      strapi.documents.use(async (context, next) => {
+        // @ts-expect-error ContentType is not typed correctly on the context
+        const contentTypeUid = context.contentType.uid;
+        const params = context.args.at(-1) as any;
         // Ignore actions that don't mutate documents
         if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
           return next(context);
         }
 
         // Ignore content types not created by the user
-        if (!context.uid.startsWith('api::')) {
+        if (!contentTypeUid.startsWith('api::')) {
           return next(context);
         }
 
@@ -49,19 +72,19 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
          * Await the middleware stack because for create actions,
          * the document ID only exists after the creation, which is later in the stack.
          */
-        const result = await next(context);
+        const result = (await next(context)) as any;
 
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
             this.createVersion({
-              contentType: context.uid,
-              relatedDocumentId: result.documentId,
-              locale: context.params.locale,
+              contentType: contentTypeUid,
+              relatedDocumentId: 'id' in result ? result.id : context.args[0],
+              locale: params.locale,
               // TODO: check if drafts should should be "modified" once D&P is ready
-              status: context.params.status,
-              data: omit(fieldsToIgnore, context.params.data),
-              schema: omit(fieldsToIgnore, strapi.contentType(context.uid).attributes),
+              status: params.status,
+              data: omit(fieldsToIgnore, params.data),
+              schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
             });
           });
         });
@@ -69,7 +92,28 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         return result;
       });
 
-      isInitialized = true;
+      const retentionDays = getRetentionDays(strapi);
+      // Schedule a job to delete expired history versions every day at midnight
+      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
+        const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
+        const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
+
+        query.deleteMany({
+          where: {
+            created_at: {
+              $lt: expirationDate.toISOString(),
+            },
+          },
+        });
+      });
+
+      state.isInitialized = true;
+    },
+
+    async destroy() {
+      if (state.deleteExpiredJob) {
+        state.deleteExpiredJob.cancel();
+      }
     },
 
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {

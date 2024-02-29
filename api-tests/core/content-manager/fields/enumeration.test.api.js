@@ -44,7 +44,7 @@ describe('Test type enumeration', () => {
     );
 
     expect(res.statusCode).toBe(200); // should return 201
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 'one',
     });
   });
@@ -73,7 +73,7 @@ describe('Test type enumeration', () => {
     );
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withenumeration.withenumeration/${res.body.id}`,
+      `/content-manager/collection-types/api::withenumeration.withenumeration/${res.body.data.id}`,
       {
         body: {
           field: 'one',
@@ -82,8 +82,8 @@ describe('Test type enumeration', () => {
     );
 
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      id: res.body.data.id,
       field: 'one',
     });
   });
@@ -99,7 +99,7 @@ describe('Test type enumeration', () => {
     );
 
     expect(res.statusCode).toBe(200); // should return 201
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: null,
     });
   });
