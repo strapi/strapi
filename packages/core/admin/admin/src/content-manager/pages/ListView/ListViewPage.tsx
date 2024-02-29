@@ -28,6 +28,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -266,6 +267,7 @@ const ListViewPage = () => {
 
   return (
     <Main>
+      <Helmet title={`${contentTypeTitle} | Strapi`} />
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(

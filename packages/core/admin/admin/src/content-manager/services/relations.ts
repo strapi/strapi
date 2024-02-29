@@ -27,15 +27,15 @@ const relationsApi = contentManagerApi.injectEndpoints({
     getRelations: build.query<
       GetRelationsResponse,
       Contracts.Relations.FindExisting.Params & {
-        pagination?: Contracts.Relations.FindExisting.Request['query'];
+        params?: Contracts.Relations.FindExisting.Request['query'];
       }
     >({
-      query: ({ model, id, targetField, pagination }) => {
+      query: ({ model, id, targetField, params }) => {
         return {
           url: `/content-manager/relations/${model}/${id}/${targetField}`,
           method: 'GET',
           config: {
-            params: pagination,
+            params,
           },
         };
       },
