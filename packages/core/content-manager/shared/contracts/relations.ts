@@ -35,10 +35,12 @@ export declare namespace FindAvailable {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       id?: Entity.ID;
-      _q?: string;
-      _filter?: string;
       locale?: Documents.Params.Attribute.Locale;
       status?: Documents.Params.PublicationState.Kind;
+      _q?: string;
+      _filter?: string;
+      idsToOmit?: Documents.ID[];
+      idsToInclude?: Documents.ID[];
     };
   }
 

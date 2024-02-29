@@ -201,8 +201,7 @@ export default {
 
     // We are looking for available content type relations and should be
     // filtering by valid documentIds only
-    const stringIdsToOmit = idsToOmit?.filter((id: any) => !Number(id));
-    if (stringIdsToOmit?.length > 0) {
+    if (idsToOmit?.length > 0) {
       addFiltersClause(queryParams, {
         documentId: { $notIn: uniq(idsToOmit) },
       });
@@ -227,12 +226,11 @@ export default {
         [`${alias}.id`]: { $notNull: true },
         // Always find available draft entries, as we will be potentially
         // connecting them from the CM edit view
-        [`${alias}.published_at`]: isPublished ? { $notNull: true } : { $notNull: false },
+        [`${alias}.published_at`]: { $notNull: isPublished },
       };
 
-      const stringIdsToInclude = idsToInclude?.filter((id: any) => !Number(id));
-      if ((stringIdsToInclude?.length ?? 0) !== 0) {
-        where[`${alias}.document_id`].$notIn = stringIdsToInclude;
+      if ((idsToInclude?.length ?? 0) !== 0) {
+        where[`${alias}.document_id`].$notIn = idsToInclude;
       }
 
       const knexSubQuery = subQuery
@@ -288,13 +286,13 @@ export default {
       }
     );
 
-    let resultIds = [];
-
+    // Collect all the entity IDs relations in the targetField
+    let resultEntityIds = [];
     if (entity?.[targetField]) {
       if (Array.isArray(entity?.[targetField])) {
-        resultIds = entity?.[targetField]?.map((result: any) => result.id);
+        resultEntityIds = entity?.[targetField]?.map((result: any) => result.id);
       } else {
-        resultIds = entity?.[targetField]?.id ? [entity[targetField].id] : [];
+        resultEntityIds = entity?.[targetField]?.id ? [entity[targetField].id] : [];
       }
     }
 
@@ -306,7 +304,9 @@ export default {
     const page = await strapi.entityService.findPage(targetUid as Common.UID.ContentType, {
       fields,
       filters: {
-        id: { $in: resultIds },
+        // The existing relations will be entries of the target model who's
+        // entity ID is in the list of entity IDs related to the source entity
+        id: { $in: resultEntityIds },
       },
       sort,
       page: ctx.request.query.page,
