@@ -242,4 +242,4 @@ const AdvancedSettingsPage = () => {
   );
 };
 
-export default ProtectedAdvancedSettingsPage;
+export { ProtectedAdvancedSettingsPage, AdvancedSettingsPage };
