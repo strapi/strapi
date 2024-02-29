@@ -1,4 +1,5 @@
 import type { LoadedStrapi, Schema, Common } from '@strapi/types';
+import type { Model } from '@strapi/database';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -38,7 +39,7 @@ const deleteEntitiesRecords = async (
 ): Promise<IDeleteResults> => {
   const { entities } = options;
 
-  const models = Array.from(strapi.db.metadata.values());
+  const models = strapi.get('models').get() as Model[];
   const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
 
   const contentTypesToClear = contentTypes
