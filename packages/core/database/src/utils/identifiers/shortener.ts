@@ -18,7 +18,7 @@ import crypto from 'node:crypto';
 import { partition, isInteger, sumBy, snakeCase } from 'lodash/fp';
 
 // TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
-export const MAX_DB_IDENTIFIER_LENGTH = 0;
+export const MAX_DB_IDENTIFIER_LENGTH = 55;
 
 // We can accept a number of compressible tokens up to:
 // tokens accepted = (MAX_LENGTH / (HASH_LENGTH + MIN_TOKEN_LENGTH) + (tokens * IDENTIFIER_SEPARATER.length))
