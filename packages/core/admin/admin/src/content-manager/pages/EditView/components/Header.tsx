@@ -75,7 +75,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
         )}
         <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
           {formatMessage({
-            id: getTranslation('content-manager.content-manager.containers.Edit.submit'),
+            id: getTranslation('content-manager.containers.Edit.submit'),
             defaultMessage: 'Save',
           })}
         </Button>
@@ -111,7 +111,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
         <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
           <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
             {formatMessage({
-              id: getTranslation('content-manager.content-manager.containers.Edit.submit'),
+              id: getTranslation('content-manager.containers.Edit.submit'),
               defaultMessage: 'Save',
             })}
           </Button>

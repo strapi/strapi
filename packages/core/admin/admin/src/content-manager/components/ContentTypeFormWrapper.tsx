@@ -335,7 +335,7 @@ const ContentTypeFormWrapper = ({
         trackUsage('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('content-manager.content-manager.success.record.save') },
+          message: { id: getTranslation('content-manager.success.record.save') },
         });
 
         setCurrentStep('contentManager.success');
@@ -482,7 +482,7 @@ const ContentTypeFormWrapper = ({
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('content-manager.content-manager.success.record.save') },
+          message: { id: getTranslation('content-manager.success.record.save') },
         });
 
         // TODO: need to find a better place, or a better abstraction

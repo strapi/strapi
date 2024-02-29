@@ -228,7 +228,7 @@ const DragAndDropElement = ({
             role="button"
             tabIndex={0}
             aria-label={formatMessage({
-              id: getTranslation('content-manager.content-manager.components.DragHandle-label'),
+              id: getTranslation('content-manager.components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
             onClick={(e) => e.stopPropagation()}
@@ -262,7 +262,7 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
         forwardedAs="div"
         role="button"
         aria-label={formatMessage({
-          id: getTranslation('content-manager.content-manager.components.DragHandle-label'),
+          id: getTranslation('content-manager.components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
         dragHandleTopMargin={dragHandleTopMargin}

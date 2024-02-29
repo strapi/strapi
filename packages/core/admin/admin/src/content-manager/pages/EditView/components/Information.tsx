@@ -86,7 +86,7 @@ const Body = () => {
 
         <KeyValuePair
           label={formatMessage({
-            id: getTranslation('content-manager.content-manager.content-manager.containers.Edit.information.by'),
+            id: getTranslation('content-manager.content-manager.containers.Edit.information.by'),
             defaultMessage: 'By',
           })}
           value={created.by}
@@ -104,7 +104,7 @@ const Body = () => {
 
         <KeyValuePair
           label={formatMessage({
-            id: getTranslation('content-manager.content-manager.content-manager.containers.Edit.information.by'),
+            id: getTranslation('content-manager.content-manager.containers.Edit.information.by'),
             defaultMessage: 'By',
           })}
           value={updated.by}
