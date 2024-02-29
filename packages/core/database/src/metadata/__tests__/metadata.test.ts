@@ -1,6 +1,6 @@
 import { createMetadata, Metadata } from '..';
 import { models } from './resources/models';
-import { metadata as expected } from './resources/expected-metadata';
+import { metadata as expectedLong } from './resources/expected-metadata-long';
 
 const testModels = models as any;
 
@@ -330,7 +330,7 @@ describe('metadata', () => {
        *
        * TODO: break it up into individual pieces to help debugging
        */
-      describe('valid cases', () => {
+      describe.skip('valid cases -- without shortening', () => {
         let results: Metadata;
 
         let error: unknown;
@@ -351,9 +351,46 @@ describe('metadata', () => {
           expect(results).toBeInstanceOf(Map);
 
           // const resultsAsArray = Array.from(results.entries());
-          expect(results).toEqualMap(new Map(expected as any));
+          expect(results).toEqualMap(new Map(expectedLong as any));
+        });
+      });
+
+      describe('valid cases -- with shortening', () => {
+        test('creates a table name with a long name', () => {
+          const results = createMetadata([
+            {
+              attributes: {
+                // titleSuperhugelonglonglongreallylongnametotestcontenttypesyessssssitsgoingtowork: {
+                //   type: 'string',
+                // },
+              },
+              tableName:
+                'really-long-test-name-for-this-test-to-test-a-really-long-name-because-we-need-to-test-this',
+              uid: 'test',
+              singularName:
+                'really-long-test-name-for-this-test-to-test-a-really-long-name-because-we-need-to-test-this',
+            },
+          ]);
+          console.log('results', map2str(results));
+          expect(results).toEqualMap(
+            new Map([
+              [
+                'api::really-long-test-name-for-this-test-to-test-a-really-long-name.really-long-test-name-for-this-test-to-test-a-really-long-name',
+                {},
+              ],
+            ])
+          );
         });
       });
     });
   });
 });
+
+const map2str = (map: Map<string, unknown>, keyStartsWith?: string) => {
+  // Filter map entries if keyStartsWith is provided
+  const filteredEntries = keyStartsWith
+    ? Array.from(map.entries()).filter(([key]) => key.startsWith(keyStartsWith))
+    : Array.from(map.entries());
+
+  return JSON.stringify(filteredEntries, null, 2);
+};

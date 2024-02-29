@@ -36,6 +36,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
   for (const model of _.cloneDeep(models)) {
     metadata.add({
       ...model,
+      tableName: identifiers.getTableName(model.tableName),
       attributes: {
         ...model.attributes,
       },
