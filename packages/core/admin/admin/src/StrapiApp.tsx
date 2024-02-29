@@ -485,7 +485,7 @@ class StrapiApp {
       );
     }
 
-    // @ts-expect-error – we've already checked above that the block exists.
+    // @ts-expect-error – we've alredy checked above that the block exists.
     this.admin.injectionZones.contentManager[containerName][blockName].push(component);
   };
 

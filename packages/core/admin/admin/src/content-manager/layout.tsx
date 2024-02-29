@@ -99,14 +99,10 @@ const Layout = () => {
           defaultMessage: 'Content Manager',
         })}
       />
-      {isHistoryRoute ? (
+      <DSLayout sideNav={<LeftMenu />}>
+        <DragLayer renderItem={renderDraglayerItem} />
         <Outlet />
-      ) : (
-        <DSLayout sideNav={<LeftMenu />}>
-          <DragLayer renderItem={renderDraglayerItem} />
-          <Outlet />
-        </DSLayout>
-      )}
+      </DSLayout>
     </>
   );
 };

@@ -103,7 +103,7 @@ describe.skip('Test type date', () => {
 
     const newDate = '2017-11-23';
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withdate.withdate/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withdate.withdate/${res.body.data.documentId}`,
       {
         body: {
           field: newDate,
@@ -113,7 +113,7 @@ describe.skip('Test type date', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: '2017-11-23',
     });
   });

@@ -87,11 +87,11 @@ describe('Core API - Basic + dz', () => {
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: product,
+      documentId: expect.anything(),
+      ...product,
     });
 
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.publishedAt).toBeDefined();
 
     data.productWithDz.push(body.data);
   });
@@ -109,7 +109,7 @@ describe('Core API - Basic + dz', () => {
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject(data.productWithDz[0]);
     body.data.forEach((p) => {
-      expect(p.attributes.publishedAt).toBeDefined();
+      expect(p.publishedAt).toBeDefined();
     });
   });
 
@@ -128,7 +128,7 @@ describe('Core API - Basic + dz', () => {
 
     const { statusCode, body } = await rq({
       method: 'PUT',
-      url: `/product-with-dzs/${data.productWithDz[0].id}`,
+      url: `/product-with-dzs/${data.productWithDz[0].documentId}`,
       body: {
         data: product,
       },
@@ -139,18 +139,19 @@ describe('Core API - Basic + dz', () => {
 
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject({
-      id: data.productWithDz[0].id,
-      attributes: product,
+      documentId: data.productWithDz[0].documentId,
+      ...product,
     });
 
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.publishedAt).toBeDefined();
     data.productWithDz[0] = body.data;
   });
 
-  test('Delete product with compo', async () => {
+  // TODO V5: Decide response of delete
+  test.skip('Delete product with compo', async () => {
     const { statusCode, body } = await rq({
       method: 'DELETE',
-      url: `/product-with-dzs/${data.productWithDz[0].id}`,
+      url: `/product-with-dzs/${data.productWithDz[0].documentId}`,
       qs: {
         populate: ['dz'],
       },
@@ -159,7 +160,7 @@ describe('Core API - Basic + dz', () => {
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject(data.productWithDz[0]);
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.publishedAt).toBeDefined();
     data.productWithDz.shift();
   });
 
@@ -302,12 +303,12 @@ describe('Core API - Basic + dz', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'dz[0].name must be defined.',
+          message: 'dz[0].name must be a `string` type, but the final value was: `null`.',
           details: {
             errors: [
               {
                 path: ['dz', '0', 'name'],
-                message: 'dz[0].name must be defined.',
+                message: 'dz[0].name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],

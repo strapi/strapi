@@ -48,7 +48,7 @@ interface Context {
   /**
    * this will be undefined if someone is creating an entry.
    */
-  id?: string;
+  documentId?: string;
   /**
    * this will be undefined if someone is creating an entry.
    */

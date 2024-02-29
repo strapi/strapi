@@ -32,7 +32,7 @@ describe('Document Service', () => {
           publishedAt: null, // should be a draft
         });
 
-        const articles = await findArticlesDb({ documentId: article.id });
+        const articles = await findArticlesDb({ documentId: article.documentId });
         // Only one article should have been created
         expect(articles).toHaveLength(1);
       })

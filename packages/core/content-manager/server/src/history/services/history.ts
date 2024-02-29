@@ -79,7 +79,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              relatedDocumentId: 'id' in result ? result.id : context.args[0],
+              relatedDocumentId: 'documentId' in result ? result.documentId : context.args[0],
               locale: params.locale,
               // TODO: check if drafts should should be "modified" once D&P is ready
               status: params.status,

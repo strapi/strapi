@@ -146,7 +146,6 @@ const DEFAULT_SETTINGS = {
  * ```
  *
  */
-
 const useDocumentLayout: UseDocumentLayout = (model) => {
   const { schema, components } = useDocument({ model, collectionType: '' }, { skip: true });
   const [{ query }] = useQueryParams();

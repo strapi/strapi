@@ -15,14 +15,14 @@ describe('Transforms', () => {
 
   test('Handles arrays of entries', () => {
     expect(transforms.transformResponse([{ id: 1, title: 'Hello' }])).toStrictEqual({
-      data: [{ id: 1, attributes: { title: 'Hello' } }],
+      data: [{ id: 1, title: 'Hello' }],
       meta: {},
     });
   });
 
   test('Handles single entry', () => {
     expect(transforms.transformResponse({ id: 1, title: 'Hello' })).toStrictEqual({
-      data: { id: 1, attributes: { title: 'Hello' } },
+      data: { id: 1, title: 'Hello' },
       meta: {},
     });
   });
@@ -30,7 +30,7 @@ describe('Transforms', () => {
   test('Accepts any meta', () => {
     const someMeta = { foo: 'bar' };
     expect(transforms.transformResponse({ id: 1, title: 'Hello' }, someMeta)).toStrictEqual({
-      data: { id: 1, attributes: { title: 'Hello' } },
+      data: { id: 1, title: 'Hello' },
       meta: someMeta,
     });
   });
@@ -71,16 +71,10 @@ describe('Transforms', () => {
     ).toStrictEqual({
       data: {
         id: 1,
-        attributes: {
-          title: 'Hello',
-          relation: {
-            data: {
-              id: 1,
-              attributes: {
-                value: 'test',
-              },
-            },
-          },
+        title: 'Hello',
+        relation: {
+          id: 1,
+          value: 'test',
         },
       },
       meta: {},
@@ -123,19 +117,13 @@ describe('Transforms', () => {
     ).toStrictEqual({
       data: {
         id: 1,
-        attributes: {
-          title: 'Hello',
-          relation: {
-            data: [
-              {
-                id: 1,
-                attributes: {
-                  value: 'test',
-                },
-              },
-            ],
+        title: 'Hello',
+        relation: [
+          {
+            id: 1,
+            value: 'test',
           },
-        },
+        ],
       },
       meta: {},
     });
@@ -188,27 +176,17 @@ describe('Transforms', () => {
     ).toStrictEqual({
       data: {
         id: 1,
-        attributes: {
-          title: 'Hello',
-          relation: {
-            data: [
-              {
-                id: 1,
-                attributes: {
-                  value: 'test',
-                  nestedRelation: {
-                    data: {
-                      id: 2,
-                      attributes: {
-                        foo: 'bar',
-                      },
-                    },
-                  },
-                },
-              },
-            ],
+        title: 'Hello',
+        relation: [
+          {
+            id: 1,
+            value: 'test',
+            nestedRelation: {
+              id: 2,
+              foo: 'bar',
+            },
           },
-        },
+        ],
       },
       meta: {},
     });
@@ -248,19 +226,13 @@ describe('Transforms', () => {
     ).toStrictEqual({
       data: {
         id: 1,
-        attributes: {
-          title: 'Hello',
-          media: {
-            data: [
-              {
-                id: 1,
-                attributes: {
-                  value: 'test',
-                },
-              },
-            ],
+        title: 'Hello',
+        media: [
+          {
+            id: 1,
+            value: 'test',
           },
-        },
+        ],
       },
       meta: {},
     });

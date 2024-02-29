@@ -10,20 +10,20 @@ import { Locale } from '../../../shared/contracts/locales';
 import { useGetLocalesQuery } from '../services/locales';
 
 interface LocaleListCellProps {
-  id: string;
+  documentId: string;
   collectionType: string;
   locale: string;
   model: string;
 }
 
 const LocaleListCell = ({
-  id,
+  documentId,
   locale: currentLocale,
   collectionType,
   model,
 }: LocaleListCellProps) => {
   const { meta, isLoading } = useDocument({
-    id,
+    documentId,
     collectionType,
     model,
     params: {

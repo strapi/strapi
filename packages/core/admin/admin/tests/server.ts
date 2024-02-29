@@ -4,7 +4,6 @@ import { setupServer } from 'msw/node';
 import * as qs from 'qs';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../src/content-manager/constants/collections';
-import { historyHandlers } from '../src/content-manager/history/tests/server';
 
 import { MockData, mockData } from './mockData';
 
@@ -465,14 +464,9 @@ export const server = setupServer(
       return res(ctx.status(200));
     }),
     rest.get('/content-manager/content-types/:model/configuration', (req, res, ctx) => {
-      const configuration =
-        req.params.model === 'api::homepage.homepage'
-          ? mockData.contentManager.singleTypeConfiguration
-          : mockData.contentManager.collectionTypeConfiguration;
-
       return res(
         ctx.json({
-          data: configuration,
+          data: mockData.contentManager.configuration,
         })
       );
     }),
@@ -491,7 +485,8 @@ export const server = setupServer(
         return res(
           ctx.json({
             data: {
-              id,
+              documentId: id,
+              id: 1,
               name: 'Entry 1',
               createdAt: '',
               updatedAt: '',
@@ -518,7 +513,8 @@ export const server = setupServer(
         return res(
           ctx.json({
             data: {
-              id,
+              documentId: id,
+              id: 1,
               name: 'Entry 1',
               ...data,
               createdAt: '',
@@ -549,7 +545,8 @@ export const server = setupServer(
       return res(
         ctx.json({
           data: {
-            id: '12345',
+            documentId: '12345',
+            id: 1,
             ...data,
           },
         })
@@ -561,7 +558,8 @@ export const server = setupServer(
       return res(
         ctx.json({
           data: {
-            id: '67890',
+            documentId: '67890',
+            id: 2,
             ...data,
           },
         })
@@ -574,7 +572,8 @@ export const server = setupServer(
         return res(
           ctx.status(200),
           ctx.json({
-            id: '12345',
+            documentId: id,
+            id: 1,
             title: 'test',
           })
         );
@@ -596,7 +595,8 @@ export const server = setupServer(
           return res(
             ctx.status(200),
             ctx.json({
-              id: '12345',
+              documentId: id,
+              id: 1,
               title: 'test',
               publishedAt: '2024-01-23T16:23:38.948Z',
             })
@@ -620,7 +620,8 @@ export const server = setupServer(
           return res(
             ctx.status(200),
             ctx.json({
-              id: '12345',
+              documentId: id,
+              id: 1,
               title: 'test',
               publishedAt: null,
             })
@@ -642,7 +643,8 @@ export const server = setupServer(
         return res(
           ctx.status(200),
           ctx.json({
-            id: '12345',
+            documentId: id,
+            id: 1,
             title: 'test',
           })
         );
@@ -688,18 +690,21 @@ export const server = setupServer(
         ctx.json({
           results: [
             {
+              documentId: '12345',
               id: 1,
               name: 'Entry 1',
               publishedAt: null,
               notrepeat_req: {},
             },
             {
+              documentId: '67890',
               id: 2,
               name: 'Entry 2',
               publishedAt: null,
               notrepeat_req: {},
             },
             {
+              documentId: 'abcde',
               id: 3,
               name: 'Entry 3',
               publishedAt: null,

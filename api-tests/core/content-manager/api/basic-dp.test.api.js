@@ -125,13 +125,13 @@ describe('CM API - Basic', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject(_.omit(product, 'publishedAt'));
-    expect(res.body.data.id).toEqual(data.productsWithDP[0].id);
+    expect(res.body.data.documentId).toEqual(data.productsWithDP[0].documentId);
     expect(res.body.data.publishedAt).toBeNull();
     data.productsWithDP[0] = res.body.data;
   });
@@ -144,14 +144,14 @@ describe('CM API - Basic', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject(_.omit(product, ['publishedAt']));
     expect(res.body.data.publishedAt).toBeNull();
-    expect(res.body.data.id).toEqual(data.productsWithDP[0].id);
+    expect(res.body.data.documentId).toEqual(data.productsWithDP[0].documentId);
     data.productsWithDP[0] = res.body.data;
   });
 
@@ -164,7 +164,7 @@ describe('CM API - Basic', () => {
     };
 
     const { body } = await rq({
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.documentId}/actions/publish`,
       method: 'POST',
       body: product,
     });
@@ -173,12 +173,12 @@ describe('CM API - Basic', () => {
     const [draftDocument, publishedDocument] = await Promise.all([
       rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.documentId}`,
         qs: { status: 'draft' },
       }),
       rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.documentId}`,
         qs: { status: 'published' },
       }),
     ]);
@@ -207,12 +207,12 @@ describe('CM API - Basic', () => {
     const [draftDocument, publishedDocument] = await Promise.all([
       rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}`,
         qs: { status: 'draft' },
       }),
       rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}`,
         qs: { status: 'published' },
       }),
     ]);
@@ -227,7 +227,7 @@ describe('CM API - Basic', () => {
     const entry = data.productsWithDP[0];
 
     const { body } = await rq({
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.documentId}/actions/publish`,
       method: 'POST',
     });
 
@@ -248,7 +248,7 @@ describe('CM API - Basic', () => {
       const entry = data.productsWithDP[0];
 
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.documentId}/actions/unpublish`,
         method: 'POST',
       });
 
@@ -261,7 +261,7 @@ describe('CM API - Basic', () => {
       const entry = data.productsWithDP[0];
 
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.documentId}/actions/unpublish`,
         method: 'POST',
       });
 
@@ -298,21 +298,21 @@ describe('CM API - Basic', () => {
 
       await rq({
         method: 'PUT',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}`,
         body: updatedProduct,
       });
 
       // Unpublish and discard product draft
       const unpublishRes = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/unpublish`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}/actions/unpublish`,
         body: { discardDraft: true },
       });
 
       // Get draft
       const draft = await rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}`,
         qs: { status: 'draft' },
       });
 
@@ -325,12 +325,12 @@ describe('CM API - Basic', () => {
   test.skip('Delete a draft', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithDP[0]);
-    expect(res.body.id).toEqual(data.productsWithDP[0].id);
+    expect(res.body.documentId).toEqual(data.productsWithDP[0].documentId);
     expect(res.body.publishedAt).toBeNull();
     data.productsWithDP.shift();
   });
@@ -357,14 +357,14 @@ describe('CM API - Basic', () => {
 
       await rq({
         method: 'PUT',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}`,
         body: updatedProduct,
       });
 
       // Discard the draft
       const discardRes = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/discard`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}/actions/discard`,
       });
 
       expect(discardRes.statusCode).toBe(200);
@@ -389,7 +389,7 @@ describe('CM API - Basic', () => {
       // Discard the draft
       const discardRes = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.id}/actions/discard`,
+        url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}/actions/discard`,
       });
 
       expect(discardRes.statusCode).toBe(404);

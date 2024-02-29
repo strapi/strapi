@@ -89,6 +89,7 @@ module.exports = ({ strapi }) => ({
       ext,
       mime: type,
       size: bytesToKbytes(size),
+      sizeInBytes: size,
     };
 
     const { refId, ref, field } = metas;

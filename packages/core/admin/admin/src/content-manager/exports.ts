@@ -13,5 +13,6 @@ export type {
   ListFieldLayout,
   ListLayout,
 } from './hooks/useDocumentLayout';
+export * from './features/DocumentRBAC';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';

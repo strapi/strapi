@@ -70,8 +70,8 @@ describe('Releases home page', () => {
 
     const { user } = render(<ReleasesPage />);
 
-    const releaseSubtitle = await screen.findByText('17 releases');
-    expect(releaseSubtitle).toBeInTheDocument();
+    const pendingTab = await screen.findByText('Pending (17)');
+    expect(pendingTab).toBeInTheDocument();
 
     const firstEntry = screen.getByRole('heading', { level: 3, name: 'entry 1' });
     expect(firstEntry).toBeInTheDocument();

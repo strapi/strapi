@@ -8,9 +8,11 @@ describe('Time validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: () => ({
-        findFirst: fakeFindFirst,
-      }),
+      db: {
+        query: () => ({
+          findOne: fakeFindFirst,
+        }),
+      },
     } as any;
 
     afterEach(() => {
@@ -155,9 +157,11 @@ describe('Time validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrTimeUnique: '00:00:00.000Z' },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrTimeUnique: '00:00:00.000Z',
+        },
       });
     });
 
@@ -179,14 +183,14 @@ describe('Time validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: {
+        where: {
           attrTimeUnique: valueToCheck,
           id: {
             $ne: 1,
           },
+          locale: 'en',
+          publishedAt: null,
         },
-        locale: 'en',
-        status: 'draft',
       });
     });
   });

@@ -3,7 +3,7 @@ import { prop, pick, reduce, map, keys, toPath, isNil } from 'lodash/fp';
 import utils from '@strapi/utils';
 import { getService } from '../utils';
 
-const { contentTypes, parseMultipartData, sanitize } = utils;
+const { contentTypes, sanitize } = utils;
 const { ApplicationError, NotFoundError } = utils.errors;
 
 const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = contentTypes;
@@ -88,9 +88,9 @@ const createLocalizationHandler = (contentType: any) => {
 
   return (ctx: any = {}) => {
     const { id } = ctx.params;
-    const { data, files } = parseMultipartData(ctx);
+    const data = ctx.request.body ?? {};
 
-    return handler({ id, data, files });
+    return handler({ id, data });
   };
 };
 
@@ -99,7 +99,7 @@ const createCreateLocalizationHandler =
   async (args: any = {}) => {
     const { copyNonLocalizedAttributes } = getService('content-types');
 
-    const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
+    const { sanitizeInput } = createSanitizer(contentType);
 
     const entry = isSingleType(contentType)
       ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
@@ -111,7 +111,7 @@ const createCreateLocalizationHandler =
       throw new NotFoundError();
     }
 
-    const { data, files } = args;
+    const { data } = args;
 
     const { findByCode } = getService('locales');
 
@@ -136,11 +136,8 @@ const createCreateLocalizationHandler =
       localizations: getAllLocalizationsIds(entry),
     };
 
-    const sanitizedFiles = sanitizeInputFiles(files);
-
     const newEntry = await strapi.entityService.create(contentType.uid, {
       data: sanitizedData,
-      files: sanitizedFiles,
       populate: ['localizations'],
     });
 

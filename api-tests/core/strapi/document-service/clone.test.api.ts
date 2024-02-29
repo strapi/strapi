@@ -25,14 +25,12 @@ describe('Document Service', () => {
 
         const result = await strapi.documents(ARTICLE_UID).clone(articleDb.id, {
           locale: 'en', // should only clone the english locale
-          data: {
-            title: 'Cloned Document',
-          },
+          data: { title: 'Cloned Document' },
         });
 
         expect(result).not.toBeNull();
 
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
 
         // all articles should be in draft, and only one should be english
         expect(clonedArticlesDb.length).toBe(1);
@@ -66,7 +64,7 @@ describe('Document Service', () => {
           documentId: articleDb.id,
           publishedAt: null,
         });
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
 
         // all articles should be in draft, and all locales should be cloned
         expect(clonedArticlesDb.length).toBe(originalArticlesDb.length);

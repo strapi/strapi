@@ -92,7 +92,7 @@ describe('Test type boolean', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withboolean.withboolean/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withboolean.withboolean/${res.body.data.documentId}`,
       {
         body: {
           field: false,
@@ -102,7 +102,7 @@ describe('Test type boolean', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: false,
     });
   });
