@@ -98,6 +98,10 @@ const MyLink = () => {
 };
 ```
 
+### NoContent
+
+This component has been removed and not replaced, you should use the `EmptyStateLayout` component from `@strapi/design-system`.
+
 ### NoMedia
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
