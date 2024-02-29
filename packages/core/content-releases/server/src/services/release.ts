@@ -574,167 +574,176 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     },
 
     async publish(releaseId: PublishRelease.Request['params']['id']) {
-      const trx = await strapi.db.transaction();
-
-      try {
-        const lockedRelease = (await strapi.db
-          ?.queryBuilder(RELEASE_MODEL_UID)
-          .where({ id: releaseId })
-          .select(['id', 'releasedAt', 'status'])
-          .first()
-          .transacting(trx.get())
-          .forUpdate()
-          .execute()) as Pick<Release, 'id' | 'releasedAt' | 'status'> | undefined;
-
-        if (!lockedRelease) {
-          throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-        }
-
-        if (lockedRelease.releasedAt) {
-          throw new errors.ValidationError('Release already published');
-        }
-
-        if (lockedRelease.status === 'failed') {
-          throw new errors.ValidationError(
-            'Release failed to publish before, change it to try again'
-          );
-        }
-
-        // We need to pass the type because entityService.findOne is not returning the right type
-        const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-          where: {
-            release: {
-              id: releaseId,
-            },
-          },
-          populate: {
-            entry: {
-              fields: ['id'],
-            },
-          },
-        });
-
-        if (actions.length === 0) {
-          throw new errors.ValidationError('No entries to publish');
-        }
-
-        try {
-          strapi.log.info(`[Content Releases] Starting to publish release with id ${releaseId}`);
-
-          /**
-           * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
-           * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
-           */
-          const collectionTypeActions: {
-            [key: UID.ContentType]: {
-              entriesToPublishIds: ReleaseAction['entry']['id'][];
-              entriesToUnpublishIds: ReleaseAction['entry']['id'][];
-            };
-          } = {};
-          const singleTypeActions: {
-            uid: UID.ContentType;
-            id: ReleaseAction['entry']['id'];
-            action: ReleaseAction['type'];
-          }[] = [];
-          for (const action of actions) {
-            const contentTypeUid = action.contentType;
-
-            if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
-              if (!collectionTypeActions[contentTypeUid]) {
-                collectionTypeActions[contentTypeUid] = {
-                  entriesToPublishIds: [],
-                  entriesToUnpublishIds: [],
-                };
-              }
-
-              if (action.type === 'publish') {
-                collectionTypeActions[contentTypeUid].entriesToPublishIds.push(action.entry.id);
-              } else {
-                collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
-              }
-            } else {
-              singleTypeActions.push({
-                uid: contentTypeUid,
-                action: action.type,
-                id: action.entry.id,
-              });
-            }
-          }
-
-          await strapi.db.transaction(async () => {
-            // First we publish all the singleTypes
-            for (const { uid, action, id } of singleTypeActions) {
-              await publishSingleTypeAction(uid, action, id);
-            }
-
-            // Then, we can continue with publishing the collectionTypes
-            for (const contentTypeUid of Object.keys(collectionTypeActions)) {
-              const uid = contentTypeUid as UID.ContentType;
-
-              await publishCollectionTypeAction(
-                uid,
-                collectionTypeActions[uid].entriesToPublishIds,
-                collectionTypeActions[uid].entriesToUnpublishIds
-              );
-            }
-          });
-
-          // We need to run the update in the same transaction because the release is locked
-          await strapi.db
-            ?.queryBuilder(RELEASE_MODEL_UID)
-            .where({ id: releaseId })
-            .update({
-              status: 'done',
-              releasedAt: new Date(),
-            })
-            .transacting(trx.get())
-            .execute();
-
-          const release = await strapi.db
+      const {
+        release,
+        error,
+      }: { release: Pick<Release, 'id' | 'releasedAt' | 'status'>; error: Error } =
+        await strapi.db.transaction(async ({ trx }) => {
+          // In this first transaction we don't care about rollback, we are using this transaction only to lock the release
+          const lockedRelease = (await strapi.db
             ?.queryBuilder(RELEASE_MODEL_UID)
             .where({ id: releaseId })
             .select(['id', 'releasedAt', 'status'])
-            .transacting(trx.get())
             .first()
-            .execute();
+            .transacting(trx)
+            .forUpdate()
+            .execute()) as Pick<Release, 'id' | 'releasedAt' | 'status'> | undefined;
 
-          if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-              isPublished: true,
-              release,
-            });
+          if (!lockedRelease) {
+            throw new errors.NotFoundError(`No release found for id ${releaseId}`);
           }
 
-          strapi.telemetry.send('didPublishContentRelease');
-          trx.commit();
+          if (lockedRelease.releasedAt) {
+            throw new errors.ValidationError('Release already published');
+          }
 
-          return release;
-        } catch (error) {
-          if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-              isPublished: false,
+          if (lockedRelease.status === 'failed') {
+            throw new errors.ValidationError(
+              'Release failed to publish before, change it to try again'
+            );
+          }
+
+          try {
+            strapi.log.info(`[Content Releases] Starting to publish release with id ${releaseId}`);
+
+            // We need to pass the type because entityService.findOne is not returning the right type
+            const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+              where: {
+                release: {
+                  id: releaseId,
+                },
+              },
+              populate: {
+                entry: {
+                  fields: ['id'],
+                },
+              },
+            });
+
+            if (actions.length === 0) {
+              throw new errors.ValidationError('No entries to publish');
+            }
+
+            /**
+             * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
+             * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
+             */
+            const collectionTypeActions: {
+              [key: UID.ContentType]: {
+                entriesToPublishIds: ReleaseAction['entry']['id'][];
+                entriesToUnpublishIds: ReleaseAction['entry']['id'][];
+              };
+            } = {};
+            const singleTypeActions: {
+              uid: UID.ContentType;
+              id: ReleaseAction['entry']['id'];
+              action: ReleaseAction['type'];
+            }[] = [];
+            for (const action of actions) {
+              const contentTypeUid = action.contentType;
+
+              if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
+                if (!collectionTypeActions[contentTypeUid]) {
+                  collectionTypeActions[contentTypeUid] = {
+                    entriesToPublishIds: [],
+                    entriesToUnpublishIds: [],
+                  };
+                }
+
+                if (action.type === 'publish') {
+                  collectionTypeActions[contentTypeUid].entriesToPublishIds.push(action.entry.id);
+                } else {
+                  collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
+                }
+              } else {
+                singleTypeActions.push({
+                  uid: contentTypeUid,
+                  action: action.type,
+                  id: action.entry.id,
+                });
+              }
+            }
+
+            await strapi.db.transaction(async () => {
+              // First we publish all the singleTypes
+              for (const { uid, action, id } of singleTypeActions) {
+                await publishSingleTypeAction(uid, action, id);
+              }
+
+              // Then, we can continue with publishing the collectionTypes
+              for (const contentTypeUid of Object.keys(collectionTypeActions)) {
+                const uid = contentTypeUid as UID.ContentType;
+
+                await publishCollectionTypeAction(
+                  uid,
+                  collectionTypeActions[uid].entriesToPublishIds,
+                  collectionTypeActions[uid].entriesToUnpublishIds
+                );
+              }
+            });
+
+            // We need to run the update in the same transaction because the release is locked
+            await strapi.db
+              ?.queryBuilder(RELEASE_MODEL_UID)
+              .where({ id: releaseId })
+              .update({
+                status: 'done',
+                releasedAt: new Date(),
+              })
+              .transacting(trx)
+              .execute();
+
+            const release = await strapi.db
+              ?.queryBuilder(RELEASE_MODEL_UID)
+              .where({ id: releaseId })
+              .select(['id', 'releasedAt', 'status'])
+              .transacting(trx)
+              .first()
+              .execute();
+
+            if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+              dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+                isPublished: true,
+                release,
+              });
+            }
+
+            strapi.telemetry.send('didPublishContentRelease');
+
+            return { release, error: null };
+          } catch (error) {
+            if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
+              dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+                isPublished: false,
+                error,
+              });
+            }
+
+            // We need to run the update in the same transaction because the release is locked
+            await strapi.db
+              ?.queryBuilder(RELEASE_MODEL_UID)
+              .where({ id: releaseId })
+              .update({
+                status: 'failed',
+              })
+              .transacting(trx)
+              .execute();
+
+            // At this point, we don't want to throw the error because if that happen we rollback the change in the release status
+            // We want to throw the error after the transaction is finished, so we return the error
+            return {
+              release: null,
               error,
-            });
+            };
           }
+        });
 
-          // We need to run the update in the same transaction because the release is locked
-          await strapi.db
-            ?.queryBuilder(RELEASE_MODEL_UID)
-            .where({ id: releaseId })
-            .update({
-              status: 'failed',
-            })
-            .transacting(trx.get())
-            .execute();
-
-          throw error;
-        }
-      } catch (error) {
-        // We don't want to rollback the first transaction in any case, we use the transaction only to lock the release row
-        // But we always need to make sure to commit the transaction so the lock is released even if there is an error
-        await trx.commit();
+      // Now the first transaction is commited, we can safely throw the error if it exists
+      if (error) {
         throw error;
       }
+
+      return release;
     },
 
     async updateAction(
