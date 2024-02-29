@@ -7,6 +7,7 @@ import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
 import { BooleanInput } from './Boolean';
+import { CheckboxInput } from './Checkbox';
 import { DateInput } from './Date';
 import { DateTimeInput } from './DateTime';
 import { EmailInput } from './Email';
@@ -38,6 +39,8 @@ const InputRenderer = memo(
         return <StringInput ref={forwardRef} {...props} />;
       case 'boolean':
         return <BooleanInput ref={forwardRef} {...props} />;
+      case 'checkbox':
+        return <CheckboxInput ref={forwardRef} {...props} />;
       case 'datetime':
         return <DateTimeInput ref={forwardRef} {...props} />;
       case 'date':
@@ -76,6 +79,7 @@ const NotSupportedField = forwardRef<any, InputProps>((props, ref) => {
       ref={composedRefs}
       disabled
       error={error}
+      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
       label={props.label}
       id={props.name}
       hint={props.hint}

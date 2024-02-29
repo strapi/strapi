@@ -11,8 +11,8 @@ import {
   Textarea,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { Form, GenericInput } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { GenericInput } from '@strapi/helper-plugin';
+import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

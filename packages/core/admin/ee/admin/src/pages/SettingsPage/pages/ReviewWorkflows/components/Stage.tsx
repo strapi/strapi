@@ -33,7 +33,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
-import { composeRefs } from '../../../../../../../../admin/src/content-manager/utils/refs';
+import { composeRefs } from '../../../../../../../../admin/src/utils/refs';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,

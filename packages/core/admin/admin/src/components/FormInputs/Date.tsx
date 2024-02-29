@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 
-import { TimePicker } from '@strapi/design-system';
+import { DatePicker } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
@@ -9,33 +9,35 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const TimeInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ disabled, label, hint, name, required }, ref) => {
+const DateInput = forwardRef<HTMLInputElement, InputProps>(
+  ({ disabled, label, hint, name, required, placeholder }, ref) => {
     const { formatMessage } = useIntl();
-    const field = useField<string>(name);
+    const field = useField<Date>(name);
     const fieldRef = useFocusInputField(name);
 
     const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
 
     return (
-      <TimePicker
+      <DatePicker
         ref={composedRefs}
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         disabled={disabled}
         error={field.error}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         id={name}
         hint={hint}
         name={name}
-        onChange={(time) => {
-          field.onChange(name, time);
+        onChange={(date) => {
+          field.onChange(name, date);
         }}
         onClear={() => field.onChange(name, undefined)}
+        placeholder={placeholder}
         required={required}
-        value={field.value}
+        selectedDate={field.value}
       />
     );
   }
 );
 
-export { TimeInput };
+export { DateInput };

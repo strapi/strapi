@@ -13,7 +13,6 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
   useAPIErrorHandler,
@@ -26,7 +25,7 @@ import {
   translatedErrors,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';

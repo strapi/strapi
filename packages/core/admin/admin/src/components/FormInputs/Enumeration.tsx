@@ -20,6 +20,7 @@ export const EnumerationInput = forwardRef<any, EnumerationProps>(
         ref={composedRefs}
         disabled={disabled}
         error={field.error}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         hint={hint}
         name={name}

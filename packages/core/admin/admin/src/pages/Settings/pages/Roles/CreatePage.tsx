@@ -16,7 +16,6 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
-  Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
   useNotification,
@@ -27,7 +26,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';

@@ -17,8 +17,10 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
-import { createContext } from '../../components/Context';
 import { getIn, setIn } from '../utils/object';
+import { useComposedRefs } from '../utils/refs';
+
+import { createContext } from './Context';
 
 import type { InputProps as InputPropsImpl, EnumerationProps } from './FormInputs/types';
 import type * as Yup from 'yup';
@@ -118,6 +120,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
   ({ disabled = false, method, onSubmit, ...props }, ref) => {
+    const formRef = React.useRef<HTMLFormElement>(null!);
     const initialValues = React.useRef(props.initialValues ?? {});
     const [state, dispatch] = React.useReducer(reducer, {
       errors: {},
@@ -145,6 +148,31 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         payload: errors,
       });
     }, []);
+
+    React.useEffect(() => {
+      if (Object.keys(state.errors).length === 0) return;
+
+      /**
+       * Small timeout to ensure the form has been
+       * rendered before we try to focus on the first
+       */
+      const ref = setTimeout(() => {
+        const [firstError] = formRef.current.querySelectorAll('[data-strapi-field-error]');
+
+        if (firstError) {
+          const errorId = firstError.getAttribute('id');
+          const formElementInError = formRef.current.querySelector(
+            `[aria-describedby="${errorId}"]`
+          );
+
+          if (formElementInError && formElementInError instanceof HTMLElement) {
+            formElementInError.focus();
+          }
+        }
+      });
+
+      return () => clearTimeout(ref);
+    }, [state.errors]);
 
     /**
      * Uses the provided validation schema
@@ -344,8 +372,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       dispatch({ type: 'SET_ISSUBMITTING', payload: isSubmitting });
     }, []);
 
+    const composedRefs = useComposedRefs(formRef, ref);
+
     return (
-      <form ref={ref} method={method} noValidate onSubmit={handleSubmit}>
+      <form ref={composedRefs} method={method} noValidate onSubmit={handleSubmit}>
         <FormProvider
           disabled={disabled}
           onChange={handleChange}

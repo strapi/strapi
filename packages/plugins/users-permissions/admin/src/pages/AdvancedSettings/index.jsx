@@ -16,7 +16,6 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  Form,
   GenericInput,
   LoadingIndicatorPage,
   SettingsPageTitle,
@@ -28,7 +27,7 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 

@@ -15,22 +15,24 @@ interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
 interface InputProps {
   disabled?: boolean;
   hint?: ReactNode;
-  label: string;
+  label: ReactNode;
   name: string;
   placeholder?: string;
   required?: boolean;
   options?: never;
-  type: Exclude<
-    Attribute.Kind,
-    | 'enumeration'
-    | 'media'
-    | 'blocks'
-    | 'richtext'
-    | 'uid'
-    | 'dynamiczone'
-    | 'component'
-    | 'relation'
-  >;
+  type:
+    | Exclude<
+        Attribute.Kind,
+        | 'enumeration'
+        | 'media'
+        | 'blocks'
+        | 'richtext'
+        | 'uid'
+        | 'dynamiczone'
+        | 'component'
+        | 'relation'
+      >
+    | 'checkbox';
 }
 
 export { EnumerationProps, InputProps };

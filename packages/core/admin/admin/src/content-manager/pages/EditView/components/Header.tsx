@@ -16,8 +16,8 @@ import { useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
+import { useForm } from '../../../../components/Form';
 import { capitalise } from '../../../../utils/strings';
-import { useForm } from '../../../components/Form';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
