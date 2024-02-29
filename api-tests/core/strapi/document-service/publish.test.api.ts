@@ -31,11 +31,11 @@ describe('Document Service', () => {
 
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({
-            documentId: articleDb.id,
+            documentId: articleDb.documentId,
             publishedAt: { $null: true },
           }),
           findArticlesDb({
-            documentId: articleDb.id,
+            documentId: articleDb.documentId,
             publishedAt: { $notNull: true },
           }),
         ]);
@@ -56,8 +56,8 @@ describe('Document Service', () => {
 
         // Publish twice should not create two new published versions,
         // the second published version should replace the first one
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
 
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({

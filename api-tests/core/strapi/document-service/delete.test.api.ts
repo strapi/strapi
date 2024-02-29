@@ -24,7 +24,7 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
         await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, { locale: '*' });
 
-        const articles = await findArticlesDb({ documentId: articleDb.id });
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
         expect(articles).toHaveLength(0);
       })
@@ -45,7 +45,7 @@ describe('Document Service', () => {
 
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
       // update article
-      const updatedArticle = await strapi.documents(ARTICLE_UID).update(articleDb.id, {
+      const updatedArticle = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
         locale: 'en',
         data: {
           comp: componentData.comp,
@@ -55,7 +55,7 @@ describe('Document Service', () => {
       });
 
       // delete article
-      await strapi.documents(ARTICLE_UID).delete(articleDb.id, { locale: 'en' });
+      await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, { locale: 'en' });
 
       // Components should not be in the database anymore
       const compTable = strapi.db.metadata.get('article.comp').tableName;
@@ -82,7 +82,7 @@ describe('Document Service', () => {
           locale: 'nl',
         });
 
-        const articles = await findArticlesDb({ documentId: articleDb.id });
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
         expect(articles.length).toBeGreaterThan(0);
         // Should not have dutch locale
@@ -96,11 +96,11 @@ describe('Document Service', () => {
       'status is ignored when deleting a document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.id, {
+        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
           status: 'published',
         });
 
-        const articles = await findArticlesDb({ documentId: articleDb.id });
+        const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
         expect(articles.length).toBe(0);
       })
