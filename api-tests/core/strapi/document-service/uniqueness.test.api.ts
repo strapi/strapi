@@ -56,12 +56,12 @@ describe.skip('Document Service', () => {
       // Reset the name of the draft category
       await strapi
         .documents(CATEGORY_UID)
-        .update(category.id, { data: { name: 'other-not-unique-name' } });
+        .update(category.documentId, { data: { name: 'other-not-unique-name' } });
 
       // Now we can create a new category with the same name as the published category
       // When we try to publish it, it should throw an error
       const newCategory = await strapi.documents(CATEGORY_UID).create({ data: { name } });
-      expect(strapi.documents(CATEGORY_UID).publish(newCategory.id)).rejects.toThrow();
+      expect(strapi.documents(CATEGORY_UID).publish(newCategory.documentId)).rejects.toThrow();
     });
   });
 });

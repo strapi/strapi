@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { render, screen, waitFor } from '@tests/utils';
 
-import { Form } from '../../../../../../components/Form';
+import { Form } from '../../../../../../../components/Form';
 import { BlocksInput } from '../BlocksInput';
 
 import { blocksData } from './mock-schema';

@@ -1,9 +1,8 @@
 import _ from 'lodash/fp';
-
+import * as identifiers from '../utils/identifiers';
 import * as types from '../utils/types';
 import {
   createRelation,
-  getJoinTableName,
   isPolymorphic,
   isBidirectional,
   isAnyToOne,
@@ -17,7 +16,6 @@ import type { Attribute, Model } from '../types';
 
 export type { Metadata, Meta };
 export {
-  getJoinTableName,
   isPolymorphic,
   isBidirectional,
   isAnyToOne,
@@ -59,7 +57,6 @@ export const createMetadata = (models: Model[] = []): Metadata => {
 
         createAttribute(attributeName, attribute);
       } catch (error) {
-        console.log(error);
         if (error instanceof Error) {
           throw new Error(
             `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
@@ -87,6 +84,6 @@ export const createMetadata = (models: Model[] = []): Metadata => {
 };
 
 const createAttribute = (attributeName: string, attribute: Attribute) => {
-  const columnName = _.snakeCase(attributeName);
+  const columnName = identifiers.getColumnName(attributeName);
   Object.assign(attribute, { columnName });
 };

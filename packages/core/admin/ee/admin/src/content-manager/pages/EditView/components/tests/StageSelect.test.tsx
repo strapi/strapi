@@ -3,7 +3,7 @@ import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
-import { Form } from '../../../../../../../../admin/src/content-manager/components/Form';
+import { Form } from '../../../../../../../../admin/src/components/Form';
 import { StageSelect } from '../StageSelect';
 
 /**

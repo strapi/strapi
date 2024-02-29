@@ -124,8 +124,6 @@ describeOnCondition(hasFutureFlag)('History', () => {
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
-      const CREATE_URL =
-        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/create(\?.*)?/;
       const HISTORY_URL =
         /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
 

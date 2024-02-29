@@ -8,4 +8,11 @@ module.exports = {
 
     ctx.send(200);
   },
+  async permissionsPrune(ctx) {
+    const permissionService = strapi.service('admin::permission');
+
+    await permissionService.cleanPermissionsInDatabase();
+
+    ctx.send(200);
+  },
 };

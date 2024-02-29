@@ -30,9 +30,11 @@ const dogModel = {
 const dogs = [
   {
     name: null,
+    publishedAt: null,
   },
   {
     name: 'Atos',
+    publishedAt: null,
   },
 ];
 
@@ -42,8 +44,7 @@ const restart = async () => {
   rq = await createAuthRequest({ strapi });
 };
 
-// V5: Fix unique field validations
-describe.skip('Migration - required attribute', () => {
+describe('Migration - required attribute', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
@@ -74,10 +75,10 @@ describe.skip('Migration - required attribute', () => {
 
       const { body } = await rq({
         method: 'PUT',
-        url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].id}`,
+        url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].documentId}`,
         body: { name: 'Nelson' },
       });
-      data.dogs[0] = body;
+      data.dogs[0] = body.data;
 
       // migration
       const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
@@ -95,7 +96,7 @@ describe.skip('Migration - required attribute', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::dog.dog/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::dog.dog/${creationRes.body.data.documentId}/actions/publish`,
       });
 
       expect(res.body).toMatchObject({
@@ -134,8 +135,8 @@ describe.skip('Migration - required attribute', () => {
         body: { name: null },
       });
 
-      expect(res.body).toMatchObject({ name: null });
-      data.dogs.push(res.body);
+      expect(res.body.data).toMatchObject({ name: null });
+      data.dogs.push(res.body.data);
     });
   });
 });

@@ -219,7 +219,7 @@ const ListViewPage = () => {
         const res = await deleteDocument({
           model,
           collectionType: COLLECTION_TYPES,
-          id: idToDelete,
+          documentId: idToDelete,
         });
         if ('error' in res) {
           toggleNotification({
@@ -344,6 +344,7 @@ const ListViewPage = () => {
                 <Table.HeaderCheckboxCell />
                 {/* Dynamic headers based on fields */}
                 {results.length > 0 &&
+                  // @ts-expect-error – this will be fixed when we bring in the table from the helper-plugin and we'll derive the type from there and work backwards.
                   tableHeaders.map((header) => <Table.HeaderCell key={header.name} {...header} />)}
               </Table.Head>
               {/* Loading content */}
@@ -361,10 +362,13 @@ const ListViewPage = () => {
               >
                 {results.map((rowData, index) => {
                   return (
-                    // @ts-expect-error – TODO: fix this with V5 typing
-                    <Tr cursor="pointer" key={rowData.id} onClick={handleRowClick(rowData.id)}>
+                    <Tr
+                      cursor="pointer"
+                      key={rowData.documentId}
+                      onClick={handleRowClick(rowData.documentId)}
+                    >
                       <Td>
-                        <Table.CheckboxDataCell rowId={rowData.id} index={index} />
+                        <Table.CheckboxDataCell rowId={rowData.documentId} index={index} />
                       </Td>
                       {tableHeaders.map(({ cellFormatter, ...header }) => {
                         if (header.name === 'status') {
@@ -451,7 +455,7 @@ const ListViewPage = () => {
                           <Td key={header.name}>
                             <CellContent
                               content={rowData[header.name.split('.')[0]]}
-                              rowId={rowData.id}
+                              rowId={rowData.documentId}
                               {...header}
                             />
                           </Td>
@@ -459,7 +463,7 @@ const ListViewPage = () => {
                       })}
                       {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
                       <ActionsCell onClick={(e) => e.stopPropagation()}>
-                        <TableActions id={rowData.id} document={rowData} />
+                        <TableActions document={rowData} />
                       </ActionsCell>
                     </Tr>
                   );

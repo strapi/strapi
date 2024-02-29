@@ -8,6 +8,8 @@ const ALLOWED_CONTENT_TYPES = [
   'api::article.article',
   'api::author.author',
   'api::homepage.homepage',
+  'api::product.product',
+  'api::shop.shop',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
   'plugin::i18n.locale',

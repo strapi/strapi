@@ -60,7 +60,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     const listener = async (raw: Buffer) => {
       const parsed = JSON.parse(raw.toString());
-
       // If not a message related to our transfer process, ignore it
       if (!parsed.uuid || parsed?.data?.type !== 'transfer' || parsed?.data?.id !== processID) {
         this.ws?.once('message', listener);
@@ -70,18 +69,17 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       const { uuid, data: message } = parsed;
       const { ended, error, data } = message;
 
+      if (error) {
+        await this.#respond(uuid);
+        stream.destroy(error);
+        return;
+      }
+
       if (ended) {
         await this.#respond(uuid);
         await this.#endStep(stage);
 
         stream.end();
-        return;
-      }
-
-      if (error) {
-        await this.#respond(uuid);
-        await this.#endStep(stage);
-        stream.destroy(error);
         return;
       }
 

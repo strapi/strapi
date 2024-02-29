@@ -21,8 +21,8 @@ describe('Settings Page', () => {
     expect(screen.getByRole('grid')).toBeInTheDocument();
 
     const HEADER_CELLS = ['ID', 'Display name', 'Default locale', 'Actions'];
-    const EN_ROW_CELLS = ['1', 'English', 'Default', 'Edit'];
-    const FR_ROW_CELLS = ['2', 'Français', 'Edit Delete'];
+    const EN_ROW_CELLS = ['1', 'English', 'Default', 'Edit English locale'];
+    const FR_ROW_CELLS = ['2', 'Français', 'Edit Français locale Delete Français locale'];
 
     expect(screen.getByRole('row', { name: HEADER_CELLS.join(' ') })).toBeInTheDocument();
     expect(screen.getByRole('row', { name: EN_ROW_CELLS.join(' ') })).toBeInTheDocument();
