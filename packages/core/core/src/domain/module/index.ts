@@ -43,16 +43,8 @@ export interface Module {
   controllers: Record<string, Common.Controller>;
 }
 
-// Convert uids to config dot-delimited format and namespace them into 'config'
-// to avoid conflicts with Strapi configs.
-// For example, an api named "rest" will be found in config.get('config.rest')
-const uidToPath = (uid: string) => {
-  // TODO: resolve with
-  // Plugin namespace is put into plugin
-  if (uid.startsWith('plugin::')) {
-    return uid.replace('::', '.');
-  }
-  return `configs.${uid.replace('::', '.')}`;
+const escapedNamespace = (namespace: string) => {
+  return namespace.replace('::', '.');
 };
 
 // Removes the namespace from a map with keys prefixed with a namespace
@@ -110,13 +102,26 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       strapi.get('policies').add(namespace, rawModule.policies);
       strapi.get('middlewares').add(namespace, rawModule.middlewares);
       strapi.get('controllers').add(namespace, rawModule.controllers);
-      strapi.get('config').set(uidToPath(namespace), rawModule.config);
+      strapi.get('config').set(namespace, rawModule.config);
     },
     get routes() {
       return rawModule.routes ?? {};
     },
     config(path: string, defaultValue: unknown) {
-      return strapi.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);
+      let val = strapi.get('config').get(`${namespace}.${path}`);
+
+      if (val) {
+        return val;
+      }
+
+      // if we didn't find it in, for example, api::article, look in api.article and warn about the deprecation
+      val = strapi.get('config').get(`${escapedNamespace(namespace)}.${path}`);
+      if (val) {
+        strapi.log.warn('Config paths should use the uid namespace with :: instead of .');
+        return val;
+      }
+
+      return defaultValue;
     },
     contentType(ctName: Common.UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);
