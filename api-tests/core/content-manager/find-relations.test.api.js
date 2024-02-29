@@ -1,5 +1,7 @@
 'use strict';
 
+const { omit } = require('lodash/fp');
+
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -8,6 +10,7 @@ const modelsUtils = require('api-tests/models');
 let strapi;
 let rq;
 
+const defaultLocale = 'en';
 const extraLocale = 'fr';
 const data = {
   products: {
@@ -197,37 +200,6 @@ describe('Find Relations', () => {
     ]);
     data.products.published.push(publishedSkate.body.data, publishedChair.body.data);
 
-    /**
-     * Transform the draft relations into published relations if they exist
-     */
-    const buildPublishedRelations = (draftRelations, publishedProducts) => {
-      const publishedRelations = JSON.parse(JSON.stringify(draftRelations));
-
-      const replaceWithPublished = (draftProduct) => {
-        const published = publishedProducts.find(
-          (publishedProduct) => publishedProduct.id === draftProduct.id
-        );
-
-        return published || undefined;
-      };
-
-      // Iterate over relations and replace products with their published counterparts
-      for (const key in publishedRelations) {
-        if (Array.isArray(publishedRelations[key])) {
-          publishedRelations[key] = publishedRelations[key]
-            .map(replaceWithPublished)
-            .filter(Boolean);
-        } else if (
-          typeof publishedRelations[key] === 'object' &&
-          publishedRelations[key] !== null
-        ) {
-          publishedRelations[key] = replaceWithPublished(publishedRelations[key]);
-        }
-      }
-
-      return publishedRelations;
-    };
-
     // Define the relations between the shops and the products
     const draftRelations = {
       products_ow: data.products.draft[0],
@@ -241,29 +213,20 @@ describe('Find Relations', () => {
         compo_products_mw: [data.products.draft[0]],
       },
     };
-    const publishedRelations = buildPublishedRelations(draftRelations, data.products.published);
-
-    const shopRelations = {
-      draft: draftRelations,
-      published: publishedRelations,
-    };
-    data.shopRelations = shopRelations;
 
     // Create 2 draft shops
     const [draftShop, draftEmptyShop] = await Promise.all([
       createEntry(shopUid, {
         name: 'Cazotte Shop',
-        products_ow: shopRelations.draft.products_ow.id,
-        products_oo: shopRelations.draft.products_oo.id,
-        products_mo: shopRelations.draft.products_mo.id,
-        products_om: shopRelations.draft.products_om.map((product) => product.id),
-        products_mm: shopRelations.draft.products_mm.map((product) => product.id),
-        products_mw: shopRelations.draft.products_mw.map((product) => product.id),
+        products_ow: draftRelations.products_ow.id,
+        products_oo: draftRelations.products_oo.id,
+        products_mo: draftRelations.products_mo.id,
+        products_om: draftRelations.products_om.map((product) => product.id),
+        products_mm: draftRelations.products_mm.map((product) => product.id),
+        products_mw: draftRelations.products_mw.map((product) => product.id),
         myCompo: {
-          compo_products_ow: shopRelations.draft.myCompo.compo_products_ow.id,
-          compo_products_mw: shopRelations.draft.myCompo.compo_products_mw.map(
-            (product) => product.id
-          ),
+          compo_products_ow: draftRelations.myCompo.compo_products_ow.id,
+          compo_products_mw: draftRelations.myCompo.compo_products_mw.map((product) => product.id),
         },
       }),
       createEntry(shopUid, {
@@ -278,16 +241,29 @@ describe('Find Relations', () => {
 
     // Publish both shops
     const [publishedShop, publishedEmptyShop] = await Promise.all([
-      rq({
-        url: `/content-manager/collection-types/${shopUid}/${data.shops.draft[0].id}/actions/publish`,
-        method: 'POST',
+      strapi.documents(shopUid).publish(draftShop.data.id, {
+        populate: [
+          'products_ow',
+          'products_oo',
+          'products_mo',
+          'products_om',
+          'products_mm',
+          'products_mw',
+          'myCompo.compo_products_ow',
+          'myCompo.compo_products_mw',
+        ],
       }),
-      rq({
-        url: `/content-manager/collection-types/${shopUid}/${data.shops.draft[1].id}/actions/publish`,
-        method: 'POST',
-      }),
+      strapi.documents(shopUid).publish(draftEmptyShop.data.id),
     ]);
-    data.shops.published.push(publishedShop.body.data, publishedEmptyShop.body.data);
+
+    data.shops.published.push(publishedShop.versions[0], publishedEmptyShop.versions[0]);
+
+    data.shopRelations = {
+      draft: draftRelations,
+      published: omit(['id', 'updatedAt', 'publishedAt', 'locale', 'createdAt', 'name'])(
+        publishedShop.versions[0]
+      ),
+    };
 
     // Define the ids of the shops we will use for testing
     const testData = {
@@ -579,8 +555,7 @@ describe('Find Relations', () => {
 
   // Run tests against every type of relation in the shop content type, always
   // from the default locale
-  const defaultLocale = 'en';
-  describe.only.each([
+  describe.each([
     ['products_ow', false],
     ['products_oo', false],
     ['products_mo', false],

@@ -35,7 +35,7 @@ export declare namespace FindAvailable {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       id?: Entity.ID;
-      locale?: Documents.Params.Attribute.Locale;
+      locale?: Documents.Params.Locale;
       status?: Documents.Params.PublicationState.Kind;
       _q?: string;
       _filter?: string;

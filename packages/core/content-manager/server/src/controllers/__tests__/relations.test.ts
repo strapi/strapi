@@ -30,6 +30,11 @@ const contentTypes = {
 
 describe('Relations', () => {
   const findOne: jest.MockedFunction<() => Record<string, any>> = jest.fn(() => ({ id: 1 }));
+  const dbFindOne: jest.MockedFunction<() => Record<string, any>> = jest.fn(() => ({ id: 1 }));
+  const dbFindPage: jest.MockedFunction<() => Record<string, any[]>> = jest.fn(() => ({
+    results: [],
+  }));
+
   beforeAll(() => {
     global.strapi = {
       getModel: jest.fn((uid) => {
@@ -76,7 +81,8 @@ describe('Relations', () => {
       },
       db: {
         query: jest.fn().mockReturnValue({
-          findOne: jest.fn(() => ({ id: 1 })),
+          findOne: dbFindOne,
+          findPage: dbFindPage,
         }),
       },
     } as any;
@@ -183,13 +189,6 @@ describe('Relations', () => {
         },
       });
 
-      findOne.mockReturnValueOnce({
-        id: 1,
-        relation: {
-          id: 1,
-        },
-      });
-
       const ctx = createContext(
         {
           params: {
@@ -210,14 +209,20 @@ describe('Relations', () => {
         }
       );
 
+      dbFindOne.mockReturnValue({
+        id: 1,
+        relation: {
+          id: 1,
+        },
+      });
+
       await relations.findExisting(ctx);
 
-      expect(strapi.entityService.findPage).toHaveBeenCalledWith(
-        'target',
+      expect(dbFindPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          sort: ['myField:ASC', 'documentId:ASC'],
-          fields: ['myField', 'publishedAt', 'documentId'],
           filters: { id: { $in: [1] } },
+          orderBy: ['myField', 'documentId'],
+          select: ['myField', 'publishedAt', 'documentId'],
         })
       );
     });

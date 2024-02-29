@@ -33,8 +33,6 @@ export type DateTimeValue = Attribute.DateTimeValue | number;
 
 export type TimeStampValue = Attribute.TimestampValue;
 
-export type Locale = string;
-
 /**
  * List of possible values for the scalar attributes
  * Uses the local GetValue to benefit from the values' overrides

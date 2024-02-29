@@ -114,24 +114,25 @@ describe('i18n - Find available relations', () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/relations/api::shop.shop/products',
+      qs: { locale: 'en', status: 'published' },
     });
 
+    const { documentId: id, name, publishedAt, locale } = data.products[1];
+    const expectedObj = { id, name, publishedAt, locale };
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[1])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 
   test('Can filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/relations/api::shop.shop/products',
-      qs: { locale: 'it' },
+      qs: { locale: 'it', status: 'published' },
     });
 
+    const { documentId: id, name, publishedAt, locale } = data.products[0];
+    const expectedObj = { id, name, publishedAt, locale };
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[0])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 });

@@ -59,7 +59,7 @@ export default {
     ctx: any,
     id?: Entity.ID,
     status?: Documents.Params.PublicationState.Kind,
-    locale?: Documents.Params.Attribute.Locale
+    locale?: Documents.Params.Locale
   ) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
@@ -163,11 +163,6 @@ export default {
     const status = ctx.request?.query?.status || 'draft';
 
     const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
-    if (!validation) {
-      // If validation of the request has failed the error has already been sent
-      // to the ctx
-      return;
-    }
 
     const {
       targetField,
@@ -262,11 +257,6 @@ export default {
     const status = ctx.request?.query?.status || 'draft';
 
     const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
-    if (!validation) {
-      // If validation of the request has failed the error has already been sent
-      // to the ctx
-      return;
-    }
 
     const {
       targetField,
@@ -276,15 +266,11 @@ export default {
       currentEntityId,
     } = validation;
 
-    const entity = await strapi.entityService.findOne(
-      sourceUid as Common.UID.ContentType,
-      // TODO
-      currentEntityId as unknown as number,
-      {
-        fields: ['id'],
-        populate: { [targetField]: { fields: ['id'] } },
-      }
-    );
+    const entity = await strapi.db.query(sourceUid).findOne({
+      where: { id: currentEntityId },
+      select: ['id'],
+      populate: { [targetField]: { fields: ['id'] } },
+    });
 
     // Collect all the entity IDs relations in the targetField
     let resultEntityIds = [];
@@ -299,16 +285,16 @@ export default {
     const fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
     const sort = fields
       .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
-      .map((field: any) => `${field}:ASC`);
+      .map((field: any) => field);
 
-    const page = await strapi.entityService.findPage(targetUid as Common.UID.ContentType, {
-      fields,
+    const page = await strapi.db.query(targetUid).findPage({
+      select: fields,
       filters: {
         // The existing relations will be entries of the target model who's
         // entity ID is in the list of entity IDs related to the source entity
         id: { $in: resultEntityIds },
       },
-      sort,
+      orderBy: sort,
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
     });

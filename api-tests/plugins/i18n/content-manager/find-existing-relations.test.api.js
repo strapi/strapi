@@ -81,8 +81,7 @@ const products = ({ shop: shops }) => {
   return entries;
 };
 
-// TODO: V5 - Fix relations
-describe.skip('i18n - Find existing relations', () => {
+describe('i18n - Find existing relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -116,24 +115,34 @@ describe.skip('i18n - Find existing relations', () => {
   test('Get Italian product for italian shop filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/products`,
+      url: `/content-manager/relations/api::shop.shop/${data.shops[0].documentId}/products`,
+      qs: {
+        locale: 'it',
+        status: 'published',
+      },
     });
 
+    const { documentId: id, name, publishedAt, locale } = data.products[0];
+    const expectedObj = { id, name, publishedAt, locale };
+
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[0])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 
   test('Get english product for english shop', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/relations/api::shop.shop/${data.shops[1].id}/products`,
+      url: `/content-manager/relations/api::shop.shop/${data.shops[1].documentId}/products`,
+      qs: {
+        locale: 'en',
+        status: 'published',
+      },
     });
 
+    const { documentId: id, name, publishedAt, locale } = data.products[1];
+    const expectedObj = { id, name, publishedAt, locale };
+
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[1])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 });
