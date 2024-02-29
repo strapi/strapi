@@ -17,7 +17,6 @@ export * from './components/LoadingIndicatorPage';
 export * from './components/NoContent';
 export * from './components/NoMedia';
 export * from './components/NoPermissions';
-export * from './components/NotAllowedInput';
 export * from './components/PageSizeURLQuery';
 export * from './components/PaginationURLQuery';
 export * from './components/ReactSelect';
