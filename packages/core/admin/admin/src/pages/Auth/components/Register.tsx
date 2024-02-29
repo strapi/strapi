@@ -1,19 +1,9 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  Main,
-  TextInput,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
   auth,
-  getYupInnerErrors,
   translatedErrors,
   useAPIErrorHandler,
   useGuidedTour,
@@ -53,38 +43,109 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
   lastname: yup.string().nullable(),
   password: yup
     .string()
-    .min(8, translatedErrors.minLength)
-    .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
-    .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
-    .matches(/\d/, 'components.Input.error.contain.number')
-    .required(translatedErrors.required),
+    .min(8, {
+      id: translatedErrors.minLength,
+      defaultMessage: 'Password must be at least 8 characters',
+      values: { min: 8 },
+    })
+    .matches(/[a-z]/, {
+      message: {
+        id: 'components.Input.error.contain.lowercase',
+        defaultMessage: 'Password must contain at least 1 lowercase letter',
+      },
+    })
+    .matches(/[A-Z]/, {
+      message: {
+        id: 'components.Input.error.contain.uppercase',
+        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      },
+    })
+    .matches(/\d/, {
+      message: {
+        id: 'components.Input.error.contain.number',
+        defaultMessage: 'Password must contain at least 1 number',
+      },
+    })
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'Password is required',
+    }),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
-    .required(translatedErrors.required),
-  registrationToken: yup.string().required(translatedErrors.required),
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'Confirm password is required',
+    })
+    .oneOf([yup.ref('password'), null], {
+      id: 'components.Input.error.password.noMatch',
+      defaultMessage: 'Passwords must match',
+    }),
+  registrationToken: yup.string().required({
+    id: translatedErrors.required,
+    defaultMessage: 'Registration token is required',
+  }),
 });
 
 const REGISTER_ADMIN_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required(translatedErrors.required),
+  firstname: yup.string().trim().required({
+    id: translatedErrors.required,
+    defaultMessage: 'Firstname is required',
+  }),
   lastname: yup.string().nullable(),
   password: yup
     .string()
-    .min(8, translatedErrors.minLength)
-    .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
-    .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
-    .matches(/\d/, 'components.Input.error.contain.number')
-    .required(translatedErrors.required),
-  email: yup
-    .string()
-    .email(translatedErrors.email)
-    .strict()
-    .lowercase(translatedErrors.lowercase)
-    .required(translatedErrors.required),
+    .min(8, {
+      id: translatedErrors.minLength,
+      defaultMessage: 'Password must be at least 8 characters',
+      values: { min: 8 },
+    })
+    .matches(/[a-z]/, {
+      message: {
+        id: 'components.Input.error.contain.lowercase',
+        defaultMessage: 'Password must contain at least 1 lowercase letter',
+      },
+    })
+    .matches(/[A-Z]/, {
+      message: {
+        id: 'components.Input.error.contain.uppercase',
+        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      },
+    })
+    .matches(/\d/, {
+      message: {
+        id: 'components.Input.error.contain.number',
+        defaultMessage: 'Password must contain at least 1 number',
+      },
+    })
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'Password is required',
+    }),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
-    .required(translatedErrors.required),
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'Confirm password is required',
+    })
+    .oneOf([yup.ref('password'), null], {
+      id: 'components.Input.error.password.noMatch',
+      defaultMessage: 'Passwords must match',
+    }),
+  email: yup
+    .string()
+    .email({
+      id: translatedErrors.email,
+      defaultMessage: 'Not a valid email',
+    })
+    .strict()
+    .lowercase({
+      id: translatedErrors.lowercase,
+      defaultMessage: 'Email must be lowercase',
+    })
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'Email is required',
+    }),
 });
 
 interface RegisterProps {
@@ -301,117 +362,120 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
             } catch (err) {
               if (err instanceof ValidationError) {
-                const errors = getYupInnerErrors(err);
-
-                helpers.setErrors(errors);
+                helpers.setErrors(
+                  err.inner.reduce<Record<string, string>>((acc, { message, path }) => {
+                    if (path && typeof message === 'object') {
+                      acc[path] = formatMessage(message);
+                    }
+                    return acc;
+                  }, {})
+                );
               }
               setSubmitCount(submitCount + 1);
             }
           }}
         >
-          <Main>
-            <Flex direction="column" alignItems="stretch" gap={6} marginTop={7}>
-              <Grid gap={4}>
-                {[
-                  {
-                    label: formatMessage({
-                      id: 'Auth.form.firstname.label',
-                      defaultMessage: 'Firstname',
-                    }),
-                    name: 'firstname',
-                    required: true,
-                    size: 6,
-                    type: 'string' as const,
-                  },
-                  {
-                    label: formatMessage({
-                      id: 'Auth.form.lastname.label',
-                      defaultMessage: 'Lastname',
-                    }),
-                    name: 'lastname',
-                    size: 6,
-                    type: 'string' as const,
-                  },
-                  {
-                    disabled: !isAdminRegistration,
-                    label: formatMessage({
-                      id: 'Auth.form.email.label',
-                      defaultMessage: 'Email',
-                    }),
-                    name: 'email',
-                    required: true,
-                    size: 12,
-                    type: 'email' as const,
-                  },
-                  {
-                    hint: formatMessage({
-                      id: 'Auth.form.password.hint',
+          <Flex direction="column" alignItems="stretch" gap={6} marginTop={7}>
+            <Grid gap={4}>
+              {[
+                {
+                  label: formatMessage({
+                    id: 'Auth.form.firstname.label',
+                    defaultMessage: 'Firstname',
+                  }),
+                  name: 'firstname',
+                  required: true,
+                  size: 6,
+                  type: 'string' as const,
+                },
+                {
+                  label: formatMessage({
+                    id: 'Auth.form.lastname.label',
+                    defaultMessage: 'Lastname',
+                  }),
+                  name: 'lastname',
+                  size: 6,
+                  type: 'string' as const,
+                },
+                {
+                  disabled: !isAdminRegistration,
+                  label: formatMessage({
+                    id: 'Auth.form.email.label',
+                    defaultMessage: 'Email',
+                  }),
+                  name: 'email',
+                  required: true,
+                  size: 12,
+                  type: 'email' as const,
+                },
+                {
+                  hint: formatMessage({
+                    id: 'Auth.form.password.hint',
+                    defaultMessage:
+                      'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
+                  }),
+                  label: formatMessage({
+                    id: 'global.password',
+                    defaultMessage: 'Password',
+                  }),
+                  name: 'password',
+                  required: true,
+                  size: 12,
+                  type: 'password' as const,
+                },
+                {
+                  label: formatMessage({
+                    id: 'Auth.form.confirmPassword.label',
+                    defaultMessage: 'Confirm Password',
+                  }),
+                  name: 'confirmPassword',
+                  required: true,
+                  size: 12,
+                  type: 'password' as const,
+                },
+                {
+                  label: formatMessage(
+                    {
+                      id: 'Auth.form.register.news.label',
                       defaultMessage:
-                        'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
-                    }),
-                    label: formatMessage({
-                      id: 'global.password',
-                      defaultMessage: 'Password',
-                    }),
-                    name: 'password',
-                    required: true,
-                    size: 12,
-                    type: 'password' as const,
-                  },
-                  {
-                    label: formatMessage({
-                      id: 'Auth.form.confirmPassword.label',
-                      defaultMessage: 'Confirm Password',
-                    }),
-                    name: 'confirmPassword',
-                    required: true,
-                    size: 12,
-                    type: 'password' as const,
-                  },
-                  {
-                    label: formatMessage(
-                      {
-                        id: 'Auth.form.register.news.label',
-                        defaultMessage:
-                          'Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).',
-                      },
-                      {
-                        terms: (
-                          <A target="_blank" href="https://strapi.io/terms" rel="noreferrer">
-                            {formatMessage({
-                              id: 'Auth.privacy-policy-agreement.terms',
-                              defaultMessage: 'terms',
-                            })}
-                          </A>
-                        ),
-                        policy: (
-                          <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
-                            {formatMessage({
-                              id: 'Auth.privacy-policy-agreement.policy',
-                              defaultMessage: 'policy',
-                            })}
-                          </A>
-                        ),
-                      }
-                    ),
-                    name: 'news',
-                    size: 12,
-                    type: 'checkbox' as const,
-                  },
-                ].map(({ size, ...field }) => (
-                  <GridItem key={field.name} col={size}>
-                    <InputRenderer {...field} />
-                  </GridItem>
-                ))}
-              </Grid>
-              <Button fullWidth size="L" type="submit">
-                {formatMessage({
-                  id: 'Auth.form.button.register',
-                  defaultMessage: "Let's start",
-                })}
-              </Button>
-            </Flex>
-          </Main>
+                        'Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).',
+                    },
+                    {
+                      terms: (
+                        <A target="_blank" href="https://strapi.io/terms" rel="noreferrer">
+                          {formatMessage({
+                            id: 'Auth.privacy-policy-agreement.terms',
+                            defaultMessage: 'terms',
+                          })}
+                        </A>
+                      ),
+                      policy: (
+                        <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
+                          {formatMessage({
+                            id: 'Auth.privacy-policy-agreement.policy',
+                            defaultMessage: 'policy',
+                          })}
+                        </A>
+                      ),
+                    }
+                  ),
+                  name: 'news',
+                  size: 12,
+                  type: 'checkbox' as const,
+                },
+              ].map(({ size, ...field }) => (
+                <GridItem key={field.name} col={size}>
+                  <InputRenderer {...field} />
+                </GridItem>
+              ))}
+            </Grid>
+            <Button fullWidth size="L" type="submit">
+              {formatMessage({
+                id: 'Auth.form.button.register',
+                defaultMessage: "Let's start",
+              })}
+            </Button>
+          </Flex>
         </Form>
         {match?.params.authType === 'register' && (
           <Box paddingTop={4}>

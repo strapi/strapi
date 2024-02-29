@@ -27,16 +27,22 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       values: { min: 8 },
     })
     .matches(/[a-z]/, {
-      id: 'components.Input.error.contain.lowercase',
-      defaultMessage: 'Password must contain at least 1 lowercase letter',
+      message: {
+        id: 'components.Input.error.contain.lowercase',
+        defaultMessage: 'Password must contain at least 1 lowercase letter',
+      },
     })
     .matches(/[A-Z]/, {
-      id: 'components.Input.error.contain.uppercase',
-      defaultMessage: 'Password must contain at least 1 uppercase letter',
+      message: {
+        id: 'components.Input.error.contain.uppercase',
+        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      },
     })
     .matches(/\d/, {
-      id: 'components.Input.error.contain.number',
-      defaultMessage: 'Password must contain at least 1 number',
+      message: {
+        id: 'components.Input.error.contain.number',
+        defaultMessage: 'Password must contain at least 1 number',
+      },
     })
     .required({
       id: translatedErrors.required,
@@ -44,13 +50,13 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     }),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref('password'), null], {
-      id: 'components.Input.error.password.noMatch',
-      defaultMessage: 'Passwords must match',
-    })
     .required({
       id: translatedErrors.required,
       defaultMessage: 'Confirm password is required',
+    })
+    .oneOf([yup.ref('password'), null], {
+      id: 'components.Input.error.password.noMatch',
+      defaultMessage: 'Passwords must match',
     }),
 });
 

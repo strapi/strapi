@@ -130,6 +130,7 @@ const Login = ({ children }: LoginProps) => {
                     defaultMessage: 'Password',
                   }),
                   name: 'password',
+                  required: true,
                   type: 'password' as const,
                 },
                 {

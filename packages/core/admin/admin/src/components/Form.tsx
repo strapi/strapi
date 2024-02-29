@@ -143,22 +143,36 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     }, [props.initialValues]);
 
     const setErrors = React.useCallback((errors: FormErrors) => {
-      const [firstError] = formRef.current.querySelectorAll('[data-strapi-field-error]');
-
-      if (firstError) {
-        const errorId = firstError.getAttribute('id');
-        const formElementInError = formRef.current.querySelector(`[aria-describedby="${errorId}"]`);
-
-        if (formElementInError && formElementInError instanceof HTMLElement) {
-          formElementInError.focus();
-        }
-      }
-
       dispatch({
         type: 'SET_ERRORS',
         payload: errors,
       });
     }, []);
+
+    React.useEffect(() => {
+      if (Object.keys(state.errors).length === 0) return;
+
+      /**
+       * Small timeout to ensure the form has been
+       * rendered before we try to focus on the first
+       */
+      const ref = setTimeout(() => {
+        const [firstError] = formRef.current.querySelectorAll('[data-strapi-field-error]');
+
+        if (firstError) {
+          const errorId = firstError.getAttribute('id');
+          const formElementInError = formRef.current.querySelector(
+            `[aria-describedby="${errorId}"]`
+          );
+
+          if (formElementInError && formElementInError instanceof HTMLElement) {
+            formElementInError.focus();
+          }
+        }
+      });
+
+      return () => clearTimeout(ref);
+    }, [state.errors]);
 
     /**
      * Uses the provided validation schema
