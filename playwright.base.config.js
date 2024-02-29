@@ -18,7 +18,7 @@ const getEnvString = (envVar, defaultValue) => {
 };
 
 const getEnvBool = (envVar, defaultValue) => {
-  if (!envVar) {
+  if (!envVar || envVar === '') {
     return defaultValue;
   }
 
