@@ -7060,6 +7060,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
+    "@strapi/database": "workspace:*"
     "@strapi/logger": "npm:4.20.3"
     "@strapi/pack-up": "npm:4.20.3"
     "@strapi/types": "npm:4.20.3"
