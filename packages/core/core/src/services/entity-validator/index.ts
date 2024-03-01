@@ -37,12 +37,12 @@ interface ValidatorContext {
 interface AttributeValidatorMetas {
   attr: Schema.Attribute.AnyAttribute;
   updatedAttribute: { name: string; value: unknown };
-  model: Struct.ContentTypeSchema | Struct.ComponentSchema;
+  model: Struct.Schema;
   entity?: Entity;
 }
 
 interface ModelValidatorMetas {
-  model: Struct.ContentTypeSchema | Struct.ComponentSchema;
+  model: Struct.Schema;
   data: Record<string, unknown>;
   entity?: Entity;
 }

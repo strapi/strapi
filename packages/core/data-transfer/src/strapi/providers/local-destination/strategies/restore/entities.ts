@@ -34,7 +34,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
         let cType:
           | Struct.ContentTypeSchema
           | Struct.ComponentSchema
-          | ((...opts: any[]) => Struct.ContentTypeSchema | Struct.ComponentSchema) = contentType;
+          | ((...opts: any[]) => Struct.Schema) = contentType;
 
         /**
          * Resolve the component UID of an entity's attribute based

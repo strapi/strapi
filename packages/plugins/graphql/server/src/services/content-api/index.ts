@@ -150,9 +150,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * Register needed GraphQL types for every content type
    * @param {object[]} contentTypes
    */
-  const registerAPITypes = (
-    contentTypes: (Struct.ContentTypeSchema | Struct.ComponentSchema)[]
-  ) => {
+  const registerAPITypes = (contentTypes: Struct.Schema[]) => {
     for (const contentType of contentTypes) {
       const { modelType } = contentType;
 

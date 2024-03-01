@@ -4,9 +4,7 @@ import * as componentsService from '../../utils/components';
 
 import type { Core, UID, Data, Struct } from '@strapi/types';
 
-const sanitizeComponentLikeAttributes = <
-  T extends Struct.ContentTypeSchema | Struct.ComponentSchema
->(
+const sanitizeComponentLikeAttributes = <T extends Struct.Schema>(
   model: T,
   data: Data.Entity<T['uid']>
 ) => {
@@ -81,7 +79,7 @@ const createEntityQuery = (strapi: Core.LoadedStrapi): any => {
     };
 
     const getDeepPopulateComponentLikeQuery = (
-      contentType: Struct.ContentTypeSchema | Struct.ComponentSchema,
+      contentType: Struct.Schema,
       params = { select: '*' }
     ) => {
       const { attributes } = contentType;

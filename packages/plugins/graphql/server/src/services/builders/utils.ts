@@ -15,10 +15,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {boolean} options.multiple
      * @return {object}
      */
-    getContentTypeArgs(
-      contentType: Struct.ContentTypeSchema | Struct.ComponentSchema,
-      { multiple = true } = {}
-    ) {
+    getContentTypeArgs(contentType: Struct.Schema, { multiple = true } = {}) {
       const { naming } = getService('utils');
       const { args } = getService('internals');
 

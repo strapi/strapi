@@ -30,7 +30,7 @@ function omitComponentData(
   data: Modules.EntityService.Params.Data.Input<Struct.ComponentSchema['uid']>
 ): Partial<Modules.EntityService.Params.Data.Input<Struct.ComponentSchema['uid']>>;
 function omitComponentData(
-  contentType: Struct.ContentTypeSchema | Struct.ComponentSchema,
+  contentType: Struct.Schema,
   data: Modules.EntityService.Params.Data.Input<
     Struct.ContentTypeSchema['uid'] | Struct.ComponentSchema['uid']
   >

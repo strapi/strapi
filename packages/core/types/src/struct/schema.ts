@@ -5,10 +5,12 @@ export type ContentTypeKind = 'collectionType' | 'singleType';
 
 export type ModelType = 'contentType' | 'component';
 
+export type Schema = ContentTypeSchema | ComponentSchema;
+
 /**
  * Represents a Strapi Schema once loaded by the server
  */
-export interface Schema {
+export interface BaseSchema {
   /**
    * The unique identifier of the Schema
    */
@@ -104,7 +106,7 @@ export interface SchemaPluginOptions {
 /**
  * Schema for a content type
  */
-export interface ContentTypeSchema extends Schema {
+export interface ContentTypeSchema extends BaseSchema {
   modelType: 'contentType';
 
   /**
@@ -156,7 +158,7 @@ export interface SingleTypeSchema extends ContentTypeSchema {
 /**
  * Schema for a component
  */
-export interface ComponentSchema extends Schema {
+export interface ComponentSchema extends BaseSchema {
   modelType: 'component';
 
   uid: UID.Component;

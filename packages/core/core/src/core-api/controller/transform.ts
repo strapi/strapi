@@ -27,7 +27,7 @@ function isDZEntries(property: unknown): property is (Entry & { __component: UID
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Struct.ContentTypeSchema | Struct.ComponentSchema } = {}
+  opts: { contentType?: Struct.Schema } = {}
 ) => {
   if (isNil(resource)) {
     return resource;
@@ -56,11 +56,11 @@ function transformComponent(
 
 function transformEntry<T extends Entry | Entry[] | null>(
   entry: T,
-  type?: Struct.ContentTypeSchema | Struct.ComponentSchema
+  type?: Struct.Schema
 ): T extends Entry[] ? TransformedEntry[] : T extends Entry ? TransformedEntry : null;
 function transformEntry(
   entry: Entry | Entry[] | null,
-  type?: Struct.ContentTypeSchema | Struct.ComponentSchema
+  type?: Struct.Schema
 ): TransformedEntry | TransformedEntry[] | null {
   if (isNil(entry)) {
     return entry;

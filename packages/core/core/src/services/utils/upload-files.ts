@@ -25,7 +25,7 @@ const uploadFile: UploadFile = async (uid, entity, files) => {
     }
 
     const currentPath = [];
-    let tmpModel: Struct.ContentTypeSchema | Struct.ComponentSchema = modelDef;
+    let tmpModel: Struct.Schema = modelDef;
     let modelUID = uid;
 
     for (let i = 0; i < path.length; i += 1) {
