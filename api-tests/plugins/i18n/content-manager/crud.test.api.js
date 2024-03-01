@@ -85,8 +85,7 @@ describe('i18n - Content API', () => {
       data.categories.push(res.body.data);
     });
 
-    // V5: Fix locale creation test
-    test.skip('non-default locale', async () => {
+    test('non-default locale', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::category.category',
