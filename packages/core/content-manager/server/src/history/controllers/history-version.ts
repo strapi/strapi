@@ -4,6 +4,29 @@ import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
 
+const validatePagination = ({ page, pageSize }: { page: any; pageSize: any }) => {
+  let pageNumber = 1;
+  let pageSizeNumber = 10;
+
+  if (page) {
+    pageNumber = parseInt(page, 10);
+
+    if (Number.isNaN(pageNumber) || pageNumber < 1) {
+      throw new errors.PaginationError('invalid pageNumber param');
+    }
+  }
+
+  if (pageSize) {
+    pageSizeNumber = parseInt(pageSize, 10);
+
+    if (Number.isNaN(pageSizeNumber) || pageSizeNumber < 1 || pageSizeNumber > 100) {
+      throw new errors.PaginationError('invalid pageSize param');
+    }
+  }
+
+  return { page: pageNumber, pageSize: pageSizeNumber };
+};
+
 const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
   return {
     async findMany(ctx) {
@@ -34,7 +57,10 @@ const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
       const params: HistoryVersions.GetHistoryVersions.Request['query'] =
         await permissionChecker.sanitizeQuery(ctx.query);
 
-      const { results, pagination } = await getService(strapi, 'history').findVersionsPage(params);
+      const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
+        ...params,
+        ...validatePagination({ page: params.page, pageSize: params.pageSize }),
+      });
 
       return { data: results, meta: { pagination } };
     },
