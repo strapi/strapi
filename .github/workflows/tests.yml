@@ -189,7 +189,7 @@ jobs:
         if: failure()
         with:
           name: ce-playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
   e2e_ee:
@@ -231,7 +231,7 @@ jobs:
         if: failure()
         with:
           name: ee-playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
   api_ce_pg:
