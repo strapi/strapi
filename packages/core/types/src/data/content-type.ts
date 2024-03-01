@@ -1,7 +1,7 @@
 import type { ID } from './constants';
 
 import type { Intersect } from '../utils';
-import type { UID } from '../public';
+import type * as UID from '../uid';
 import type { AttributeNames, AttributeValueByName } from '../schema';
 
 export type DocumentID = string;

@@ -1,11 +1,11 @@
 import { Flex, Icon } from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
 
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 
 interface ComponentIconProps {
   showBackground?: boolean;
-  icon?: Internal.Struct.ContentTypeSchemaInfo['icon'];
+  icon?: Struct.ContentTypeSchemaInfo['icon'];
 }
 
 const ComponentIcon = ({ showBackground = true, icon = 'cube' }: ComponentIconProps) => {

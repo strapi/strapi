@@ -1,6 +1,6 @@
 import { entries, mapValues, omit } from 'lodash/fp';
 import { pagination } from '@strapi/utils';
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
 
@@ -16,7 +16,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @return {object}
      */
     getContentTypeArgs(
-      contentType: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema,
+      contentType: Struct.ContentTypeSchema | Struct.ComponentSchema,
       { multiple = true } = {}
     ) {
       const { naming } = getService('utils');
@@ -66,7 +66,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Filter an object entries and keep only those whose value is a unique scalar attribute
      */
-    getUniqueScalarAttributes(attributes: Internal.Struct.SchemaAttributes) {
+    getUniqueScalarAttributes(attributes: Struct.SchemaAttributes) {
       const { isStrapiScalar } = getService('utils').attributes;
 
       const uniqueAttributes = entries(attributes).filter(
@@ -81,7 +81,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {object} attributes - The attributes object to transform
      * @return {Object<string, string>}
      */
-    scalarAttributesToFiltersMap(attributes: Internal.Struct.SchemaAttributes) {
+    scalarAttributesToFiltersMap(attributes: Struct.SchemaAttributes) {
       return mapValues((attribute) => {
         const { mappers, naming } = getService('utils');
 
@@ -99,7 +99,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       {
         contentType,
         usePagination = false,
-      }: { contentType: Internal.Struct.ContentTypeSchema; usePagination?: boolean }
+      }: { contentType: Struct.ContentTypeSchema; usePagination?: boolean }
     ) {
       const { mappers } = getService('utils');
       const { config } = strapi.plugin('graphql');

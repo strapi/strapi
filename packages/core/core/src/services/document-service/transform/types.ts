@@ -1,4 +1,4 @@
-import type { Public } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import type { ID } from './relations/utils/types';
 
 export type Data = {
@@ -8,7 +8,7 @@ export type Data = {
 };
 
 export type Options = {
-  uid: Public.UID.Schema;
+  uid: UID.Schema;
   locale?: string | null;
   isDraft: boolean;
 };

@@ -1,6 +1,6 @@
 import { propOr } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import type { Core, Internal, Data } from '@strapi/types';
+import type { Core, Struct, Data } from '@strapi/types';
 
 import {
   getPaginationInfo,
@@ -25,7 +25,7 @@ const setPublishedAt = (data: Record<string, unknown>) => {
 const createCollectionTypeService = ({
   contentType,
 }: {
-  contentType: Internal.Struct.CollectionTypeSchema;
+  contentType: Struct.CollectionTypeSchema;
 }): Core.CoreAPI.Service.CollectionType => {
   const { uid } = contentType;
 

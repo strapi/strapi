@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import strapiUtils from '@strapi/utils';
-import type { Schema, Internal } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 import blocksValidator from './blocks-validator';
 
 const { yup } = strapiUtils;
 
 interface ValidatorMetas<TAttribute extends Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
-  model: Internal.Struct.ContentTypeSchema;
+  model: Struct.ContentTypeSchema;
   updatedAttribute: { name: string; value: unknown };
   entity: Record<string, unknown> | null;
 }

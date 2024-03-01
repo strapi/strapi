@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import type { Schema, Public, Internal } from '@strapi/types';
+import type { Schema, UID, Struct } from '@strapi/types';
 
 export type UploadFile = (
-  uid: Public.UID.Schema,
+  uid: UID.Schema,
   entity: Record<string, unknown>,
   files: Record<string, unknown>
 ) => Promise<void>;
@@ -25,7 +25,7 @@ const uploadFile: UploadFile = async (uid, entity, files) => {
     }
 
     const currentPath = [];
-    let tmpModel: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema = modelDef;
+    let tmpModel: Struct.ContentTypeSchema | Struct.ComponentSchema = modelDef;
     let modelUID = uid;
 
     for (let i = 0; i < path.length; i += 1) {
@@ -55,7 +55,7 @@ const uploadFile: UploadFile = async (uid, entity, files) => {
         if (!value) return {};
 
         modelUID = value.__component; // get component type
-        tmpModel = strapi.components[modelUID as Public.UID.Component];
+        tmpModel = strapi.components[modelUID as UID.Component];
       } else if (attr.type === 'relation') {
         if (!('target' in attr)) {
           return {};

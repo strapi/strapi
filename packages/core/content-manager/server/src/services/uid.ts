@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-import type { Core, Schema, Public } from '@strapi/types';
+import type { Core, Schema, UID } from '@strapi/types';
 
 export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   async generateUIDField({
@@ -10,7 +10,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     data,
     locale,
   }: {
-    contentTypeUID: Public.UID.ContentType;
+    contentTypeUID: UID.ContentType;
     field: string;
     data: Record<string, any>;
     locale?: string;
@@ -53,7 +53,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     value,
     locale,
   }: {
-    contentTypeUID: Public.UID.ContentType;
+    contentTypeUID: UID.ContentType;
     field: string;
     value: string;
     locale?: string;
@@ -103,7 +103,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     value,
     locale,
   }: {
-    contentTypeUID: Public.UID.ContentType;
+    contentTypeUID: UID.ContentType;
     field: string;
     value: string;
     locale?: string;

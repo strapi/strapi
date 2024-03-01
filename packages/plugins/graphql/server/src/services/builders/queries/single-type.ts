@@ -1,6 +1,6 @@
 import { extendType } from 'nexus';
 import type * as Nexus from 'nexus';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -12,7 +12,7 @@ export default ({ strapi }: Context) => {
 
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
-  const buildSingleTypeQueries = (contentType: Internal.Struct.SingleTypeSchema) => {
+  const buildSingleTypeQueries = (contentType: Struct.SingleTypeSchema) => {
     const findQueryName = `Query.${getFindOneQueryName(contentType)}`;
 
     const extension = getService('extension');
@@ -44,7 +44,7 @@ export default ({ strapi }: Context) => {
 
   const addFindQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<string>,
-    contentType: Internal.Struct.SingleTypeSchema
+    contentType: Struct.SingleTypeSchema
   ) => {
     const { uid } = contentType;
 

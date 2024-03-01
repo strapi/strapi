@@ -6,7 +6,7 @@ import { chain } from 'stream-chain';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 
-import type { Internal, Utils } from '@strapi/types';
+import type { Struct, Utils } from '@strapi/types';
 
 import type {
   IAsset,
@@ -84,7 +84,7 @@ export const TransferGroupPresets: TransferGroupFilter = {
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
-type SchemaMap = Utils.String.Dict<Internal.Struct.Schema>;
+type SchemaMap = Utils.String.Dict<Struct.Schema>;
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
@@ -422,7 +422,7 @@ class TransferEngine<
       const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
 
       if (schemaDiffs.length) {
-        diffs[key] = schemaDiffs as Diff<Internal.Struct.Schema>[];
+        diffs[key] = schemaDiffs as Diff<Struct.Schema>[];
       }
     });
 
@@ -802,7 +802,7 @@ class TransferEngine<
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTracker(stage, {
-      key: (value: Internal.Struct.Schema) => value.modelType,
+      key: (value: Struct.Schema) => value.modelType,
     });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });

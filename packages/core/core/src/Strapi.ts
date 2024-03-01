@@ -7,7 +7,7 @@ import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
-import type { Core, Modules, Internal, Public, Schema } from '@strapi/types';
+import type { Core, Modules, Struct, UID, Schema } from '@strapi/types';
 
 import loadConfiguration from './configuration';
 
@@ -233,7 +233,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('services').getAll();
   }
 
-  service(uid: Public.UID.Service) {
+  service(uid: UID.Service) {
     return this.get('services').get(uid);
   }
 
@@ -241,7 +241,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('controllers').getAll();
   }
 
-  controller(uid: Public.UID.Controller) {
+  controller(uid: UID.Controller) {
     return this.get('controllers').get(uid);
   }
 
@@ -249,7 +249,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('content-types').getAll();
   }
 
-  contentType(name: Public.UID.ContentType) {
+  contentType(name: UID.ContentType) {
     return this.get('content-types').get(name);
   }
 
@@ -583,17 +583,15 @@ class Strapi extends Container implements Core.Strapi {
     }
   }
 
-  getModel(uid: Public.UID.ContentType): Schema.ContentType;
-  getModel(uid: Public.UID.Component): Schema.Component;
-  getModel<TUID extends Public.UID.Schema>(
-    uid: TUID
-  ): Schema.ContentType | Schema.Component | undefined {
+  getModel(uid: UID.ContentType): Schema.ContentType;
+  getModel(uid: UID.Component): Schema.Component;
+  getModel<TUID extends UID.Schema>(uid: TUID): Schema.ContentType | Schema.Component | undefined {
     if (uid in this.contentTypes) {
-      return this.contentTypes[uid as Public.UID.ContentType];
+      return this.contentTypes[uid as UID.ContentType];
     }
 
     if (uid in this.components) {
-      return this.components[uid as Public.UID.Component];
+      return this.components[uid as UID.Component];
     }
   }
 
@@ -601,7 +599,7 @@ class Strapi extends Container implements Core.Strapi {
    * Binds queries with a specific model
    * @param {string} uid
    */
-  query(uid: Public.UID.Schema) {
+  query(uid: UID.Schema) {
     return this.db!.query(uid);
   }
 }

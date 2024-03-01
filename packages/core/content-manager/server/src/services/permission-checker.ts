@@ -1,5 +1,5 @@
 import { pipeAsync } from '@strapi/utils';
-import type { Core, Public, Modules } from '@strapi/types';
+import type { Core, UID, Modules } from '@strapi/types';
 
 const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -11,7 +11,7 @@ const ACTIONS = {
   discard: 'plugin::content-manager.explorer.update',
 } as const;
 
-type Entity = Modules.EntityService.Result<Public.UID.ContentType>;
+type Entity = Modules.EntityService.Result<UID.ContentType>;
 type Query = {
   page?: string;
   pageSize?: string;

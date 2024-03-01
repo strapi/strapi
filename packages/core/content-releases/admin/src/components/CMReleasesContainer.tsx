@@ -23,7 +23,7 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { Public } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -256,7 +256,7 @@ export const CMReleasesContainer = () => {
     slug,
   } = useCMEditViewDataManager();
 
-  const contentTypeUid = slug as Public.UID.ContentType;
+  const contentTypeUid = slug as UID.ContentType;
 
   const canFetch = entryId != null && contentTypeUid != null;
   const fetchParams = canFetch

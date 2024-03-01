@@ -2,7 +2,7 @@ import { extendType, nonNull } from 'nexus';
 import { omit, isNil } from 'lodash/fp';
 import { sanitize, validate, errors } from '@strapi/utils';
 import type * as Nexus from 'nexus';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 const { NotFoundError } = errors;
@@ -23,7 +23,7 @@ export default ({ strapi }: Context) => {
 
   const addUpdateMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Internal.Struct.SingleTypeSchema
+    contentType: Struct.SingleTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -84,7 +84,7 @@ export default ({ strapi }: Context) => {
 
   const addDeleteMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Internal.Struct.SingleTypeSchema
+    contentType: Struct.SingleTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -126,7 +126,7 @@ export default ({ strapi }: Context) => {
   };
 
   return {
-    buildSingleTypeMutations(contentType: Internal.Struct.SingleTypeSchema) {
+    buildSingleTypeMutations(contentType: Struct.SingleTypeSchema) {
       const updateMutationName = `Mutation.${getUpdateMutationTypeName(contentType)}`;
       const deleteMutationName = `Mutation.${getDeleteMutationTypeName(contentType)}`;
 

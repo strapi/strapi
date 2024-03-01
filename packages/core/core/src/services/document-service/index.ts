@@ -1,4 +1,4 @@
-import { Core, Modules, Public } from '@strapi/types';
+import { Core, Modules, UID } from '@strapi/types';
 
 import { createContentTypeRepository } from './repository-factory';
 import { createMiddlewareManager } from './middlewares';
@@ -24,7 +24,7 @@ export const createDocumentService = (strapi: Core.Strapi): any => {
   const repositories = new Map<string, Modules.Documents.ServiceInstance>();
   const middlewares = createMiddlewareManager();
 
-  function factory<TUID extends Public.UID.ContentType>(
+  function factory<TUID extends UID.ContentType>(
     uid: TUID
   ): Modules.Documents.ServiceInstance<TUID> {
     if (repositories.has(uid)) {

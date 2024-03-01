@@ -23,7 +23,7 @@ export interface IProvider {
   close?(): MaybePromise<void>; // called during transfer engine close
 
   getMetadata(): MaybePromise<IMetadata | null>; // returns the transfer metadata to be used for version validation
-  getSchemas?(): MaybePromise<Record<string, Internal.Struct.Schema> | null>; // returns the schemas for the schema validation
+  getSchemas?(): MaybePromise<Record<string, Struct.Schema> | null>; // returns the schemas for the schema validation
 
   beforeTransfer?(): MaybePromise<void>; // called immediately before transfer stages are run
 }

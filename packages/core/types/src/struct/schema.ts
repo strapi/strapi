@@ -1,5 +1,5 @@
-import type { Attribute } from '../../schema';
-import type { UID } from '../../public';
+import type { Attribute } from '../schema';
+import type * as UID from '../uid';
 
 export type ContentTypeKind = 'collectionType' | 'singleType';
 

@@ -1,7 +1,7 @@
-import type { Public, Modules, Schema } from '@strapi/types';
+import type { UID, Modules, Schema } from '@strapi/types';
 import transforms from './transforms';
 
-const applyTransforms = <TUID extends Public.UID.ContentType>(
+const applyTransforms = <TUID extends UID.ContentType>(
   data: Modules.EntityService.Params.Data.Input<TUID>,
   context: {
     contentType: Schema.ContentType<TUID>;

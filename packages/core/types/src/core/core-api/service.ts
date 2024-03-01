@@ -1,5 +1,5 @@
 import type { ID } from '../../data';
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 import type { MatchFirst, Test } from '../../utils';
 
 type EntityID = ID;

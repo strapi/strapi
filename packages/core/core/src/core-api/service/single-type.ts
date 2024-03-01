@@ -1,5 +1,5 @@
 import { propOr } from 'lodash/fp';
-import type { Core, Internal, Public } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getFetchParams } from './get-fetch-params';
 
@@ -17,7 +17,7 @@ const setPublishedAt = (data: Record<string, unknown>) => {
 const createSingleTypeService = ({
   contentType,
 }: {
-  contentType: Internal.Struct.SingleTypeSchema;
+  contentType: Struct.SingleTypeSchema;
 }): Core.CoreAPI.Service.SingleType => {
   const { uid } = contentType;
 

@@ -1,12 +1,10 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Public, Internal } from '@strapi/types';
+import type { UID, Struct } from '@strapi/types';
 import { createContentType, ContentTypeDefinition } from '../domain/content-type';
 import { addNamespace, hasNamespace } from './namespace';
 
 type ContentTypesInput = Record<string, ContentTypeDefinition>;
-type ContentTypeExtendFn = (
-  contentType: Internal.Struct.ContentTypeSchema
-) => Internal.Struct.ContentTypeSchema;
+type ContentTypeExtendFn = (contentType: Struct.ContentTypeSchema) => Struct.ContentTypeSchema;
 
 const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
   for (const ctName of Object.keys(contentTypes)) {
@@ -21,7 +19,7 @@ const validateKeySameToSingularName = (contentTypes: ContentTypesInput) => {
 };
 
 const contentTypesRegistry = () => {
-  const contentTypes: Record<string, Internal.Struct.ContentTypeSchema> = {};
+  const contentTypes: Record<string, Struct.ContentTypeSchema> = {};
 
   return {
     /**
@@ -34,7 +32,7 @@ const contentTypesRegistry = () => {
     /**
      * Returns the instance of a contentType. Instantiate the contentType if not already done
      */
-    get(uid: Public.UID.ContentType) {
+    get(uid: UID.ContentType) {
       return contentTypes[uid];
     },
 
@@ -48,7 +46,7 @@ const contentTypesRegistry = () => {
     /**
      * Registers a contentType
      */
-    set(uid: Public.UID.ContentType, contentType: Internal.Struct.ContentTypeSchema) {
+    set(uid: UID.ContentType, contentType: Struct.ContentTypeSchema) {
       contentTypes[uid] = contentType;
       return this;
     },
@@ -73,7 +71,7 @@ const contentTypesRegistry = () => {
     /**
      * Wraps a contentType to extend it
      */
-    extend(ctUID: Public.UID.ContentType, extendFn: ContentTypeExtendFn) {
+    extend(ctUID: UID.ContentType, extendFn: ContentTypeExtendFn) {
       const currentContentType = this.get(ctUID);
 
       if (!currentContentType) {

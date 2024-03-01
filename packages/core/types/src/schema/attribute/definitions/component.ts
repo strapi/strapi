@@ -1,6 +1,6 @@
 import type * as Data from '../../../data';
 
-import type { UID } from '../../../public';
+import type * as UID from '../../../uid';
 import type { Constants, If, Intersect } from '../../../utils';
 import type { Attribute } from '../../../schema';
 

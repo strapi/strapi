@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { yup } from '@strapi/utils';
 
 import type { TestContext } from 'yup';
-import type { Schema, Public, Internal } from '@strapi/types';
+import type { Schema, UID, Struct } from '@strapi/types';
 
 import { hasComponent } from '../../utils/attributes';
 import { modelTypes, VALID_UID_TARGETS } from '../../services/constants';
@@ -18,7 +18,7 @@ import {
 
 export type GetTypeValidatorOptions = {
   types: ReadonlyArray<string>;
-  attributes?: Internal.Struct.SchemaAttributes;
+  attributes?: Struct.SchemaAttributes;
   modelType?: (typeof modelTypes)[keyof typeof modelTypes];
 };
 
@@ -224,7 +224,7 @@ const getTypeShape = (
           .test({
             name: 'Check max component nesting is 1 lvl',
             test(compoUID: unknown) {
-              const targetCompo = strapi.components[compoUID as Public.UID.Component];
+              const targetCompo = strapi.components[compoUID as UID.Component];
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 
               if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {

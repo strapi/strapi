@@ -1,8 +1,8 @@
-import { Public } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { LongHand } from './types';
 
-export const isLocalizedContentType = (uid: Public.UID.Schema) => {
+export const isLocalizedContentType = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
   return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
 };
@@ -16,8 +16,8 @@ export const getDefaultLocale = () => {
 export const getRelationTargetLocale = (
   relation: LongHand,
   opts: {
-    targetUid: Public.UID.Schema;
-    sourceUid: Public.UID.Schema;
+    targetUid: UID.Schema;
+    sourceUid: UID.Schema;
     sourceLocale?: string | null;
   }
 ) => {

@@ -16,7 +16,7 @@ import type {
   Extends,
   IsNever,
 } from '../../utils';
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 
 type Pagination = { page: number; pageSize: number; pageCount: number; total: number };
 

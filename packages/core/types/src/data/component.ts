@@ -2,7 +2,7 @@ import type { ID } from './constants';
 
 import type { Intersect } from '../utils';
 import type { AttributeNames, AttributeValueByName } from '../schema';
-import type { UID } from '../public';
+import type * as UID from '../uid';
 
 export type Component<
   TComponentUID extends UID.Component = UID.Component,

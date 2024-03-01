@@ -1,5 +1,5 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Core, Public } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
 type PolicyExtendFn = (policy: Core.Policy) => Core.Policy;
@@ -20,7 +20,7 @@ const policiesRegistry = () => {
     /**
      * Returns the instance of a policy. Instantiate the policy if not already done
      */
-    get(uid: Public.UID.Policy) {
+    get(uid: UID.Policy) {
       return policies[uid];
     },
 
@@ -59,7 +59,7 @@ const policiesRegistry = () => {
      * @param {string} uid
      * @param {(policy: Policy) => Policy} extendFn
      */
-    extend(uid: Public.UID.Policy, extendFn: PolicyExtendFn) {
+    extend(uid: UID.Policy, extendFn: PolicyExtendFn) {
       const currentPolicy = this.get(uid);
 
       if (!currentPolicy) {

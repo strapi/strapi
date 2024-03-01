@@ -1,7 +1,7 @@
-import type { Public, Modules } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 
-type Entity = Modules.EntityService.Result<Public.UID.Schema>;
+type Entity = Modules.EntityService.Result<UID.Schema>;
 
 /**
  * /content-manager/<collection-type | single-type>/:model/:id/assignee

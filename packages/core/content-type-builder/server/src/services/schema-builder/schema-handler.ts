@@ -1,5 +1,5 @@
 import path from 'path';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 import fse from 'fs-extra';
 import _ from 'lodash';
 
@@ -12,7 +12,7 @@ export type Infos = {
   uid?: Internal.UID.ContentType;
   dir: string;
   filename: string;
-  schema?: Internal.Struct.ContentTypeSchema;
+  schema?: Struct.ContentTypeSchema;
 };
 
 export default function createSchemaHandler(infos: Infos) {
@@ -31,7 +31,7 @@ export default function createSchemaHandler(infos: Infos) {
         info: {},
         options: {},
         attributes: {},
-      } as Internal.Struct.ContentTypeSchema),
+      } as Struct.ContentTypeSchema),
   };
 
   const state = _.cloneDeep(initialState);
@@ -85,7 +85,7 @@ export default function createSchemaHandler(infos: Infos) {
       return _.cloneDeep(state.schema);
     },
 
-    setSchema(val: Internal.Struct.ContentTypeSchema) {
+    setSchema(val: Struct.ContentTypeSchema) {
       modified = true;
 
       state.schema = _.cloneDeep(val);
@@ -135,7 +135,7 @@ export default function createSchemaHandler(infos: Infos) {
       return this.unset(['attributes', key]);
     },
 
-    setAttributes(newAttributes: Internal.Struct.SchemaAttributes) {
+    setAttributes(newAttributes: Struct.SchemaAttributes) {
       if (!this.schema) return this;
 
       // delete old configurable attributes
@@ -147,7 +147,7 @@ export default function createSchemaHandler(infos: Infos) {
 
       // set new Attributes
       for (const key of Object.keys(newAttributes)) {
-        this.setAttribute(key, newAttributes[key as keyof Internal.Struct.SchemaAttributes]);
+        this.setAttribute(key, newAttributes[key as keyof Struct.SchemaAttributes]);
       }
 
       return this;

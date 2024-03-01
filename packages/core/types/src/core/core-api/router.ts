@@ -1,7 +1,7 @@
 import type { ExtendableContext, Middleware as KoaMiddleware } from 'koa';
 
 import type { MatchFirst, Test } from '../../utils';
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 
 import type { Strapi } from '..';
 

@@ -1,12 +1,12 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Core, Internal, Utils, Public } from '@strapi/types';
+import type { Core, Struct, Utils, UID } from '@strapi/types';
 import type Koa from 'koa';
 
 import { parseBody } from './transform';
 
 interface Options {
-  contentType: Internal.Struct.CollectionTypeSchema;
+  contentType: Struct.CollectionTypeSchema;
 }
 
 /**
@@ -16,7 +16,7 @@ interface Options {
 const createCollectionTypeController = ({
   contentType,
 }: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.CollectionType> => {
-  const uid = contentType.uid as Public.UID.Service;
+  const uid = contentType.uid as UID.Service;
 
   return {
     /**

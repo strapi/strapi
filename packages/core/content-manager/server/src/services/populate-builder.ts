@@ -1,5 +1,5 @@
 import { isNil } from 'lodash/fp';
-import type { Public } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
 /**
@@ -12,7 +12,7 @@ import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/popula
  * // populate = { article: { populate: { count: true } } }
  *
  */
-const populateBuilder = (uid: Public.UID.Schema) => {
+const populateBuilder = (uid: UID.Schema) => {
   let getInitialPopulate = async (): Promise<undefined | Populate> => {
     return undefined;
   };

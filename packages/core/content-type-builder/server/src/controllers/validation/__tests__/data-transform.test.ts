@@ -1,4 +1,4 @@
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { removeEmptyDefaults, removeDeletedUIDTargetFields } from '../data-transform';
 
 describe('Data transform', () => {
@@ -33,10 +33,7 @@ describe('Data transform', () => {
             targetField: 'random',
           },
         },
-      } as Pick<
-        Internal.Struct.ContentTypeSchema,
-        'attributes'
-      > as Internal.Struct.ContentTypeSchema;
+      } as Pick<Struct.ContentTypeSchema, 'attributes'> as Struct.ContentTypeSchema;
 
       removeDeletedUIDTargetFields(data);
 

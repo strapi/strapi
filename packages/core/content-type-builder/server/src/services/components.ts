@@ -1,4 +1,4 @@
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 import { get, has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
@@ -53,8 +53,8 @@ export const createComponent = async ({ component, components = [] }: any) => {
 };
 
 type ComponentToCreate = {
-  component: Internal.Struct.ComponentSchema;
-  components?: Internal.Struct.ComponentSchema[];
+  component: Struct.ComponentSchema;
+  components?: Struct.ComponentSchema[];
 };
 
 export const editComponent = async (

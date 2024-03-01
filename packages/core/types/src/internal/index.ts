@@ -12,8 +12,3 @@ export type * as UID from './uid';
  * Registry utilities (Keys, etc...)
  */
 export type * as Registry from './registry';
-
-/**
- * Various static structs (schema, model, content-type, ...)
- */
-export type * as Struct from './struct';

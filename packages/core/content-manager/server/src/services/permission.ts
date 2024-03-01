@@ -3,7 +3,7 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
 
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   canConfigureContentType({
@@ -11,7 +11,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     contentType,
   }: {
     userAbility: any;
-    contentType: Internal.Struct.ContentTypeSchema;
+    contentType: Struct.ContentTypeSchema;
   }) {
     const action = contentTypesUtils.isSingleType(contentType)
       ? 'plugin::content-manager.single-types.configure-view'

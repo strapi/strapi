@@ -1,4 +1,4 @@
-import { UID } from '../../../public';
+import type * as UID from '../../../uid';
 import { MatchFirst } from '../../../utils';
 
 import { Result } from '.';

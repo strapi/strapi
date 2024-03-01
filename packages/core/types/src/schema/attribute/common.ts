@@ -1,4 +1,4 @@
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 import type { Attribute } from '../../schema';
 
 // TODO: [TS2] Where to move this? Common doesn't really make sense :/

@@ -1,4 +1,4 @@
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { ComponentConfiguration } from './components';
 
@@ -42,7 +42,7 @@ export type Configuration = {
   layouts: Layouts;
 };
 
-export interface ContentType extends Internal.Struct.ContentTypeSchema {
+export interface ContentType extends Struct.ContentTypeSchema {
   isDisplayed: boolean;
   apiID: string;
 }

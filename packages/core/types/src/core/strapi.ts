@@ -5,7 +5,7 @@ import type * as Core from '../core';
 import type * as Modules from '../modules';
 import type * as Schema from '../schema';
 
-import type { UID } from '../public';
+import type * as UID from '../uid';
 
 import type { Container } from './container';
 

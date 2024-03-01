@@ -6,7 +6,7 @@
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import { Modules, Core, Public, Internal, Schema } from '@strapi/types';
+import { Modules, Core, UID, Internal, Struct, Schema } from '@strapi/types';
 import validators from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
@@ -37,12 +37,12 @@ interface ValidatorContext {
 interface AttributeValidatorMetas {
   attr: Schema.Attribute.AnyAttribute;
   updatedAttribute: { name: string; value: unknown };
-  model: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema;
+  model: Struct.ContentTypeSchema | Struct.ComponentSchema;
   entity?: Entity;
 }
 
 interface ModelValidatorMetas {
-  model: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema;
+  model: Struct.ContentTypeSchema | Struct.ComponentSchema;
   data: Record<string, unknown>;
   entity?: Entity;
 }
@@ -128,10 +128,7 @@ const preventCast = (validator: strapiUtils.yup.AnySchema) =>
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
-    {
-      attr,
-      updatedAttribute,
-    }: ValidatorMeta<Schema.Attribute.Component<Public.UID.Component, boolean>>,
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
     { isDraft }: ValidatorContext
   ) => {
     const model = strapi.getModel(attr.component);
@@ -306,7 +303,7 @@ const createModelValidator =
 
 const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   return async <
-    TUID extends Public.UID.ContentType,
+    TUID extends UID.ContentType,
     TData extends Modules.EntityService.Params.Data.Input<TUID>
   >(
     model: Schema.ContentType<TUID>,
@@ -352,7 +349,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
 /**
  * Builds an object containing all the media and relations being associated with an entity
  */
-const buildRelationsStore = <TUID extends Public.UID.Schema>({
+const buildRelationsStore = <TUID extends UID.Schema>({
   uid,
   data,
 }: {
@@ -451,7 +448,7 @@ const buildRelationsStore = <TUID extends Public.UID.Schema>({
           return mergeWith(
             relationsStore,
             buildRelationsStore({
-              uid: value.__component as Public.UID.Component,
+              uid: value.__component as UID.Component,
               data: value,
             }),
             (objValue, srcValue) => {
@@ -480,7 +477,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
-      const count = await strapi.query(key as Public.UID.Schema).count({
+      const count = await strapi.query(key as UID.Schema).count({
         where: {
           id: {
             $in: uniqueValues.map((v) => v.id),

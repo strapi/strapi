@@ -1,5 +1,5 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Core, Public } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
 export type ServiceFactory = (params: { strapi: Core.Strapi }) => Core.Service | Core.Service;
@@ -22,7 +22,7 @@ const servicesRegistry = (strapi: Core.Strapi) => {
     /**
      * Returns the instance of a service. Instantiate the service if not already done
      */
-    get(uid: Public.UID.Service) {
+    get(uid: UID.Service) {
       if (instantiatedServices[uid]) {
         return instantiatedServices[uid];
       }
@@ -46,7 +46,7 @@ const servicesRegistry = (strapi: Core.Strapi) => {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
-            return this.get(uid as Public.UID.Service);
+            return this.get(uid as UID.Service);
           },
         });
       }
@@ -83,7 +83,7 @@ const servicesRegistry = (strapi: Core.Strapi) => {
     /**
      * Wraps a service to extend it
      */
-    extend(uid: Public.UID.Service, extendFn: ServiceExtendFn) {
+    extend(uid: UID.Service, extendFn: ServiceExtendFn) {
       const currentService = this.get(uid);
 
       if (!currentService) {

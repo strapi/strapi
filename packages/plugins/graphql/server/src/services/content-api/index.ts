@@ -2,7 +2,7 @@ import { pruneSchema } from '@graphql-tools/utils';
 import { makeSchema } from 'nexus';
 import { prop, startsWith } from 'lodash/fp';
 import type * as Nexus from 'nexus';
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import { wrapResolvers } from './wrap-resolvers';
 import {
@@ -151,7 +151,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * @param {object[]} contentTypes
    */
   const registerAPITypes = (
-    contentTypes: (Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema)[]
+    contentTypes: (Struct.ContentTypeSchema | Struct.ComponentSchema)[]
   ) => {
     for (const contentType of contentTypes) {
       const { modelType } = contentType;
@@ -175,20 +175,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Generate & register single type's definition
       if (kind === 'singleType') {
-        registerSingleType(contentType as Internal.Struct.SingleTypeSchema, registerOptions);
+        registerSingleType(contentType as Struct.SingleTypeSchema, registerOptions);
       }
 
       // Generate & register collection type's definition
       else if (kind === 'collectionType') {
-        registerCollectionType(
-          contentType as Internal.Struct.CollectionTypeSchema,
-          registerOptions
-        );
+        registerCollectionType(contentType as Struct.CollectionTypeSchema, registerOptions);
       }
     }
   };
 
-  const registerMorphTypes = (contentTypes: Internal.Struct.Schema[]) => {
+  const registerMorphTypes = (contentTypes: Struct.Schema[]) => {
     // Create & register a union type that includes every type or component registered
     const genericMorphType = builders.buildGenericMorphDefinition();
     registry.register(GENERIC_MORPH_TYPENAME, genericMorphType, { kind: KINDS.morph });

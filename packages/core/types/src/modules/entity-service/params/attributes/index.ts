@@ -1,6 +1,6 @@
 import type * as Schema from '../../../../schema';
 
-import type { UID } from '../../../../public';
+import type * as UID from '../../../../uid';
 import type { Array, Constants, If, Extends, IsNotNever, MatchFirst } from '../../../../utils';
 
 import type { OmitRelationsWithoutTarget, RelationInputValue } from './relation';

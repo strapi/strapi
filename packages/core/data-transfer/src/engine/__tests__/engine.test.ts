@@ -1,7 +1,7 @@
 import { posix, win32 } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
 
 import type {
@@ -262,7 +262,7 @@ const getConfigurationMockSourceStream = (
 ) => getMockSourceStream(data);
 
 const getSchemasMockSourceStream = (
-  data: Array<Internal.Struct.Schema> = [
+  data: Array<Struct.Schema> = [
     {
       uid: 'api::foo.foo',
       modelName: 'foo',
@@ -328,7 +328,7 @@ const createSource = (streamData?: {
   entities?: Entity[];
   links?: ILink[];
   configuration?: IConfiguration[];
-  schemas?: Internal.Struct.Schema[];
+  schemas?: Struct.Schema[];
 }): ISourceProvider => {
   return {
     type: 'source',

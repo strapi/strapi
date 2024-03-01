@@ -1,7 +1,7 @@
 import { extendType, nonNull } from 'nexus';
 import { sanitize } from '@strapi/utils';
 import type * as Nexus from 'nexus';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -21,7 +21,7 @@ export default ({ strapi }: Context) => {
 
   const addCreateMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Internal.Struct.CollectionTypeSchema
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -62,7 +62,7 @@ export default ({ strapi }: Context) => {
 
   const addUpdateMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Internal.Struct.CollectionTypeSchema
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -112,7 +112,7 @@ export default ({ strapi }: Context) => {
 
   const addDeleteMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Internal.Struct.CollectionTypeSchema
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -148,7 +148,7 @@ export default ({ strapi }: Context) => {
   };
 
   return {
-    buildCollectionTypeMutations(contentType: Internal.Struct.CollectionTypeSchema) {
+    buildCollectionTypeMutations(contentType: Struct.CollectionTypeSchema) {
       const createMutationName = `Mutation.${getCreateMutationTypeName(contentType)}`;
       const updateMutationName = `Mutation.${getUpdateMutationTypeName(contentType)}`;
       const deleteMutationName = `Mutation.${getDeleteMutationTypeName(contentType)}`;

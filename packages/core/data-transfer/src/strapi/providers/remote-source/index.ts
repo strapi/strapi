@@ -1,5 +1,5 @@
 import { PassThrough, Readable, Writable } from 'stream';
-import type { Internal, Utils } from '@strapi/types';
+import type { Struct, Utils } from '@strapi/types';
 import { WebSocket } from 'ws';
 import { castArray } from 'lodash/fp';
 
@@ -270,9 +270,9 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await this.dispatcher?.dispatchTransferAction<
-      Utils.String.Dict<Internal.Struct.Schema>
-    >('getSchemas');
+    const schemas = await this.dispatcher?.dispatchTransferAction<Utils.String.Dict<Struct.Schema>>(
+      'getSchemas'
+    );
 
     return schemas ?? null;
   }

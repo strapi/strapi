@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Modules, Internal, Core } from '@strapi/types';
+import type { Modules, Struct, Core } from '@strapi/types';
 import {
   contentTypes as contentTypesUtils,
   convertQueryParams,
@@ -40,7 +40,7 @@ const { transformParamsToQuery } = convertQueryParams;
  *
  */
 type Context = {
-  contentType: Internal.Struct.ContentTypeSchema;
+  contentType: Struct.ContentTypeSchema;
 };
 
 const createPipeline = (data: Record<string, unknown>, context: Context) => {

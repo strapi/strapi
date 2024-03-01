@@ -1,4 +1,4 @@
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -11,7 +11,7 @@ export interface IRestoreOptions {
   entities?: {
     include?: string[]; // only delete these stage entities before transfer
     exclude?: string[]; // exclude these stage entities from deletion
-    filters?: ((contentType: Internal.Struct.ContentTypeSchema) => boolean)[]; // custom filters to exclude a content type from deletion
+    filters?: ((contentType: Struct.ContentTypeSchema) => boolean)[]; // custom filters to exclude a content type from deletion
     params?: { [uid: string]: unknown }; // params object passed to deleteMany before transfer for custom deletions
   };
 }
@@ -39,7 +39,7 @@ const deleteEntitiesRecords = async (
   const { entities } = options;
   const query = queries.entity.createEntityQuery(strapi);
   type A = typeof strapi.contentTypes;
-  const contentTypes = Object.values(strapi.contentTypes) as Internal.Struct.ContentTypeSchema[];
+  const contentTypes = Object.values(strapi.contentTypes) as Struct.ContentTypeSchema[];
 
   const contentTypesToClear = contentTypes.filter((contentType) => {
     let removeThisContentType = true;

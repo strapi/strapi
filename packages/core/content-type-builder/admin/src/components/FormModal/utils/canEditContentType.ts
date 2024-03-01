@@ -3,10 +3,10 @@ import get from 'lodash/get';
 import { getRelationType } from '../../../utils/getRelationType';
 
 import type { AttributeType } from '../../../types';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 export type EditableContentTypeSchema = {
-  kind: Internal.Struct.ContentTypeKind;
+  kind: Struct.ContentTypeKind;
   name: string;
   attributes: AttributeType[];
 };
@@ -19,7 +19,7 @@ export type EditableContentTypeData = {
 };
 
 type ModifiedData = {
-  kind: Internal.Struct.ContentTypeKind;
+  kind: Struct.ContentTypeKind;
 };
 
 export const canEditContentType = (data: Record<string, any>, modifiedData: ModifiedData) => {

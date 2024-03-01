@@ -1,6 +1,6 @@
 import { setCreatorFields, errors } from '@strapi/utils';
 
-import type { Core, Modules, Internal } from '@strapi/types';
+import type { Core, Modules, Struct, Internal } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
@@ -413,7 +413,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       const contentTypeModelsMap = contentTypeUids.reduce(
         (
-          acc: { [key: ReleaseAction['contentType']]: Internal.Struct.ContentTypeSchema },
+          acc: { [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema },
           contentTypeUid: ReleaseAction['contentType']
         ) => {
           acc[contentTypeUid] = strapi.getModel(contentTypeUid);
@@ -435,8 +435,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       const componentsMap = components.reduce(
         (
-          acc: { [key: Internal.Struct.ComponentSchema['uid']]: Internal.Struct.ComponentSchema },
-          component: Internal.Struct.ComponentSchema
+          acc: { [key: Struct.ComponentSchema['uid']]: Struct.ComponentSchema },
+          component: Struct.ComponentSchema
         ) => {
           acc[component.uid] = component;
 

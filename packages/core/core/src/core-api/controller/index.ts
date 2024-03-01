@@ -1,29 +1,27 @@
 import { prop } from 'lodash/fp';
 import type Koa from 'koa';
 import { contentTypes as contentTypeUtils, sanitize, validate } from '@strapi/utils';
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import { transformResponse } from './transform';
 import createSingleTypeController from './single-type';
 import createCollectionTypeController from './collection-type';
 
 const isSingleType = (
-  contentType: Internal.Struct.ContentTypeSchema
-): contentType is Internal.Struct.SingleTypeSchema => contentTypeUtils.isSingleType(contentType);
+  contentType: Struct.ContentTypeSchema
+): contentType is Struct.SingleTypeSchema => contentTypeUtils.isSingleType(contentType);
 
 const getAuthFromKoaContext = (ctx: Koa.Context) => prop('state.auth', ctx) ?? {};
 
-function createController<
-  T extends Internal.Struct.SingleTypeSchema | Internal.Struct.CollectionTypeSchema
->(opts: {
+function createController<T extends Struct.SingleTypeSchema | Struct.CollectionTypeSchema>(opts: {
   contentType: T;
-}): T extends Internal.Struct.SingleTypeSchema
+}): T extends Struct.SingleTypeSchema
   ? Core.CoreAPI.Controller.SingleType
   : Core.CoreAPI.Controller.CollectionType;
 function createController({
   contentType,
 }: {
-  contentType: Internal.Struct.SingleTypeSchema | Internal.Struct.CollectionTypeSchema;
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema;
 }) {
   const proto: Core.CoreAPI.Controller.Base = {
     transformResponse(data, meta) {

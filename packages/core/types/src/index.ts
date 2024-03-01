@@ -6,6 +6,8 @@ export type * as Plugin from './plugin';
 export type * as Public from './public';
 export type * as Schema from './schema';
 export type * as Utils from './utils';
+export type * as Struct from './struct';
+export type * as UID from './uid';
 
 import type { LoadedStrapi } from './core';
 

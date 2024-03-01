@@ -1,6 +1,6 @@
 import { extendType } from 'nexus';
 import type * as Nexus from 'nexus';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -17,7 +17,7 @@ export default ({ strapi }: Context) => {
     getEntityResponseCollectionName,
   } = naming;
 
-  const buildCollectionTypeQueries = (contentType: Internal.Struct.CollectionTypeSchema) => {
+  const buildCollectionTypeQueries = (contentType: Struct.CollectionTypeSchema) => {
     const findOneQueryName = `Query.${getFindOneQueryName(contentType)}`;
     const findQueryName = `Query.${getFindQueryName(contentType)}`;
 
@@ -62,7 +62,7 @@ export default ({ strapi }: Context) => {
    */
   const addFindOneQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Internal.Struct.CollectionTypeSchema
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -94,7 +94,7 @@ export default ({ strapi }: Context) => {
    */
   const addFindQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Internal.Struct.CollectionTypeSchema
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const { uid } = contentType;
 

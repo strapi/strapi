@@ -1,4 +1,4 @@
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 import type { ID } from './document-engine';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-engine';

@@ -1,5 +1,5 @@
 import { toLower, castArray, trim, prop, isNil } from 'lodash/fp';
-import type { Core, Public } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
@@ -122,7 +122,7 @@ const getController = (
   }
 
   if (!ctrl) {
-    return strapi.controller(name as Public.UID.Controller);
+    return strapi.controller(name as UID.Controller);
   }
 
   return ctrl;

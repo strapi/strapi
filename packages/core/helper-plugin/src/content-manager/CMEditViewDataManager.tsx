@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { TranslationMessage } from '../types';
 
-import type { Schema, Data, Internal } from '@strapi/types';
+import type { Schema, Data, Struct } from '@strapi/types';
 
 interface Entity {
   id: Data.ID;
@@ -49,8 +49,8 @@ interface CMEditViewDataManagerContextValue {
   ) => void;
   addNonRepeatableComponentToField?: (
     keys: string,
-    componentLayoutData: Internal.Struct.ComponentSchema,
-    allComponents: Record<string, Internal.Struct.ComponentSchema>
+    componentLayoutData: Struct.ComponentSchema,
+    allComponents: Record<string, Struct.ComponentSchema>
   ) => void;
   addRepeatableComponentToField?: (
     keys: string,
@@ -60,15 +60,15 @@ interface CMEditViewDataManagerContextValue {
     position?: number
   ) => void;
   allLayoutData: {
-    components: Record<string, Internal.Struct.ComponentSchema>;
-    contentType?: Internal.Struct.ContentTypeSchema;
+    components: Record<string, Struct.ComponentSchema>;
+    contentType?: Struct.ContentTypeSchema;
   };
   createActionAllowedFields: string[];
   formErrors: Record<string, TranslationMessage>;
   initialData: ContentType;
   isCreatingEntry: boolean;
   isSingleType: boolean;
-  layout?: Internal.Struct.CollectionTypeSchema | Internal.Struct.SingleTypeSchema;
+  layout?: Struct.CollectionTypeSchema | Struct.SingleTypeSchema;
   modifiedData: ContentType;
   moveComponentDown?: (dynamicZoneName: string, currentIndex: number) => void;
   moveComponentField?: (payload: { name: string; newIndex: number; currentIndex: number }) => void;

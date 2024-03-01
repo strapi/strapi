@@ -1,9 +1,10 @@
 import { env } from '@strapi/utils';
 
 import type { Strapi, Router, Controller, Service, Policy, Middleware } from '../core';
-import type { Struct } from '../internal';
+import type { ContentTypeSchema } from '../struct';
 import type { Schemas } from '../schema';
-import type { Shared, UID } from '../public';
+import type { Shared } from '../public';
+import type * as UID from '../uid';
 import type { Constants, Extends, Or, Not } from '../utils';
 
 export type IsEnabled<
@@ -34,7 +35,7 @@ export type LoadedPlugin = {
   services: Record<string, Service>;
   policies: Record<string, Policy>;
   middlewares: Record<string, Middleware>;
-  contentTypes: Record<string, { schema: Struct.ContentTypeSchema }>;
+  contentTypes: Record<string, { schema: ContentTypeSchema }>;
 };
 
 export * as Config from './config';

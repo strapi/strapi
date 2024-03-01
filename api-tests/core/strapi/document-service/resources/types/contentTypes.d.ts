@@ -1,6 +1,6 @@
 import type { Internal, Schema } from '@strapi/types';
 
-export interface AdminPermission extends Internal.Struct.CollectionTypeSchema {
+export interface AdminPermission extends Struct.CollectionTypeSchema {
   collectionName: 'admin_permissions';
   info: {
     name: 'Permission';
@@ -40,7 +40,7 @@ export interface AdminPermission extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface AdminUser extends Internal.Struct.CollectionTypeSchema {
+export interface AdminUser extends Struct.CollectionTypeSchema {
   collectionName: 'admin_users';
   info: {
     name: 'User';
@@ -99,7 +99,7 @@ export interface AdminUser extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface AdminRole extends Internal.Struct.CollectionTypeSchema {
+export interface AdminRole extends Struct.CollectionTypeSchema {
   collectionName: 'admin_roles';
   info: {
     name: 'Role';
@@ -141,7 +141,7 @@ export interface AdminRole extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface AdminApiToken extends Internal.Struct.CollectionTypeSchema {
+export interface AdminApiToken extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_api_tokens';
   info: {
     name: 'Api Token';
@@ -195,7 +195,7 @@ export interface AdminApiToken extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface AdminApiTokenPermission extends Internal.Struct.CollectionTypeSchema {
+export interface AdminApiTokenPermission extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_api_token_permissions';
   info: {
     name: 'API Token Permission';
@@ -232,7 +232,7 @@ export interface AdminApiTokenPermission extends Internal.Struct.CollectionTypeS
   };
 }
 
-export interface AdminTransferToken extends Internal.Struct.CollectionTypeSchema {
+export interface AdminTransferToken extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_transfer_tokens';
   info: {
     name: 'Transfer Token';
@@ -283,7 +283,7 @@ export interface AdminTransferToken extends Internal.Struct.CollectionTypeSchema
   };
 }
 
-export interface AdminTransferTokenPermission extends Internal.Struct.CollectionTypeSchema {
+export interface AdminTransferTokenPermission extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_transfer_token_permissions';
   info: {
     name: 'Transfer Token Permission';
@@ -328,7 +328,7 @@ export interface AdminTransferTokenPermission extends Internal.Struct.Collection
   };
 }
 
-export interface PluginUploadFile extends Internal.Struct.CollectionTypeSchema {
+export interface PluginUploadFile extends Struct.CollectionTypeSchema {
   collectionName: 'files';
   info: {
     singularName: 'file';
@@ -377,7 +377,7 @@ export interface PluginUploadFile extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface PluginUploadFolder extends Internal.Struct.CollectionTypeSchema {
+export interface PluginUploadFolder extends Struct.CollectionTypeSchema {
   collectionName: 'upload_folders';
   info: {
     singularName: 'folder';
@@ -424,7 +424,7 @@ export interface PluginUploadFolder extends Internal.Struct.CollectionTypeSchema
   };
 }
 
-export interface PluginI18NLocale extends Internal.Struct.CollectionTypeSchema {
+export interface PluginI18NLocale extends Struct.CollectionTypeSchema {
   collectionName: 'i18n_locale';
   info: {
     singularName: 'locale';
@@ -460,7 +460,7 @@ export interface PluginI18NLocale extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface PluginUsersPermissionsPermission extends Internal.Struct.CollectionTypeSchema {
+export interface PluginUsersPermissionsPermission extends Struct.CollectionTypeSchema {
   collectionName: 'up_permissions';
   info: {
     name: 'permission';
@@ -501,7 +501,7 @@ export interface PluginUsersPermissionsPermission extends Internal.Struct.Collec
   };
 }
 
-export interface PluginUsersPermissionsRole extends Internal.Struct.CollectionTypeSchema {
+export interface PluginUsersPermissionsRole extends Struct.CollectionTypeSchema {
   collectionName: 'up_roles';
   info: {
     name: 'role';
@@ -553,7 +553,7 @@ export interface PluginUsersPermissionsRole extends Internal.Struct.CollectionTy
   };
 }
 
-export interface PluginUsersPermissionsUser extends Internal.Struct.CollectionTypeSchema {
+export interface PluginUsersPermissionsUser extends Struct.CollectionTypeSchema {
   collectionName: 'up_users';
   info: {
     name: 'user';
@@ -609,7 +609,7 @@ export interface PluginUsersPermissionsUser extends Internal.Struct.CollectionTy
   };
 }
 
-export interface ApiArticleArticle extends Internal.Struct.CollectionTypeSchema {
+export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
   info: {
     singularName: 'article';
@@ -675,7 +675,7 @@ export interface ApiArticleArticle extends Internal.Struct.CollectionTypeSchema 
   };
 }
 
-export interface ApiAuthorAuthor extends Internal.Struct.CollectionTypeSchema {
+export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
   collectionName: 'authors';
   info: {
     singularName: 'author';
@@ -711,7 +711,7 @@ export interface ApiAuthorAuthor extends Internal.Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiCategoryCategory extends Internal.Struct.CollectionTypeSchema {
+export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   collectionName: 'categories';
   info: {
     singularName: 'category';

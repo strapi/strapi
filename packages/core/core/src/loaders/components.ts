@@ -1,7 +1,7 @@
 import { join } from 'path';
 import _ from 'lodash';
 import { pathExists } from 'fs-extra';
-import type { Core, Internal, Public } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 import { loadFiles } from '../utils/load-files';
 
 type LoadedComponent = {
@@ -23,7 +23,7 @@ type LoadedComponents = {
 };
 
 type ComponentMap = {
-  [uid in Public.UID.Component]: Internal.Struct.ComponentSchema;
+  [uid in UID.Component]: Struct.ComponentSchema;
 };
 
 export default async function loadComponents(strapi: Core.Strapi) {
@@ -46,7 +46,7 @@ export default async function loadComponents(strapi: Core.Strapi) {
         );
       }
 
-      const uid: Public.UID.Component = `${category}.${key}`;
+      const uid: UID.Component = `${category}.${key}`;
 
       acc[uid] = Object.assign(schema, {
         __schema__: _.cloneDeep(schema),

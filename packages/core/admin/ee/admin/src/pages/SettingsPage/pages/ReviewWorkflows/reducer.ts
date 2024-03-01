@@ -1,4 +1,4 @@
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { createDraft, produce } from 'immer';
 
 import {
@@ -35,8 +35,8 @@ export type PartialWorkflow = Omit<CurrentWorkflow, 'stages'> & { stages?: Parti
 
 export interface ServerState {
   contentTypes?: {
-    collectionTypes: Internal.Struct.CollectionTypeSchema[];
-    singleTypes: Internal.Struct.SingleTypeSchema[];
+    collectionTypes: Struct.CollectionTypeSchema[];
+    singleTypes: Struct.SingleTypeSchema[];
   };
   roles?: AdminRole[];
   workflow?: PartialWorkflow | null;

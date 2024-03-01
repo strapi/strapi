@@ -1,4 +1,4 @@
-import { UID } from '../../public';
+import type * as UID from '../../uid';
 import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
 

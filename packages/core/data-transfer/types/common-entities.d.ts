@@ -13,7 +13,7 @@ export interface IMetadata {
  * Common TransferEngine format to represent a Strapi entity
  * @template T The schema UID this entity represents
  */
-export interface IEntity<T extends Public.UID.ContentType = Public.UID.ContentType> {
+export interface IEntity<T extends UID.ContentType = UID.ContentType> {
   /**
    * UID of the parent type (content-type, component, etc...)
    */

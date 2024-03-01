@@ -1,7 +1,7 @@
 import { isUndefined } from 'lodash/fp';
 import { yup } from '@strapi/utils';
 import type { TestContext, TestFunction } from 'yup';
-import type { Schema, Public } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import { typeKinds, coreUids } from '../../services/constants';
 import { isValidName } from './common';
 
@@ -36,9 +36,7 @@ export const getRelationValidator = (
   allowedRelations: ReadonlyArray<string>
 ) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
-    .filter(
-      (key) => strapi.contentTypes[key as Public.UID.ContentType].kind === typeKinds.COLLECTION_TYPE
-    )
+    .filter((key) => strapi.contentTypes[key as UID.ContentType].kind === typeKinds.COLLECTION_TYPE)
     .filter((key) => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 

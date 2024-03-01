@@ -1,4 +1,4 @@
-import { Modules, Public, Schema } from '@strapi/types';
+import { Modules, UID, Schema } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { isObject, isNil } from 'lodash/fp';
 import { ShortHand, LongHand, ID, GetId } from '../utils/types';
@@ -115,7 +115,7 @@ const transformDataIdsVisitor = (
   idMap: IdMap,
   data: Record<string, any>,
   opts: {
-    uid: Public.UID.Schema;
+    uid: UID.Schema;
     locale?: string | null;
     isDraft?: boolean;
     allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
@@ -138,7 +138,7 @@ const transformDataIdsVisitor = (
             locale: getRelationTargetLocale(
               { id: documentId, locale },
               {
-                targetUid: target as Public.UID.Schema,
+                targetUid: target as UID.Schema,
                 sourceUid: opts.uid,
                 sourceLocale: opts.locale,
               }

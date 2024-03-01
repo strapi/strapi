@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
-import type { Public } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { getService } from '../utils';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
@@ -16,7 +16,7 @@ export default {
    */
   async getComponents(ctx: Context) {
     const componentService = getService('components');
-    const componentUIDs = Object.keys(strapi.components) as Public.UID.Component[];
+    const componentUIDs = Object.keys(strapi.components) as UID.Component[];
 
     const data = componentUIDs.map((uid) => {
       return componentService.formatComponent(strapi.components[uid]);

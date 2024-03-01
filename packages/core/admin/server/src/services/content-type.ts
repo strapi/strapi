@@ -5,7 +5,7 @@ import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
 
-import type { Modules, Internal } from '@strapi/types';
+import type { Modules, Struct } from '@strapi/types';
 
 interface FieldOptions {
   prefix?: string; // prefix to add to the path
@@ -23,7 +23,7 @@ interface FieldOptions {
  * Creates an array of paths to the fields and nested fields, without path nodes
  */
 const getNestedFields = (
-  model: Internal.Struct.ContentTypeSchema,
+  model: Struct.ContentTypeSchema,
   {
     prefix = '',
     nestingLevel = 15,
@@ -80,7 +80,7 @@ const getNestedFields = (
  * Creates an array of paths to the fields and nested fields, with path nodes
  */
 const getNestedFieldsWithIntermediate = (
-  model: Internal.Struct.ContentTypeSchema,
+  model: Struct.ContentTypeSchema,
   { prefix = '', nestingLevel = 15, components = {} }: FieldOptions
 ): string[] => {
   if (nestingLevel === 0) {

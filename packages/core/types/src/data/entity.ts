@@ -1,7 +1,7 @@
 import type { ContentType } from './content-type';
 import type { Component } from './component';
 
-import type { UID } from '../public';
+import type * as UID from '../uid';
 import type { ModelType, AttributeNames } from '../schema';
 
 export type Entity<

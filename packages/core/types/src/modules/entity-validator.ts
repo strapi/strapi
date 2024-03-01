@@ -1,5 +1,5 @@
 import type { ContentTypes } from '../schema';
-import type { UID } from '../public';
+import type * as UID from '../uid';
 
 import type * as EntityService from './entity-service';
 

@@ -1,6 +1,6 @@
 import { inputObjectType } from 'nexus';
 import type * as Nexus from 'nexus';
-import type { Internal, Schema } from '@strapi/types';
+import type { Struct, Schema } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -64,7 +64,7 @@ export default ({ strapi }: Context) => {
     builder.field(attributeName, { type: getFiltersInputTypeName(component) });
   };
 
-  const buildContentTypeFilters = (contentType: Internal.Struct.ContentTypeSchema) => {
+  const buildContentTypeFilters = (contentType: Struct.ContentTypeSchema) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
 

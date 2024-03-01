@@ -1,6 +1,6 @@
-import type { Modules, Public } from '@strapi/types';
+import type { Modules, UID } from '@strapi/types';
 
-type Fields = Modules.Documents.Params.Pick<Public.UID.Schema, 'fields'>['fields'];
+type Fields = Modules.Documents.Params.Pick<UID.Schema, 'fields'>['fields'];
 
 export const transformFields = (fields: Fields): Fields => {
   // If  it's a string, and it doesn't contain documentId, should be an array

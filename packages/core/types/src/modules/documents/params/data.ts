@@ -1,4 +1,4 @@
-import type { UID } from '../../../public';
+import type * as UID from '../../../uid';
 
 import type * as AttributeUtils from './attributes';
 

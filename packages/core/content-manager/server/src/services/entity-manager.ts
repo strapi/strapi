@@ -1,4 +1,4 @@
-import type { Public, Core, Modules } from '@strapi/types';
+import type { UID, Core, Modules } from '@strapi/types';
 
 import { omit } from 'lodash/fp';
 import { mapAsync, contentTypes, sanitize, errors } from '@strapi/utils';
@@ -21,10 +21,10 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
 // Types reused from entity service
-export type Entity = Modules.EntityService.Result<Public.UID.ContentType>;
-type Body = Modules.EntityService.Params.Data.Input<Public.UID.ContentType>;
+export type Entity = Modules.EntityService.Result<UID.ContentType>;
+type Body = Modules.EntityService.Params.Data.Input<UID.ContentType>;
 
-const emitEvent = async (uid: Public.UID.ContentType, event: string, entity: Entity) => {
+const emitEvent = async (uid: UID.ContentType, event: string, entity: Entity) => {
   const modelDef = strapi.getModel(uid);
   const sanitizedEntity = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, entity);
 
@@ -34,7 +34,7 @@ const emitEvent = async (uid: Public.UID.ContentType, event: string, entity: Ent
   });
 };
 
-const buildDeepPopulate = (uid: Public.UID.ContentType) => {
+const buildDeepPopulate = (uid: UID.ContentType) => {
   // User can configure to populate relations, so downstream services can use them.
   // They will be transformed into counts later if this is set to true.
 
@@ -55,7 +55,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
    * @returns
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  mapEntity<T = any>(entity: any, uid?: Public.UID.ContentType): T {
+  mapEntity<T = any>(entity: any, uid?: UID.ContentType): T {
     return entity;
   },
 
@@ -65,7 +65,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
    * @param {Array|Object|null} entities
    * @param {string} uid
    */
-  async mapEntitiesResponse(entities: any, uid: Public.UID.ContentType) {
+  async mapEntitiesResponse(entities: any, uid: UID.ContentType) {
     if (entities?.results) {
       const mappedResults = await mapAsync(entities.results, (entity: Entity) =>
         this.mapEntity(entity, uid)
@@ -78,7 +78,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
   async find(
     opts: Parameters<Modules.Documents.ServiceInstance['findMany']>[0],
-    uid: Public.UID.ContentType
+    uid: UID.ContentType
   ) {
     const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
     const entities = await strapi.documents(uid).findMany(params);
@@ -87,7 +87,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
   async findPage(
     opts: Parameters<Modules.Documents.ServiceInstance['findMany']>[0],
-    uid: Public.UID.ContentType
+    uid: UID.ContentType
   ) {
     // Pagination
     const page = Number(opts?.page) || 1;
@@ -111,7 +111,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return this.mapEntitiesResponse(result, uid);
   },
 
-  async findOne(id: string, uid: Public.UID.ContentType, opts = {}) {
+  async findOne(id: string, uid: UID.ContentType, opts = {}) {
     return (
       strapi
         .documents(uid)
@@ -122,7 +122,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   },
 
   async create(
-    uid: Public.UID.ContentType,
+    uid: UID.ContentType,
     opts: Parameters<Modules.Documents.ServiceInstance['create']>[0] = {} as any
   ) {
     const populate = opts.populate ?? (await buildDeepPopulate(uid));
@@ -142,7 +142,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
   async update(
     document: Entity,
-    uid: Public.UID.ContentType,
+    uid: UID.ContentType,
     opts: Parameters<Modules.Documents.ServiceInstance['update']>[1] = {} as any
   ) {
     const publishData = omitPublishedAtField(opts.data || {});
@@ -166,7 +166,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return updatedDocument;
   },
 
-  async clone(document: Entity, body: Partial<Body>, uid: Public.UID.ContentType) {
+  async clone(document: Entity, body: Partial<Body>, uid: UID.ContentType) {
     const populate = await buildDeepPopulate(uid);
     const publishData = { ...body };
 
@@ -195,7 +195,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   /**
    *  Check if a document exists
    */
-  async exists(uid: Public.UID.ContentType, id?: string) {
+  async exists(uid: UID.ContentType, id?: string) {
     // Collection type
     if (id) {
       const count = await strapi.db.query(uid).count({ where: { documentId: id } });
@@ -209,7 +209,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
   async delete(
     document: Entity,
-    uid: Public.UID.ContentType,
+    uid: UID.ContentType,
     opts: Parameters<Modules.Documents.ServiceInstance['delete']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
@@ -228,16 +228,13 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   },
 
   // FIXME: handle relations
-  deleteMany(
-    opts: Parameters<typeof strapi.entityService.deleteMany>[1],
-    uid: Public.UID.ContentType
-  ) {
+  deleteMany(opts: Parameters<typeof strapi.entityService.deleteMany>[1], uid: UID.ContentType) {
     return strapi.entityService.deleteMany(uid, opts);
   },
 
   async publish(
     document: Entity,
-    uid: Public.UID.ContentType,
+    uid: UID.ContentType,
     opts: Parameters<Modules.Documents.ServiceInstance['publish']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
@@ -260,7 +257,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return mappedEntity;
   },
 
-  async publishMany(entities: Entity[], uid: Public.UID.ContentType) {
+  async publishMany(entities: Entity[], uid: UID.ContentType) {
     if (!entities.length) {
       return null;
     }
@@ -303,7 +300,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return publishedEntitiesCount;
   },
 
-  async unpublishMany(entities: Entity[], uid: Public.UID.ContentType) {
+  async unpublishMany(entities: Entity[], uid: UID.ContentType) {
     if (!entities.length) {
       return null;
     }
@@ -335,7 +332,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
   async unpublish(
     document: Entity,
-    uid: Public.UID.ContentType,
+    uid: UID.ContentType,
     opts: Parameters<Modules.Documents.ServiceInstance['unpublish']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
@@ -360,7 +357,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
   async discard(
     document: Entity,
-    uid: Public.UID.ContentType,
+    uid: UID.ContentType,
     opts: Parameters<Modules.Documents.ServiceInstance['discardDraft']>[1] = {} as any
   ) {
     const populate = await buildDeepPopulate(uid);
@@ -384,7 +381,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return mappedEntity;
   },
 
-  async countDraftRelations(id: string, uid: Public.UID.ContentType, locale: string) {
+  async countDraftRelations(id: string, uid: UID.ContentType, locale: string) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
@@ -399,11 +396,7 @@ const entityManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return sumDraftCounts(document, uid);
   },
 
-  async countManyEntriesDraftRelations(
-    ids: number[],
-    uid: Public.UID.ContentType,
-    locale: string = 'en'
-  ) {
+  async countManyEntriesDraftRelations(ids: number[], uid: UID.ContentType, locale: string = 'en') {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {

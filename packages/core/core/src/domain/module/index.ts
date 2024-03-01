@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
-import type { Core, Public, Internal } from '@strapi/types';
+import type { Core, UID, Struct } from '@strapi/types';
 
 import { removeNamespace } from '../../registries/namespace';
 import { validateModule } from './validation';
@@ -31,15 +31,15 @@ export interface Module {
   load: () => void;
   routes: Core.Module['routes'];
   config: (path: string, defaultValue?: unknown) => unknown;
-  contentType: (ctName: Public.UID.ContentType) => Internal.Struct.ContentTypeSchema;
-  contentTypes: Record<string, Internal.Struct.ContentTypeSchema>;
-  service: (serviceName: Public.UID.Service) => Core.Service;
+  contentType: (ctName: UID.ContentType) => Struct.ContentTypeSchema;
+  contentTypes: Record<string, Struct.ContentTypeSchema>;
+  service: (serviceName: UID.Service) => Core.Service;
   services: Record<string, Core.Service>;
-  policy: (policyName: Public.UID.Policy) => Core.Policy;
+  policy: (policyName: UID.Policy) => Core.Policy;
   policies: Record<string, Core.Policy>;
-  middleware: (middlewareName: Public.UID.Middleware) => Core.Middleware;
+  middleware: (middlewareName: UID.Middleware) => Core.Middleware;
   middlewares: Record<string, Core.Middleware>;
-  controller: (controllerName: Public.UID.Controller) => Core.Controller;
+  controller: (controllerName: UID.Controller) => Core.Controller;
   controllers: Record<string, Core.Controller>;
 }
 
@@ -112,35 +112,35 @@ export const createModule = (
     config(path: string, defaultValue: unknown) {
       return strapi.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);
     },
-    contentType(ctName: Public.UID.ContentType) {
+    contentType(ctName: UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);
     },
     get contentTypes() {
       const contentTypes = strapi.get('content-types').getAll(namespace);
       return removeNamespacedKeys(contentTypes, namespace);
     },
-    service(serviceName: Public.UID.Service) {
+    service(serviceName: UID.Service) {
       return strapi.get('services').get(`${namespace}.${serviceName}`);
     },
     get services() {
       const services = strapi.get('services').getAll(namespace);
       return removeNamespacedKeys(services, namespace);
     },
-    policy(policyName: Public.UID.Policy) {
+    policy(policyName: UID.Policy) {
       return strapi.get('policies').get(`${namespace}.${policyName}`);
     },
     get policies() {
       const policies = strapi.get('policies').getAll(namespace);
       return removeNamespacedKeys(policies, namespace);
     },
-    middleware(middlewareName: Public.UID.Middleware) {
+    middleware(middlewareName: UID.Middleware) {
       return strapi.get('middlewares').get(`${namespace}.${middlewareName}`);
     },
     get middlewares() {
       const middlewares = strapi.get('middlewares').getAll(namespace);
       return removeNamespacedKeys(middlewares, namespace);
     },
-    controller(controllerName: Public.UID.Controller) {
+    controller(controllerName: UID.Controller) {
       return strapi.get('controllers').get(`${namespace}.${controllerName}`);
     },
     get controllers() {

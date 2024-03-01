@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, MaybePromise, ProviderType } from '../../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
@@ -82,7 +82,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return createConfigurationStream(this.strapi);
   }
 
-  getSchemas(): Record<string, Internal.Struct.Schema> {
+  getSchemas(): Record<string, Struct.Schema> {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
 
     const schemas = {

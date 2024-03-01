@@ -1,7 +1,7 @@
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 
 export type RepositoryFactoryMethod<
-  TContentType extends Internal.Struct.SingleTypeSchema | Internal.Struct.CollectionTypeSchema
+  TContentType extends Struct.SingleTypeSchema | Struct.CollectionTypeSchema
 > = (contentType: TContentType) => any;
 
 export const wrapInTransaction = (fn: (...args: any) => any) => {

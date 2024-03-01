@@ -1,6 +1,6 @@
 import type * as Schema from '../../../schema';
 
-import type { UID } from '../../../public';
+import type * as UID from '../../../uid';
 import type { Constants, Guard, If, And, DoesNotExtends, IsNotNever } from '../../../utils';
 
 import type { Params } from '..';

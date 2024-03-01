@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import utils, { errors } from '@strapi/utils';
-import type { Schema, Internal } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-export const hasComponent = (model: Internal.Struct.Schema) => {
+export const hasComponent = (model: Struct.Schema) => {
   const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
     return model.attributes[key].type === 'component';
   });

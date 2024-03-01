@@ -1,7 +1,7 @@
 import { isNil, isPlainObject } from 'lodash/fp';
 import { parseMultipartData } from '@strapi/utils';
 import type Koa from 'koa';
-import type { Public, Internal } from '@strapi/types';
+import type { Struct, Internal } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
@@ -42,7 +42,7 @@ const parseBody = (ctx: Koa.Context) => {
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema } = {}
+  opts: { contentType?: Struct.ContentTypeSchema | Struct.ComponentSchema } = {}
 ) => {
   if (isNil(resource)) {
     return resource;
@@ -56,11 +56,11 @@ const transformResponse = (
 
 function transformComponent<T extends Entry | Entry[] | null>(
   data: T,
-  component: Internal.Struct.ComponentSchema
+  component: Struct.ComponentSchema
 ): T extends Entry[] ? TransformedComponent[] : T extends Entry ? TransformedComponent : null;
 function transformComponent(
   data: Entry | Entry[] | null,
-  component: Internal.Struct.ComponentSchema
+  component: Struct.ComponentSchema
 ): TransformedComponent | TransformedComponent[] | null {
   if (Array.isArray(data)) {
     return data.map((datum) => transformComponent(datum, component));
@@ -78,11 +78,11 @@ function transformComponent(
 
 function transformEntry<T extends Entry | Entry[] | null>(
   entry: T,
-  type?: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema
+  type?: Struct.ContentTypeSchema | Struct.ComponentSchema
 ): T extends Entry[] ? TransformedEntry[] : T extends Entry ? TransformedEntry : null;
 function transformEntry(
   entry: Entry | Entry[] | null,
-  type?: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema
+  type?: Struct.ContentTypeSchema | Struct.ComponentSchema
 ): TransformedEntry | TransformedEntry[] | null {
   if (isNil(entry)) {
     return entry;

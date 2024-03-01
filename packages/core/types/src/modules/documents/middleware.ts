@@ -1,5 +1,5 @@
 // Utility type to reuse Param definition in MiddlewareContext
-import { UID } from '../../public';
+import type * as UID from '../../uid';
 import type { ServiceInstance } from './service-instance';
 
 export interface Context<

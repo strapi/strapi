@@ -1,7 +1,7 @@
 import type * as Schema from '../../../../schema';
 
 import type { If } from '../../../../utils';
-import type { UID } from '../../../../public';
+import type * as UID from '../../../../uid';
 
 import type { ID } from './id';
 

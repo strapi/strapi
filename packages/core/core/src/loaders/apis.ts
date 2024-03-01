@@ -3,7 +3,7 @@ import fse, { existsSync } from 'fs-extra';
 import _ from 'lodash';
 import { isKebabCase, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
 
 interface API {
@@ -16,7 +16,7 @@ interface API {
   services: Record<string, Core.Service>;
   policies: Record<string, Core.Policy>;
   middlewares: Record<string, Core.Middleware>;
-  contentTypes: Record<string, { schema: Internal.Struct.ContentTypeSchema }>;
+  contentTypes: Record<string, { schema: Struct.ContentTypeSchema }>;
 }
 
 interface APIs {

@@ -1,8 +1,8 @@
-import type { Core, Internal } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import type { TypeRegistry } from '../../../type-registry';
 
 const registerFiltersDefinition = (
-  contentType: Internal.Struct.Schema,
+  contentType: Struct.Schema,
   {
     registry,
     strapi,

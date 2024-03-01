@@ -8,7 +8,7 @@ import tar from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 
 import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
 
@@ -108,7 +108,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect<Internal.Struct.Schema>(this.createSchemasReadStream());
+    const schemas = await collect<Struct.Schema>(this.createSchemasReadStream());
 
     if (isEmpty(schemas)) {
       throw new ProviderInitializationError('Could not load schemas from Strapi data file.');

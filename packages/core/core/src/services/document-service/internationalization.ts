@@ -1,7 +1,7 @@
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 
 export const defaultLocale = (
-  contentType: Internal.Struct.SingleTypeSchema | Internal.Struct.CollectionTypeSchema,
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   params: any
 ) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
@@ -18,7 +18,7 @@ export const defaultLocale = (
  * Add locale lookup query to the params
  */
 export const localeToLookup = (
-  contentType: Internal.Struct.SingleTypeSchema | Internal.Struct.CollectionTypeSchema,
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   params: any
 ) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
@@ -37,7 +37,7 @@ export const localeToLookup = (
  * Translate locale status parameter into the data that will be saved
  */
 export const localeToData = (
-  contentType: Internal.Struct.SingleTypeSchema | Internal.Struct.CollectionTypeSchema,
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   params: any
 ) => {
   if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {

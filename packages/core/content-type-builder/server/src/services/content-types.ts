@@ -1,17 +1,17 @@
 import _ from 'lodash';
 import { getOr } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Public, Internal } from '@strapi/types';
+import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
 
 const { ApplicationError } = errors;
 
-export const isContentTypeVisible = (model: Internal.Struct.ContentTypeSchema) =>
+export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
 
-export const getRestrictRelationsTo = (contentType: Internal.Struct.ContentTypeSchema) => {
+export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) => {
   const { uid } = contentType;
   if (uid === coreUids.STRAPI_USER) {
     // TODO: replace with an obj { relation: 'x', bidirectional: true|false }
@@ -156,7 +156,7 @@ export const generateAPI = ({
  * Edits a contentType and handle the nested contentTypes sent with it
  */
 export const editContentType = async (
-  uid: Public.UID.ContentType,
+  uid: UID.ContentType,
   { contentType, components = [] }: any
 ) => {
   const builder = createBuilder();
@@ -234,7 +234,7 @@ export const editContentType = async (
   return updatedContentType;
 };
 
-export const deleteContentTypes = async (uids: Public.UID.ContentType[]) => {
+export const deleteContentTypes = async (uids: UID.ContentType[]) => {
   const builder = createBuilder();
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 
@@ -256,10 +256,7 @@ export const deleteContentTypes = async (uids: Public.UID.ContentType[]) => {
 /**
  * Deletes a content type and the api files related to it
  */
-export const deleteContentType = async (
-  uid: Public.UID.ContentType,
-  defaultBuilder: any = undefined
-) => {
+export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: any = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');

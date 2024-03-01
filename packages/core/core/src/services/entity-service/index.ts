@@ -9,7 +9,7 @@ import {
   convertQueryParams,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
-import type { Core, Modules, Internal, Utils, Public, Schema } from '@strapi/types';
+import type { Core, Modules, Struct, Utils, UID, Schema } from '@strapi/types';
 
 import uploadFiles from '../utils/upload-files';
 
@@ -36,7 +36,7 @@ type Decoratable<T> = T & {
 };
 
 type Context = {
-  contentType: Internal.Struct.ContentTypeSchema;
+  contentType: Struct.ContentTypeSchema;
 };
 
 const transformLoadParamsToQuery = (
@@ -102,7 +102,7 @@ const createDefaultImplementation = ({
 
   async emitEvent(uid, event: string, entity) {
     // Ignore audit log events to prevent infinite loops
-    if (uid === ('admin::audit-log' as Public.UID.ContentType)) {
+    if (uid === ('admin::audit-log' as UID.ContentType)) {
       return;
     }
 
@@ -184,7 +184,7 @@ const createDefaultImplementation = ({
   },
 
   async create<
-    TUID extends Public.UID.ContentType,
+    TUID extends UID.ContentType,
     TParams extends Modules.EntityService.Params.Pick<
       TUID,
       'data' | 'files' | 'fields' | 'populate'

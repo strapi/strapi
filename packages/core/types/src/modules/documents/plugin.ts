@@ -1,6 +1,7 @@
 import type * as Plugin from '../../plugin';
 
-import type { UID, Shared } from '../../public';
+import type * as UID from '../../uid';
+import type { Shared } from '../../public';
 import type { Guard, Object, If } from '../../utils';
 
 export type GetPluginParams<TSchemaUID extends UID.Schema> = Guard.OfTypes<

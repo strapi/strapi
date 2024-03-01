@@ -1,4 +1,5 @@
-import type { UID, Registries } from '../public';
+import type { Registries } from '../public';
+import type * as UID from '../uid';
 import type { If, Object, Guard } from '../utils';
 
 import type * as Attribute from './attribute';

@@ -3,7 +3,7 @@ import pipe from 'lodash/fp/pipe';
 import { DOCUMENT_META_FIELDS } from '../../../constants/attributes';
 
 import type { ComponentsDictionary, Document } from '../../../hooks/useDocument';
-import type { Internal, Schema, Public } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * traverseData
@@ -53,14 +53,14 @@ const traverseData =
           if (attribute.repeatable) {
             const componentValue = (
               predicate(attribute, value) ? transform(value, attribute) : value
-            ) as Schema.Attribute.Value<Schema.Attribute.Component<Public.UID.Component, true>>;
+            ) as Schema.Attribute.Value<Schema.Attribute.Component<UID.Component, true>>;
             acc[key] = componentValue.map((componentData) =>
               traverse(componentData, components[attribute.component]?.attributes ?? {})
             );
           } else {
             const componentValue = (
               predicate(attribute, value) ? transform(value, attribute) : value
-            ) as Schema.Attribute.Value<Schema.Attribute.Component<Public.UID.Component, false>>;
+            ) as Schema.Attribute.Value<Schema.Attribute.Component<UID.Component, false>>;
 
             acc[key] = traverse(componentValue, components[attribute.component]?.attributes ?? {});
           }

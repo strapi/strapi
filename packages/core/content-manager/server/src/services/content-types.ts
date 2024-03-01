@@ -1,7 +1,7 @@
 import { isNil, mapValues } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
-import type { Public, Internal, Core } from '@strapi/types';
+import type { UID, Struct, Core } from '@strapi/types';
 
 import type { ConfigurationUpdate } from './configuration';
 
@@ -26,7 +26,7 @@ const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return Object.values(strapi.contentTypes).map(toContentManagerModel);
   },
 
-  findContentType(uid: Public.UID.ContentType) {
+  findContentType(uid: UID.ContentType) {
     const { toContentManagerModel } = getService('data-mapper');
 
     const contentType = strapi.contentTypes[uid];
@@ -42,7 +42,7 @@ const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     );
   },
 
-  findContentTypesByKind(kind: { kind: Internal.Struct.ContentTypeKind | undefined }) {
+  findContentTypesByKind(kind: { kind: Struct.ContentTypeKind | undefined }) {
     if (!kind) {
       return this.findAllContentTypes();
     }
@@ -51,7 +51,7 @@ const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
-  async findConfiguration(contentType: Internal.Struct.ContentTypeSchema) {
+  async findConfiguration(contentType: Struct.ContentTypeSchema) {
     const configuration = await configurationService.getConfiguration(contentType.uid);
 
     return {
@@ -61,7 +61,7 @@ const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   },
 
   async updateConfiguration(
-    contentType: Internal.Struct.ContentTypeSchema,
+    contentType: Struct.ContentTypeSchema,
     newConfiguration: ConfigurationUpdate
   ) {
     await configurationService.setConfiguration(contentType.uid, newConfiguration);
@@ -69,7 +69,7 @@ const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     return this.findConfiguration(contentType);
   },
 
-  findComponentsConfigurations(contentType: Internal.Struct.ContentTypeSchema) {
+  findComponentsConfigurations(contentType: Struct.ContentTypeSchema) {
     // delegate to componentService
     return getService('components').findComponentsConfigurations(contentType);
   },

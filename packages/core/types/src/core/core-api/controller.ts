@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 import type { MatchFirst, Test } from '../../utils';
 
 import type { ControllerHandler } from '../controller';

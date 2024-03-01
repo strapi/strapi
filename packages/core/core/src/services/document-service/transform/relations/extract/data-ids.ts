@@ -1,5 +1,5 @@
 import { isObject } from 'lodash/fp';
-import { Modules, Schema, Public } from '@strapi/types';
+import { Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, ID } from '../utils/types';
@@ -76,7 +76,7 @@ const extractRelationIds = <T extends Schema.Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Public.UID.Schema; locale?: string | null; isDraft?: boolean }
+  opts: { uid: UID.Schema; locale?: string | null; isDraft?: boolean }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
@@ -93,7 +93,7 @@ const extractDataIds = (
             uid: target,
             documentId: relation.id as string,
             locale: getRelationTargetLocale(relation, {
-              targetUid: target as Public.UID.Schema,
+              targetUid: target as UID.Schema,
               sourceUid: opts.uid,
               sourceLocale: opts.locale,
             }),

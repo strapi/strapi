@@ -1,19 +1,19 @@
 import _ from 'lodash';
 import { has, omit, pipe, assign } from 'lodash/fp';
-import type { Internal, Utils, Public, Schema, Data, Modules } from '@strapi/types';
+import type { Struct, Utils, UID, Schema, Data, Modules } from '@strapi/types';
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
 
-type LoadedComponents<TUID extends Public.UID.Schema> = Data.Entity<
+type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,
   Schema.AttributeNamesByType<TUID, 'component' | 'dynamiczone'>
 >;
 
-type SingleComponentValue = Schema.Attribute.ComponentValue<Public.UID.Component, false>;
-type RepeatableComponentValue = Schema.Attribute.ComponentValue<Public.UID.Component, true>;
+type SingleComponentValue = Schema.Attribute.ComponentValue<UID.Component, false>;
+type RepeatableComponentValue = Schema.Attribute.ComponentValue<UID.Component, true>;
 
 type ComponentValue = SingleComponentValue | RepeatableComponentValue;
 
-type DynamicZoneValue = Schema.Attribute.DynamicZoneValue<Public.UID.Component[]>;
+type DynamicZoneValue = Schema.Attribute.DynamicZoneValue<UID.Component[]>;
 
 type ComponentBody = {
   [key: string]: ComponentValue | DynamicZoneValue;
@@ -22,21 +22,21 @@ type ComponentBody = {
 const isDialectMySQL = () => strapi.db?.dialect.client === 'mysql';
 
 function omitComponentData(
-  contentType: Internal.Struct.ContentTypeSchema,
-  data: Modules.EntityService.Params.Data.Input<Internal.Struct.ContentTypeSchema['uid']>
-): Partial<Modules.EntityService.Params.Data.Input<Internal.Struct.ContentTypeSchema['uid']>>;
+  contentType: Struct.ContentTypeSchema,
+  data: Modules.EntityService.Params.Data.Input<Struct.ContentTypeSchema['uid']>
+): Partial<Modules.EntityService.Params.Data.Input<Struct.ContentTypeSchema['uid']>>;
 function omitComponentData(
-  contentType: Internal.Struct.ComponentSchema,
-  data: Modules.EntityService.Params.Data.Input<Internal.Struct.ComponentSchema['uid']>
-): Partial<Modules.EntityService.Params.Data.Input<Internal.Struct.ComponentSchema['uid']>>;
+  contentType: Struct.ComponentSchema,
+  data: Modules.EntityService.Params.Data.Input<Struct.ComponentSchema['uid']>
+): Partial<Modules.EntityService.Params.Data.Input<Struct.ComponentSchema['uid']>>;
 function omitComponentData(
-  contentType: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema,
+  contentType: Struct.ContentTypeSchema | Struct.ComponentSchema,
   data: Modules.EntityService.Params.Data.Input<
-    Internal.Struct.ContentTypeSchema['uid'] | Internal.Struct.ComponentSchema['uid']
+    Struct.ContentTypeSchema['uid'] | Struct.ComponentSchema['uid']
   >
 ): Partial<
   Modules.EntityService.Params.Data.Input<
-    Internal.Struct.ContentTypeSchema['uid'] | Internal.Struct.ComponentSchema['uid']
+    Struct.ContentTypeSchema['uid'] | Struct.ComponentSchema['uid']
   >
 > {
   const { attributes } = contentType;
@@ -49,7 +49,7 @@ function omitComponentData(
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async <
-  TUID extends Public.UID.Schema,
+  TUID extends UID.Schema,
   TData extends Modules.EntityService.Params.Data.Input<TUID>
 >(
   uid: TUID,
@@ -101,7 +101,7 @@ const createComponents = async <
       } else {
         const component = await createComponent(
           componentUID,
-          componentValue as Modules.EntityService.Params.Data.Input<Public.UID.Component>
+          componentValue as Modules.EntityService.Params.Data.Input<UID.Component>
         );
         componentBody[attributeName] = {
           id: component.id,
@@ -151,7 +151,7 @@ const createComponents = async <
   return componentBody;
 };
 
-const getComponents = async <TUID extends Public.UID.Schema>(
+const getComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entity: { id: Modules.EntityService.Params.Attribute.ID }
 ): Promise<LoadedComponents<TUID>> => {
@@ -169,7 +169,7 @@ const getComponents = async <TUID extends Public.UID.Schema>(
   create or update
 */
 const updateComponents = async <
-  TUID extends Public.UID.Schema,
+  TUID extends UID.Schema,
   TData extends Partial<Modules.EntityService.Params.Data.Input<TUID>>
 >(
   uid: TUID,
@@ -274,9 +274,9 @@ const pickStringifiedId = ({
   return `${id}`;
 };
 
-const deleteOldComponents = async <TUID extends Public.UID.Schema>(
+const deleteOldComponents = async <TUID extends UID.Schema>(
   uid: TUID,
-  componentUID: Public.UID.Component,
+  componentUID: UID.Component,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
   componentValue: ComponentValue
@@ -305,7 +305,7 @@ const deleteOldComponents = async <TUID extends Public.UID.Schema>(
   }
 };
 
-const deleteOldDZComponents = async <TUID extends Public.UID.Schema>(
+const deleteOldDZComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   attributeName: string,
@@ -358,7 +358,7 @@ const deleteOldDZComponents = async <TUID extends Public.UID.Schema>(
   }
 };
 
-const deleteComponents = async <TUID extends Public.UID.Schema, TEntity extends Data.Entity<TUID>>(
+const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.Entity<TUID>>(
   uid: TUID,
   entityToDelete: TEntity,
   { loadComponents = true } = {}
@@ -407,7 +407,7 @@ const deleteComponents = async <TUID extends Public.UID.Schema, TEntity extends 
   }
 };
 
-const cloneComponents = async <TUID extends Public.UID.Schema>(
+const cloneComponents = async <TUID extends UID.Schema>(
   uid: TUID,
   entityToClone: { id: Modules.EntityService.Params.Attribute.ID },
   data: Modules.EntityService.Params.Data.Input<TUID>
@@ -507,7 +507,7 @@ const cloneComponents = async <TUID extends Public.UID.Schema>(
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends Public.UID.Component>(
+const createComponent = async <TUID extends UID.Component>(
   uid: TUID,
   data: Modules.EntityService.Params.Data.Input<TUID>
 ) => {
@@ -527,7 +527,7 @@ const createComponent = async <TUID extends Public.UID.Component>(
 };
 
 // components can have nested compos so this must be recursive
-const updateComponent = async <TUID extends Public.UID.Component>(
+const updateComponent = async <TUID extends UID.Component>(
   uid: TUID,
   componentToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   data: Modules.EntityService.Params.Data.Input<TUID>
@@ -544,7 +544,7 @@ const updateComponent = async <TUID extends Public.UID.Component>(
   });
 };
 
-const updateOrCreateComponent = <TUID extends Public.UID.Component>(
+const updateOrCreateComponent = <TUID extends UID.Component>(
   componentUID: TUID,
   value: Modules.EntityService.Params.Data.Input<TUID>
 ) => {
@@ -562,7 +562,7 @@ const updateOrCreateComponent = <TUID extends Public.UID.Component>(
   return createComponent(componentUID, value);
 };
 
-const deleteComponent = async <TUID extends Public.UID.Component>(
+const deleteComponent = async <TUID extends UID.Component>(
   uid: TUID,
   componentToDelete: Data.Component<TUID>
 ) => {
@@ -570,7 +570,7 @@ const deleteComponent = async <TUID extends Public.UID.Component>(
   await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
-const cloneComponent = async <TUID extends Public.UID.Component>(
+const cloneComponent = async <TUID extends UID.Component>(
   uid: TUID,
   data: Modules.EntityService.Params.Data.Input<TUID>
 ) => {

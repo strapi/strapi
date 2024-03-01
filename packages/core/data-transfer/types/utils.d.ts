@@ -9,7 +9,7 @@ export type MaybePromise<T> = T | Promise<T>;
 
 // The data type passed in for each stage
 export type TransferStageTypeMap = {
-  schemas: Internal.Struct.Schema;
+  schemas: Struct.Schema;
   entities: IEntity;
   links: ILink;
   assets: IAsset;

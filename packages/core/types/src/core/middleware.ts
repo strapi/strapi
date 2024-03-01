@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 
-import type { UID } from '../public';
+import type * as UID from '../uid';
 
 import type { Strapi } from './strapi';
 

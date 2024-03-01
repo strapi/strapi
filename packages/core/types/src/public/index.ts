@@ -3,6 +3,4 @@
  */
 export * as Registries from './registries';
 
-export * as UID from './uid';
-
 export * as Shared from './shared';

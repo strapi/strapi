@@ -1,4 +1,4 @@
-import type { UID } from '../../public';
+import type * as UID from '../../uid';
 import type { Constants, Guard, And, Extends, IsNotNever } from '../../utils';
 import type { Attribute } from '../../schema';
 

@@ -1,12 +1,12 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Core, Public } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
 export type ControllerFactory =
   | ((params: { strapi: Core.Strapi }) => Core.Controller)
   | Core.Controller;
-export type ControllerFactoryMap = Record<Public.UID.Controller, ControllerFactory>;
-export type ControllerMap = Record<Public.UID.Controller, Core.Controller>;
+export type ControllerFactoryMap = Record<UID.Controller, ControllerFactory>;
+export type ControllerMap = Record<UID.Controller, Core.Controller>;
 export type ControllerExtendFn = (service: Core.Controller) => Core.Controller;
 
 const controllersRegistry = (strapi: Core.Strapi) => {
@@ -24,7 +24,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
     /**
      * Returns the instance of a controller. Instantiate the controller if not already done
      */
-    get(uid: Public.UID.Controller) {
+    get(uid: UID.Controller) {
       if (instances[uid]) {
         return instances[uid];
       }
@@ -44,7 +44,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
       const filteredControllers = pickBy((_, uid) => hasNamespace(uid, namespace))(controllers);
 
       const map = {};
-      for (const uid of Object.keys(filteredControllers) as Public.UID.Controller[]) {
+      for (const uid of Object.keys(filteredControllers) as UID.Controller[]) {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
@@ -59,7 +59,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
     /**
      * Registers a controller
      */
-    set(uid: Public.UID.Controller, value: ControllerFactory) {
+    set(uid: UID.Controller, value: ControllerFactory) {
       controllers[uid] = value;
       delete instances[uid];
       return this;
@@ -69,9 +69,9 @@ const controllersRegistry = (strapi: Core.Strapi) => {
      * Registers a map of controllers for a specific namespace
      */
     add(namespace: string, newControllers: ControllerFactoryMap) {
-      for (const controllerName of Object.keys(newControllers) as Public.UID.Controller[]) {
+      for (const controllerName of Object.keys(newControllers) as UID.Controller[]) {
         const controller = newControllers[controllerName];
-        const uid = addNamespace(controllerName, namespace) as Public.UID.Controller;
+        const uid = addNamespace(controllerName, namespace) as UID.Controller;
 
         if (has(uid, controllers)) {
           throw new Error(`Controller ${uid} has already been registered.`);
@@ -86,7 +86,7 @@ const controllersRegistry = (strapi: Core.Strapi) => {
     /**
      * Wraps a controller to extend it
      */
-    extend(controllerUID: Public.UID.Controller, extendFn: ControllerExtendFn) {
+    extend(controllerUID: UID.Controller, extendFn: ControllerExtendFn) {
       const currentController = this.get(controllerUID);
 
       if (!currentController) {

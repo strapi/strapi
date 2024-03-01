@@ -1,9 +1,9 @@
 import { curry, matchesProperty, pick } from 'lodash/fp';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 const isOfKind = (kind: unknown) => matchesProperty('kind', kind);
 
-const resolveContentType = (uid: Internal.UID.ContentType): Internal.Struct.ContentTypeSchema => {
+const resolveContentType = (uid: Internal.UID.ContentType): Struct.ContentTypeSchema => {
   return strapi.contentTypes[uid];
 };
 

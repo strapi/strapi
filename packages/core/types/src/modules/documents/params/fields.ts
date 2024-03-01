@@ -1,6 +1,6 @@
 import type * as Schema from '../../../schema';
 
-import type { UID } from '../../../public';
+import type * as UID from '../../../uid';
 import type { Guard } from '../../../utils';
 
 /**

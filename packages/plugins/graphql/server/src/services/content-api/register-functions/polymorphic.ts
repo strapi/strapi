@@ -1,9 +1,9 @@
 import { unionType } from 'nexus';
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 const registerPolymorphicContentType = (
-  contentType: Internal.Struct.Schema,
+  contentType: Struct.Schema,
   { registry, strapi }: Context
 ) => {
   const { service: getService } = strapi.plugin('graphql');

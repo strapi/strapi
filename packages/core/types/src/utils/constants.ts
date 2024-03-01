@@ -1,5 +1,5 @@
 import type * as Internal from '../internal';
-import type * as Public from '../public';
+import type * as UID from '../uid';
 
 import type { Or, NotStrictEqual } from '../utils';
 
@@ -16,10 +16,7 @@ export type AreSchemaRegistriesExtended = Or<
 
 export type IsContentTypeRegistryExtended = NotStrictEqual<
   Internal.UID.ContentType,
-  Public.UID.ContentType
+  UID.ContentType
 >;
 
-export type IsComponentRegistryExtended = NotStrictEqual<
-  Internal.UID.Component,
-  Public.UID.Component
->;
+export type IsComponentRegistryExtended = NotStrictEqual<Internal.UID.Component, UID.Component>;

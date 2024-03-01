@@ -1,5 +1,5 @@
 import { pipe, omit, pick } from 'lodash/fp';
-import type { Core, Public, Utils } from '@strapi/types';
+import type { Core, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { createService } from './core-api/service';
@@ -12,7 +12,7 @@ const symbols = {
 type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S) => T);
 
 // Content type is proxied to allow for dynamic content type updates
-const getContentTypeProxy = (strapi: Core.Strapi, uid: Public.UID.ContentType) => {
+const getContentTypeProxy = (strapi: Core.Strapi, uid: UID.ContentType) => {
   return new Proxy(strapi.contentType(uid), {
     get(target, prop) {
       const contentType = strapi.contentType(uid);
@@ -24,7 +24,7 @@ const getContentTypeProxy = (strapi: Core.Strapi, uid: Public.UID.ContentType) =
 };
 
 const createCoreController = <
-  TUID extends Public.UID.ContentType,
+  TUID extends UID.ContentType,
   TController extends Core.CoreAPI.Controller.Extendable<TUID>
 >(
   uid: TUID,
@@ -63,7 +63,7 @@ const createCoreController = <
 };
 
 function createCoreService<
-  TUID extends Public.UID.ContentType,
+  TUID extends UID.ContentType,
   TService extends Core.CoreAPI.Service.Extendable<TUID>
 >(
   uid: TUID,
@@ -89,7 +89,7 @@ function createCoreService<
   };
 }
 
-function createCoreRouter<T extends Public.UID.ContentType>(
+function createCoreRouter<T extends UID.ContentType>(
   uid: T,
   cfg?: Core.CoreAPI.Router.RouterConfig<T>
 ): Core.CoreAPI.Router.Router {

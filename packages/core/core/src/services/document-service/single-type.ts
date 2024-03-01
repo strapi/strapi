@@ -1,13 +1,13 @@
-import type { Internal } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import createDocumentEngine from './document-engine';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
 
-export const createSingleTypeRepository: RepositoryFactoryMethod<
-  Internal.Struct.SingleTypeSchema
-> = (contentType) => {
+export const createSingleTypeRepository: RepositoryFactoryMethod<Struct.SingleTypeSchema> = (
+  contentType
+) => {
   const { uid } = contentType;
 
   // TODO: move the code back into here instead of using the document-engine

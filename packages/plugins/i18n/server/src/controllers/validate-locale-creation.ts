@@ -1,6 +1,6 @@
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Core, Internal } from '@strapi/strapi';
+import type { Core, Struct } from '@strapi/strapi';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
@@ -18,7 +18,7 @@ const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
     // fillNonLocalizedAttributes,
   } = getService('content-types');
 
-  const modelDef = strapi.getModel(model) as Internal.Struct.ContentTypeSchema;
+  const modelDef = strapi.getModel(model) as Struct.ContentTypeSchema;
 
   if (!isLocalizedContentType(modelDef)) {
     return next();

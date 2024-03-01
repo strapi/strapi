@@ -1,8 +1,8 @@
 import { errors } from '@strapi/utils';
-import { Public, Modules, Internal } from '@strapi/types';
+import { UID, Modules, Struct } from '@strapi/types';
 
-type PaginatedDocuments = Modules.Documents.PaginatedResult<Public.UID.Schema>;
-type SortQuery = Modules.Documents.Params.Sort.StringNotation<Public.UID.Schema> & string;
+type PaginatedDocuments = Modules.Documents.PaginatedResult<UID.Schema>;
+type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & string;
 
 // Admin document response follows the same format as the document service
 type Document = Modules.Documents.Document<any>;
@@ -65,7 +65,7 @@ export declare namespace FindOne {
  */
 export declare namespace Create {
   export interface Request {
-    body: Internal.Struct.SchemaAttributes;
+    body: Struct.SchemaAttributes;
     query: {};
   }
 
@@ -112,7 +112,7 @@ export declare namespace AutoClone {
  */
 export declare namespace Clone {
   export interface Request {
-    body: Internal.Struct.SchemaAttributes;
+    body: Struct.SchemaAttributes;
     query: {
       locale?: string | null;
     };

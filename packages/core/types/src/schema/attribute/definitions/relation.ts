@@ -1,7 +1,7 @@
 import type { AttributeNamesByType, Attribute } from '../../../schema';
 import type { ContentType } from '../../../data';
 import type { Guard, String, Extends, If, Intersect } from '../../../utils';
-import type { UID } from '../../../public';
+import type * as UID from '../../../uid';
 
 // TODO: [TS2] Make sure the inference is correct when using extends Relation<infer TRelationKind>
 //             (global search)

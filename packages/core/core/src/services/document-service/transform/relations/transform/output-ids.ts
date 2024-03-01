@@ -1,9 +1,9 @@
-import { Public } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
 import { switchIdForDocumentId } from '../../utils';
 
-const transformOutputIds = async (uid: Public.UID.Schema, output: Record<string, any>) => {
+const transformOutputIds = async (uid: UID.Schema, output: Record<string, any>) => {
   return traverseEntity(
     ({ key, value, attribute }, { set }) => {
       // Find relational attributes, and return the document ids
