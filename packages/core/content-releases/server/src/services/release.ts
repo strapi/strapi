@@ -24,7 +24,7 @@ import type {
   ReleaseActionGroupBy,
 } from '../../../shared/contracts/release-actions';
 import type { Entity, UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getService, getPopulatedEntry, getEntryValidStatus } from '../utils';
 
 export interface Locale extends Entity {
   name: string;
@@ -77,7 +77,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       ]);
 
       const release = await strapi.entityService.create(RELEASE_MODEL_UID, {
-        data: releaseWithCreatorFields,
+        data: {
+          ...releaseWithCreatorFields,
+          status: 'empty',
+        },
       });
 
       if (
@@ -258,6 +261,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         }
       }
 
+      this.updateReleaseStatus(id);
+
       strapi.telemetry.send('didUpdateContentRelease');
 
       return updatedRelease;
@@ -288,11 +293,16 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       const { entry, type } = action;
 
-      return strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
+      const populatedEntry = await getPopulatedEntry(entry.contentType, entry.id, { strapi });
+      // @ts-expect-error – TODO: fix this error where populatedEntry _could_ be `null`.
+      const isEntryValid = await getEntryValidStatus(entry.contentType, populatedEntry, { strapi });
+
+      const releaseAction = await strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
         data: {
           type,
           contentType: entry.contentType,
           locale: entry.locale,
+          isEntryValid,
           entry: {
             id: entry.id,
             __type: entry.contentType,
@@ -302,6 +312,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         },
         populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
       });
+
+      this.updateReleaseStatus(releaseId);
+
+      return releaseAction;
     },
 
     async findActions(
@@ -673,6 +687,14 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
           });
         }
 
+        // If transaction failed, change release status to failed
+        strapi.db.query(RELEASE_MODEL_UID).update({
+          where: { id: releaseId },
+          data: {
+            status: 'failed',
+          },
+        });
+
         throw error;
       }
     },
@@ -726,7 +748,56 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         );
       }
 
+      this.updateReleaseStatus(releaseId);
+
       return deletedAction;
+    },
+
+    async updateReleaseStatus(releaseId: Release['id']) {
+      const [totalActions, invalidActions] = await Promise.all([
+        this.countActions({
+          filters: {
+            release: releaseId,
+          },
+        }),
+        this.countActions({
+          filters: {
+            release: releaseId,
+            isEntryValid: false,
+          },
+        }),
+      ]);
+
+      if (totalActions > 0) {
+        if (invalidActions > 0) {
+          return strapi.db.query(RELEASE_MODEL_UID).update({
+            where: {
+              id: releaseId,
+            },
+            data: {
+              status: 'blocked',
+            },
+          });
+        }
+
+        return strapi.db.query(RELEASE_MODEL_UID).update({
+          where: {
+            id: releaseId,
+          },
+          data: {
+            status: 'ready',
+          },
+        });
+      }
+
+      return strapi.db.query(RELEASE_MODEL_UID).update({
+        where: {
+          id: releaseId,
+        },
+        data: {
+          status: 'empty',
+        },
+      });
     },
   };
 };

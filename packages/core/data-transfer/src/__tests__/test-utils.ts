@@ -50,6 +50,13 @@ export const getContentTypes = (): {
 });
 
 /**
+ * Factory to get default strapi models test values
+ */
+export const getStrapiModels = () => {
+  return [{ uid: 'model::foo' }, { uid: 'model::bar' }];
+};
+
+/**
  * Create a factory of readable streams (wrapped with a jest mock function)
  */
 export const createMockedReadableFactory = <T extends string = ContentType>(source: {

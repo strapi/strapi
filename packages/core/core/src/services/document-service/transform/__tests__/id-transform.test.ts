@@ -55,45 +55,109 @@ describe('Transform relational data', () => {
     ]);
   });
 
-  it('Shorthand syntax', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: ['doc1', 'doc2', 'doc3'],
-          category: 'doc4',
-          relatedProducts: ['doc1', 'doc2', 'doc3'],
+  describe('Shorthand syntax', () => {
+    it('Shorthand syntax', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: ['doc1', 'doc2', 'doc3'],
+            category: 'doc4',
+            relatedProducts: ['doc1', 'doc2', 'doc3'],
+          },
         },
-      },
-      { locale: 'en', isDraft: true }
-    );
+        { locale: 'en', isDraft: true }
+      );
 
-    expect(data).toEqual({
-      name: 'test',
-      categories: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-      category: 'doc4-en-draft',
-      relatedProducts: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+      expect(data).toEqual({
+        name: 'test',
+        categories: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+        category: 'doc4-en-draft',
+        relatedProducts: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+      });
+    });
+
+    it('Should ignore number values', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [1, 2, 'doc1'],
+            category: 4,
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(data).toEqual({
+        name: 'test',
+        categories: [1, 2, 'doc1-en-draft'],
+        category: 4,
+      });
     });
   });
 
-  it('Longhand syntax', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: [{ id: 'doc1' }, { id: 'doc2' }, { id: 'doc3' }],
-          category: { id: 'doc4' },
+  describe('Longhand syntax', () => {
+    it('Longhand syntax', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ documentId: 'doc1' }, { documentId: 'doc2' }, { documentId: 'doc3' }],
+            category: { documentId: 'doc4' },
+          },
         },
-      },
-      { locale: 'en', isDraft: true }
-    );
+        { locale: 'en', isDraft: true }
+      );
 
-    expect(data).toEqual({
-      name: 'test',
-      categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
-      category: { id: 'doc4-en-draft' },
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        category: { id: 'doc4-en-draft' },
+      });
+    });
+
+    it('Longhand syntax with id', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ id: 1 }],
+            category: { id: 2 },
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 1 }],
+        category: { id: 2 },
+      });
+    });
+
+    it('Document id takes priority over id', async () => {
+      const { data } = await transformParamsDocumentId(
+        PRODUCT_UID,
+        {
+          data: {
+            name: 'test',
+            categories: [{ id: 1, documentId: 'doc2' }],
+            category: { id: 2, documentId: 'doc4' },
+          },
+        },
+        { locale: 'en', isDraft: true }
+      );
+
+      expect(data).toMatchObject({
+        name: 'test',
+        categories: [{ id: 'doc2-en-draft' }],
+        category: { id: 'doc4-en-draft' },
+      });
     });
   });
 
@@ -143,7 +207,7 @@ describe('Transform relational data', () => {
       {
         data: {
           name: 'test',
-          categories: { connect: [{ id: 'doc1', position: { before: 'doc2' } }] },
+          categories: { connect: [{ documentId: 'doc1', position: { before: 'doc2' } }] },
           category: { connect: 'doc4' },
         },
       },
@@ -163,14 +227,14 @@ describe('Transform relational data', () => {
       {
         data: {
           name: 'test',
-          categories: { connect: [{ id: 'doc1', position: { after: 'doc2' } }] },
+          categories: { connect: [{ documentId: 'doc1', position: { after: 'doc2' } }] },
           category: { connect: 'doc4' },
         },
       },
       { locale: 'en', isDraft: true }
     );
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
       categories: { connect: [{ id: 'doc1-en-draft', position: { after: 'doc2-en-draft' } }] },
       category: { connect: 'doc4-en-draft' },

@@ -4,7 +4,7 @@ import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-s
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import { EditorFromTextArea } from 'codemirror5';
 
-import { useField } from '../../../../../components/Form';
+import { useField } from '../../../../../../components/Form';
 
 import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
@@ -18,7 +18,7 @@ import {
 import { WysiwygFooter } from './WysiwygFooter';
 import { WysiwygNav } from './WysiwygNav';
 
-import type { InputProps } from '../../../../../components/FormInputs/types';
+import type { InputProps } from '../../../../../../components/FormInputs/types';
 import type { Schema } from '@strapi/types';
 
 interface WysiwygProps extends Omit<InputProps, 'type'> {

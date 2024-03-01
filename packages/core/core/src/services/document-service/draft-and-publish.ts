@@ -1,66 +1,66 @@
+import type { Modules } from '@strapi/types';
+import { assoc } from 'lodash/fp';
+
+type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documents.Params.All;
+
 /**
  * Sets status to draft only
  */
-export const setStatusToDraft = (params: any) => {
-  params.status = 'draft';
-};
+export const setStatusToDraft: ParamsTransform = assoc('status', 'draft');
 
 /**
  * Adds a default status of `draft` to the params
  */
-export const defaultToDraft = (params: any) => {
+export const defaultToDraft: ParamsTransform = (params) => {
   // Default to draft if no status is provided or it's invalid
   if (!params.status || params.status !== 'published') {
-    params.status = 'draft';
+    return setStatusToDraft(params);
   }
+
+  return params;
 };
 
 /**
  * In mutating actions we don't want user to set the publishedAt attribute.
  */
-export const filterDataPublishedAt = async (params: any) => {
-  if (params?.data.publishedAt) {
-    params.data.publishedAt = null;
+export const filterDataPublishedAt: ParamsTransform = (params) => {
+  if (params?.data?.publishedAt) {
+    return assoc(['data', 'publishedAt'], null, params);
   }
+
+  return params;
 };
 
 /**
  * Add status lookup query to the params
  */
-export const statusToLookup = (params: any) => {
+export const statusToLookup: ParamsTransform = (params) => {
   const lookup = params.lookup || {};
 
   switch (params?.status) {
     case 'published':
-      lookup.publishedAt = { $notNull: true };
-      break;
+      return assoc(['lookup', 'publishedAt'], { $notNull: true }, params);
     case 'draft':
-      lookup.publishedAt = { $null: true };
-      break;
+      return assoc(['lookup', 'publishedAt'], { $null: true }, params);
     default:
       break;
   }
 
-  params.lookup = lookup;
+  return assoc('lookup', lookup, params);
 };
 
 /**
  * Translate publication status parameter into the data that will be saved
  */
-export const statusToData = (params: any) => {
-  // Ignore publishedAt attribute. TODO: Make publishedAt not editable
-  const { publishedAt, ...data } = params.data || {};
-
+export const statusToData: ParamsTransform = (params) => {
   switch (params?.status) {
     case 'published':
-      data.publishedAt = new Date();
-      break;
+      return assoc(['data', 'publishedAt'], new Date(), params);
     case 'draft':
-      data.publishedAt = null;
-      break;
+      return assoc(['data', 'publishedAt'], null, params);
     default:
       break;
   }
 
-  params.data = data;
+  return params;
 };

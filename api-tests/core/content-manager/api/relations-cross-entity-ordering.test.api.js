@@ -171,9 +171,9 @@ describe.skip('Relations', () => {
     data.products.push(createdProduct2);
     data.products.push(createdProduct3);
 
-    id1 = data.products[0].id;
-    id2 = data.products[1].id;
-    id3 = data.products[2].id;
+    id1 = data.products[0].documentId;
+    id2 = data.products[1].documentId;
+    id3 = data.products[2].documentId;
   });
 
   afterAll(async () => {
@@ -210,23 +210,27 @@ describe.skip('Relations', () => {
       // Update shop 1 relation order
       await updateEntry(
         'shop',
-        shops[0].id,
+        shops[0].documentId,
         {
           name: 'Cazotte Shop',
           products_om: { disconnect: [id2] },
           products_mm: { disconnect: [id2] },
           products_mw: { disconnect: [id2] },
           myCompo: {
-            id: shops[0].myCompo.id,
+            id: shops[0].myCompo.documentId,
             compo_products_mw: { disconnect: [id2] },
           },
         },
         []
       );
 
-      const updatedShop2 = await strapi.entityService.findOne('api::shop.shop', shops[1].id, {
-        populate: populateShop,
-      });
+      const updatedShop2 = await strapi.entityService.findOne(
+        'api::shop.shop',
+        shops[1].documentId,
+        {
+          populate: populateShop,
+        }
+      );
 
       // shop2 relations should be unchanged
       expect(updatedShop2.products_om).toMatchObject([{ id: id1 }, { id: id2 }]);

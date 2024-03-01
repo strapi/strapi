@@ -1,7 +1,8 @@
 import { errors } from '@strapi/utils';
-import { UID, Modules, Struct } from '@strapi/types';
+import type { Modules, Struct, UID } from '@strapi/types';
 
 type PaginatedDocuments = Modules.Documents.PaginatedResult<UID.Schema>;
+type PaginationQuery = Modules.Documents.Params.Pagination.PageNotation;
 type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & string;
 
 // Admin document response follows the same format as the document service
@@ -50,7 +51,7 @@ export declare namespace FindOne {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -143,7 +144,7 @@ export declare namespace Update {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -166,7 +167,7 @@ export declare namespace Delete {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -211,7 +212,7 @@ export declare namespace Publish {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -240,7 +241,7 @@ export declare namespace Unpublish {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -263,7 +264,7 @@ export declare namespace Discard {
 
   export interface Params {
     model: string;
-    id: Modules.Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -279,7 +280,7 @@ export declare namespace Discard {
 export declare namespace BulkDelete {
   export interface Request {
     body: {
-      ids: string[];
+      documentIds: Modules.Documents.ID[];
     };
     query: {};
   }
@@ -302,7 +303,7 @@ export declare namespace BulkDelete {
 export declare namespace BulkPublish {
   export interface Request {
     body: {
-      ids: Modules.Documents.ID[];
+      documentIds: Modules.Documents.ID[];
     };
     query: {};
   }
@@ -323,7 +324,7 @@ export declare namespace BulkPublish {
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      ids: number[];
+      documentIds: Modules.Documents.ID[];
     };
     query: {};
   }
@@ -368,7 +369,7 @@ export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
     body: {};
     query: {
-      ids?: Array<Document['id']>;
+      documentIds?: Modules.Documents.ID[];
       locale?: string;
     };
   }

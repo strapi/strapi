@@ -74,7 +74,7 @@ describe('Test type password', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withpassword.withpassword/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withpassword.withpassword/${res.body.data.documentId}`,
       {
         body: {
           field: 'otherPwd',
@@ -84,7 +84,7 @@ describe('Test type password', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
     });
     expect(res.body.data.field).toBeUndefined();
   });

@@ -144,7 +144,11 @@ describe('Review workflows service', () => {
 
       const extendFunc = contentTypesContainer.extend.mock.calls[0][1];
 
-      expect(extendFunc({ collectionName: 'toto' })).toEqual({
+      const contentType = { collectionName: 'toto', attributes: {} };
+
+      extendFunc(contentType);
+
+      expect(contentType).toEqual({
         collectionName: 'toto',
         attributes: {
           [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({

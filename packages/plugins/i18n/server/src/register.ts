@@ -28,7 +28,7 @@ const addContentManagerLocaleMiddleware = (strapi: Core.Strapi) => {
   });
 
   strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
-    if (ctx.method === 'PUT') {
+    if (ctx.method === 'POST' || ctx.method === 'PUT') {
       return validateLocaleCreation(ctx, next);
     }
 

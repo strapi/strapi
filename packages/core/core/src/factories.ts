@@ -11,18 +11,6 @@ const symbols = {
 
 type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S) => T);
 
-// Content type is proxied to allow for dynamic content type updates
-const getContentTypeProxy = (strapi: Core.Strapi, uid: UID.ContentType) => {
-  return new Proxy(strapi.contentType(uid), {
-    get(target, prop) {
-      const contentType = strapi.contentType(uid);
-      if (prop in contentType) {
-        return contentType[prop as keyof typeof contentType];
-      }
-    },
-  });
-};
-
 const createCoreController = <
   TUID extends UID.ContentType,
   TController extends Core.CoreAPI.Controller.Extendable<TUID>
@@ -37,7 +25,7 @@ const createCoreController = <
   }: {
     strapi: Core.Strapi;
   }): TController & Core.CoreAPI.Controller.ContentType<TUID> => {
-    const baseController = createController({ contentType: getContentTypeProxy(strapi, uid) });
+    const baseController = createController({ contentType: strapi.contentType(uid) });
 
     const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
 
@@ -74,7 +62,7 @@ function createCoreService<
   }: {
     strapi: Core.Strapi;
   }): TService & Core.CoreAPI.Service.ContentType<TUID> => {
-    const baseService = createService({ contentType: getContentTypeProxy(strapi, uid) });
+    const baseService = createService({ contentType: strapi.contentType(uid) });
 
     const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
 

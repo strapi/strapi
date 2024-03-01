@@ -5,7 +5,7 @@ import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-helper';
 import resources from '../resources/index';
-import { ARTICLE_UID, findArticleDb, AUTHOR_UID, findAuthorDb, CATEGORY_UID } from '../utils';
+import { ARTICLE_UID, CATEGORY_UID } from '../utils';
 import { testInTransaction } from '../../../../utils';
 
 describe('Document Service relations', () => {
@@ -21,28 +21,6 @@ describe('Document Service relations', () => {
     await destroyTestSetup(testUtils);
   });
 
-  // TODO: Test for all type of relations
-  describe.skip('FindOne', () => {
-    it('Can populate top level relations', async () => {
-      const article = await strapi
-        .documents(ARTICLE_UID)
-        .findOne('Article1', { locale: 'en', populate: { categories: true } });
-
-      // TODO: Category id should be the document id
-      // expect(article.categories[0].id).toBe('Cat1-En');
-    });
-
-    it.todo('Can populate a nested relation');
-
-    it.todo('Can populate a relation in component');
-
-    it.todo('Can filter by a relation id ');
-
-    it.todo('Can filter by a relation attribute');
-
-    it.todo('Can select fields of relation');
-  });
-
   describe('Create', () => {
     it('Can create a document with relations', async () => {
       const article = await strapi.documents(ARTICLE_UID).create({
@@ -55,7 +33,7 @@ describe('Document Service relations', () => {
       });
 
       // TODO: Category id should be the document id
-      expect(article.categories[0].id).toBe('Cat1');
+      expect(article.categories[0].documentId).toBe('Cat1');
     });
   });
 
@@ -73,7 +51,7 @@ describe('Document Service relations', () => {
       });
 
       // TODO: Category id should be the document id
-      // expect(article.categories[0].id).toBe('Cat2-En');
+      // expect(article.categories[0].documentId).toBe('Cat2-En');
     });
   });
 
@@ -86,7 +64,7 @@ describe('Document Service relations', () => {
           populate: { categories: true },
         });
 
-        const publishedArticles = await strapi.documents(ARTICLE_UID).publish(article.id, {
+        const publishedArticles = await strapi.documents(ARTICLE_UID).publish(article.documentId, {
           populate: { categories: true },
         });
         const publishedArticle = publishedArticles.versions[0];
@@ -108,7 +86,7 @@ describe('Document Service relations', () => {
         // Publish connected category
         await strapi.documents(CATEGORY_UID).publish('Cat1', { locale: 'en' });
 
-        const publishedArticles = await strapi.documents(ARTICLE_UID).publish(article.id, {
+        const publishedArticles = await strapi.documents(ARTICLE_UID).publish(article.documentId, {
           locale: article.locale,
           populate: { categories: true },
         });
@@ -117,7 +95,7 @@ describe('Document Service relations', () => {
         expect(publishedArticles.versions.length).toBe(1);
         // Cat1 has a published document
         expect(publishedArticle.categories.length).toBe(1);
-        expect(publishedArticle.categories[0].id).toBe('Cat1');
+        expect(publishedArticle.categories[0].documentId).toBe('Cat1');
       })
     );
   });
@@ -129,7 +107,7 @@ describe('Document Service relations', () => {
         data: { title: 'Article with author', categories: ['Cat1'] },
       });
 
-      const id = draftArticle.id as string;
+      const id = draftArticle.documentId;
 
       // Publish documents
       await strapi.documents(CATEGORY_UID).publish('Cat1');

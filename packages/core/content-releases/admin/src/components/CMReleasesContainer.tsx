@@ -19,21 +19,22 @@ import {
   CheckPermissions,
   NoContent,
   useAPIErrorHandler,
-  useCMEditViewDataManager,
   useNotification,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink } from 'react-router-dom';
+import { Link as ReactRouterLink, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { GetContentTypeEntryReleases } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../services/release';
+import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
@@ -100,7 +101,8 @@ const AddActionToReleaseModal = ({
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { modifiedData } = useCMEditViewDataManager();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const locale = query.plugins?.i18n?.locale;
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
@@ -113,7 +115,6 @@ const AddActionToReleaseModal = ({
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
   const handleSubmit = async (values: FormValues) => {
-    const locale = modifiedData.locale as string | undefined;
     const releaseActionEntry = {
       contentType: contentTypeUid,
       id: entryId,
@@ -249,24 +250,27 @@ const AddActionToReleaseModal = ({
 
 export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const { formatMessage } = useIntl();
-  const {
-    isCreatingEntry,
-    initialData: { id: entryId },
-    slug,
-  } = useCMEditViewDataManager();
+  const { formatMessage, formatDate, formatTime } = useIntl();
+  const { id, slug } = useParams<{
+    id: string;
+    origin: string;
+    slug: string;
+    collectionType: string;
+  }>();
+  const isCreatingEntry = id === 'create';
 
   const contentTypeUid = slug as UID.ContentType;
-
-  const canFetch = entryId != null && contentTypeUid != null;
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
+  const canFetch = id != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
         contentTypeUid: contentTypeUid,
-        entryId: entryId,
+        entryId: id,
         hasEntryAttached: true,
       }
     : skipToken;
   // Get all 'pending' releases that have the entry attached
+  // @ts-expect-error – we'll fix this when we fix content-releases for v5
   const response = useGetReleasesForEntryQuery(fetchParams);
   const releases = response.data?.data;
 
@@ -353,12 +357,39 @@ export const CMReleasesContainer = () => {
                     )}
                   </Typography>
                 </Box>
-                <Flex padding={4} direction="column" gap={3} width="100%" alignItems="flex-start">
+                <Flex padding={4} direction="column" gap={2} width="100%" alignItems="flex-start">
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
+                  {IsSchedulingEnabled && release.scheduledAt && release.timezone && (
+                    <Typography variant="pi" textColor="neutral600">
+                      {formatMessage(
+                        {
+                          id: 'content-releases.content-manager-edit-view.scheduled.date',
+                          defaultMessage: '{date} at {time} ({offset})',
+                        },
+                        {
+                          date: formatDate(new Date(release.scheduledAt), {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            timeZone: release.timezone,
+                          }),
+                          time: formatTime(new Date(release.scheduledAt), {
+                            hourCycle: 'h23',
+                            timeZone: release.timezone,
+                          }),
+                          offset: getTimezoneOffset(
+                            release.timezone,
+                            new Date(release.scheduledAt)
+                          ),
+                        }
+                      )}
+                    </Typography>
+                  )}
                   <CheckPermissions permissions={PERMISSIONS.deleteAction}>
                     <ReleaseActionMenu.Root hasTriggerBorder>
+                      <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
                       <ReleaseActionMenu.DeleteReleaseActionItem
                         releaseId={release.id}
                         actionId={release.action.id}
@@ -390,7 +421,8 @@ export const CMReleasesContainer = () => {
           <AddActionToReleaseModal
             handleClose={toggleModal}
             contentTypeUid={contentTypeUid}
-            entryId={entryId}
+            // @ts-expect-error – we'll fix this when we fix content-releases for v5
+            entryId={id}
           />
         )}
       </Box>

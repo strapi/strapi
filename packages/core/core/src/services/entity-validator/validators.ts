@@ -176,10 +176,10 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
      * At this point we know that we are creating a new entry, publishing an entry or that the unique field value has changed
      * We check if there is an entry of this content type in the same locale, publication state and with the same unique field value
      */
-    const record = await strapi.documents(model.uid).findFirst({
-      locale: options.locale,
-      status: options.isDraft ? 'draft' : 'published',
-      filters: {
+    const record = await strapi.db.query(model.uid).findOne({
+      where: {
+        locale: options.locale,
+        publishedAt: options.isDraft ? null : { $notNull: true },
         [updatedAttribute.name]: value,
         ...(entity?.id ? { id: { $ne: entity.id } } : {}),
       },

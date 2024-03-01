@@ -1,24 +1,14 @@
 import type * as UID from '../../../uid';
-import { MatchFirst } from '../../../utils';
+import type * as Params from '../params/document-engine';
 
-import { Result } from '.';
-import * as Params from '../params/document-engine';
+import type { Result } from '.';
 
 export type CountResult = { count: number };
 
 export type FindMany<
   TContentTypeUID extends UID.ContentType,
   TParams extends Params.FindMany<TContentTypeUID>
-> = Promise<
-  MatchFirst<
-    [
-      [UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
-      // Is this true for documents?
-      [UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
-    ],
-    (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
-  >
->;
+> = Promise<Result<TContentTypeUID, TParams>[]>;
 
 export type FindFirst<
   TContentTypeUID extends UID.ContentType,
@@ -30,12 +20,9 @@ export type FindOne<
   TParams extends Params.FindFirst<TContentTypeUID>
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
-export type Delete<
-  TContentTypeUID extends UID.ContentType,
-  TParams extends Params.Delete<TContentTypeUID>
-> = Promise<{
-  versions: Result<TContentTypeUID, TParams>[];
-} | null>;
+export type Delete = Promise<{
+  deletedEntries: number;
+}>;
 
 export type DeleteMany = Promise<CountResult | null>;
 
@@ -48,7 +35,7 @@ export type Clone<
   TContentTypeUID extends UID.ContentType,
   TParams extends Params.Clone<TContentTypeUID>
 > = Promise<{
-  id: string;
+  documentId: string;
   versions: Result<TContentTypeUID, TParams>[];
 } | null>;
 

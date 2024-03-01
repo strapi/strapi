@@ -1,4 +1,4 @@
-import type * as UID from '../../uid';
+import type { Schema } from '../..';
 import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
 
@@ -10,7 +10,7 @@ export * from './result';
 export * from './service-instance';
 
 export type Service = {
-  <TContentTypeUID extends UID.ContentType>(uid: TContentTypeUID): ServiceInstance<TContentTypeUID>;
+  (uid: Schema.ContentType['uid']): ServiceInstance;
 
   /** Add a middleware for all uid's and a specific action
    *  @example - Add a default locale

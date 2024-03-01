@@ -4,6 +4,7 @@ import type { DocumentMetadata } from '../../../shared/contracts/collection-type
 
 export interface DocumentVersion {
   id: string;
+  documentId: string;
   locale: string;
   updatedAt: string | null | Date;
   publishedAt: string | null | Date;
@@ -69,7 +70,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  async getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
 
@@ -93,7 +94,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   /**
    * Returns available status of a document for the current locale
    */
-  async getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
     // Find the other status of the document
     const status =
       version.publishedAt !== null
@@ -118,7 +119,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: UID.ContentType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(uid: UID.SingleType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
     // The status of all documents should be the same
@@ -127,10 +128,10 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
     return strapi.documents(uid).findMany({
       filters: {
-        id: { $in: documents.map((d) => d.id) },
+        documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
       },
       status: otherStatus,
-      fields: ['id', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+      fields: ['documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     }) as unknown as DocumentMetadata['availableStatus'];
   },
 
@@ -167,8 +168,8 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if i18n is disabled
     // TODO: Sanitize createdBy
     const versions = await strapi.db.query(uid).findMany({
-      where: { documentId: version.id },
-      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt'],
+      where: { documentId: version.documentId },
+      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt', 'documentId'],
       populate: {
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],
@@ -179,10 +180,13 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
       },
     });
 
-    const [availableLocalesResult, availableStatusResult] = await Promise.all([
-      availableLocales ? this.getAvailableLocales(version, versions) : [],
-      availableStatus ? this.getAvailableStatus(version, versions) : null,
-    ]);
+    const availableLocalesResult = availableLocales
+      ? this.getAvailableLocales(version, versions)
+      : [];
+
+    const availableStatusResult = availableStatus
+      ? this.getAvailableStatus(version, versions)
+      : null;
 
     return {
       availableLocales: availableLocalesResult,

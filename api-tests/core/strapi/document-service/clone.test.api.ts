@@ -24,16 +24,14 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.id, {
+        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
           locale: 'en', // should only clone the english locale
-          data: {
-            title: 'Cloned Document',
-          },
+          data: { title: 'Cloned Document' },
         });
 
         expect(result).not.toBeNull();
 
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
 
         // all articles should be in draft, and only one should be english
         expect(clonedArticlesDb.length).toBe(1);
@@ -45,7 +43,7 @@ describe('Document Service', () => {
         });
 
         // Original article should not be modified
-        const originalArticleDb = await findArticleDb({ documentId: articleDb.id });
+        const originalArticleDb = await findArticleDb({ documentId: articleDb.documentId });
         expect(originalArticleDb).toMatchObject(articleDb);
       })
     );
@@ -55,7 +53,7 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.id, {
+        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
           data: {
             title: 'Cloned Document', // Clone all locales
           },
@@ -64,10 +62,10 @@ describe('Document Service', () => {
         expect(result).not.toBeNull();
 
         const originalArticlesDb = await findArticlesDb({
-          documentId: articleDb.id,
+          documentId: articleDb.documentId,
           publishedAt: null,
         });
-        const clonedArticlesDb = await findArticlesDb({ documentId: result.id });
+        const clonedArticlesDb = await findArticlesDb({ documentId: result.documentId });
 
         // all articles should be in draft, and all locales should be cloned
         expect(clonedArticlesDb.length).toBe(originalArticlesDb.length);
@@ -84,7 +82,7 @@ describe('Document Service', () => {
       'clone a document with components',
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ documentId: 'Article1' });
-        const documentId = articlesDb.at(0)!.id;
+        const documentId = articlesDb.at(0)!.documentId;
 
         const componentData = {
           comp: {

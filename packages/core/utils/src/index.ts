@@ -1,7 +1,6 @@
 /**
  * Export shared utilities
  */
-import { parseMultipartData } from './parse-multipart';
 import parseType from './parse-type';
 import * as policy from './policy';
 import { templateConfiguration } from './template-configuration';
@@ -49,7 +48,6 @@ import machineID from './machine-id';
 
 export {
   machineID,
-  parseMultipartData,
   parseType,
   policy,
   templateConfiguration,

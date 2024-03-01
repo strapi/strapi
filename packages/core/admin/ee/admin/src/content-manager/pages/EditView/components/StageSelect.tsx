@@ -14,7 +14,7 @@ import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import type { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
-import { useField } from '../../../../../../../admin/src/content-manager/components/Form';
+import { useField } from '../../../../../../../admin/src/components/Form';
 import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 import { LimitsModal } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';

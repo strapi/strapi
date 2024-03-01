@@ -1,10 +1,10 @@
-import { Schema, UID, Struct } from '@strapi/types';
+import type { Schema, Modules, UID, Struct } from '@strapi/types';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
-export type ReleaseActionEntry = Entity & {
+export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   // Entity attributes
   [key: string]: Schema.Attribute.AnyAttribute;
 } & {
@@ -17,6 +17,7 @@ export interface ReleaseAction extends Entity {
   contentType: UID.ContentType;
   locale?: string;
   release: Release;
+  isEntryValid: boolean;
 }
 
 export interface FormattedReleaseAction extends Entity {

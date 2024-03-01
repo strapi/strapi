@@ -56,8 +56,8 @@ describe('Create Strapi API End to End', () => {
 
       data.tags.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.name).toBe('tag1');
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.name).toBe('tag1');
     });
 
     test('Create tag2', async () => {
@@ -73,8 +73,8 @@ describe('Create Strapi API End to End', () => {
 
       data.tags.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.name).toBe('tag2');
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.name).toBe('tag2');
     });
 
     test('Create tag3', async () => {
@@ -90,8 +90,8 @@ describe('Create Strapi API End to End', () => {
 
       data.tags.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.name).toBe('tag3');
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.name).toBe('tag3');
     });
 
     test('Create article1 without relation', async () => {
@@ -110,16 +110,16 @@ describe('Create Strapi API End to End', () => {
 
       data.articles.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
     });
 
     test('Create article2 with tag1', async () => {
       const entry = {
         title: 'Article 2',
         content: 'Content 2',
-        tags: [data.tags[0].id],
+        tags: [data.tags[0].documentId],
       };
 
       const { body } = await rq({
@@ -135,12 +135,12 @@ describe('Create Strapi API End to End', () => {
 
       data.articles.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(Array.isArray(body.data.attributes.tags.data)).toBeTruthy();
-      expect(body.data.attributes.tags.data.length).toBe(1);
-      expect(body.data.attributes.tags.data[0].id).toBe(data.tags[0].id);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(Array.isArray(body.data.tags)).toBeTruthy();
+      expect(body.data.tags.length).toBe(1);
+      expect(body.data.tags[0].documentId).toBe(data.tags[0].documentId);
     });
 
     test('Create article with non existent tag', async () => {
@@ -168,13 +168,13 @@ describe('Create Strapi API End to End', () => {
     });
 
     test('Update article1 add tag2', async () => {
-      const { id, attributes } = data.articles[0];
-      const entry = { ...attributes, tags: [data.tags[1].id] };
+      const { id, documentId, ...attributes } = data.articles[0];
+      const entry = { ...attributes, tags: [data.tags[1].documentId] };
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -186,23 +186,23 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(Array.isArray(body.data.attributes.tags.data)).toBeTruthy();
-      expect(body.data.attributes.tags.data.length).toBe(1);
-      expect(body.data.attributes.tags.data[0].id).toBe(data.tags[1].id);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(Array.isArray(body.data.tags)).toBeTruthy();
+      expect(body.data.tags.length).toBe(1);
+      expect(body.data.tags[0].documentId).toBe(data.tags[1].documentId);
     });
 
     test('Update article1 add tag1 and tag3', async () => {
-      const { id, attributes } = data.articles[0];
+      const { id, documentId, ...attributes } = data.articles[0];
       const entry = { ...attributes };
-      entry.tags = data.tags.map((t) => t.id);
+      entry.tags = data.tags.map((t) => t.documentId);
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -214,22 +214,21 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(Array.isArray(body.data.attributes.tags.data)).toBeTruthy();
-      expect(body.data.attributes.tags.data.length).toBe(3);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(Array.isArray(body.data.tags)).toBeTruthy();
+      expect(body.data.tags.length).toBe(3);
     });
 
     test('Error when updating article1 with some non existent tags', async () => {
-      const { id, attributes } = data.articles[0];
-      const entry = { ...attributes };
-      entry.tags = [1000, 1001, 1002, ...data.tags.slice(-1).map((t) => t.id)];
+      const { id, documentId, ...entry } = data.articles[0];
+      entry.tags = [1000, 1001, 1002, ...data.tags.slice(-1).map((t) => t.documentId)];
 
       cleanDate(entry);
 
       const res = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -246,15 +245,14 @@ describe('Create Strapi API End to End', () => {
     });
 
     test('Update article1 remove one tag', async () => {
-      const { id, attributes } = data.articles[0];
+      const { id, documentId, ...entry } = data.articles[0];
 
-      const entry = { ...attributes };
-      entry.tags = entry.tags.data.slice(1).map((t) => t.id);
+      entry.tags = entry.tags.slice(1).map((t) => t.documentId);
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -266,21 +264,21 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(Array.isArray(body.data.attributes.tags.data)).toBeTruthy();
-      expect(body.data.attributes.tags.data.length).toBe(2);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(Array.isArray(body.data.tags)).toBeTruthy();
+      expect(body.data.tags.length).toBe(2);
     });
 
     test('Update article1 remove all tag', async () => {
-      const { id, attributes } = data.articles[0];
+      const { id, documentId, ...attributes } = data.articles[0];
       const entry = { ...attributes, tags: [] };
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -292,11 +290,11 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(Array.isArray(body.data.attributes.tags.data)).toBeTruthy();
-      expect(body.data.attributes.tags.data.length).toBe(0);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(Array.isArray(body.data.tags)).toBeTruthy();
+      expect(body.data.tags.length).toBe(0);
     });
   });
 
@@ -328,8 +326,8 @@ describe('Create Strapi API End to End', () => {
 
       data.categories.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.name).toBe('cat1');
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.name).toBe('cat1');
     });
 
     test('Create cat2', async () => {
@@ -348,15 +346,15 @@ describe('Create Strapi API End to End', () => {
 
       data.categories.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.name).toBe('cat2');
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.name).toBe('cat2');
     });
 
     test('Create article1 with cat1', async () => {
       const entry = {
         title: 'Article 1',
         content: 'Content 1',
-        category: data.categories[0].id,
+        category: data.categories[0].documentId,
       };
 
       const { body } = await rq({
@@ -372,22 +370,20 @@ describe('Create Strapi API End to End', () => {
 
       data.articles.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(body.data.attributes.category.data.attributes.name).toBe(
-        data.categories[0].attributes.name
-      );
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.category.name).toBe(data.categories[0].name);
     });
 
     test('Update article1 with cat2', async () => {
-      const { id, attributes } = data.articles[0];
-      const entry = { ...attributes, category: data.categories[1].id };
+      const { id, documentId, ...attributes } = data.articles[0];
+      const entry = { ...attributes, category: data.categories[1].documentId };
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -399,12 +395,10 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(body.data.attributes.category.data.attributes.name).toBe(
-        data.categories[1].attributes.name
-      );
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.category.name).toBe(data.categories[1].name);
     });
 
     test('Create article2', async () => {
@@ -423,20 +417,20 @@ describe('Create Strapi API End to End', () => {
 
       data.articles.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
     });
 
     test('Update article2 with cat2', async () => {
-      const { id, attributes } = data.articles[1];
+      const { id, documentId, ...attributes } = data.articles[1];
 
-      const entry = { ...attributes, category: data.categories[1].id };
+      const entry = { ...attributes, category: data.categories[1].documentId };
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -448,26 +442,23 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[1] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(body.data.attributes.category.data.attributes.name).toBe(
-        data.categories[1].attributes.name
-      );
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.category.name).toBe(data.categories[1].name);
     });
 
     test('Update cat1 with article1', async () => {
-      const { id, attributes } = data.categories[0];
+      const { id, documentId, ...entry } = data.categories[0];
 
-      const entry = { ...attributes };
-      entry.articles = data.categories[0].attributes.articles.data
-        .map((a) => a.id)
-        .concat(data.articles[0].id);
+      entry.articles = data.categories[0].articles
+        .map((a) => a.documentId)
+        .concat(data.articles[0].documentId);
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/categories/${id}`,
+        url: `/categories/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -479,16 +470,16 @@ describe('Create Strapi API End to End', () => {
 
       data.categories[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(Array.isArray(body.data.attributes.articles.data)).toBeTruthy();
-      expect(body.data.attributes.articles.data.length).toBe(1);
-      expect(body.data.attributes.name).toBe(entry.name);
+      expect(body.data.documentId).toBeDefined();
+      expect(Array.isArray(body.data.articles)).toBeTruthy();
+      expect(body.data.articles.length).toBe(1);
+      expect(body.data.name).toBe(entry.name);
     });
 
     test('Create cat3 with article1', async () => {
       const entry = {
         name: 'cat3',
-        articles: [data.articles[0].id],
+        articles: [data.articles[0].documentId],
       };
 
       const { body } = await rq({
@@ -504,77 +495,77 @@ describe('Create Strapi API End to End', () => {
 
       data.categories.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(Array.isArray(body.data.attributes.articles.data)).toBeTruthy();
-      expect(body.data.attributes.articles.data.length).toBe(1);
-      expect(body.data.attributes.name).toBe(entry.name);
+      expect(body.data.documentId).toBeDefined();
+      expect(Array.isArray(body.data.articles)).toBeTruthy();
+      expect(body.data.articles.length).toBe(1);
+      expect(body.data.name).toBe(entry.name);
     });
 
     test('Get article1 with cat3', async () => {
       const { body } = await rq({
-        url: `/articles/${data.articles[0].id}`,
+        url: `/articles/${data.articles[0].documentId}`,
         method: 'GET',
         qs: {
           populate: ['category'],
         },
       });
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.category.data.id).toBe(data.categories[2].id);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.category.documentId).toBe(data.categories[2].documentId);
     });
 
     test('Get article2 with cat2', async () => {
       const { body } = await rq({
-        url: `/articles/${data.articles[1].id}`,
+        url: `/articles/${data.articles[1].documentId}`,
         method: 'GET',
         qs: {
           populate: ['category'],
         },
       });
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.category.data.id).toBe(data.categories[1].id);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.category.documentId).toBe(data.categories[1].documentId);
     });
 
     test('Get cat1 without relations', async () => {
       const { body } = await rq({
-        url: `/categories/${data.categories[0].id}`,
+        url: `/categories/${data.categories[0].documentId}`,
         method: 'GET',
         qs: {
           populate: ['articles'],
         },
       });
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.articles.data.length).toBe(0);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.articles.length).toBe(0);
     });
 
     test('Get cat2 with article2', async () => {
       const { body } = await rq({
-        url: `/categories/${data.categories[1].id}`,
+        url: `/categories/${data.categories[1].documentId}`,
         method: 'GET',
         qs: {
           populate: ['articles'],
         },
       });
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.articles.data.length).toBe(1);
-      expect(body.data.attributes.articles.data[0].id).toBe(data.articles[1].id);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.articles.length).toBe(1);
+      expect(body.data.articles[0].documentId).toBe(data.articles[1].documentId);
     });
 
     test('Get cat3 with article1', async () => {
       const { body } = await rq({
-        url: `/categories/${data.categories[2].id}`,
+        url: `/categories/${data.categories[2].documentId}`,
         method: 'GET',
         qs: {
           populate: ['articles'],
         },
       });
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.articles.data.length).toBe(1);
-      expect(body.data.attributes.articles.data[0].id).toBe(data.articles[0].id);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.articles.length).toBe(1);
+      expect(body.data.articles[0].documentId).toBe(data.articles[0].documentId);
     });
   });
 
@@ -603,8 +594,8 @@ describe('Create Strapi API End to End', () => {
 
       data.references.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.name).toBe('ref1');
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.name).toBe('ref1');
     });
 
     test('Create article1', async () => {
@@ -624,18 +615,18 @@ describe('Create Strapi API End to End', () => {
       data.articles.push(body.data);
 
       expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
     });
 
     test('Update article1 with ref1', async () => {
-      const { id, attributes } = data.articles[0];
-      const entry = { ...attributes, reference: data.references[0].id };
+      const { id, documentId, ...attributes } = data.articles[0];
+      const entry = { ...attributes, reference: data.references[0].documentId };
 
       cleanDate(entry);
 
       const { body } = await rq({
-        url: `/articles/${id}`,
+        url: `/articles/${documentId}`,
         method: 'PUT',
         body: {
           data: entry,
@@ -647,17 +638,17 @@ describe('Create Strapi API End to End', () => {
 
       data.articles[0] = body.data;
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(body.data.attributes.reference.data.id).toBe(entry.reference);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.reference.documentId).toBe(entry.reference);
     });
 
     test('Create article2 with ref1', async () => {
       const entry = {
         title: 'Article 2',
         content: 'Content 2',
-        reference: data.references[0].id,
+        reference: data.references[0].documentId,
       };
 
       const { body } = await rq({
@@ -673,10 +664,10 @@ describe('Create Strapi API End to End', () => {
 
       data.articles.push(body.data);
 
-      expect(body.data.id).toBeDefined();
-      expect(body.data.attributes.title).toBe(entry.title);
-      expect(body.data.attributes.content).toBe(entry.content);
-      expect(body.data.attributes.reference.data.id).toBe(entry.reference);
+      expect(body.data.documentId).toBeDefined();
+      expect(body.data.title).toBe(entry.title);
+      expect(body.data.content).toBe(entry.content);
+      expect(body.data.reference.documentId).toBe(entry.reference);
     });
   });
 
@@ -715,7 +706,7 @@ describe('Create Strapi API End to End', () => {
         body: {
           data: {
             name: 'cat111',
-            tag: createdTag.id,
+            tag: createdTag.documentId,
           },
         },
         qs: {
@@ -724,7 +715,7 @@ describe('Create Strapi API End to End', () => {
       });
 
       data.references.push(createdReference);
-      expect(createdReference.attributes.tag.data.id).toBe(createdTag.id);
+      expect(createdReference.tag.documentId).toBe(createdTag.documentId);
     });
 
     test('Detach Tag from a Reference', async () => {
@@ -750,7 +741,7 @@ describe('Create Strapi API End to End', () => {
         body: {
           data: {
             name: 'cat111',
-            tag: createdTag.id,
+            tag: createdTag.documentId,
           },
         },
         qs: {
@@ -760,12 +751,12 @@ describe('Create Strapi API End to End', () => {
 
       data.references.push(createdReference);
 
-      expect(createdReference.attributes.tag.data.id).toBe(createdTag.id);
+      expect(createdReference.tag.documentId).toBe(createdTag.documentId);
 
       const {
         body: { data: updatedReference },
       } = await rq({
-        url: `/references/${createdReference.id}`,
+        url: `/references/${createdReference.documentId}`,
         method: 'PUT',
         body: {
           data: {
@@ -777,7 +768,7 @@ describe('Create Strapi API End to End', () => {
         },
       });
 
-      expect(updatedReference.attributes.tag.data).toBe(null);
+      expect(updatedReference.tag).toBe(null);
     });
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {
@@ -803,7 +794,7 @@ describe('Create Strapi API End to End', () => {
         body: {
           data: {
             name: 'cat111',
-            tag: createdTag.id,
+            tag: createdTag.documentId,
           },
         },
         qs: {
@@ -814,21 +805,21 @@ describe('Create Strapi API End to End', () => {
       data.references.push(createdReference);
 
       await rq({
-        url: `/tags/${createdTag.id}`,
+        url: `/tags/${createdTag.documentId}`,
         method: 'DELETE',
       });
 
       const {
         body: { data: foundReference },
       } = await rq({
-        url: `/references/${createdReference.id}`,
+        url: `/references/${createdReference.documentId}`,
         method: 'GET',
         qs: {
           populate: ['tag'],
         },
       });
 
-      expect(foundReference.attributes.tag.data).toBe(null);
+      expect(foundReference.tag).toBe(null);
     });
   });
 });

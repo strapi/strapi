@@ -17,6 +17,7 @@ export const COMPONENT_JOIN_TABLE_SUFFIX = 'components';
 export const DZ_JOIN_TABLE_SUFFIX = 'components';
 export const COMPONENT_INVERSE_COLUMN_NAME = 'component';
 export const COMPONENT_TYPE_COLUMN = 'component_type';
+export const ENTITY = 'entity';
 
 export const getComponentJoinTableName = (collectionName: string) =>
   identifiers.getTableName(collectionName, { suffix: COMPONENT_JOIN_TABLE_SUFFIX });
@@ -24,7 +25,7 @@ export const getComponentJoinTableName = (collectionName: string) =>
 export const getDzJoinTableName = (collectionName: string) =>
   identifiers.getTableName(collectionName, { suffix: DZ_JOIN_TABLE_SUFFIX });
 
-const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order, ENTITY: entity } = identifiers;
+const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
 
 export type LoadedContentTypeModel = Struct.ContentTypeSchema &
   Required<Pick<Struct.ContentTypeSchema, 'collectionName' | 'uid' | 'modelName'>>;
@@ -46,7 +47,7 @@ export const transformAttribute = (
     }
     case 'component': {
       const joinTableName = getComponentJoinTableName(contentType.collectionName);
-      const joinColumnEntityName = identifiers.getJoinColumnEntityIdName();
+      const joinColumnEntityName = identifiers.getJoinColumnAttributeIdName(ENTITY);
       const joinColumnInverseName = identifiers.getJoinColumnAttributeIdName(
         COMPONENT_INVERSE_COLUMN_NAME
       );
@@ -81,7 +82,7 @@ export const transformAttribute = (
     }
     case 'dynamiczone': {
       const joinTableName = getDzJoinTableName(contentType.collectionName);
-      const joinColumnEntityName = identifiers.getJoinColumnEntityIdName();
+      const joinColumnEntityName = identifiers.getJoinColumnAttributeIdName(ENTITY);
       const joinColumnInverseName = identifiers.getJoinColumnAttributeIdName(
         COMPONENT_INVERSE_COLUMN_NAME
       );
@@ -146,9 +147,9 @@ export const createDocumentId = createId;
 const createCompoLinkModel = (contentType: LoadedContentTypeModel): Model => {
   const name = getComponentJoinTableName(contentType.collectionName);
 
-  const entityId = identifiers.getJoinColumnEntityIdName();
+  const entityId = identifiers.getJoinColumnAttributeIdName(ENTITY);
   const componentId = identifiers.getJoinColumnAttributeIdName(COMPONENT_INVERSE_COLUMN_NAME);
-  const fkIndex = identifiers.getFkIndexName([contentType.collectionName, entity]);
+  const fkIndex = identifiers.getFkIndexName([contentType.collectionName, ENTITY]);
 
   return {
     // TODO: make sure there can't be any conflicts with a prefix

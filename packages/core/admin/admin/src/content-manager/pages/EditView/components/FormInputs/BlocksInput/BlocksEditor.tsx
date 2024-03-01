@@ -11,7 +11,7 @@ import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import styled, { type CSSProperties } from 'styled-components';
 
-import { FieldValue } from '../../../../../components/Form';
+import { FieldValue } from '../../../../../../components/Form';
 import { getTranslation } from '../../../../../utils/translations';
 
 import { codeBlocks } from './Blocks/Code';

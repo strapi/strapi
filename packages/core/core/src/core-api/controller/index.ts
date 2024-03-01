@@ -4,8 +4,8 @@ import { contentTypes as contentTypeUtils, sanitize, validate } from '@strapi/ut
 import type { Core, Struct } from '@strapi/types';
 
 import { transformResponse } from './transform';
-import createSingleTypeController from './single-type';
-import createCollectionTypeController from './collection-type';
+import { createSingleTypeController } from './single-type';
+import { createCollectionTypeController } from './collection-type';
 
 const isSingleType = (
   contentType: Struct.ContentTypeSchema
@@ -23,6 +23,8 @@ function createController({
 }: {
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema;
 }) {
+  // TODO: replace with Base class + SingleType and CollectionType classes
+
   const proto: Core.CoreAPI.Controller.Base = {
     transformResponse(data, meta) {
       return transformResponse(data, meta, { contentType });

@@ -4,7 +4,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 
 interface DynamicZoneLabelProps {
-  label?: string;
+  label?: React.ReactNode;
   labelAction?: React.ReactNode;
   name: string;
   numberOfComponents?: number;

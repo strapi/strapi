@@ -1,17 +1,10 @@
 import _ from 'lodash/fp';
+import { MAX_DB_IDENTIFIER_LENGTH, getNameFromTokens } from './shortener';
 
-// TODO: Names will not be shortened until this is set to a non-zero number
-export const MAX_DB_IDENTIFIER_LENGTH = 0;
-
-export const ENTITY = 'entity';
+// Constants for column names used in naming methods
 export const ID_COLUMN = 'id';
 export const ORDER_COLUMN = 'order';
 export const FIELD_COLUMN = 'field';
-
-type NameToken = {
-  name: string;
-  compressible: boolean;
-};
 
 type NameInput = string | string[];
 
@@ -21,24 +14,14 @@ type NameOptions = {
   maxLength?: number;
 };
 
-export const getNameFromTokens = (tokens: NameToken[], max: number = MAX_DB_IDENTIFIER_LENGTH) => {
-  const fullLength = tokens
-    .map((token) => {
-      return _.snakeCase(token.name);
-    })
-    .join('_');
-
-  if (!max || fullLength.length <= max) {
-    return fullLength;
-  }
-
-  // TODO: this is where the shortening algorithm goes
-
-  return fullLength;
-};
-
-// Generic name handler used by all helper functions
-export const getName = (names: NameInput, options: NameOptions) => {
+// Generic name handler that must be used by all helper functions
+/**
+ * TODO: we should be requiring snake_case inputs for all names here, but we
+ * aren't and it will require some refactoring to make it work. Currently if
+ * we get names 'myModel' and 'my_model' they would be converted to the same
+ * final string my_model which generally works but is not entirely safe
+ * */
+export const getName = (names: NameInput, options?: NameOptions) => {
   const tokens = _.castArray(names).map((name) => {
     return {
       name,
@@ -46,87 +29,113 @@ export const getName = (names: NameInput, options: NameOptions) => {
     };
   });
 
-  if (options.suffix) {
+  if (options?.suffix) {
     tokens.push({ name: options.suffix, compressible: false });
   }
 
-  if (options.prefix) {
+  if (options?.prefix) {
     tokens.unshift({ name: options.prefix, compressible: false });
   }
 
-  return getNameFromTokens(tokens, options?.maxLength);
+  const maxLength = options?.maxLength ?? MAX_DB_IDENTIFIER_LENGTH; // nullish coalesce because 0 is a valid maxLength
+
+  return getNameFromTokens(tokens, maxLength);
 };
 
 /**
  * TABLES
  */
 
-// Get a base table name for a model
 export const getTableName = (name: string, options?: NameOptions) => {
-  const tokens = [
-    {
-      name,
-      compressible: true,
-    },
-  ];
-
-  if (options?.suffix) {
-    tokens.push({ name: options.suffix, compressible: false });
-  }
-
-  if (options?.prefix) {
-    tokens.unshift({ name: options?.prefix, compressible: false });
-  }
-
-  return getNameFromTokens(tokens);
+  return getName(name, options);
 };
 
-export const getJoinTableName = (collectionName: string, attributeName: string) => {
-  return getName([collectionName, attributeName], { suffix: 'links' }); // _.snakeCase(`${tableName}_${attributeName}_links`);
+export const getJoinTableName = (
+  collectionName: string,
+  attributeName: string,
+  options?: NameOptions
+) => {
+  return getName([collectionName, attributeName], { suffix: 'links', ...options });
 };
 
-export const getMorphTableName = (collectionName: string, attributeName: string) => {
-  return getName([collectionName, attributeName], { suffix: 'morphs' }); // _.snakeCase(`${tableName}_${attributeName}_morphs`);
+export const getMorphTableName = (
+  collectionName: string,
+  attributeName: string,
+  options?: NameOptions
+) => {
+  return getName([collectionName, attributeName], { suffix: 'morphs', ...options });
 };
 
 /**
  * COLUMNS
  */
 
-// Regular relation join tables
-export const getJoinColumnEntityIdName = () => {
-  return getName(ENTITY, { suffix: 'id' });
+export const getColumnName = (attributeName: string, options?: NameOptions) => {
+  return getName(attributeName, options);
 };
 
-export const getJoinColumnAttributeIdName = (attributeName: string) => {
-  return getName(attributeName, { suffix: 'id' });
+export const getJoinColumnAttributeIdName = (attributeName: string, options?: NameOptions) => {
+  return getName(attributeName, { suffix: 'id', ...options });
 };
 
-// Morph Join Tables
-export const getMorphColumnJoinTableIdName = (singularName: string) => {
-  return getName(singularName, { suffix: 'id' });
+export const getInverseJoinColumnAttributeIdName = (
+  attributeName: string,
+  options?: NameOptions
+) => {
+  return getName(attributeName, { suffix: 'id', prefix: 'inv', ...options });
 };
 
-export const getMorphColumnAttributeIdName = (attributeName: string) => {
-  return getName(attributeName, { suffix: 'id' });
+export const getOrderColumnName = (singularName: string, options?: NameOptions) => {
+  return getName(singularName, { suffix: 'order', ...options });
 };
 
-export const getMorphColumnTypeName = (attributeName: string) => {
-  return getName(attributeName, { suffix: 'type' });
+export const getInverseOrderColumnName = (singularName: string, options?: NameOptions) => {
+  return getName(singularName, { suffix: 'order', prefix: 'inv', ...options });
+};
+
+/**
+ * Morph Join Tables
+ */
+export const getMorphColumnJoinTableIdName = (singularName: string, options?: NameOptions) => {
+  return getName(singularName, { suffix: 'id', ...options });
+};
+
+export const getMorphColumnAttributeIdName = (attributeName: string, options?: NameOptions) => {
+  return getName(attributeName, { suffix: 'id', ...options });
+};
+
+export const getMorphColumnTypeName = (attributeName: string, options?: NameOptions) => {
+  return getName(attributeName, { suffix: 'type', ...options });
 };
 
 /**
  * INDEXES
  */
 
-export const getIndexName = (names: NameInput) => {
-  return getName(names, { suffix: 'index' });
+export const getIndexName = (names: NameInput, options?: NameOptions) => {
+  return getName(names, { suffix: 'index', ...options });
 };
 
-export const getFkIndexName = (names: NameInput) => {
-  return getName(names, { suffix: 'fk' });
+export const getFkIndexName = (names: NameInput, options?: NameOptions) => {
+  return getName(names, { suffix: 'fk', ...options });
 };
 
-export const getUniqueIndexName = (names: NameInput) => {
-  return getName(names, { suffix: 'unique' });
+export const getInverseFkIndexName = (names: NameInput, options?: NameOptions) => {
+  return getName(names, { suffix: 'inv_fk', ...options });
+};
+
+export const getOrderFkIndexName = (names: NameInput, options?: NameOptions) => {
+  return getName(names, { suffix: 'order_fk', ...options });
+};
+
+export const getOrderInverseFkIndexName = (names: NameInput, options?: NameOptions) => {
+  return getName(names, { suffix: 'order_inv_fk', ...options });
+};
+
+export const getUniqueIndexName = (names: NameInput, options?: NameOptions) => {
+  return getName(names, { suffix: 'unique', ...options });
+};
+
+export const getPrimaryIndexName = (names: NameInput) => {
+  return getName(names, { suffix: 'primary' });
 };

@@ -10,6 +10,7 @@ import {
 import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../core/store/hooks';
+import { setIn } from '../../utils/object';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
 import { ComponentsDictionary, extractContentTypeComponents } from '../hooks/useDocument';
@@ -23,7 +24,6 @@ import {
   useUpdateComponentConfigurationMutation,
 } from '../services/components';
 import { useGetInitialDataQuery } from '../services/init';
-import { setIn } from '../utils/object';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 

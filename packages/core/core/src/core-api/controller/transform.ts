@@ -1,13 +1,10 @@
 import { isNil, isPlainObject } from 'lodash/fp';
-import { parseMultipartData } from '@strapi/utils';
-import type Koa from 'koa';
-import type { Struct, Internal } from '@strapi/types';
+import type { UID, Struct } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
-  attributes: Record<string, unknown>;
   meta?: Record<string, unknown>;
-};
+} & Record<string, unknown>;
 
 type TransformedComponent = {
   id: string;
@@ -23,21 +20,9 @@ function isEntry(property: unknown): property is Entry | Entry[] {
   return property === null || isPlainObject(property) || Array.isArray(property);
 }
 
-function isDZEntries(
-  property: unknown
-): property is (Entry & { __component: Internal.UID.Component })[] {
+function isDZEntries(property: unknown): property is (Entry & { __component: UID.Component })[] {
   return Array.isArray(property);
 }
-
-const parseBody = (ctx: Koa.Context) => {
-  if (ctx.is('multipart')) {
-    return parseMultipartData(ctx);
-  }
-
-  const { data } = ctx.request.body || {};
-
-  return { data };
-};
 
 const transformResponse = (
   resource: any,
@@ -66,14 +51,7 @@ function transformComponent(
     return data.map((datum) => transformComponent(datum, component));
   }
 
-  const res = transformEntry(data, component);
-
-  if (isNil(res)) {
-    return res;
-  }
-
-  const { id, attributes } = res;
-  return { id, ...attributes };
+  return transformEntry(data, component);
 }
 
 function transformEntry<T extends Entry | Entry[] | null>(
@@ -105,9 +83,7 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      const data = transformEntry(property, strapi.contentType(attribute.target));
-
-      attributeValues[key] = { data };
+      attributeValues[key] = transformEntry(property, strapi.contentType(attribute.target));
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
       attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
     } else if (attribute && attribute.type === 'dynamiczone' && isDZEntries(property)) {
@@ -119,9 +95,7 @@ function transformEntry(
         return transformComponent(subProperty, strapi.components[subProperty.__component]);
       });
     } else if (attribute && attribute.type === 'media' && isEntry(property)) {
-      const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
-
-      attributeValues[key] = { data };
+      attributeValues[key] = transformEntry(property, strapi.contentType('plugin::upload.file'));
     } else {
       attributeValues[key] = property;
     }
@@ -129,10 +103,10 @@ function transformEntry(
 
   return {
     id,
-    attributes: attributeValues,
+    ...attributeValues,
     // NOTE: not necessary for now
     // meta: {},
   };
 }
 
-export { parseBody, transformResponse };
+export { transformResponse };

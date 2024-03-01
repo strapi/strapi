@@ -6,7 +6,7 @@ export type TransferPullMessage = CreateTransferMessage<
   | TransferStepCommands<'entities', IEntity[]>
   | TransferStepCommands<'links', ILink[]>
   | TransferStepCommands<'configuration', IConfiguration[]>
-  | TransferStepCommands<'assets', TransferAssetFlow[] | null>
+  | TransferStepCommands<'assets', TransferAssetFlow[]>
 >;
 
 export type TransferPullStep = TransferPullMessage['step'];

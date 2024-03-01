@@ -90,6 +90,148 @@ To update the app template:
       "type": "relation",
       "relation": "oneToOne",
       "target": "admin::user"
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "meta.seo"
+    }
+  }
+  // ...
+}
+```
+
+### Product
+
+This collection type is internationalized.
+
+```json
+{
+  // ...
+  "attributes": {
+    "name": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "isAvailable": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "description": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "blocks"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos", "audios"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "meta.seo"
+    },
+    "sku": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "integer",
+      "unique": true
+    },
+    "variations": {
+      "type": "component",
+      "repeatable": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "product.variations"
+    }
+  }
+  // ...
+}
+```
+
+### Shop (Single Type)
+
+This single type is internationalized.
+
+```json
+{
+  // ...
+  "attributes": {
+    "title": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "dynamiczone",
+      "components": [
+        "page-blocks.product-carousel",
+        "page-blocks.hero-image",
+        "page-blocks.content-and-image"
+      ],
+      "required": true,
+      "min": 2
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "meta.seo"
     }
   }
   // ...
@@ -117,33 +259,6 @@ To update the app template:
 ```
 
 ## API Customisations
-
-### Database
-
-Found at `template/src/api/database`
-
-#### Usage
-
-```ts
-import { test } from '@playwright/test';
-
-test.beforeEach(async ({ page }) => {
-  await page.request.fetch('http://localhost:1337/api/database/dump', {
-    method: 'POST',
-  });
-});
-```
-
-This endpoint does not have a `body`.
-
-#### What does it do?
-
-This endpoint `DELETES` every row from every table _excluding_ the "core" tables – normally prefixed with `strapi_`.
-
-#### Why do we have it?
-
-This lets us wipe the entire test instance _if_ we need to. DTS does technically
-do this already for us. But nonetheless, its useful.
 
 ### Config
 

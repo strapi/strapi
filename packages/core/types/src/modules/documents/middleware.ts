@@ -3,20 +3,15 @@ import type * as UID from '../../uid';
 import type { ServiceInstance } from './service-instance';
 
 export interface Context<
-  TContentTypeUID extends UID.ContentType = UID.ContentType,
-  TAction extends keyof ServiceInstance<TContentTypeUID> = keyof ServiceInstance<TContentTypeUID>
+  TAction extends keyof ServiceInstance = keyof ServiceInstance,
+  TArgs = Parameters<ServiceInstance[TAction]>
 > {
-  uid: TContentTypeUID;
+  uid: UID.ContentType;
   action: TAction;
-  args: Parameters<ServiceInstance<TContentTypeUID>[TAction]>;
+  args: TArgs;
 }
 
-export type Middleware<
-  TContentTypeUID extends UID.ContentType = UID.ContentType,
-  TAction extends keyof ServiceInstance<TContentTypeUID> = keyof ServiceInstance<TContentTypeUID>
-> = (
-  ctx: Context<TContentTypeUID, TAction>,
-  next: (
-    ctx: Context<TContentTypeUID, TAction>
-  ) => ReturnType<ServiceInstance<TContentTypeUID>[TAction]>
-) => ReturnType<ServiceInstance<TContentTypeUID>[TAction]>;
+export type Middleware = (
+  ctx: Context,
+  next: (ctx: Context) => ReturnType<ServiceInstance[keyof ServiceInstance]>
+) => ReturnType<ServiceInstance[keyof ServiceInstance]>;

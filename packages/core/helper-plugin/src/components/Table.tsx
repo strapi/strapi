@@ -27,13 +27,15 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-import type { Schema, Data } from '@strapi/types';
+import type { Schema, Modules, Data } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableContextValue<TRow extends { id: Data.ID } = { id: Data.ID }> {
+interface TableContextValue<
+  TRow extends { documentId: Modules.Documents.ID; id: number } | { id: Data.ID } = { id: Data.ID }
+> {
   selectedEntries: Data.ID[];
   setSelectedEntries: React.Dispatch<React.SetStateAction<Data.ID[]>>;
   onSelectRow: (args: { name: Data.ID; value: boolean }) => void;
@@ -229,7 +231,6 @@ interface HeaderCellProps {
    */
   cellFormatter?: (
     data: {
-      id: string;
       [key: string]: any;
     },
     header: Omit<HeaderCellProps, 'cellFormatter'>,

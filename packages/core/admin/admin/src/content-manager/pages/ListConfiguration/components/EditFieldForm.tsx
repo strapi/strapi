@@ -16,10 +16,10 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
+import { Form, useField } from '../../../../components/Form';
+import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { capitalise } from '../../../../utils/strings';
 import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
-import { Form, useField } from '../../../components/Form';
-import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { getTranslation } from '../../../utils/translations';
 
 import type { ListFieldLayout } from '../../../hooks/useDocumentLayout';

@@ -1,19 +1,10 @@
 import type * as UID from '../../uid';
-
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-engine';
 
 export type ID = string;
 
-export type UploadFile = (
-  uid: UID.Schema,
-  entity: Record<string, unknown>,
-  files: Record<string, unknown>
-) => Promise<void>;
-
 export interface DocumentEngine {
-  uploadFiles: UploadFile;
-
   findMany<
     TContentTypeUID extends UID.ContentType,
     TParams extends Params.FindMany<TContentTypeUID>
@@ -40,15 +31,7 @@ export interface DocumentEngine {
     uid: TContentTypeUID,
     documentId: ID,
     params?: TParams
-  ): Result.Delete<TContentTypeUID, TParams>;
-
-  deleteMany<
-    TContentTypeUID extends UID.ContentType,
-    TParams extends Params.DeleteMany<TContentTypeUID>
-  >(
-    uid: TContentTypeUID,
-    params?: TParams
-  ): Result.DeleteMany;
+  ): Result.Delete;
 
   create<TContentTypeUID extends UID.ContentType, TParams extends Params.Create<TContentTypeUID>>(
     uid: TContentTypeUID,
@@ -95,4 +78,10 @@ export interface DocumentEngine {
     documentId: ID,
     params?: TParams
   ): Result.DiscardDraft<TContentTypeUID, TParams>;
+
+  // Entry utilities
+  deleteEntry<TContentTypeUID extends UID.ContentType>(
+    uid: TContentTypeUID,
+    entryId: number | string
+  ): Promise<void>;
 }

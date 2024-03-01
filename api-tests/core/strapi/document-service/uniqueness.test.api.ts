@@ -4,7 +4,7 @@ import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper
 import resources from './resources/index';
 import { CATEGORY_UID, Category } from './utils';
 
-describe.skip('Document Service', () => {
+describe('Document Service', () => {
   let testUtils;
   let strapi: Core.LoadedStrapi;
 
@@ -39,7 +39,7 @@ describe.skip('Document Service', () => {
       createdCategory = category;
 
       expect(async () => {
-        await strapi.documents(CATEGORY_UID).update(category.id, {
+        await strapi.documents(CATEGORY_UID).update(category.documentId, {
           data: { name: testName },
         });
       }).rejects.toThrow();
@@ -51,18 +51,18 @@ describe.skip('Document Service', () => {
       const category = await strapi.documents(CATEGORY_UID).create({ data: { name } });
 
       // Publish that category
-      const publishRes = strapi.documents(CATEGORY_UID).publish(category.id);
+      const publishRes = strapi.documents(CATEGORY_UID).publish(category.documentId);
       await expect(publishRes).resolves.not.toThrowError();
 
       // Reset the name of the draft category
       await strapi
         .documents(CATEGORY_UID)
-        .update(category.id, { data: { name: 'other-not-unique-name' } });
+        .update(category.documentId, { data: { name: 'other-not-unique-name' } });
 
       // Now we can create a new category with the same name as the published category
       // When we try to publish it, it should throw an error
       const newCategory = await strapi.documents(CATEGORY_UID).create({ data: { name } });
-      expect(strapi.documents(CATEGORY_UID).publish(newCategory.id)).rejects.toThrow();
+      expect(strapi.documents(CATEGORY_UID).publish(newCategory.documentId)).rejects.toThrow();
     });
   });
 });

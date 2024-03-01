@@ -53,7 +53,7 @@ export type DeleteMany<TContentTypeUID extends UID.ContentType> = Pick<
 
 export type Create<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'data' | 'files' | 'fields' | 'populate' | 'locale' | 'lookup'
+  'data' | 'files' | 'fields' | 'populate' | 'locale' | 'lookup' | 'status'
 >;
 
 export type Clone<TContentTypeUID extends UID.ContentType> = Pick<

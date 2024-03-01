@@ -25,12 +25,12 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish every draft in every locale
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId, { locale: '*' });
 
         // Update drafts
         await Promise.all(
           ['es', 'nl', 'en'].map((locale) =>
-            strapi.documents(ARTICLE_UID).update(articleDb.id, {
+            strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
               locale,
               data: { title: 'Draft Article' },
             })
@@ -38,10 +38,12 @@ describe('Document Service', () => {
         );
 
         // Discard drafts
-        const result = await strapi.documents(ARTICLE_UID).discardDraft(articleDb.id);
+        const result = await strapi
+          .documents(ARTICLE_UID)
+          .discardDraft(articleDb.documentId, { locale: '*' });
 
         const draftArticlesDb = await findArticlesDb({
-          documentId: articleDb.id,
+          documentId: articleDb.documentId,
           publishedAt: { $null: true },
         });
 
@@ -68,12 +70,12 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish every draft in every locale
-        await strapi.documents(ARTICLE_UID).publish(articleDb.id);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId, { locale: '*' });
 
         // Update drafts
         await Promise.all(
           ['es', 'nl', 'en'].map((locale) =>
-            strapi.documents(ARTICLE_UID).update(articleDb.id, {
+            strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
               locale,
               data: { title: 'Draft Article' },
             })
@@ -83,10 +85,10 @@ describe('Document Service', () => {
         // Discard english draft
         const result = await strapi
           .documents(ARTICLE_UID)
-          .discardDraft(articleDb.id, { locale: 'en' });
+          .discardDraft(articleDb.documentId, { locale: 'en' });
 
         const draftArticlesDb = await findArticlesDb({
-          documentId: articleDb.id,
+          documentId: articleDb.documentId,
           publishedAt: { $null: true },
         });
 

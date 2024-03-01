@@ -14,15 +14,14 @@ import {
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import {
-  Form,
   GenericInput,
   useNotification,
   useOverlayBlocker,
   translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
-import { Data } from '@strapi/types';
-import { Formik, FormikHelpers } from 'formik';
+import type { Data } from '@strapi/types';
+import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 

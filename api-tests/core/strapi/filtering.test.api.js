@@ -260,7 +260,7 @@ describe('Filtering API', () => {
           },
         });
 
-        const matching = data.product.filter((x) => x.attributes.price === null);
+        const matching = data.product.filter((x) => x.price === null);
 
         res.body.data.sort((a, b) => (a.id > b.id ? 1 : -1));
         expect(res.body.data.length).toBe(matching.length);
@@ -1288,9 +1288,7 @@ describe('Filtering API', () => {
       });
 
       expect(res.body.data).toEqual(
-        expect.arrayContaining(
-          data.product.slice(0).sort((a, b) => a.attributes.rank - b.attributes.rank)
-        )
+        expect.arrayContaining(data.product.slice(0).sort((a, b) => a.rank - b.rank))
       );
     });
 
@@ -1304,9 +1302,7 @@ describe('Filtering API', () => {
       });
 
       expect(res.body.data).toEqual(
-        expect.arrayContaining(
-          data.product.slice(0).sort((a, b) => a.attributes.rank - b.attributes.rank)
-        )
+        expect.arrayContaining(data.product.slice(0).sort((a, b) => a.rank - b.rank))
       );
 
       const res2 = await rq({
@@ -1318,9 +1314,7 @@ describe('Filtering API', () => {
       });
 
       expect(res2.body.data).toEqual(
-        expect.arrayContaining(
-          data.product.slice(0).sort((a, b) => b.attributes.rank - a.attributes.rank)
-        )
+        expect.arrayContaining(data.product.slice(0).sort((a, b) => b.rank - a.rank))
       );
     });
 

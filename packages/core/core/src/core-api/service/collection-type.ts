@@ -1,88 +1,86 @@
-import { propOr } from 'lodash/fp';
-import { contentTypes } from '@strapi/utils';
-import type { Core, Struct, Data } from '@strapi/types';
+import type { Core, Struct, Modules } from '@strapi/types';
 
-import {
-  getPaginationInfo,
-  convertPagedToStartLimit,
-  shouldCount,
-  transformPaginationResponse,
-} from './pagination';
-import { getFetchParams } from './get-fetch-params';
+import { getPaginationInfo, shouldCount, transformPaginationResponse } from './pagination';
 
-const {
-  constants: { PUBLISHED_AT_ATTRIBUTE },
-} = contentTypes;
+import { CoreService } from './core-service';
 
-const setPublishedAt = (data: Record<string, unknown>) => {
-  data[PUBLISHED_AT_ATTRIBUTE] = propOr(new Date(), PUBLISHED_AT_ATTRIBUTE, data);
-};
+export class CollectionTypeService
+  extends CoreService
+  implements Core.CoreAPI.Service.CollectionType
+{
+  private contentType: Struct.CollectionTypeSchema;
+
+  constructor(contentType: Struct.CollectionTypeSchema) {
+    super();
+
+    this.contentType = contentType;
+  }
+
+  async find(params = {}) {
+    const { uid } = this.contentType;
+
+    const fetchParams = this.getFetchParams(params);
+
+    const paginationInfo = getPaginationInfo(fetchParams);
+
+    const results = await strapi.documents(uid).findMany({
+      ...fetchParams,
+      ...paginationInfo,
+    });
+
+    if (shouldCount(fetchParams)) {
+      const count = await strapi.documents(uid).count({ ...fetchParams, ...paginationInfo });
+
+      if (typeof count !== 'number') {
+        throw new Error('Count should be a number');
+      }
+
+      return {
+        results,
+        pagination: transformPaginationResponse(paginationInfo, count),
+      };
+    }
+
+    return {
+      results,
+      pagination: paginationInfo,
+    };
+  }
+
+  findOne(documentId: Modules.Documents.ID, params = {}) {
+    const { uid } = this.contentType;
+
+    return strapi.documents(uid).findOne(documentId, this.getFetchParams(params));
+  }
+
+  async create(params = { data: {} }) {
+    const { uid } = this.contentType;
+
+    return strapi.documents(uid).create(this.getFetchParams(params));
+  }
+
+  update(docId: Modules.Documents.ID, params = { data: {} }) {
+    const { uid } = this.contentType;
+
+    return strapi.documents(uid).update(docId, this.getFetchParams(params));
+  }
+
+  async delete(docId: Modules.Documents.ID, params = {}) {
+    const { uid } = this.contentType;
+
+    return strapi.documents(uid).delete(docId, this.getFetchParams(params));
+  }
+}
 
 /**
  *
  * Returns a collection type service to handle default core-api actions
  */
-const createCollectionTypeService = ({
-  contentType,
-}: {
-  contentType: Struct.CollectionTypeSchema;
-}): Core.CoreAPI.Service.CollectionType => {
-  const { uid } = contentType;
 
-  return <any>{
-    getFetchParams,
-
-    async find(params = {}) {
-      const fetchParams = this.getFetchParams(params);
-
-      const paginationInfo = getPaginationInfo(fetchParams);
-
-      const results = await strapi.entityService?.findMany(uid, {
-        ...fetchParams,
-        ...convertPagedToStartLimit(paginationInfo),
-      });
-
-      if (shouldCount(fetchParams)) {
-        const count = await strapi.entityService?.count(uid, { ...fetchParams, ...paginationInfo });
-
-        if (typeof count !== 'number') {
-          throw new Error('Count should be a number');
-        }
-
-        return {
-          results,
-          pagination: transformPaginationResponse(paginationInfo, count),
-        };
-      }
-
-      return {
-        results,
-        pagination: paginationInfo,
-      };
-    },
-
-    findOne(entityId: Data.ID, params = {}) {
-      return strapi.entityService?.findOne(uid, entityId, this.getFetchParams(params));
-    },
-
-    create(params = { data: {} }) {
-      const { data } = params;
-
-      setPublishedAt(data);
-
-      return strapi.entityService?.create(uid, { ...params, data });
-    },
-
-    update(entityId: Data.ID, params = { data: {} }) {
-      const { data } = params;
-
-      return strapi.entityService?.update(uid, entityId, { ...params, data });
-    },
-
-    delete(entityId: Data.ID, params = {}) {
-      return strapi.entityService?.delete(uid, entityId, params);
-    },
-  };
+const createCollectionTypeService = (
+  contentType: Struct.CollectionTypeSchema
+): Core.CoreAPI.Service.CollectionType => {
+  return new CollectionTypeService(contentType);
 };
 
-export default createCollectionTypeService;
+export { createCollectionTypeService };

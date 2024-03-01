@@ -1,6 +1,6 @@
 import { UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import { LongHand } from './types';
+import { LongHandDocument } from './types';
 
 export const isLocalizedContentType = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
@@ -14,7 +14,7 @@ export const getDefaultLocale = () => {
 };
 
 export const getRelationTargetLocale = (
-  relation: LongHand,
+  relation: LongHandDocument,
   opts: {
     targetUid: UID.Schema;
     sourceUid: UID.Schema;

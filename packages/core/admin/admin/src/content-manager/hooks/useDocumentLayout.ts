@@ -20,7 +20,7 @@ import {
   useDocument,
 } from './useDocument';
 
-import type { InputProps } from '../components/FormInputs/types';
+import type { InputProps } from '../../components/FormInputs/types';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Schema as SchemaUtils } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';
@@ -66,8 +66,9 @@ interface ListLayout {
   options: LayoutOptions;
   settings: LayoutSettings;
 }
-interface EditFieldSharedProps extends Omit<InputProps, 'hint' | 'type'> {
+interface EditFieldSharedProps extends Omit<InputProps, 'hint' | 'label' | 'type'> {
   hint?: string;
+  label: string;
   mainField?: string;
   size: number;
   unique?: boolean;

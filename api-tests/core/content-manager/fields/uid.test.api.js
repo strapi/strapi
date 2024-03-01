@@ -246,7 +246,7 @@ describe('Test type UID', () => {
       );
 
       const res = await rq.post(
-        `/content-manager/collection-types/api::withrequireduid.withrequireduid/${createRes.body.data.id}/actions/publish`
+        `/content-manager/collection-types/api::withrequireduid.withrequireduid/${createRes.body.data.documentId}/actions/publish`
       );
 
       expect(res.statusCode).toBe(400);

@@ -11,10 +11,9 @@ import {
   TextInput,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { Form } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
-import { Modules } from '@strapi/types';
-import { Field, FormikHelpers, FormikProvider, useFormik } from 'formik';
+import type { Modules } from '@strapi/types';
+import { Field, Form, FormikHelpers, FormikProvider, useFormik } from 'formik';
 import { IntlShape, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import * as yup from 'yup';
@@ -26,17 +25,15 @@ import { EventTableCE } from './EventsTable';
 import { HeadersInput } from './HeadersInput';
 import { TriggerContainer } from './TriggerContainer';
 
-type Webhook = Modules.WebhookStore.Webhook;
-
 interface WebhookFormValues {
-  name: Webhook['name'];
-  url: Webhook['url'];
+  name: Modules.WebhookStore.Webhook['name'];
+  url: Modules.WebhookStore.Webhook['url'];
   headers: Array<{ key: string; value: string }>;
-  events: Webhook['events'];
+  events: Modules.WebhookStore.Webhook['events'];
 }
 
 interface WebhookFormProps {
-  data?: Webhook;
+  data?: Modules.WebhookStore.Webhook;
   handleSubmit: (
     values: WebhookFormValues,
     formik: FormikHelpers<WebhookFormValues>
@@ -70,7 +67,7 @@ const WebhookForm = ({
   /**
    * Map the headers into a form that can be used within the formik form
    */
-  const mapHeaders = (headers: Webhook['headers']) => {
+  const mapHeaders = (headers: Modules.WebhookStore.Webhook['headers']) => {
     if (!Object.keys(headers).length) {
       return [{ key: '', value: '' }];
     }

@@ -73,7 +73,7 @@ describe('Test type enumeration', () => {
     );
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withenumeration.withenumeration/${res.body.data.id}`,
+      `/content-manager/collection-types/api::withenumeration.withenumeration/${res.body.data.documentId}`,
       {
         body: {
           field: 'one',
@@ -83,7 +83,7 @@ describe('Test type enumeration', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toMatchObject({
-      id: res.body.data.id,
+      documentId: res.body.data.documentId,
       field: 'one',
     });
   });

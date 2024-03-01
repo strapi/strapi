@@ -29,6 +29,7 @@ interface PanelDescription {
  * -----------------------------------------------------------------------------------------------*/
 
 const Panels = () => {
+  const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
       query: { status },
@@ -42,23 +43,20 @@ const Panels = () => {
   const props = {
     activeTab: status,
     model,
-    id,
-    document,
-    meta,
+    documentId: id,
+    document: isCloning ? undefined : document,
+    meta: isCloning ? undefined : meta,
     collectionType,
   } satisfies PanelComponentProps;
 
-  const descriptions = React.useMemo(
-    () =>
-      (
-        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-      ).getEditViewSidePanels(),
-    [plugins]
-  );
-
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <DescriptionComponentRenderer props={props} descriptions={descriptions}>
+      <DescriptionComponentRenderer
+        props={props}
+        descriptions={(
+          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+        ).getEditViewSidePanels()}
+      >
         {(panels) =>
           panels.map(({ content, id, ...description }) => (
             <Panel key={id} {...description}>
@@ -102,7 +100,7 @@ const ActionsPanelContent = () => {
   const props = {
     activeTab: status,
     model,
-    id,
+    documentId: id,
     document: isCloning ? undefined : document,
     meta: isCloning ? undefined : meta,
     collectionType,

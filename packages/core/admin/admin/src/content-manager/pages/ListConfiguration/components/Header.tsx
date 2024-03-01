@@ -5,8 +5,8 @@ import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import { useForm } from '../../../../components/Form';
 import { capitalise } from '../../../../utils/strings';
-import { useForm } from '../../../components/Form';
 import { getTranslation } from '../../../utils/translations';
 
 interface HeaderProps {

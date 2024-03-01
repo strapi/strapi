@@ -44,10 +44,15 @@ const EditLocale = (props: EditLocaleProps) => {
     <>
       <IconButton
         onClick={() => setVisible(true)}
-        label={formatMessage({
-          id: getTranslation('Settings.list.actions.edit'),
-          defaultMessage: 'Edit',
-        })}
+        label={formatMessage(
+          {
+            id: getTranslation('Settings.list.actions.edit'),
+            defaultMessage: 'Edit {name} locale',
+          },
+          {
+            name: props.name,
+          }
+        )}
         icon={<Pencil />}
         borderWidth={0}
       />

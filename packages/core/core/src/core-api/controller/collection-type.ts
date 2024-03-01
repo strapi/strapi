@@ -3,8 +3,6 @@ import { errors } from '@strapi/utils';
 import type { Core, Struct, Utils, UID } from '@strapi/types';
 import type Koa from 'koa';
 
-import { parseBody } from './transform';
-
 interface Options {
   contentType: Struct.CollectionTypeSchema;
 }
@@ -18,6 +16,7 @@ const createCollectionTypeController = ({
 }: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.CollectionType> => {
   const uid = contentType.uid as UID.Service;
 
+  // TODO: transform into a class
   return {
     /**
      * Retrieve records.
@@ -32,9 +31,7 @@ const createCollectionTypeController = ({
     },
 
     /**
-     * Retrieve a record.
-     *
-     * @return {Object}
+     * Retrieve a record
      */
     async findOne(ctx) {
       const { id } = ctx.params;
@@ -49,14 +46,12 @@ const createCollectionTypeController = ({
 
     /**
      * Create a record.
-     *
-     * @return {Object}
      */
     async create(ctx) {
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const body = parseBody(ctx);
+      const { body = {} as any } = ctx.request;
 
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
@@ -67,7 +62,6 @@ const createCollectionTypeController = ({
       const entity = await strapi.service(uid).create({
         ...sanitizedQuery,
         data: sanitizedInputData,
-        files: 'files' in body ? body.files : undefined,
       });
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -77,15 +71,13 @@ const createCollectionTypeController = ({
 
     /**
      * Update a record.
-     *
-     * @return {Object}
      */
     async update(ctx: Koa.Context) {
       const { id } = ctx.params;
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const body = parseBody(ctx);
+      const { body = {} as any } = ctx.request;
 
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
@@ -96,7 +88,6 @@ const createCollectionTypeController = ({
       const entity = await strapi.service(uid).update(id, {
         ...sanitizedQuery,
         data: sanitizedInputData,
-        files: 'files' in body ? body.files : undefined,
       });
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -106,20 +97,17 @@ const createCollectionTypeController = ({
 
     /**
      * Destroy a record.
-     *
-     * @return {Object}
      */
     async delete(ctx) {
       const { id } = ctx.params;
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const entity = await strapi.service(uid).delete(id, sanitizedQuery);
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      await strapi.service(uid).delete(id, sanitizedQuery);
 
-      return this.transformResponse(sanitizedEntity);
+      ctx.status = 204;
     },
   };
 };
 
-export default createCollectionTypeController;
+export { createCollectionTypeController };
