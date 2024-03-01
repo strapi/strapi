@@ -5,8 +5,8 @@ inputs:
     description: 'Should run EE or CE e2e tests'
   jestOptions:
     description: 'Jest options'
-  futureContentHistory:
-    description: 'Future unstable content history feature'
+  enableFutureFeatures:
+    description: 'Enable future unstable features'
 runs:
   using: 'composite'
   steps:
@@ -14,5 +14,6 @@ runs:
       env:
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
-        STRAPI_FEATURES_FUTURE_CONTENT_HISTORY: ${{ inputs.futureContentHistory }}
+        STRAPI_FEATURES_FUTURE_CONTENT_HISTORY: ${{ inputs.enableFutureFeatures }}
+        STRAPI_FEATURES_FUTURE_RELEASES_SCHEDULING: ${{ inputs.enableFutureFeatures }}
       shell: bash

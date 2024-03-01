@@ -225,7 +225,7 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
-          futureContentHistory: true
+          enableFutureFeatures: true
           jestOptions: --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v4
