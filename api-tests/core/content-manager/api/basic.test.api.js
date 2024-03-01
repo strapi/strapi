@@ -102,13 +102,13 @@ describe('CM API - Basic', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product.product/${data.products[0].id}`,
+      url: `/content-manager/collection-types/api::product.product/${data.products[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
-    expect(res.body.data.id).toEqual(data.products[0].id);
+    expect(res.body.data.documentId).toEqual(data.products[0].documentId);
     expect(res.body.data.publishedAt).toBeDefined();
     data.products[0] = res.body.data;
   });
@@ -116,7 +116,7 @@ describe('CM API - Basic', () => {
   test('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product.product/${data.products[0].id}`,
+      url: `/content-manager/collection-types/api::product.product/${data.products[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -137,7 +137,7 @@ describe('CM API - Basic', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.id}`,
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.documentId}`,
       body: {},
     });
 
@@ -159,7 +159,7 @@ describe('CM API - Basic', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.id}`,
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.documentId}`,
       body: {
         name: 'Product 1 updated',
       },
@@ -188,7 +188,7 @@ describe('CM API - Basic', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product.product/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -223,7 +223,7 @@ describe('CM API - Basic', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product.product/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);

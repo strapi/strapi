@@ -1,6 +1,6 @@
 import { render as renderRTL } from '@tests/utils';
 
-import { Form } from '../../../../../../components/Form';
+import { Form } from '../../../../../../../components/Form';
 import { Wysiwyg, WysiwygProps } from '../Field';
 
 jest.mock('@strapi/helper-plugin', () => ({

@@ -108,7 +108,7 @@ const ConfirmDialogPublishAll = ({
   } = useGetManyDraftRelationCountQuery(
     {
       model,
-      ids: selectedEntries,
+      documentIds: selectedEntries.map((id) => id.toString()),
       locale: query?.plugins?.i18n?.locale,
     },
     {

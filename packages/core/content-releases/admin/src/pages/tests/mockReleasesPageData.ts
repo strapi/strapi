@@ -232,6 +232,7 @@ const PENDING_RELEASES_MOCK_DATA = {
       pageCount: 2,
       total: 17,
     },
+    pendingReleasesCount: 17,
   },
 };
 

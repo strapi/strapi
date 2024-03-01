@@ -25,9 +25,11 @@ describe('Date validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: () => ({
-        findFirst: fakeFindFirst,
-      }),
+      db: {
+        query: () => ({
+          findOne: fakeFindFirst,
+        }),
+      },
     } as any;
 
     afterEach(() => {
@@ -153,9 +155,11 @@ describe('Date validator', () => {
       await validator('2021-11-29');
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrDateUnique: '2021-11-29' },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrDateUnique: '2021-11-29',
+        },
       });
     });
 
@@ -177,14 +181,14 @@ describe('Date validator', () => {
       await validator('2021-11-29');
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: {
+        where: {
           attrDateUnique: '2021-11-29',
           id: {
             $ne: 1,
           },
+          locale: 'en',
+          publishedAt: null,
         },
-        locale: 'en',
-        status: 'draft',
       });
     });
   });

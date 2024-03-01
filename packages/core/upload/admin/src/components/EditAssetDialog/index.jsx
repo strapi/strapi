@@ -19,8 +19,8 @@ import {
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Form, getFileExtension, pxToRem, useTracking } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { getFileExtension, pxToRem, useTracking } from '@strapi/helper-plugin';
+import { Form, Formik } from 'formik';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

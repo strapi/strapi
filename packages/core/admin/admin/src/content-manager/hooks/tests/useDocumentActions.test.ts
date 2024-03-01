@@ -32,10 +32,10 @@ describe('useDocumentActions', () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -48,7 +48,8 @@ describe('useDocumentActions', () => {
         {
           "data": {
             "content": "the brown fox jumps over the lazy dog",
-            "id": "67890",
+            "documentId": "12345",
+            "id": 2,
             "title": "test",
           },
         }
@@ -75,10 +76,10 @@ describe('useDocumentActions', () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -122,14 +123,15 @@ describe('useDocumentActions', () => {
       });
 
       expect(response).toMatchInlineSnapshot(`
-          {
-            "data": {
-              "content": "the brown fox jumps over the lazy dog",
-              "id": "12345",
-              "title": "test",
-            },
-          }
-        `);
+        {
+          "data": {
+            "content": "the brown fox jumps over the lazy dog",
+            "documentId": "12345",
+            "id": 1,
+            "title": "test",
+          },
+        }
+      `);
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -186,7 +188,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -194,7 +196,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "title": "test",
         }
       `);
@@ -220,7 +223,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -250,7 +253,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -258,7 +261,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "title": "test",
         }
       `);
@@ -284,7 +288,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -314,7 +318,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -322,7 +326,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "title": "test",
         }
       `);
@@ -348,7 +353,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -379,7 +384,7 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
             title: 'Entry 1',
@@ -391,7 +396,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "publishedAt": "2024-01-23T16:23:38.948Z",
           "title": "test",
         }
@@ -419,7 +425,7 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
             title: 'Entry 1',
@@ -454,10 +460,10 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             content: 'the brown fox jumps over the lazy dog',
           }
         );
@@ -470,7 +476,8 @@ describe('useDocumentActions', () => {
           "data": {
             "content": "the brown fox jumps over the lazy dog",
             "createdAt": "",
-            "id": "12345",
+            "documentId": "12345",
+            "id": 1,
             "name": "Entry 1",
             "publishedAt": "",
             "updatedAt": "",
@@ -500,10 +507,10 @@ describe('useDocumentActions', () => {
           {
             collectionType: 'collection-types',
             model: mockData.contentManager.contentType,
-            id: '12345',
+            documentId: '12345',
           },
           {
-            id: '12345',
+            documentId: '12345',
             content: 'the brown fox jumps over the lazy dog',
           }
         );
@@ -535,7 +542,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;
@@ -543,7 +550,8 @@ describe('useDocumentActions', () => {
 
       expect(response).toMatchInlineSnapshot(`
         {
-          "id": "12345",
+          "documentId": "12345",
+          "id": 1,
           "publishedAt": null,
           "title": "test",
         }
@@ -570,7 +578,7 @@ describe('useDocumentActions', () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
-          id: '12345',
+          documentId: '12345',
         });
 
         response = res;

@@ -87,11 +87,11 @@ describe('Core API - Basic + compo ', () => {
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: product,
+      documentId: expect.anything(),
+      ...product,
     });
 
-    expect(body.data.attributes.publishedAt).toBeISODate();
+    expect(body.data.publishedAt).toBeISODate();
     data.productsWithCompoAndDP.push(body.data);
   });
 
@@ -109,7 +109,7 @@ describe('Core API - Basic + compo ', () => {
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject(data.productsWithCompoAndDP[0]);
     body.data.forEach((p) => {
-      expect(p.attributes.publishedAt).toBeISODate();
+      expect(p.publishedAt).toBeISODate();
     });
   });
 
@@ -126,7 +126,7 @@ describe('Core API - Basic + compo ', () => {
     };
     const { statusCode, body } = await rq({
       method: 'PUT',
-      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
+      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].documentId}`,
       body: {
         data: product,
       },
@@ -138,18 +138,19 @@ describe('Core API - Basic + compo ', () => {
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject({
-      id: data.productsWithCompoAndDP[0].id,
-      attributes: product,
+      documentId: data.productsWithCompoAndDP[0].documentId,
+      ...product,
     });
 
-    expect(body.data.attributes.publishedAt).toBeISODate();
+    expect(body.data.publishedAt).toBeISODate();
     data.productsWithCompoAndDP[0] = body.data;
   });
 
-  test('Delete product with compo', async () => {
+  // TODO V5: Decide response of delete
+  test.skip('Delete product with compo', async () => {
     const { statusCode, body } = await rq({
       method: 'DELETE',
-      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
+      url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].documentId}`,
       qs: {
         populate: ['compo'],
       },
@@ -157,7 +158,7 @@ describe('Core API - Basic + compo ', () => {
 
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject(data.productsWithCompoAndDP[0]);
-    expect(body.data.attributes.publishedAt).toBeISODate();
+    expect(body.data.publishedAt).toBeISODate();
     data.productsWithCompoAndDP.shift();
   });
 
@@ -297,12 +298,12 @@ describe('Core API - Basic + compo ', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'compo[0].name must be defined.',
+          message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
           details: {
             errors: [
               {
                 path: ['compo', '0', 'name'],
-                message: 'compo[0].name must be defined.',
+                message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
                 name: 'ValidationError',
               },
             ],

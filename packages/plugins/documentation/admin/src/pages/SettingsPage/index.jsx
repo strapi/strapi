@@ -15,7 +15,6 @@ import {
   FieldAction,
 } from '@strapi/design-system';
 import {
-  Form,
   LoadingIndicatorPage,
   useFocusWhenNavigate,
   translatedErrors,
@@ -23,7 +22,7 @@ import {
 } from '@strapi/helper-plugin';
 // Strapi Icons
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import * as yup from 'yup';

@@ -80,7 +80,7 @@ function checkAPIResultFields(res, fields) {
   checkAPIResultValidity(res);
 
   res.body.data
-    .map((entity) => Object.keys(entity.attributes))
+    .map((entity) => Object.keys(entity))
     .map(symmetricDifference(fields))
     .forEach((diff) => {
       expect(diff).toStrictEqual([]);
@@ -743,7 +743,8 @@ describe('Core API - Validate', () => {
 
   describe('Fields', () => {
     const allDocumentFields = [
-      // TODO: Document id should not be in attributes
+      // TODO: Sanitize id field
+      'id',
       'documentId',
       'locale',
       'name',
@@ -768,7 +769,7 @@ describe('Core API - Validate', () => {
           it('Successfully select a field: name', async () => {
             const res = await rq.get('/api/documents', { qs: { fields: 'name' } });
 
-            checkAPIResultFields(res, ['name']);
+            checkAPIResultFields(res, ['id', 'documentId', 'name']);
           });
         });
 
@@ -806,7 +807,7 @@ describe('Core API - Validate', () => {
           it('Successfully select a field: name', async () => {
             const res = await rq.get('/api/documents', { qs: { fields: ['name'] } });
 
-            checkAPIResultFields(res, ['name']);
+            checkAPIResultFields(res, ['id', 'documentId', 'name']);
           });
         });
 
@@ -853,7 +854,7 @@ describe('Core API - Validate', () => {
         it('Select only requested fields: [name, misc]', async () => {
           const res = await rq.get('/api/documents', { qs: { fields: ['name', 'misc'] } });
 
-          checkAPIResultFields(res, ['name', 'misc']);
+          checkAPIResultFields(res, ['id', 'documentId', 'name', 'misc']);
         });
       });
     });
@@ -926,10 +927,7 @@ describe('Core API - Validate', () => {
         checkAPIResultValidity(res);
 
         res.body.data.forEach((document) => {
-          expect(document.attributes).toHaveProperty(
-            'relations',
-            expect.objectContaining({ data: expect.any(Array) })
-          );
+          expect(document).toHaveProperty('relations', expect.any(Array));
         });
       });
 
@@ -953,13 +951,13 @@ describe('Core API - Validate', () => {
             checkAPIResultValidity(res);
 
             res.body.data.forEach((document) => {
-              expect(document.attributes).toHaveProperty(
+              expect(document).toHaveProperty(
                 'dz',
                 expect.arrayContaining([
                   expect.objectContaining({ __component: expect.any(String) }),
                 ])
               );
-              expect(document.attributes.dz).toHaveLength(3);
+              expect(document.dz).toHaveLength(3);
             });
           }
         );
@@ -975,11 +973,11 @@ describe('Core API - Validate', () => {
             checkAPIResultValidity(res);
 
             res.body.data.forEach((document) => {
-              expect(document.attributes).toHaveProperty(
+              expect(document).toHaveProperty(
                 'dz',
                 expect.arrayContaining([expect.objectContaining({ __component: componentUID })])
               );
-              expect(document.attributes.dz).toHaveLength(expectedLength);
+              expect(document.dz).toHaveLength(expectedLength);
             });
           }
         );
@@ -990,7 +988,7 @@ describe('Core API - Validate', () => {
           checkAPIResultValidity(res);
 
           res.body.data.forEach((document) => {
-            expect(document.attributes).not.toHaveProperty('dz');
+            expect(document).not.toHaveProperty('dz');
           });
         });
 
@@ -1010,10 +1008,7 @@ describe('Core API - Validate', () => {
         checkAPIResultValidity(res);
 
         res.body.data.forEach((document) => {
-          expect(document.attributes).toHaveProperty(
-            'relations',
-            expect.objectContaining({ data: expect.any(Array) })
-          );
+          expect(document).toHaveProperty('relations', expect.any(Array));
         });
       });
 
@@ -1028,7 +1023,7 @@ describe('Core API - Validate', () => {
         checkAPIResultValidity(res);
 
         res.body.data.forEach((document) => {
-          expect(document.attributes).toHaveProperty(
+          expect(document).toHaveProperty(
             'dz',
             expect.arrayContaining([expect.objectContaining({ __component: expect.any(String) })])
           );
@@ -1044,10 +1039,7 @@ describe('Core API - Validate', () => {
         checkAPIResultValidity(res);
 
         res.body.data.forEach((document) => {
-          expect(document.attributes).toHaveProperty(
-            'relations',
-            expect.objectContaining({ data: expect.any(Array) })
-          );
+          expect(document).toHaveProperty('relations', expect.any(Array));
         });
       });
 
@@ -1062,7 +1054,7 @@ describe('Core API - Validate', () => {
         checkAPIResultValidity(res);
 
         res.body.data.forEach((document) => {
-          expect(document.attributes).toHaveProperty(
+          expect(document).toHaveProperty(
             'dz',
             expect.arrayContaining([expect.objectContaining({ __component: expect.any(String) })])
           );

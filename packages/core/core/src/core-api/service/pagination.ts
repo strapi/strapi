@@ -74,6 +74,7 @@ const shouldCount = (params: { pagination?: PaginationParams }) => {
 
 const isOffsetPagination = (pagination?: PaginationParams): pagination is OffsetPagination =>
   has('start', pagination) || has('limit', pagination);
+
 const isPagedPagination = (pagination?: PaginationParams): pagination is PagedPagination =>
   has('page', pagination) || has('pageSize', pagination);
 
@@ -121,18 +122,6 @@ const getPaginationInfo = (params: { pagination?: PaginationParams }): Paginatio
   };
 };
 
-const convertPagedToStartLimit = (paginationInfo: PaginationInfo) => {
-  if ('page' in paginationInfo) {
-    const { page, pageSize } = paginationInfo;
-    return {
-      start: (page - 1) * pageSize,
-      limit: pageSize,
-    };
-  }
-
-  return paginationInfo;
-};
-
 const transformPaginationResponse = (paginationInfo: PaginationInfo, count: number) => {
   if ('page' in paginationInfo) {
     return {
@@ -148,4 +137,4 @@ const transformPaginationResponse = (paginationInfo: PaginationInfo, count: numb
   };
 };
 
-export { getPaginationInfo, convertPagedToStartLimit, transformPaginationResponse, shouldCount };
+export { getPaginationInfo, transformPaginationResponse, shouldCount };

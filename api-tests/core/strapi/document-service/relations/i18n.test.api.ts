@@ -150,8 +150,8 @@ describe('Document Service relations', () => {
           data: {
             name: 'test',
             products_mm: [
-              { id: 'Skate', locale: 'en' },
-              { id: 'Candle', locale: 'en' },
+              { documentId: 'Skate', locale: 'en' },
+              { documentId: 'Candle', locale: 'en' },
             ],
           },
           populate: {
@@ -173,8 +173,8 @@ describe('Document Service relations', () => {
           data: {
             name: 'test',
             products_mm: [
-              { id: 'Skate', locale: 'en' },
-              { id: 'Skate', locale: 'es' },
+              { documentId: 'Skate', locale: 'en' },
+              { documentId: 'Skate', locale: 'es' },
             ],
           },
           populate: {
@@ -197,7 +197,7 @@ describe('Document Service relations', () => {
         const document = await strapi.documents(PRODUCT_UID).create({
           data: {
             name: 'Skate',
-            tag: { id: 'Tag1', locale: null },
+            tag: { documentId: 'Tag1', locale: null },
           },
           populate: {
             tag: true,
