@@ -64,7 +64,7 @@ describe('VersionHeader', () => {
           selectedVersion,
           mainField: 'title',
         },
-        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
+        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
       expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe('VersionHeader', () => {
         },
         {
           pathname:
-            '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history',
+            '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history',
           search: '?plugins[i18n][locale]=en',
         }
       );
