@@ -7,9 +7,9 @@ import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled, { CSSProperties, css } from 'styled-components';
 
+import { composeRefs } from '../../../../../../utils/refs';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
-import { composeRefs } from '../../../../../utils/refs';
 import { getTranslation } from '../../../../../utils/translations';
 
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';

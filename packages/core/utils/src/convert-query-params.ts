@@ -9,7 +9,6 @@ import {
   isNil,
   toNumber,
   isInteger,
-  has,
   isEmpty,
   isObject,
   cloneDeep,
@@ -20,13 +19,10 @@ import {
 } from 'lodash/fp';
 import _ from 'lodash';
 import parseType from './parse-type';
-import * as contentTypesUtils from './content-types';
 import { PaginationError } from './errors';
 import { isDynamicZoneAttribute, isMorphToRelationalAttribute } from './content-types';
 import { Model } from './types';
 import { isOperator } from './operators';
-
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 type SortOrder = 'asc' | 'desc';
 
@@ -482,8 +478,6 @@ const convertNestedPopulate = (subPopulate: boolean | PopulateObjectParams, sche
     query.limit = convertLimitQueryParams(limit);
   }
 
-  convertPublicationStateParams(schema, subPopulate, query);
-
   return query;
 };
 
@@ -610,33 +604,6 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): Wher
   return filters;
 };
 
-const convertPublicationStateParams = (
-  schema?: Model,
-  params: { publicationState?: 'live' | 'preview' } = {},
-  query: Query = {}
-) => {
-  if (!schema) {
-    return;
-  }
-
-  const { publicationState } = params;
-
-  if (!_.isNil(publicationState)) {
-    if (!contentTypesUtils.constants.DP_PUB_STATES.includes(publicationState)) {
-      throw new Error(
-        `Invalid publicationState. Expected one of 'preview','live' received: ${publicationState}.`
-      );
-    }
-
-    // NOTE: this is the query layer filters not the entity service filters
-    query.filters = ({ meta }: { meta: Model }) => {
-      if (publicationState === 'live' && has(PUBLISHED_AT_ATTRIBUTE, meta.attributes)) {
-        return { [PUBLISHED_AT_ATTRIBUTE]: { $notNull: true } };
-      }
-    };
-  }
-};
-
 const transformParamsToQuery = (uid: string, params: Params): Query => {
   // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
   const schema = strapi.getModel(uid);
@@ -683,8 +650,6 @@ const transformParamsToQuery = (uid: string, params: Params): Query => {
     query.limit = convertLimitQueryParams(limit);
   }
 
-  convertPublicationStateParams(schema, params, query);
-
   return query;
 };
 
@@ -695,6 +660,5 @@ export default {
   convertPopulateQueryParams,
   convertFiltersQueryParams,
   convertFieldsQueryParams,
-  convertPublicationStateParams,
   transformParamsToQuery,
 };

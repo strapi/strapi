@@ -12,8 +12,9 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
+import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { type InputProps, useField, useForm } from '../../../../components/Form';
+import { useComposedRefs } from '../../../../../utils/refs';
 import { useDoc } from '../../../../hooks/useDocument';
 import {
   useGenerateUIDMutation,
@@ -21,7 +22,6 @@ import {
   useGetDefaultUIDQuery,
 } from '../../../../services/uid';
 import { buildValidParams } from '../../../../utils/api';
-import { useComposedRefs } from '../../../../utils/refs';
 
 import type { Attribute } from '@strapi/types';
 
@@ -83,7 +83,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
      * but we also want to set it as the initialValue too.
      */
     React.useEffect(() => {
-      if (defaultGeneratedUID) {
+      if (defaultGeneratedUID && field.value === undefined) {
         field.onChange(name, defaultGeneratedUID);
       }
     }, [defaultGeneratedUID, field, name]);
@@ -246,11 +246,12 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           </Flex>
         }
         hint={hint}
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         name={name}
         onChange={field.onChange}
         placeholder={placeholder}
-        value={field.value}
+        value={field.value ?? ''}
         required={required}
       />
     );

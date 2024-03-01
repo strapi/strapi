@@ -67,12 +67,15 @@ describe('Transform relational data', () => {
           data: {
             name: 'test',
             categories: [
-              { id: 'category-1', locale: 'en' },
-              { id: 'category-1', locale: 'fr' },
-              { id: 'category-2', locale: 'en' },
+              { documentId: 'category-1', locale: 'en' },
+              { documentId: 'category-1', locale: 'fr' },
+              { documentId: 'category-2', locale: 'en' },
             ],
-            category: { id: 'category-4', locale: 'en' },
-            relatedProducts: [{ id: 'product-1' }, { id: 'product-2', locale: null }],
+            category: { documentId: 'category-4', locale: 'en' },
+            relatedProducts: [
+              { documentId: 'product-1' },
+              { documentId: 'product-2', locale: null },
+            ],
           },
         },
         { locale: 'en', isDraft: true }
@@ -97,7 +100,7 @@ describe('Transform relational data', () => {
         {
           data: {
             name: 'test',
-            categories: [{ id: 'category-1' }],
+            categories: [{ documentId: 'category-1' }],
           },
         },
         { isDraft: true }
@@ -119,11 +122,15 @@ describe('Transform relational data', () => {
             categories: {
               connect: [
                 {
-                  id: 'category-1',
+                  documentId: 'category-1',
                   locale: 'fr',
                   position: { before: 'category-2', locale: 'en' },
                 },
-                { id: 'category-2', locale: 'en', position: { after: 'category-1', locale: 'fr' } },
+                {
+                  documentId: 'category-2',
+                  locale: 'en',
+                  position: { after: 'category-1', locale: 'fr' },
+                },
               ],
             },
           },
@@ -150,7 +157,7 @@ describe('Transform relational data', () => {
         CATEGORY_UID,
         {
           data: {
-            products: [{ id: 'product-1' }, { id: 'product-2', locale: 'en' }],
+            products: [{ documentId: 'product-1' }, { documentId: 'product-2', locale: 'en' }],
           },
         },
         { locale: 'en', isDraft: true }
@@ -169,7 +176,7 @@ describe('Transform relational data', () => {
         CATEGORY_UID,
         {
           data: {
-            relatedCategories: [{ id: 'category-1' }],
+            relatedCategories: [{ documentId: 'category-1' }],
           },
         },
         { locale: 'fr', isDraft: true }
@@ -187,7 +194,7 @@ describe('Transform relational data', () => {
         {
           data: {
             // Connect to another locale than the current one
-            relatedCategories: [{ id: 'category-1', locale: 'fr' }],
+            relatedCategories: [{ documentId: 'category-1', locale: 'fr' }],
           },
         },
         { locale: 'en', isDraft: true }

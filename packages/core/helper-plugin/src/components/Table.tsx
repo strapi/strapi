@@ -27,13 +27,15 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-import type { Attribute, Entity } from '@strapi/types';
+import type { Attribute, Documents, Entity } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableContextValue<TRow extends { id: Entity.ID } = { id: Entity.ID }> {
+interface TableContextValue<
+  TRow extends { documentId: Documents.ID; id: number } | { id: Entity.ID } = { id: Entity.ID }
+> {
   selectedEntries: Entity.ID[];
   setSelectedEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
   onSelectRow: (args: { name: Entity.ID; value: boolean }) => void;
@@ -229,7 +231,6 @@ interface HeaderCellProps {
    */
   cellFormatter?: (
     data: {
-      id: string;
       [key: string]: any;
     },
     header: Omit<HeaderCellProps, 'cellFormatter'>,

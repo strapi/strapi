@@ -1,3 +1,4 @@
+import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 
 import { DOCUMENT_META_FIELDS } from '../../../constants/attributes';
@@ -16,7 +17,7 @@ type Predicate = <TAttribute extends Attribute.Any>(
 type Transform = <TAttribute extends Attribute.Any>(value: any, attribute: TAttribute) => any;
 type AnyData = Omit<Document, 'id'>;
 
-const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component'];
+const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
 
 /**
  * @internal This function is used to traverse the data and transform the values.
@@ -117,8 +118,20 @@ const prepareRelations = traverseData(
  * @description TODO
  */
 const prepareTempKeys = traverseData(
-  () => false,
-  (v) => v
+  (attribute) =>
+    (attribute.type === 'component' && attribute.repeatable) || attribute.type === 'dynamiczone',
+  (data) => {
+    if (Array.isArray(data) && data.length > 0) {
+      const keys = generateNKeysBetween(undefined, undefined, data.length);
+
+      return data.map((datum, index) => ({
+        ...datum,
+        __temp_key__: keys[index],
+      }));
+    }
+
+    return data;
+  }
 );
 
 /* -------------------------------------------------------------------------------------------------

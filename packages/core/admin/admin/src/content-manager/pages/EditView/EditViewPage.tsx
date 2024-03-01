@@ -23,8 +23,8 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { Blocker, Form } from '../../../components/Form';
 import { useOnce } from '../../../hooks/useOnce';
-import { Blocker, Form } from '../../components/Form';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
@@ -128,7 +128,11 @@ const EditViewPage = () => {
       return undefined;
     }
 
-    const form = document ?? createDefaultForm(schema, components);
+    /**
+     * Check that we have an ID so we know the
+     * document has been created in some way.
+     */
+    const form = document?.id ? document : createDefaultForm(schema, components);
 
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, isSingleType, schema, components]);

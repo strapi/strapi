@@ -192,7 +192,7 @@ describe('Not required dynamiczone', () => {
   describe('Getting one entry', () => {
     test('The entry has its dynamic zone populated', async () => {
       const createRes = await createEntry();
-      const entryId = createRes.body.data.id;
+      const entryId = createRes.body.data.documentId;
 
       const res = await rq({
         method: 'GET',
@@ -258,7 +258,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.data.id;
+      const entryId = createRes.body.data.documentId;
 
       const res = await rq({
         method: 'PUT',
@@ -280,7 +280,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEmpty();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.data.id;
+      const entryId = createRes.body.data.documentId;
 
       const res = await rq({
         method: 'PUT',
@@ -316,7 +316,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.data.id;
+      const entryId = createRes.body.data.documentId;
 
       const res = await rq({
         method: 'PUT',
@@ -360,7 +360,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.data.id;
+      const entryId = createRes.body.data.documentId;
 
       const res = await rq({
         method: 'PUT',
@@ -382,7 +382,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.data.id;
+      const entryId = createRes.body.data.documentId;
 
       const res = await rq({
         method: 'PUT',
@@ -405,7 +405,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.documentId;
 
       const res = await rq({
         method: 'DELETE',

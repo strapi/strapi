@@ -22,13 +22,13 @@ const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials, state })
   return createAgent(strapi, state).login(userInfo);
 };
 
+// TODO: Remove
 const transformToRESTResource = (input) => {
   if (Array.isArray(input)) {
     return input.map((value) => transformToRESTResource(value));
   }
 
-  const { id, ...attributes } = input;
-  return { id, attributes };
+  return input;
 };
 
 module.exports = {

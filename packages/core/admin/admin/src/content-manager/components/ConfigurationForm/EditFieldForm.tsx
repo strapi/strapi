@@ -15,13 +15,13 @@ import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { Form, InputProps, useField } from '../../../components/Form';
+import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { capitalise } from '../../../utils/strings';
 import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
 import { useGetInitialDataQuery } from '../../services/init';
 import { getTranslation } from '../../utils/translations';
 import { FieldTypeIcon } from '../FieldTypeIcon';
-import { Form, InputProps, useField } from '../Form';
-import { InputRenderer } from '../FormInputs/Renderer';
 
 import { TEMP_FIELD_NAME } from './Fields';
 

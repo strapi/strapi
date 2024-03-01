@@ -1,11 +1,11 @@
-import { getDocumentDimensions } from '../dimensions';
+import { getDocumentLocaleAndStatus } from '../dimensions';
 
 describe('getDocumentDimensions', () => {
   test('invalid locale', () => {
-    expect(() => getDocumentDimensions({ locale: 'invalid', status: 'draft' })).toThrow();
+    expect(() => getDocumentLocaleAndStatus({ locale: 'invalid', status: 'draft' })).toThrow();
   });
 
   test('invalid status', () => {
-    expect(() => getDocumentDimensions({ locale: 'en', status: 'notAStatus' })).toThrow();
+    expect(() => getDocumentLocaleAndStatus({ locale: 'en', status: 'notAStatus' })).toThrow();
   });
 });

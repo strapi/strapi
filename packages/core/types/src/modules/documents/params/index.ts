@@ -44,7 +44,7 @@ export type Pick<
     // Publication State
     [HasMember<TKind, 'status'>, PublicationState.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: Locale }],
+    [HasMember<TKind, 'locale'>, { locale?: Locale }], // TODO: also allow arrays ?
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
@@ -85,5 +85,7 @@ export type Kind =
   | 'lookup';
 
 type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
+
+export type All = Pick<Common.UID.Schema, Kind>;
 
 export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };

@@ -14,8 +14,8 @@ const documentApi = contentManagerApi.injectEndpoints({
       Contracts.CollectionTypes.Clone.Response,
       Contracts.CollectionTypes.Clone.Params & { query?: string }
     >({
-      query: ({ model, sourceId: id, query }) => ({
-        url: `/content-manager/collection-types/${model}/auto-clone/${id}`,
+      query: ({ model, sourceId, query }) => ({
+        url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
         config: {
           params: query,
@@ -30,8 +30,8 @@ const documentApi = contentManagerApi.injectEndpoints({
         params?: Contracts.CollectionTypes.Clone.Request['query'];
       }
     >({
-      query: ({ model, sourceId: id, data, params }) => ({
-        url: `/content-manager/collection-types/${model}/clone/${id}`,
+      query: ({ model, sourceId, data, params }) => ({
+        url: `/content-manager/collection-types/${model}/clone/${sourceId}`,
         method: 'POST',
         data,
         config: {
@@ -63,16 +63,15 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     deleteDocument: builder.mutation<
       Contracts.CollectionTypes.Delete.Response,
-      {
-        model: string;
-        collectionType: string;
-        id?: string;
-        params?: Contracts.CollectionTypes.Delete.Request['query'];
-      }
+      Pick<Contracts.CollectionTypes.Delete.Params, 'model'> &
+        Pick<Partial<Contracts.CollectionTypes.Delete.Params>, 'documentId'> & {
+          collectionType: string;
+          params?: Contracts.CollectionTypes.Find.Request['query'];
+        }
     >({
-      query: ({ collectionType, model, id, params }) => ({
+      query: ({ collectionType, model, documentId, params }) => ({
         url: `/content-manager/${collectionType}/${model}${
-          collectionType !== SINGLE_TYPES && id ? `/${id}` : ''
+          collectionType !== SINGLE_TYPES && documentId ? `/${documentId}` : ''
         }`,
         method: 'DELETE',
         config: {
@@ -93,33 +92,33 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data: body,
       }),
-      invalidatesTags: (_res, _error, { model, ids }) =>
-        ids.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) =>
+        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
     }),
     discardDocument: builder.mutation<
       Contracts.CollectionTypes.Discard.Response,
-      Pick<Contracts.CollectionTypes.Discard.Params, 'model'> & {
-        collectionType: string;
-        id?: Contracts.CollectionTypes.Discard.Params['id'];
-        params?: Contracts.CollectionTypes.Find.Request['query'] & {
-          [key: string]: any;
-        };
-      }
+      Pick<Contracts.CollectionTypes.Discard.Params, 'model'> &
+        Partial<Pick<Contracts.CollectionTypes.Discard.Params, 'documentId'>> & {
+          collectionType: string;
+          params?: Contracts.CollectionTypes.Find.Request['query'] & {
+            [key: string]: any;
+          };
+        }
     >({
-      query: ({ collectionType, model, id, params }) => ({
-        url: id
-          ? `/content-manager/${collectionType}/${model}/${id}/actions/discard`
+      query: ({ collectionType, model, documentId, params }) => ({
+        url: documentId
+          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/discard`
           : `/content-manager/${collectionType}/${model}/actions/discard`,
         method: 'POST',
         config: {
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
+      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
         return [
           {
             type: 'Document',
-            id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           { type: 'Document', id: `${model}_LIST` },
         ];
@@ -147,9 +146,9 @@ const documentApi = contentManagerApi.injectEndpoints({
       providesTags: (result, _error, arg) => {
         return [
           { type: 'Document', id: `${arg.model}_LIST` },
-          ...(result?.results.map(({ id }) => ({
+          ...(result?.results.map(({ documentId }) => ({
             type: 'Document' as const,
-            id: `${arg.model}_${id}`,
+            id: `${arg.model}_${documentId}`,
           })) ?? []),
         ];
       },
@@ -160,15 +159,15 @@ const documentApi = contentManagerApi.injectEndpoints({
         collectionType: string;
         model: string;
         /**
-         * You don't pass the ID if the document is a single-type
+         * You don't pass the documentId if the document is a single-type
          */
-        id?: string;
+        documentId?: string;
         params?: Contracts.CollectionTypes.CountDraftRelations.Request['query'];
       }
     >({
-      query: ({ collectionType, model, id, params }) => ({
-        url: id
-          ? `/content-manager/${collectionType}/${model}/${id}/actions/countDraftRelations`
+      query: ({ collectionType, model, documentId, params }) => ({
+        url: documentId
+          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/countDraftRelations`
           : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
         method: 'GET',
         config: {
@@ -178,17 +177,21 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     getDocument: builder.query<
       Contracts.CollectionTypes.FindOne.Response,
-      {
-        collectionType: string;
-        model: string;
-        id?: string;
-        params?: Contracts.CollectionTypes.FindOne.Request['query'];
-      }
+      Pick<Contracts.CollectionTypes.FindOne.Params, 'model'> &
+        Partial<Pick<Contracts.CollectionTypes.FindOne.Params, 'documentId'>> & {
+          collectionType: string;
+          params?: Contracts.CollectionTypes.FindOne.Request['query'];
+        }
     >({
       // @ts-expect-error – TODO: fix ts error where data unknown doesn't work with response via an assertion?
-      queryFn: async ({ collectionType, model, id, params }, _api, _extraOpts, baseQuery) => {
+      queryFn: async (
+        { collectionType, model, documentId, params },
+        _api,
+        _extraOpts,
+        baseQuery
+      ) => {
         const res = await baseQuery({
-          url: `/content-manager/${collectionType}/${model}${id ? `/${id}` : ''}`,
+          url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
           method: 'GET',
           config: {
             params,
@@ -206,14 +209,14 @@ const documentApi = contentManagerApi.injectEndpoints({
 
         return res;
       },
-      providesTags: (result, _error, { collectionType, model, id }) => {
+      providesTags: (result, _error, { collectionType, model, documentId }) => {
         return [
           // we prefer the result's id because we don't fetch single-types with an ID.
           {
             type: 'Document',
             id:
               collectionType !== SINGLE_TYPES
-                ? `${model}_${result && 'id' in result ? result.id : id}`
+                ? `${model}_${result && 'documentId' in result ? result.documentId : documentId}`
                 : model,
           },
         ];
@@ -241,20 +244,16 @@ const documentApi = contentManagerApi.injectEndpoints({
      */
     publishDocument: builder.mutation<
       Contracts.CollectionTypes.Publish.Response,
-      {
-        collectionType: string;
-        data: Contracts.CollectionTypes.Publish.Request['body'];
-        model: string;
-        /**
-         * You don't pass the ID if the document is a single-type
-         */
-        id?: string;
-        params?: Contracts.CollectionTypes.Publish.Request['query'];
-      }
+      Pick<Contracts.CollectionTypes.Publish.Params, 'model'> &
+        Partial<Pick<Contracts.CollectionTypes.Publish.Params, 'documentId'>> & {
+          collectionType: string;
+          data: Contracts.CollectionTypes.Publish.Request['body'];
+          params?: Contracts.CollectionTypes.Publish.Request['query'];
+        }
     >({
-      query: ({ collectionType, model, id, params, data }) => ({
-        url: id
-          ? `/content-manager/${collectionType}/${model}/${id}/actions/publish`
+      query: ({ collectionType, model, documentId, params, data }) => ({
+        url: documentId
+          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/publish`
           : `/content-manager/${collectionType}/${model}/actions/publish`,
         method: 'POST',
         data,
@@ -262,11 +261,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
+      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
         return [
           {
             type: 'Document',
-            id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           { type: 'Document', id: `${model}_LIST` },
         ];
@@ -282,49 +281,47 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data: body,
       }),
-      invalidatesTags: (_res, _error, { model, ids }) =>
-        ids.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) =>
+        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
     }),
     updateDocument: builder.mutation<
       Contracts.CollectionTypes.Update.Response,
-      {
-        collectionType: string;
-        model: string;
-        id?: string;
-        data: Contracts.CollectionTypes.Update.Request['body'];
-        params?: Contracts.CollectionTypes.Update.Request['query'];
-      }
+      Pick<Contracts.CollectionTypes.Update.Params, 'model'> &
+        Partial<Pick<Contracts.CollectionTypes.Update.Params, 'documentId'>> & {
+          collectionType: string;
+          data: Contracts.CollectionTypes.Update.Request['body'];
+          params?: Contracts.CollectionTypes.Update.Request['query'];
+        }
     >({
-      query: ({ collectionType, model, id, data, params }) => ({
-        url: `/content-manager/${collectionType}/${model}${id ? `/${id}` : ''}`,
+      query: ({ collectionType, model, documentId, data, params }) => ({
+        url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
         method: 'PUT',
         data,
         config: {
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
+      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
         return [
-          { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model },
+          {
+            type: 'Document',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
     }),
     unpublishDocument: builder.mutation<
       Contracts.CollectionTypes.Unpublish.Response,
-      {
-        collectionType: string;
-        model: string;
-        /**
-         * You don't pass the ID if the document is a single-type
-         */
-        id?: string;
-        params?: Contracts.CollectionTypes.Unpublish.Request['query'];
-        data: Contracts.CollectionTypes.Unpublish.Request['body'];
-      }
+      Pick<Contracts.CollectionTypes.Unpublish.Params, 'model'> &
+        Partial<Pick<Contracts.CollectionTypes.Unpublish.Params, 'documentId'>> & {
+          collectionType: string;
+          params?: Contracts.CollectionTypes.Unpublish.Request['query'];
+          data: Contracts.CollectionTypes.Unpublish.Request['body'];
+        }
     >({
-      query: ({ collectionType, model, id, params, data }) => ({
-        url: id
-          ? `/content-manager/${collectionType}/${model}/${id}/actions/unpublish`
+      query: ({ collectionType, model, documentId, params, data }) => ({
+        url: documentId
+          ? `/content-manager/${collectionType}/${model}/${documentId}/actions/unpublish`
           : `/content-manager/${collectionType}/${model}/actions/unpublish`,
         method: 'POST',
         data,
@@ -332,11 +329,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model, id }) => {
+      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
         return [
           {
             type: 'Document',
-            id: collectionType !== SINGLE_TYPES ? `${model}_${id}` : model,
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
         ];
       },
@@ -351,8 +348,8 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data: body,
       }),
-      invalidatesTags: (_res, _error, { model, ids }) =>
-        ids.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) =>
+        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
     }),
   }),
 });

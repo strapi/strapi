@@ -3,8 +3,8 @@ import { ReactNode } from 'react';
 import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { useForm } from '../../../components/Form';
-import { InputRenderer as FormInputRenderer } from '../../../components/FormInputs/Renderer';
+import { useForm } from '../../../../components/Form';
+import { InputRenderer as FormInputRenderer } from '../../../../components/FormInputs/Renderer';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';

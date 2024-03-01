@@ -12,22 +12,21 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   useOverlayBlocker,
   SettingsPageTitle,
   LoadingIndicatorPage,
-  Form,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
-  Link,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
-import { useMatch } from 'react-router-dom';
+import { NavLink, useMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
 import { PERMISSIONS } from '../../../constants';
@@ -110,7 +109,7 @@ export const EditPage = () => {
           <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
-                !isLoadingPlugins && (
+                !isLoadingPlugins ? (
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     type="submit"
@@ -122,12 +121,12 @@ export const EditPage = () => {
                       defaultMessage: 'Save',
                     })}
                   </Button>
-                )
+                ) : null
               }
               title={role.name}
               subtitle={role.description}
               navigationAction={
-                <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
+                <Link as={NavLink} startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
                   {formatMessage({
                     id: 'global.back',
                     defaultMessage: 'Back',
