@@ -1,5 +1,5 @@
 import type { Readable } from 'stream';
-import type { Attribute, Common } from '@strapi/types';
+import type { Public, Schema } from '@strapi/types';
 
 export interface IMetadata {
   strapi?: {
@@ -13,7 +13,7 @@ export interface IMetadata {
  * Common TransferEngine format to represent a Strapi entity
  * @template T The schema UID this entity represents
  */
-export interface IEntity<T extends Common.UID.ContentType = Common.UID.ContentType> {
+export interface IEntity<T extends Public.UID.ContentType = Public.UID.ContentType> {
   /**
    * UID of the parent type (content-type, component, etc...)
    */
@@ -28,7 +28,7 @@ export interface IEntity<T extends Common.UID.ContentType = Common.UID.ContentTy
   /**
    * The entity data (attributes value)
    */
-  data: Attribute.GetValues<T>;
+  data: Entity<T>;
 }
 
 /**
@@ -49,7 +49,7 @@ interface IDefaultLink {
   /**
    * The relation type
    */
-  relation: Attribute.RelationKind.Any;
+  relation: Schema.Attribute.RelationKind.Any;
 
   /**
    * Left side of the link

@@ -1,8 +1,8 @@
-import { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export const getService = (
   name: string,
-  { strapi }: { strapi: Strapi } = { strapi: global.strapi }
+  { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
 ) => {
   return strapi.service(`admin::${name}`);
 };

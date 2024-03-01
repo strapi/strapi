@@ -7,14 +7,14 @@ import { CellContentProps } from './CellContent';
 import { CellValue } from './CellValue';
 
 import type { ComponentsDictionary } from '../../../../hooks/useDocument';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * SingleComponent
  * -----------------------------------------------------------------------------------------------*/
 
 interface SingleComponentProps extends Pick<CellContentProps, 'mainField'> {
-  content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, false>>;
+  content: Schema.Attribute.Value<Schema.Attribute.Component<`${string}.${string}`, false>>;
   schema: ComponentsDictionary[string];
 }
 
@@ -41,7 +41,7 @@ const SingleComponentTypography = styled(Typography)`
  * -----------------------------------------------------------------------------------------------*/
 
 interface RepeatableComponentProps extends Pick<CellContentProps, 'mainField'> {
-  content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, true>>;
+  content: Schema.Attribute.Value<Schema.Attribute.Component<`${string}.${string}`, true>>;
   schema: ComponentsDictionary[string];
 }
 

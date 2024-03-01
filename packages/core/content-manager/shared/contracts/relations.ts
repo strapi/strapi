@@ -1,10 +1,10 @@
-import { Entity, EntityService } from '@strapi/types';
+import { Modules, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-type PaginationQuery = EntityService.Params.Pagination.PageNotation;
+type PaginationQuery = Modules.EntityService.Params.Pagination.PageNotation;
 
 export interface RelationResult {
-  id: Entity.ID;
+  id: Data.ID;
   publishedAt: string | null;
 }
 

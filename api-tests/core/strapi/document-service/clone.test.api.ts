@@ -1,12 +1,13 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
+import { testInTransaction } from '../../../utils';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
-  let strapi: LoadedStrapi;
+  let strapi: Core.LoadedStrapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);

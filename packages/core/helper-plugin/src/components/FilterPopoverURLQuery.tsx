@@ -24,7 +24,7 @@ import { useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 import type { DefaultFilterInputsProps, Filter, FilterData, Operator } from '../types';
-import type { EntityService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 export interface FilterPopoverURLQueryProps extends Pick<PopoverProps, 'source'> {
   displayedFilters: FilterData[];
@@ -51,7 +51,7 @@ export const FilterPopoverURLQuery = ({
   const defaultFieldSchema = { fieldSchema: { type: 'string' } };
   const [modifiedData, setModifiedData] = React.useState<{
     name: string;
-    filter: EntityService.Params.Filters.Operator.Where;
+    filter: Modules.EntityService.Params.Filters.Operator.Where;
     value: string | null;
   }>({
     name: displayedFilters[0]?.name || '',
@@ -136,7 +136,7 @@ export const FilterPopoverURLQuery = ({
     onToggle();
   };
 
-  const handleChangeOperator = (operator: EntityService.Params.Filters.Operator.Where) => {
+  const handleChangeOperator = (operator: Modules.EntityService.Params.Filters.Operator.Where) => {
     if (operator === '$null' || operator === '$notNull') {
       setModifiedData((prev) => ({
         ...prev,
@@ -190,7 +190,7 @@ export const FilterPopoverURLQuery = ({
               value={modifiedData.filter}
               onChange={(value) =>
                 // TODO: we should do an assertion function to ensure the value is a valid operator
-                handleChangeOperator(value as EntityService.Params.Filters.Operator.Where)
+                handleChangeOperator(value as Modules.EntityService.Params.Filters.Operator.Where)
               }
             >
               {filterList.map((option) => {

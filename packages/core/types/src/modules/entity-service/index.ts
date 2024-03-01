@@ -1,9 +1,13 @@
-import type { Attribute, Common, Utils } from '../../types';
-import type { PartialEntity, Entity, Result, PaginatedResult } from './result';
+import type * as Schema from '../../schema';
+
+import type { UID } from '../../public';
+import type { MatchFirst, Guard } from '../../utils';
+
 import type * as Params from './params';
+import type { PartialEntity, Entity, Result, PaginatedResult } from './result';
 
 export type UploadFile = (
-  uid: Common.UID.Schema,
+  uid: UID.Schema,
   entity: Record<string, unknown>,
   files: Record<string, unknown>
 ) => Promise<void>;
@@ -19,29 +23,26 @@ export interface EntityService {
 
   wrapParams<
     TResult extends object = object,
-    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType = UID.ContentType,
     TParams extends object = object
   >(
     params?: TParams,
     options?: { uid: TContentTypeUID; action: WrapAction }
   ): Promise<TResult> | TResult;
 
-  wrapResult<
-    TResult = any,
-    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
-  >(
+  wrapResult<TResult = any, TContentTypeUID extends UID.ContentType = UID.ContentType>(
     result: unknown,
     options?: { uid: TContentTypeUID; action: WrapAction; [key: string]: unknown }
   ): Promise<TResult> | TResult;
 
-  emitEvent<TContentTypeUID extends Common.UID.ContentType>(
+  emitEvent<TContentTypeUID extends UID.ContentType>(
     uid: TContentTypeUID,
     event: string,
     entity: Entity<TContentTypeUID>
   ): Promise<void>;
   // TODO: Split in 2 different signatures for both single types & collection types
   findMany<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
       | 'fields'
@@ -57,17 +58,17 @@ export interface EntityService {
     uid: TContentTypeUID,
     params?: TParams
   ): Promise<
-    Utils.Expression.MatchFirst<
+    MatchFirst<
       [
-        [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
-        [Common.UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
+        [UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
+        [UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
       ],
       (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
     >
   >;
 
   findOne<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
@@ -76,7 +77,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   delete<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
@@ -85,7 +86,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   create<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
@@ -93,7 +94,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams>>;
 
   update<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
@@ -102,7 +103,7 @@ export interface EntityService {
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
   findPage<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
       | 'fields'
@@ -120,7 +121,7 @@ export interface EntityService {
   ): Promise<PaginatedResult<TContentTypeUID, TParams>>;
 
   clone<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
@@ -131,7 +132,7 @@ export interface EntityService {
   /**
    * @deprecated
    */
-  deleteMany<TContentTypeUID extends Common.UID.ContentType>(
+  deleteMany<TContentTypeUID extends UID.ContentType>(
     uid: TContentTypeUID,
     params: Params.Pick<TContentTypeUID, 'filters' | '_q'>
   ): Promise<{ count: number }>;
@@ -141,7 +142,7 @@ export interface EntityService {
    * @deprecated
    */
   findWithRelationCounts<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
       | 'fields'
@@ -162,7 +163,7 @@ export interface EntityService {
    * @deprecated
    */
   findWithRelationCountsPage<
-    TContentTypeUID extends Common.UID.ContentType,
+    TContentTypeUID extends UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
       | 'fields'
@@ -179,7 +180,7 @@ export interface EntityService {
     params?: TParams
   ): Promise<PaginatedResult<TContentTypeUID, TParams>>;
 
-  count<TContentTypeUID extends Common.UID.ContentType>(
+  count<TContentTypeUID extends UID.ContentType>(
     uid: TContentTypeUID,
     params?: Params.Pick<TContentTypeUID, 'filters' | '_q'>
   ): Promise<number>;
@@ -189,12 +190,12 @@ export interface EntityService {
    * @internal
    */
   load<
-    TContentTypeUID extends Common.UID.ContentType,
-    TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
+    TContentTypeUID extends UID.ContentType,
+    TField extends Schema.PopulatableAttributeNames<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     entity: PartialEntity<TContentTypeUID>,
-    field: Utils.Guard.Never<TField, string>,
+    field: Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>
   ): Promise<any>;
 
@@ -203,33 +204,37 @@ export interface EntityService {
    * @internal
    */
   loadPages<
-    TContentTypeUID extends Common.UID.ContentType,
-    TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
+    TContentTypeUID extends UID.ContentType,
+    TField extends Schema.PopulatableAttributeNames<TContentTypeUID>
   >(
     uid: TContentTypeUID,
     entity: PartialEntity<TContentTypeUID>,
-    field: Utils.Guard.Never<TField, string>,
+    field: Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>,
     pagination?: Params.Pagination.Any
   ): Promise<any>;
 }
 
 type GetPopulatableFieldParams<
-  TContentTypeUID extends Common.UID.ContentType,
-  TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
-> = Utils.Expression.MatchFirst<
+  TContentTypeUID extends UID.ContentType,
+  TField extends Schema.PopulatableAttributeNames<TContentTypeUID>
+> = MatchFirst<
   [
     [
-      Attribute.HasTarget<TContentTypeUID, TField>,
-      Params.Populate.NestedParams<Attribute.GetTarget<TContentTypeUID, TField>>
+      Schema.Attribute.HasTarget<Schema.AttributeByName<TContentTypeUID, TField>>,
+      Params.Populate.NestedParams<
+        Schema.Attribute.Target<Schema.AttributeByName<TContentTypeUID, TField>>
+      >
     ],
     [
-      Attribute.HasMorphTargets<TContentTypeUID, TField>,
+      Schema.Attribute.HasMorphTargets<Schema.AttributeByName<TContentTypeUID, TField>>,
       (
-        | Params.Populate.Fragment<Attribute.GetMorphTargets<TContentTypeUID, TField>>
-        | Params.Populate.NestedParams<Common.UID.Schema>
+        | Params.Populate.Fragment<
+            Schema.Attribute.MorphTargets<Schema.AttributeByName<TContentTypeUID, TField>>
+          >
+        | Params.Populate.NestedParams<UID.Schema>
       )
     ]
   ],
-  Params.Populate.Fragment<Common.UID.Schema> | Params.Populate.NestedParams<Common.UID.Schema>
+  Params.Populate.Fragment<UID.Schema> | Params.Populate.NestedParams<UID.Schema>
 >;

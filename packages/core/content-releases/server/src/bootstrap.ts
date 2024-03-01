@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 
 import { ALLOWED_WEBHOOK_EVENTS, RELEASE_ACTION_MODEL_UID } from './constants';
 import { getService } from './utils';
 
-export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
+export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
@@ -49,7 +49,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
             where: {
               target_type: model.uid,
               target_id: {
-                $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
+                $in: (entriesToDelete as Array<{ id: Data.ID }>).map((entry) => entry.id),
               },
             },
           });

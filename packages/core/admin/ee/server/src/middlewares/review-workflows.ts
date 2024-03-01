@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
-import { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { set } from 'lodash/fp';
 
 /**
@@ -12,7 +13,7 @@ import { set } from 'lodash/fp';
  *
  * @param {object} strapi - The Strapi instance.
  */
-export function contentTypeMiddleware(strapi: Strapi) {
+export function contentTypeMiddleware(strapi: Core.Strapi) {
   /**
    * A middleware function that moves the `reviewWorkflows` attribute from the top level of
    * the request body to the `options` object within the request body.

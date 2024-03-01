@@ -9,7 +9,7 @@ import { NavLink } from 'react-router-dom';
 
 import { useRegenerateTokenMutation } from '../../../../services/api';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 interface RegenerateProps {
   onRegenerate?: (newKey: string) => void;
@@ -104,7 +104,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
 };
 
 interface Token {
-  id: Entity.ID;
+  id: Data.ID;
   name: string;
 }
 

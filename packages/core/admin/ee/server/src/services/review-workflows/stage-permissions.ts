@@ -1,4 +1,4 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { prop } from 'lodash/fp';
 import { mapAsync, errors } from '@strapi/utils';
 import { getService } from '../../utils';
@@ -7,7 +7,7 @@ import { STAGE_TRANSITION_UID } from '../../constants/workflows';
 const { ApplicationError } = errors;
 const validActions = [STAGE_TRANSITION_UID];
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const roleService = getService('role');
   const permissionService = getService('permission');
 

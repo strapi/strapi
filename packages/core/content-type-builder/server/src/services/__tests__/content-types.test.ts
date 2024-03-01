@@ -1,4 +1,4 @@
-import { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import { formatContentType } from '../content-types';
 
 describe('Content types service', () => {
@@ -26,7 +26,7 @@ describe('Content types service', () => {
           type: 'string',
         },
       },
-    } as unknown as Schema.ContentType;
+    } as unknown as Internal.Struct.ContentTypeSchema;
 
     it('Returns consistent schemas', () => {
       expect(formatContentType(contentType)).toMatchSnapshot();

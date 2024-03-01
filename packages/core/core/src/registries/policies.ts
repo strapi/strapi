@@ -1,9 +1,9 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Common } from '@strapi/types';
+import type { Core, Public } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
-type PolicyExtendFn = (policy: Common.Policy) => Common.Policy;
-type PolicyMap = Record<string, Common.Policy>;
+type PolicyExtendFn = (policy: Core.Policy) => Core.Policy;
+type PolicyMap = Record<string, Core.Policy>;
 
 // TODO: move instantiation part here instead of in the policy utils
 const policiesRegistry = () => {
@@ -20,7 +20,7 @@ const policiesRegistry = () => {
     /**
      * Returns the instance of a policy. Instantiate the policy if not already done
      */
-    get(uid: Common.UID.Policy) {
+    get(uid: Public.UID.Policy) {
       return policies[uid];
     },
 
@@ -34,7 +34,7 @@ const policiesRegistry = () => {
     /**
      * Registers a policy
      */
-    set(uid: string, policy: Common.Policy) {
+    set(uid: string, policy: Core.Policy) {
       policies[uid] = policy;
       return this;
     },
@@ -59,7 +59,7 @@ const policiesRegistry = () => {
      * @param {string} uid
      * @param {(policy: Policy) => Policy} extendFn
      */
-    extend(uid: Common.UID.Policy, extendFn: PolicyExtendFn) {
+    extend(uid: Public.UID.Policy, extendFn: PolicyExtendFn) {
       const currentPolicy = this.get(uid);
 
       if (!currentPolicy) {

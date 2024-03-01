@@ -1,16 +1,16 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-import { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
+import type { Core, Schema, Public } from '@strapi/types';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   async generateUIDField({
     contentTypeUID,
     field,
     data,
     locale,
   }: {
-    contentTypeUID: UID.ContentType;
+    contentTypeUID: Public.UID.ContentType;
     field: string;
     data: Record<string, any>;
     locale?: string;
@@ -18,7 +18,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 
-    const { targetField, default: defaultValue, options } = attributes[field] as Attribute.UID;
+    const {
+      targetField,
+      default: defaultValue,
+      options,
+    } = attributes[field] as Schema.Attribute.UID;
+
     // @ts-expect-error targetField can be undefined
     const targetValue = _.get(data, targetField);
 
@@ -48,7 +53,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     value,
     locale,
   }: {
-    contentTypeUID: UID.ContentType;
+    contentTypeUID: Public.UID.ContentType;
     field: string;
     value: string;
     locale?: string;
@@ -98,7 +103,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     value,
     locale,
   }: {
-    contentTypeUID: UID.ContentType;
+    contentTypeUID: Public.UID.ContentType;
     field: string;
     value: string;
     locale?: string;

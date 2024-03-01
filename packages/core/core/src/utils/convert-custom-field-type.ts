@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 type InputAttributes = {
   [key: string]: {
@@ -7,7 +7,7 @@ type InputAttributes = {
   };
 };
 
-export const convertCustomFieldType = (strapi: Strapi) => {
+export const convertCustomFieldType = (strapi: Core.Strapi) => {
   const allContentTypeSchemaAttributes = Object.values(strapi.contentTypes).map(
     (schema) => schema.attributes
   );

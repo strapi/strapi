@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useField } from '../../../../../../../admin/src/content-manager/components/Form';
@@ -58,7 +58,7 @@ export const StageSelect = () => {
 
   const [updateStage, { error }] = useUpdateStageMutation();
 
-  const handleChange = async (stageId: Entity.ID) => {
+  const handleChange = async (stageId: Data.ID) => {
     try {
       /**
        * If the current license has a limit:

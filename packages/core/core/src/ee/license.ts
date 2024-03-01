@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { machineID } from '@strapi/utils';
 
@@ -81,7 +81,11 @@ const throwError = () => {
   throw new LicenseCheckError('Could not proceed to the online validation of your license.', true);
 };
 
-const fetchLicense = async ({ strapi }: { strapi: Strapi }, key: string, projectId: string) => {
+const fetchLicense = async (
+  { strapi }: { strapi: Core.Strapi },
+  key: string,
+  projectId: string
+) => {
   const response = await strapi
     .fetch(`https://license.strapi.io/api/licenses/validate`, {
       method: 'POST',

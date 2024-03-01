@@ -19,11 +19,11 @@ import { WysiwygFooter } from './WysiwygFooter';
 import { WysiwygNav } from './WysiwygNav';
 
 import type { InputProps } from '../../../../../components/FormInputs/types';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface WysiwygProps extends Omit<InputProps, 'type'> {
   labelAction?: React.ReactNode;
-  type: Attribute.RichText['type'];
+  type: Schema.Attribute.RichText['type'];
 }
 
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(

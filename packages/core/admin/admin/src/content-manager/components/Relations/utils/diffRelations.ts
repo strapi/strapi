@@ -1,7 +1,7 @@
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 interface RelationData {
-  id: Entity.ID;
+  id: Data.ID;
   __temp_key__: number;
 }
 

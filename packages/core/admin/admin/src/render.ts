@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 
-import type { FeaturesService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: {
@@ -12,7 +12,7 @@ interface RenderAdminArgs {
     config?: StrapiAppConstructorArgs['config'];
   };
   plugins: StrapiAppConstructorArgs['appPlugins'];
-  features?: FeaturesService['config'];
+  features?: Modules.Features.FeaturesService['config'];
 }
 
 const renderAdmin = async (
@@ -32,9 +32,9 @@ const renderAdmin = async (
      */
     backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
     isEE: false,
-    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
+    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
-      isEnabled: (name: keyof FeaturesService['config']) => {
+      isEnabled: (name: keyof Modules.Features.FeaturesService['config']) => {
         return features?.future?.[name] === true;
       },
     },

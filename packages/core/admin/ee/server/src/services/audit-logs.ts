@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import localProvider from '@strapi/provider-audit-logs-local';
 import { scheduleJob } from 'node-schedule';
 
@@ -61,7 +61,7 @@ const getEventMap = (defaultEvents: any) => {
   }, {} as any);
 };
 
-const getRetentionDays = (strapi: LoadedStrapi) => {
+const getRetentionDays = (strapi: Core.LoadedStrapi) => {
   const licenseRetentionDays = strapi.ee.features.get('audit-logs')?.options.retentionDays;
   const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
 
@@ -79,7 +79,7 @@ const getRetentionDays = (strapi: LoadedStrapi) => {
   return licenseRetentionDays;
 };
 
-const createAuditLogsService = (strapi: LoadedStrapi) => {
+const createAuditLogsService = (strapi: Core.LoadedStrapi) => {
   // Manage internal service state privately
   const state = {} as any;
 

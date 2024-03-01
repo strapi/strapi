@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
+import type { Core } from '@strapi/types';
 
-import { Strapi } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { validateUpdateStageOnEntity } from '../../../validation/review-workflows';
@@ -12,11 +12,11 @@ import {
 
 /**
  *
- * @param { Strapi } strapi - Strapi instance
+ * @param { Core.Strapi } strapi - Strapi instance
  * @param userAbility
  * @return { (Stage) => SanitizedStage }
  */
-function sanitizeStage({ strapi }: { strapi: Strapi }, userAbility: unknown) {
+function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
   const permissionChecker = strapi
     .plugin('content-manager')
     .service('permission-checker')

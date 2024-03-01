@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import { uniq, startsWith, intersection } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import { Schema, Permissions } from '@strapi/types';
 import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
+
+import type { Modules, Internal } from '@strapi/types';
 
 interface FieldOptions {
   prefix?: string; // prefix to add to the path
@@ -22,7 +23,7 @@ interface FieldOptions {
  * Creates an array of paths to the fields and nested fields, without path nodes
  */
 const getNestedFields = (
-  model: Schema.ContentType,
+  model: Internal.Struct.ContentTypeSchema,
   {
     prefix = '',
     nestingLevel = 15,
@@ -79,7 +80,7 @@ const getNestedFields = (
  * Creates an array of paths to the fields and nested fields, with path nodes
  */
 const getNestedFieldsWithIntermediate = (
-  model: Schema.ContentType,
+  model: Internal.Struct.ContentTypeSchema,
   { prefix = '', nestingLevel = 15, components = {} }: FieldOptions
 ): string[] => {
   if (nestingLevel === 0) {
@@ -118,7 +119,7 @@ const getNestedFieldsWithIntermediate = (
 const getPermissionsWithNestedFields = (
   actions: any[],
   { nestingLevel, restrictedSubjects = [] }: FieldOptions = {}
-): Permissions.PermissionRule[] => {
+): Modules.Permissions.PermissionRule[] => {
   return actions.reduce((permissions, action) => {
     const validSubjects = action.subjects.filter(
       (subject: any) => !restrictedSubjects.includes(subject)
@@ -150,9 +151,9 @@ const getPermissionsWithNestedFields = (
  * Cleans permissions' fields (add required ones, remove the non-existing ones)
  */
 const cleanPermissionFields = (
-  permissions: Permissions.PermissionRule[],
+  permissions: Modules.Permissions.PermissionRule[],
   { nestingLevel }: FieldOptions = {}
-): Permissions.PermissionRule[] => {
+): Modules.Permissions.PermissionRule[] => {
   const { actionProvider } = getService('permission');
 
   return permissions.map((permission: any) => {

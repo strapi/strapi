@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
 import type {} from 'koa-body';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import { getService } from '../utils';
 import {
   validateContentTypeInput,
@@ -25,10 +25,11 @@ export default {
       .filter(
         (uid) =>
           !kind ||
-          _.get(strapi.contentTypes[uid as UID.ContentType], 'kind', 'collectionType') === kind
+          _.get(strapi.contentTypes[uid as Internal.UID.ContentType], 'kind', 'collectionType') ===
+            kind
       )
       .map((uid) =>
-        contentTypeService.formatContentType(strapi.contentTypes[uid as UID.ContentType])
+        contentTypeService.formatContentType(strapi.contentTypes[uid as Internal.UID.ContentType])
       );
 
     ctx.send({

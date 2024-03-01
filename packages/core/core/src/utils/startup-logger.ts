@@ -2,9 +2,9 @@ import chalk from 'chalk';
 import CLITable from 'cli-table3';
 import _ from 'lodash/fp';
 
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export const createStartupLogger = (app: Strapi) => {
+export const createStartupLogger = (app: Core.Strapi) => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;

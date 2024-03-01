@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -7,7 +7,7 @@ export default ({ strapi }: Context) => ({
     contentTypeUID,
     attributeName,
   }: {
-    contentTypeUID: UID.ContentType;
+    contentTypeUID: Internal.UID.ContentType;
     attributeName: string;
   }) {
     return async (parent: any) => {

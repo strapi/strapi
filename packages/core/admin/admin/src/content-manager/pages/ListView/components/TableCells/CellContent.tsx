@@ -9,11 +9,11 @@ import { SingleComponent, RepeatableComponent } from './Components';
 import { MediaSingle, MediaMultiple } from './Media';
 
 import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
-import type { Attribute, Entity } from '@strapi/types';
+import type { Schema, Data } from '@strapi/types';
 
 interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
-  content: Attribute.GetValue<Attribute.Any>;
-  rowId: Entity.ID;
+  content: Schema.Attribute.Value<Schema.Attribute.AnyAttribute>;
+  rowId: Data.ID;
 }
 
 const CellContent = ({ content, mainField, attribute }: CellContentProps) => {
@@ -129,7 +129,7 @@ const hasContent = (
     return content?.count > 0;
   }
 
-  /* 
+  /*
       Biginteger fields need to be treated as strings, as `isNumber`
       doesn't deal with them.
   */

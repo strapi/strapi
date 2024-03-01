@@ -2,7 +2,7 @@ import { join } from 'path';
 import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
 import { env } from '@strapi/utils';
-import type { Strapi, Plugin, Schema } from '@strapi/types';
+import type { Core, Plugin, Internal } from '@strapi/types';
 import { loadConfigFile } from '../../utils/load-config-file';
 import { loadFiles } from '../../utils/load-files';
 import { getEnabledPlugins } from './get-enabled-plugins';
@@ -83,7 +83,7 @@ const applyUserConfig = async (plugins: Plugins) => {
   }
 };
 
-export default async function loadPlugins(strapi: Strapi) {
+export default async function loadPlugins(strapi: Core.Strapi) {
   const plugins: Plugins = {};
 
   const enabledPlugins = await getEnabledPlugins(strapi);
@@ -129,7 +129,7 @@ export default async function loadPlugins(strapi: Strapi) {
 
 const formatContentTypes = (
   pluginName: string,
-  contentTypes: Record<string, { schema: Schema.ContentType }>
+  contentTypes: Record<string, { schema: Internal.Struct.ContentTypeSchema }>
 ) => {
   Object.values(contentTypes).forEach((definition) => {
     const { schema } = definition;

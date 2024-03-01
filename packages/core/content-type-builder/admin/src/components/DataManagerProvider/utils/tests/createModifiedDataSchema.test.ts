@@ -1,7 +1,7 @@
 import { createModifiedDataSchema } from '../createModifiedDataSchema';
 
 import type { Components } from '../../../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | createModifiedDataSchema', () => {
   it('should create the modifiedData object correctly when it is used in the content type view and there is no associated components', () => {
@@ -12,7 +12,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
       },
     };
 
-    const retrievedComponents: UID.Component[] = [];
+    const retrievedComponents: Internal.UID.Component[] = [];
     const components = {};
     const isInContentTypeView = true;
 
@@ -34,7 +34,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
       },
     };
 
-    const retrievedComponents: UID.Component[] = [];
+    const retrievedComponents: Internal.UID.Component[] = [];
     const components = {};
     const isInContentTypeView = false;
 
@@ -59,7 +59,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
       },
     };
 
-    const retrievedComponents: UID.Component[] = ['blog.dish'];
+    const retrievedComponents: Internal.UID.Component[] = ['blog.dish'];
     const components: Components = {
       'blog.dish': {
         uid: 'blog.dish',

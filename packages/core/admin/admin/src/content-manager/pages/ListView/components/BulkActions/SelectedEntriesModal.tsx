@@ -26,7 +26,7 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
-import { Entity } from '@strapi/types';
+import { Data } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -119,7 +119,7 @@ const EntryValidationText = ({
 interface SelectedEntriesTableContentProps {
   isPublishing?: boolean;
   rowsToDisplay?: TableRow[];
-  entriesToPublish?: Entity.ID[];
+  entriesToPublish?: Data.ID[];
   validationErrors: Record<string, EntryValidationTextProps['validationErrors']>;
 }
 
@@ -230,13 +230,13 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
 interface SelectedEntriesModalContentProps
   extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
   refetchModalData: React.MouseEventHandler<HTMLButtonElement>;
-  setEntriesToFetch: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
-  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
+  setEntriesToFetch: React.Dispatch<React.SetStateAction<Data.ID[]>>;
+  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Data.ID[]>>;
   toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
 }
 
 interface TableRow {
-  id: Entity.ID;
+  id: Data.ID;
   publishedAt: string | null;
 }
 
@@ -472,7 +472,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
       const validate = createYupSchema(schema.attributes, components);
-      const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
+      const validationErrors: Record<Data.ID, Record<string, TranslationMessage>> = {};
       const rows = data.map((entry) => {
         try {
           validate.validateSync(entry, { abortEarly: false });

@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { EmailConfig, SendOptions } from './types';
 
 interface EmailProvider {
@@ -38,7 +38,7 @@ const createProvider = (emailConfig: EmailConfig) => {
   return provider.init(emailConfig.providerOptions, emailConfig.settings);
 };
 
-export const bootstrap = async ({ strapi }: { strapi: Strapi }) => {
+export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const emailConfig: EmailConfig = strapi.config.get('plugin.email');
   strapi.plugin('email').provider = createProvider(emailConfig);
 

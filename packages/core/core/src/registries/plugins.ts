@@ -1,10 +1,10 @@
 import { has } from 'lodash/fp';
 
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-type PluginMap = Record<string, Common.Plugin>;
+type PluginMap = Record<string, Core.Plugin>;
 
-const pluginsRegistry = (strapi: Strapi) => {
+const pluginsRegistry = (strapi: Core.Strapi) => {
   const plugins: PluginMap = {};
 
   return {
@@ -14,7 +14,7 @@ const pluginsRegistry = (strapi: Strapi) => {
     getAll() {
       return plugins;
     },
-    add(name: string, pluginConfig: Common.Plugin) {
+    add(name: string, pluginConfig: Core.Plugin) {
       if (has(name, plugins)) {
         throw new Error(`Plugin ${name} has already been registered.`);
       }

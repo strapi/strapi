@@ -1,6 +1,6 @@
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export const responseTime: Common.MiddlewareFactory = () => {
+export const responseTime: Core.MiddlewareFactory = () => {
   return async (ctx, next) => {
     const start = Date.now();
 

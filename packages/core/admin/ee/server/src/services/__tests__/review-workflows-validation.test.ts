@@ -4,7 +4,7 @@ jest.mock('../review-workflows/workflows/content-types', () => {
   }));
 });
 
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import validationServiceFactory from '../review-workflows/validation';
 import { MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../../constants/workflows';
 
@@ -29,7 +29,7 @@ const strapiMock = {
       },
     },
   },
-} as unknown as LoadedStrapi;
+} as unknown as Core.LoadedStrapi;
 
 let validationService: any;
 

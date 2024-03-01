@@ -26,7 +26,7 @@ import { InputRenderer } from '../FormInputs/Renderer';
 import { TEMP_FIELD_NAME } from './Fields';
 
 import type { ConfigurationFormData } from './Form';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Constants
@@ -44,7 +44,7 @@ const FIELD_SCHEMA = yup.object().shape({
  * -----------------------------------------------------------------------------------------------*/
 
 interface EditFieldFormProps {
-  attribute?: Attribute.Any;
+  attribute?: Schema.Attribute.AnyAttribute;
   name: string;
   onClose: () => void;
 }
@@ -239,7 +239,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
  * @description not all edit fields have the same editable properties, it depends on the type
  * e.g. a dynamic zone can only change it's label.
  */
-const filterFieldsBasedOnAttributeType = (type: Attribute.Kind) => (field: InputProps) => {
+const filterFieldsBasedOnAttributeType = (type: Schema.Attribute.Kind) => (field: InputProps) => {
   switch (type) {
     case 'blocks':
     case 'richtext':

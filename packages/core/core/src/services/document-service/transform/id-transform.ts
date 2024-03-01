@@ -1,4 +1,4 @@
-import { Common } from '@strapi/types';
+import { Public } from '@strapi/types';
 import { mapAsync, pipeAsync } from '@strapi/utils';
 import { isObject } from 'lodash/fp';
 import { transformOutputIds as transformRelationOutputIds } from './relations/transform/output-ids';
@@ -13,7 +13,7 @@ import { transformData } from './data';
  * Transform input of a query to map document ids to entity ids.
  */
 async function transformParamsDocumentId(
-  uid: Common.UID.Schema,
+  uid: Public.UID.Schema,
   input: { data?: any; fields?: any; filters?: any; populate?: any; sort?: any },
   opts: {
     locale?: string | null;
@@ -60,7 +60,7 @@ async function transformParamsDocumentId(
  * Transform response of a query to map entity ids to document ids.
  */
 async function transformOutputDocumentId(
-  uid: Common.UID.Schema,
+  uid: Public.UID.Schema,
   output: Record<string, any> | Record<string, any>[]
 ) {
   if (Array.isArray(output)) {

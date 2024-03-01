@@ -1,11 +1,11 @@
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Common, Schema } from '@strapi/strapi';
+import type { Core, Internal } from '@strapi/strapi';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
-const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
+const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   const { model } = ctx.params;
   const { query } = ctx.request;
   const body = ctx.request.body as any;
@@ -18,7 +18,7 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
     // fillNonLocalizedAttributes,
   } = getService('content-types');
 
-  const modelDef = strapi.getModel(model) as Schema.ContentType;
+  const modelDef = strapi.getModel(model) as Internal.Struct.ContentTypeSchema;
 
   if (!isLocalizedContentType(modelDef)) {
     return next();

@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { cloneDeep } from 'lodash/fp';
 import stageFactory from '../review-workflows/stages';
 import { STAGE_MODEL_UID } from '../../constants/workflows';
@@ -115,7 +115,7 @@ const strapiMock = {
       },
     },
   },
-} as unknown as LoadedStrapi;
+} as unknown as Core.LoadedStrapi;
 
 const stagesService = stageFactory({ strapi: strapiMock });
 

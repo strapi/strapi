@@ -1,6 +1,6 @@
 import { setCreatorFields, errors } from '@strapi/utils';
 
-import type { LoadedStrapi, EntityService, UID, Schema } from '@strapi/types';
+import type { Core, Modules, Internal } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
@@ -48,7 +48,7 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   }
 };
 
-const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
+const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const dispatchWebhook = (
     event: string,
     { isPublished, release, error }: { isPublished: boolean; release?: Release; error?: unknown }
@@ -330,7 +330,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     },
 
     async countActions(
-      query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
+      query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
     ) {
       return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
     },
@@ -384,8 +384,10 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         .plugin('content-manager')
         .service('content-types');
 
-      const contentTypesData: Record<UID.ContentType, { mainField: string; displayName: string }> =
-        {};
+      const contentTypesData: Record<
+        Internal.UID.ContentType,
+        { mainField: string; displayName: string }
+      > = {};
       for (const contentTypeUid of contentTypesUids) {
         const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
           uid: contentTypeUid,
@@ -411,7 +413,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
       const contentTypeModelsMap = contentTypeUids.reduce(
         (
-          acc: { [key: ReleaseAction['contentType']]: Schema.ContentType },
+          acc: { [key: ReleaseAction['contentType']]: Internal.Struct.ContentTypeSchema },
           contentTypeUid: ReleaseAction['contentType']
         ) => {
           acc[contentTypeUid] = strapi.getModel(contentTypeUid);
@@ -433,8 +435,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
       const componentsMap = components.reduce(
         (
-          acc: { [key: Schema.Component['uid']]: Schema.Component },
-          component: Schema.Component
+          acc: { [key: Internal.Struct.ComponentSchema['uid']]: Internal.Struct.ComponentSchema },
+          component: Internal.Struct.ComponentSchema
         ) => {
           acc[component.uid] = component;
 
@@ -522,13 +524,13 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
          * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
          */
         const collectionTypeActions: {
-          [key: UID.ContentType]: {
+          [key: Internal.UID.ContentType]: {
             entriestoPublishIds: ReleaseAction['entry']['id'][];
             entriesToUnpublishIds: ReleaseAction['entry']['id'][];
           };
         } = {};
         const singleTypeActions: {
-          uid: UID.ContentType;
+          uid: Internal.UID.ContentType;
           id: ReleaseAction['entry']['id'];
           action: ReleaseAction['type'];
         }[] = [];
@@ -595,7 +597,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
               .build();
 
             const { entriestoPublishIds, entriesToUnpublishIds } =
-              collectionTypeActions[contentTypeUid as UID.ContentType];
+              collectionTypeActions[contentTypeUid as Internal.UID.ContentType];
 
             /**
              * We need to get the populate entries to be able to publish without errors on components/relations/dynamicZones
@@ -603,7 +605,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
              * So, we need to fetch them manually
              */
             const entriesToPublish = (await strapi.entityService.findMany(
-              contentTypeUid as UID.ContentType,
+              contentTypeUid as Internal.UID.ContentType,
               {
                 filters: {
                   id: {
@@ -615,7 +617,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
             )) as Entity[];
 
             const entriesToUnpublish = (await strapi.entityService.findMany(
-              contentTypeUid as UID.ContentType,
+              contentTypeUid as Internal.UID.ContentType,
               {
                 filters: {
                   id: {

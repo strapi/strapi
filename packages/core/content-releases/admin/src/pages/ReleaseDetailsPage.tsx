@@ -335,7 +335,7 @@ const ReleaseDetailsLayout = ({
           !release.releasedAt && (
             <Flex gap={2}>
               <Menu.Root>
-                {/* 
+                {/*
                   TODO Fix in the DS
                   - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
@@ -624,15 +624,18 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     );
   }
 
+  const groupByLabel = formatMessage({
+    id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
+    defaultMessage: 'Group by',
+  });
+
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
-            aria-label={formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
-              defaultMessage: 'Group by',
-            })}
+            placeholder={groupByLabel}
+            aria-label={groupByLabel}
             customizeContent={(value) =>
               formatMessage(
                 {

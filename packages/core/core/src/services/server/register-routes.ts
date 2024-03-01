@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-const createRouteScopeGenerator = (namespace: string) => (route: Common.RouteInput) => {
+const createRouteScopeGenerator = (namespace: string) => (route: Core.RouteInput) => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
 
   if (typeof route.handler === 'string') {
@@ -18,7 +18,7 @@ const createRouteScopeGenerator = (namespace: string) => (route: Common.RouteInp
 /**
  * Register all routes
  */
-export default (strapi: Strapi) => {
+export default (strapi: Core.Strapi) => {
   registerAdminRoutes(strapi);
   registerAPIRoutes(strapi);
   registerPluginRoutes(strapi);
@@ -28,7 +28,7 @@ export default (strapi: Strapi) => {
  * Register admin routes
  * @param {import('../../').Strapi} strapi
  */
-const registerAdminRoutes = (strapi: Strapi) => {
+const registerAdminRoutes = (strapi: Core.Strapi) => {
   const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
   _.forEach(strapi.admin?.routes, (router) => {
@@ -46,7 +46,7 @@ const registerAdminRoutes = (strapi: Strapi) => {
  * Register plugin routes
  * @param {import('../../').Strapi} strapi
  */
-const registerPluginRoutes = (strapi: Strapi) => {
+const registerPluginRoutes = (strapi: Core.Strapi) => {
   for (const pluginName of Object.keys(strapi.plugins)) {
     const plugin = strapi.plugins[pluginName];
 
@@ -81,7 +81,7 @@ const registerPluginRoutes = (strapi: Strapi) => {
 /**
  * Register api routes
  */
-const registerAPIRoutes = (strapi: Strapi) => {
+const registerAPIRoutes = (strapi: Core.Strapi) => {
   for (const apiName of Object.keys(strapi.api)) {
     const api = strapi.api[apiName];
 

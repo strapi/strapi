@@ -1,4 +1,4 @@
-import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
+import type { Core, Public } from '@strapi/types';
 import { groupBy, pick } from 'lodash/fp';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
@@ -65,7 +65,7 @@ export interface GetMetadataOptions {
   availableStatus?: boolean;
 }
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
@@ -118,7 +118,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: Common.UID.ContentType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(uid: Public.UID.ContentType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
     // The status of all documents should be the same
@@ -160,7 +160,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async getMetadata(
-    uid: Common.UID.ContentType,
+    uid: Public.UID.ContentType,
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
@@ -196,7 +196,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * - Available status of the document for the current locale
    */
   async formatDocumentWithMetadata(
-    uid: Common.UID.ContentType,
+    uid: Public.UID.ContentType,
     document: DocumentVersion,
     opts: GetMetadataOptions = {}
   ) {

@@ -15,7 +15,7 @@ import {
   type UseKeyboardDragAndDropCallbacks,
 } from './useKeyboardDragAndDrop';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 const DIRECTIONS = {
   UPWARD: 'upward',
@@ -66,7 +66,7 @@ type DropCollectedProps = {
  */
 const useDragAndDrop = <
   TIndex extends number | Array<number>,
-  TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown } = {
+  TItem extends { index: TIndex; id?: Data.ID; [key: string]: unknown } = {
     index: TIndex;
     [key: string]: unknown;
   }

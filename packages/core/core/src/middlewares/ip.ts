@@ -1,6 +1,6 @@
 import koaIp from 'koa-ip';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export type Config = koaIp.KoaIPOptions;
 
-export const ip: Common.MiddlewareFactory<Config> = (config) => koaIp(config);
+export const ip: Core.MiddlewareFactory<Config> = (config) => koaIp(config);

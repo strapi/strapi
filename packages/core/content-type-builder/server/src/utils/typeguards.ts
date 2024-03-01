@@ -1,7 +1,7 @@
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 export const hasDefaultAttribute = (
-  attribute: Attribute.Any
-): attribute is Attribute.Any & Attribute.DefaultOption<unknown> => {
+  attribute: Schema.Attribute.AnyAttribute
+): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.DefaultOption<unknown> => {
   return 'default' in attribute;
 };

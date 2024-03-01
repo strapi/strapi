@@ -2,13 +2,13 @@ import { join } from 'path';
 import { Duplex, PassThrough, Readable } from 'stream';
 import * as webStream from 'stream/web';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
 
 function getFileStream(
   filepath: string,
-  strapi: LoadedStrapi,
+  strapi: Core.LoadedStrapi,
   isLocal = false
 ): PassThrough | ReadStream {
   if (isLocal) {
@@ -42,7 +42,7 @@ function getFileStream(
 
 function getFileStats(
   filepath: string,
-  strapi: LoadedStrapi,
+  strapi: Core.LoadedStrapi,
   isLocal = false
 ): Promise<{ size: number }> {
   if (isLocal) {
@@ -72,7 +72,7 @@ function getFileStats(
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
-export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
+export const createAssetsStream = (strapi: Core.LoadedStrapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')

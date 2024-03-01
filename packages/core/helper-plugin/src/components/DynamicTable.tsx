@@ -16,7 +16,7 @@ import {
   TableProps as DSTableProps,
 } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import { Entity } from '@strapi/types';
+import { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useTracking } from '../features/Tracking';
@@ -27,7 +27,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
 
 interface TableProps<
-  TRows extends { id: Entity.ID } = { id: Entity.ID },
+  TRows extends { id: Data.ID } = { id: Data.ID },
   THeader extends TableHeader = TableHeader
 > extends Pick<EmptyBodyTableProps, 'action'>,
     Pick<DSTableProps, 'footer'> {
@@ -51,7 +51,7 @@ interface TableProps<
 }
 
 interface TableRowProps<
-  TRows extends { id: Entity.ID } = { id: Entity.ID },
+  TRows extends { id: Data.ID } = { id: Data.ID },
   THeader extends TableHeader = TableHeader
 > extends Pick<
       TableProps<TRows, THeader>,

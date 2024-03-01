@@ -11,7 +11,7 @@ import { getTranslation } from '../../../../utils/translations';
 import { CellValue } from './CellValue';
 
 import type { CellContentProps } from './CellContent';
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * RelationSingle
@@ -44,7 +44,7 @@ const TypographyMaxWidth = styled(Typography)`
  * -----------------------------------------------------------------------------------------------*/
 
 interface RelationMultipleProps extends Pick<CellContentProps, 'mainField' | 'name' | 'content'> {
-  entityId: Entity.ID;
+  entityId: Data.ID;
   uid: string;
 }
 

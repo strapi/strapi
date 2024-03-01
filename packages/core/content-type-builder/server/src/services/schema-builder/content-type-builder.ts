@@ -2,7 +2,7 @@ import path from 'path';
 import _ from 'lodash';
 
 import { nameToCollectionName, errors } from '@strapi/utils';
-import type { Attribute, UID } from '@strapi/types';
+import type { Schema, Internal } from '@strapi/types';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
@@ -10,7 +10,10 @@ import { CreateContentTypeInput } from '../../controllers/validation/content-typ
 
 const { ApplicationError } = errors;
 
-const reuseUnsetPreviousProperties = (newAttribute: Attribute.Any, oldAttribute: Attribute.Any) => {
+const reuseUnsetPreviousProperties = (
+  newAttribute: Schema.Attribute.AnyAttribute,
+  oldAttribute: Schema.Attribute.AnyAttribute
+) => {
   _.defaults(
     newAttribute,
     _.omit(oldAttribute, [
@@ -252,8 +255,11 @@ export default function createComponentBuilder() {
  * @param {string} options.singularName content-type singularName
  * @returns {string} uid
  */
-const createContentTypeUID = ({ singularName }: { singularName: string }): UID.ContentType =>
-  `api::${singularName}.${singularName}`;
+const createContentTypeUID = ({
+  singularName,
+}: {
+  singularName: string;
+}): Internal.UID.ContentType => `api::${singularName}.${singularName}`;
 
 const generateRelation = ({ key, attribute, uid, targetAttribute = {} }: any) => {
   const opts: any = {

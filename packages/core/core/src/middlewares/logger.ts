@@ -1,6 +1,6 @@
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export const logger: Common.MiddlewareFactory = (_, { strapi }) => {
+export const logger: Core.MiddlewareFactory = (_, { strapi }) => {
   return async (ctx, next) => {
     const start = Date.now();
     await next();

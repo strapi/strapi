@@ -5,20 +5,22 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
-import type { Attribute, Schema } from '@strapi/types';
+import type { Schema, Internal } from '@strapi/types';
 
 const formatContentTypeData = <
-  TSchema extends Schema.ContentType,
-  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
+  TSchema extends Internal.Struct.ContentTypeSchema,
+  TData extends {
+    [K in keyof TSchema['attributes']]: Schema.Attribute.Value<TSchema['attributes'][K]>;
+  }
 >(
   data: TData,
   ct: TSchema,
-  composSchema: Record<string, Schema.Component>
+  composSchema: Record<string, Internal.Struct.ComponentSchema>
 ) => {
   const recursiveFormatData = <
-    TSchemum extends Schema.Schema,
+    TSchemum extends Internal.Struct.Schema,
     TDatum extends {
-      [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
+      [P in keyof TSchemum['attributes']]: Schema.Attribute.Value<TSchemum['attributes'][P]>;
     }
   >(
     data: TDatum,

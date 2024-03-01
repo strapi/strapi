@@ -4,13 +4,14 @@
  *  { disconnect: [ id ] }
  */
 
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { createTestSetup, destroyTestSetup } from '../../../../../utils/builder-helper';
 import resources from '../../resources/index';
 
 describe('Disconnect disconnect', () => {
   let testUtils;
-  let strapi: LoadedStrapi;
+  let strapi: Core.LoadedStrapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);

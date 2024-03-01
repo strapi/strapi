@@ -1,6 +1,6 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
 import { shiftCronExpression } from '../utils/cron';
@@ -90,7 +90,7 @@ const init = (licenseDir: string, logger?: Logger) => {
  *
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
-const onlineUpdate = async ({ strapi }: { strapi: Strapi }) => {
+const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
   const { get, commit, rollback } = (await strapi.db?.transaction()) as any;
   const transaction = get();
 
@@ -197,7 +197,7 @@ const validateInfo = () => {
   enable();
 };
 
-const checkLicense = async ({ strapi }: { strapi: Strapi }) => {
+const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
   const shouldStayOffline =
     ee.licenseInfo.type === 'gold' &&
     // This env variable support is temporarily used to ease the migration between online vs offline

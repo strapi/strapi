@@ -1,13 +1,13 @@
-import { UID, Common, Schema } from '@strapi/types';
+import type { Public, Core, Internal } from '@strapi/types';
 import type { Context, Next } from 'koa';
 import isNil from 'lodash/isNil';
 
-interface ContentType extends Schema.ContentType {
+interface ContentType extends Internal.Struct.ContentTypeSchema {
   plugin?: string;
 }
 
 export default async (ctx: Context, next: Next) => {
-  const { model }: { model: UID.ContentType } = ctx.params;
+  const { model }: { model: Public.UID.ContentType } = ctx.params;
 
   const ct: ContentType = strapi.contentTypes[model];
 
@@ -22,7 +22,7 @@ export default async (ctx: Context, next: Next) => {
     target = strapi.plugin(ct.plugin);
   }
 
-  const { route }: { route: Common.Route } = ctx.state;
+  const { route }: { route: Core.Route } = ctx.state;
 
   if (typeof route.handler !== 'string') {
     return next();

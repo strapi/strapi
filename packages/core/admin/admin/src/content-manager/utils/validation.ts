@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
 
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
-import type { Attribute } from '@strapi/types';
+import type { Schema as SchemaUtils, Data } from '@strapi/types';
 import type { ObjectShape } from 'yup/lib/object';
 
 type AnySchema =
@@ -75,17 +75,21 @@ const createYupSchema = (
                 ...acc,
                 [name]: transformSchema(
                   yup.array().of(
-                    yup.lazy((data: Attribute.GetValue<Attribute.DynamicZone>[number]) => {
-                      const { attributes } = components[data.__component];
+                    yup.lazy(
+                      (
+                        data: SchemaUtils.Attribute.Value<SchemaUtils.Attribute.DynamicZone>[number]
+                      ) => {
+                        const { attributes } = components[data.__component];
 
-                      return yup
-                        .object()
-                        .shape({
-                          __component: yup.string().required().oneOf(Object.keys(components)),
-                        })
-                        .nullable(false)
-                        .concat(createModelSchema(attributes));
-                    }) as unknown as yup.ObjectSchema<any>
+                        return yup
+                          .object()
+                          .shape({
+                            __component: yup.string().required().oneOf(Object.keys(components)),
+                          })
+                          .nullable(false)
+                          .concat(createModelSchema(attributes));
+                      }
+                    ) as unknown as yup.ObjectSchema<any>
                   )
                 ),
               };
@@ -118,7 +122,7 @@ const createYupSchema = (
 
 const createAttributeSchema = (
   attribute: Exclude<
-    Attribute.Any,
+    SchemaUtils.Attribute.AnyAttribute,
     { type: 'dynamiczone' } | { type: 'component' } | { type: 'relation' }
   >
 ) => {

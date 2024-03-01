@@ -1,12 +1,12 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Common } from '@strapi/types';
+import type { Core, Public } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
-type MiddlewareExtendFn = (middleware: Common.Middleware) => Common.Middleware;
+type MiddlewareExtendFn = (middleware: Core.Middleware) => Core.Middleware;
 
 // TODO: move instantiation part here instead of in the server service
 const middlewaresRegistry = () => {
-  const middlewares: Record<Common.UID.Middleware, Common.Middleware> = {};
+  const middlewares: Record<Public.UID.Middleware, Core.Middleware> = {};
 
   return {
     /**
@@ -19,7 +19,7 @@ const middlewaresRegistry = () => {
     /**
      * Returns the instance of a middleware. Instantiate the middleware if not already done
      */
-    get(uid: Common.UID.Middleware) {
+    get(uid: Public.UID.Middleware) {
       return middlewares[uid];
     },
 
@@ -33,7 +33,7 @@ const middlewaresRegistry = () => {
     /**
      * Registers a middleware
      */
-    set(uid: Common.UID.Middleware, middleware: Common.Middleware) {
+    set(uid: Public.UID.Middleware, middleware: Core.Middleware) {
       middlewares[uid] = middleware;
       return this;
     },
@@ -41,10 +41,10 @@ const middlewaresRegistry = () => {
     /**
      * Registers a map of middlewares for a specific namespace
      */
-    add(namespace: string, rawMiddlewares: Record<string, Common.Middleware> = {}) {
+    add(namespace: string, rawMiddlewares: Record<string, Core.Middleware> = {}) {
       for (const middlewareName of Object.keys(rawMiddlewares)) {
         const middleware = rawMiddlewares[middlewareName];
-        const uid = addNamespace(middlewareName, namespace) as Common.UID.Middleware;
+        const uid = addNamespace(middlewareName, namespace) as Public.UID.Middleware;
 
         if (has(uid, middlewares)) {
           throw new Error(`Middleware ${uid} has already been registered.`);
@@ -56,7 +56,7 @@ const middlewaresRegistry = () => {
     /**
      * Wraps a middleware to extend it
      */
-    extend(uid: Common.UID.Middleware, extendFn: MiddlewareExtendFn) {
+    extend(uid: Public.UID.Middleware, extendFn: MiddlewareExtendFn) {
       const currentMiddleware = this.get(uid);
 
       if (!currentMiddleware) {

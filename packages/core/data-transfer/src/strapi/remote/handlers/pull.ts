@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { randomUUID } from 'crypto';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
@@ -294,7 +294,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     this.provider = createLocalStrapiSourceProvider({
       autoDestroy: false,
-      getStrapi: () => strapi as LoadedStrapi,
+      getStrapi: () => strapi as Core.LoadedStrapi,
     });
 
     return { transferID: this.transferID };

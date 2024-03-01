@@ -1,11 +1,11 @@
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /**
  *
  * Retrieves the relation type
  */
 export const getRelationType = (
-  relation: Attribute.RelationKind.WithTarget | undefined,
+  relation: Schema.Attribute.RelationKind.WithTarget | undefined,
   targetAttribute?: string | null
 ) => {
   const hasNotTargetAttribute = targetAttribute === undefined || targetAttribute === null;

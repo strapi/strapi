@@ -1,5 +1,5 @@
 import path from 'path';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
@@ -121,7 +121,7 @@ export default function createComponentBuilder() {
       return component;
     },
 
-    deleteComponent(this: any, uid: UID.Component) {
+    deleteComponent(this: any, uid: Internal.UID.Component) {
       if (!this.components.has(uid)) {
         throw new errors.ApplicationError('component.notFound');
       }

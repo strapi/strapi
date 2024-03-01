@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import utils, { errors } from '@strapi/utils';
-import type { Attribute, Schema } from '@strapi/types';
+import type { Schema, Internal } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-export const hasComponent = (model: Schema.Schema) => {
+export const hasComponent = (model: Internal.Struct.Schema) => {
   const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
     return model.attributes[key].type === 'component';
   });
@@ -12,9 +12,11 @@ export const hasComponent = (model: Schema.Schema) => {
   return compoKeys.length > 0;
 };
 
-export const isConfigurable = (attribute: Attribute.Any) => _.get(attribute, 'configurable', true);
+export const isConfigurable = (attribute: Schema.Attribute.AnyAttribute) =>
+  _.get(attribute, 'configurable', true);
 
-export const isRelation = (attribute: Attribute.Any) => attribute.type === 'relation';
+export const isRelation = (attribute: Schema.Attribute.AnyAttribute) =>
+  attribute.type === 'relation';
 
 /**
  * Formats a component's attributes
@@ -32,7 +34,7 @@ export const formatAttributes = (model: any) => {
 /**
  * Formats a component attribute
  */
-export const formatAttribute = (attribute: Attribute.Any & Record<string, any>) => {
+export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Record<string, any>) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {

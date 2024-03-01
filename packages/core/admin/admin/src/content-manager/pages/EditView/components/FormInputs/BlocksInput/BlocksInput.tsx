@@ -7,10 +7,10 @@ import { InputProps } from '../../../../../components/FormInputs/types';
 
 import { BlocksEditor } from './BlocksEditor';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface BlocksInputProps extends Omit<InputProps, 'type'> {
-  type: Attribute.Blocks['type'];
+  type: Schema.Attribute.Blocks['type'];
 }
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(

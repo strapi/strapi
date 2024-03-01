@@ -1,5 +1,5 @@
 import { type Model, utils } from '@strapi/database';
-import { Schema, Attribute } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 import { createId } from '@paralleldrive/cuid2';
 import assert from 'node:assert';
 import _ from 'lodash/fp';
@@ -26,13 +26,13 @@ export const getDzJoinTableName = (collectionName: string) =>
 
 const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order, ENTITY: entity } = identifiers;
 
-export type LoadedContentTypeModel = Schema.ContentType &
-  Required<Pick<Schema.ContentType, 'collectionName' | 'uid' | 'modelName'>>;
+export type LoadedContentTypeModel = Internal.Struct.ContentTypeSchema &
+  Required<Pick<Internal.Struct.ContentTypeSchema, 'collectionName' | 'uid' | 'modelName'>>;
 
 // Transforms an attribute (particularly for relation types) into the format that strapi/database accepts
 export const transformAttribute = (
   name: string,
-  attribute: Attribute.Any,
+  attribute: Schema.Attribute.AnyAttribute,
   contentType: LoadedContentTypeModel
 ) => {
   switch (attribute.type) {
@@ -227,7 +227,7 @@ export const transformContentTypesToModels = (contentTypes: LoadedContentTypeMod
 
     // Add document id to content types
     // as it is not documented
-    const documentIdAttribute: Record<string, Attribute.Any> =
+    const documentIdAttribute: Record<string, Schema.Attribute.AnyAttribute> =
       contentType.modelType === 'contentType'
         ? { documentId: { type: 'string', default: createDocumentId } }
         : {};

@@ -1,6 +1,6 @@
 import { propOr } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import type { CoreApi, Schema, Entity } from '@strapi/types';
+import type { Core, Internal, Data } from '@strapi/types';
 
 import {
   getPaginationInfo,
@@ -25,8 +25,8 @@ const setPublishedAt = (data: Record<string, unknown>) => {
 const createCollectionTypeService = ({
   contentType,
 }: {
-  contentType: Schema.CollectionType;
-}): CoreApi.Service.CollectionType => {
+  contentType: Internal.Struct.CollectionTypeSchema;
+}): Core.CoreAPI.Service.CollectionType => {
   const { uid } = contentType;
 
   return <any>{
@@ -61,7 +61,7 @@ const createCollectionTypeService = ({
       };
     },
 
-    findOne(entityId: Entity.ID, params = {}) {
+    findOne(entityId: Data.ID, params = {}) {
       return strapi.entityService?.findOne(uid, entityId, this.getFetchParams(params));
     },
 
@@ -73,13 +73,13 @@ const createCollectionTypeService = ({
       return strapi.entityService?.create(uid, { ...params, data });
     },
 
-    update(entityId: Entity.ID, params = { data: {} }) {
+    update(entityId: Data.ID, params = { data: {} }) {
       const { data } = params;
 
       return strapi.entityService?.update(uid, entityId, { ...params, data });
     },
 
-    delete(entityId: Entity.ID, params = {}) {
+    delete(entityId: Data.ID, params = {}) {
       return strapi.entityService?.delete(uid, entityId, params);
     },
   };

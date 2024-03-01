@@ -1,6 +1,6 @@
 import { isEmpty, isArray } from 'lodash/fp';
 import koaSession from 'koa-session';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const defaultConfig = {
   key: 'koa.sess',
@@ -15,7 +15,7 @@ const defaultConfig = {
   sameSite: undefined,
 };
 
-export const session: Common.MiddlewareFactory<Partial<koaSession.opts>> = (
+export const session: Core.MiddlewareFactory<Partial<koaSession.opts>> = (
   userConfig,
   { strapi }
 ) => {

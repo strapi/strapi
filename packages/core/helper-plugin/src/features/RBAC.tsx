@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 /**
  * This is duplicated from the `@strapi/admin` package.
  */
 interface Permission {
-  id?: Entity.ID;
+  id?: Data.ID;
   action: string;
   actionParameters?: object;
   subject?: string | null;

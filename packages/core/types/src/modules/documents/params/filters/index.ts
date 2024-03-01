@@ -1,4 +1,7 @@
-import type { Attribute, Common, Utils } from '../../../../types';
+import type * as Schema from '../../../../schema';
+
+import type { UID } from '../../../../public';
+import type { Guard, If, And, MatchFirst, StrictEqual, IsNotNever } from '../../../../utils';
 
 import type * as Operator from './operators';
 import type * as AttributeUtils from '../attributes';
@@ -12,26 +15,34 @@ type IDKey = 'id';
  * Filter representation for nested attributes
  */
 type NestedAttributeCondition<
-  TSchemaUID extends Common.UID.Schema,
-  TAttributeName extends Attribute.GetKeys<TSchemaUID>
+  TSchemaUID extends UID.Schema,
+  TAttributeName extends Schema.AttributeNames<TSchemaUID>
 > = ObjectNotation<
-  Utils.Guard.Never<Attribute.GetTarget<TSchemaUID, TAttributeName>, Common.UID.Schema>
+  Guard.Never<
+    Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TAttributeName>>,
+    UID.Schema
+  >
 >;
 
 /**
  * Filter representation for scalar attributes
  */
 type AttributeCondition<
-  TSchemaUID extends Common.UID.Schema,
-  TAttributeName extends IDKey | Attribute.GetKeys<TSchemaUID>
-> = Utils.Expression.MatchFirst<
+  TSchemaUID extends UID.Schema,
+  TAttributeName extends IDKey | Schema.AttributeNames<TSchemaUID>
+> = MatchFirst<
   [
     // Special catch for manually added ID attributes
-    [Utils.Expression.StrictEqual<TAttributeName, IDKey>, Params.Attribute.ID],
+    [StrictEqual<TAttributeName, IDKey>, Params.Attribute.ID],
     [
-      Utils.Expression.IsNotNever<TAttributeName>,
+      IsNotNever<TAttributeName>,
       // Get the filter attribute value for the given attribute
-      AttributeUtils.GetValue<Attribute.Get<TSchemaUID, Exclude<TAttributeName, IDKey>>>
+      AttributeUtils.GetValue<
+        Schema.AttributeByName<
+          TSchemaUID,
+          Extract<TAttributeName, Schema.AttributeNames<TSchemaUID>>
+        >
+      >
     ]
   ],
   // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
@@ -57,7 +68,7 @@ type AttributeCondition<
 /**
  * Tree representation of a Strapi filter for a given schema UID
  */
-export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
+export type ObjectNotation<TSchemaUID extends UID.Schema> = {
   [TIter in Operator.Group]?: ObjectNotation<TSchemaUID>[];
 } & {
   [TIter in Operator.Logical]?: ObjectNotation<TSchemaUID>;
@@ -67,11 +78,8 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
   ]
     ? // If both the scalar and nested keys are resolved, then create a strongly
       // typed filter object, else create a loose generic abstraction.
-      Utils.Expression.If<
-        Utils.Expression.And<
-          Utils.Expression.IsNotNever<TScalarKeys>,
-          Utils.Expression.IsNotNever<TNestedKeys>
-        >,
+      If<
+        And<IsNotNever<TScalarKeys>, IsNotNever<TNestedKeys>>,
         // Strongly typed representation of the filter object tree
         {
           [TIter in IDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
@@ -87,4 +95,4 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
       >
     : never);
 
-export type Any<TSchemaUID extends Common.UID.Schema> = ObjectNotation<TSchemaUID>;
+export type Any<TSchemaUID extends UID.Schema> = ObjectNotation<TSchemaUID>;

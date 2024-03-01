@@ -1,6 +1,6 @@
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
-const checkIfAttributeIsDisplayable = (attribute: Attribute.Any) => {
+const checkIfAttributeIsDisplayable = (attribute: Schema.Attribute.AnyAttribute) => {
   const { type } = attribute;
 
   if (type === 'relation') {

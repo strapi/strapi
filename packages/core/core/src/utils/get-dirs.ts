@@ -1,5 +1,5 @@
 import { join, resolve } from 'path';
-import type { Strapi, StrapiDirectories } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export type Options = {
   app: string;
@@ -8,8 +8,8 @@ export type Options = {
 
 export const getDirs = (
   { app: appDir, dist: distDir }: Options,
-  { strapi }: { strapi: Strapi }
-): StrapiDirectories => ({
+  { strapi }: { strapi: Core.Strapi }
+): Core.StrapiDirectories => ({
   dist: {
     root: distDir,
     src: join(distDir, 'src'),

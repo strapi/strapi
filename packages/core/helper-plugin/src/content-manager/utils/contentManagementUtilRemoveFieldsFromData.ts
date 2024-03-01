@@ -2,23 +2,25 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
-import type { Attribute, Schema } from '@strapi/types';
+import type { Schema, Internal } from '@strapi/types';
 
 const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];
 
 const contentManagementUtilRemoveFieldsFromData = <
-  TSchema extends Schema.ContentType,
-  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
+  TSchema extends Internal.Struct.ContentTypeSchema,
+  TData extends {
+    [K in keyof TSchema['attributes']]: Schema.Attribute.Value<TSchema['attributes'][K]>;
+  }
 >(
   data: TData,
   contentTypeSchema: TSchema,
-  componentSchema: Record<string, Schema.Component>,
+  componentSchema: Record<string, Internal.Struct.ComponentSchema>,
   fields = defaultFields
 ) => {
   const recursiveCleanData = <
     TSchemum extends Schema.Schema,
     TDatum extends {
-      [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
+      [P in keyof TSchemum['attributes']]: Schema.Attribute.Value<TSchemum['attributes'][P]>;
     }
   >(
     data: TDatum,

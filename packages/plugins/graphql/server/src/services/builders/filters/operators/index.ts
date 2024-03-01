@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { mapValues } from 'lodash/fp';
 import andOperator from './and';
@@ -50,5 +50,5 @@ const operators = {
 };
 
 // Instantiate every operator with the Strapi instance
-export default ({ strapi }: { strapi: Strapi }) =>
+export default ({ strapi }: { strapi: Core.Strapi }) =>
   mapValues((opCtor) => opCtor({ strapi }), operators);

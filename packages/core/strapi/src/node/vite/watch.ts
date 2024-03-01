@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
 
@@ -39,7 +39,7 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
     await next();
   });
 
-  const serveAdmin: Common.MiddlewareHandler = async (koaCtx, next) => {
+  const serveAdmin: Core.MiddlewareHandler = async (koaCtx, next) => {
     await next();
 
     if (koaCtx.method !== 'HEAD' && koaCtx.method !== 'GET') {

@@ -8,7 +8,7 @@ import {
   useAPIErrorHandler,
   useNotification,
 } from '@strapi/helper-plugin';
-import { Webhook } from '@strapi/types';
+import { Modules } from '@strapi/types';
 import { FormikHelpers } from 'formik';
 import { useNavigate, useMatch } from 'react-router-dom';
 
@@ -28,7 +28,7 @@ const cleanData = (
   data: WebhookFormValues
 ): Omit<CreateWebhook.Request['body'], 'id' | 'isEnabled'> => ({
   ...data,
-  headers: data.headers.reduce<Webhook['headers']>((acc, { key, value }) => {
+  headers: data.headers.reduce<Modules.WebhookStore.Webhook['headers']>((acc, { key, value }) => {
     if (key !== '') {
       acc[key] = value;
     }

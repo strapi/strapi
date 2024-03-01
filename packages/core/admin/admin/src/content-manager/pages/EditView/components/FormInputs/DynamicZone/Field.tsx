@@ -18,7 +18,7 @@ import { ComponentPicker } from './ComponentPicker';
 import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
 import { DynamicZoneLabel } from './DynamicZoneLabel';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface DynamicZoneContextValue {
   isInDynamicZone: boolean;
@@ -59,9 +59,9 @@ const DynamicZone = ({
   );
 
   const { value = [] } =
-    useField<Array<Attribute.GetValue<Attribute.DynamicZone>[number] & { __temp_key__: number }>>(
-      name
-    );
+    useField<
+      Array<Schema.Attribute.Value<Schema.Attribute.DynamicZone>[number] & { __temp_key__: number }>
+    >(name);
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return attribute.components.reduce<

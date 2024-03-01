@@ -6,7 +6,7 @@
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import { EntityValidator, Common, Schema, Attribute, Shared, EntityService } from '@strapi/types';
+import { Modules, Core, Public, Internal, Schema } from '@strapi/types';
 import validators from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
@@ -24,7 +24,7 @@ type ID = { id: string | number };
 
 type RelationSource = string | number | ID;
 
-interface ValidatorMeta<TAttribute = Attribute.Any> {
+interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
   updatedAttribute: { name: string; value: any };
 }
@@ -35,14 +35,14 @@ interface ValidatorContext {
 }
 
 interface AttributeValidatorMetas {
-  attr: Attribute.Any;
+  attr: Schema.Attribute.AnyAttribute;
   updatedAttribute: { name: string; value: unknown };
-  model: Schema.ContentType | Schema.Component;
+  model: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema;
   entity?: Entity;
 }
 
 interface ModelValidatorMetas {
-  model: Schema.ContentType | Schema.Component;
+  model: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema;
   data: Record<string, unknown>;
   entity?: Entity;
 }
@@ -56,7 +56,10 @@ const addMinMax = <
   }
 >(
   validator: T,
-  { attr, updatedAttribute }: ValidatorMeta<Attribute.Any & Attribute.MinMaxOption<string | number>>
+  {
+    attr,
+    updatedAttribute,
+  }: ValidatorMeta<Schema.Attribute.AnyAttribute & Schema.Attribute.MinMaxOption<string | number>>
 ): T => {
   let nextValidator: T = validator;
 
@@ -76,7 +79,9 @@ const addMinMax = <
 const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
   return <T extends strapiUtils.yup.AnySchema>(
     validator: T,
-    { attr: { required } }: ValidatorMeta<Partial<Attribute.Any & Attribute.RequiredOption>>
+    {
+      attr: { required },
+    }: ValidatorMeta<Partial<Schema.Attribute.AnyAttribute & Schema.Attribute.RequiredOption>>
   ): T => {
     let nextValidator = validator;
 
@@ -96,7 +101,7 @@ const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
 const addDefault = (createOrUpdate: CreateOrUpdate) => {
   return (
     validator: strapiUtils.yup.BaseSchema,
-    { attr }: ValidatorMeta<Attribute.Any & Attribute.DefaultOption<unknown>>
+    { attr }: ValidatorMeta<Schema.Attribute.AnyAttribute & Schema.Attribute.DefaultOption<unknown>>
   ) => {
     let nextValidator = validator;
 
@@ -123,7 +128,10 @@ const preventCast = (validator: strapiUtils.yup.AnySchema) =>
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
-    { attr, updatedAttribute }: ValidatorMeta<Attribute.Component<Common.UID.Component, boolean>>,
+    {
+      attr,
+      updatedAttribute,
+    }: ValidatorMeta<Schema.Attribute.Component<Public.UID.Component, boolean>>,
     { isDraft }: ValidatorContext
   ) => {
     const model = strapi.getModel(attr.component);
@@ -200,7 +208,7 @@ const createDzValidator =
 const createRelationValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
-    { attr, updatedAttribute }: ValidatorMeta<Attribute.Relation>,
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
     { isDraft }: ValidatorContext
   ) => {
     let validator;
@@ -298,10 +306,10 @@ const createModelValidator =
 
 const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   return async <
-    TUID extends Common.UID.ContentType,
-    TData extends EntityService.Params.Data.Input<TUID>
+    TUID extends Public.UID.ContentType,
+    TData extends Modules.EntityService.Params.Data.Input<TUID>
   >(
-    model: Shared.ContentTypes[TUID],
+    model: Schema.ContentType<TUID>,
     data: TData | Partial<TData> | undefined,
     options?: ValidatorContext,
     entity?: Entity
@@ -344,7 +352,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
 /**
  * Builds an object containing all the media and relations being associated with an entity
  */
-const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Component>({
+const buildRelationsStore = <TUID extends Public.UID.Schema>({
   uid,
   data,
 }: {
@@ -443,7 +451,7 @@ const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Co
           return mergeWith(
             relationsStore,
             buildRelationsStore({
-              uid: value.__component as Common.UID.Component,
+              uid: value.__component as Public.UID.Component,
               data: value,
             }),
             (objValue, srcValue) => {
@@ -472,7 +480,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
-      const count = await strapi.query(key as Common.UID.Schema).count({
+      const count = await strapi.query(key as Public.UID.Schema).count({
         where: {
           id: {
             $in: uniqueValues.map((v) => v.id),
@@ -494,7 +502,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   return Promise.all(promises);
 };
 
-const entityValidator: EntityValidator = {
+const entityValidator: Modules.EntityValidator.EntityValidator = {
   validateEntityCreation: createValidateEntity('creation'),
   validateEntityUpdate: createValidateEntity('update'),
 };

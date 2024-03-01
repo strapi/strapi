@@ -1,6 +1,6 @@
 import { prop, propEq, identity, merge } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Strapi } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 
 const { ValidationError } = errors;
 
@@ -16,7 +16,7 @@ const getLocalizedTypesFromRegistry = ({ strapi, typeRegistry }: any) => {
   );
 };
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   register() {
     const { service: getGraphQLService } = strapi.plugin('graphql');
     const { service: getI18NService } = strapi.plugin('i18n');

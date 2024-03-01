@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { createRouteManager } from './routing';
 
@@ -8,7 +8,7 @@ interface Options {
   type?: string;
 }
 
-const createAPI = (strapi: Strapi, opts: Options = {}) => {
+const createAPI = (strapi: Core.Strapi, opts: Options = {}) => {
   const { prefix, type } = opts;
 
   const api = new Router({ prefix });
@@ -25,7 +25,7 @@ const createAPI = (strapi: Strapi, opts: Options = {}) => {
       return this;
     },
 
-    routes(routes: Common.Router | Common.Route[]) {
+    routes(routes: Core.Router | Core.Route[]) {
       routeManager.addRoutes(routes, api);
       return this;
     },

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } from 'lodash/fp';
 
 import { generateTimestampCode, stringIncludes, hooks as hooksUtils, errors } from '@strapi/utils';
-import { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 import permissionDomain from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
@@ -178,7 +178,7 @@ const count = async (params = {} as any): Promise<number> => {
  * Check if the given roles id can be deleted safely, throw otherwise
  * @param ids
  */
-const checkRolesIdForDeletion = async (ids = [] as Entity.ID[]) => {
+const checkRolesIdForDeletion = async (ids = [] as Data.ID[]) => {
   const superAdminRole = await getSuperAdmin();
 
   if (superAdminRole && stringIncludes(ids, superAdminRole.id)) {
@@ -197,7 +197,7 @@ const checkRolesIdForDeletion = async (ids = [] as Entity.ID[]) => {
  * Delete roles in database if they have no user assigned
  * @param ids query params to find the roles
  */
-const deleteByIds = async (ids = [] as Entity.ID[]): Promise<AdminRole[]> => {
+const deleteByIds = async (ids = [] as Data.ID[]): Promise<AdminRole[]> => {
   await checkRolesIdForDeletion(ids);
 
   await getService('permission').deleteByRolesIds(ids);
@@ -217,7 +217,7 @@ const deleteByIds = async (ids = [] as Entity.ID[]): Promise<AdminRole[]> => {
 
 /** Count the number of users for some roles
  */
-const getUsersCount = async (roleId: Entity.ID): Promise<number> => {
+const getUsersCount = async (roleId: Data.ID): Promise<number> => {
   return strapi.query('admin::user').count({ where: { roles: { id: roleId } } });
 };
 
@@ -316,11 +316,11 @@ const displayWarningIfNoSuperAdmin = async () => {
 
 /**
  * Assign permissions to a role
- * @param roleId - role ID
+ * @param roleId - role Data.ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
 const assignPermissions = async (
-  roleId: Entity.ID,
+  roleId: Data.ID,
   permissions: Array<Pick<Permission, 'action' | 'subject' | 'conditions'>> = []
 ) => {
   await validatePermissionsExist(permissions);
@@ -379,7 +379,7 @@ const assignPermissions = async (
   return permissionsToReturn;
 };
 
-const addPermissions = async (roleId: Entity.ID, permissions: any) => {
+const addPermissions = async (roleId: Data.ID, permissions: any) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
 

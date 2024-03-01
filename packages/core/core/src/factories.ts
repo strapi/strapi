@@ -1,5 +1,5 @@
 import { pipe, omit, pick } from 'lodash/fp';
-import type { Strapi, Common, CoreApi, Utils } from '@strapi/types';
+import type { Core, Public, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
 import { createService } from './core-api/service';
@@ -9,10 +9,10 @@ const symbols = {
   CustomController: Symbol('StrapiCustomCoreController'),
 } as const;
 
-type WithStrapiCallback<T> = T | (<S extends { strapi: Strapi }>(params: S) => T);
+type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S) => T);
 
 // Content type is proxied to allow for dynamic content type updates
-const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
+const getContentTypeProxy = (strapi: Core.Strapi, uid: Public.UID.ContentType) => {
   return new Proxy(strapi.contentType(uid), {
     get(target, prop) {
       const contentType = strapi.contentType(uid);
@@ -24,13 +24,19 @@ const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
 };
 
 const createCoreController = <
-  TUID extends Common.UID.ContentType,
-  TController extends CoreApi.Controller.Extendable<TUID>
+  TUID extends Public.UID.ContentType,
+  TController extends Core.CoreAPI.Controller.Extendable<TUID>
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Controller.Extendable<TUID> & TController>>
+  cfg?: WithStrapiCallback<
+    Utils.PartialWithThis<Core.CoreAPI.Controller.Extendable<TUID> & TController>
+  >
 ) => {
-  return ({ strapi }: { strapi: Strapi }): TController & CoreApi.Controller.ContentType<TUID> => {
+  return ({
+    strapi,
+  }: {
+    strapi: Core.Strapi;
+  }): TController & Core.CoreAPI.Controller.ContentType<TUID> => {
     const baseController = createController({ contentType: getContentTypeProxy(strapi, uid) });
 
     const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
@@ -57,13 +63,17 @@ const createCoreController = <
 };
 
 function createCoreService<
-  TUID extends Common.UID.ContentType,
-  TService extends CoreApi.Service.Extendable<TUID>
+  TUID extends Public.UID.ContentType,
+  TService extends Core.CoreAPI.Service.Extendable<TUID>
 >(
   uid: TUID,
-  cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Service.Extendable<TUID> & TService>>
+  cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>
 ) {
-  return ({ strapi }: { strapi: Strapi }): TService & CoreApi.Service.ContentType<TUID> => {
+  return ({
+    strapi,
+  }: {
+    strapi: Core.Strapi;
+  }): TService & Core.CoreAPI.Service.ContentType<TUID> => {
     const baseService = createService({ contentType: getContentTypeProxy(strapi, uid) });
 
     const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
@@ -79,12 +89,12 @@ function createCoreService<
   };
 }
 
-function createCoreRouter<T extends Common.UID.ContentType>(
+function createCoreRouter<T extends Public.UID.ContentType>(
   uid: T,
-  cfg?: CoreApi.Router.RouterConfig<T>
-): CoreApi.Router.Router {
+  cfg?: Core.CoreAPI.Router.RouterConfig<T>
+): Core.CoreAPI.Router.Router {
   const { prefix, config = {}, only, except, type = 'content-api' } = cfg ?? {};
-  let routes: CoreApi.Router.Route[];
+  let routes: Core.CoreAPI.Router.Route[];
 
   return {
     type,
@@ -115,7 +125,7 @@ function createCoreRouter<T extends Common.UID.ContentType>(
   };
 }
 
-const isCustomController = <T extends Common.Controller>(controller: T): boolean => {
+const isCustomController = <T extends Core.Controller>(controller: T): boolean => {
   return symbols.CustomController in controller;
 };
 

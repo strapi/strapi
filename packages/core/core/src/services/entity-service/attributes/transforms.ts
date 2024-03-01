@@ -1,11 +1,14 @@
 import { getOr, toNumber, isString } from 'lodash/fp';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import bcrypt from 'bcryptjs';
 
 type Transforms = {
-  [TKind in Attribute.Kind]?: (
+  [TKind in Schema.Attribute.Kind]?: (
     value: unknown,
-    context: { attribute: Attribute.Any; attributeName: string }
+    context: {
+      attribute: Schema.Attribute.AnyAttribute;
+      attributeName: string;
+    }
   ) => any;
 };
 

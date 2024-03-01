@@ -13,7 +13,7 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import { Form } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
-import { Webhook } from '@strapi/types';
+import { Modules } from '@strapi/types';
 import { Field, FormikHelpers, FormikProvider, useFormik } from 'formik';
 import { IntlShape, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -25,6 +25,8 @@ import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { EventTableCE } from './EventsTable';
 import { HeadersInput } from './HeadersInput';
 import { TriggerContainer } from './TriggerContainer';
+
+type Webhook = Modules.WebhookStore.Webhook;
 
 interface WebhookFormValues {
   name: Webhook['name'];

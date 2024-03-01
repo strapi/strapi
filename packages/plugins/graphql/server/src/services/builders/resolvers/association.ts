@@ -1,6 +1,6 @@
 import { get } from 'lodash/fp';
 import { sanitize, validate, pipeAsync, errors } from '@strapi/utils';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -18,7 +18,7 @@ export default ({ strapi }: Context) => {
       contentTypeUID,
       attributeName,
     }: {
-      contentTypeUID: UID.ContentType;
+      contentTypeUID: Internal.UID.ContentType;
       attributeName: string;
     }) {
       const contentType = strapi.getModel(contentTypeUID);

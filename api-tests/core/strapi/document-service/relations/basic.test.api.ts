@@ -1,7 +1,8 @@
 /**
  * Create and get relations using the document service.
  */
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-helper';
 import resources from '../resources/index';
 import { ARTICLE_UID, findArticleDb, AUTHOR_UID, findAuthorDb, CATEGORY_UID } from '../utils';
@@ -9,7 +10,7 @@ import { testInTransaction } from '../../../../utils';
 
 describe('Document Service relations', () => {
   let testUtils;
-  let strapi: LoadedStrapi;
+  let strapi: Core.LoadedStrapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);

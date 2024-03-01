@@ -1,5 +1,5 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export default (strapi: Strapi) => {
+export default (strapi: Core.Strapi) => {
   strapi.get('validators').set('content-api', { input: [], query: [] });
 };

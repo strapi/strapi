@@ -2,7 +2,7 @@ import { extendType, nonNull } from 'nexus';
 import { omit, isNil } from 'lodash/fp';
 import { sanitize, validate, errors } from '@strapi/utils';
 import type * as Nexus from 'nexus';
-import type { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import type { Context } from '../../types';
 
 const { NotFoundError } = errors;
@@ -23,7 +23,7 @@ export default ({ strapi }: Context) => {
 
   const addUpdateMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Schema.SingleType
+    contentType: Internal.Struct.SingleTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -74,8 +74,8 @@ export default ({ strapi }: Context) => {
 
         // Create or update
         const value = isNil(entity)
-          ? create(parent, transformedArgs)
-          : update(uid, { id: entity.id, data: transformedArgs.data });
+          ? await create(parent, transformedArgs)
+          : await update(uid, { id: entity.id, data: transformedArgs.data });
 
         return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
@@ -84,7 +84,7 @@ export default ({ strapi }: Context) => {
 
   const addDeleteMutation = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Mutation'>,
-    contentType: Schema.SingleType
+    contentType: Internal.Struct.SingleTypeSchema
   ) => {
     const { uid } = contentType;
 
@@ -126,7 +126,7 @@ export default ({ strapi }: Context) => {
   };
 
   return {
-    buildSingleTypeMutations(contentType: Schema.SingleType) {
+    buildSingleTypeMutations(contentType: Internal.Struct.SingleTypeSchema) {
       const updateMutationName = `Mutation.${getUpdateMutationTypeName(contentType)}`;
       const deleteMutationName = `Mutation.${getDeleteMutationTypeName(contentType)}`;
 

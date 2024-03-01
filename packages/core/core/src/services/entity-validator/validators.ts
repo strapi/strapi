@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import strapiUtils from '@strapi/utils';
-import type { Attribute, Schema } from '@strapi/types';
+import type { Schema, Internal } from '@strapi/types';
 import blocksValidator from './blocks-validator';
 
 const { yup } = strapiUtils;
 
-interface ValidatorMetas<TAttribute extends Attribute.Any> {
+interface ValidatorMetas<TAttribute extends Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
-  model: Schema.ContentType;
+  model: Internal.Struct.ContentTypeSchema;
   updatedAttribute: { name: string; value: unknown };
   entity: Record<string, unknown> | null;
 }
@@ -28,12 +28,12 @@ const addMinLengthValidator = (
     attr,
   }: {
     attr:
-      | Attribute.String
-      | Attribute.Text
-      | Attribute.RichText
-      | Attribute.Password
-      | Attribute.Email
-      | Attribute.UID;
+      | Schema.Attribute.String
+      | Schema.Attribute.Text
+      | Schema.Attribute.RichText
+      | Schema.Attribute.Password
+      | Schema.Attribute.Email
+      | Schema.Attribute.UID;
   },
   { isDraft }: ValidatorOptions
 ) => {
@@ -52,12 +52,12 @@ const addMaxLengthValidator = (
     attr,
   }: {
     attr:
-      | Attribute.String
-      | Attribute.Text
-      | Attribute.RichText
-      | Attribute.Password
-      | Attribute.Email
-      | Attribute.UID;
+      | Schema.Attribute.String
+      | Schema.Attribute.Text
+      | Schema.Attribute.RichText
+      | Schema.Attribute.Password
+      | Schema.Attribute.Email
+      | Schema.Attribute.UID;
   }
 ) => {
   return attr.maxLength && _.isInteger(attr.maxLength) ? validator.max(attr.maxLength) : validator;
@@ -72,7 +72,7 @@ const addMinIntegerValidator = (
   {
     attr,
   }: {
-    attr: Attribute.Integer | Attribute.BigInteger;
+    attr: Schema.Attribute.Integer | Schema.Attribute.BigInteger;
   }
 ) => (_.isNumber(attr.min) ? validator.min(_.toInteger(attr.min)) : validator);
 
@@ -84,7 +84,7 @@ const addMaxIntegerValidator = (
   {
     attr,
   }: {
-    attr: Attribute.Integer | Attribute.BigInteger;
+    attr: Schema.Attribute.Integer | Schema.Attribute.BigInteger;
   }
 ) => (_.isNumber(attr.max) ? validator.max(_.toInteger(attr.max)) : validator);
 
@@ -96,7 +96,7 @@ const addMinFloatValidator = (
   {
     attr,
   }: {
-    attr: Attribute.Decimal | Attribute.Float;
+    attr: Schema.Attribute.Decimal | Schema.Attribute.Float;
   }
 ) => (_.isNumber(attr.min) ? validator.min(attr.min) : validator);
 
@@ -108,7 +108,7 @@ const addMaxFloatValidator = (
   {
     attr,
   }: {
-    attr: Attribute.Decimal | Attribute.Float;
+    attr: Schema.Attribute.Decimal | Schema.Attribute.Float;
   }
 ) => (_.isNumber(attr.max) ? validator.max(attr.max) : validator);
 
@@ -121,12 +121,12 @@ const addStringRegexValidator = (
     attr,
   }: {
     attr:
-      | Attribute.String
-      | Attribute.Text
-      | Attribute.RichText
-      | Attribute.Password
-      | Attribute.Email
-      | Attribute.UID;
+      | Schema.Attribute.String
+      | Schema.Attribute.Text
+      | Schema.Attribute.RichText
+      | Schema.Attribute.Password
+      | Schema.Attribute.Email
+      | Schema.Attribute.UID;
   }
 ) => {
   return 'regex' in attr && !_.isUndefined(attr.regex)
@@ -139,7 +139,12 @@ const addStringRegexValidator = (
  */
 const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
   validator: T,
-  { attr, model, updatedAttribute, entity }: ValidatorMetas<Attribute.Any & Attribute.UniqueOption>,
+  {
+    attr,
+    model,
+    updatedAttribute,
+    entity,
+  }: ValidatorMetas<Schema.Attribute.AnyAttribute & Schema.Attribute.UniqueOption>,
   options: ValidatorOptions
 ): T => {
   if (attr.type !== 'uid' && !attr.unique) {
@@ -188,12 +193,12 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
 
 const stringValidator = (
   metas: ValidatorMetas<
-    | Attribute.String
-    | Attribute.Text
-    | Attribute.RichText
-    | Attribute.Password
-    | Attribute.Email
-    | Attribute.UID
+    | Schema.Attribute.String
+    | Schema.Attribute.Text
+    | Schema.Attribute.RichText
+    | Schema.Attribute.Password
+    | Schema.Attribute.Email
+    | Schema.Attribute.UID
   >,
   options: ValidatorOptions
 ) => {
@@ -207,25 +212,28 @@ const stringValidator = (
   return schema;
 };
 
-const emailValidator = (metas: ValidatorMetas<Attribute.Email>, options: ValidatorOptions) => {
+const emailValidator = (
+  metas: ValidatorMetas<Schema.Attribute.Email>,
+  options: ValidatorOptions
+) => {
   const schema = stringValidator(metas, options);
   return schema.email().min(1, '${path} cannot be empty');
 };
 
-const uidValidator = (metas: ValidatorMetas<Attribute.UID>, options: ValidatorOptions) => {
+const uidValidator = (metas: ValidatorMetas<Schema.Attribute.UID>, options: ValidatorOptions) => {
   const schema = stringValidator(metas, options);
 
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
 
-const enumerationValidator = ({ attr }: { attr: Attribute.Enumeration }) => {
+const enumerationValidator = ({ attr }: { attr: Schema.Attribute.Enumeration }) => {
   return yup
     .string()
     .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null as any));
 };
 
 const integerValidator = (
-  metas: ValidatorMetas<Attribute.Integer | Attribute.BigInteger>,
+  metas: ValidatorMetas<Schema.Attribute.Integer | Schema.Attribute.BigInteger>,
   options: ValidatorOptions
 ) => {
   let schema = yup.number().integer();
@@ -238,7 +246,7 @@ const integerValidator = (
 };
 
 const floatValidator = (
-  metas: ValidatorMetas<Attribute.Decimal | Attribute.Float>,
+  metas: ValidatorMetas<Schema.Attribute.Decimal | Schema.Attribute.Float>,
   options: ValidatorOptions
 ) => {
   let schema = yup.number();
@@ -250,7 +258,7 @@ const floatValidator = (
 };
 
 const bigintegerValidator = (
-  metas: ValidatorMetas<Attribute.BigInteger>,
+  metas: ValidatorMetas<Schema.Attribute.BigInteger>,
   options: ValidatorOptions
 ) => {
   const schema = yup.mixed();
@@ -258,7 +266,12 @@ const bigintegerValidator = (
 };
 
 const datesValidator = (
-  metas: ValidatorMetas<Attribute.Date | Attribute.DateTime | Attribute.Time | Attribute.Timestamp>,
+  metas: ValidatorMetas<
+    | Schema.Attribute.Date
+    | Schema.Attribute.DateTime
+    | Schema.Attribute.Time
+    | Schema.Attribute.Timestamp
+  >,
   options: ValidatorOptions
 ) => {
   const schema = yup.mixed();

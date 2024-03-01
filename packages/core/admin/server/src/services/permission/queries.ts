@@ -1,18 +1,16 @@
 import { isNil, isArray, prop, xor, eq, map, differenceWith } from 'lodash/fp';
-import { Entity } from '@strapi/types';
 import pmap from 'p-map';
 import { getService } from '../../utils';
 import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 import { Action } from '../../domain/action';
-
-type ID = Entity.ID;
+import type { Data } from '@strapi/types';
 
 /**
  * Delete permissions of roles in database
  * @param rolesIds ids of roles
  */
-export const deleteByRolesIds = async (rolesIds: ID[]): Promise<void> => {
+export const deleteByRolesIds = async (rolesIds: Data.ID[]): Promise<void> => {
   const permissionsToDelete = await strapi.query('admin::permission').findMany({
     select: ['id'],
     where: {
@@ -29,7 +27,7 @@ export const deleteByRolesIds = async (rolesIds: ID[]): Promise<void> => {
  * Delete permissions
  * @param ids ids of permissions
  */
-export const deleteByIds = async (ids: ID[]): Promise<void> => {
+export const deleteByIds = async (ids: Data.ID[]): Promise<void> => {
   const result = [];
   for (const id of ids) {
     const queryResult = await strapi.query('admin::permission').delete({ where: { id } });

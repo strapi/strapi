@@ -1,13 +1,13 @@
 import { join } from 'path';
 import { nameToSlug, errors } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import createBuilder from './schema-builder';
 
 type Infos = {
   name: string;
 };
 
-interface WorkingComponent extends Schema.Component {
+interface WorkingComponent extends Internal.Struct.ComponentSchema {
   setUID: (uid: string) => WorkingComponent;
   setDir: (dir: string) => WorkingComponent;
   updateComponent: (oldUID: string, newUID: string) => void;

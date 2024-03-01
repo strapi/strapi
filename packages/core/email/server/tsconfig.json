@@ -2,6 +2,7 @@
   "extends": "tsconfig/base.json",
   "include": ["./src", "../shared"],
   "compilerOptions": {
+    "moduleResolution": "nodenext",
     "rootDir": "../",
     "baseUrl": "."
   }

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
   options: Array<{ disabled?: boolean; hidden?: boolean; label?: string; value: string }>;
@@ -21,7 +21,7 @@ interface InputProps {
   required?: boolean;
   options?: never;
   type: Exclude<
-    Attribute.Kind,
+    Schema.Attribute.Kind,
     | 'enumeration'
     | 'media'
     | 'blocks'

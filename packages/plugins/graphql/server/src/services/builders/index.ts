@@ -1,5 +1,5 @@
 import { merge, map, pipe, reduce } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 // Builders Factories
 
@@ -41,7 +41,7 @@ const buildersFactories = [
   resolvers,
 ];
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const buildersMap = new Map();
 
   return {

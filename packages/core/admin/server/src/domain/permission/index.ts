@@ -1,5 +1,6 @@
+import type { Utils } from '@strapi/types';
+
 import { providerFactory } from '@strapi/utils';
-import { Utils } from '@strapi/types';
 import {
   pipe,
   set,

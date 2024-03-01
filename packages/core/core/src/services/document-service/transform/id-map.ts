@@ -1,4 +1,4 @@
-import { Strapi, Entity } from '@strapi/types';
+import { Core, Data } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 
 /**
@@ -19,7 +19,7 @@ const encodeKey = (obj: any) => {
 
 interface KeyFields {
   uid: string;
-  documentId: Entity.ID;
+  documentId: Data.ID;
   locale?: string | null;
   isDraft?: boolean;
 }
@@ -37,7 +37,7 @@ export interface IdMap {
 /**
  * Holds a registry of document ids and their corresponding entity ids.
  */
-const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
+const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
   const loadedIds = new Map();
   const toLoadIds = new Map();
 

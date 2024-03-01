@@ -1,10 +1,14 @@
 import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
-import type { LoadedStrapi, Attribute, Common, Schema } from '@strapi/types';
+
 import * as componentsService from '../../utils/components';
 
-const sanitizeComponentLikeAttributes = <T extends Schema.ContentType | Schema.Component>(
+import type { Core, Public, Data, Internal } from '@strapi/types';
+
+const sanitizeComponentLikeAttributes = <
+  T extends Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema
+>(
   model: T,
-  data: Attribute.GetValues<T['uid']>
+  data: Data.Entity<T['uid']>
 ) => {
   const { attributes } = model;
 
@@ -17,9 +21,9 @@ const sanitizeComponentLikeAttributes = <T extends Schema.ContentType | Schema.C
 
 const omitInvalidCreationAttributes = omit(['id']);
 
-const createEntityQuery = (strapi: LoadedStrapi): any => {
+const createEntityQuery = (strapi: Core.LoadedStrapi): any => {
   const components = {
-    async assignToEntity(uid: Common.UID.Schema, data: any) {
+    async assignToEntity(uid: Public.UID.Schema, data: any) {
       const model = strapi.getModel(uid);
 
       const entityComponents = await componentsService.createComponents(uid, data);
@@ -29,12 +33,12 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     },
 
     async get<T extends object>(uid: string, entity: T) {
-      return componentsService.getComponents(uid as Common.UID.Schema, entity as any);
+      return componentsService.getComponents(uid as Public.UID.Schema, entity as any);
     },
 
     delete<T extends object>(uid: string, componentsToDelete: T) {
       return componentsService.deleteComponents(
-        uid as Common.UID.Schema,
+        uid as Public.UID.Schema,
         componentsToDelete as any,
         {
           loadComponents: false,
@@ -43,7 +47,7 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     },
   };
 
-  const query = (uid: Common.UID.Schema) => {
+  const query = (uid: Public.UID.Schema) => {
     const create = async <T extends { data: U }, U extends object>(params: T) => {
       const dataWithComponents = await components.assignToEntity(uid, params.data);
       const sanitizedData = omitInvalidCreationAttributes(dataWithComponents);
@@ -81,7 +85,7 @@ const createEntityQuery = (strapi: LoadedStrapi): any => {
     };
 
     const getDeepPopulateComponentLikeQuery = (
-      contentType: Schema.ContentType | Schema.Component,
+      contentType: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema,
       params = { select: '*' }
     ) => {
       const { attributes } = contentType;

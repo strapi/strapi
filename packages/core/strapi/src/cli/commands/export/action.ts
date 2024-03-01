@@ -1,7 +1,7 @@
 import { isObject, isString, isFinite, toNumber } from 'lodash/fp';
 import fs from 'fs-extra';
 import chalk from 'chalk';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import {
   engine as engineDataTransfer,
@@ -148,7 +148,7 @@ export default async (opts: CmdOptions) => {
 /**
  * It creates a local strapi destination provider
  */
-const createSourceProvider = (strapi: LoadedStrapi) => {
+const createSourceProvider = (strapi: Core.LoadedStrapi) => {
   return createLocalStrapiSourceProvider({
     async getStrapi() {
       return strapi;

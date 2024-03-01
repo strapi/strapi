@@ -1,11 +1,12 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
 import { CATEGORY_UID, Category } from './utils';
 
 describe.skip('Document Service', () => {
   let testUtils;
-  let strapi: LoadedStrapi;
+  let strapi: Core.LoadedStrapi;
 
   let testName;
   let createdCategory;

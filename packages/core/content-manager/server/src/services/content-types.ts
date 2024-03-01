@@ -1,7 +1,7 @@
 import { isNil, mapValues } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
-import { LoadedStrapi as Strapi, UID, Schema } from '@strapi/types';
+import type { Public, Internal, Core } from '@strapi/types';
 
 import type { ConfigurationUpdate } from './configuration';
 
@@ -19,14 +19,14 @@ const configurationService = createConfigurationService({
   },
 });
 
-const service = ({ strapi }: { strapi: Strapi }) => ({
+const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   findAllContentTypes() {
     const { toContentManagerModel } = getService('data-mapper');
 
     return Object.values(strapi.contentTypes).map(toContentManagerModel);
   },
 
-  findContentType(uid: UID.ContentType) {
+  findContentType(uid: Public.UID.ContentType) {
     const { toContentManagerModel } = getService('data-mapper');
 
     const contentType = strapi.contentTypes[uid];
@@ -42,7 +42,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
     );
   },
 
-  findContentTypesByKind(kind: { kind: Schema.ContentTypeKind | undefined }) {
+  findContentTypesByKind(kind: { kind: Internal.Struct.ContentTypeKind | undefined }) {
     if (!kind) {
       return this.findAllContentTypes();
     }
@@ -51,7 +51,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
-  async findConfiguration(contentType: Schema.ContentType) {
+  async findConfiguration(contentType: Internal.Struct.ContentTypeSchema) {
     const configuration = await configurationService.getConfiguration(contentType.uid);
 
     return {
@@ -61,7 +61,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async updateConfiguration(
-    contentType: Schema.ContentType,
+    contentType: Internal.Struct.ContentTypeSchema,
     newConfiguration: ConfigurationUpdate
   ) {
     await configurationService.setConfiguration(contentType.uid, newConfiguration);
@@ -69,7 +69,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
     return this.findConfiguration(contentType);
   },
 
-  findComponentsConfigurations(contentType: Schema.ContentType) {
+  findComponentsConfigurations(contentType: Internal.Struct.ContentTypeSchema) {
     // delegate to componentService
     return getService('components').findComponentsConfigurations(contentType);
   },

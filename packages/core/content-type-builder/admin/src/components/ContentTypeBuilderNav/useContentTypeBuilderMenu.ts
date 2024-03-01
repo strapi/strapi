@@ -9,7 +9,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 export const useContentTypeBuilderMenu = () => {
   const {
@@ -38,7 +38,7 @@ export const useContentTypeBuilderMenu = () => {
   const canOpenModalCreateCTorComponent =
     !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
     !Object.keys(components).some(
-      (component) => components[component as UID.Component].isTemporary === true
+      (component) => components[component as Internal.UID.Component].isTemporary === true
     ) &&
     isEqual(modifiedData, initialData);
 

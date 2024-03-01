@@ -1,10 +1,10 @@
-import { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
+import type { Configuration, Settings, Metadatas, Layouts } from './content-types';
 import { errors } from '@strapi/utils';
-import { Configuration, Settings, Metadatas, Layouts } from './content-types';
 
-export interface Component extends Schema.Component {
+export interface Component extends Internal.Struct.ComponentSchema {
   isDisplayed: boolean;
-  info: Schema.Info;
+  info: Internal.Struct.SchemaInfo;
   apiID: string;
 }
 

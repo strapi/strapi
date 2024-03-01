@@ -13,14 +13,14 @@ import { ComponentCard } from './ComponentCard';
 import { ComponentList } from './ComponentList';
 import { Tr } from './Tr';
 
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
   components: Array<string>;
   customRowComponent?: () => void;
   name?: string;
-  targetUid: UID.Component;
+  targetUid: Internal.UID.Component;
 }
 
 const StyledAddIcon = styled(Plus)`

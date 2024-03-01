@@ -7,28 +7,7 @@ import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
-import type {
-  Strapi as StrapiI,
-  Server,
-  EntityService,
-  Documents,
-  EventHub,
-  StartupLogger,
-  CronService,
-  WebhookStore,
-  CoreStore,
-  TelemetryService,
-  RequestContext,
-  CustomFields,
-  Fetch,
-  StrapiFS,
-  StrapiDirectories,
-  Reloader,
-  EntityValidator,
-  Common,
-  Shared,
-  Schema,
-} from '@strapi/types';
+import type { Core, Modules, Internal, Public, Schema } from '@strapi/types';
 
 import loadConfiguration from './configuration';
 
@@ -120,42 +99,42 @@ const reloader = (strapi: Strapi) => {
 
 export type LoadedStrapi = Required<Strapi>;
 
-class Strapi extends Container implements StrapiI {
-  server: Server;
+class Strapi extends Container implements Core.Strapi {
+  server: Modules.Server.Server;
 
   log: Logger;
 
-  fs: StrapiFS;
+  fs: Core.StrapiFS;
 
-  eventHub: EventHub;
+  eventHub: Modules.EventHub.EventHub;
 
-  startupLogger: StartupLogger;
+  startupLogger: Core.StartupLogger;
 
-  cron: CronService;
+  cron: Modules.Cron.CronService;
 
   webhookRunner?: WebhookRunner;
 
-  webhookStore?: WebhookStore;
+  webhookStore?: Modules.WebhookStore.WebhookStore;
 
-  store?: CoreStore;
+  store?: Modules.CoreStore.CoreStore;
 
-  entityValidator?: EntityValidator;
+  entityValidator?: Modules.EntityValidator.EntityValidator;
 
-  entityService?: EntityService.EntityService;
+  entityService?: Modules.EntityService.EntityService;
 
-  documents?: Documents.Service;
+  documents?: Modules.Documents.Service;
 
-  telemetry: TelemetryService;
+  telemetry: Modules.Metrics.TelemetryService;
 
-  requestContext: RequestContext;
+  requestContext: Modules.RequestContext.RequestContext;
 
-  customFields: CustomFields.CustomFields;
+  customFields: Modules.CustomFields.CustomFields;
 
-  fetch: Fetch;
+  fetch: Modules.Fetch.Fetch;
 
-  dirs: StrapiDirectories;
+  dirs: Core.StrapiDirectories;
 
-  admin?: Common.Module;
+  admin?: Core.Module;
 
   isLoaded: boolean;
 
@@ -165,12 +144,12 @@ class Strapi extends Container implements StrapiI {
 
   EE?: boolean;
 
-  reload: Reloader;
+  reload: Core.Reloader;
 
   features: FeaturesService;
 
   // @ts-expect-error - Assigned in constructor
-  ee: StrapiI['ee'];
+  ee: Core.Strapi['ee'];
 
   constructor(opts: StrapiOptions = {}) {
     super();
@@ -254,7 +233,7 @@ class Strapi extends Container implements StrapiI {
     return this.get('services').getAll();
   }
 
-  service(uid: Common.UID.Service) {
+  service(uid: Public.UID.Service) {
     return this.get('services').get(uid);
   }
 
@@ -262,19 +241,19 @@ class Strapi extends Container implements StrapiI {
     return this.get('controllers').getAll();
   }
 
-  controller(uid: Common.UID.Controller) {
+  controller(uid: Public.UID.Controller) {
     return this.get('controllers').get(uid);
   }
 
-  get contentTypes(): Shared.ContentTypes {
+  get contentTypes(): Schema.ContentTypes {
     return this.get('content-types').getAll();
   }
 
-  contentType(name: Common.UID.ContentType) {
+  contentType(name: Public.UID.ContentType) {
     return this.get('content-types').get(name);
   }
 
-  get components(): Shared.Components {
+  get components(): Schema.Components {
     return this.get('components').getAll();
   }
 
@@ -294,11 +273,11 @@ class Strapi extends Container implements StrapiI {
     return this.get('middlewares').get(name);
   }
 
-  get plugins(): Record<string, Common.Plugin> {
+  get plugins(): Record<string, Core.Plugin> {
     return this.get('plugins').getAll();
   }
 
-  plugin(name: string): Common.Plugin {
+  plugin(name: string): Core.Plugin {
     return this.get('plugins').get(name);
   }
 
@@ -314,7 +293,7 @@ class Strapi extends Container implements StrapiI {
   //   return this.get('apis').get(name);
   // }
 
-  get api(): Record<string, Common.Module> {
+  get api(): Record<string, Core.Module> {
     return this.get('apis').getAll();
   }
 
@@ -377,7 +356,7 @@ class Strapi extends Container implements StrapiI {
           numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
           numberOfComponents: _.size(this.components),
           numberOfDynamicZones: getNumberOfDynamicZones(),
-          numberOfCustomControllers: Object.values<Common.Controller>(this.controllers).filter(
+          numberOfCustomControllers: Object.values<Core.Controller>(this.controllers).filter(
             // TODO: Fix this at the content API loader level to prevent future types issues
             (controller) => controller !== undefined && factories.isCustomController(controller)
           ).length,
@@ -573,7 +552,7 @@ class Strapi extends Container implements StrapiI {
 
     this.isLoaded = true;
 
-    return this as this & Required<StrapiI>;
+    return this as this & Required<Core.Strapi>;
   }
 
   async startWebhooks() {
@@ -604,17 +583,17 @@ class Strapi extends Container implements StrapiI {
     }
   }
 
-  getModel(uid: Common.UID.ContentType): Schema.ContentType;
-  getModel(uid: Common.UID.Component): Schema.Component;
-  getModel<TUID extends Common.UID.Schema>(
+  getModel(uid: Public.UID.ContentType): Schema.ContentType;
+  getModel(uid: Public.UID.Component): Schema.Component;
+  getModel<TUID extends Public.UID.Schema>(
     uid: TUID
   ): Schema.ContentType | Schema.Component | undefined {
     if (uid in this.contentTypes) {
-      return this.contentTypes[uid as Common.UID.ContentType];
+      return this.contentTypes[uid as Public.UID.ContentType];
     }
 
     if (uid in this.components) {
-      return this.components[uid as Common.UID.Component];
+      return this.components[uid as Public.UID.Component];
     }
   }
 
@@ -622,7 +601,7 @@ class Strapi extends Container implements StrapiI {
    * Binds queries with a specific model
    * @param {string} uid
    */
-  query(uid: Common.UID.Schema) {
+  query(uid: Public.UID.Schema) {
     return this.db!.query(uid);
   }
 }
@@ -635,12 +614,12 @@ interface StrapiOptions {
 }
 
 interface Init {
-  (options?: StrapiOptions): StrapiI;
+  (options?: StrapiOptions): Core.Strapi;
   factories: typeof factories;
   compile: typeof compile;
 }
 
-const initFn = (options: StrapiOptions = {}): StrapiI => {
+const initFn = (options: StrapiOptions = {}): Core.Strapi => {
   const strapi = new Strapi(options);
   global.strapi = strapi as LoadedStrapi;
   return strapi;

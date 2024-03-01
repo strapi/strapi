@@ -2,7 +2,7 @@ import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core, Internal } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,
@@ -25,7 +25,7 @@ export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): LoadedStrapi | Promise<LoadedStrapi>; // return an initialized instance of Strapi
+  getStrapi(): Core.LoadedStrapi | Promise<Core.LoadedStrapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
@@ -39,7 +39,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   options: ILocalStrapiDestinationProviderOptions;
 
-  strapi?: LoadedStrapi;
+  strapi?: Core.LoadedStrapi;
 
   transaction?: Transaction;
 
@@ -181,7 +181,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     };
   }
 
-  getSchemas() {
+  getSchemas(): Record<string, Internal.Struct.Schema> {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
     const schemas = {
       ...this.strapi.contentTypes,

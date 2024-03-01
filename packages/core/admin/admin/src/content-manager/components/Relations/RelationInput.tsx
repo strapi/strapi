@@ -35,7 +35,7 @@ import { getTranslation } from '../../utils/translations';
 
 import type { NormalizedRelation } from './utils/normalizeRelations';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 const RELATION_ITEM_HEIGHT = 50;
 const RELATION_GUTTER = 4;
@@ -575,7 +575,7 @@ interface RelationItemProps
   disabled: boolean;
   endAction: React.ReactNode;
   iconButtonAriaLabel: string;
-  id: Entity.ID;
+  id: Data.ID;
   name: string;
   status?: NormalizedRelation['publicationState'];
   updatePositionOfRelation: UseDragAndDropOptions['onMoveItem'];

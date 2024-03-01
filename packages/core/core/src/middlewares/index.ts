@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { compression } from './compression';
 import { cors } from './cors';
 import { errors } from './errors';
@@ -14,7 +14,7 @@ import { security } from './security';
 import { session } from './session';
 import { publicStatic } from './public';
 
-export const middlewares: Record<string, Common.MiddlewareFactory> = {
+export const middlewares: Record<string, Core.MiddlewareFactory> = {
   compression,
   cors,
   errors,

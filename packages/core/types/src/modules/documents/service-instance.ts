@@ -1,11 +1,11 @@
-import type { Common } from '../..';
+import type { UID } from '../../public';
 import type { ID } from './document-engine';
 import type * as Params from './params/document-engine';
-import type * as Result from './result/document-enigne';
+import type * as Result from './result/document-engine';
 
-export type ServiceInstance<
-  TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
-> = {
+declare const a: Parameters<ServiceInstance['findMany']>[0];
+
+export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.ContentType> = {
   findMany: <TParams extends Params.FindMany<TContentTypeUID>>(
     params?: TParams
   ) => Result.FindMany<TContentTypeUID, TParams>;

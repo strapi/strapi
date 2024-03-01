@@ -1,5 +1,5 @@
 import { type StrapiTheme } from '@strapi/design-system';
-import { type Attribute } from '@strapi/types';
+import { type Schema } from '@strapi/types';
 import { type BaseEditor } from 'slate';
 import { type HistoryEditor } from 'slate-history';
 import { type ReactEditor } from 'slate-react';
@@ -14,11 +14,11 @@ declare module 'styled-components' {
 declare module 'slate' {
   interface CustomTypes {
     Editor: Omit<BaseEditor & ReactEditor & HistoryEditor & LinkEditor, 'children'> & {
-      children: Attribute.BlocksValue;
+      children: Schema.Attribute.BlocksValue;
     };
-    Element: Attribute.BlocksNode;
-    Descendant: Attribute.BlocksInlineNode | Text;
-    Text: Attribute.BlocksTextNode;
+    Element: Schema.Attribute.BlocksNode;
+    Descendant: Schema.Attribute.BlocksInlineNode | Text;
+    Text: Schema.Attribute.BlocksTextNode;
   }
 }
 

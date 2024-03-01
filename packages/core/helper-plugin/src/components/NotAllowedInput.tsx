@@ -5,7 +5,7 @@ import { EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface NotAllowedInputProps {
   disabled?: boolean;
@@ -15,7 +15,7 @@ interface NotAllowedInputProps {
   placeholder?: string;
   required?: boolean;
   options?: never;
-  type: Attribute.Kind;
+  type: Schema.Attribute.Kind;
 }
 
 const NotAllowedInput = ({ hint, label, required, name }: NotAllowedInputProps) => {

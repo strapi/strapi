@@ -21,10 +21,10 @@ import styled from 'styled-components';
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 interface TokenTableRowData {
-  id: Entity.ID;
+  id: Data.ID;
   name: string;
   description: string;
   createdAt: string;
@@ -209,7 +209,7 @@ const MESSAGES_MAP = {
 
 interface DefaultButtonProps {
   tokenName: string;
-  tokenId: Entity.ID;
+  tokenId: Data.ID;
   buttonType?: 'edit' | 'read';
   children: React.ReactNode;
 }
@@ -294,7 +294,7 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
 
 interface ButtonProps {
   tokenName: string;
-  tokenId: Entity.ID;
+  tokenId: Data.ID;
 }
 
 const ReadButton = ({ tokenName, tokenId }: ButtonProps) => {

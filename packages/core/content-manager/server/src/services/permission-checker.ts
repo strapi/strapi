@@ -1,5 +1,5 @@
 import { pipeAsync } from '@strapi/utils';
-import { LoadedStrapi as Strapi, EntityService, Common } from '@strapi/types';
+import type { Core, Public, Modules } from '@strapi/types';
 
 const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -11,7 +11,7 @@ const ACTIONS = {
   discard: 'plugin::content-manager.explorer.update',
 } as const;
 
-type Entity = EntityService.Result<Common.UID.ContentType>;
+type Entity = Modules.EntityService.Result<Public.UID.ContentType>;
 type Query = {
   page?: string;
   pageSize?: string;
@@ -19,7 +19,7 @@ type Query = {
 };
 
 const createPermissionChecker =
-  (strapi: Strapi) =>
+  (strapi: Core.LoadedStrapi) =>
   ({ userAbility, model }: { userAbility: any; model: string }) => {
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
@@ -113,6 +113,6 @@ const createPermissionChecker =
     };
   };
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   create: createPermissionChecker(strapi),
 });

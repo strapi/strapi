@@ -1,12 +1,12 @@
 import { errors } from '@strapi/utils';
 import type * as Nexus from 'nexus';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const { ValidationError } = errors;
 
 const EQ_FIELD_NAME = 'eq';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   fieldName: EQ_FIELD_NAME,
 
   strapiOperator: '$eq',

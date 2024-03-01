@@ -19,9 +19,9 @@ import {
   Uid,
 } from '@strapi/icons';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
-const iconByTypes: Record<Attribute.Kind, React.ReactElement> = {
+const iconByTypes: Record<Schema.Attribute.Kind, React.ReactElement> = {
   biginteger: <Number />,
   boolean: <Boolean />,
   date: <Date />,

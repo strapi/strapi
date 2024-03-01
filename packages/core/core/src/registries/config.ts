@@ -1,9 +1,9 @@
-import type { ConfigProvider } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import _, { PropertyName } from 'lodash';
 
 type Config = Record<string, unknown>;
 
-export default (initialConfig = {}): ConfigProvider => {
+export default (initialConfig = {}): Core.ConfigProvider => {
   const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
 
   return {

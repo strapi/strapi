@@ -2,15 +2,15 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 import { contentManagerApi } from './api';
 
-import type { EntityService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 
 type GetRelationsResponse =
   | {
       results: Contracts.Relations.RelationResult[];
       pagination: {
-        page: NonNullable<EntityService.Params.Pagination.PageNotation['page']>;
-        pageSize: NonNullable<EntityService.Params.Pagination.PageNotation['pageSize']>;
+        page: NonNullable<Modules.EntityService.Params.Pagination.PageNotation['page']>;
+        pageSize: NonNullable<Modules.EntityService.Params.Pagination.PageNotation['pageSize']>;
         pageCount: number;
         total: number;
       } | null;

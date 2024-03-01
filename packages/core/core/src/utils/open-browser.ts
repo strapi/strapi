@@ -1,8 +1,8 @@
 import open from 'open';
 
-import type { ConfigProvider } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export const openBrowser = async (config: ConfigProvider) => {
+export const openBrowser = async (config: Core.ConfigProvider) => {
   const url = config.get<string>('admin.absoluteUrl');
 
   return open(url);

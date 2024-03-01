@@ -3,13 +3,13 @@ import get from 'lodash/get';
 import { makeUnique } from '../../../utils/makeUnique';
 
 import type { AttributeType, Components } from '../../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 const retrieveComponentsFromSchema = (
   attributes: AttributeType[],
   allComponentsData: Components
-): UID.Component[] => {
-  const allComponents: UID.Component[] = attributes.reduce((acc: any, current) => {
+): Internal.UID.Component[] => {
+  const allComponents: Internal.UID.Component[] = attributes.reduce((acc: any, current) => {
     const type = current.type;
     if (type === 'component') {
       const currentComponentName = current.component;
@@ -40,7 +40,7 @@ const retrieveComponentsFromSchema = (
     return acc;
   }, []);
 
-  return makeUnique<UID.Component>(allComponents);
+  return makeUnique<Internal.UID.Component>(allComponents);
 };
 
 export { retrieveComponentsFromSchema };

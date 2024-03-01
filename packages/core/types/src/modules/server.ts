@@ -1,7 +1,7 @@
 import type * as http from 'http';
 import type Router from '@koa/router';
 import type Koa from 'koa';
-import type { Common } from '../types';
+import type * as Core from '../core';
 
 export interface HTTPServer extends http.Server {
   destroy: () => Promise<void>;
@@ -10,7 +10,7 @@ export interface HTTPServer extends http.Server {
 export interface API {
   listRoutes(): Router.Layer[];
   use(fn: Router.Middleware): API;
-  routes(routes: Common.Router | Omit<Common.Route, 'info'>[]): this;
+  routes(routes: Core.Router | Omit<Core.Route, 'info'>[]): this;
   mount(router: Router): this;
 }
 
@@ -21,7 +21,7 @@ export interface Server {
   api(name: 'content-api'): API;
   api(name: 'admin'): API;
   use(...args: Parameters<Koa['use']>): Server;
-  routes(routes: Common.Router | Omit<Common.Route, 'info'>[]): this;
+  routes(routes: Core.Router | Omit<Core.Route, 'info'>[]): this;
   mount(): this;
   initRouting(): this;
   initMiddlewares(): Promise<this>;

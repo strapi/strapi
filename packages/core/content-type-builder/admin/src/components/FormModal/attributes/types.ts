@@ -1,5 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import { RelationKind } from '@strapi/types/dist/types/core/attributes';
+import type { Schema } from '@strapi/types';
 import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
@@ -277,7 +277,7 @@ export const attributeTypes = {
       initialData: { targetAttribute?: string };
       modifiedData: {
         name?: string;
-        relation?: RelationKind.WithTarget;
+        relation?: Schema.Attribute.RelationKind.WithTarget;
         targetAttribute?: string;
       };
     }

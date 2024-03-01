@@ -1,13 +1,13 @@
 import path from 'path';
 import { isArray } from 'lodash/fp';
 import { importDefault } from '@strapi/utils';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const instantiateMiddleware = (
-  middlewareFactory: Common.MiddlewareFactory,
+  middlewareFactory: Core.MiddlewareFactory,
   name: string,
   config: unknown,
-  strapi: Strapi
+  strapi: Core.Strapi
 ) => {
   try {
     return middlewareFactory(config, { strapi });
@@ -18,7 +18,7 @@ const instantiateMiddleware = (
   }
 };
 
-const resolveRouteMiddlewares = (route: Common.Route, strapi: Strapi) => {
+const resolveRouteMiddlewares = (route: Core.Route, strapi: Core.Strapi) => {
   const middlewaresConfig = route?.config?.middlewares ?? [];
 
   if (!isArray(middlewaresConfig)) {
@@ -30,18 +30,18 @@ const resolveRouteMiddlewares = (route: Common.Route, strapi: Strapi) => {
   return middlewares.map(({ handler }) => handler);
 };
 
-const dummyMiddleware: Common.MiddlewareHandler = (_, next) => next();
+const dummyMiddleware: Core.MiddlewareHandler = (_, next) => next();
 
 /**
  * Initialize every configured middlewares
  */
 const resolveMiddlewares = (
-  config: Array<Common.MiddlewareName | Common.MiddlewareConfig | Common.MiddlewareHandler>,
-  strapi: Strapi
+  config: Array<Core.MiddlewareName | Core.MiddlewareConfig | Core.MiddlewareHandler>,
+  strapi: Core.Strapi
 ) => {
   const middlewares: {
     name: string | null;
-    handler: Common.MiddlewareHandler;
+    handler: Core.MiddlewareHandler;
   }[] = [];
 
   for (const item of config) {
@@ -109,7 +109,7 @@ const resolveMiddlewares = (
 /**
  * Resolve middleware from package name or path
  */
-const resolveCustomMiddleware = (resolve: string, strapi: Strapi) => {
+const resolveCustomMiddleware = (resolve: string, strapi: Core.Strapi) => {
   let modulePath;
 
   try {

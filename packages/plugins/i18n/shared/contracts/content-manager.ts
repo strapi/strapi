@@ -1,4 +1,4 @@
-import { Entity } from '@strapi/strapi';
+import { Data } from '@strapi/strapi';
 import { errors } from '@strapi/utils';
 
 /**
@@ -8,7 +8,7 @@ export declare namespace GetNonLocalizedFields {
   export interface Request {
     query: {};
     body: {
-      id?: Entity.ID;
+      id?: Data.ID;
       locale?: string;
       model: string;
     };
@@ -19,7 +19,7 @@ export declare namespace GetNonLocalizedFields {
    */
   export interface Response {
     nonLocalizedFields: object;
-    localizations: Array<{ id: Entity.ID; locale: string; publishedAt: string | null }>;
+    localizations: Array<{ id: Data.ID; locale: string; publishedAt: string | null }>;
     error?: errors.ApplicationError;
   }
 }

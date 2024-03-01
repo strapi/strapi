@@ -3,7 +3,7 @@ import React from 'react';
 import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
-import { Attribute, Entity } from '@strapi/types';
+import { Schema, Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
@@ -12,7 +12,7 @@ import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
-type MainField = Attribute.Any & {
+type MainField = Schema.Attribute.AnyAttribute & {
   name: string;
 };
 
@@ -28,7 +28,7 @@ interface Metadata {
 interface ListLayoutRow {
   key: string;
   name: string;
-  fieldSchema: Attribute.Any | { type: 'custom' };
+  fieldSchema: Schema.Attribute.AnyAttribute | { type: 'custom' };
   metadatas: Metadata['list'];
 }
 
@@ -37,14 +37,14 @@ export interface TableHeader extends Omit<ListLayoutRow, 'metadatas' | 'fieldSch
     label: string;
   };
   name: keyof AuditLog;
-  fieldSchema?: Attribute.Any | { type: 'custom' };
+  fieldSchema?: Schema.Attribute.AnyAttribute | { type: 'custom' };
   cellFormatter?: (data?: AuditLog[keyof AuditLog]) => React.ReactNode;
 }
 
 type TableRowsProps = {
   headers: TableHeader[];
   rows: AuditLog[];
-  onOpenModal: (id: Entity.ID) => void;
+  onOpenModal: (id: Data.ID) => void;
 };
 
 export const TableRows = ({ headers, rows = [], onOpenModal }: TableRowsProps) => {

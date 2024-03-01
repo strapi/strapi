@@ -2,7 +2,8 @@ import type { Context } from 'koa';
 
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
-import { Webhook } from '@strapi/types';
+
+import type { Modules } from '@strapi/types';
 
 import {
   CreateWebhook,
@@ -137,7 +138,11 @@ export default {
 
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    const response = await strapi.webhookRunner.run(webhook as Webhook, 'trigger-test', {});
+    const response = await strapi.webhookRunner.run(
+      webhook as Modules.WebhookStore.Webhook,
+      'trigger-test',
+      {}
+    );
 
     ctx.body = { data: response } satisfies TriggerWebhook.Response;
   },

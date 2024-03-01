@@ -1,4 +1,4 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { set, isString, map, get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../../constants/workflows';
@@ -7,7 +7,7 @@ import { getWorkflowContentTypeFilter } from '../../../utils/review-workflows';
 import workflowsContentTypesFactory from './content-types';
 
 const { ApplicationError } = errors;
-const processFilters = ({ strapi }: { strapi: Strapi }, filters: any = {}) => {
+const processFilters = ({ strapi }: { strapi: Core.LoadedStrapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
 
   if (isString(filters.contentTypes)) {
@@ -27,7 +27,7 @@ const processPopulate = (populate: any) => {
   return WORKFLOW_POPULATE;
 };
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });
   const metrics = getService('review-workflows-metrics', { strapi });

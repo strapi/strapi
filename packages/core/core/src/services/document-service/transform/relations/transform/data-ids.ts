@@ -1,4 +1,4 @@
-import { EntityService, Attribute, Common } from '@strapi/types';
+import { Modules, Public, Schema } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { isObject, isNil } from 'lodash/fp';
 import { ShortHand, LongHand, ID, GetId } from '../utils/types';
@@ -51,10 +51,10 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
   return undefined;
 };
 
-const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
-  relation: EntityService.Params.Attribute.RelationInputValue<T>,
+const transformRelationIdsVisitor = <T extends Schema.Attribute.RelationKind.Any>(
+  relation: Modules.EntityService.Params.Attribute.RelationInputValue<T>,
   getId: GetId
-): EntityService.Params.Attribute.RelationInputValue<T> => {
+): Modules.EntityService.Params.Attribute.RelationInputValue<T> => {
   const map = transformPrimitive(relation as any, getId);
   if (map) return map;
 
@@ -115,7 +115,7 @@ const transformDataIdsVisitor = (
   idMap: IdMap,
   data: Record<string, any>,
   opts: {
-    uid: Common.UID.Schema;
+    uid: Public.UID.Schema;
     locale?: string | null;
     isDraft?: boolean;
     allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
@@ -138,7 +138,7 @@ const transformDataIdsVisitor = (
             locale: getRelationTargetLocale(
               { id: documentId, locale },
               {
-                targetUid: target as Common.UID.Schema,
+                targetUid: target as Public.UID.Schema,
                 sourceUid: opts.uid,
                 sourceLocale: opts.locale,
               }

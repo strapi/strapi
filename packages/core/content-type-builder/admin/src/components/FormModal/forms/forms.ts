@@ -15,7 +15,7 @@ import { addItemsToFormSection, FormTypeOptions } from './utils/addItemsToFormSe
 import { createComponentCollectionName } from './utils/createCollectionName';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
-import type { Common } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 type ContentType = {
   schema: {
@@ -255,7 +255,7 @@ export const forms = {
     schema(
       alreadyTakenNames: Array<string>,
       isEditing: boolean,
-      ctUid: Common.UID.ContentType,
+      ctUid: Internal.UID.ContentType,
       reservedNames: {
         models: any;
       },
@@ -350,7 +350,7 @@ export const forms = {
   },
   component: {
     schema(
-      alreadyTakenAttributes: Array<Common.UID.Component>,
+      alreadyTakenAttributes: Array<Internal.UID.Component>,
       componentCategory: string,
       reservedNames: {
         models: any;
@@ -358,10 +358,10 @@ export const forms = {
       isEditing = false,
       components: Record<string, any>,
       componentDisplayName: string,
-      compoUid: Common.UID.Component | null = null
+      compoUid: Internal.UID.Component | null = null
     ) {
       const takenNames = isEditing
-        ? alreadyTakenAttributes.filter((uid: Common.UID.Component) => uid !== compoUid)
+        ? alreadyTakenAttributes.filter((uid: Internal.UID.Component) => uid !== compoUid)
         : alreadyTakenAttributes;
       const collectionNames = Object.values(components).map((component: any) => {
         return component?.schema?.collectionName;

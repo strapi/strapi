@@ -1,4 +1,4 @@
-import { Entity, LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { mapAsync, reduceAsync, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../../constants/workflows';
@@ -8,7 +8,7 @@ const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
 const sanitizeStageFields = pick(sanitizedStageFields);
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
   const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });

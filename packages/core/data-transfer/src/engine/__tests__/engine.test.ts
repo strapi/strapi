@@ -1,7 +1,7 @@
 import { posix, win32 } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
-import type { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
 
 import type {
@@ -262,18 +262,27 @@ const getConfigurationMockSourceStream = (
 ) => getMockSourceStream(data);
 
 const getSchemasMockSourceStream = (
-  data: Array<Schema.Schema> = [
+  data: Array<Internal.Struct.Schema> = [
     {
+      uid: 'api::foo.foo',
+      modelName: 'foo',
+      globalId: 'foo',
       info: { displayName: 'foo' },
       modelType: 'contentType',
       attributes: { foo: { type: 'string' } },
     },
     {
+      uid: 'api::bar.bar',
+      modelName: 'bar',
+      globalId: 'bar',
       info: { displayName: 'bar' },
       modelType: 'contentType',
       attributes: { bar: { type: 'integer' } },
     },
     {
+      uid: 'api::homepage.homepage',
+      modelName: 'homepage',
+      globalId: 'homepage',
       info: { displayName: 'Homepage' },
       modelType: 'contentType',
       attributes: {
@@ -281,6 +290,9 @@ const getSchemasMockSourceStream = (
       },
     },
     {
+      uid: 'api::permission.permission',
+      modelName: 'permission',
+      globalId: 'permission',
       info: { displayName: 'Permission' },
       modelType: 'contentType',
       attributes: {
@@ -290,8 +302,8 @@ const getSchemasMockSourceStream = (
   ]
 ) => getMockSourceStream(data);
 
-const getMockDestinationStream = (listener?) => {
-  const stream = new Writable({
+const getMockDestinationStream = (listener?: any) => {
+  return new Writable({
     objectMode: true,
     write(chunk, encoding, callback) {
       if (listener) {
@@ -300,7 +312,6 @@ const getMockDestinationStream = (listener?) => {
       callback();
     },
   });
-  return stream;
 };
 
 extendExpectForDataTransferTests();
@@ -317,7 +328,7 @@ const createSource = (streamData?: {
   entities?: Entity[];
   links?: ILink[];
   configuration?: IConfiguration[];
-  schemas?: Schema.Schema[];
+  schemas?: Internal.Struct.Schema[];
 }): ISourceProvider => {
   return {
     type: 'source',

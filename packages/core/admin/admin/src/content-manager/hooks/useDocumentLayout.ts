@@ -22,7 +22,7 @@ import {
 
 import type { InputProps } from '../components/FormInputs/types';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute } from '@strapi/types';
+import type { Schema as SchemaUtils } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';
 
 type LayoutOptions = Schema['options'] & Schema['pluginOptions'] & object;
@@ -36,7 +36,7 @@ interface ListFieldLayout {
   /**
    * The attribute data from the content-type's schema for the field
    */
-  attribute: Attribute.Any | { type: 'custom' };
+  attribute: SchemaUtils.Attribute.AnyAttribute | { type: 'custom' };
   /**
    * Typically used by plugins to render a custom cell
    */
@@ -79,11 +79,11 @@ interface EditFieldSharedProps extends Omit<InputProps, 'hint' | 'type'> {
  * is under the property attribute and the type is under the property type.
  */
 type EditFieldLayout = {
-  [K in Attribute.Kind]: EditFieldSharedProps & {
-    attribute: Extract<Attribute.Any, { type: K }>;
+  [K in SchemaUtils.Attribute.Kind]: EditFieldSharedProps & {
+    attribute: Extract<SchemaUtils.Attribute.AnyAttribute, { type: K }>;
     type: K;
   };
-}[Attribute.Kind];
+}[SchemaUtils.Attribute.Kind];
 
 interface EditLayout {
   layout: Array<Array<EditFieldLayout[]>>;

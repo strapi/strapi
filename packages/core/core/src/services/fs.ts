@@ -1,7 +1,7 @@
 import path from 'path';
 import fse from 'fs-extra';
 
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 interface StrapiFS {
   writeAppFile(optPath: string | string[], data: string): Promise<void>;
@@ -13,7 +13,7 @@ interface StrapiFS {
 /**
  * create strapi fs layer
  */
-export default (strapi: Strapi) => {
+export default (strapi: Core.Strapi) => {
   function normalizePath(optPath: string | string[]) {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 

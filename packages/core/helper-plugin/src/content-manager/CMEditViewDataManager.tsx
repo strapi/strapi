@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { TranslationMessage } from '../types';
 
-import type { Attribute, Schema, Entity as StrapiEntity } from '@strapi/types';
+import type { Schema, Data, Internal } from '@strapi/types';
 
 interface Entity {
-  id: StrapiEntity.ID;
+  id: Data.ID;
   createdAt: string | null;
   createdBy: User | null;
   updatedAt: string | null;
@@ -32,7 +32,7 @@ interface User extends NonNullableObject<Entity> {
 interface ContentType extends Partial<Entity> {
   publishedAt?: string | null;
   publishedBy?: User | null;
-  [key: string]: Attribute.GetValue<Attribute.Any> | null;
+  [key: string]: Schema.Attribute.Value<Schema.Attribute.AnyAttribute> | null;
 }
 
 /**
@@ -49,8 +49,8 @@ interface CMEditViewDataManagerContextValue {
   ) => void;
   addNonRepeatableComponentToField?: (
     keys: string,
-    componentLayoutData: Schema.Component,
-    allComponents: Record<string, Schema.Component>
+    componentLayoutData: Internal.Struct.ComponentSchema,
+    allComponents: Record<string, Internal.Struct.ComponentSchema>
   ) => void;
   addRepeatableComponentToField?: (
     keys: string,
@@ -60,22 +60,22 @@ interface CMEditViewDataManagerContextValue {
     position?: number
   ) => void;
   allLayoutData: {
-    components: Record<string, Schema.Component>;
-    contentType?: Schema.ContentType;
+    components: Record<string, Internal.Struct.ComponentSchema>;
+    contentType?: Internal.Struct.ContentTypeSchema;
   };
   createActionAllowedFields: string[];
   formErrors: Record<string, TranslationMessage>;
   initialData: ContentType;
   isCreatingEntry: boolean;
   isSingleType: boolean;
-  layout?: Schema.CollectionType | Schema.SingleType;
+  layout?: Internal.Struct.CollectionTypeSchema | Internal.Struct.SingleTypeSchema;
   modifiedData: ContentType;
   moveComponentDown?: (dynamicZoneName: string, currentIndex: number) => void;
   moveComponentField?: (payload: { name: string; newIndex: number; currentIndex: number }) => void;
   moveComponentUp?: (dynamicZoneName: string, currentIndex: number) => void;
-  onChange?: <TAttribute extends Attribute.Any>(
+  onChange?: <TAttribute extends Schema.Attribute.AnyAttribute>(
     payload: {
-      target: { name: string; type: string; value: Attribute.GetValue<TAttribute> };
+      target: { name: string; type: string; value: Schema.Attribute.Value<TAttribute> };
     },
     shouldSetInitialValue?: boolean
   ) => void;

@@ -1,4 +1,4 @@
-import { Attribute, Common, Schema } from '@strapi/types';
+import { Schema, Public, Internal } from '@strapi/types';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
@@ -6,7 +6,7 @@ import type { errors } from '@strapi/utils';
 
 export type ReleaseActionEntry = Entity & {
   // Entity attributes
-  [key: string]: Attribute.Any;
+  [key: string]: Schema.Attribute.AnyAttribute;
 } & {
   locale?: string;
 };
@@ -14,7 +14,7 @@ export type ReleaseActionEntry = Entity & {
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
-  contentType: Common.UID.ContentType;
+  contentType: Public.UID.ContentType;
   locale?: string;
   release: Release;
 }
@@ -23,7 +23,7 @@ export interface FormattedReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: {
-    uid: Common.UID.ContentType;
+    uid: Public.UID.ContentType;
     mainFieldValue?: string;
     displayName: string;
   };
@@ -47,7 +47,7 @@ export declare namespace CreateReleaseAction {
       entry: {
         id: ReleaseActionEntry['id'];
         locale?: ReleaseActionEntry['locale'];
-        contentType: Common.UID.ContentType;
+        contentType: Public.UID.ContentType;
       };
     };
   }
@@ -79,8 +79,11 @@ export declare namespace GetReleaseActions {
     };
     meta: {
       pagination: Pagination;
-      contentTypes: Record<Schema.ContentType['uid'], Schema.ContentType>;
-      components: Record<Schema.Component['uid'], Schema.Component>;
+      contentTypes: Record<
+        Internal.Struct.ContentTypeSchema['uid'],
+        Internal.Struct.ContentTypeSchema
+      >;
+      components: Record<Internal.Struct.ComponentSchema['uid'], Internal.Struct.ComponentSchema>;
     };
   }
 }

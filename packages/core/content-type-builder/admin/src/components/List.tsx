@@ -15,7 +15,7 @@ import { DynamicZoneList } from './DynamicZoneList';
 import { NestedTFooter } from './NestedFooter';
 
 import type { SchemaType } from '../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface ListProps {
   addComponentToDZ?: () => void;
@@ -27,7 +27,7 @@ interface ListProps {
   isMain?: boolean;
   items: any[];
   secondLoopComponentUid?: string | null;
-  targetUid?: UID.Any;
+  targetUid?: Internal.UID.Schema;
   isSub?: boolean;
 }
 

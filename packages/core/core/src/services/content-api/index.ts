@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import instantiatePermissionsUtilities from './permissions';
 
-const transformRoutePrefixFor = (pluginName: string) => (route: Common.Route) => {
+const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
   const prefix = route.config && route.config.prefix;
   const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
 
@@ -12,14 +12,14 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Common.Route) =>
   };
 };
 
-const filterContentAPI = (route: Common.Route) => route.info.type === 'content-api';
+const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api';
 
 /**
  * Create a content API container that holds logic, tools and utils. (eg: permissions, ...)
  */
-const createContentAPI = (strapi: Strapi) => {
+const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
-    const routesMap: Record<string, Common.Route[]> = {};
+    const routesMap: Record<string, Core.Route[]> = {};
 
     _.forEach(strapi.api, (api, apiName) => {
       const routes = _.flatMap(api.routes, (route) => {

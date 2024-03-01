@@ -3,7 +3,7 @@ import fse, { existsSync } from 'fs-extra';
 import _ from 'lodash';
 import { isKebabCase, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
-import type { Strapi, Common, Schema } from '@strapi/types';
+import type { Core, Internal } from '@strapi/types';
 import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
 
 interface API {
@@ -11,12 +11,12 @@ interface API {
   destroy: () => void | Promise<void>;
   register: () => void | Promise<void>;
   config: Record<string, unknown>;
-  routes: Record<string, Common.Router>;
-  controllers: Record<string, Common.Controller>;
-  services: Record<string, Common.Service>;
-  policies: Record<string, Common.Policy>;
-  middlewares: Record<string, Common.Middleware>;
-  contentTypes: Record<string, { schema: Schema.ContentType }>;
+  routes: Record<string, Core.Router>;
+  controllers: Record<string, Core.Controller>;
+  services: Record<string, Core.Service>;
+  policies: Record<string, Core.Policy>;
+  middlewares: Record<string, Core.Middleware>;
+  contentTypes: Record<string, { schema: Internal.Struct.ContentTypeSchema }>;
 }
 
 interface APIs {
@@ -35,7 +35,7 @@ const normalizeName = (name: string) => (isKebabCase(name) ? name : _.kebabCase(
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');
 
-export default async function loadAPIs(strapi: Strapi) {
+export default async function loadAPIs(strapi: Core.Strapi) {
   if (!existsSync(strapi.dirs.dist.api)) {
     return;
   }

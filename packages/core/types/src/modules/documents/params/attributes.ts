@@ -1,82 +1,93 @@
-import type { Attribute, Common, Utils, Entity } from '../../../types';
+import type * as Schema from '../../../schema';
+import type * as Data from '../../../data';
 
-export type NonFilterableKind = Extract<Attribute.Kind, 'password' | 'dynamiczone'>;
-export type FilterableKind = Exclude<Attribute.Kind, NonFilterableKind>;
+import type { UID } from '../../../public';
+import type { Array, Constants, Object, If, Extends, MatchFirst, IsNotNever } from '../../../utils';
 
-export type GetNonFilterableKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysBy<
-  Attribute.GetAll<TSchemaUID>,
-  Attribute.OfType<NonFilterableKind>,
+export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
+export type FilterableKind = Exclude<Schema.Attribute.Kind, NonFilterableKind>;
+
+export type GetNonFilterableKeys<TSchemaUID extends UID.Schema> = Object.KeysBy<
+  Schema.Attributes<TSchemaUID>,
+  Schema.Attribute.OfType<NonFilterableKind>,
   string
 >;
 
-export type GetScalarKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
-  Attribute.GetKeysByType<TSchemaUID, Attribute.NonPopulatableKind>,
+export type GetScalarKeys<TSchemaUID extends UID.Schema> = Exclude<
+  Schema.AttributeNamesByType<TSchemaUID, Schema.Attribute.NonPopulatableKind>,
   GetNonFilterableKeys<TSchemaUID>
 >;
 
-export type GetNestedKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
-  Attribute.GetKeysWithTarget<TSchemaUID>,
+export type GetNestedKeys<TSchemaUID extends UID.Schema> = Exclude<
+  Schema.AttributeNamesWithTarget<TSchemaUID>,
   GetNonFilterableKeys<TSchemaUID>
 >;
 
-export type ID = Entity.ID;
+export type ID = Data.ID;
 
 export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 1 | 0;
 
 export type NumberValue = string | number;
 
-export type DateValue = Attribute.DateValue | number;
+export type DateValue = Schema.Attribute.DateValue | number;
 
-export type TimeValue = Attribute.TimeValue | number;
+export type TimeValue = Schema.Attribute.TimeValue | number;
 
-export type DateTimeValue = Attribute.DateTimeValue | number;
+export type DateTimeValue = Schema.Attribute.DateTimeValue | number;
 
-export type TimeStampValue = Attribute.TimestampValue;
+export type TimeStampValue = Schema.Attribute.TimestampValue;
 
 /**
  * List of possible values for the scalar attributes
  * Uses the local GetValue to benefit from the values' overrides
  */
 export type ScalarValues = GetValue<
-  | Attribute.BigInteger
-  | Attribute.Boolean
-  | Attribute.DateTime
-  | Attribute.Date
-  | Attribute.Decimal
-  | Attribute.Email
-  | Attribute.Enumeration<string[]>
-  | Attribute.Float
-  | Attribute.Integer
-  | Attribute.Blocks
-  | Attribute.JSON
+  | Schema.Attribute.BigInteger
+  | Schema.Attribute.Boolean
+  | Schema.Attribute.DateTime
+  | Schema.Attribute.Date
+  | Schema.Attribute.Decimal
+  | Schema.Attribute.Email
+  | Schema.Attribute.Enumeration<string[]>
+  | Schema.Attribute.Float
+  | Schema.Attribute.Integer
+  | Schema.Attribute.Blocks
+  | Schema.Attribute.JSON
   // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
   //      The member below has been commented on purpose to avoid adding it back without noticing.
-  // | Attribute.Password
-  | Attribute.RichText
-  | Attribute.String
-  | Attribute.Text
-  | Attribute.Time
-  | Attribute.Timestamp
-  | Attribute.UID
+  // | Schema.Attribute.Password
+  | Schema.Attribute.RichText
+  | Schema.Attribute.String
+  | Schema.Attribute.Text
+  | Schema.Attribute.Time
+  | Schema.Attribute.Timestamp
+  | Schema.Attribute.UID
 >;
 
 /**
  * Attribute.GetValues override with extended values
  */
-export type GetValues<TSchemaUID extends Common.UID.Schema> = {
+export type GetValues<TSchemaUID extends UID.Schema> = {
   id?: ID;
 } & OmitRelationWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Attribute.GetOptionalKeys<TSchemaUID>]?: GetValue<Attribute.Get<TSchemaUID, TKey>>;
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
+      Schema.AttributeByName<TSchemaUID, TKey>
+    >;
   } & {
-    [TKey in Attribute.GetRequiredKeys<TSchemaUID>]-?: GetValue<Attribute.Get<TSchemaUID, TKey>>;
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
+      Schema.AttributeByName<TSchemaUID, TKey>
+    >;
   }
 >;
 
-export type OmitRelationWithoutTarget<TSchemaUID extends Common.UID.Schema, TValue> = Omit<
+export type OmitRelationWithoutTarget<TSchemaUID extends UID.Schema, TValue> = Omit<
   TValue,
-  Exclude<Attribute.GetKeysByType<TSchemaUID, 'relation'>, Attribute.GetKeysWithTarget<TSchemaUID>>
+  Exclude<
+    Schema.AttributeNamesByType<TSchemaUID, 'relation'>,
+    Schema.AttributeNamesWithTarget<TSchemaUID>
+  >
 >;
 
 /**
@@ -84,28 +95,25 @@ export type OmitRelationWithoutTarget<TSchemaUID extends Common.UID.Schema, TVal
  *
  * Fallback to unknown if never is found
  */
-export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.If<
-  Utils.Expression.IsNotNever<TAttribute>,
-  Utils.Expression.MatchFirst<
+export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
+  IsNotNever<TAttribute>,
+  MatchFirst<
     [
       // Relation
       [
-        Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
-        TAttribute extends Attribute.Relation<infer TRelationKind, infer TTarget>
-          ? Utils.Expression.If<
-              Utils.Expression.IsNotNever<TTarget>,
-              Attribute.RelationPluralityModifier<TRelationKind, ID>
-            >
+        Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
+        TAttribute extends Schema.Attribute.Relation<infer TRelationKind, infer TTarget>
+          ? If<IsNotNever<TTarget>, Schema.Attribute.RelationPluralityModifier<TRelationKind, ID>>
           : never
       ],
       // DynamicZone
       [
-        Utils.Expression.Extends<TAttribute, Attribute.OfType<'dynamiczone'>>,
-        TAttribute extends Attribute.DynamicZone<infer TComponentsUIDs>
+        Extends<TAttribute, Schema.Attribute.OfType<'dynamiczone'>>,
+        TAttribute extends Schema.Attribute.DynamicZone<infer TComponentsUIDs>
           ? Array<
               // Extract tuple values to a component uid union type
-              Utils.Array.Values<TComponentsUIDs> extends infer TComponentUID
-                ? TComponentUID extends Common.UID.Component
+              Array.Values<TComponentsUIDs> extends infer TComponentUID
+                ? TComponentUID extends UID.Component
                   ? GetValues<TComponentUID> & { __component: TComponentUID }
                   : never
                 : never
@@ -114,35 +122,35 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
       ],
       // Component
       [
-        Utils.Expression.Extends<TAttribute, Attribute.OfType<'component'>>,
-        TAttribute extends Attribute.Component<infer TComponentUID, infer TRepeatable>
-          ? TComponentUID extends Common.UID.Component
+        Extends<TAttribute, Schema.Attribute.OfType<'component'>>,
+        TAttribute extends Schema.Attribute.Component<infer TComponentUID, infer TRepeatable>
+          ? TComponentUID extends UID.Component
             ? GetValues<TComponentUID> extends infer TValues
-              ? Utils.Expression.If<TRepeatable, TValues[], TValues>
+              ? If<TRepeatable, TValues[], TValues>
               : never
             : never
           : never
       ],
       // Boolean
-      [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, BooleanValue],
+      [Extends<TAttribute, Schema.Attribute.Boolean>, BooleanValue],
       // Number
       [
-        Utils.Expression.Extends<
+        Extends<
           TAttribute,
-          Attribute.Integer | Attribute.BigInteger | Attribute.Float | Attribute.Decimal
+          | Schema.Attribute.Integer
+          | Schema.Attribute.BigInteger
+          | Schema.Attribute.Float
+          | Schema.Attribute.Decimal
         >,
         NumberValue
       ],
       // Date / Time
-      [Utils.Expression.Extends<TAttribute, Attribute.Time>, TimeValue],
-      [Utils.Expression.Extends<TAttribute, Attribute.Date>, DateValue],
-      [
-        Utils.Expression.Extends<TAttribute, Attribute.Timestamp | Attribute.DateTime>,
-        DateTimeValue
-      ],
+      [Extends<TAttribute, Schema.Attribute.Time>, TimeValue],
+      [Extends<TAttribute, Schema.Attribute.Date>, DateValue],
+      [Extends<TAttribute, Schema.Attribute.Timestamp | Schema.Attribute.DateTime>, DateTimeValue],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
-      [Utils.Expression.True, Attribute.GetValue<TAttribute, unknown>]
+      [Constants.True, Schema.Attribute.Value<TAttribute>]
     ],
     unknown
   >,

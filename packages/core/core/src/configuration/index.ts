@@ -4,7 +4,7 @@ import path from 'path';
 import _ from 'lodash';
 import { omit } from 'lodash/fp';
 import dotenv from 'dotenv';
-import type { Config } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from '@strapi/utils';
 
 import loadConfigDir from './config-loader';
@@ -36,13 +36,13 @@ const defaultConfig = {
         enabled: true,
       },
     },
-  } satisfies Partial<Config.Server>,
-  admin: {} satisfies Partial<Config.Admin>,
+  } satisfies Partial<Core.Config.Server>,
+  admin: {} satisfies Partial<Core.Config.Admin>,
   api: {
     rest: {
       prefix: '/api',
     },
-  } satisfies Partial<Config.Api>,
+  } satisfies Partial<Core.Config.Api>,
 };
 
 export default (dirs: { app: string; dist: string }, initialConfig: any = {}) => {

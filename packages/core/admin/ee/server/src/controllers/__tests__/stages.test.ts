@@ -1,5 +1,6 @@
 import { ENTITY_STAGE_ATTRIBUTE } from '../../constants/workflows';
 import stages from '../workflows/stages';
+
 import '@strapi/types';
 
 describe('Stages', () => {
@@ -52,8 +53,8 @@ describe('Stages', () => {
     plugin(name) {
       return this.plugins[name];
     },
+    // @ts-expect-error - only defining the properties we need
     entityService: {
-      // @ts-expect-error - only defining the properties we need
       findOne: jest.fn((_, id) => {
         if (id === nonExistantEntityId) {
           return Promise.resolve(null);

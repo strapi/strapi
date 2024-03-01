@@ -9,16 +9,7 @@ import {
   convertQueryParams,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
-import type {
-  Strapi,
-  EntityService,
-  EntityValidator,
-  EventHub,
-  Common,
-  Schema,
-  Shared,
-  Utils,
-} from '@strapi/types';
+import type { Core, Modules, Internal, Utils, Public, Schema } from '@strapi/types';
 
 import uploadFiles from '../utils/upload-files';
 
@@ -38,14 +29,14 @@ const { transformParamsToQuery } = convertQueryParams;
 
 type Decoratable<T> = T & {
   decorate(
-    decorator: (old: EntityService.EntityService) => EntityService.EntityService & {
+    decorator: (old: Modules.EntityService.EntityService) => Modules.EntityService.EntityService & {
       [key: string]: unknown;
     }
   ): void;
 };
 
 type Context = {
-  contentType: Schema.ContentType;
+  contentType: Internal.Struct.ContentTypeSchema;
 };
 
 const transformLoadParamsToQuery = (
@@ -91,11 +82,11 @@ const createDefaultImplementation = ({
   eventHub,
   entityValidator,
 }: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-  eventHub: EventHub;
-  entityValidator: EntityValidator;
-}): EntityService.EntityService => ({
+  eventHub: Modules.EventHub.EventHub;
+  entityValidator: Modules.EntityValidator.EntityValidator;
+}): Modules.EntityService.EntityService => ({
   /**
    * Upload files utility
    */
@@ -111,7 +102,7 @@ const createDefaultImplementation = ({
 
   async emitEvent(uid, event: string, entity) {
     // Ignore audit log events to prevent infinite loops
-    if (uid === ('admin::audit-log' as Common.UID.ContentType)) {
+    if (uid === ('admin::audit-log' as Public.UID.ContentType)) {
       return;
     }
 
@@ -193,8 +184,11 @@ const createDefaultImplementation = ({
   },
 
   async create<
-    TUID extends Common.UID.ContentType,
-    TParams extends EntityService.Params.Pick<TUID, 'data' | 'files' | 'fields' | 'populate'>
+    TUID extends Public.UID.ContentType,
+    TParams extends Modules.EntityService.Params.Pick<
+      TUID,
+      'data' | 'files' | 'fields' | 'populate'
+    >
   >(uid: TUID, params?: TParams) {
     const wrappedParams = await this.wrapParams<TParams>(params, { uid, action: 'create' });
     const { data, files } = wrappedParams;
@@ -203,7 +197,7 @@ const createDefaultImplementation = ({
       throw new Error('cannot create');
     }
 
-    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
+    const model = strapi.getModel(uid) as Schema.ContentType;
 
     const isDraft = contentTypesUtils.isDraft(data);
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
@@ -242,7 +236,10 @@ const createDefaultImplementation = ({
 
   async update(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams<
-      EntityService.Params.Pick<typeof uid, 'data:partial' | 'files' | 'fields' | 'populate'>
+      Modules.EntityService.Params.Pick<
+        typeof uid,
+        'data:partial' | 'files' | 'fields' | 'populate'
+      >
     >(opts, {
       uid,
       action: 'update',
@@ -327,7 +324,7 @@ const createDefaultImplementation = ({
 
   async clone(uid, cloneId, opts) {
     const wrappedParams = await this.wrapParams<
-      EntityService.Params.Pick<typeof uid, 'data' | 'files' | 'fields' | 'populate'>
+      Modules.EntityService.Params.Pick<typeof uid, 'data' | 'files' | 'fields' | 'populate'>
     >(opts, { uid, action: 'clone' });
     const { data, files } = wrappedParams;
 
@@ -449,11 +446,11 @@ const createDefaultImplementation = ({
 });
 
 export default (ctx: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-  eventHub: EventHub;
-  entityValidator: EntityValidator;
-}): Decoratable<EntityService.EntityService> => {
+  eventHub: Modules.EventHub.EventHub;
+  entityValidator: Modules.EntityValidator.EntityValidator;
+}): Decoratable<Modules.EntityService.EntityService> => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     ctx.strapi.webhookStore?.addAllowedEvent(key, value);
   });
@@ -478,11 +475,11 @@ export default (ctx: {
   Object.keys(service.implementation).forEach((key) => delegator.method(key));
 
   // wrap methods to handle Database Errors
-  service.decorate((oldService: EntityService.EntityService) => {
+  service.decorate((oldService: Modules.EntityService.EntityService) => {
     const newService = _.mapValues(
       oldService,
-      (method, methodName: keyof EntityService.EntityService) =>
-        async function (this: EntityService.EntityService, ...args: []) {
+      (method, methodName: keyof Modules.EntityService.EntityService) =>
+        async function (this: Modules.EntityService.EntityService, ...args: []) {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {
@@ -505,5 +502,5 @@ export default (ctx: {
     return newService;
   });
 
-  return service as unknown as Decoratable<EntityService.EntityService>;
+  return service as unknown as Decoratable<Modules.EntityService.EntityService>;
 };

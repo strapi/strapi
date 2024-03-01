@@ -8,7 +8,7 @@ import { pluginId } from '../../../pluginId';
 import { makeUnique } from '../../../utils/makeUnique';
 
 import type { Components, Component, AttributeType, ContentTypes } from '../../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 const getCreatedAndModifiedComponents = (
   allComponents: Components,
@@ -26,7 +26,10 @@ const getCreatedAndModifiedComponents = (
   return makeUnique(componentUIDsToReturn);
 };
 
-const formatComponent = (component: Component | Record<string, any>, mainDataUID: UID.Any) => {
+const formatComponent = (
+  component: Component | Record<string, any>,
+  mainDataUID: Internal.UID.Schema
+) => {
   const formattedAttributes = formatAttributes(
     get(component, 'schema.attributes', []),
     mainDataUID
@@ -74,7 +77,7 @@ const formatMainDataType = (data: any, isComponent = false) => {
  * @param {Object} attributes
  * @param {String} mainDataUID uid of the main data type
  */
-const formatAttributes = (attributes: AttributeType[], mainDataUID: UID.Any) => {
+const formatAttributes = (attributes: AttributeType[], mainDataUID: Internal.UID.Schema) => {
   return attributes.reduce((acc: Record<string, AttributeType>, { name, ...rest }) => {
     const currentAttribute = rest;
     const hasARelationWithMainDataUID = currentAttribute.target === mainDataUID;
@@ -128,7 +131,7 @@ const removeNullKeys = (obj: Record<string, any>) =>
 const getComponentsToPost = (
   allComponents: Components,
   initialComponents: Components,
-  mainDataUID: UID.Any
+  mainDataUID: Internal.UID.Schema
 ) => {
   const componentsToFormat = getCreatedAndModifiedComponents(allComponents, initialComponents);
   const formattedComponents = componentsToFormat.map((compoUID) => {

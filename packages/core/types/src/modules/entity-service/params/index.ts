@@ -1,5 +1,7 @@
-import type { Common, Utils } from '../../../types';
+import type { UID } from '../../../public';
+import type { Extends, MatchAllIntersect } from '../../../utils';
 import type { GetPluginParams } from '..';
+
 // Params
 import type * as Sort from './sort';
 import type * as Pagination from './pagination';
@@ -13,10 +15,7 @@ import type * as Search from './search';
 // Utils
 import type * as Attribute from './attributes';
 
-export type Pick<
-  TSchemaUID extends Common.UID.Schema,
-  TKind extends Kind
-> = Utils.Expression.MatchAllIntersect<
+export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIntersect<
   [
     // Sort
     [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
@@ -75,6 +74,6 @@ export type Kind =
   | 'files'
   | '_q';
 
-type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
+type HasMember<TValue extends Kind, TTest extends Kind> = Extends<TTest, TValue>;
 
 export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };

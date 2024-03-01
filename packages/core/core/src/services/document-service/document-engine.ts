@@ -1,5 +1,5 @@
 import type { Database } from '@strapi/database';
-import type { Documents, Schema, Strapi, Shared, Common } from '@strapi/types';
+import type { Modules, Internal, Core } from '@strapi/types';
 import {
   contentTypes as contentTypesUtils,
   convertQueryParams,
@@ -40,7 +40,7 @@ const { transformParamsToQuery } = convertQueryParams;
  *
  */
 type Context = {
-  contentType: Schema.ContentType;
+  contentType: Internal.Struct.ContentTypeSchema;
 };
 
 const createPipeline = (data: Record<string, unknown>, context: Context) => {
@@ -55,9 +55,9 @@ const createDocumentEngine = ({
   strapi,
   db,
 }: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-}): Documents.Engine => ({
+}): Modules.Documents.Engine => ({
   uploadFiles,
 
   async findMany(uid, params) {
@@ -158,7 +158,7 @@ const createDocumentEngine = ({
       throw new Error('Create requires data attribute');
     }
 
-    const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
+    const model = strapi.getModel(uid);
 
     const validData = await entityValidator.validateEntityCreation(model, data, {
       isDraft: !data.publishedAt,
@@ -383,7 +383,7 @@ const createDocumentEngine = ({
   },
 });
 
-export default (ctx: { strapi: Strapi; db: Database }): Documents.Engine => {
+export default (ctx: { strapi: Core.Strapi; db: Database }): Modules.Documents.Engine => {
   const implementation = createDocumentEngine(ctx);
 
   // TODO: Wrap with database error handling

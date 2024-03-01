@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import type { Strapi, Common, Server } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 import { createHTTPServer } from './http-server';
 import { createRouteManager } from './routing';
@@ -10,12 +10,12 @@ import registerApplicationMiddlewares from './register-middlewares';
 import createKoaApp from './koa';
 import requestCtx from '../request-context';
 
-const healthCheck: Common.MiddlewareHandler = async (ctx) => {
+const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
   ctx.status = 204;
 };
 
-const createServer = (strapi: Strapi): Server => {
+const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
   const app = createKoaApp({
     proxy: strapi.config.get('server.proxy'),
     keys: strapi.config.get('server.app.keys'),
@@ -55,7 +55,7 @@ const createServer = (strapi: Strapi): Server => {
       return this;
     },
 
-    routes(routes: Common.Router | Omit<Common.Route, 'info'>[]) {
+    routes(routes: Core.Router | Omit<Core.Route, 'info'>[]) {
       if (!Array.isArray(routes) && routes.type) {
         const api = apis[routes.type];
         if (!api) {
@@ -92,9 +92,7 @@ const createServer = (strapi: Strapi): Server => {
     },
 
     listRoutes() {
-      const allRoutes = [...router.stack];
-
-      return allRoutes;
+      return [...router.stack];
     },
 
     listen(...args: any[]) {

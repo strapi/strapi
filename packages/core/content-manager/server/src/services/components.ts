@@ -1,6 +1,6 @@
 import { has, isNil, mapValues } from 'lodash/fp';
 
-import { Strapi, UID, Schema } from '@strapi/types';
+import type { Public, Internal, Core } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { ConfigurationUpdate } from './configuration';
 
@@ -21,14 +21,14 @@ const configurationService = createConfigurationService({
   },
 });
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   findAllComponents() {
     const { toContentManagerModel } = getService('data-mapper');
 
     return Object.values(strapi.components).map(toContentManagerModel);
   },
 
-  findComponent(uid: UID.Component) {
+  findComponent(uid: Public.UID.Component) {
     const { toContentManagerModel } = getService('data-mapper');
 
     const component = strapi.components[uid];
@@ -36,7 +36,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return isNil(component) ? component : toContentManagerModel(component);
   },
 
-  async findConfiguration(component: Schema.Component) {
+  async findConfiguration(component: Internal.Struct.ComponentSchema) {
     const configuration: Configuration = await configurationService.getConfiguration(component.uid);
 
     return {
@@ -46,19 +46,22 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     };
   },
 
-  async updateConfiguration(component: Schema.Component, newConfiguration: ConfigurationUpdate) {
+  async updateConfiguration(
+    component: Internal.Struct.ComponentSchema,
+    newConfiguration: ConfigurationUpdate
+  ) {
     await configurationService.setConfiguration(component.uid, newConfiguration);
 
     return this.findConfiguration(component);
   },
 
-  async findComponentsConfigurations(model: Schema.Component) {
+  async findComponentsConfigurations(model: Internal.Struct.ComponentSchema) {
     const componentsMap: Record<
       string,
       Configuration & { category: string; isComponent: boolean }
     > = {};
 
-    const getComponentConfigurations = async (uid: UID.Component) => {
+    const getComponentConfigurations = async (uid: Public.UID.Component) => {
       const component = this.findComponent(uid);
 
       if (has(uid, componentsMap)) {

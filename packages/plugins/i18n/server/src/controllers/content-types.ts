@@ -1,6 +1,6 @@
 import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Common } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 import { getService } from '../utils';
 import { validateGetNonLocalizedAttributesInput } from '../validation/content-types';
 
@@ -74,6 +74,6 @@ const controller = {
       ),
     };
   },
-} satisfies Common.Controller;
+} satisfies Core.Controller;
 
 export default controller;

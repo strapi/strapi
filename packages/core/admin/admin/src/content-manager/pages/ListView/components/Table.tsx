@@ -21,7 +21,7 @@ import {
   useTableContext,
 } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
-import { Documents, Entity } from '@strapi/types';
+import { Modules, Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { InjectionZoneList } from './InjectionZoneList';
@@ -32,7 +32,7 @@ import { InjectionZoneList } from './InjectionZoneList';
  * -----------------------------------------------------------------------------------------------*/
 
 interface CheckboxDataCellProps {
-  rowId: Entity.ID;
+  rowId: Data.ID;
   index: number;
 }
 
@@ -69,7 +69,7 @@ const CheckboxDataCell = ({ rowId, index }: CheckboxDataCellProps) => {
 
 interface BodyImplProps {
   children?: React.ReactNode;
-  onConfirmDelete: (id: Documents.ID) => Promise<void>;
+  onConfirmDelete: (id: Modules.Documents.ID) => Promise<void>;
   isConfirmDeleteRowOpen: boolean;
   setIsConfirmDeleteRowOpen: (isOpen: boolean) => void;
 }

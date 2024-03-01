@@ -1,4 +1,4 @@
-import { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
 import { BuildOptions } from './build';
@@ -46,7 +46,7 @@ interface BaseContext {
   /**
    * The Strapi instance
    */
-  strapi: Strapi;
+  strapi: Core.Strapi;
   /**
    * The browserslist target either loaded from the user's workspace or falling back to the default
    */

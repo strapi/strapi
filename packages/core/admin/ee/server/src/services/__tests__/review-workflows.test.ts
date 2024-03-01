@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import reviewWorkflowsServiceFactory from '../review-workflows/review-workflows';
 import { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
 
@@ -94,7 +94,7 @@ const strapiMock = {
   webhookStore: {
     addAllowedEvent: jest.fn(),
   },
-} as unknown as LoadedStrapi;
+} as unknown as Core.LoadedStrapi;
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
 

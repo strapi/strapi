@@ -1,5 +1,5 @@
 import { isObject } from 'lodash/fp';
-import { EntityService, Attribute, Common } from '@strapi/types';
+import { Modules, Schema, Public } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, ID } from '../utils/types';
@@ -34,8 +34,8 @@ const handlePrimitive = (
 /**
  * Get all relations document ids from a relation input value
  */
-const extractRelationIds = <T extends Attribute.RelationKind.Any>(
-  relation: EntityService.Params.Attribute.RelationInputValue<T>
+const extractRelationIds = <T extends Schema.Attribute.RelationKind.Any>(
+  relation: Modules.EntityService.Params.Attribute.RelationInputValue<T>
 ): ExtractedId[] => {
   const ids = handlePrimitive(relation);
   if (!isObject(relation)) return ids;
@@ -76,7 +76,7 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft?: boolean }
+  opts: { uid: Public.UID.Schema; locale?: string | null; isDraft?: boolean }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
@@ -93,7 +93,7 @@ const extractDataIds = (
             uid: target,
             documentId: relation.id as string,
             locale: getRelationTargetLocale(relation, {
-              targetUid: target as Common.UID.Schema,
+              targetUid: target as Public.UID.Schema,
               sourceUid: opts.uid,
               sourceLocale: opts.locale,
             }),

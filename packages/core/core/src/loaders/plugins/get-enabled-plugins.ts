@@ -4,7 +4,7 @@ import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { isKebabCase } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
 interface PluginMeta {
@@ -80,7 +80,7 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
   return detailedDeclaration;
 };
 
-export const getEnabledPlugins = async (strapi: Strapi, { client } = { client: false }) => {
+export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { client: false }) => {
   const internalPlugins: PluginMetas = {};
 
   for (const dep of INTERNAL_PLUGINS) {

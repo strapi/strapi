@@ -1,13 +1,13 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core, Public } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
-export type ServiceFactory = (params: { strapi: Strapi }) => Common.Service | Common.Service;
+export type ServiceFactory = (params: { strapi: Core.Strapi }) => Core.Service | Core.Service;
 export type ServiceFactoryMap = Record<string, ServiceFactory>;
-export type ServiceMap = Record<string, Common.Service>;
-export type ServiceExtendFn = (service: Common.Service) => Common.Service;
+export type ServiceMap = Record<string, Core.Service>;
+export type ServiceExtendFn = (service: Core.Service) => Core.Service;
 
-const servicesRegistry = (strapi: Strapi) => {
+const servicesRegistry = (strapi: Core.Strapi) => {
   const services: ServiceFactoryMap = {};
   const instantiatedServices: ServiceMap = {};
 
@@ -22,7 +22,7 @@ const servicesRegistry = (strapi: Strapi) => {
     /**
      * Returns the instance of a service. Instantiate the service if not already done
      */
-    get(uid: Common.UID.Service) {
+    get(uid: Public.UID.Service) {
       if (instantiatedServices[uid]) {
         return instantiatedServices[uid];
       }
@@ -46,7 +46,7 @@ const servicesRegistry = (strapi: Strapi) => {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
-            return this.get(uid as Common.UID.Service);
+            return this.get(uid as Public.UID.Service);
           },
         });
       }
@@ -83,7 +83,7 @@ const servicesRegistry = (strapi: Strapi) => {
     /**
      * Wraps a service to extend it
      */
-    extend(uid: Common.UID.Service, extendFn: ServiceExtendFn) {
+    extend(uid: Public.UID.Service, extendFn: ServiceExtendFn) {
       const currentService = this.get(uid);
 
       if (!currentService) {

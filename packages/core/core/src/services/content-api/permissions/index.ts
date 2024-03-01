@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { createActionProvider, createConditionProvider } from './providers';
 import createPermissionEngine from './engine';
 
@@ -10,7 +10,7 @@ interface ValidatePermissionHandler {
 }
 
 /**
- * Creates an handler that checks if the permission's action exists in the action registry
+ * Creates a handler that checks if the permission's action exists in the action registry
  */
 const createValidatePermissionHandler =
   (actionProvider: ReturnType<typeof createActionProvider>): ValidatePermissionHandler =>
@@ -31,9 +31,9 @@ const createValidatePermissionHandler =
 
 /**
  * Create instances of providers and permission engine for the core content-API service.
- * Also, expose utilities to get informations about available actions and such.
+ * Also, expose utilities to get information about available actions and such.
  */
-export default (strapi: Strapi) => {
+export default (strapi: Core.Strapi) => {
   // NOTE: Here we define both an action and condition provider,
   // but at the moment, we're only using the action one.
   const providers = {
@@ -59,7 +59,7 @@ export default (strapi: Strapi) => {
      * Check if a controller's action is bound to the
      * content-api by looking at a potential __type__ symbol
      */
-    const isContentApi = (action: Common.ControllerHandler & { [s: symbol]: any }) => {
+    const isContentApi = (action: Core.ControllerHandler & { [s: symbol]: any }) => {
       if (!_.has(action, typeSymbol)) {
         return false;
       }
@@ -71,7 +71,7 @@ export default (strapi: Strapi) => {
      * Register actions from a specific API source into the result tree
      */
     const registerAPIsActions = (
-      apis: Record<string, Common.Plugin | Common.Module>,
+      apis: Record<string, Core.Plugin | Core.Module>,
       source: 'api' | 'plugin'
     ) => {
       _.forEach(apis, (api, apiName) => {
@@ -104,10 +104,8 @@ export default (strapi: Strapi) => {
   };
 
   /**
-   * Register all the content-API's controllers actions into the action provider.
+   * Register all the content-API controllers actions into the action provider.
    * This method make use of the {@link getActionsMap} to generate the list of actions to register.
-   *
-   * @return {void}
    */
   const registerActions = async () => {
     const actionsMap = getActionsMap();

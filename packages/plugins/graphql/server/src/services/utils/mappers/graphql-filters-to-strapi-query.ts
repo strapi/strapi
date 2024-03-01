@@ -1,5 +1,5 @@
 import { has, propEq, isNil, isDate, isObject } from 'lodash/fp';
-import type { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import type { Context } from '../../types';
 
 // todo[v4]: Find a way to get that dynamically
@@ -41,7 +41,7 @@ export default ({ strapi }: Context) => {
      * @param {object} contentType
      * @return {object | object[]}
      */
-    graphQLFiltersToStrapiQuery(filters: any, contentType: Schema.Any): any {
+    graphQLFiltersToStrapiQuery(filters: any, contentType: Internal.Struct.Schema): any {
       const { isStrapiScalar, isMedia, isRelation, isComponent } = getService('utils').attributes;
       const { operators } = getService('builders').filters;
 

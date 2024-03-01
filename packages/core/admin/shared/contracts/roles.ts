@@ -1,4 +1,4 @@
-import { Entity, EntityService } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import { AdminRole, Permission, SanitizedAdminRole } from './shared';
 
@@ -30,7 +30,7 @@ export declare namespace GetPermissions {
  */
 export declare namespace UpdatePermissions {
   export interface Request {
-    params: { id: Entity.ID };
+    params: { id: Data.ID };
     query: {};
     body: {
       permissions: Omit<Permission, 'id' | 'createdAt' | 'updatedAt' | 'actionParameters'>[];
@@ -67,7 +67,7 @@ export declare namespace FindRole {
  */
 export declare namespace FindRoles {
   export interface Request {
-    query: EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'>;
+    query: Modules.EntityService.Params.Pick<'admin::role', 'sort' | 'filters' | 'fields'>;
     body: {};
   }
 

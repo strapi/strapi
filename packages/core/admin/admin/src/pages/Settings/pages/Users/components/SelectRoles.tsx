@@ -6,9 +6,9 @@ import styled, { keyframes } from 'styled-components';
 
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
-interface SelectRolesProps extends Pick<FieldInputProps<Entity.ID[]>, 'onChange' | 'value'> {
+interface SelectRolesProps extends Pick<FieldInputProps<Data.ID[]>, 'onChange' | 'value'> {
   disabled?: boolean;
   error?: string;
 }

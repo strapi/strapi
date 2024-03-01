@@ -1,5 +1,5 @@
 import { sanitize, validate } from '@strapi/utils';
-import type { Attribute, UID } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -8,7 +8,7 @@ export default ({ strapi }: Context) => ({
     contentTypeUID,
     attributeName,
   }: {
-    contentTypeUID: UID.ContentType;
+    contentTypeUID: Internal.UID.ContentType;
     attributeName: string;
   }) {
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
@@ -18,7 +18,7 @@ export default ({ strapi }: Context) => ({
 
       const { component: componentName } = contentType.attributes[
         attributeName
-      ] as Attribute.Component;
+      ] as Schema.Attribute.Component;
       const component = strapi.getModel(componentName);
 
       const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });

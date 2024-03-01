@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { yup } from '@strapi/utils';
 
 import type { TestContext } from 'yup';
-import type { Attribute, Common, Schema } from '@strapi/types';
+import type { Schema, Public, Internal } from '@strapi/types';
 
 import { hasComponent } from '../../utils/attributes';
 import { modelTypes, VALID_UID_TARGETS } from '../../services/constants';
@@ -18,7 +18,7 @@ import {
 
 export type GetTypeValidatorOptions = {
   types: ReadonlyArray<string>;
-  attributes?: Schema.Attributes;
+  attributes?: Internal.Struct.SchemaAttributes;
   modelType?: (typeof modelTypes)[keyof typeof modelTypes];
 };
 
@@ -32,7 +32,7 @@ const maxLengthIsGreaterThanOrEqualToMinLength = {
 };
 
 export const getTypeValidator = (
-  attribute: Attribute.Any,
+  attribute: Schema.Attribute.AnyAttribute,
   { types, modelType, attributes }: GetTypeValidatorOptions
 ) => {
   return yup.object({
@@ -47,7 +47,10 @@ export const getTypeValidator = (
   } as any);
 };
 
-const getTypeShape = (attribute: Attribute.Any, { modelType, attributes }: any = {}) => {
+const getTypeShape = (
+  attribute: Schema.Attribute.AnyAttribute,
+  { modelType, attributes }: any = {}
+) => {
   switch (attribute.type) {
     /**
      * complex types
@@ -221,7 +224,7 @@ const getTypeShape = (attribute: Attribute.Any, { modelType, attributes }: any =
           .test({
             name: 'Check max component nesting is 1 lvl',
             test(compoUID: unknown) {
-              const targetCompo = strapi.components[compoUID as Common.UID.Component];
+              const targetCompo = strapi.components[compoUID as Public.UID.Component];
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 
               if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {

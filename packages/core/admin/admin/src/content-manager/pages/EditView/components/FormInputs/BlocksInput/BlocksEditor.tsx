@@ -4,7 +4,7 @@ import { createContext } from '@radix-ui/react-context';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Expand } from '@strapi/icons';
-import { type Attribute } from '@strapi/types';
+import { type Schema } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
@@ -35,7 +35,7 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  matchNode: (node: Attribute.BlocksNode) => boolean;
+  matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
@@ -129,11 +129,11 @@ const ExpandIconButton = styled(IconButton)`
  * Why not use the entity id as the key, since it's unique for each locale?
  * Because it would not solve the problem when using the "fill in from other locale" feature
  */
-function useResetKey(value?: Attribute.BlocksValue): {
+function useResetKey(value?: Schema.Attribute.BlocksValue): {
   key: number;
   incrementSlateUpdatesCount: () => void;
 } {
-  // Keep track how how many times Slate detected a change from a user interaction in the editor
+  // Keep track how many times Slate detected a change from a user interaction in the editor
   const slateUpdatesCount = React.useRef(0);
   // Keep track of how many times the value prop was updated, whether from within editor or from outside
   const valueUpdatesCount = React.useRef(0);
@@ -163,7 +163,7 @@ const pipe =
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
 interface BlocksEditorProps
-  extends Pick<FieldValue<Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
+  extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
     BlocksContentProps {
   disabled?: boolean;
   name: string;
@@ -206,7 +206,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       if (isAstChange) {
         incrementSlateUpdatesCount();
 
-        onChange(name, state as Attribute.BlocksValue);
+        onChange(name, state as Schema.Attribute.BlocksValue);
       }
     };
 

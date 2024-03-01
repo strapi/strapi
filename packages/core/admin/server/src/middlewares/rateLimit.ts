@@ -2,11 +2,11 @@ import type { Context, Next } from 'koa';
 import path from 'path';
 import utils from '@strapi/utils';
 import { isString, has, toLower, get } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const { RateLimitError } = utils.errors;
 
-export default (config: any, { strapi }: { strapi: Strapi }) =>
+export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     let rateLimitConfig = strapi.config.get('admin.rateLimit') as any;
 

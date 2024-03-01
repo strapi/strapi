@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { Sender } from './sender';
 
 interface State {
@@ -12,7 +12,7 @@ const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
     counter: 0,
   };
 
-  const middleware: Common.MiddlewareHandler = async (ctx, next) => {
+  const middleware: Core.MiddlewareHandler = async (ctx, next) => {
     const { url, method } = ctx.request;
 
     if (!url.includes('.') && ['GET', 'PUT', 'POST', 'DELETE'].includes(method)) {

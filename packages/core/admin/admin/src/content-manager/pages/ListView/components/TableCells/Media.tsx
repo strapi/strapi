@@ -4,10 +4,10 @@ import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-s
 import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 interface MediaFile {
-  id?: Entity.ID;
+  id?: Data.ID;
   alternativeText?: string;
   ext: string;
   formats: {

@@ -13,7 +13,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { Entity } from '@strapi/types';
+import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -139,7 +139,7 @@ const ListView = () => {
 
   const [deleteToken] = useDeleteTransferTokenMutation();
 
-  const handleDelete = async (id: Entity.ID) => {
+  const handleDelete = async (id: Data.ID) => {
     try {
       const res = await deleteToken(id);
 

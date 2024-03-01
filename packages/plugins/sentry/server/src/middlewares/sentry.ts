@@ -1,11 +1,11 @@
-import type { Strapi } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 import type Sentry from '@sentry/node';
 import type createSentryService from '../services/sentry';
 
 /**
  * Programmatic sentry middleware. We do not want to expose it in the plugin
  */
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sentryService: ReturnType<typeof createSentryService> = strapi
     .plugin('sentry')
     .service('sentry');

@@ -1,4 +1,5 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import executeCERegister from '../../../server/src/register';
 import migrateAuditLogsTable from './migrations/audit-logs-table';
 import migrateReviewWorkflowStagesColor from './migrations/review-workflows-stages-color';
@@ -11,7 +12,7 @@ import createAuditLogsService from './services/audit-logs';
 import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 import { getService } from './utils';
 
-export default async ({ strapi }: { strapi: Strapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const auditLogsIsEnabled = strapi.config.get('admin.auditLogs.enabled', true);
 
   if (auditLogsIsEnabled) {

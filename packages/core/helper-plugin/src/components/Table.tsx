@@ -27,16 +27,16 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-import type { Attribute, Entity } from '@strapi/types';
+import type { Schema, Data } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableContextValue<TRow extends { id: Entity.ID } = { id: Entity.ID }> {
-  selectedEntries: Entity.ID[];
-  setSelectedEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
-  onSelectRow: (args: { name: Entity.ID; value: boolean }) => void;
+interface TableContextValue<TRow extends { id: Data.ID } = { id: Data.ID }> {
+  selectedEntries: Data.ID[];
+  setSelectedEntries: React.Dispatch<React.SetStateAction<Data.ID[]>>;
+  onSelectRow: (args: { name: Data.ID; value: boolean }) => void;
   rows: TRow[];
   isLoading: boolean;
   isFetching: boolean;
@@ -46,7 +46,7 @@ interface TableContextValue<TRow extends { id: Entity.ID } = { id: Entity.ID }> 
 
 const TableContext = React.createContext<TableContextValue | null>(null);
 
-const useTableContext = <TRow extends { id: Entity.ID }>() => {
+const useTableContext = <TRow extends { id: Data.ID }>() => {
   const context = React.useContext(TableContext);
 
   if (!context) {
@@ -91,7 +91,7 @@ const ActionBar = ({ children }: ActionBarProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface BulkDeleteButtonProps {
-  onConfirmDeleteAll: (ids: Entity.ID[]) => Promise<void>;
+  onConfirmDeleteAll: (ids: Data.ID[]) => Promise<void>;
 }
 
 const BulkDeleteButton = ({ onConfirmDeleteAll }: BulkDeleteButtonProps) => {
@@ -223,7 +223,7 @@ interface HeaderCellProps {
   /**
    * The attribute data from the content-type's schema for the field
    */
-  attribute: Attribute.Any | { type: 'custom' };
+  attribute: Schema.Attribute.AnyAttribute | { type: 'custom' };
   /**
    * Typically used by plugins to render a custom cell
    */
@@ -321,7 +321,7 @@ const HeaderCell = ({ attribute, mainField, name, label, sortable }: HeaderCellP
 interface RootProps
   extends Partial<Pick<TableContextValue, 'colCount' | 'rows' | 'isLoading' | 'isFetching'>> {
   children?: React.ReactNode;
-  defaultSelectedEntries?: Entity.ID[];
+  defaultSelectedEntries?: Data.ID[];
 }
 
 const Root = ({
@@ -332,7 +332,7 @@ const Root = ({
   isLoading = false,
   isFetching = false,
 }: RootProps) => {
-  const [selectedEntries, setSelectedEntries] = React.useState<Entity.ID[]>(defaultSelectedEntries);
+  const [selectedEntries, setSelectedEntries] = React.useState<Data.ID[]>(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
   const onSelectRow = React.useCallback<TableContextValue['onSelectRow']>(({ name, value }) => {

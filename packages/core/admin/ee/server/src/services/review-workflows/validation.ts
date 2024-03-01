@@ -1,4 +1,4 @@
-import { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { uniq } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { getService } from '../../utils';
@@ -7,7 +7,7 @@ import { clampMaxWorkflows, clampMaxStagesPerWorkflow } from '../../utils/review
 
 const { ValidationError } = errors;
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   return {
     limits: {
       numberOfWorkflows: MAX_WORKFLOWS,

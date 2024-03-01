@@ -1,7 +1,7 @@
 import { defaultsDeep, merge } from 'lodash/fp';
 import helmet, { KoaHelmet } from 'koa-helmet';
 
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export type Config = NonNullable<Parameters<KoaHelmet>[0]>;
 
@@ -29,7 +29,7 @@ const defaults: Config = {
   },
 };
 
-export const security: Common.MiddlewareFactory<Config> =
+export const security: Core.MiddlewareFactory<Config> =
   (config, { strapi }) =>
   (ctx, next) => {
     let helmetConfig: Config = defaultsDeep(defaults, config);

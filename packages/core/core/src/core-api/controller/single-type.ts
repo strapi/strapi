@@ -1,11 +1,11 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Schema, CoreApi, Utils, Common } from '@strapi/types';
+import type { Internal, Core, Utils, Public } from '@strapi/types';
 
 import { parseBody } from './transform';
 
 interface Options {
-  contentType: Schema.SingleType;
+  contentType: Internal.Struct.SingleTypeSchema;
 }
 
 /**
@@ -13,8 +13,8 @@ interface Options {
  */
 const createSingleTypeController = ({
   contentType,
-}: Options): Utils.PartialWithThis<CoreApi.Controller.SingleType> => {
-  const uid = contentType.uid as Common.UID.Service;
+}: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.SingleType> => {
+  const uid = contentType.uid as Public.UID.Service;
 
   return {
     /**

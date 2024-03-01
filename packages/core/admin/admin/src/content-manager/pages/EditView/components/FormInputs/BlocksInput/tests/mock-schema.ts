@@ -1,6 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 
-import { type Attribute } from '@strapi/types';
+import { type Schema } from '@strapi/types';
 
 const mockImage = {
   url: 'https://via.placeholder.com/300/09f/fff.png',
@@ -21,7 +21,7 @@ const mockImage = {
   updatedAt: '2023-08-24T09:43:30.065Z',
 };
 
-const blocksData: Attribute.BlocksValue = [
+const blocksData: Schema.Attribute.BlocksValue = [
   {
     type: 'paragraph',
     children: [

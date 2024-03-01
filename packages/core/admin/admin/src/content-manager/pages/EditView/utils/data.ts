@@ -3,17 +3,20 @@ import pipe from 'lodash/fp/pipe';
 import { DOCUMENT_META_FIELDS } from '../../../constants/attributes';
 
 import type { ComponentsDictionary, Document } from '../../../hooks/useDocument';
-import type { Schema, Attribute, Common } from '@strapi/types';
+import type { Internal, Schema, Public } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * traverseData
  * -----------------------------------------------------------------------------------------------*/
 
-type Predicate = <TAttribute extends Attribute.Any>(
+type Predicate = <TAttribute extends Schema.Attribute.AnyAttribute>(
   attribute: TAttribute,
-  value: Attribute.GetValue<TAttribute>
+  value: Schema.Attribute.Value<TAttribute>
 ) => boolean;
-type Transform = <TAttribute extends Attribute.Any>(value: any, attribute: TAttribute) => any;
+type Transform = <TAttribute extends Schema.Attribute.AnyAttribute>(
+  value: any,
+  attribute: TAttribute
+) => any;
 type AnyData = Omit<Document, 'id'>;
 
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component'];
@@ -50,21 +53,21 @@ const traverseData =
           if (attribute.repeatable) {
             const componentValue = (
               predicate(attribute, value) ? transform(value, attribute) : value
-            ) as Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
+            ) as Schema.Attribute.Value<Schema.Attribute.Component<Public.UID.Component, true>>;
             acc[key] = componentValue.map((componentData) =>
               traverse(componentData, components[attribute.component]?.attributes ?? {})
             );
           } else {
             const componentValue = (
               predicate(attribute, value) ? transform(value, attribute) : value
-            ) as Attribute.GetValue<Attribute.Component<Common.UID.Component, false>>;
+            ) as Schema.Attribute.Value<Schema.Attribute.Component<Public.UID.Component, false>>;
 
             acc[key] = traverse(componentValue, components[attribute.component]?.attributes ?? {});
           }
         } else if (attribute.type === 'dynamiczone') {
           const dynamicZoneValue = (
             predicate(attribute, value) ? transform(value, attribute) : value
-          ) as Attribute.GetDynamicZoneValue<Attribute.DynamicZone>;
+          ) as Schema.Attribute.Value<Schema.Attribute.DynamicZone>;
 
           acc[key] = dynamicZoneValue.map((componentData) =>
             traverse(componentData, components[componentData.__component]?.attributes ?? {})
@@ -89,7 +92,7 @@ const traverseData =
 /**
  * @internal Removes all the fields that are not allowed.
  */
-const removeProhibitedFields = (prohibitedFields: Attribute.Kind[]) =>
+const removeProhibitedFields = (prohibitedFields: Schema.Attribute.Kind[]) =>
   traverseData(
     (attribute) => prohibitedFields.includes(attribute.type),
     () => ''

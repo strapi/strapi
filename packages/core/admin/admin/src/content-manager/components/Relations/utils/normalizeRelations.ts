@@ -3,7 +3,6 @@ import { PUBLICATION_STATES } from '../RelationInputDataManager';
 import { getRelationLink } from './getRelationLink';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute } from '@strapi/types';
 
 export interface NormalizeRelationArgs {
   shouldAddLink: boolean;

@@ -1,7 +1,7 @@
 import { isArray, isString, isUndefined, constant } from 'lodash/fp';
 import { objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 import type { Context } from '../types';
 
@@ -233,11 +233,11 @@ export default (context: Context) => {
     builder.field(attributeName, { type, resolve, args });
   };
 
-  const isNotPrivate = (contentType: Schema.Any) => (attributeName: string) => {
+  const isNotPrivate = (contentType: Internal.Struct.Schema) => (attributeName: string) => {
     return !contentTypes.isPrivateAttribute(contentType, attributeName);
   };
 
-  const isNotDisabled = (contentType: Schema.Any) => (attributeName: string) => {
+  const isNotDisabled = (contentType: Internal.Struct.Schema) => (attributeName: string) => {
     return extension.shadowCRUD(contentType.uid).field(attributeName).hasOutputEnabled();
   };
 
@@ -247,7 +247,7 @@ export default (context: Context) => {
      * @param contentType - The content type used to created the definition
      * @return {NexusObjectTypeDef}
      */
-    buildTypeDefinition(contentType: Schema.Any) {
+    buildTypeDefinition(contentType: Internal.Struct.Schema) {
       const utils = getGraphQLService('utils');
 
       const { getComponentName, getTypeName } = utils.naming;

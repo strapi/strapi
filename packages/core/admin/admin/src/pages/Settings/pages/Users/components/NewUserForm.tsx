@@ -21,7 +21,7 @@ import {
   translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
+import { Data } from '@strapi/types';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -273,7 +273,7 @@ interface InitialData {
   firstname?: string;
   lastname?: string;
   email?: string;
-  roles?: Entity.ID[];
+  roles?: Data.ID[];
   useSSORegistration?: boolean;
 }
 

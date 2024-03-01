@@ -1,9 +1,9 @@
 // Utility type to reuse Param definition in MiddlewareContext
-import type { Common } from '../..';
+import { UID } from '../../public';
 import type { ServiceInstance } from './service-instance';
 
 export interface Context<
-  TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
+  TContentTypeUID extends UID.ContentType = UID.ContentType,
   TAction extends keyof ServiceInstance<TContentTypeUID> = keyof ServiceInstance<TContentTypeUID>
 > {
   uid: TContentTypeUID;
@@ -12,7 +12,7 @@ export interface Context<
 }
 
 export type Middleware<
-  TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
+  TContentTypeUID extends UID.ContentType = UID.ContentType,
   TAction extends keyof ServiceInstance<TContentTypeUID> = keyof ServiceInstance<TContentTypeUID>
 > = (
   ctx: Context<TContentTypeUID, TAction>,

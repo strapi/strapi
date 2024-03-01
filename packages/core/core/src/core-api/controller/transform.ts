@@ -1,7 +1,7 @@
 import { isNil, isPlainObject } from 'lodash/fp';
 import { parseMultipartData } from '@strapi/utils';
 import type Koa from 'koa';
-import type { Common, Schema, UID } from '@strapi/types';
+import type { Public, Internal } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
@@ -23,7 +23,9 @@ function isEntry(property: unknown): property is Entry | Entry[] {
   return property === null || isPlainObject(property) || Array.isArray(property);
 }
 
-function isDZEntries(property: unknown): property is (Entry & { __component: UID.Component })[] {
+function isDZEntries(
+  property: unknown
+): property is (Entry & { __component: Internal.UID.Component })[] {
   return Array.isArray(property);
 }
 
@@ -40,7 +42,7 @@ const parseBody = (ctx: Koa.Context) => {
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Schema.ContentType | Schema.Component } = {}
+  opts: { contentType?: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema } = {}
 ) => {
   if (isNil(resource)) {
     return resource;
@@ -54,11 +56,11 @@ const transformResponse = (
 
 function transformComponent<T extends Entry | Entry[] | null>(
   data: T,
-  component: Schema.Component
+  component: Internal.Struct.ComponentSchema
 ): T extends Entry[] ? TransformedComponent[] : T extends Entry ? TransformedComponent : null;
 function transformComponent(
   data: Entry | Entry[] | null,
-  component: Schema.Component
+  component: Internal.Struct.ComponentSchema
 ): TransformedComponent | TransformedComponent[] | null {
   if (Array.isArray(data)) {
     return data.map((datum) => transformComponent(datum, component));
@@ -76,11 +78,11 @@ function transformComponent(
 
 function transformEntry<T extends Entry | Entry[] | null>(
   entry: T,
-  type?: Schema.ContentType | Schema.Component
+  type?: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema
 ): T extends Entry[] ? TransformedEntry[] : T extends Entry ? TransformedEntry : null;
 function transformEntry(
   entry: Entry | Entry[] | null,
-  type?: Schema.ContentType | Schema.Component
+  type?: Internal.Struct.ContentTypeSchema | Internal.Struct.ComponentSchema
 ): TransformedEntry | TransformedEntry[] | null {
   if (isNil(entry)) {
     return entry;
@@ -103,10 +105,7 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      const data = transformEntry(
-        property,
-        strapi.contentType(attribute.target as Common.UID.ContentType)
-      );
+      const data = transformEntry(property, strapi.contentType(attribute.target));
 
       attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {

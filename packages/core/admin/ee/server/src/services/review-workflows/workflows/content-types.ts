@@ -1,10 +1,10 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { mapAsync } from '@strapi/utils';
 import { difference, merge } from 'lodash/fp';
 import { getService } from '../../../utils';
 import { WORKFLOW_MODEL_UID } from '../../../constants/workflows';
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const contentManagerContentTypeService = strapi
     .plugin('content-manager')
     .service('content-types');

@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Schema } from '@strapi/types';
+import type { Core, Internal } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -11,7 +11,7 @@ export interface IRestoreOptions {
   entities?: {
     include?: string[]; // only delete these stage entities before transfer
     exclude?: string[]; // exclude these stage entities from deletion
-    filters?: ((contentType: Schema.ContentType) => boolean)[]; // custom filters to exclude a content type from deletion
+    filters?: ((contentType: Internal.Struct.ContentTypeSchema) => boolean)[]; // custom filters to exclude a content type from deletion
     params?: { [uid: string]: unknown }; // params object passed to deleteMany before transfer for custom deletions
   };
 }
@@ -21,7 +21,7 @@ interface IDeleteResults {
   aggregate: { [uid: string]: { count: number } };
 }
 
-export const deleteRecords = async (strapi: LoadedStrapi, options: IRestoreOptions) => {
+export const deleteRecords = async (strapi: Core.LoadedStrapi, options: IRestoreOptions) => {
   const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
@@ -33,14 +33,13 @@ export const deleteRecords = async (strapi: LoadedStrapi, options: IRestoreOptio
 };
 
 const deleteEntitiesRecords = async (
-  strapi: LoadedStrapi,
+  strapi: Core.LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { entities } = options;
   const query = queries.entity.createEntityQuery(strapi);
-  const contentTypes = Object.values<Schema.ContentType>(
-    strapi.contentTypes as Record<string, Schema.ContentType>
-  );
+  type A = typeof strapi.contentTypes;
+  const contentTypes = Object.values(strapi.contentTypes) as Internal.Struct.ContentTypeSchema[];
 
   const contentTypesToClear = contentTypes.filter((contentType) => {
     let removeThisContentType = true;
@@ -80,7 +79,7 @@ const deleteEntitiesRecords = async (
 };
 
 const deleteConfigurationRecords = async (
-  strapi: LoadedStrapi,
+  strapi: Core.LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { coreStore = true, webhook = true } = options?.configuration ?? {};
