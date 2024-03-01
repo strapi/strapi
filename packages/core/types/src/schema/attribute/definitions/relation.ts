@@ -12,8 +12,6 @@ export type Relation<
   | RelationWithTarget<Extract<TRelationKind, RelationKind.WithTarget>, TTargetUID>
   | RelationWithoutTarget<Extract<TRelationKind, RelationKind.WithoutTarget>>;
 
-// region Shortcuts
-
 export type RelationWithTarget<
   TRelationKind extends RelationKind.WithTarget = RelationKind.WithTarget,
   TTargetUID extends UID.ContentType = UID.ContentType
@@ -59,10 +57,6 @@ export type MorphReference<
 export type MorphOwner<TRelationKind extends RelationKind.MorphOwner = RelationKind.MorphOwner> =
   Relation<TRelationKind>;
 
-// endregion
-
-// region Options
-
 export type RelationOptions = Intersect<
   [
     Attribute.ConfigurableOption,
@@ -73,10 +67,6 @@ export type RelationOptions = Intersect<
     { useJoinTable?: boolean }
   ]
 >;
-
-// endregion
-
-// region Bidirectional Relations (oneToOne, oneToMany, manyToOne, manyToMany)
 
 export type CommonBidirectionalProperties<TTargetUID extends UID.ContentType = UID.ContentType> = {
   target: TTargetUID;
@@ -120,10 +110,6 @@ export type ManyToMany<TTargetUID extends UID.ContentType = UID.ContentType> = I
   ]
 >;
 
-// endregion
-
-// region xWay (oneWay, manyWay)
-
 export type XWayCommonProperties<TTargetUID extends UID.ContentType = UID.ContentType> = {
   target: TTargetUID;
 };
@@ -145,10 +131,6 @@ export type ManyWay<TTargetUID extends UID.ContentType = UID.ContentType> = Inte
     { relation: 'manyWay' }
   ]
 >;
-
-// endregion
-
-// region Morph Reference Relations (morphOne, morphMany)
 
 export type MorphReferenceCommonProperties<TTargetUID extends UID.ContentType = UID.ContentType> = {
   target: TTargetUID;
@@ -176,10 +158,6 @@ export type MorphMany<TTargetUID extends UID.ContentType = UID.ContentType> = In
   ]
 >;
 
-// endregion
-
-// region Morph Owner Relations (morphToOne, morphToMany)
-
 export type MorphToOne = Intersect<
   [Attribute.OfType<'relation'>, RelationOptions, { relation: 'morphToOne' }]
 >;
@@ -187,10 +165,6 @@ export type MorphToOne = Intersect<
 export type MorphToMany = Intersect<
   [Attribute.OfType<'relation'>, RelationOptions, { relation: 'morphToMany' }]
 >;
-
-// endregion
-
-// region Queries
 
 export type RelationPluralityModifier<TRelationKind extends RelationKind.Any, TValue> = If<
   IsManyRelation<TRelationKind>,
@@ -209,10 +183,6 @@ export type RelationTarget<TAttribute extends Attribute.Attribute> = TAttribute 
 >
   ? TTarget
   : never;
-
-// endregion
-
-// region Value
 
 export type RelationValue<
   TRelationKind extends RelationKind.Any,
@@ -243,8 +213,6 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> =
     : TAttribute extends Relation<RelationKind.WithTarget, UID.ContentType>
     ? RelationValue<TAttribute['relation'], TAttribute['target']>
     : never;
-
-// endregion
 
 // TODO: [TS2] Maybe try to simplify this, so that it doesn't require a PhD to understand
 export namespace RelationKind {
