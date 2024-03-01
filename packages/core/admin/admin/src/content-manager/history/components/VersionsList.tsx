@@ -201,7 +201,13 @@ const VersionsList = () => {
         overflow="auto"
       >
         {versions.data.map((version, index) => (
-          <li key={version.id}>
+          <li
+            key={version.id}
+            aria-label={formatMessage({
+              id: 'content-manager.history.sidebar.title.version-card.aria-label',
+              defaultMessage: 'Version card',
+            })}
+          >
             <VersionCard version={version} isCurrent={page === 1 && index === 0} />
           </li>
         ))}
