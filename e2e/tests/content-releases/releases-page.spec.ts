@@ -5,21 +5,11 @@ import { login } from '../../utils/login';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-/**
- * Skip tests on v5 until Releases + Scheduling are migrated to v5
- */
-describeOnCondition(/*edition === 'EE'*/ false)('Releases page', () => {
+describeOnCondition(edition === 'EE')('Releases page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
-
-    await page.evaluate(() => {
-      // Remove after Scheduling Beta release
-      window.strapi.future = {
-        isEnabled: () => true,
-      };
-    });
   });
 
   test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
