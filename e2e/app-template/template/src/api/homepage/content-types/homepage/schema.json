@@ -20,6 +20,11 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "admin::user"
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "meta.seo"
     }
   }
 }

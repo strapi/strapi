@@ -2,7 +2,9 @@ import type { Attribute, Common, Utils } from '../../../../types';
 import type { ID } from './id';
 
 type ShortHand = ID;
-type LongHand = { id: ID };
+type LongHandEntity = { id: ID };
+type LongHandDocument = { documentId: ID; locale?: string };
+type LongHand = LongHandEntity | LongHandDocument;
 
 interface PositionalArguments {
   before?: ID;
@@ -11,7 +13,7 @@ interface PositionalArguments {
   end?: boolean;
 }
 
-type WithPositionArguments<T> = T & PositionalArguments;
+type WithPositionArguments<T> = T & { position: PositionalArguments };
 
 type Set = { set: ShortHand[] | LongHand[] | null };
 type Connect = { connect: ShortHand[] | WithPositionArguments<LongHand>[] };

@@ -290,7 +290,7 @@ const SettingsPage = () => {
                           formErrors.email?.id &&
                           formatMessage({
                             id: `email.${formErrors.email?.id}`,
-                            defaultMessage: 'This is an invalid email',
+                            defaultMessage: 'This is not a valid email',
                           })
                         }
                         placeholder={formatMessage({

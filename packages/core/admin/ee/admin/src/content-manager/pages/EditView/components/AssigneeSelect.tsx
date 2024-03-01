@@ -1,12 +1,9 @@
 import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
-import {
-  useCMEditViewDataManager,
-  useAPIErrorHandler,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { useField } from '../../../../../../../admin/src/components/Form';
+import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
 import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useAdminUsers } from '../../../../../../../admin/src/services/users';
@@ -15,7 +12,7 @@ import { useUpdateAssigneeMutation } from '../../../../services/reviewWorkflows'
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
 
 const AssigneeSelect = () => {
-  const { initialData, layout, isSingleType, onChange } = useCMEditViewDataManager();
+  const { collectionType, model, id } = useDoc();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -25,23 +22,28 @@ const AssigneeSelect = () => {
     isLoading: isLoadingPermissions,
   } = useRBAC(permissions.settings?.users);
   const { data, isLoading, isError } = useAdminUsers(
-    {},
+    { id },
     {
-      skip: isLoadingPermissions || !canRead,
+      skip: isLoadingPermissions || !canRead || !id,
     }
   );
 
   const users = data?.users || [];
 
-  const currentAssignee = initialData?.[ASSIGNEE_ATTRIBUTE_NAME] ?? null;
+  /**
+   * TODO: type this value when we can test it.
+   */
+  const field = useField(ASSIGNEE_ATTRIBUTE_NAME);
+
+  const currentAssignee = field.value ?? null;
 
   const [updateAssignee, { error, isLoading: isMutating }] = useUpdateAssigneeMutation();
 
   const handleChange = async (assigneeId: string | null) => {
     const res = await updateAssignee({
-      slug: isSingleType ? 'single-types' : 'collection-types',
-      model: layout!.uid,
-      id: initialData.id!,
+      slug: collectionType,
+      model: model,
+      id: id!,
       data: {
         id: assigneeId ? parseInt(assigneeId, 10) : null,
       },
@@ -50,16 +52,7 @@ const AssigneeSelect = () => {
     if ('data' in res) {
       // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
       // as modified, which is what the boolean flag is for
-      onChange?.(
-        {
-          target: {
-            type: '',
-            name: ASSIGNEE_ATTRIBUTE_NAME,
-            value: res.data[ASSIGNEE_ATTRIBUTE_NAME],
-          },
-        },
-        true
-      );
+      field.onChange(ASSIGNEE_ATTRIBUTE_NAME, res.data[ASSIGNEE_ATTRIBUTE_NAME]);
 
       toggleNotification({
         type: 'success',
@@ -89,7 +82,7 @@ const AssigneeSelect = () => {
               (error && formatAPIError(error))) ??
             undefined
           }
-          disabled={!isLoadingPermissions && !isLoading && users.length === 0}
+          disabled={(!isLoadingPermissions && !isLoading && users.length === 0) || !id}
           name={ASSIGNEE_ATTRIBUTE_NAME}
           id={ASSIGNEE_ATTRIBUTE_NAME}
           value={currentAssignee ? currentAssignee.id.toString() : null}
@@ -98,7 +91,7 @@ const AssigneeSelect = () => {
           onClear={() => handleChange(null)}
           placeholder={formatMessage({
             id: 'content-manager.reviewWorkflows.assignee.placeholder',
-            defaultMessage: 'Select …',
+            defaultMessage: 'Select…',
           })}
           label={formatMessage({
             id: 'content-manager.reviewWorkflows.assignee.label',

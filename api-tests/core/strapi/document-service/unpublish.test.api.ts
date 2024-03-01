@@ -21,9 +21,9 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish first all locales
-        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId, { locale: '*' });
         // Unpublish all locales
-        await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId, { locale: '*' });
 
         const publishedArticles = await findPublishedArticlesDb(articleDb.documentId);
 
@@ -38,7 +38,7 @@ describe('Document Service', () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish first all locales
-        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId, { locale: '*' });
         const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.documentId);
 
         await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId, {

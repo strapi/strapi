@@ -33,7 +33,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
-import { composeRefs } from '../../../../../../../../admin/src/content-manager/utils/refs';
+import { composeRefs } from '../../../../../../../../admin/src/utils/refs';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,
@@ -418,15 +418,16 @@ export const Stage = ({
               <GridItem col={6}>
                 {filteredRoles?.length === 0 ? (
                   <NotAllowedInput
-                    description={{
+                    hint={formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
                       defaultMessage: 'You don’t have the permission to see roles',
-                    }}
-                    intlLabel={{
+                    })}
+                    label={formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.label',
                       defaultMessage: 'Roles that can change this stage',
-                    }}
+                    })}
                     name={permissionsField.name}
+                    type="enumeration"
                   />
                 ) : (
                   <Flex alignItems="flex-end" gap={3}>

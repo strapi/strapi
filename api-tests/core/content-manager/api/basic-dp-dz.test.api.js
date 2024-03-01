@@ -81,20 +81,20 @@ describe('CM API - Basic + dz', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDzAndDP.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDzAndDP.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithDzAndDP[0]);
-    expect(res.body.publishedAt).toBeNull();
+    expect(res.body.data).toMatchObject(data.productsWithDzAndDP[0]);
+    expect(res.body.data.publishedAt).toBeNull();
   });
 
   test('Update product with compo', async () => {
@@ -111,21 +111,21 @@ describe('CM API - Basic + dz', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithDzAndDP[0].id);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithDzAndDP[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.documentId).toEqual(data.productsWithDzAndDP[0].documentId);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithDzAndDP[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -152,16 +152,16 @@ describe('CM API - Basic + dz', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/clone/${createdProduct.data.documentId}`,
       body: {
         publishedAt: new Date().toISOString(),
       },
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
+    expect(res.body.data).toMatchObject(product);
     // When cloning the new entry must be a draft
-    expect(res.body.publishedAt).toBeNull();
+    expect(res.body.data.publishedAt).toBeNull();
   });
 
   describe('validation', () => {
@@ -175,14 +175,14 @@ describe('CM API - Basic + dz', () => {
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
           url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
-            method === 'update' ? data.productsWithDzAndDP[0].id : ''
+            method === 'update' ? data.productsWithDzAndDP[0].documentId : ''
           }`,
           body: product,
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
+        expect(res.body.data).toMatchObject(product);
+        data.productsWithDzAndDP.push(res.body.data);
       });
 
       test(`Can ${method} product with compo - minLength`, async () => {
@@ -200,14 +200,14 @@ describe('CM API - Basic + dz', () => {
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
           url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
-            method === 'update' ? data.productsWithDzAndDP[0].id : ''
+            method === 'update' ? data.productsWithDzAndDP[0].documentId : ''
           }`,
           body: product,
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
+        expect(res.body.data).toMatchObject(product);
+        data.productsWithDzAndDP.push(res.body.data);
       });
 
       test(`Cannot ${method} product with compo - maxLength`, async () => {
@@ -225,7 +225,7 @@ describe('CM API - Basic + dz', () => {
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
           url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
-            method === 'update' ? data.productsWithDzAndDP[0].id : ''
+            method === 'update' ? data.productsWithDzAndDP[0].documentId : ''
           }`,
           body: product,
         });
@@ -264,14 +264,14 @@ describe('CM API - Basic + dz', () => {
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
           url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
-            method === 'update' ? data.productsWithDzAndDP[0].id : ''
+            method === 'update' ? data.productsWithDzAndDP[0].documentId : ''
           }`,
           body: product,
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toMatchObject(product);
-        data.productsWithDzAndDP.push(res.body);
+        expect(res.body.data).toMatchObject(product);
+        data.productsWithDzAndDP.push(res.body.data);
       });
 
       test(`Cannot ${method} product with compo - missing __component`, async () => {
@@ -288,7 +288,7 @@ describe('CM API - Basic + dz', () => {
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
           url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
-            method === 'update' ? data.productsWithDzAndDP[0].id : ''
+            method === 'update' ? data.productsWithDzAndDP[0].documentId : ''
           }`,
           body: product,
         });

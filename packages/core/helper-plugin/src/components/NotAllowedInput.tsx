@@ -1,55 +1,41 @@
-import { TextInput, TextInputProps } from '@strapi/design-system';
+import type { ReactNode } from 'react';
+
+import { TextInput } from '@strapi/design-system';
 import { EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { TranslationMessage } from '../types';
+import type { Attribute } from '@strapi/types';
 
-interface NotAllowedInputProps extends Pick<TextInputProps, 'labelAction' | 'name'> {
-  description?: TranslationMessage;
-  error?: string;
-  intlLabel?: TranslationMessage;
+interface NotAllowedInputProps {
+  disabled?: boolean;
+  hint?: ReactNode;
+  label: ReactNode;
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: never;
+  type: Attribute.Kind;
 }
 
-const NotAllowedInput = ({
-  description,
-  error,
-  intlLabel,
-  labelAction,
-  name = '',
-}: NotAllowedInputProps) => {
+const NotAllowedInput = ({ hint, label, required, name }: NotAllowedInputProps) => {
   const { formatMessage } = useIntl();
-  const label = intlLabel?.id
-    ? formatMessage(
-        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-        { ...intlLabel.values }
-      )
-    : name;
-
-  const hint = description?.id
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
 
   const placeholder = formatMessage({
     id: 'components.NotAllowedInput.text',
     defaultMessage: 'No permissions to see this field',
   });
 
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
-
   return (
     <TextInput
       disabled
-      error={errorMessage}
+      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
       label={label}
-      labelAction={labelAction}
       id={name}
       hint={hint}
       name={name}
       placeholder={placeholder}
+      required={required}
       startAction={<StyledIcon />}
       type="text"
       value=""

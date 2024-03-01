@@ -10,10 +10,21 @@ type AnyFunc = (...args: any) => any;
 type PipeArgs<F extends AnyFunc[], PrevReturn = Parameters<F[0]>[0]> = F extends [
   (arg: any) => infer B
 ]
-  ? [(arg: PrevReturn) => B]
+  ? [
+      (
+        arg: PrevReturn extends Promise<infer PrevResolvedReturn> ? PrevResolvedReturn : PrevReturn
+      ) => B
+    ]
   : F extends [(arg: any) => infer B, ...infer Tail]
   ? Tail extends AnyFunc[]
-    ? [(arg: PrevReturn) => B, ...PipeArgs<Tail, B>]
+    ? [
+        (
+          arg: PrevReturn extends Promise<infer PrevResolvedReturn>
+            ? PrevResolvedReturn
+            : PrevReturn
+        ) => B,
+        ...PipeArgs<Tail, B>
+      ]
     : []
   : [];
 

@@ -10,14 +10,12 @@ import {
   Loader,
   Typography,
 } from '@strapi/design-system';
-import {
-  useCMEditViewDataManager,
-  useAPIErrorHandler,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
+import { useField } from '../../../../../../../admin/src/components/Form';
+import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 import { LimitsModal } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
 import {
@@ -30,18 +28,18 @@ import { useGetStagesQuery, useUpdateStageMutation } from '../../../../services/
 import { STAGE_ATTRIBUTE_NAME } from './constants';
 
 export const StageSelect = () => {
-  const { initialData, layout: contentType, isSingleType, onChange } = useCMEditViewDataManager();
+  const { collectionType, model, id } = useDoc();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { data, isLoading } = useGetStagesQuery(
     {
-      slug: isSingleType ? 'single-types' : 'collection-types',
-      model: contentType!.uid,
-      id: initialData!.id!,
+      slug: collectionType,
+      model: model,
+      id: id!,
     },
     {
-      skip: !initialData?.id || !contentType?.uid,
+      skip: !id,
     }
   );
 
@@ -54,7 +52,9 @@ export const StageSelect = () => {
   // it is possible to rely on initialData here, because it always will
   // be updated at the same time when modifiedData is updated, otherwise
   // the entity is flagged as modified
-  const activeWorkflowStage = initialData?.[STAGE_ATTRIBUTE_NAME] ?? null;
+  const field = useField(STAGE_ATTRIBUTE_NAME);
+
+  const activeWorkflowStage = field.value ?? null;
 
   const [updateStage, { error }] = useUpdateStageMutation();
 
@@ -91,27 +91,18 @@ export const StageSelect = () => {
       ) {
         setShowLimitModal('stage');
       } else {
-        if (initialData.id && contentType) {
+        if (id) {
           const res = await updateStage({
-            model: contentType.uid,
-            id: initialData.id,
-            slug: isSingleType ? 'single-types' : 'collection-types',
+            model,
+            id,
+            slug: collectionType,
             data: { id: stageId },
           });
 
           if ('data' in res) {
             // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
             // as modified, which is what the boolean flag is for
-            onChange?.(
-              {
-                target: {
-                  name: STAGE_ATTRIBUTE_NAME,
-                  value: res.data[STAGE_ATTRIBUTE_NAME],
-                  type: '',
-                },
-              },
-              true
-            );
+            field.onChange(STAGE_ATTRIBUTE_NAME, res.data[STAGE_ATTRIBUTE_NAME]);
 
             toggleNotification({
               type: 'success',
@@ -155,6 +146,10 @@ export const StageSelect = () => {
             label={formatMessage({
               id: 'content-manager.reviewWorkflows.stage.label',
               defaultMessage: 'Review stage',
+            })}
+            placeholder={formatMessage({
+              id: 'content-manager.reviewWorkflows.assignee.placeholder',
+              defaultMessage: 'Select…',
             })}
             startIcon={
               activeWorkflowStage && (

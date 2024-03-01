@@ -1,9 +1,11 @@
 import React, { PropsWithChildren } from 'react';
 
 import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import { Link, SettingsPageTitle } from '@strapi/helper-plugin';
+import { Link } from '@strapi/design-system/v2';
+import { SettingsPageTitle } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
 import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 import { DRAG_DROP_TYPES } from '../constants';
@@ -39,7 +41,8 @@ const Back: React.FC<BackProps> = ({ href }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Link startIcon={<ArrowLeft />} to={href}>
+    // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
+    <Link as={NavLink} startIcon={<ArrowLeft />} to={href}>
       {formatMessage({
         id: 'global.back',
         defaultMessage: 'Back',

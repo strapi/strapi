@@ -106,6 +106,9 @@ describe('i18n - Content API', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -139,7 +142,7 @@ describe('i18n - Content API', () => {
       expect(body.data[0]).toMatchObject(transformToRESTResource(data.categories[1]));
     });
 
-    test('Can filter on all locale', async () => {
+    test.skip('Can filter on all locale', async () => {
       const res = await rq({
         method: 'GET',
         url: '/categories?locale=all',
@@ -181,7 +184,8 @@ describe('i18n - Content API', () => {
       expect(body.data).toMatchObject(transformToRESTResource(data.homepages[1]));
     });
 
-    test('Can filter on all locale', async () => {
+    // TODO V5: Decide if we want to support locale=all
+    test.skip('Can filter on all locale', async () => {
       const res = await rq({
         method: 'GET',
         url: '/homepage?locale=all',

@@ -1,33 +1,38 @@
 import { waitForElementToBeRemoved } from '@testing-library/react';
-import { render, waitFor, server } from '@tests/utils';
+import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
+import { Route, Routes } from 'react-router-dom';
 
+import { Form } from '../../../../../../../../admin/src/components/Form';
 import { StageSelect } from '../StageSelect';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockReturnValue({
-    initialData: {
-      id: 1,
-      strapi_stage: {
-        id: 1,
-        color: '#4945FF',
-        name: 'Stage 1',
+/**
+ * Reimplement when we have review-workflows working with V5 again – see  https://strapi-inc.atlassian.net/browse/CONTENT-2030
+ */
+describe.skip('EE | Content Manager | EditView | InformationBox | StageSelect', () => {
+  const render = () =>
+    renderRTL(<StageSelect />, {
+      renderOptions: {
+        wrapper: ({ children }) => {
+          return (
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug/:id"
+                element={
+                  <Form method="PUT" onSubmit={jest.fn()}>
+                    {children}
+                  </Form>
+                }
+              />
+            </Routes>
+          );
+        },
       },
-    },
-    isCreatingEntry: false,
-    isSingleType: false,
-    layout: { uid: 'api::articles:articles' },
-  }),
-}));
-
-describe('EE | Content Manager | EditView | InformationBox | StageSelect', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+      initialEntries: ['/content-manager/collection-types/api::address.address/1234'],
+    });
 
   it('renders a select input, if a workflow stage is assigned to the entity', async () => {
-    const { getByRole, queryByTestId, user, findByText } = render(<StageSelect />);
+    const { getByRole, queryByTestId, user, findByText } = render();
 
     await waitForElementToBeRemoved(() => queryByTestId('loader'));
 
@@ -45,7 +50,7 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
       })
     );
 
-    const { queryByRole, queryByTestId, findByText } = render(<StageSelect />);
+    const { queryByRole, queryByTestId, findByText } = render();
 
     await waitForElementToBeRemoved(() => queryByTestId('loader'));
 

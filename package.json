@@ -75,7 +75,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.15.0-typescript.1",
+    "@strapi/design-system": "1.16.0-typescript.0",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -85,7 +85,7 @@
     "@commitlint/cli": "17.7.2",
     "@commitlint/config-conventional": "17.7.0",
     "@commitlint/prompt-cli": "17.7.2",
-    "@playwright/test": "1.38.1",
+    "@playwright/test": "1.41.2",
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.2.0",
     "@swc/cli": "0.1.62",

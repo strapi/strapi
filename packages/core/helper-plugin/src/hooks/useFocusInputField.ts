@@ -2,7 +2,9 @@ import { MutableRefObject, useEffect, useState } from 'react';
 
 import { useQuery } from './useQuery';
 
-type InputFieldRefs = HTMLElement | { input: MutableRefObject<HTMLInputElement> } | null;
+type InputFieldRefs<T extends HTMLElement> = T | { input: MutableRefObject<T> } | null;
+
+type FieldRef = <T extends HTMLElement>(node: InputFieldRefs<T>) => void;
 
 /**
  * @description Given the name of an input field (this does not need to be the name you pass as a prop to the DOM element),
@@ -18,7 +20,9 @@ type InputFieldRefs = HTMLElement | { input: MutableRefObject<HTMLInputElement> 
  * );
  * ```
  */
-export const useFocusInputField = (name: string): ((node: InputFieldRefs) => void) => {
+export const useFocusInputField = <T extends HTMLElement>(
+  name: string
+): ((node: InputFieldRefs<T>) => void) => {
   const search = useQuery();
 
   /**
@@ -27,7 +31,7 @@ export const useFocusInputField = (name: string): ((node: InputFieldRefs) => voi
    * Realistically, it will only be an `HTMLElement` but `TextInput` in the design-system
    * has an imperativeHandle we can't remove until v2 of the design-system.
    */
-  const [field, setField] = useState<InputFieldRefs>(null);
+  const [field, setField] = useState<InputFieldRefs<T>>(null);
 
   useEffect(() => {
     if (search.has('field') && search.get('field') === name && field) {

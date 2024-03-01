@@ -43,7 +43,7 @@ describe('Test type json', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: inputValue,
     });
   });
@@ -64,7 +64,7 @@ describe('Test type json', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: inputValue,
     });
   });
@@ -94,7 +94,7 @@ describe('Test type json', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withjson.withjson/${res.body.id}`,
+      `/content-manager/collection-types/api::withjson.withjson/${res.body.data.documentId}`,
       {
         body: {
           field: {
@@ -105,8 +105,8 @@ describe('Test type json', () => {
     );
 
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      documentId: res.body.data.documentId,
       field: { newKey: 'newVal' },
     });
   });

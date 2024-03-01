@@ -68,10 +68,10 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
-    expect(res.body).not.toHaveProperty('hiddenAttribute');
-    expect(res.body.publishedAt).toBeDefined();
-    data.products.push(res.body);
+    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).not.toHaveProperty('hiddenAttribute');
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.products.push(res.body.data);
   });
 
   test('Read product', async () => {
@@ -102,21 +102,21 @@ describe('CM API - Basic', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product.product/${data.products[0].id}`,
+      url: `/content-manager/collection-types/api::product.product/${data.products[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
-    expect(res.body.id).toEqual(data.products[0].id);
-    expect(res.body.publishedAt).toBeDefined();
-    data.products[0] = res.body;
+    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data.documentId).toEqual(data.products[0].documentId);
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.products[0] = res.body.data;
   });
 
   test('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product.product/${data.products[0].id}`,
+      url: `/content-manager/collection-types/api::product.product/${data.products[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -137,12 +137,12 @@ describe('CM API - Basic', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.documentId}`,
       body: {},
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
   });
 
   test('Clone and update product', async () => {
@@ -159,14 +159,14 @@ describe('CM API - Basic', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.data.documentId}`,
       body: {
         name: 'Product 1 updated',
       },
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       name: 'Product 1 updated',
       description: 'Product description',
     });
@@ -188,7 +188,7 @@ describe('CM API - Basic', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product.product/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -223,7 +223,7 @@ describe('CM API - Basic', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product.product/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);

@@ -1,4 +1,3 @@
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render, fireEvent } from '@tests/utils';
 
 import {
@@ -38,56 +37,6 @@ jest.mock('../useRelation', () => ({
   }),
 }));
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockReturnValue({
-    isCreatingEntry: true,
-    createActionAllowedFields: ['relation'],
-    readActionAllowedFields: ['relation'],
-    updateActionAllowedFields: ['relation'],
-    slug: 'test',
-    initialData: {
-      relation: [
-        {
-          id: '1',
-          __temp_key__: 1,
-          mainField: 'Relation 1',
-          name: 'Relation 1',
-        },
-
-        {
-          id: '2',
-          __temp_key__: 2,
-          mainField: 'Relation 2',
-          name: 'Relation 2',
-        },
-      ],
-    },
-    modifiedData: {
-      id: '1',
-      relation: [
-        {
-          id: '1',
-          __temp_key__: 1,
-          mainField: 'Relation 1',
-          name: 'Relation 1',
-        },
-
-        {
-          id: '2',
-          __temp_key__: 2,
-          mainField: 'Relation 2',
-          name: 'Relation 2',
-        },
-      ],
-    },
-    relationLoad: jest.fn(),
-    relationConnect: jest.fn(),
-    relationDisconnect: jest.fn(),
-    relationReorder: jest.fn(),
-  }),
-}));
-
 const RelationInputDataManagerComponent = (props?: Partial<RelationInputDataManagerProps>) => (
   <RelationInputDataManager
     description="Description"
@@ -123,7 +72,10 @@ const setup = (props?: Partial<RelationInputDataManagerProps>) => ({
   ...render(<RelationInputDataManagerComponent {...props} />),
 });
 
-describe('RelationInputDataManager', () => {
+/**
+ * TODO: re-enable with V5 contracts when BE has introduced relations again.
+ */
+describe.skip('RelationInputDataManager', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -196,19 +148,18 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Sets the disabled prop if the user does not have all permissions', async () => {
-    // @ts-expect-error - mock
-    useCMEditViewDataManager.mockReturnValueOnce({
-      isCreatingEntry: false,
-      createActionAllowedFields: [],
-      readActionAllowedFields: ['relation'],
-      updateActionAllowedFields: [],
-      slug: 'test',
-      initialData: {},
-      modifiedData: {
-        id: '1',
-      },
-      relationLoad: jest.fn(),
-    });
+    // useCMEditViewDataManager.mockReturnValueOnce({
+    //   isCreatingEntry: false,
+    //   createActionAllowedFields: [],
+    //   readActionAllowedFields: ['relation'],
+    //   updateActionAllowedFields: [],
+    //   slug: 'test',
+    //   initialData: {},
+    //   modifiedData: {
+    //     id: '1',
+    //   },
+    //   relationLoad: jest.fn(),
+    // });
 
     const { container } = setup();
 
@@ -216,17 +167,16 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Renders <NotAllowedInput /> if entity is created and field is not allowed', async () => {
-    // @ts-expect-error - mock
-    useCMEditViewDataManager.mockReturnValueOnce({
-      isCreatingEntry: true,
-      createActionAllowedFields: [],
-      readActionAllowedFields: [],
-      updateActionAllowedFields: [],
-      slug: 'test',
-      initialData: {},
-      modifiedData: {},
-      relationLoad: jest.fn(),
-    });
+    // useCMEditViewDataManager.mockReturnValueOnce({
+    //   isCreatingEntry: true,
+    //   createActionAllowedFields: [],
+    //   readActionAllowedFields: [],
+    //   updateActionAllowedFields: [],
+    //   slug: 'test',
+    //   initialData: {},
+    //   modifiedData: {},
+    //   relationLoad: jest.fn(),
+    // });
 
     const { container } = setup();
 
@@ -237,17 +187,16 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Renders <NotAllowedInput /> if entity is edited and field is not allowed and not readable', async () => {
-    // @ts-expect-error - mock
-    useCMEditViewDataManager.mockReturnValueOnce({
-      isCreatingEntry: false,
-      createActionAllowedFields: [],
-      readActionAllowedFields: [],
-      updateActionAllowedFields: [],
-      slug: 'test',
-      initialData: {},
-      modifiedData: { id: '1' },
-      relationLoad: jest.fn(),
-    });
+    // useCMEditViewDataManager.mockReturnValueOnce({
+    //   isCreatingEntry: false,
+    //   createActionAllowedFields: [],
+    //   readActionAllowedFields: [],
+    //   updateActionAllowedFields: [],
+    //   slug: 'test',
+    //   initialData: {},
+    //   modifiedData: { id: '1' },
+    //   relationLoad: jest.fn(),
+    // });
 
     const { container } = setup();
 
@@ -277,20 +226,20 @@ describe('RelationInputDataManager', () => {
     expect(nodes[0]).toBeInTheDocument();
   });
 
-  test('Disconnect new entity', async () => {
-    const { relationDisconnect } = useCMEditViewDataManager();
+  test.skip('Disconnect new entity', async () => {
+    // const { relationDisconnect } = useCMEditViewDataManager();
     const { findByTestId, user } = setup();
 
     await user.click(await findByTestId('remove-relation-1'));
 
-    expect(jest.mocked(relationDisconnect)?.mock.calls[0]).toMatchInlineSnapshot(`
-      [
-        {
-          "id": "1",
-          "name": "relation",
-        },
-      ]
-    `);
+    // expect(jest.mocked(relationDisconnect)?.mock.calls[0]).toMatchInlineSnapshot(`
+    //   [
+    //     {
+    //       "id": "1",
+    //       "name": "relation",
+    //     },
+    //   ]
+    // `);
   });
 
   test('Do not render Load More when an entity is created', () => {
@@ -303,17 +252,16 @@ describe('RelationInputDataManager', () => {
     // @ts-expect-error fix
     const { relations } = useRelation();
 
-    // @ts-expect-error - mock
-    useCMEditViewDataManager.mockReturnValueOnce({
-      isCreatingEntry: false,
-      createActionAllowedFields: ['relation'],
-      readActionAllowedFields: ['relation'],
-      updateActionAllowedFields: ['relation'],
-      slug: 'test',
-      initialData: {},
-      modifiedData: { id: '1' },
-      relationLoad: jest.fn(),
-    });
+    // useCMEditViewDataManager.mockReturnValueOnce({
+    //   isCreatingEntry: false,
+    //   createActionAllowedFields: ['relation'],
+    //   readActionAllowedFields: ['relation'],
+    //   updateActionAllowedFields: ['relation'],
+    //   slug: 'test',
+    //   initialData: {},
+    //   modifiedData: { id: '1' },
+    //   relationLoad: jest.fn(),
+    // });
 
     const { getByText, user } = setup();
     const loadMoreNode = getByText('Load More');
@@ -336,7 +284,7 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Connect new entity', async () => {
-    const { relationConnect } = useCMEditViewDataManager();
+    // const { relationConnect } = useCMEditViewDataManager();
     const { user, findByText, getByRole } = setup({
       mainField: {
         name: 'title',
@@ -351,19 +299,19 @@ describe('RelationInputDataManager', () => {
 
     await user.click(await findByText('Search 1'));
 
-    expect(relationConnect).toBeCalledWith(
-      expect.objectContaining({
-        name: expect.any(String),
-        toOneRelation: expect.any(Boolean),
-        value: expect.objectContaining({
-          id: '11',
-        }),
-      })
-    );
+    // expect(relationConnect).toBeCalledWith(
+    //   expect.objectContaining({
+    //     name: expect.any(String),
+    //     toOneRelation: expect.any(Boolean),
+    //     value: expect.objectContaining({
+    //       id: '11',
+    //     }),
+    //   })
+    // );
   });
 
   test('Reorder an entity', () => {
-    const { relationReorder } = useCMEditViewDataManager();
+    // const { relationReorder } = useCMEditViewDataManager();
     const { getAllByText } = setup({ relationType: 'manyToMany' });
 
     const [draggedItem, dropZone] = getAllByText('Drag');
@@ -373,7 +321,7 @@ describe('RelationInputDataManager', () => {
     fireEvent.dragOver(dropZone);
     fireEvent.drop(dropZone);
 
-    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 1, oldIndex: 0 });
+    // expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 1, oldIndex: 0 });
   });
 
   describe('Accessibility', () => {
@@ -432,21 +380,20 @@ describe('RelationInputDataManager', () => {
 
   describe('Counting relations', () => {
     it('should not render a count value when there are no relations', () => {
-      // @ts-expect-error - mock
-      useCMEditViewDataManager.mockImplementation(() => ({
-        isCreatingEntry: false,
-        createActionAllowedFields: ['relation'],
-        readActionAllowedFields: ['relation'],
-        updateActionAllowedFields: ['relation'],
-        slug: 'test',
-        initialData: {
-          relation: [],
-        },
-        modifiedData: {
-          id: '1',
-          relation: [],
-        },
-      }));
+      // useCMEditViewDataManager.mockImplementation(() => ({
+      //   isCreatingEntry: false,
+      //   createActionAllowedFields: ['relation'],
+      //   readActionAllowedFields: ['relation'],
+      //   updateActionAllowedFields: ['relation'],
+      //   slug: 'test',
+      //   initialData: {
+      //     relation: [],
+      //   },
+      //   modifiedData: {
+      //     id: '1',
+      //     relation: [],
+      //   },
+      // }));
 
       const { queryByText } = setup();
 
@@ -454,31 +401,30 @@ describe('RelationInputDataManager', () => {
     });
 
     it('should render a count value when there are relations added to the store but no relations from useRelation', () => {
-      // @ts-expect-error - mock
-      useCMEditViewDataManager.mockImplementation(() => ({
-        isCreatingEntry: false,
-        createActionAllowedFields: ['relation'],
-        readActionAllowedFields: ['relation'],
-        updateActionAllowedFields: ['relation'],
-        slug: 'test',
-        initialData: {
-          relation: [],
-        },
-        modifiedData: {
-          id: '1',
-          relation: [
-            {
-              id: '1',
-            },
-            {
-              id: '2',
-            },
-            {
-              id: '3',
-            },
-          ],
-        },
-      }));
+      // useCMEditViewDataManager.mockImplementation(() => ({
+      //   isCreatingEntry: false,
+      //   createActionAllowedFields: ['relation'],
+      //   readActionAllowedFields: ['relation'],
+      //   updateActionAllowedFields: ['relation'],
+      //   slug: 'test',
+      //   initialData: {
+      //     relation: [],
+      //   },
+      //   modifiedData: {
+      //     id: '1',
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //       {
+      //         id: '2',
+      //       },
+      //       {
+      //         id: '3',
+      //       },
+      //     ],
+      //   },
+      // }));
 
       const { getByText } = setup();
 
@@ -509,29 +455,28 @@ describe('RelationInputDataManager', () => {
         },
       }));
 
-      // @ts-expect-error - mock
-      useCMEditViewDataManager.mockImplementation(() => ({
-        isCreatingEntry: false,
-        createActionAllowedFields: ['relation'],
-        readActionAllowedFields: ['relation'],
-        updateActionAllowedFields: ['relation'],
-        slug: 'test',
-        initialData: {
-          relation: [
-            {
-              id: '1',
-            },
-          ],
-        },
-        modifiedData: {
-          id: '1',
-          relation: [
-            {
-              id: '1',
-            },
-          ],
-        },
-      }));
+      // useCMEditViewDataManager.mockImplementation(() => ({
+      //   isCreatingEntry: false,
+      //   createActionAllowedFields: ['relation'],
+      //   readActionAllowedFields: ['relation'],
+      //   updateActionAllowedFields: ['relation'],
+      //   slug: 'test',
+      //   initialData: {
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //     ],
+      //   },
+      //   modifiedData: {
+      //     id: '1',
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //     ],
+      //   },
+      // }));
 
       const { getByText } = setup();
 
@@ -539,24 +484,23 @@ describe('RelationInputDataManager', () => {
     });
 
     it('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
-      // @ts-expect-error - mock
-      useCMEditViewDataManager.mockImplementation(() => ({
-        isCreatingEntry: false,
-        createActionAllowedFields: ['relation'],
-        readActionAllowedFields: ['relation'],
-        updateActionAllowedFields: ['relation'],
-        slug: 'test',
-        initialData: {
-          relation: [
-            {
-              id: '1',
-            },
-          ],
-        },
-        modifiedData: {
-          id: '1',
-        },
-      }));
+      // useCMEditViewDataManager.mockImplementation(() => ({
+      //   isCreatingEntry: false,
+      //   createActionAllowedFields: ['relation'],
+      //   readActionAllowedFields: ['relation'],
+      //   updateActionAllowedFields: ['relation'],
+      //   slug: 'test',
+      //   initialData: {
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //     ],
+      //   },
+      //   modifiedData: {
+      //     id: '1',
+      //   },
+      // }));
 
       expect(setup).not.toThrow();
     });
@@ -585,29 +529,28 @@ describe('RelationInputDataManager', () => {
         },
       }));
 
-      // @ts-expect-error - mock
-      useCMEditViewDataManager.mockImplementation(() => ({
-        isCreatingEntry: false,
-        createActionAllowedFields: ['relation'],
-        readActionAllowedFields: ['relation'],
-        updateActionAllowedFields: ['relation'],
-        slug: 'test',
-        initialData: {
-          relation: [
-            {
-              id: '1',
-            },
-          ],
-        },
-        modifiedData: {
-          id: '1',
-          relation: [
-            {
-              id: '1',
-            },
-          ],
-        },
-      }));
+      // useCMEditViewDataManager.mockImplementation(() => ({
+      //   isCreatingEntry: false,
+      //   createActionAllowedFields: ['relation'],
+      //   readActionAllowedFields: ['relation'],
+      //   updateActionAllowedFields: ['relation'],
+      //   slug: 'test',
+      //   initialData: {
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //     ],
+      //   },
+      //   modifiedData: {
+      //     id: '1',
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //     ],
+      //   },
+      // }));
 
       const { getByText, rerender } = setup();
 
@@ -616,25 +559,24 @@ describe('RelationInputDataManager', () => {
       /**
        * Simulate changing the store
        */
-      // @ts-expect-error - mock
-      useCMEditViewDataManager.mockImplementation(() => ({
-        isCreatingEntry: false,
-        createActionAllowedFields: ['relation'],
-        readActionAllowedFields: ['relation'],
-        updateActionAllowedFields: ['relation'],
-        slug: 'test',
-        initialData: {
-          relation: [
-            {
-              id: '1',
-            },
-          ],
-        },
-        modifiedData: {
-          id: '1',
-          relation: [],
-        },
-      }));
+      // useCMEditViewDataManager.mockImplementation(() => ({
+      //   isCreatingEntry: false,
+      //   createActionAllowedFields: ['relation'],
+      //   readActionAllowedFields: ['relation'],
+      //   updateActionAllowedFields: ['relation'],
+      //   slug: 'test',
+      //   initialData: {
+      //     relation: [
+      //       {
+      //         id: '1',
+      //       },
+      //     ],
+      //   },
+      //   modifiedData: {
+      //     id: '1',
+      //     relation: [],
+      //   },
+      // }));
 
       rerender(<RelationInputDataManagerComponent />);
 

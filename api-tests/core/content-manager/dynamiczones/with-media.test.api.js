@@ -120,8 +120,8 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
+      expect(Array.isArray(res.body.data.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
         field: [
           {
             id: expect.anything(),
@@ -172,7 +172,7 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(Array.isArray(res.body.data.field)).toBe(true);
 
       const newImgRes = await uploadImg();
 
@@ -180,7 +180,7 @@ describe('Not required dynamiczone', () => {
       const newMediaId = newImgRes.body[0].id;
       const updateRes = await rq({
         method: 'PUT',
-        url: `/${res.body.id}`,
+        url: `/${res.body.data.documentId}`,
         body: {
           field: [
             {
@@ -198,7 +198,7 @@ describe('Not required dynamiczone', () => {
         },
       });
 
-      expect(updateRes.body).toMatchObject({
+      expect(updateRes.body.data).toMatchObject({
         field: [
           {
             id: expect.anything(),
@@ -252,13 +252,13 @@ describe('Not required dynamiczone', () => {
 
       const getRes = await rq({
         method: 'GET',
-        url: `/${res.body.id}`,
+        url: `/${res.body.data.documentId}`,
         qs: {
           populate: ['field'],
         },
       });
 
-      expect(getRes.body).toMatchObject({
+      expect(getRes.body.data).toMatchObject({
         field: [
           {
             id: expect.anything(),
@@ -312,8 +312,8 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
+      expect(Array.isArray(res.body.data.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
         field: [
           {
             id: expect.anything(),

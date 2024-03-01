@@ -79,10 +79,9 @@ export default {
       }
 
       if (entityId) {
-        const entityManager = getService('entity-manager');
+        const entityManager = getService('collection-types');
 
         const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-        // @ts-expect-error populate builder needs to be called with a UID
         const populate = await getService('populate-builder')(model)
           .populateFromQuery(permissionQuery)
           .build();
@@ -189,7 +188,7 @@ export default {
     const isComponent = modelSchema.modelType === 'component';
 
     if (!isComponent) {
-      const entityManager = getService('entity-manager');
+      const entityManager = getService('collection-types');
       const permissionChecker = getService('permission-checker').create({
         userAbility,
         model,
@@ -200,7 +199,6 @@ export default {
       }
 
       const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-      // @ts-expect-error populate builder needs to be called with a UID
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .build();

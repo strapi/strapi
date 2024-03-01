@@ -31,7 +31,7 @@ describe('ResetPassword', () => {
 
       fireEvent.click(getByRole('button', { name: 'Change password' }));
 
-      expect(await findByText('This value is required.')).toBeInTheDocument();
+      expect(await findByText('Passwords must match')).toBeInTheDocument();
     });
 
     it('should fail if we do not fill in the password field', async () => {
@@ -43,7 +43,8 @@ describe('ResetPassword', () => {
 
       fireEvent.click(getByRole('button', { name: 'Change password' }));
 
-      expect(await findByText('This value is required.')).toBeInTheDocument();
+      expect(await findByText('Password must be at least 8 characters')).toBeInTheDocument();
+      expect(await findByText('Passwords must match')).toBeInTheDocument();
     });
 
     it('should fail if the passwords do not match', async () => {
@@ -56,7 +57,7 @@ describe('ResetPassword', () => {
 
       fireEvent.click(getByRole('button', { name: 'Change password' }));
 
-      expect(await findByText('This value is required.')).toBeInTheDocument();
+      expect(await findByText('Passwords must match')).toBeInTheDocument();
     });
   });
 });

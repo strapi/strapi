@@ -79,20 +79,20 @@ describe('CM API - Basic + dz', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBe(null);
-    data.productsWithDz.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBe(null);
+    data.productsWithDz.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithDz[0]);
-    expect(res.body.publishedAt).toBe(null);
+    expect(res.body.data).toMatchObject(data.productsWithDz[0]);
+    expect(res.body.data.publishedAt).toBe(null);
   });
 
   test('Update product with compo', async () => {
@@ -109,21 +109,21 @@ describe('CM API - Basic + dz', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithDz[0].id);
-    expect(res.body.publishedAt).toBe(null);
-    data.productsWithDz[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.documentId).toEqual(data.productsWithDz[0].documentId);
+    expect(res.body.data.publishedAt).toBe(null);
+    data.productsWithDz[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -150,12 +150,12 @@ describe('CM API - Basic + dz', () => {
 
     const res = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/clone/${createdProduct.id}`,
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/clone/${createdProduct.data.documentId}`,
       body: {},
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
+    expect(res.body.data).toMatchObject(product);
   });
 
   // TODO: Add document validator in document service
@@ -211,7 +211,7 @@ describe('CM API - Basic + dz', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -292,7 +292,7 @@ describe('CM API - Basic + dz', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);

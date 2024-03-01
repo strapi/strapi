@@ -58,6 +58,7 @@ import {
   releaseApi,
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
+import { getTimezoneOffset } from '../utils/time';
 
 import type {
   ReleaseAction,
@@ -108,20 +109,24 @@ const TypographyMaxWidth = styled(Typography)`
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema: Schema.ContentType;
+  schema?: Schema.ContentType;
   components: { [key: Schema.Component['uid']]: Schema.Component };
   entry: ReleaseActionEntry;
 }
 
-const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument();
+  const { validate } = unstable_useDocument(
+    {
+      collectionType: schema?.kind ?? '',
+      model: schema?.uid ?? '',
+    },
+    {
+      skip: !schema,
+    }
+  );
 
-  const { errors } = validate(entry, {
-    contentType: schema,
-    components,
-    isCreatingEntry: false,
-  });
+  const errors = validate(entry) ?? {};
 
   if (Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)
@@ -200,7 +205,7 @@ const ReleaseDetailsLayout = ({
   toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
   const {
     data,
@@ -308,17 +313,45 @@ const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
+  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
+  const isScheduled = release.scheduledAt && release.timezone;
+  const numberOfEntriesText = formatMessage(
+    {
+      id: 'content-releases.pages.Details.header-subtitle',
+      defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+    },
+    { number: totalEntries }
+  );
+  const scheduledText = isScheduled
+    ? formatMessage(
+        {
+          id: 'content-releases.pages.ReleaseDetails.header-subtitle.scheduled',
+          defaultMessage: 'Scheduled for {date} at {time} ({offset})',
+        },
+        {
+          date: formatDate(new Date(release.scheduledAt!), {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: release.timezone!,
+          }),
+          time: formatTime(new Date(release.scheduledAt!), {
+            timeZone: release.timezone!,
+            hourCycle: 'h23',
+          }),
+          offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
+        }
+      )
+    : '';
+
   return (
     <Main aria-busy={isLoadingDetails}>
       <HeaderLayout
         title={release.name}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Details.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-          },
-          { number: totalEntries }
-        )}
+        subtitle={
+          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
+        }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
             {formatMessage({
@@ -667,7 +700,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               <Table.Content>
                 <Table.Head>
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.name',
                       defaultMessage: 'name',
@@ -675,7 +708,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     name="name"
                   />
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
                       defaultMessage: 'locale',
@@ -683,7 +716,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     name="locale"
                   />
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
                       defaultMessage: 'content-type',
@@ -691,7 +724,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                     name="content-type"
                   />
                   <Table.HeaderCell
-                    fieldSchemaType="string"
+                    attribute={{ type: 'string' }}
                     label={formatMessage({
                       id: 'content-releases.page.ReleaseDetails.table.header.label.action',
                       defaultMessage: 'action',
@@ -700,7 +733,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                   />
                   {!release.releasedAt && (
                     <Table.HeaderCell
-                      fieldSchemaType="string"
+                      attribute={{ type: 'string' }}
                       label={formatMessage({
                         id: 'content-releases.page.ReleaseDetails.table.header.label.status',
                         defaultMessage: 'status',
