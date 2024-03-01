@@ -504,7 +504,7 @@ const ListViewPage = ({
   };
 
   const defaultHeaderLayoutTitle = formatMessage({
-    id: getTranslation('list.table.header.name'),
+    id: getTranslation('content-manager.header.name'),
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
@@ -530,11 +530,11 @@ const ListViewPage = ({
           metadatas: {
             ...header.metadatas,
             label: formatMessage({
-              id: getTranslation(`containers.ListPage.table-headers.${list.table.header.name}`),
+              id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
               defaultMessage: header.metadatas.label,
             }),
           },
-          name: `${list.table.header.name}.${header.metadatas.mainField?.name ?? ''}`,
+          name: `${header.name}.${header.metadatas.mainField?.name ?? ''}`,
         } satisfies TableHeader;
       }
 
@@ -543,7 +543,7 @@ const ListViewPage = ({
         metadatas: {
           ...header.metadatas,
           label: formatMessage({
-            id: getTranslation(`containers.ListPage.table-headers.${list.table.header.name}`),
+            id: getTranslation(`containers.ListPage.table-headers.${header.name}`),
             defaultMessage: header.metadatas.label,
           }),
         },

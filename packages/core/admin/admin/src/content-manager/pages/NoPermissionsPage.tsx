@@ -15,7 +15,7 @@ const NoPermissions = () => {
     <Main>
       <HeaderLayout
         title={formatMessage({
-          id: getTranslation('list.table.header.name'),
+          id: getTranslation('content-manager.header.name'),
           defaultMessage: 'Content',
         })}
       />

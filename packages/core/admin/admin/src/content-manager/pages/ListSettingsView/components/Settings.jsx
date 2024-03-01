@@ -134,7 +134,7 @@ export const Settings = ({
               defaultMessage: 'Entries per page',
             })}
             hint={formatMessage({
-              id: getTranslation('content-manager.content-manager.form.Input.pageEntries.inputDescription'),
+              id: getTranslation('content-manager.form.Input.pageEntries.inputDescription'),
               defaultMessage:
                 'Note: You can override this value in the Collection Type settings page.',
             })}

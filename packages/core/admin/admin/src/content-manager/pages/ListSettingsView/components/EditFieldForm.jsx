@@ -78,7 +78,7 @@ export const EditFieldForm = ({
                 onChange={(e) => onChangeEditLabel(e)}
                 value={fieldForm.label}
                 hint={formatMessage({
-                  id: getTranslation('content-manager.content-manager.form.Input.label.inputDescription'),
+                  id: getTranslation('content-manager.form.Input.label.inputDescription'),
                   defaultMessage: "This value overrides the label displayed in the table's head",
                 })}
               />

@@ -180,7 +180,7 @@ const Header = ({ allowedActions: { canUpdate, canCreate, canPublish } }: Header
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage({
-                  id: getTranslation('content-manager.content-manager.popUpWarning.warning.unpublish-question'),
+                  id: getTranslation('content-manager.popUpWarning.warning.unpublish-question'),
                   defaultMessage: 'Are you sure you want to unpublish it?',
                 })}
               </Typography>

@@ -301,7 +301,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                       })}
                       hint={formatMessage({
                         id: getTranslation(
-                          'content-manager.content-manager.containers.SettingPage.editSettings.entry.title.description'
+                          'content-manager.containers.SettingPage.editSettings.entry.title.description'
                         ),
                         defaultMessage: 'Set the display field of your entry',
                       })}
@@ -357,7 +357,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
           </ContentLayout>
           <ConfirmDialog
             bodyText={{
-              id: getTranslation('config.popUpWarning.warning.updateAllSettings'),
+              id: getTranslation('content-manager.popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
             }}
             iconRightButton={<Check />}

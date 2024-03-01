@@ -78,7 +78,7 @@ const Body = () => {
       <Flex direction="column" alignItems="stretch" gap={2} as="dl">
         <KeyValuePair
           label={formatMessage({
-            id: getTranslation('content-manager.content-manager.containers.Edit.information.created'),
+            id: getTranslation('content-manager.containers.Edit.information.created'),
             defaultMessage: 'Created',
           })}
           value={created.at}
@@ -86,7 +86,7 @@ const Body = () => {
 
         <KeyValuePair
           label={formatMessage({
-            id: getTranslation('content-manager.content-manager.containers.Edit.information.by'),
+            id: getTranslation('content-manager.containers.Edit.information.by'),
             defaultMessage: 'By',
           })}
           value={created.by}
@@ -96,7 +96,7 @@ const Body = () => {
       <Flex direction="column" alignItems="stretch" gap={2} as="dl">
         <KeyValuePair
           label={formatMessage({
-            id: getTranslation('content-manager.content-manager.containers.Edit.information.lastUpdate'),
+            id: getTranslation('content-manager.containers.Edit.information.lastUpdate'),
             defaultMessage: 'Last update',
           })}
           value={updated.at}
@@ -104,7 +104,7 @@ const Body = () => {
 
         <KeyValuePair
           label={formatMessage({
-            id: getTranslation('content-manager.content-manager.containers.Edit.information.by'),
+            id: getTranslation('content-manager.containers.Edit.information.by'),
             defaultMessage: 'By',
           })}
           value={updated.by}
