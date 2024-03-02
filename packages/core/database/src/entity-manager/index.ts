@@ -1380,9 +1380,9 @@ export const createEntityManager = (db: Database): EntityManager => {
         }
 
         if (isOneToAny(attribute) && isBidirectional(attribute)) {
-          await replaceRegularRelations({ targetId, sourceId, attribute, omitIds, transaction });
+          await replaceRegularRelations({ targetId, sourceId, attribute, omitIds, db, transaction });
         } else {
-          await cloneRegularRelations({ targetId, sourceId, attribute, transaction });
+          await cloneRegularRelations({ targetId, sourceId, attribute, db, transaction });
         }
       });
 

@@ -2,18 +2,21 @@ import { Knex } from 'knex';
 
 import { cleanInverseOrderColumn } from '../../regular-relations';
 import type { ID, Relation } from '../../../types';
+import type { Database } from '../../..';
 
 const replaceRegularRelations = async ({
   targetId,
   sourceId,
   attribute,
   omitIds,
+  db,
   transaction: trx,
 }: {
   targetId: ID;
   sourceId: ID;
   attribute: Relation.Bidirectional;
   omitIds: ID[];
+  db: Database,
   transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
@@ -21,7 +24,7 @@ const replaceRegularRelations = async ({
   const { joinColumn, inverseJoinColumn } = joinTable;
 
   // We are effectively stealing the relation from the cloned entity
-  await strapi.db.entityManager
+  await db.entityManager
     .createQueryBuilder(joinTable.name)
     .update({ [joinColumn.name]: targetId })
     .where({ [joinColumn.name]: sourceId })
@@ -36,16 +39,17 @@ const cloneRegularRelations = async ({
   targetId,
   sourceId,
   attribute,
+  db,
   transaction: trx,
 }: {
   targetId: ID;
   sourceId: ID;
   attribute: Relation.Bidirectional;
+  db: Database;
   transaction?: Knex.Transaction;
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
-  const connection = strapi.db.getConnection();
 
   // Get the columns to select
   const columns = [joinColumn.name, inverseJoinColumn.name];
@@ -61,7 +65,7 @@ const cloneRegularRelations = async ({
     columns.push(...Object.keys(joinTable.on));
   }
 
-  const selectStatement = connection
+  const selectStatement = db.getConnection()
     .select(
       // Override joinColumn with the new id
       { [joinColumn.name]: targetId },
@@ -73,13 +77,13 @@ const cloneRegularRelations = async ({
     .toSQL();
 
   // Insert the clone relations
-  await strapi.db.entityManager
+  await db.entityManager
     .createQueryBuilder(joinTable.name)
     .insert(
-      strapi.db.connection.raw(
+      db.connection.raw(
         `(${columns.join(',')})  ${selectStatement.sql}`,
         selectStatement.bindings
-      )
+      ) as any
     )
     .onConflict([joinColumn.name, inverseJoinColumn.name])
     .ignore()
@@ -91,7 +95,8 @@ const cloneRegularRelations = async ({
     await cleanInverseOrderColumn({
       id: targetId,
       attribute,
-      trx: trx as Knex.Transaction,
+      db,
+      transaction: trx as Knex.Transaction,
     });
   }
 };
