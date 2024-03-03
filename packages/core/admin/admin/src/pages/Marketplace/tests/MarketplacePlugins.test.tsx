@@ -22,7 +22,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const waitForReload = async () => {
-  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 };
 
 const LocationDisplay = () => {

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  Flex,
   Grid,
   GridItem,
   Main,
@@ -12,18 +11,13 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import {
-  LoadingIndicatorPage,
-  useNotification,
-  AnErrorOccurred,
-  CheckPagePermissions,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Blocker, Form } from '../../../components/Form';
+import { Page } from '../../../components/PageHelpers';
 import { useOnce } from '../../../hooks/useOnce';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -138,21 +132,11 @@ const EditViewPage = () => {
   }, [document, isCreatingDocument, isSingleType, schema, components]);
 
   if (isLoading) {
-    return (
-      <Main aria-busy={true}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   if (!initialValues) {
-    return (
-      <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
-          <AnErrorOccurred />
-        </Flex>
-      </Main>
-    );
+    return <Page.Error />;
   }
 
   const handleTabChange = (index: number) => {
@@ -274,29 +258,21 @@ const ProtectedEditViewPage = () => {
   const { permissions = [], isLoading, isError } = useSyncRbac(model, query, 'editView');
 
   if (isLoading) {
-    return (
-      <Main aria-busy={true}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   if (!isLoading && isError) {
-    return (
-      <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
-          <AnErrorOccurred />
-        </Flex>
-      </Main>
-    );
+    return <Page.Error />;
   }
 
   return (
-    <CheckPagePermissions permissions={permissions}>
-      <DocumentRBAC permissions={permissions}>
-        <EditViewPage />
-      </DocumentRBAC>
-    </CheckPagePermissions>
+    <Page.Protect permissions={permissions}>
+      {({ permissions }) => (
+        <DocumentRBAC permissions={permissions}>
+          <EditViewPage />
+        </DocumentRBAC>
+      )}
+    </Page.Protect>
   );
 };
 

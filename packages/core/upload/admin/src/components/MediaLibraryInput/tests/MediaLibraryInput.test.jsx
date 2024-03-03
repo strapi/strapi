@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Form } from '@strapi/strapi/admin';
+import { Form } from '@strapi/admin/strapi-admin';
 import { screen, render } from '@tests/utils';
 
 import { MediaLibraryInput } from '../index';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 // TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
-import { useLicenseLimits } from '@strapi/admin/strapi-admin';
+import { Page, useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Badge,
@@ -24,9 +24,7 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  AnErrorOccurred,
   CheckPermissions,
-  LoadingIndicatorPage,
   PageSizeURLQuery,
   PaginationURLQuery,
   useQueryParams,
@@ -99,7 +97,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
   const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
 
   if (isError) {
-    return <AnErrorOccurred />;
+    return <Page.Error />;
   }
 
   if (releases?.length === 0) {
@@ -246,11 +244,7 @@ const ReleasesPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy={isLoading}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;

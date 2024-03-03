@@ -13,15 +13,12 @@ import {
   Typography,
   useNotifyAT,
   VisuallyHidden,
+  EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
-  CheckPagePermissions,
   CheckPermissions,
   ConfirmDialog,
-  EmptyStateLayout,
-  LoadingIndicatorPage,
-  NoPermissions,
   SearchURLQuery,
   useCollator,
   useFilter,
@@ -32,6 +29,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -86,7 +84,7 @@ export const RolesListPage = () => {
     sensitivity: 'base',
   });
 
-  const isLoading = isLoadingForData || isFetching;
+  const isLoading = isLoadingForData || isFetching || isLoadingForPermissions;
 
   const handleShowConfirmDelete = () => {
     setShowConfirmDelete(!showConfirmDelete);
@@ -131,6 +129,10 @@ export const RolesListPage = () => {
 
   const colCount = 4;
   const rowCount = (roles?.length || 0) + 1;
+
+  if (isLoading) {
+    return <Page.Loading />;
+  }
 
   return (
     <Layout>
@@ -180,8 +182,7 @@ export const RolesListPage = () => {
         />
 
         <ContentLayout>
-          {!canRead && <NoPermissions />}
-          {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
+          {!canRead && <Page.NoPermissions />}
           {canRead && sortedRoles && sortedRoles?.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
@@ -226,7 +227,7 @@ export const RolesListPage = () => {
               />
             </Table>
           ) : (
-            <EmptyStateLayout content={emptyLayout[emptyContent]} />
+            <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
           )}
         </ContentLayout>
         <ConfirmDialog
@@ -242,8 +243,8 @@ export const RolesListPage = () => {
 
 export const ProtectedRolesListPage = () => {
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.accessRoles}>
+    <Page.Protect permissions={PERMISSIONS.accessRoles}>
       <RolesListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

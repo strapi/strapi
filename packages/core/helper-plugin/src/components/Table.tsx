@@ -17,15 +17,16 @@ import {
   Loader,
   Table as DSTable,
   TableProps as DSTableProps,
+  EmptyStateLayout,
+  EmptyStateLayoutProps,
 } from '@strapi/design-system';
-import { CarretDown, Trash } from '@strapi/icons';
+import { CarretDown, EmptyDocuments, Trash } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useQueryParams } from '../hooks/useQueryParams';
 
 import { ConfirmDialog } from './ConfirmDialog';
-import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
 import type { Attribute, Documents, Entity } from '@strapi/types';
 
@@ -381,21 +382,27 @@ const Root = ({
  * EmptyBody
  * -----------------------------------------------------------------------------------------------*/
 
-interface EmptyBodyProps extends EmptyStateLayoutProps {
+interface EmptyBodyProps extends Partial<EmptyStateLayoutProps> {
   contentType: string;
 }
 
 const EmptyBody = ({ contentType, ...rest }: EmptyBodyProps) => {
   const { rows, colCount, isLoading } = useTableContext();
+  const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ filters?: string[] }>();
   const hasFilters = query?.filters !== undefined;
   const content = hasFilters
-    ? {
-        id: 'content-manager.components.TableEmpty.withFilters',
-        defaultMessage: 'There are no {contentType} with the applied filters...',
-        values: { contentType },
-      }
-    : undefined;
+    ? formatMessage(
+        {
+          id: 'content-manager.components.TableEmpty.withFilters',
+          defaultMessage: 'There are no {contentType} with the applied filters...',
+        },
+        { contentType }
+      )
+    : formatMessage({
+        id: 'app.components.EmptyStateLayout.content-document',
+        defaultMessage: 'No content found',
+      });
 
   if (rows?.length > 0 || isLoading) {
     return null;
@@ -405,7 +412,12 @@ const EmptyBody = ({ contentType, ...rest }: EmptyBodyProps) => {
     <Tbody>
       <Tr>
         <Td colSpan={colCount}>
-          <EmptyStateLayout {...rest} content={content} hasRadius={false} shadow={undefined} />
+          <EmptyStateLayout
+            content={content}
+            hasRadius
+            icon={<EmptyDocuments width="10rem" />}
+            {...rest}
+          />
         </Td>
       </Tr>
     </Tbody>

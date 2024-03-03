@@ -49,7 +49,7 @@ const render = () =>
   });
 
 const waitForReload = async () => {
-  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - providers tab', () => {

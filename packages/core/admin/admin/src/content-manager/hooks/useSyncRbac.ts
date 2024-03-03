@@ -59,8 +59,8 @@ const useSyncRbac: UseSyncRbac = (collectionTypeUID, query, containerName = 'lis
     permissions?.some((permission) => permission.subject !== collectionTypeUID) ?? true;
 
   return {
-    isLoading: permissions === null,
-    isError: isPermissionMismatch,
+    isLoading: !permissions,
+    isError: Boolean(permissions && isPermissionMismatch),
     permissions,
   };
 };

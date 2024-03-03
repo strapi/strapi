@@ -14,14 +14,13 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  CheckPagePermissions,
   useOverlayBlocker,
-  LoadingIndicatorPage,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -92,7 +91,7 @@ export const EditPage = () => {
   };
 
   if (isLoadingRole) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
@@ -217,7 +216,7 @@ export const EditPage = () => {
 };
 
 export const ProtectedRolesEditPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.updateRole}>
+  <Page.Protect permissions={PERMISSIONS.updateRole}>
     <EditPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

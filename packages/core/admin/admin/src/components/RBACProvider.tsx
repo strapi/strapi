@@ -1,11 +1,6 @@
 import * as React from 'react';
 
-import {
-  LoadingIndicatorPage,
-  Permission,
-  RBACContext,
-  RBACContextValue,
-} from '@strapi/helper-plugin';
+import { Permission, RBACContext, RBACContextValue } from '@strapi/helper-plugin';
 import produce from 'immer';
 
 import { useTypedSelector, useTypedDispatch } from '../core/store/hooks';
@@ -21,7 +16,7 @@ interface RBACProviderProps {
 }
 
 const RBACProvider = ({ children, permissions, refetchPermissions }: RBACProviderProps) => {
-  const allPermissions = useTypedSelector((state) => state.rbacProvider.allPermissions);
+  const allPermissions = useTypedSelector((state) => state.rbacProvider.allPermissions) ?? [];
 
   const dispatch = useTypedDispatch();
 
@@ -32,10 +27,6 @@ const RBACProvider = ({ children, permissions, refetchPermissions }: RBACProvide
       dispatch(resetStoreAction());
     };
   }, [permissions, dispatch]);
-
-  if (!allPermissions) {
-    return <LoadingIndicatorPage />;
-  }
 
   return (
     <RBACContext.Provider value={{ allPermissions, refetchPermissions }}>

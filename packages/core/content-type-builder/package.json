@@ -74,6 +74,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/admin": "4.20.3",
     "@strapi/pack-up": "4.20.3",
     "@strapi/types": "4.20.3",
     "@testing-library/react": "14.0.0",
@@ -87,6 +88,7 @@
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
+    "@strapi/admin": "^4.20.3",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

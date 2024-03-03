@@ -2,8 +2,6 @@ import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -12,6 +10,7 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
+import { Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -23,11 +22,10 @@ import EmailForm from './components/EmailForm';
 import EmailTable from './components/EmailTable';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
+  <Page.Protect permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
-
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -121,6 +119,10 @@ const EmailTemplatesPage = () => {
     submitMutation.mutate(editedTemplates);
   };
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <Main aria-busy={submitMutation.isLoading}>
       <Helmet
@@ -141,23 +143,17 @@ const EmailTemplatesPage = () => {
         })}
       />
       <ContentLayout>
-        {isLoading ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <>
-            <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
-            {isModalOpen && (
-              <EmailForm
-                template={data[templateToEdit]}
-                onToggle={handleToggle}
-                onSubmit={handleSubmit}
-              />
-            )}
-          </>
+        <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
+        {isModalOpen && (
+          <EmailForm
+            template={data[templateToEdit]}
+            onToggle={handleToggle}
+            onSubmit={handleSubmit}
+          />
         )}
       </ContentLayout>
     </Main>
   );
 };
 
-export default ProtectedEmailTemplatesPage;
+export { ProtectedEmailTemplatesPage, EmailTemplatesPage };

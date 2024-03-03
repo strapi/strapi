@@ -7403,6 +7403,7 @@ __metadata:
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@sindresorhus/slugify": "npm:1.1.0"
+    "@strapi/admin": "npm:4.20.3"
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/generators": "npm:4.20.3"
     "@strapi/helper-plugin": "npm:4.20.3"
@@ -7429,6 +7430,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/admin": ^4.20.3
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7481,6 +7483,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
+    "@strapi/admin": "npm:4.20.3"
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/helper-plugin": "npm:4.20.3"
     "@strapi/icons": "npm:1.16.0"
@@ -7504,6 +7507,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
+    "@strapi/admin": ^4.20.3
     koa: 2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0

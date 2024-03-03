@@ -3,13 +3,11 @@ import * as React from 'react';
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  LoadingIndicatorPage,
   useAPIErrorHandler,
   useNotification,
   useOverlayBlocker,
   useTracking,
   translatedErrors,
-  useRBAC,
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
@@ -18,6 +16,7 @@ import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
 import {
@@ -170,6 +169,10 @@ const EditPage = () => {
 
   const isFormDisabled = !isRoleLoading && role.code === 'strapi-super-admin';
 
+  if ((isLoadingPermissionsLayout && isRoleLoading && isLoadingPermissions) || !permissionsLayout) {
+    return <Page.Loading />;
+  }
+
   return (
     <Main>
       <Helmet
@@ -238,23 +241,14 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
-                {!isLoadingPermissionsLayout &&
-                !isRoleLoading &&
-                !isLoadingPermissions &&
-                permissionsLayout ? (
-                  <Box shadow="filterShadow" hasRadius>
-                    <Permissions
-                      isFormDisabled={isFormDisabled}
-                      permissions={permissions}
-                      ref={permissionsRef}
-                      layout={permissionsLayout}
-                    />
-                  </Box>
-                ) : (
-                  <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                    <LoadingIndicatorPage />
-                  </Box>
-                )}
+                <Box shadow="filterShadow" hasRadius>
+                  <Permissions
+                    isFormDisabled={isFormDisabled}
+                    permissions={permissions}
+                    ref={permissionsRef}
+                    layout={permissionsLayout}
+                  />
+                </Box>
               </Flex>
             </ContentLayout>
           </form>
@@ -265,22 +259,15 @@ const EditPage = () => {
 };
 
 const ProtectedEditPage = () => {
-  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.roles);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.roles.update
+  );
 
-  const {
-    isLoading,
-    allowedActions: { canRead, canUpdate },
-  } = useRBAC(permissions);
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
-  if (!canRead && !canUpdate) {
-    return <Navigate to=".." />;
-  }
-
-  return <EditPage />;
+  return (
+    <Page.Protect permissions={permissions}>
+      <EditPage />
+    </Page.Protect>
+  );
 };
 
 export { EditPage, ProtectedEditPage };

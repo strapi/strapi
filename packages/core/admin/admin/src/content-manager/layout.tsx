@@ -2,14 +2,15 @@
 import * as React from 'react';
 
 import { AnyAction } from '@reduxjs/toolkit';
-import { Layout as DSLayout, Main } from '@strapi/design-system';
-import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
+import { Layout as DSLayout } from '@strapi/design-system';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import produce from 'immer';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from '../components/DragLayer';
+import { Page } from '../components/PageHelpers';
 
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
 import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPreview';
@@ -47,15 +48,15 @@ const Layout = () => {
 
   if (isLoading) {
     return (
-      <Main aria-busy="true">
+      <>
         <Helmet
           title={formatMessage({
             id: getTranslation('plugin.name'),
             defaultMessage: 'Content Manager',
           })}
         />
-        <LoadingIndicatorPage />
-      </Main>
+        <Page.Loading />
+      </>
     );
   }
 
