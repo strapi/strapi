@@ -18,7 +18,8 @@ import { PasswordInput } from './Password';
 import { StringInput } from './String';
 import { TextareaInput } from './Textarea';
 import { TimeInput } from './Time';
-import { EnumerationProps, InputProps } from './types';
+
+import type { InputProps } from '../Form';
 
 /* -------------------------------------------------------------------------------------------------
  * InputRenderer
@@ -31,10 +32,10 @@ import { EnumerationProps, InputProps } from './types';
  * The entire component is memoized to avoid re-renders in large forms.
  */
 const InputRenderer = memo(
-  forwardRef<any, InputProps | EnumerationProps>((props, forwardRef) => {
+  forwardRef<any, InputProps>((props, forwardRef) => {
     switch (props.type) {
-      case 'timestamp':
       case 'biginteger':
+      case 'timestamp':
       case 'string':
         return <StringInput ref={forwardRef} {...props} />;
       case 'boolean':

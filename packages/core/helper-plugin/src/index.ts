@@ -9,7 +9,6 @@ export * from './components/Table';
 export * from './components/EmptyBodyTable';
 export * from './components/FilterListURLQuery';
 export * from './components/FilterPopoverURLQuery';
-export * from './components/GenericInput';
 export * from './components/PageSizeURLQuery';
 export * from './components/PaginationURLQuery';
 export * from './components/RelativeTime';

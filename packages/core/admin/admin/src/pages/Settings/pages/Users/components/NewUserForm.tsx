@@ -14,28 +14,38 @@ import {
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import {
-  GenericInput,
   useNotification,
   useOverlayBlocker,
   translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
-import { Formik, Form, FormikHelpers } from 'formik';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { Form, InputProps, type FormHelpers } from '../../../../../components/Form';
+import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
-import { FormLayout } from '../../../../../types/form';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
+import type { DistributiveOmit } from 'react-redux';
+
 interface ModalFormProps {
   onToggle: () => void;
 }
+
+type FormLayout = Array<
+  Array<
+    DistributiveOmit<InputProps, 'label'> & {
+      label: MessageDescriptor;
+      size: number;
+    }
+  >
+>;
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
@@ -47,7 +57,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const roleLayout = useEnterprise(
+  const roleLayout = useEnterprise<FormLayout, FormLayout, FormLayout>(
     ROLE_LAYOUT,
     async () =>
       (
@@ -100,7 +110,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     defaultMessage: 'Invite new user',
   });
 
-  const handleSubmit = async (body: InitialData, { setErrors }: FormikHelpers<InitialData>) => {
+  const handleSubmit = async (body: InitialData, { setErrors }: FormHelpers<InitialData>) => {
     // @ts-expect-error – this will be fixed in V5.
     lockApp();
 
@@ -161,16 +171,15 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
           <Crumb isCurrent>{headerTitle}</Crumb>
         </Breadcrumbs>
       </ModalHeader>
-      <Formik
-        enableReinitialize
+      <Form
+        method={currentStep === 'create' ? 'POST' : 'PUT'}
         initialValues={initialValues ?? {}}
         onSubmit={handleSubmit}
         validationSchema={FORM_SCHEMA}
-        validateOnChange={false}
       >
-        {({ errors, handleChange, values, isSubmitting }) => {
+        {({ isSubmitting }) => {
           return (
-            <Form>
+            <>
               <ModalBody>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
@@ -185,15 +194,14 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                       <Flex direction="column" alignItems="stretch" gap={1}>
                         <Grid gap={5}>
                           {FORM_LAYOUT.map((row) => {
-                            return row.map((input) => {
+                            return row.map(({ size, ...field }) => {
                               return (
-                                <GridItem key={input.name} {...input.size}>
-                                  <GenericInput
-                                    {...input}
+                                <GridItem key={field.name} col={size}>
+                                  <InputRenderer
+                                    {...field}
                                     disabled={isDisabled}
-                                    error={errors[input.name as keyof InitialData]}
-                                    onChange={handleChange}
-                                    value={values[input.name as keyof InitialData]}
+                                    label={formatMessage(field.label)}
+                                    placeholder={formatMessage(field.placeholder)}
                                   />
                                 </GridItem>
                               );
@@ -213,22 +221,16 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                     <Box paddingTop={4}>
                       <Grid gap={5}>
                         <GridItem col={6} xs={12}>
-                          <SelectRoles
-                            disabled={isDisabled}
-                            error={errors.roles}
-                            onChange={handleChange}
-                            value={values.roles ?? []}
-                          />
+                          <SelectRoles disabled={isDisabled} />
                         </GridItem>
                         {roleLayout.map((row) => {
-                          return row.map((input) => {
+                          return row.map(({ size, ...field }) => {
                             return (
-                              <GridItem key={input.name} {...input.size}>
-                                <GenericInput
-                                  {...input}
+                              <GridItem key={field.name} col={size}>
+                                <InputRenderer
+                                  {...field}
                                   disabled={isDisabled}
-                                  onChange={handleChange}
-                                  value={values[input.name]}
+                                  label={formatMessage(field.label)}
                                 />
                               </GridItem>
                             );
@@ -260,10 +262,10 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                   )
                 }
               />
-            </Form>
+            </>
           );
         }}
-      </Formik>
+      </Form>
     </ModalLayout>
   );
 };
@@ -283,12 +285,19 @@ const FORM_INITIAL_VALUES = {
   roles: [],
 };
 
-const ROLE_LAYOUT = [] satisfies FormLayout[][];
+const ROLE_LAYOUT: Array<
+  Array<
+    DistributiveOmit<InputProps, 'label'> & {
+      label: MessageDescriptor;
+      size: number;
+    }
+  >
+> = [];
 
 const FORM_LAYOUT = [
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.firstname.label',
         defaultMessage: 'First name',
       },
@@ -297,15 +306,12 @@ const FORM_LAYOUT = [
         id: 'Auth.form.firstname.placeholder',
         defaultMessage: 'e.g. Kai',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
       required: true,
     },
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.lastname.label',
         defaultMessage: 'Last name',
       },
@@ -314,16 +320,13 @@ const FORM_LAYOUT = [
         id: 'Auth.form.lastname.placeholder',
         defaultMessage: 'e.g. Doe',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
     },
   ],
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.email.label',
         defaultMessage: 'Email',
       },
@@ -332,15 +335,12 @@ const FORM_LAYOUT = [
         id: 'Auth.form.email.placeholder',
         defaultMessage: 'e.g. kai.doe@strapi.io',
       },
-      type: 'email',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'email' as const,
+      size: 6,
       required: true,
     },
   ],
-] satisfies FormLayout[][];
+];
 
 const FORM_SCHEMA = yup.object().shape({
   firstname: yup.string().trim().required(translatedErrors.required),

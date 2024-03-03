@@ -9,13 +9,10 @@ import {
   GridItem,
   HeaderLayout,
   Main,
-  Option,
-  Select,
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
 import {
-  GenericInput,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -24,8 +21,7 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
-import { Formik, Form } from 'formik';
+import { Page, Form, InputRenderer } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -137,16 +133,10 @@ const AdvancedSettingsPage = () => {
           }
         )}
       />
-      <Formik
-        onSubmit={handleSubmit}
-        initialValues={data.settings}
-        validateOnChange={false}
-        validationSchema={schema}
-        enableReinitialize
-      >
-        {({ errors, values, handleChange, isSubmitting, dirty }) => {
+      <Form onSubmit={handleSubmit} initialValues={data.settings} validationSchema={schema}>
+        {({ values, isSubmitting, modified }) => {
           return (
-            <Form>
+            <>
               <HeaderLayout
                 title={formatMessage({
                   id: getTrad('HeaderNav.link.advancedSettings'),
@@ -156,7 +146,7 @@ const AdvancedSettingsPage = () => {
                   <Button
                     loading={isSubmitting}
                     type="submit"
-                    disabled={canUpdate ? !dirty : !canUpdate}
+                    disabled={!modified || !canUpdate}
                     startIcon={<Check />}
                     size="S"
                   >
@@ -182,61 +172,50 @@ const AdvancedSettingsPage = () => {
                       })}
                     </Typography>
                     <Grid gap={6}>
-                      <GridItem col={6} s={12}>
-                        <Select
-                          label={formatMessage({
+                      {[
+                        {
+                          label: {
                             id: getTrad('EditForm.inputSelect.label.role'),
                             defaultMessage: 'Default role for authenticated users',
-                          })}
-                          value={values.default_role}
-                          hint={formatMessage({
+                          },
+                          hint: {
                             id: getTrad('EditForm.inputSelect.description.role'),
                             defaultMessage:
                               'It will attach the new authenticated user to the selected role.',
-                          })}
-                          onChange={(e) =>
-                            handleChange({ target: { name: 'default_role', value: e } })
-                          }
-                        >
-                          {data.roles.map((role) => {
-                            return (
-                              <Option key={role.type} value={role.type}>
-                                {role.name}
-                              </Option>
-                            );
-                          })}
-                        </Select>
-                      </GridItem>
-                      {layout.map((input) => {
-                        let value = values[input.name];
-
-                        if (!value) {
-                          value = input.type === 'bool' ? false : '';
-                        }
-
-                        return (
-                          <GridItem key={input.name} {...input.size}>
-                            <GenericInput
-                              {...input}
-                              value={value}
-                              error={errors[input.name]}
-                              disabled={
-                                input.name === 'email_confirmation_redirection' &&
-                                values.email_confirmation === false
-                              }
-                              onChange={handleChange}
-                            />
-                          </GridItem>
-                        );
-                      })}
+                          },
+                          options: data.roles.map((role) => ({
+                            label: role.name,
+                            value: role.type,
+                          })),
+                          name: 'default_role',
+                          size: 6,
+                          type: 'enumeration',
+                        },
+                        ...layout,
+                      ].map(({ size, ...field }) => (
+                        <GridItem key={field.name} col={size}>
+                          <InputRenderer
+                            {...field}
+                            disabled={
+                              field.name === 'email_confirmation_redirection' &&
+                              values.email_confirmation === false
+                            }
+                            label={formatMessage(field.label)}
+                            hint={field.hint ? formatMessage(field.hint) : undefined}
+                            placeholder={
+                              field.placeholder ? formatMessage(field.placeholder) : undefined
+                            }
+                          />
+                        </GridItem>
+                      ))}
                     </Grid>
                   </Flex>
                 </Box>
               </ContentLayout>
-            </Form>
+            </>
           );
         }}
-      </Formik>
+      </Form>
     </Main>
   );
 };

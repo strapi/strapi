@@ -1,23 +1,21 @@
 import { MultiSelect, MultiSelectOption } from '@strapi/design-system';
 import { Loader as LoadingIcon } from '@strapi/icons';
-import { FieldInputProps } from 'formik';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
+import { useField } from '../../../../../components/Form';
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 
-import type { Entity } from '@strapi/types';
-
-interface SelectRolesProps extends Pick<FieldInputProps<Entity.ID[]>, 'onChange' | 'value'> {
+interface SelectRolesProps {
   disabled?: boolean;
-  error?: string;
 }
 
-const SelectRoles = ({ disabled, error, onChange, value }: SelectRolesProps) => {
+const SelectRoles = ({ disabled }: SelectRolesProps) => {
   const { isLoading, roles } = useAdminRoles();
 
   const { formatMessage } = useIntl();
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
+  const { value = [], onChange, error } = useField<string[]>('roles');
+
   const label = formatMessage({
     id: 'app.components.Users.ModalCreateBody.block-title.roles',
     defaultMessage: "User's roles",
@@ -35,12 +33,12 @@ const SelectRoles = ({ disabled, error, onChange, value }: SelectRolesProps) => 
     <MultiSelect
       id="roles"
       disabled={disabled}
-      error={errorMessage}
+      error={error}
       hint={hint}
       label={label}
       name="roles"
       onChange={(v) => {
-        onChange({ target: { name: 'roles', value: v } });
+        onChange('roles', v);
       }}
       placeholder={placeholder}
       startIcon={isLoading ? <Loader /> : undefined}

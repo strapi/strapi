@@ -1,4 +1,5 @@
-import type { FormLayout } from '../../../../../../../../admin/src/types/form';
+import type { InputProps } from '../../../../../../../../admin/src/components/Form';
+import type { MessageDescriptor } from 'react-intl';
 
 export const FORM_INITIAL_VALUES = {
   ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
@@ -13,18 +14,22 @@ export const ROLE_LAYOUT = [
     ? [
         [
           {
-            intlLabel: {
+            label: {
               id: 'Settings.permissions.users.form.sso',
               defaultMessage: 'Connect with SSO',
             },
             name: 'useSSORegistration',
-            type: 'bool',
-            size: {
-              col: 6,
-              xs: 12,
-            },
-          } as const,
+            type: 'boolean' as const,
+            size: 6,
+          },
         ],
       ]
     : []),
-] satisfies FormLayout[][];
+] satisfies Array<
+  Array<
+    Omit<InputProps, 'label'> & {
+      label: MessageDescriptor;
+      size: number;
+    }
+  >
+>;

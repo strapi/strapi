@@ -84,7 +84,7 @@ export const ListView = () => {
     (state) => state.admin_app.permissions.settings?.['api-tokens']
   );
   const {
-    allowedActions: { canCreate, canDelete, canUpdate, canRead },
+    allowedActions: { canRead, canCreate, canDelete, canUpdate },
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
@@ -113,13 +113,7 @@ export const ListView = () => {
     });
   });
 
-  const {
-    data: apiTokens = [],
-    isLoading,
-    error,
-  } = useGetAPITokensQuery(undefined, {
-    skip: !canRead,
-  });
+  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery();
 
   React.useEffect(() => {
     if (error) {

@@ -1,8 +1,7 @@
 /**
- * TODO: this entire component needs to be refactored to use Attribute as a passed base
- * to then understand the type and value types of what attribute we're rendering with
- * what input and make the types all play nicely. At least now we have an idea of what
- * everything is!
+ * TODO: we should be using the FormRenderer from the admin to do this,
+ * but the CTB has no tests or types, so we can't refactor it safely.
+ * So we're just adding this to the tech debt.
  */
 
 import * as React from 'react';
@@ -24,14 +23,13 @@ import {
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, PrimitiveType, useIntl } from 'react-intl';
 
-import { FieldSchema, useFieldHint } from '../hooks/useFieldHint';
-import { useFocusInputField } from '../hooks/useFocusInputField';
-import { pxToRem } from '../utils/pxToRem';
-
-import type { TranslationMessage } from '../types';
 import type { Attribute } from '@strapi/types';
+
+interface TranslationMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
+}
 
 interface InputOption {
   metadatas: {
@@ -48,6 +46,7 @@ interface CustomInputProps<TAttribute extends Attribute.Any>
   ref?: React.Ref<HTMLElement>;
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
+const pxToRem = (px: number) => `${px / 16}rem`;
 
 interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
   attribute?: TAttribute;
@@ -134,7 +133,6 @@ const GenericInput = ({
   });
 
   const [showPassword, setShowPassword] = React.useState(false);
-  const fieldRef = useFocusInputField(name);
 
   const CustomInput = customInputs ? customInputs[type] : null;
 
@@ -179,7 +177,6 @@ const GenericInput = ({
     return (
       <CustomInput
         {...rest}
-        ref={fieldRef}
         attribute={attribute}
         description={description}
         hint={hint}
@@ -216,8 +213,6 @@ const GenericInput = ({
     case 'json': {
       return (
         <JSONInput
-          // @ts-expect-error JSONInput ref is weird but it does work
-          ref={fieldRef}
           label={label}
           labelAction={labelAction}
           value={value}
@@ -241,7 +236,6 @@ const GenericInput = ({
     case 'bool': {
       return (
         <ToggleInput
-          ref={fieldRef}
           checked={defaultValue === null ? null : defaultValue || false}
           disabled={disabled}
           hint={hint}
@@ -278,7 +272,6 @@ const GenericInput = ({
     case 'checkbox': {
       return (
         <Checkbox
-          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           hint={hint}
@@ -297,7 +290,6 @@ const GenericInput = ({
     case 'datetime': {
       return (
         <DateTimePicker
-          ref={fieldRef}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           disabled={disabled}
           error={errorMessage}
@@ -322,7 +314,6 @@ const GenericInput = ({
     case 'date': {
       return (
         <DatePicker
-          ref={fieldRef}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           disabled={disabled}
           error={errorMessage}
@@ -349,7 +340,6 @@ const GenericInput = ({
     case 'number': {
       return (
         <NumberInput
-          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           label={label}
@@ -370,7 +360,6 @@ const GenericInput = ({
     case 'email': {
       return (
         <TextInput
-          ref={fieldRef}
           autoComplete={autoComplete}
           disabled={disabled}
           error={errorMessage}
@@ -394,7 +383,6 @@ const GenericInput = ({
     case 'string': {
       return (
         <TextInput
-          ref={fieldRef}
           autoComplete={autoComplete}
           disabled={disabled}
           error={errorMessage}
@@ -416,7 +404,6 @@ const GenericInput = ({
     case 'password': {
       return (
         <TextInput
-          ref={fieldRef}
           autoComplete={autoComplete}
           disabled={disabled}
           error={errorMessage}
@@ -461,7 +448,6 @@ const GenericInput = ({
     case 'select': {
       return (
         <SingleSelect
-          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           label={label}
@@ -489,7 +475,6 @@ const GenericInput = ({
     case 'textarea': {
       return (
         <Textarea
-          ref={fieldRef}
           disabled={disabled}
           error={errorMessage}
           label={label}
@@ -516,7 +501,6 @@ const GenericInput = ({
 
       return (
         <TimePicker
-          ref={fieldRef}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           disabled={disabled}
           error={errorMessage}
@@ -558,6 +542,131 @@ const GenericInput = ({
       );
     }
   }
+};
+
+type FieldSchema = {
+  minLength?: number | string;
+  maxLength?: number | string;
+  max?: number | string;
+  min?: number | string;
+};
+interface UseFieldHintProps {
+  description?: MessageDescriptor & { values?: Record<string, PrimitiveType> };
+  fieldSchema?: FieldSchema;
+  type?: string;
+}
+
+/**
+ * @description
+ * A hook for generating the hint for a field
+ */
+const useFieldHint = ({ description, fieldSchema, type }: UseFieldHintProps) => {
+  const { formatMessage } = useIntl();
+
+  const buildDescription = () =>
+    description?.id
+      ? formatMessage(
+          { id: description.id, defaultMessage: description.defaultMessage },
+          { ...description.values }
+        )
+      : '';
+
+  const buildHint = () => {
+    const { maximum, minimum } = getMinMax(fieldSchema);
+    const units = getFieldUnits({
+      type,
+      minimum,
+      maximum,
+    });
+
+    const minIsNumber = typeof minimum === 'number';
+    const maxIsNumber = typeof maximum === 'number';
+    const hasMinAndMax = maxIsNumber && minIsNumber;
+    const hasMinOrMax = maxIsNumber || minIsNumber;
+
+    if (!description?.id && !hasMinOrMax) {
+      return '';
+    }
+
+    return formatMessage(
+      {
+        id: 'content-manager.form.Input.hint.text',
+        defaultMessage:
+          '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}',
+      },
+      {
+        min: minimum,
+        max: maximum,
+        description: buildDescription(),
+        unit: units?.message && hasMinOrMax ? formatMessage(units.message, units.values) : null,
+        divider: hasMinAndMax
+          ? formatMessage({
+              id: 'content-manager.form.Input.hint.minMaxDivider',
+              defaultMessage: ' / ',
+            })
+          : null,
+        br: hasMinOrMax ? <br /> : null,
+      }
+    );
+  };
+
+  return { hint: buildHint() };
+};
+
+const getFieldUnits = ({
+  type,
+  minimum,
+  maximum,
+}: {
+  type?: string;
+  minimum?: number;
+  maximum?: number;
+}) => {
+  if (type && ['biginteger', 'integer', 'number'].includes(type)) {
+    return {};
+  }
+  const maxValue = Math.max(minimum || 0, maximum || 0);
+
+  return {
+    message: {
+      id: 'content-manager.form.Input.hint.character.unit',
+      defaultMessage: '{maxValue, plural, one { character} other { characters}}',
+    },
+    values: {
+      maxValue,
+    },
+  };
+};
+
+const getMinMax = (fieldSchema?: FieldSchema) => {
+  if (!fieldSchema) {
+    return { maximum: undefined, minimum: undefined };
+  }
+
+  const { minLength, maxLength, max, min } = fieldSchema;
+
+  let minimum;
+  let maximum;
+
+  const parsedMin = Number(min);
+  const parsedMinLength = Number(minLength);
+
+  if (!Number.isNaN(parsedMin)) {
+    minimum = parsedMin;
+  } else if (!Number.isNaN(parsedMinLength)) {
+    minimum = parsedMinLength;
+  }
+
+  const parsedMax = Number(max);
+  const parsedMaxLength = Number(maxLength);
+
+  if (!Number.isNaN(parsedMax)) {
+    maximum = parsedMax;
+  } else if (!Number.isNaN(parsedMaxLength)) {
+    maximum = parsedMaxLength;
+  }
+
+  return { maximum, minimum };
 };
 
 /**

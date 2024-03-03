@@ -13,7 +13,6 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  GenericInput,
   translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -22,14 +21,15 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Formik, Form, FormikHelpers } from 'formik';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { NavLink, Navigate, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { NavLink, useMatch, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Update } from '../../../../../../shared/contracts/user';
+import { Form, FormHelpers } from '../../../../components/Form';
+import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
@@ -41,8 +41,6 @@ import { getFullName } from '../../../../utils/getFullName';
 import { MagicLinkCE } from './components/MagicLinkCE';
 import { SelectRoles } from './components/SelectRoles';
 import { COMMON_USER_SCHEMA } from './utils/validation';
-
-import type { FormLayout } from '../../../../types/form';
 
 const EDIT_VALIDATION_SCHEMA = yup.object().shape({
   ...COMMON_USER_SCHEMA,
@@ -144,7 +142,7 @@ const EditPage = () => {
     confirmPassword: '',
   } satisfies InitialData;
 
-  const handleSubmit = async (body: InitialData, actions: FormikHelpers<InitialData>) => {
+  const handleSubmit = async (body: InitialData, actions: FormHelpers<InitialData>) => {
     lockApp?.();
 
     const { confirmPassword: _confirmPassword, password, ...bodyRest } = body;
@@ -192,19 +190,19 @@ const EditPage = () => {
           }
         )}
       />
-      <Formik
+      <Form
+        method="PUT"
         onSubmit={handleSubmit}
         initialValues={initialData}
-        validateOnChange={false}
         validationSchema={EDIT_VALIDATION_SCHEMA}
       >
-        {({ errors, values, handleChange, isSubmitting, dirty }) => {
+        {({ isSubmitting, modified }) => {
           return (
-            <Form>
+            <>
               <HeaderLayout
                 primaryAction={
                   <Button
-                    disabled={isSubmitting || !canUpdate ? true : !dirty}
+                    disabled={isSubmitting || !canUpdate || !modified}
                     startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"
@@ -263,16 +261,18 @@ const EditPage = () => {
                       </Typography>
                       <Grid gap={5}>
                         {LAYOUT.map((row) =>
-                          row.map((input) => {
+                          row.map(({ size, label, ...field }) => {
                             return (
-                              <GridItem key={input.name} {...input.size}>
-                                <GenericInput
-                                  {...input}
+                              <GridItem key={field.name} col={size}>
+                                <InputRenderer
+                                  {...field}
                                   disabled={!canUpdate}
-                                  // TODO: remove this coercion.
-                                  error={errors[input.name as keyof typeof errors] as string}
-                                  onChange={handleChange}
-                                  value={values[input.name as keyof typeof values]}
+                                  label={formatMessage(label)}
+                                  placeholder={
+                                    'placeholder' in field
+                                      ? formatMessage(field.placeholder)
+                                      : undefined
+                                  }
                                 />
                               </GridItem>
                             );
@@ -299,22 +299,17 @@ const EditPage = () => {
                       </Typography>
                       <Grid gap={5}>
                         <GridItem col={6} xs={12}>
-                          <SelectRoles
-                            disabled={!canUpdate}
-                            error={errors.roles as string}
-                            onChange={handleChange}
-                            value={values.roles}
-                          />
+                          <SelectRoles disabled={!canUpdate} />
                         </GridItem>
                       </Grid>
                     </Flex>
                   </Box>
                 </Flex>
               </ContentLayout>
-            </Form>
+            </>
           );
         }}
-      </Formik>
+      </Form>
     </Main>
   );
 };
@@ -326,7 +321,7 @@ const EditPage = () => {
 const LAYOUT = [
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.firstname.label',
         defaultMessage: 'First name',
       },
@@ -335,15 +330,12 @@ const LAYOUT = [
         id: 'Auth.form.firstname.placeholder',
         defaultMessage: 'e.g. Kai',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
       required: true,
     },
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.lastname.label',
         defaultMessage: 'Last name',
       },
@@ -352,16 +344,13 @@ const LAYOUT = [
         id: 'Auth.form.lastname.placeholder',
         defaultMessage: 'e.g. Doe',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
     },
   ],
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.email.label',
         defaultMessage: 'Email',
       },
@@ -370,15 +359,12 @@ const LAYOUT = [
         id: 'Auth.form.email.placeholder',
         defaultMessage: 'e.g. kai.doe@strapi.io',
       },
-      type: 'email',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'email' as const,
+      size: 6,
       required: true,
     },
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.username.label',
         defaultMessage: 'Username',
       },
@@ -387,56 +373,44 @@ const LAYOUT = [
         id: 'Auth.form.username.placeholder',
         defaultMessage: 'e.g. Kai_Doe',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
     },
   ],
   [
     {
-      intlLabel: {
+      autoComplete: 'new-password',
+      label: {
         id: 'global.password',
         defaultMessage: 'Password',
       },
       name: 'password',
-      type: 'password',
-      size: {
-        col: 6,
-        xs: 12,
-      },
-      autoComplete: 'new-password',
+      type: 'password' as const,
+      size: 6,
     },
     {
-      intlLabel: {
+      autoComplete: 'new-password',
+      label: {
         id: 'Auth.form.confirmPassword.label',
         defaultMessage: 'Password confirmation',
       },
       name: 'confirmPassword',
-      type: 'password',
-      size: {
-        col: 6,
-        xs: 12,
-      },
-      autoComplete: 'new-password',
+      type: 'password' as const,
+      size: 6,
     },
   ],
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.active.label',
         defaultMessage: 'Active',
       },
       name: 'isActive',
-      type: 'bool',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'boolean' as const,
+      size: 6,
     },
   ],
-] satisfies FormLayout[][];
+];
 
 const ProtectedEditPage = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.read);

@@ -22,13 +22,17 @@ import { useComposedRefs } from '../utils/refs';
 
 import { createContext } from './Context';
 
-import type { InputProps as InputPropsImpl, EnumerationProps } from './FormInputs/types';
+import type {
+  InputProps as InputPropsImpl,
+  StringProps,
+  EnumerationProps,
+} from './FormInputs/types';
 import type * as Yup from 'yup';
 
 /* -------------------------------------------------------------------------------------------------
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
-type InputProps = InputPropsImpl | EnumerationProps;
+type InputProps = InputPropsImpl | StringProps | EnumerationProps;
 
 interface FormValues {
   [field: string]: any;
@@ -53,6 +57,7 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
+  setValues: (values: TFormValues) => void;
   validate: () => Promise<FormErrors<TFormValues> | null>;
 }
 
@@ -86,6 +91,9 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
   setErrors: () => {
     throw new Error(ERR_MSG);
   },
+  setValues: () => {
+    throw new Error(ERR_MSG);
+  },
   setSubmitting: () => {
     throw new Error(ERR_MSG);
   },
@@ -99,13 +107,19 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
  * Form
  * -----------------------------------------------------------------------------------------------*/
 
-interface FormHelpers<TFormValues extends FormValues = FormValues> {
-  setErrors: (errors: FormErrors<TFormValues>) => void;
-}
+interface FormHelpers<TFormValues extends FormValues = FormValues>
+  extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues'> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
   extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
-  children: React.ReactNode;
+  children:
+    | React.ReactNode
+    | ((
+        props: Pick<
+          FormContextValue<TFormValues>,
+          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'values'
+        >
+      ) => React.ReactNode);
   method: 'POST' | 'PUT';
   onSubmit?: (values: TFormValues, helpers: FormHelpers<TFormValues>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
@@ -146,6 +160,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       dispatch({
         type: 'SET_ERRORS',
         payload: errors,
+      });
+    }, []);
+
+    const setValues = React.useCallback((values: FormValues) => {
+      dispatch({
+        type: 'SET_VALUES',
+        payload: values,
       });
     }, []);
 
@@ -248,6 +269,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
 
         await onSubmit(state.values, {
           setErrors,
+          setValues,
         });
 
         dispatch({
@@ -385,11 +407,18 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           moveFieldRow={moveFieldRow}
           removeFieldRow={removeFieldRow}
           setErrors={setErrors}
+          setValues={setValues}
           setSubmitting={setSubmitting}
           validate={validate}
           {...state}
         >
-          {props.children}
+          {typeof props.children === 'function'
+            ? props.children({
+                modified,
+                disabled,
+                ...state,
+              })
+            : props.children}
         </FormProvider>
       </form>
     );
@@ -444,7 +473,8 @@ type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'MOVE_FIELD_ROW'; payload: { field: string; fromIndex: number; toIndex: number } }
   | { type: 'SET_ERRORS'; payload: FormErrors<TFormValues> }
   | { type: 'SET_ISSUBMITTING'; payload: boolean }
-  | { type: 'SET_INITIAL_VALUES'; payload: TFormValues };
+  | { type: 'SET_INITIAL_VALUES'; payload: TFormValues }
+  | { type: 'SET_VALUES'; payload: TFormValues };
 
 const reducer = <TFormValues extends FormValues = FormValues>(
   state: FormState<TFormValues>,
@@ -453,6 +483,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
   produce(state, (draft) => {
     switch (action.type) {
       case 'SET_INITIAL_VALUES':
+        // @ts-expect-error – TODO: figure out why this fails ts.
+        draft.values = action.payload;
+        break;
+      case 'SET_VALUES':
         // @ts-expect-error – TODO: figure out why this fails ts.
         draft.values = action.payload;
         break;
