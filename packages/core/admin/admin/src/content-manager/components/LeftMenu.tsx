@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useCollator, useFilter } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
@@ -7,7 +8,7 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system/v2';
-import { useCollator, useFilter, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';

@@ -33,6 +33,8 @@ import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
+import type { DistributiveOmit } from 'react-redux';
+
 interface ModalFormProps {
   onToggle: () => void;
 }

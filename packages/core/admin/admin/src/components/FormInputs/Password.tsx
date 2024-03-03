@@ -1,11 +1,10 @@
 import { forwardRef, useState } from 'react';
 
-import { Icon, TextInput } from '@strapi/design-system';
+import { Icon, TextInput, useComposedRefs } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
 import type { StringProps } from './types';
