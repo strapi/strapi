@@ -3,8 +3,9 @@ import type { Common, Schema, UID } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
-  meta?: Record<string, unknown>;
-} & Record<string, unknown>;
+  documentId?: string | null;
+  attributes: Record<string, unknown>;
+};
 
 type TransformedComponent = {
   id: string;
@@ -13,6 +14,7 @@ type TransformedComponent = {
 
 type Entry = {
   id: string;
+  documentId: string | null;
   [key: string]: Entry | Entry[] | string | number | null | boolean | Date;
 };
 
@@ -27,14 +29,23 @@ function isDZEntries(property: unknown): property is (Entry & { __component: UID
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Schema.ContentType | Schema.Component } = {}
+  opts: {
+    contentType?: Schema.ContentType | Schema.Component;
+    useJsonAPIFormat?: boolean;
+  } = {
+    useJsonAPIFormat: false,
+  }
 ) => {
   if (isNil(resource)) {
     return resource;
   }
 
+  if (!isPlainObject(resource) && !Array.isArray(resource)) {
+    throw new Error('Entry must be an object or an arrayy of objects');
+  }
+
   return {
-    data: transformEntry(resource, opts?.contentType),
+    data: opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource,
     meta,
   };
 };
@@ -51,7 +62,14 @@ function transformComponent(
     return data.map((datum) => transformComponent(datum, component));
   }
 
-  return transformEntry(data, component);
+  const res = transformEntry(data, component);
+
+  if (isNil(res)) {
+    return res;
+  }
+
+  const { id, documentId, attributes } = res;
+  return { id, documentId, ...attributes };
 }
 
 function transformEntry<T extends Entry | Entry[] | null>(
@@ -74,7 +92,7 @@ function transformEntry(
     throw new Error('Entry must be an object');
   }
 
-  const { id, ...properties } = entry;
+  const { id, documentId, ...properties } = entry;
 
   const attributeValues: Record<string, unknown> = {};
 
@@ -88,7 +106,7 @@ function transformEntry(
         strapi.contentType(attribute.target as Common.UID.ContentType)
       );
 
-      attributeValues[key] = data;
+      attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
       attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
     } else if (attribute && attribute.type === 'dynamiczone' && isDZEntries(property)) {
@@ -102,7 +120,7 @@ function transformEntry(
     } else if (attribute && attribute.type === 'media' && isEntry(property)) {
       const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
 
-      attributeValues[key] = data;
+      attributeValues[key] = { data };
     } else {
       attributeValues[key] = property;
     }
@@ -110,9 +128,8 @@ function transformEntry(
 
   return {
     id,
-    ...attributeValues,
-    // NOTE: not necessary for now
-    // meta: {},
+    documentId,
+    attributes: attributeValues,
   };
 }
 
