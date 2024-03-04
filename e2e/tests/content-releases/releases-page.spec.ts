@@ -50,6 +50,17 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
+  test('A user should be able to click new release button and see new release dialog', async ({
+    page,
+  }) => {
+    // Navigate to the releases page
+    await page.getByRole('link', { name: 'Releases' }).click();
+
+    // Open the create release dialog
+    await page.getByRole('button', { name: 'New release' }).click();
+    await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
+  });
+
   test('A user should be able to create a release with scheduling info and view their pending and done releases', async ({
     page,
   }) => {
