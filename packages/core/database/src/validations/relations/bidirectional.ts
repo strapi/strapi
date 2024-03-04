@@ -1,5 +1,5 @@
 import type { Database } from '../..';
-import type { Relation } from '../../types';
+import type { MetadataOptions, Relation } from '../../types';
 import { getJoinTableName } from '../../utils/identifiers';
 
 type Link = {
@@ -54,7 +54,7 @@ const isLinkTableEmpty = async (db: Database, linkTableName: string) => {
  * @param {*} db
  * @return {*}
  */
-export const validateBidirectionalRelations = async (db: Database) => {
+export const validateBidirectionalRelations = async (db: Database, options: MetadataOptions) => {
   const invalidLinks = getLinksWithoutMappedBy(db);
 
   for (const { relation, invRelation } of invalidLinks) {
@@ -62,8 +62,16 @@ export const validateBidirectionalRelations = async (db: Database) => {
     const invModelMetadata = db.metadata.get(relation.target);
 
     // Generate the join table name based on the relation target table and attribute name.
-    const joinTableName = getJoinTableName(modelMetadata.tableName, invRelation.inversedBy);
-    const inverseJoinTableName = getJoinTableName(invModelMetadata.tableName, relation.inversedBy);
+    const joinTableName = getJoinTableName(
+      modelMetadata.tableName,
+      invRelation.inversedBy,
+      options
+    );
+    const inverseJoinTableName = getJoinTableName(
+      invModelMetadata.tableName,
+      relation.inversedBy,
+      options
+    );
 
     const joinTableEmpty = await isLinkTableEmpty(db, joinTableName);
     const inverseJoinTableEmpty = await isLinkTableEmpty(db, inverseJoinTableName);

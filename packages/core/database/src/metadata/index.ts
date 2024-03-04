@@ -12,7 +12,7 @@ import {
   isManyToAny,
 } from './relations';
 import { Metadata, Meta } from './metadata';
-import type { Attribute, Model } from '../types';
+import type { Attribute, Model, MetadataOptions } from '../types';
 
 export type { Metadata, Meta };
 export {
@@ -29,14 +29,15 @@ export {
 /**
  * Create Metadata from models configurations
  */
-export const createMetadata = (models: Model[] = []): Metadata => {
+export const createMetadata = (models: Model[], options: MetadataOptions): Metadata => {
   const metadata = new Metadata();
+  const maxLength = options.maxLength;
 
   // init pass
-  for (const model of _.cloneDeep(models)) {
+  for (const model of _.cloneDeep(models ?? [])) {
     metadata.add({
       ...model,
-      tableName: identifiers.getTableName(model.tableName),
+      tableName: identifiers.getTableName(model.tableName, { maxLength }),
       attributes: {
         ...model.attributes,
       },
@@ -52,11 +53,11 @@ export const createMetadata = (models: Model[] = []): Metadata => {
     for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
       try {
         if (types.isRelationalAttribute(attribute)) {
-          createRelation(attributeName, attribute, meta, metadata);
+          createRelation(attributeName, attribute, meta, metadata, options);
           continue;
         }
 
-        createAttribute(attributeName, attribute);
+        createAttribute(attributeName, attribute, options);
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(
@@ -84,7 +85,7 @@ export const createMetadata = (models: Model[] = []): Metadata => {
   return metadata;
 };
 
-const createAttribute = (attributeName: string, attribute: Attribute) => {
-  const columnName = identifiers.getColumnName(attributeName);
+const createAttribute = (attributeName: string, attribute: Attribute, options: MetadataOptions) => {
+  const columnName = identifiers.getColumnName(attributeName, options);
   Object.assign(attribute, { columnName });
 };

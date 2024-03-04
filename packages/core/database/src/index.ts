@@ -10,14 +10,18 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model } from './types';
+import type { MetadataOptions, Model } from './types';
 import * as identifiers from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
+// The max length for a database identifier
+export const MAX_DB_IDENTIFIER_LENGTH = 55;
+
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+  maxIdentifierLength?: number;
   [key: string]: unknown;
 }
 
@@ -44,14 +48,21 @@ class Database {
 
   entityManager: EntityManager;
 
+  #metadataOptions: MetadataOptions;
+
   static async init(config: DatabaseConfig) {
     const db = new Database(config);
-    await validateDatabase(db);
+    await validateDatabase(db, db.#metadataOptions);
     return db;
   }
 
   constructor(config: DatabaseConfig) {
-    this.metadata = createMetadata(config.models);
+    // TODO: do we want this to be user-configurable? Probably not
+    this.#metadataOptions = {
+      maxLength: config?.settings?.maxIdentifierLength ?? MAX_DB_IDENTIFIER_LENGTH,
+    };
+
+    this.metadata = createMetadata(config.models, this.#metadataOptions);
 
     this.config = {
       ...config,
@@ -77,7 +88,7 @@ class Database {
 
     this.connection = createConnection(this.config.connection, { pool: { afterCreate } });
 
-    this.schema = createSchemaProvider(this);
+    this.schema = createSchemaProvider(this, this.#metadataOptions);
 
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
@@ -170,6 +181,7 @@ class Database {
 }
 
 const utils = { identifiers };
+const constants = { MAX_DB_IDENTIFIER_LENGTH };
 
-export { Database, errors, utils };
-export type { Model };
+export { Database, errors, utils, constants };
+export type { Model, MetadataOptions };

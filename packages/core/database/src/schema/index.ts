@@ -6,6 +6,7 @@ import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
 import type { Database } from '..';
+import { MetadataOptions } from '../types';
 
 export type * from './types';
 
@@ -25,8 +26,8 @@ export interface SchemaProvider {
 /**
  * @type {import('.').default}
  */
-export const createSchemaProvider = (db: Database): SchemaProvider => {
-  const schema = metadataToSchema(db.metadata);
+export const createSchemaProvider = (db: Database, options: MetadataOptions): SchemaProvider => {
+  const schema = metadataToSchema(db.metadata, options);
 
   return {
     builder: createSchemaBuilder(db),

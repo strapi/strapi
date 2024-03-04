@@ -58,6 +58,9 @@ type TestCase = [
 
 describe('metadata', () => {
   describe('createMetadata', () => {
+    describe('full length identifiers', () => {
+      const options = { maxLength: 0 };
+
     describe('attribute conversion', () => {
       // Define a base model structure that you'll reuse and modify for each test case
       const baseModel = (attributeName: string, attributeDetails: any) => ({
@@ -124,7 +127,7 @@ describe('metadata', () => {
           const expected = baseExpected(attributeName, expectedDetails);
 
           // Call your function to convert models to the expected format
-          const results = createMetadata(models);
+            const results = createMetadata(models, options);
 
           // Extract the attribute from the results for comparison
           const resultAttribute = results.get('admin::permission').attributes[attributeName];
@@ -161,7 +164,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'DB table "strapi_core_store_settings" already exists. Change the collectionName of the related content type'
           );
         });
@@ -186,7 +189,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'Error on attribute role in model undefined(strapi::core-store): Metadata for "admin::role" not found'
           );
         });
@@ -212,7 +215,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'Error on attribute role in model undefined(strapi::core-store): Unknown relation'
           );
         });
@@ -238,7 +241,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'Error on attribute role in model undefined(strapi::core-store): inversedBy attribute permissions not found target strapi::core-store'
           );
         });
@@ -267,7 +270,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'Error on attribute role in model undefined(strapi::core-store): inversedBy attribute permissions targets non relational attribute in strapi::core-store'
           );
         });
@@ -296,7 +299,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'Error on attribute role in model undefined(strapi::core-store): inversedBy attribute permissions targets non relational attribute in strapi::core-store'
           );
         });
@@ -319,7 +322,7 @@ describe('metadata', () => {
               tableName: 'strapi_core_store_settings',
             },
           ] as any;
-          expect(() => createMetadata(badModels)).toThrow(
+            expect(() => createMetadata(badModels, options)).toThrow(
             'Error on attribute role in model undefined(strapi::core-store): Metadata for "missingtarget" not found'
           );
         });
@@ -336,7 +339,7 @@ describe('metadata', () => {
         let error: unknown;
         beforeAll(() => {
           try {
-            results = createMetadata(testModels as any);
+              results = createMetadata(testModels as any, options);
           } catch (createError) {
             error = createError;
           }
@@ -353,44 +356,11 @@ describe('metadata', () => {
           // const resultsAsArray = Array.from(results.entries());
           expect(results).toEqualMap(new Map(expectedLong as any));
         });
-      });
-
-      describe('valid cases -- with shortening', () => {
-        test('creates a table name with a long name', () => {
-          const results = createMetadata([
-            {
-              attributes: {
-                // titleSuperhugelonglonglongreallylongnametotestcontenttypesyessssssitsgoingtowork: {
-                //   type: 'string',
-                // },
-              },
-              tableName:
-                'really-long-test-name-for-this-test-to-test-a-really-long-name-because-we-need-to-test-this',
-              uid: 'test',
-              singularName:
-                'really-long-test-name-for-this-test-to-test-a-really-long-name-because-we-need-to-test-this',
-            },
-          ]);
-          console.log('results', map2str(results));
-          expect(results).toEqualMap(
-            new Map([
-              [
-                'api::really-long-test-name-for-this-test-to-test-a-really-long-name.really-long-test-name-for-this-test-to-test-a-really-long-name',
-                {},
-              ],
-            ])
-          );
         });
       });
     });
+    describe('shortened identifiers', () => {
+      test.todo('shortened identifier tests');
+    });
   });
 });
-
-const map2str = (map: Map<string, unknown>, keyStartsWith?: string) => {
-  // Filter map entries if keyStartsWith is provided
-  const filteredEntries = keyStartsWith
-    ? Array.from(map.entries()).filter(([key]) => key.startsWith(keyStartsWith))
-    : Array.from(map.entries());
-
-  return JSON.stringify(filteredEntries, null, 2);
-};

@@ -222,3 +222,7 @@ export interface Model {
   foreignKeys?: ForeignKey[];
   lifecycles?: Partial<Record<Action, SubscriberFn>>;
 }
+
+export type MetadataOptions = {
+  maxLength: number;
+};

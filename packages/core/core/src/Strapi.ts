@@ -5,7 +5,7 @@ import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
-import { Database } from '@strapi/database';
+import { Database, constants as dbConstants } from '@strapi/database';
 import { hooks } from '@strapi/utils';
 import type {
   Strapi as StrapiI,
@@ -491,11 +491,15 @@ class Strapi extends Container implements StrapiI {
   }
 
   async bootstrap() {
+    // Set the max identifier length in the database
+    const maxLength = dbConstants.MAX_DB_IDENTIFIER_LENGTH;
+    this.config.set('database.settings.maxIdentifierLength', maxLength);
+
     const models = [
-      ...utils.transformContentTypesToModels([
-        ...Object.values(this.contentTypes),
-        ...Object.values(this.components),
-      ]),
+      ...utils.transformContentTypesToModels(
+        [...Object.values(this.contentTypes), ...Object.values(this.components)],
+        { maxLength }
+      ),
       ...this.get('models').get(),
     ];
 

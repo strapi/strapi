@@ -263,41 +263,44 @@ function patchContentTypes(
 }
 
 describe('transformContentTypesToModels', () => {
-  test('converts valid content types to models', () => {
-    const models = transformContentTypesToModels(contentTypes);
+  describe('full length identifiers', () => {
+    const options = { maxLength: 0 };
+    test('converts valid content types to models', () => {
+      const models = transformContentTypesToModels(contentTypes, options);
 
-    expect(models).toMatchModels(expectedModels);
-  });
+      expect(models).toMatchModels(expectedModels);
+    });
 
-  test.each(['id', 'document_id', 'ID', 'documentId'])(
-    'throws on restricted attribute name: %s',
-    (restrictedName) => {
-      const changes = {
-        attributes: {
-          [restrictedName]: {
-            type: 'string',
+    test.each(['id', 'document_id', 'ID', 'documentId'])(
+      'throws on restricted attribute name: %s',
+      (restrictedName) => {
+        const changes = {
+          attributes: {
+            [restrictedName]: {
+              type: 'string',
+            },
           },
-        },
-      };
-      const modifiedContentTypes = patchContentTypes('countries', changes);
+        };
+        const modifiedContentTypes = patchContentTypes('countries', changes);
 
-      expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
-        `The attribute "${restrictedName}" is reserved`
-      );
-    }
-  );
+        expect(() => transformContentTypesToModels(modifiedContentTypes, options)).toThrow(
+          `The attribute "${restrictedName}" is reserved`
+        );
+      }
+    );
 
-  test.each(['collectionName', 'uid', 'modelName'])(
-    'throws on missing name: %s',
-    (restrictedName) => {
-      const changes = {
-        [restrictedName]: null,
-      };
-      const modifiedContentTypes = patchContentTypes('countries', changes);
+    test.each(['collectionName', 'uid', 'modelName'])(
+      'throws on missing name: %s',
+      (restrictedName) => {
+        const changes = {
+          [restrictedName]: null,
+        };
+        const modifiedContentTypes = patchContentTypes('countries', changes);
 
-      expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
-        `"${restrictedName}" is required`
-      );
-    }
-  );
+        expect(() => transformContentTypesToModels(modifiedContentTypes, options)).toThrow(
+          `"${restrictedName}" is required`
+        );
+      }
+    );
+  });
 });

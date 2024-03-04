@@ -17,9 +17,6 @@
 import crypto from 'node:crypto';
 import { partition, isInteger, sumBy, snakeCase } from 'lodash/fp';
 
-// TODO: Names will not be shortened until this is set to a non-zero number (most likely 55)
-export const MAX_DB_IDENTIFIER_LENGTH = 55;
-
 // We can accept a number of compressible tokens up to:
 // tokens accepted = (MAX_LENGTH / (HASH_LENGTH + MIN_TOKEN_LENGTH) + (tokens * IDENTIFIER_SEPARATER.length))
 // Be aware of that when considering changing these values, we should be able to support at least 4 compressible identifiers
@@ -109,12 +106,12 @@ export function getShortenedName(name: string, len: number) {
  * incompressible tokens.
  *
  * @param {NameToken[]} nameTokens - Array of name tokens
- * @param {number} [maxLength=MAX_DB_IDENTIFIER_LENGTH] - Maximum length for the final name string.
+ * @param {number} [maxLength] - Maximum length for the final name string.
  * @returns {string} The generated name string within maxLength.
  * @throws {Error} If the name cannot be shortened to meet maxLength.
  * @internal
  */
-export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_IDENTIFIER_LENGTH) {
+export function getNameFromTokens(nameTokens: NameToken[], maxLength: number) {
   if (!isInteger(maxLength) || maxLength < 0) {
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }

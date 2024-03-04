@@ -82,7 +82,8 @@ function persistStagesJoinTables({ strapi }: { strapi: Strapi }) {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID) as any;
       const joinTableName = identifiers.getTableName(
-        attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name
+        attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name,
+        { maxLength: strapi.config.get('database.settings.maxIdentifierLength') }
       );
       return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
