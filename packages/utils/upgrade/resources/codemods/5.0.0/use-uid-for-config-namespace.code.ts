@@ -34,12 +34,11 @@ const transform: Transform = (file, api) => {
           argumentNode.type === 'Literal' &&
           typeof argumentNode.value === 'string'
         ) {
-          if (
-            ignoreList.some((ignoreItem) => (argumentNode.value as string).startsWith(ignoreItem))
-          ) {
+          const value = argumentNode.value as string;
+          if (ignoreList.some((ignoreItem) => value.startsWith(ignoreItem))) {
             return;
           }
-          argumentNode.value = argumentNode.value.replace('.', '::');
+          argumentNode.value = value.replace('.', '::');
         }
       });
   });
