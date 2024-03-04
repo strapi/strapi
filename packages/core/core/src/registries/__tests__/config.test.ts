@@ -63,11 +63,21 @@ describe('config', () => {
     expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
     consoleSpy.mockRestore();
   });
-  test('does NOT support deprecation for other prefixes', () => {
+  test('get does NOT support deprecation for other prefixes', () => {
     const config = configProvider({
       'api::myapi': { foo: 'bar' },
     });
 
     expect(config.get('api.myapi')).toEqual(undefined);
+  });
+
+  test('set does NOT support deprecation for other prefixes', () => {
+    const config = configProvider({
+      'api::myapi': { foo: 'bar' },
+    });
+
+    config.set('api.myapi.foo', 'nope');
+    expect(config.get('api.myapi.foo')).toEqual('nope');
+    expect(config.get('api::myapi.foo')).toEqual('bar');
   });
 });
