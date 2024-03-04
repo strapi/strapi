@@ -333,7 +333,7 @@ describe('metadata', () => {
        *
        * TODO: break it up into individual pieces to help debugging
        */
-      describe.skip('valid cases -- without shortening', () => {
+        describe('valid cases -- without shortening', () => {
         let results: Metadata;
 
         let error: unknown;

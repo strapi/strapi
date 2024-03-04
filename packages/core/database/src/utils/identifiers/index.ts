@@ -12,6 +12,7 @@ type NameOptions = {
   suffix?: string;
   prefix?: string;
   maxLength: number;
+  snakeCase?: boolean;
 };
 
 // Generic name handler that must be used by all helper functions
@@ -37,7 +38,7 @@ export const getName = (names: NameInput, options: NameOptions) => {
     tokens.unshift({ name: options.prefix, compressible: false });
   }
 
-  return getNameFromTokens(tokens, options.maxLength);
+  return getNameFromTokens(tokens, { maxLength: options.maxLength, snakeCase: options.snakeCase });
 };
 
 /**

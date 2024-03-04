@@ -95,7 +95,9 @@ describe('identifiers', () => {
           { name: '12345', compressible: true },
           { name: 'links', compressible: false },
         ],
-        22
+        {
+          maxLength: 22,
+        }
       );
       expect(name).toEqual('1234567890_12345_links');
     });
@@ -107,31 +109,43 @@ describe('identifiers', () => {
           { name: '123_4', compressible: true },
           { name: 'links', compressible: false },
         ],
-        22
+        {
+          maxLength: 22,
+        }
       );
       expect(name).toEqual('1234_56789_123_4_links');
     });
 
     test('shortens string that does not fit in min length (one compressible)', () => {
-      const name = getNameFromTokens([{ name: '123456789012345', compressible: true }], 13);
+      const name = getNameFromTokens([{ name: '123456789012345', compressible: true }], {
+        maxLength: 13,
+      });
       expect(name).toEqual('1234567878db8');
     });
 
     test('shortens strings with separator in them already (last char before hash)', () => {
-      const name = getNameFromTokens([{ name: '1234567_9012345', compressible: true }], 13);
+      const name = getNameFromTokens([{ name: '1234567_9012345', compressible: true }], {
+        maxLength: 13,
+      });
       expect(name).toEqual('1234567_47b4e');
     });
 
     test('shortens strings with separator in them already (past the hash)', () => {
-      const name = getNameFromTokens([{ name: '12345678_012345', compressible: true }], 13);
+      const name = getNameFromTokens([{ name: '12345678_012345', compressible: true }], {
+        maxLength: 13,
+      });
       expect(name).toEqual('12345678867f6');
     });
 
     test('returns original string when it fits (one compressible)', () => {
-      const name = getNameFromTokens([{ name: '12345', compressible: true }], 5);
+      const name = getNameFromTokens([{ name: '12345', compressible: true }], {
+        maxLength: 5,
+      });
       expect(name).toEqual('12345');
 
-      const name2 = getNameFromTokens([{ name: '12345', compressible: true }], 10);
+      const name2 = getNameFromTokens([{ name: '12345', compressible: true }], {
+        maxLength: 10,
+      });
       expect(name2).toEqual('12345');
     });
 
@@ -142,7 +156,9 @@ describe('identifiers', () => {
           { name: '12345', compressible: true },
           { name: 'links', compressible: false },
         ],
-        21
+        {
+          maxLength: 21,
+        }
       );
       expect(name).toEqual('1234cd65a_12345_links');
     });
@@ -155,7 +171,9 @@ describe('identifiers', () => {
             { name: '1234567890', compressible: true },
             { name: 'links', compressible: false },
           ],
-          21
+          {
+            maxLength: 21,
+          }
         )
       ).toThrow('Maximum length is too small to accommodate all tokens');
     });
@@ -176,7 +194,9 @@ describe('identifiers', () => {
           { name: '1234567890', compressible: true },
           { name: incompressibleString, compressible: false },
         ],
-        len
+        {
+          maxLength: len,
+        }
       );
       expect(name).toEqual('123cd65a_123cd65a_links');
     });
@@ -189,7 +209,9 @@ describe('identifiers', () => {
           { name: '12', compressible: true },
           { name: '12', compressible: true },
         ],
-        12
+        {
+          maxLength: 12,
+        }
       );
       expect(res).toBe('12_12_12_12');
     });
@@ -204,15 +226,19 @@ describe('identifiers', () => {
             { name: '1', compressible: true },
             { name: '12', compressible: true },
           ],
-          12
+          {
+            maxLength: 12,
+          }
         )
       ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
     test('throws when incompressible string cannot fit', () => {
-      expect(() => getNameFromTokens([{ name: '123456', compressible: false }], 5)).toThrow(
-        'Maximum length is too small to accommodate all tokens'
-      );
+      expect(() =>
+        getNameFromTokens([{ name: '123456', compressible: false }], {
+          maxLength: 5,
+        })
+      ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
     test('throws when incompressible strings cannot fit due to separators', () => {
@@ -222,7 +248,9 @@ describe('identifiers', () => {
             { name: '123456', compressible: false },
             { name: '123456', compressible: false },
           ],
-          12
+          {
+            maxLength: 12,
+          }
         )
       ).toThrow('Maximum length is too small to accommodate all tokens');
     });
@@ -235,7 +263,9 @@ describe('identifiers', () => {
           { name: '0987654321', compressible: true },
           { name: 'links', compressible: false },
         ],
-        30
+        {
+          maxLength: 30,
+        }
       );
       expect(name.length).toEqual(30);
       expect(name).toEqual('1234cd65a_12345_0984addb_links');
@@ -249,7 +279,9 @@ describe('identifiers', () => {
         { name: '12345', compressible: true },
         { name: '0987654321', compressible: true },
       ],
-      34
+      {
+        maxLength: 34,
+      }
     );
     expect(name.length).toEqual(34);
     expect(name).toEqual('inv_order_1234cd65a_12345_0984addb');
@@ -263,7 +295,9 @@ describe('identifiers', () => {
         { name: '3456789012', compressible: true },
         { name: 'post', compressible: false },
       ],
-      31
+      {
+        maxLength: 31,
+      }
     );
     expect(name.length).toEqual(31);
     expect(name).toEqual('pre_1234cd65a_in_3456be378_post');
@@ -277,7 +311,9 @@ describe('identifiers', () => {
         { name: '3456789012', compressible: true },
         { name: 'post', compressible: false },
       ],
-      32
+      {
+        maxLength: 32,
+      }
     );
     expect(name.length).toEqual(32);
     expect(name).toEqual('pre_1234567890_in_3456be378_post');
@@ -289,7 +325,9 @@ describe('identifiers', () => {
         { name: '2345678901', compressible: false },
         { name: '3456789012', compressible: false },
       ],
-      34
+      {
+        maxLength: 34,
+      }
     );
     expect(name).toEqual('1234567890_2345678901_3456789012');
   });

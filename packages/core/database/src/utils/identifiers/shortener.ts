@@ -34,6 +34,11 @@ type NameToken = {
 
 type NameTokenWithAllocation = NameToken & { allocatedLength: number };
 
+export type NameFromTokenOptions = {
+  maxLength: number;
+  snakeCase?: boolean;
+};
+
 /**
  * Creates a hash of the given data with the specified string length as a string of hex characters
  *
@@ -111,13 +116,15 @@ export function getShortenedName(name: string, len: number) {
  * @throws {Error} If the name cannot be shortened to meet maxLength.
  * @internal
  */
-export function getNameFromTokens(nameTokens: NameToken[], maxLength: number) {
+export function getNameFromTokens(nameTokens: NameToken[], options: NameFromTokenOptions) {
+  const { maxLength } = options;
+
   if (!isInteger(maxLength) || maxLength < 0) {
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
 
   const fullLengthName = nameTokens
-    .map((token) => snakeCase(token.name))
+    .map((token) => (options.snakeCase === false ? token.name : snakeCase(token.name)))
     .join(IDENTIFIER_SEPARATOR);
 
   // if it fits, or maxLength is disabled, return full length string
