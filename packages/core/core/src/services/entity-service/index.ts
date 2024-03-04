@@ -205,7 +205,7 @@ const createDefaultImplementation = ({
 
     const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
 
-    const isDraft = contentTypesUtils.isDraft(data);
+    const isDraft = contentTypesUtils.isDraft(data, model);
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate

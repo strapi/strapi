@@ -1,6 +1,6 @@
 import { omit } from 'lodash/fp';
 
-import { pipeAsync } from '@strapi/utils';
+import { pipeAsync, contentTypes } from '@strapi/utils';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from '../common';
 import createDocumentEngine from '../document-engine';
@@ -9,6 +9,7 @@ import * as i18n from '../internationalization';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
+  const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
 
   // TODO: move the code back into here instead of using the document-engine
   const documents = createDocumentEngine({ strapi, db: strapi?.db });
@@ -16,8 +17,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function findMany(params = {} as any) {
     // TODO: replace with chaining
     const queryParams = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType)
     )(params);
@@ -27,8 +28,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function findFirst(params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType)
     )(params);
@@ -38,8 +39,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function findOne(id: string, params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType)
     )(params);
@@ -59,9 +60,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function create(params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.setStatusToDraft,
-      DP.statusToData,
-      DP.filterDataPublishedAt,
+      DP.setStatusToDraft(contentType),
+      DP.statusToData(contentType),
+      DP.filterDataPublishedAt(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToData(contentType)
     )(params);
@@ -77,7 +78,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function clone(id: string, params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.filterDataPublishedAt,
+      DP.filterDataPublishedAt(contentType),
       i18n.localeToLookup(contentType)
     )(params);
 
@@ -86,10 +87,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function update(id: string, params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.setStatusToDraft,
-      DP.statusToLookup,
-      DP.statusToData,
-      DP.filterDataPublishedAt,
+      DP.setStatusToDraft(contentType),
+      DP.statusToLookup(contentType),
+      DP.statusToData(contentType),
+      DP.filterDataPublishedAt(contentType),
       // Default locale will be set if not provided
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
@@ -120,8 +121,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function count(params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType)
     )(params);
@@ -165,8 +166,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
     count: wrapInTransaction(count),
-    publish: wrapInTransaction(publish),
-    unpublish: wrapInTransaction(unpublish),
-    discardDraft: wrapInTransaction(discardDraft),
+    publish: hasDraftAndPublish ? wrapInTransaction(publish) : undefined,
+    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : undefined,
+    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : undefined,
   };
 };

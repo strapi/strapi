@@ -22,6 +22,7 @@ export type CreateContentTypeInput = {
   displayName: Schema.ContentTypeInfo['displayName'];
   description: Schema.ContentTypeInfo['description'];
   options?: Schema.Options;
+  withDraftAndPublish?: Schema.Options['withDraftAndPublish'];
   pluginOptions?: Schema.ContentType['pluginOptions'];
   config?: object;
 };

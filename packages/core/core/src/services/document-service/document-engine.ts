@@ -30,10 +30,8 @@ const { transformParamsToQuery } = convertQueryParams;
 
 /**
  * TODO: Sanitization / validation built-in
- * TODO: i18n - Move logic to i18n package
  * TODO: Webhooks
  * TODO: Audit logs
- * TODO: replace 'any'
  * TODO: availableLocales
  *
  */
@@ -151,7 +149,7 @@ const createDocumentEngine = ({
   async update(uid, documentId, params) {
     // Param parsing
     const { data, ...restParams } = await transformParamsDocumentId(uid, params || {}, {
-      isDraft: true,
+      isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
     });
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
@@ -168,7 +166,7 @@ const createDocumentEngine = ({
       model,
       data,
       {
-        isDraft: true, // Always update the draft version
+        isDraft: !params?.data?.publishedAt, // Always update the draft version
         locale: params?.locale,
       },
       entryToUpdate
@@ -217,7 +215,7 @@ const createDocumentEngine = ({
     const newDocumentId = createDocumentId();
 
     const versions = await mapAsync(entries, async (entryToClone: any) => {
-      const isDraft = contentTypesUtils.isDraft(data);
+      const isDraft = contentTypesUtils.isDraft(data, model);
       // Todo: Merge data with entry to clone
       const validData = await entityValidator.validateEntityUpdate(
         model,
