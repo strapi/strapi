@@ -26,12 +26,30 @@ describe('config', () => {
     expect(config.get('plugin::myplugin')).toEqual({ foo: 'bar' });
   });
   test('supports deprecation for plugin.', () => {
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+
     const config = configProvider({
       'plugin::myplugin': { foo: 'bar' },
     });
 
     expect(config.get('plugin.myplugin.foo')).toEqual('bar');
-    expect(config.get('plugin.myplugin')).toEqual({ foo: 'bar' });
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+    consoleSpy.mockRestore();
+  });
+  test('logs deprecation with strapi logger if avaialable', () => {
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+    const infoSpy = jest.fn();
+    const config = configProvider(
+      {
+        'plugin::myplugin': { foo: 'bar' },
+      },
+      { log: { info: infoSpy } }
+    );
+
+    expect(config.get('plugin.myplugin.foo')).toEqual('bar');
+    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+    consoleSpy.mockRestore();
   });
   test('does NOT support deprecation for other prefixes', () => {
     const config = configProvider({
