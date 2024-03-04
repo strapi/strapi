@@ -1,4 +1,7 @@
+import { Strapi } from '@strapi/types';
 import configProvider from '../config';
+
+const logLevel = 'warn';
 
 describe('config', () => {
   test('returns objects for partial paths', () => {
@@ -26,7 +29,7 @@ describe('config', () => {
     expect(config.get('plugin::myplugin')).toEqual({ foo: 'bar' });
   });
   test('get supports deprecation for plugin.', () => {
-    const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
     const config = configProvider({
       'plugin::myplugin': { foo: 'bar' },
@@ -37,7 +40,7 @@ describe('config', () => {
     consoleSpy.mockRestore();
   });
   test('set supports deprecation for plugin.', () => {
-    const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
     const config = configProvider({
       'plugin::myplugin': { foo: 'bar' },
@@ -49,18 +52,18 @@ describe('config', () => {
     consoleSpy.mockRestore();
   });
   test('logs deprecation with strapi logger if available', () => {
-    const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-    const infoSpy = jest.fn();
+    const logSpy = jest.fn();
     const config = configProvider(
       {
         'plugin::myplugin': { foo: 'bar' },
       },
-      { log: { info: infoSpy } }
+      { log: { [logLevel]: logSpy } } as any
     );
 
     expect(config.get('plugin.myplugin.foo')).toEqual('bar');
-    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
     expect(consoleSpy).not.toHaveBeenCalled();
     consoleSpy.mockRestore();
   });

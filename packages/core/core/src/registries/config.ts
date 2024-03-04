@@ -1,10 +1,9 @@
-import type { ConfigProvider } from '@strapi/types';
+import type { ConfigProvider, LoadedStrapi, Strapi } from '@strapi/types';
 import { get, set, has, isString, type PropertyName } from 'lodash';
-import type { LoadedStrapi } from '../Strapi';
 
 type Config = Record<string, unknown>;
 
-export default (initialConfig = {}, strapi?: Partial<LoadedStrapi>): ConfigProvider => {
+export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvider => {
   const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change
@@ -14,7 +13,7 @@ export default (initialConfig = {}, strapi?: Partial<LoadedStrapi>): ConfigProvi
       const newPath = path.replace('plugin.', 'plugin::');
 
       // strapi logger may not be loaded yet, so fall back to console
-      (strapi?.log?.info ?? console.info)(
+      (strapi?.log?.warn ?? console.warn)(
         `Using dot notation for model config namespaces is deprecated, for example "plugin::myplugin" should be used instead of "plugin.myplugin". Modifying requested path ${path} to ${newPath}`
       );
       return newPath;
