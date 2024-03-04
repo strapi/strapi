@@ -98,8 +98,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       .click();
 
     const currentDate = new Date();
-    currentDate.setHours(currentDate.getHours() + 4); // set 4hrs ahead of current time
-    currentDate.setMinutes(0); // set minutes to 0 so that it's a valid time
+    currentDate.setMinutes(45); // set 45 minutes ahead so its a valid time
     const currentTime = currentDate.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
