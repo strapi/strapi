@@ -30,10 +30,7 @@
         }
       },
       "type": "dynamiczone",
-      "components": [
-        "page-blocks.hero-image",
-        "page-blocks.content-and-image"
-      ],
+      "components": ["page-blocks.hero-image", "page-blocks.content-and-image"],
       "required": true,
       "min": 2
     },
