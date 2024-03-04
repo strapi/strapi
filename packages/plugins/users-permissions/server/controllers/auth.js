@@ -278,7 +278,7 @@ module.exports = {
       throw new ApplicationError('Register action is currently disabled');
     }
 
-    const { register } = strapi.config.get('plugin.users-permissions');
+    const { register } = strapi.config.get('plugin::users-permissions');
     const alwaysAllowedKeys = ['username', 'password', 'email'];
 
     // Note that we intentionally do not filter allowedFields to allow a project to explicitly accept private or other Strapi field on registration

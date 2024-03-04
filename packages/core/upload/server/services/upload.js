@@ -244,7 +244,7 @@ module.exports = ({ strapi }) => ({
    * and responsive formats (if enabled).
    */
   async uploadFileAndPersist(fileData, { user } = {}) {
-    const config = strapi.config.get('plugin.upload');
+    const config = strapi.config.get('plugin::upload');
     const { isImage } = getService('image-manipulation');
 
     await getService('provider').checkFileSize(fileData);
@@ -283,7 +283,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async replace(id, { data, file }, { user } = {}) {
-    const config = strapi.config.get('plugin.upload');
+    const config = strapi.config.get('plugin::upload');
 
     const { isImage } = getService('image-manipulation');
 
@@ -382,7 +382,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async remove(file) {
-    const config = strapi.config.get('plugin.upload');
+    const config = strapi.config.get('plugin::upload');
 
     // execute delete function of the provider
     if (file.provider === config.provider) {

@@ -109,7 +109,7 @@ module.exports = async ({ strapi }) => {
 
   await getService('users-permissions').initialize();
 
-  if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
+  if (!strapi.config.get('plugin::users-permissions.jwtSecret')) {
     if (process.env.NODE_ENV !== 'development') {
       throw new Error(
         `Missing jwtSecret. Please, set configuration variable "jwtSecret" for the users-permissions plugin in config/plugins.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`).

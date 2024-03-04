@@ -9,7 +9,7 @@ const { RateLimitError } = utils.errors;
 module.exports =
   (config, { strapi }) =>
   async (ctx, next) => {
-    let rateLimitConfig = strapi.config.get('plugin.users-permissions.ratelimit');
+    let rateLimitConfig = strapi.config.get('plugin::users-permissions.ratelimit');
 
     if (!rateLimitConfig) {
       rateLimitConfig = {

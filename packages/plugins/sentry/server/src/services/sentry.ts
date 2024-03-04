@@ -7,7 +7,7 @@ const createSentryService = (strapi: Strapi) => {
   let instance: typeof Sentry | null = null;
 
   // Retrieve user config and merge it with the default one
-  const config = strapi.config.get('plugin.sentry') as Config;
+  const config = strapi.config.get('plugin::sentry') as Config;
 
   return {
     /**

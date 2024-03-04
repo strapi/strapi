@@ -201,7 +201,7 @@ const mergeCustomizer = (dest: any, src: any) => {
  * @param {object} schema
  */
 const addGraphqlSchema = (schema: any) => {
-  _.mergeWith(strapi.config.get('plugin.i18n.schema.graphql'), schema, mergeCustomizer);
+  _.mergeWith(strapi.config.get('plugin::i18n.schema.graphql'), schema, mergeCustomizer);
 };
 
 /**

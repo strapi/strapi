@@ -128,7 +128,7 @@ const DEFAULT_BREAKPOINTS = {
   small: 500,
 };
 
-const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
+const getBreakpoints = () => strapi.config.get('plugin::upload.breakpoints', DEFAULT_BREAKPOINTS);
 
 const generateResponsiveFormats = async (file) => {
   const { responsiveDimensions = false } = await getService('upload').getSettings();
