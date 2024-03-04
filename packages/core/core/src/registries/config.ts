@@ -14,7 +14,7 @@ export default (initialConfig = {}, strapi?: Partial<LoadedStrapi>): ConfigProvi
       const newPath = path.replace('plugin.', 'plugin::');
 
       // strapi logger may not be loaded yet, so fall back to console
-      (strapi?.log?.info || console.info)(
+      (strapi?.log?.info ?? console.info)(
         `Using dot notation for model config namespaces is deprecated, for example "plugin::myplugin" should be used instead of "plugin.myplugin". Modifying requested path ${path} to ${newPath}`
       );
       return newPath;
