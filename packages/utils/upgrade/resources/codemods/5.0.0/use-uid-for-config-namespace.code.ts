@@ -1,9 +1,9 @@
 import { Transform } from 'jscodeshift';
 
 /**
- * Replaces string dot format for config get/set/has with uid format for 'plugin' namespace
+ * Replaces string dot format for config get/set/has with uid format for 'plugin' and 'api' namespace where possible
  * For example, `strapi.config.get('plugin.anyString')` will become `strapi.config.get('plugin::anyString')`
- * Also replaces 'api.' with 'api::' except when it's followed by 'rest' or 'responses' (the valid api config values in Strapi v4)
+ * Ignores api followed by 'rest' or 'responses' because those are the valid Strapi api config values in v4
  */
 const transform: Transform = (file, api) => {
   const jscodeshift = api.jscodeshift;
