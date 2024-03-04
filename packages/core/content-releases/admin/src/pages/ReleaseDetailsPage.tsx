@@ -68,6 +68,8 @@ import {
 import { useTypedDispatch } from '../store/hooks';
 import { getTimezoneOffset } from '../utils/time';
 
+import { getBadgeProps } from './ReleasesPage';
+
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
@@ -86,12 +88,19 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
+const StyledMenuItem = styled(Menu.Item)<{
+  disabled?: boolean;
+  variant?: 'neutral' | 'danger';
+}>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
   span {
     color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
+
+  &:hover {
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
   }
 `;
 
@@ -358,7 +367,13 @@ const ReleaseDetailsLayout = ({
       <HeaderLayout
         title={release.name}
         subtitle={
-          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {numberOfEntriesText +
+                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+            </Typography>
+            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+          </Flex>
         }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
@@ -402,14 +417,7 @@ const ReleaseDetailsLayout = ({
                     width="100%"
                   >
                     <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                      <Flex
-                        paddingTop={2}
-                        paddingBottom={2}
-                        alignItems="center"
-                        gap={2}
-                        hasRadius
-                        width="100%"
-                      >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <PencilIcon />
                         <Typography ellipsis>
                           {formatMessage({
@@ -419,15 +427,12 @@ const ReleaseDetailsLayout = ({
                         </Typography>
                       </Flex>
                     </StyledMenuItem>
-                    <StyledMenuItem disabled={!canDelete} onSelect={toggleWarningSubmit}>
-                      <Flex
-                        paddingTop={2}
-                        paddingBottom={2}
-                        alignItems="center"
-                        gap={2}
-                        hasRadius
-                        width="100%"
-                      >
+                    <StyledMenuItem
+                      disabled={!canDelete}
+                      onSelect={toggleWarningSubmit}
+                      variant="danger"
+                    >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />
                         <Typography ellipsis textColor="danger600">
                           {formatMessage({
