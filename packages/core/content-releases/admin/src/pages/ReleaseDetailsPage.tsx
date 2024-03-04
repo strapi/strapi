@@ -60,6 +60,8 @@ import {
 import { useTypedDispatch } from '../store/hooks';
 import { getTimezoneOffset } from '../utils/time';
 
+import { getBadgeProps } from './ReleasesPage';
+
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
@@ -350,7 +352,13 @@ export const ReleaseDetailsLayout = ({
       <HeaderLayout
         title={release.name}
         subtitle={
-          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {numberOfEntriesText +
+                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+            </Typography>
+            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+          </Flex>
         }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
