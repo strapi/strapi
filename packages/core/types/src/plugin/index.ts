@@ -3,16 +3,16 @@ import { env } from '@strapi/utils';
 import type { Strapi, Router, Controller, Service, Policy, Middleware } from '../core';
 import type { ContentTypeSchema } from '../struct';
 import type { Schemas } from '../schema';
-import type { Shared } from '../public';
+import type * as Public from '../public';
 import type * as UID from '../uid';
 import type { Constants, Extends, Or, Not } from '../utils';
 
 export type IsEnabled<
   TName extends keyof any,
   TSchemaUID extends UID.Schema
-> = TName extends keyof Shared.PluginActivation
+> = TName extends keyof Public.PluginActivation
   ? // Only if the plugin is enabled
-    Shared.PluginActivation[TName] extends infer TRule
+    Public.PluginActivation[TName] extends infer TRule
     ? Or<
         // Either if the schema definitions are still generic
         Not<Constants.AreSchemaRegistriesExtended>,

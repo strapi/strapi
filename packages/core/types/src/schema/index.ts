@@ -1,4 +1,4 @@
-import type { Registries } from '../public';
+import type * as Public from '../public';
 import type * as UID from '../uid';
 import type { If, Object, Guard } from '../utils';
 
@@ -11,11 +11,11 @@ export { Attribute };
  *
  * Both are fetched from the public registries.
  */
-export type Schemas = Registries.ContentTypesSchemas & Registries.ComponentsSchemas;
+export type Schemas = Public.ContentTypesSchemas & Public.ComponentsSchemas;
 
-export type ContentTypes = Registries.ContentTypesSchemas;
+export type ContentTypes = Public.ContentTypesSchemas;
 
-export type Components = Registries.ComponentsSchemas;
+export type Components = Public.ComponentsSchemas;
 
 export type ContentType<TContentTypeUID extends UID.ContentType = UID.ContentType> =
   ContentTypes[TContentTypeUID];
