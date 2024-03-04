@@ -11,14 +11,13 @@ export default (initialConfig = {}, strapi?: Partial<LoadedStrapi>): ConfigProvi
   // we will still support certain namespaces, currently only 'plugin.'
   const transformDeprecatedPaths = (path: PropertyName) => {
     if (isString(path) && path.startsWith('plugin.')) {
-      // strapi may not be loaded yet, so fall back to console
+      const newPath = path.replace('plugin.', 'plugin::');
+
+      // strapi logger may not be loaded yet, so fall back to console
       (strapi?.log?.info || console.info)(
-        `DEPRECATION: Use plugin:: prefix insetad of  requested config ${path} found at ${path.replace(
-          '.',
-          '::'
-        )}; `
+        `Using dot notation for model config namespaces is deprecated, for example "plugin::myplugin" should be used instead of "plugin.myplugin". Modifying requested path ${path} to ${newPath}`
       );
-      return path.replace('plugin.', 'plugin::');
+      return newPath;
     }
 
     return path;
