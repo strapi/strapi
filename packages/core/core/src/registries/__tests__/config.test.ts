@@ -61,6 +61,7 @@ describe('config', () => {
 
     expect(config.get('plugin.myplugin.foo')).toEqual('bar');
     expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+    expect(consoleSpy).not.toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
   test('get does NOT support deprecation for other prefixes', () => {
