@@ -64,7 +64,7 @@ export const ReleaseModal = ({
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
     const formattedDate = parse(time, 'HH:mm', new Date(date));
-    const timezoneWithoutOffset = timezone.slice(timezone.indexOf('_') + 1);
+    const timezoneWithoutOffset = timezone.split('_')[1];
     return zonedTimeToUtc(formattedDate, timezoneWithoutOffset);
   };
 
@@ -73,7 +73,7 @@ export const ReleaseModal = ({
    */
   const getTimezoneWithOffset = () => {
     const currentTimezone = timezoneList.find(
-      (timezone) => timezone.value.slice(timezone.value.indexOf('_') + 1) === initialValues.timezone
+      (timezone) => timezone.value.split('_')[1] === initialValues.timezone
     );
     return currentTimezone?.value || systemTimezone.value;
   };
@@ -96,9 +96,7 @@ export const ReleaseModal = ({
         onSubmit={(values) => {
           handleSubmit({
             ...values,
-            timezone: values.timezone
-              ? values.timezone.slice(values.timezone.indexOf('_') + 1)
-              : null,
+            timezone: values.timezone ? values.timezone.split('_')[1] : null,
             scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
           });
         }}
@@ -186,10 +184,7 @@ export const ReleaseModal = ({
                               }}
                               selectedDate={values.date || undefined}
                               required
-                              minDate={utcToZonedTime(
-                                new Date(),
-                                values.timezone.slice(values.timezone.indexOf('_') + 1)
-                              )}
+                              minDate={utcToZonedTime(new Date(), values.timezone.split('_')[1])}
                             />
                           </Box>
                           <Box width="100%">
@@ -266,9 +261,7 @@ const getTimezones = (selectedDate: Date) => {
   });
 
   const systemTimezone = timezoneList.find(
-    (timezone) =>
-      timezone.value.slice(timezone.value.indexOf('_') + 1) ===
-      Intl.DateTimeFormat().resolvedOptions().timeZone
+    (timezone) => timezone.value.split('_')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
   return { timezoneList, systemTimezone };
@@ -287,11 +280,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
 
       const updatedTimezone =
         values.timezone &&
-        timezoneList.find(
-          (tz) =>
-            tz.value.slice(tz.value.indexOf('_') + 1) ===
-            values.timezone!.slice(values.timezone!.indexOf('_') + 1)
-        );
+        timezoneList.find((tz) => tz.value.split('_')[1] === values.timezone!.split('_')[1]);
       if (updatedTimezone) {
         setFieldValue('timezone', updatedTimezone!.value);
       }
