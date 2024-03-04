@@ -2,12 +2,13 @@ import type { Schema } from '../..';
 import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
 
-export { ID, DocumentEngine as Engine } from './document-engine';
 export * as Middleware from './middleware';
 export * as Params from './params';
 export * from './plugin';
 export * from './result';
 export * from './service-instance';
+
+export type ID = string;
 
 export type Service = {
   (uid: Schema.ContentType['uid']): ServiceInstance;
