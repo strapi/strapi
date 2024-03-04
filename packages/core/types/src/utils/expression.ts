@@ -85,5 +85,5 @@ export type Intersect<TValues extends unknown[]> = TValues extends [
   infer THead,
   ...infer TTail extends unknown[]
 ]
-  ? Simplify<THead & If<Array.IsNotEmpty<TTail>, Intersect<TTail>, unknown>>
+  ? THead & If<Array.IsNotEmpty<TTail>, Intersect<TTail>, unknown>
   : never;
