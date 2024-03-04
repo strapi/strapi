@@ -25,7 +25,7 @@ describe('config', () => {
     expect(config.get('plugin::myplugin.foo')).toEqual('bar');
     expect(config.get('plugin::myplugin')).toEqual({ foo: 'bar' });
   });
-  test('supports deprecation for plugin.', () => {
+  test('get supports deprecation for plugin.', () => {
     const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
 
     const config = configProvider({
@@ -36,7 +36,19 @@ describe('config', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
     consoleSpy.mockRestore();
   });
-  test('logs deprecation with strapi logger if avaialable', () => {
+  test('set supports deprecation for plugin.', () => {
+    const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+    const config = configProvider({
+      'plugin::myplugin': { foo: 'bar' },
+    });
+    config.set('plugin.myplugin.thing', 'val');
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+
+    expect(config.get('plugin::myplugin.thing')).toEqual('val');
+    consoleSpy.mockRestore();
+  });
+  test('logs deprecation with strapi logger if available', () => {
     const consoleSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
 
     const infoSpy = jest.fn();
