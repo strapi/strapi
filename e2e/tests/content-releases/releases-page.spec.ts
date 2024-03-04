@@ -70,7 +70,17 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         name: 'Date',
       })
       .click();
-    await page.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }).click();
+
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    await page.getByRole('gridcell', { name: formattedDate }).click();
 
     await page
       .getByRole('combobox', {
