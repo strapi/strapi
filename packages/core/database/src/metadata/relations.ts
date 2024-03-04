@@ -99,7 +99,7 @@ const createOneToOne = (
         options
       );
     } else {
-      createJoinColum(
+      createJoinColumn(
         metadata,
         {
           attribute,
@@ -183,7 +183,7 @@ const createManyToOne = (
       options
     );
   } else {
-    createJoinColum(
+    createJoinColumn(
       metadata,
       {
         attribute,
@@ -419,7 +419,7 @@ const createMorphMany = (
 /**
  * Creates a join column info and add them to the attribute meta
  */
-const createJoinColum = (
+const createJoinColumn = (
   metadata: Metadata,
   { attribute, attributeName }: JoinColumnOptions,
   options: MetadataOptions
