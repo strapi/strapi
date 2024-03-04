@@ -356,6 +356,7 @@ class StrapiApp {
       }
     });
 
+    this.getPlugin('content-manager').apis.con;
     // TODO: remove once we can add the link via a document action instead
     this.injectContentManagerComponent('editView', 'right-links', {
       name: 'history',

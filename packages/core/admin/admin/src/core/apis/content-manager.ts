@@ -6,6 +6,7 @@
  */
 
 import { ReviewWorkflowsPanel } from '../../../../ee/admin/src/content-manager/pages/EditView/components/ReviewWorkflowsPanel';
+import { HISTORY_ACTIONS } from '../../content-manager/history/components/HistoryActions';
 import {
   DEFAULT_ACTIONS,
   type DocumentActionDescription,
@@ -80,6 +81,7 @@ interface DocumentActionComponent
     | 'discard'
     | 'edit'
     | 'edit-the-model'
+    | 'history'
     | 'publish'
     | 'unpublish'
     | 'update';
@@ -105,6 +107,7 @@ class ContentManagerPlugin {
     ...DEFAULT_ACTIONS,
     ...DEFAULT_TABLE_ROW_ACTIONS,
     ...DEFAULT_HEADER_ACTIONS,
+    ...HISTORY_ACTIONS,
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel, ReviewWorkflowsPanel];
   headerActions: HeaderActionComponent[] = [];
