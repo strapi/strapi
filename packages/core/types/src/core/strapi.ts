@@ -50,7 +50,9 @@ export interface Strapi extends Container {
   controllers: Record<string, Core.Controller>;
   controller(uid: UID.Controller): Core.Controller;
   contentTypes: Schema.ContentTypes;
-  contentType(name: UID.ContentType): Schema.ContentType;
+  contentType<TContentTypeUID extends UID.ContentType>(
+    name: TContentTypeUID
+  ): Schema.ContentType<TContentTypeUID>;
   policies: Record<string, Core.Policy>;
   policy(name: string): Core.Policy;
   middlewares: Record<string, Core.MiddlewareFactory>;
@@ -78,9 +80,9 @@ export interface Strapi extends Container {
   bootstrap(): Promise<Strapi>;
   startWebhooks(): Promise<void>;
   runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
-  getModel<TUID extends UID.Schema>(
-    uid: TUID
-  ): TUID extends UID.ContentType ? Schema.ContentType : Schema.Component;
+  getModel<TSchemaUID extends UID.Schema>(
+    uid: TSchemaUID
+  ): Schema.Schema<TSchemaUID>
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 
