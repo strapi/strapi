@@ -82,7 +82,9 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       })
       .click();
 
-    const formattedDate = new Date().toLocaleDateString('en-US', {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
