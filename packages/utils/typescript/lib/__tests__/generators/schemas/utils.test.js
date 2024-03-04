@@ -120,9 +120,9 @@ describe('Utils', () => {
 
   describe('Get Schema Extends Type Name', () => {
     test.each([
-      [{ modelType: 'component', kind: null }, 'Schema.Component'],
-      [{ modelType: 'contentType', kind: 'singleType' }, 'Schema.SingleType'],
-      [{ modelType: 'contentType', kind: 'collectionType' }, 'Schema.CollectionType'],
+      [{ modelType: 'component', kind: null }, 'Struct.ComponentSchema'],
+      [{ modelType: 'contentType', kind: 'singleType' }, 'Struct.SingleTypeSchema'],
+      [{ modelType: 'contentType', kind: 'collectionType' }, 'Struct.CollectionTypeSchema'],
       [{ modelType: 'invalidType', kind: 'foo' }, null],
     ])("Expect %p to generate %p as the base type for a schema's interface", (schema, expected) => {
       expect(getSchemaExtendsTypeName(schema)).toBe(expected);
