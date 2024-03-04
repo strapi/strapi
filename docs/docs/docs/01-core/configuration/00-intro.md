@@ -80,7 +80,7 @@ module.exports = () => ({
 });
 ```
 
-However, the `config` attribute is flattened and removed so that its values are accessible at, for example, `strapi.config.get('plugin.graphql.endpoint')`
+However, the `config` attribute is flattened and removed so that its values are accessible at, for example, `strapi.config.get('plugin::graphql.endpoint')`
 
 NOTE: Because this configuration contains user and plugin keys and Strapi does not yet provide a method to extend the definitions, this configuration is not strictly typed and will not be loaded from the environment variables
 

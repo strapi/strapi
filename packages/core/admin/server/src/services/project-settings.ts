@@ -59,7 +59,7 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
         tmpPath: file.path,
         // TODO
         // @ts-expect-error define the correct return type
-        provider: strapi.config.get('plugin.upload').provider,
+        provider: strapi.config.get('plugin::upload').provider,
       });
     })
   );
@@ -134,7 +134,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
       // Skip if the file was not uploaded with the current provider
       // TODO
       // @ts-expect-error define the correct return type
-      if (strapi.config.get('plugin.upload').provider !== previousSettings[inputName].provider) {
+      if (strapi.config.get('plugin::upload').provider !== previousSettings[inputName].provider) {
         return;
       }
 
