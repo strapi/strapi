@@ -90,8 +90,10 @@ export default {
 
     const where: Record<string, any> = {};
     if (!isSourceComponent) {
-      where.locale = locale;
       where.publishedAt = status === 'published' ? { $ne: null } : null;
+      if (locale) {
+        where.locale = locale;
+      }
     }
 
     let currentEntity = { id: null };

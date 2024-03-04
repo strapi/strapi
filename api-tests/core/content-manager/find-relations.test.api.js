@@ -131,6 +131,33 @@ const addPublishedAtCheck = (value) => {
   publishedAt: value;
 };
 
+const allRelations = {
+  products_ow: {
+    isComponent: false,
+  },
+  products_oo: {
+    isComponent: false,
+  },
+  products_mo: {
+    isComponent: false,
+  },
+  products_om: {
+    isComponent: false,
+  },
+  products_mm: {
+    isComponent: false,
+  },
+  products_mw: {
+    isComponent: false,
+  },
+  ['myCompo.compo_products_ow']: {
+    isComponent: true,
+  },
+  ['myCompo.compo_products_mw']: {
+    isComponent: true,
+  },
+};
+
 describe('Find Relations', () => {
   const builder = createTestBuilder();
 
@@ -156,7 +183,7 @@ describe('Find Relations', () => {
     const [skate, chair, candle, table, porte, fenetre] = await Promise.all([
       strapi.documents(productUid).create({ data: { name: 'Skate' } }),
       strapi.documents(productUid).create({ data: { name: 'Chair' } }),
-      strapi.documents(productUid).create({ data: { name: 'Candel' } }),
+      strapi.documents(productUid).create({ data: { name: 'Candle' } }),
       strapi.documents(productUid).create({ data: { name: 'Table' } }),
       // We create products in French in order to test that we can cant find
       // aviailable relations in a different locale
@@ -176,8 +203,8 @@ describe('Find Relations', () => {
 
     // Publish Skate and Chair
     const [publishedSkate, publishedChair] = await Promise.all([
-      strapi.documents(productUid).publish(productMapping.skate.id),
-      strapi.documents(productUid).publish(productMapping.chair.id),
+      strapi.documents(productUid).publish(productMapping.skate.documentId),
+      strapi.documents(productUid).publish(productMapping.chair.documentId),
     ]);
     data.products.published.push(publishedSkate.versions[0], publishedChair.versions[0]);
 
@@ -195,36 +222,25 @@ describe('Find Relations', () => {
       },
     };
 
-    const populateAllRelations = [
-      'products_ow',
-      'products_oo',
-      'products_mo',
-      'products_om',
-      'products_mm',
-      'products_mw',
-      'myCompo.compo_products_ow',
-      'myCompo.compo_products_mw',
-    ];
-
     // Create 2 draft shops
     const [draftShop, draftEmptyShop] = await Promise.all([
       strapi.documents(shopUid).create({
         data: {
           name: 'Cazotte Shop',
-          products_ow: draftRelations.products_ow.id,
-          products_oo: draftRelations.products_oo.id,
-          products_mo: draftRelations.products_mo.id,
-          products_om: draftRelations.products_om.map((product) => product.id),
-          products_mm: draftRelations.products_mm.map((product) => product.id),
-          products_mw: draftRelations.products_mw.map((product) => product.id),
+          products_ow: draftRelations.products_ow.documentId,
+          products_oo: draftRelations.products_oo.documentId,
+          products_mo: draftRelations.products_mo.documentId,
+          products_om: draftRelations.products_om.map((product) => product.documentId),
+          products_mm: draftRelations.products_mm.map((product) => product.documentId),
+          products_mw: draftRelations.products_mw.map((product) => product.documentId),
           myCompo: {
-            compo_products_ow: draftRelations.myCompo.compo_products_ow.id,
+            compo_products_ow: draftRelations.myCompo.compo_products_ow.documentId,
             compo_products_mw: draftRelations.myCompo.compo_products_mw.map(
-              (product) => product.id
+              (product) => product.documentId
             ),
           },
         },
-        populate: populateAllRelations,
+        populate: Object.keys(allRelations),
       }),
       strapi.documents(shopUid).create({
         data: {
@@ -233,17 +249,17 @@ describe('Find Relations', () => {
             compo_products_mw: [],
           },
         },
-        populate: populateAllRelations,
+        populate: Object.keys(allRelations),
       }),
     ]);
     data.shops.draft.push(draftShop, draftEmptyShop);
 
     // Publish both shops
     const [publishedShop, publishedEmptyShop] = await Promise.all([
-      strapi.documents(shopUid).publish(draftShop.id, {
-        populate: populateAllRelations,
+      strapi.documents(shopUid).publish(draftShop.documentId, {
+        populate: Object.keys(allRelations),
       }),
-      strapi.documents(shopUid).publish(draftEmptyShop.id),
+      strapi.documents(shopUid).publish(draftEmptyShop.documentId),
     ]);
     data.shops.published.push(publishedShop.versions[0], publishedEmptyShop.versions[0]);
 
@@ -259,7 +275,7 @@ describe('Find Relations', () => {
     // Define the ids of the shops we will use for testing
     const testData = {
       component: {
-        // If the target attribute represents a component, the id we use to
+        // If the source of the relation is a component, the id we use to
         // query for relations is the entity id of the component, not the id of the
         // parent entity
         modelUID: compoUid,
@@ -267,9 +283,10 @@ describe('Find Relations', () => {
         idEmptyShop: data.shops.draft[1].myCompo.id,
       },
       entity: {
+        // If the source of the relation is a content type, we use the documentId
         modelUID: shopUid,
-        id: data.shops.draft[0].id,
-        idEmptyShop: data.shops.draft[1].id,
+        id: data.shops.draft[0].documentId,
+        idEmptyShop: data.shops.draft[1].documentId,
       },
     };
     data.testData = testData;
@@ -283,7 +300,7 @@ describe('Find Relations', () => {
   /**
    * Find all the ids of the products that are related to the entity
    */
-  const getRelatedProductIds = (isComponent, status, fieldName) => {
+  const getRelatedProductDocumentIds = (isComponent, status, fieldName) => {
     let relatedProductIds;
     if (isComponent) {
       relatedProductIds = data.shopRelations[status].myCompo[fieldName];
@@ -292,9 +309,9 @@ describe('Find Relations', () => {
     }
 
     if (Array.isArray(relatedProductIds)) {
-      relatedProductIds = relatedProductIds.map((relation) => relation?.id);
+      relatedProductIds = relatedProductIds.map((relation) => relation?.documentId);
     } else {
-      relatedProductIds = [relatedProductIds?.id];
+      relatedProductIds = [relatedProductIds?.documentId];
     }
 
     return relatedProductIds.filter(Boolean);
@@ -386,7 +403,7 @@ describe('Find Relations', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${shopUid}/${data.shops.draft[0].id}/unkown`,
+          url: `/content-manager/relations/${shopUid}/${data.testData.entity.id}/unkown`,
           qs: {
             status: 'draft',
           },
@@ -407,7 +424,7 @@ describe('Find Relations', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${shopUid}/${data.shops.draft[0].id}/name`,
+          url: `/content-manager/relations/${shopUid}/${data.testData.entity.id}/name`,
           qs: {
             status: 'draft',
           },
@@ -509,7 +526,7 @@ describe('Find Relations', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${compoUid}/${data.shops.draft[0].myCompo.id}/unknown`,
+          url: `/content-manager/relations/${compoUid}/${data.testData.component.id}/unknown`,
         });
 
         expect(res.status).toBe(400);
@@ -527,7 +544,7 @@ describe('Find Relations', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${compoUid}/${data.shops.draft[0].myCompo.id}/name`,
+          url: `/content-manager/relations/${compoUid}/${data.testData.component.id}/name`,
         });
 
         expect(res.status).toBe(400);
@@ -546,24 +563,20 @@ describe('Find Relations', () => {
 
   // Run tests against every type of relation in the shop content type, always
   // from the default locale
-  describe.each([
-    ['products_ow', false],
-    ['products_oo', false],
-    ['products_mo', false],
-    ['products_om', false],
-    ['products_mm', false],
-    ['products_mw', false],
-    ['compo_products_ow', true],
-    ['compo_products_mw', true],
-  ])('Relational field (%s) (is in component: %s)', (fieldName, isComponent) => {
+  describe.each(
+    Object.entries(allRelations).map(([fieldName, { isComponent }]) => [
+      fieldName.split('.').at(-1),
+      isComponent,
+    ])
+  )('Relational field (%s) (is in component: %s)', (fieldName, isComponent) => {
     // Perform the same tests for both draft and published entries
     // Components don't have a published status
     const statuses = isComponent ? [['draft']] : [['draft'], ['published']];
 
     describe.each(statuses)(`Get %s relation(s)`, (status) => {
       const qs = {
+        // Not sending a locale will default to the default locale
         status,
-        locale: defaultLocale,
       };
 
       describe('Find Available', () => {
@@ -576,6 +589,7 @@ describe('Find Relations', () => {
               const { modelUID, idEmptyShop } = isComponent
                 ? data.testData.component
                 : data.testData.entity;
+
               const id = useEmptyShop ? idEmptyShop : undefined;
 
               const res = await rq({
@@ -600,10 +614,10 @@ describe('Find Relations', () => {
                   // Results form the request should be sorted by name
                   // but are not necessarily in the same order as data.products
                   .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((product) => product.id)
+                  .map((product) => product.documentId)
               );
 
-              const idsToOmit = [productsInThisLocale[1]?.id].filter(Boolean);
+              const idsToOmit = [productsInThisLocale[1]?.documentId].filter(Boolean);
               const omitIdsRes = await rq({
                 method: 'GET',
                 url: `/content-manager/relations/${modelUID}/${fieldName}`,
@@ -616,7 +630,7 @@ describe('Find Relations', () => {
 
               expect(omitIdsRes.body.results).toHaveLength(
                 productsInThisLocale
-                  .map((product) => product.id)
+                  .map((product) => product.documentId)
                   .filter((id) => !idsToOmit.includes(id)).length
               );
             });
@@ -641,13 +655,14 @@ describe('Find Relations', () => {
           const availableProducts = data.products[status]
             .filter((product) => {
               return (
-                !getRelatedProductIds(isComponent, status, fieldName).includes(product.id) &&
-                product.locale === defaultLocale
+                !getRelatedProductDocumentIds(isComponent, status, fieldName).includes(
+                  product.documentId
+                ) && product.locale === defaultLocale
               );
             })
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((product) => ({
-              id: product.id,
+              id: product.documentId,
               ...addPublishedAtCheck(status === 'published' ? expect().not.toBeNull() : null),
             }));
 
@@ -656,7 +671,7 @@ describe('Find Relations', () => {
             availableProducts
           );
 
-          const idsToOmit = [availableProducts[1]?.id].filter(Boolean);
+          const idsToOmit = [availableProducts[1]?.documentId].filter(Boolean);
           const omitIdsRes = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
@@ -668,7 +683,7 @@ describe('Find Relations', () => {
           });
 
           expect(omitIdsRes.body.results).toHaveLength(
-            availableProducts.filter((product) => !idsToOmit.includes(product.id)).length
+            availableProducts.filter((product) => !idsToOmit.includes(product.documentId)).length
           );
         });
 
@@ -712,14 +727,16 @@ describe('Find Relations', () => {
                   (product) =>
                     new RegExp(searchTerm, 'i').test(product.name) &&
                     product.locale === defaultLocale &&
-                    !getRelatedProductIds(isComponent, status, fieldName).includes(product.id)
+                    !getRelatedProductDocumentIds(isComponent, status, fieldName).includes(
+                      product.documentId
+                    )
                 )
                 .sort((a, b) => a.name.localeCompare(b.name));
 
               expect(res.body.results).toHaveLength(expected.length);
               expect(res.body.results).toMatchObject(
                 expected.map((product) => ({
-                  id: product.id,
+                  id: product.documentId,
                   name: product.name,
                   ...addPublishedAtCheck(status === 'published' ? expect().not.toBeNull() : null),
                 }))
@@ -741,12 +758,16 @@ describe('Find Relations', () => {
 
           expect(res.status).toBe(200);
 
-          const relatedProductIds = getRelatedProductIds(isComponent, status, fieldName);
+          const relatedProductDocumentIds = getRelatedProductDocumentIds(
+            isComponent,
+            status,
+            fieldName
+          );
 
-          expect(res.body.results).toHaveLength(relatedProductIds.length);
+          expect(res.body.results).toHaveLength(relatedProductDocumentIds.length);
           expect(res.body.results.map((result) => result.id)).toEqual(
             // TODO we aren't accounting for the order of the results here
-            expect.arrayContaining(relatedProductIds)
+            expect.arrayContaining(relatedProductDocumentIds)
           );
         });
 

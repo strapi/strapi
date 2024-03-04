@@ -3,9 +3,11 @@ import { errors } from '@strapi/utils';
 
 type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 
-export type RelationResult = Documents.AnyDocument & {
+export type RelationResult = {
+  id: Documents.ID;
   publishedAt: string | null;
   locale?: Documents.Params.Locale;
+  [key: string]: any;
 };
 
 export interface Pagination {
