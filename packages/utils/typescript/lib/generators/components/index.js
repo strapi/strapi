@@ -46,7 +46,7 @@ const generateComponentsDefinitions = async (options = {}) => {
     ...formattedSchemasDefinitions,
 
     // Global
-    generateSharedExtensionDefinition('Components', componentsDefinitions),
+    generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions),
   ];
 
   const output = emitDefinitions(allDefinitions);

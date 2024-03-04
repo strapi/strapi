@@ -6,24 +6,22 @@ import type * as Public from '../public';
 /**
  * Schemas' UIDs based on the public schema registries.
  *
- * It includes both ContentTypesSchemas and ComponentsSchemas
+ * It includes both ContentTypeSchemas and ComponentSchemas
  */
 export type Schema = ContentType | Component;
 
 /**
  * Content-Types' UIDs based on the public content-type registry.
  */
-export type X = Public.ContentTypesSchemas;
-// export type D = keyof Public.ContentTypesSchemas;
 export type ContentType = Internal.Registry.Keys<
-  Public.ContentTypesSchemas,
+  Public.ContentTypeSchemas,
   Internal.UID.ContentType
 >;
 
 /**
  * Components' UIDs based on the public component registry.
  */
-export type Component = Internal.Registry.Keys<Public.ComponentsSchemas, Internal.UID.Component>;
+export type Component = Internal.Registry.Keys<Public.ComponentSchemas, Internal.UID.Component>;
 
 /**
  * Union of every components' category, based on the public component registry
@@ -38,7 +36,7 @@ export type ComponentCategory = Component extends Internal.UID.Component<infer T
  * If no collection type is found, fallback to a generic content-type UID.
  */
 export type CollectionType = Guard.Never<
-  Extract<Object.KeysBy<Public.ContentTypesSchemas, Struct.CollectionTypeSchema>, ContentType>,
+  Extract<Object.KeysBy<Public.ContentTypeSchemas, Struct.CollectionTypeSchema>, ContentType>,
   Internal.UID.ContentType
 >;
 
@@ -48,7 +46,7 @@ export type CollectionType = Guard.Never<
  * If no collection type is found, fallback to a generic content-type UID.
  */
 export type SingleType = Guard.Never<
-  Extract<Object.KeysBy<Public.ContentTypesSchemas, Struct.SingleTypeSchema>, ContentType>,
+  Extract<Object.KeysBy<Public.ContentTypeSchemas, Struct.SingleTypeSchema>, ContentType>,
   Internal.UID.ContentType
 >;
 
@@ -62,15 +60,15 @@ export type Middleware = Internal.Registry.Keys<Public.Middlewares, Internal.UID
 
 // TODO: [TS2] Maybe need some refactoring
 export type IsCollectionType<TSchemaUID extends Schema> = TSchemaUID extends CollectionType
-  ? Extends<Public.ContentTypesSchemas[TSchemaUID], Struct.CollectionTypeSchema>
+  ? Extends<Public.ContentTypeSchemas[TSchemaUID], Struct.CollectionTypeSchema>
   : Constants.False;
 
 export type IsSingleType<TSchemaUID extends Schema> = TSchemaUID extends SingleType
-  ? Extends<Public.ContentTypesSchemas[TSchemaUID], Struct.SingleTypeSchema>
+  ? Extends<Public.ContentTypeSchemas[TSchemaUID], Struct.SingleTypeSchema>
   : Constants.False;
 
 export type IsComponent<TSchemaUID extends Schema> = TSchemaUID extends Component
-  ? Extends<Public.ComponentsSchemas[TSchemaUID], Struct.ComponentSchema>
+  ? Extends<Public.ComponentSchemas[TSchemaUID], Struct.ComponentSchema>
   : Constants.False;
 
 export type IsContentType<TSchemaUID extends Schema> = TSchemaUID extends ContentType

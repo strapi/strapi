@@ -2,11 +2,11 @@ import type { Service, Controller, Policy, Middleware } from '../core';
 import type { UID } from '../internal';
 import type { ComponentSchema, ContentTypeSchema } from '../struct';
 
-export interface ContentTypesSchemas {
+export interface ContentTypeSchemas {
   [TKey: UID.ContentType]: ContentTypeSchema;
 }
 
-export interface ComponentsSchemas {
+export interface ComponentSchemas {
   [TKey: UID.Component]: ComponentSchema;
 }
 

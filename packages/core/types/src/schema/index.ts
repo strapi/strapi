@@ -11,11 +11,11 @@ export { Attribute };
  *
  * Both are fetched from the public registries.
  */
-export type Schemas = Public.ContentTypesSchemas & Public.ComponentsSchemas;
+export type Schemas = Public.ContentTypeSchemas & Public.ComponentSchemas;
 
-export type ContentTypes = Public.ContentTypesSchemas;
+export type ContentTypes = Public.ContentTypeSchemas;
 
-export type Components = Public.ComponentsSchemas;
+export type Components = Public.ComponentSchemas;
 
 export type ContentType<TContentTypeUID extends UID.ContentType = UID.ContentType> =
   ContentTypes[TContentTypeUID];
@@ -83,11 +83,6 @@ export type AttributeNames<TSchemaUID extends UID.Schema> = Extract<
   keyof Attributes<TSchemaUID>,
   string
 >;
-
-type B = 'id' | string;
-type A = Extract<keyof any, string>;
-
-type C = B extends A ? true : false;
 
 export type AttributesByType<
   TSchemaUID extends UID.Schema,
