@@ -43,10 +43,6 @@ export interface Module {
   controllers: Record<string, Common.Controller>;
 }
 
-const escapedNamespace = (namespace: string) => {
-  return namespace.replace('::', '.');
-};
-
 // Removes the namespace from a map with keys prefixed with a namespace
 const removeNamespacedKeys = <T extends Record<string, unknown>>(map: T, namespace: string) => {
   return _.mapKeys(map, (value, key) => removeNamespace(key, namespace));
@@ -108,20 +104,7 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       return rawModule.routes ?? {};
     },
     config(path: string, defaultValue: unknown) {
-      let val = strapi.get('config').get(`${namespace}.${path}`);
-
-      if (val) {
-        return val;
-      }
-
-      // if we didn't find it in, for example, api::article, look in api.article and warn about the deprecation
-      val = strapi.get('config').get(`${escapedNamespace(namespace)}.${path}`);
-      if (val) {
-        strapi.log.warn('Config paths should use the uid namespace with :: instead of .');
-        return val;
-      }
-
-      return defaultValue;
+      return strapi.get('config').get(`${namespace}.${path}`, defaultValue);
     },
     contentType(ctName: Common.UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);
