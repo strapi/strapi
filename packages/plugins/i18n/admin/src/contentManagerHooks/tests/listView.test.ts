@@ -24,7 +24,6 @@ describe('addColumnToTableHook', () => {
     },
     metadatas: {},
     options: {
-      // @ts-expect-error – it's injected by this plugin
       i18n: {
         localized: false,
       },
@@ -59,7 +58,6 @@ describe('addColumnToTableHook', () => {
       layout: {
         ...DEFAULT_LAYOUT,
         options: {
-          // @ts-expect-error – it's injected by this plugin
           i18n: {
             localized: true,
           },
