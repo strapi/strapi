@@ -182,7 +182,7 @@ const EditView = () => {
             tokenType: TRANSFER_TOKEN_TYPE,
           });
 
-          navigate(res.data.id.toString(), {
+          navigate(`../transfer-tokens/${res.data.id.toString()}`, {
             replace: true,
             state: { transferToken: res.data },
           });
