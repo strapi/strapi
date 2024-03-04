@@ -110,7 +110,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `cd ${appDir} && npm run develop`,
+    command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
     url: `http://127.0.0.1:${port}`,
     /* default Strapi server startup timeout to 160s */
     timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
