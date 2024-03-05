@@ -3,9 +3,11 @@ import { errors } from '@strapi/utils';
 
 type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 
-export type RelationResult = Documents.AnyDocument & {
+export type RelationResult = {
+  documentId: Documents.ID;
   publishedAt: string | null;
   locale?: Documents.Params.Locale;
+  [key: string]: unknown;
 };
 
 export interface Pagination {
@@ -36,7 +38,6 @@ export declare namespace FindAvailable {
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       id?: Entity.ID;
       locale?: Documents.Params.Locale;
-      status?: Documents.Params.PublicationState.Kind;
       _q?: string;
       _filter?: string;
       idsToOmit?: Documents.ID[];
@@ -60,7 +61,6 @@ export declare namespace FindExisting {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       locale?: string | null;
-      status?: Documents.Params.PublicationState.Kind;
     };
   }
 

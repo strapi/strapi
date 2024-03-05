@@ -22,11 +22,12 @@ export const normalizeRelation = (
 ) => {
   const nextRelation: NormalizedRelation = {
     ...relation,
+    // @ts-expect-error - relation contracts dont specify that the mainField is a string
     mainField: relation[mainFieldName],
   };
 
   if (shouldAddLink) {
-    nextRelation.href = getRelationLink(targetModel, nextRelation.id);
+    nextRelation.href = getRelationLink(targetModel, nextRelation.documentId);
   }
 
   nextRelation.publicationState = false;

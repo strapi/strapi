@@ -5,8 +5,17 @@ import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
+import { areDatesEqual } from '../utils/dates';
 
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
+const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
+
+interface RelationEntity {
+  id: Entity.ID;
+  documentId: Documents.ID;
+  updatedAt: string | Date;
+  publishedAt?: string | Date; // Assuming this might be used based on your snippet
+  [key: string]: unknown; // To allow for additional properties
+}
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
@@ -55,12 +64,7 @@ const mapResults = (results: Array<any>) => {
 };
 
 export default {
-  async extractAndValidateRequestInfo(
-    ctx: any,
-    id?: Entity.ID,
-    status?: Documents.Params.PublicationState.Kind,
-    locale?: Documents.Params.Locale
-  ) {
+  async extractAndValidateRequestInfo(ctx: any, id?: Entity.ID, locale?: Documents.Params.Locale) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 
@@ -89,12 +93,10 @@ export default {
     }
 
     const where: Record<string, any> = {};
-    if (!isSourceComponent) {
+    if (!isSourceComponent && locale) {
       where.locale = locale;
-      where.publishedAt = status === 'published' ? { $ne: null } : null;
     }
 
-    let currentEntity = { id: null };
     if (id) {
       if (!isSourceComponent) {
         where.documentId = id;
@@ -107,14 +109,15 @@ export default {
         .populateFromQuery(permissionQuery)
         .build();
 
-      currentEntity = await strapi.db.query(model).findOne({
+      const currentEntity = await strapi.db.query(model).findOne({
         where,
         populate,
       });
 
-      // If an Id is provided we are asking to find the relations (available or
-      // existing) on an existing entity. We need to check if the entity exists
+      // We need to check if the entity exists
       // and if the user has the permission to read it in this way
+      // There may be multiple entities (publication states) under this
+      // documentId + locale. We only need to check if one exists
       if (!currentEntity) {
         throw new errors.NotFoundError();
       }
@@ -138,8 +141,15 @@ export default {
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq([mainField, PUBLISHED_AT_ATTRIBUTE, 'documentId']);
-    if (locale) {
+    const fieldsToSelect = uniq([
+      mainField,
+      PUBLISHED_AT_ATTRIBUTE,
+      UPDATED_AT_ATTRIBUTE,
+      'documentId',
+    ]);
+
+    // @ts-expect-error TODO improve i18n detection
+    if (targetSchema?.pluginOptions?.i18n?.localized) {
       fieldsToSelect.push('locale');
     }
 
@@ -150,7 +160,6 @@ export default {
       sourceSchema,
       targetSchema,
       targetField,
-      currentEntityId: currentEntity?.id,
     };
   },
 
@@ -159,17 +168,15 @@ export default {
 
     const { id } = ctx.request.query;
     const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status || 'draft';
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale);
 
     const {
       targetField,
       fieldsToSelect,
       mainField,
-      sourceSchema: { uid: sourceUid },
+      sourceSchema: { uid: sourceUid, modelType: sourceModelType },
       targetSchema: { uid: targetUid },
-      currentEntityId,
     } = validation;
 
     const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
@@ -187,12 +194,6 @@ export default {
       ...permissionQuery,
     };
 
-    const isPublished = status === 'published';
-    // Only ever findAvailable (e.g. populate relation select) on a draft entry
-    addFiltersClause(queryParams, {
-      [PUBLISHED_AT_ATTRIBUTE]: isPublished ? { $ne: null } : null,
-    });
-
     // We are looking for available content type relations and should be
     // filtering by valid documentIds only
     if (idsToOmit?.length > 0) {
@@ -207,21 +208,28 @@ export default {
       addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
     }
 
-    if (currentEntityId) {
-      // If we have been given an entity id, we need to filter out the
-      // relations that are already linked to the current entity
+    if (id) {
+      // If we have been given an id (document or entity), we need to filter out the
+      // relations that are already linked to the current id
       const subQuery = strapi.db.queryBuilder(sourceUid);
 
-      // The alias refers to the DB table of the target model
+      // The alias refers to the DB table of the target content type model
       const alias = subQuery.getAlias();
 
       const where: Record<string, any> = {
-        id: currentEntityId,
         [`${alias}.id`]: { $notNull: true },
-        // Always find available draft entries, as we will be potentially
-        // connecting them from the CM edit view
-        [`${alias}.published_at`]: { $notNull: isPublished },
+        [`${alias}.document_id`]: { $notNull: true },
       };
+
+      const isSourceComponent = sourceModelType === 'component';
+      if (isSourceComponent) {
+        // If the source is a component, we need to filter by the component's
+        // numeric entity id
+        where.id = id;
+      } else {
+        // If the source is a content type, we need to filter by document id
+        where.document_id = id;
+      }
 
       if ((idsToInclude?.length ?? 0) !== 0) {
         where[`${alias}.document_id`].$notIn = idsToInclude;
@@ -230,22 +238,50 @@ export default {
       const knexSubQuery = subQuery
         .where(where)
         .join({ alias, targetField })
-        .select(`${alias}.id`)
+        .select(`${alias}.document_id`)
         .getKnexQuery();
 
-      addFiltersClause(queryParams, { id: { $notIn: knexSubQuery } });
+      // We add a filter to exclude the documentIds found by the subQuery
+      addFiltersClause(queryParams, { documentId: { $notIn: knexSubQuery } });
     }
 
-    // We find a page of the targeted model (relation) to display in the
-    // relation select component in the CM edit view
     const res = await strapi.entityService.findPage(
       targetUid as Common.UID.ContentType,
       queryParams
     );
 
+    const resultsGroupedByDocId: Record<string, RelationEntity[]> = res.results.reduce(
+      // TODO improve types
+      (acc: any, result) => {
+        const documentId = result.documentId;
+        acc[documentId] = acc[documentId] || [];
+        acc[documentId].push(result);
+        return acc;
+      },
+      {}
+    );
+
+    const latestEntryForEachRelation = Object.values(resultsGroupedByDocId).reduce<
+      RelationEntity[]
+    >((acc, docIdResults) => {
+      if (docIdResults.length === 1) {
+        acc.push(docIdResults[0]);
+      } else {
+        const equalDates = areDatesEqual(docIdResults[0].updatedAt, docIdResults[1].updatedAt, 500);
+        const latestEntry = equalDates
+          ? docIdResults.find((entity) => entity.publishedAt)
+          : docIdResults.sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))[0];
+
+        if (latestEntry) {
+          acc.push(latestEntry);
+        }
+      }
+      return acc;
+    }, []);
+
     ctx.body = {
       ...res,
-      results: Array.isArray(res.results) ? mapResults(res.results) : [],
+      results: latestEntryForEachRelation,
     };
   },
 
@@ -253,16 +289,15 @@ export default {
     await validateFindExisting(ctx.request.query);
     const { id } = ctx.params;
     const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status || 'draft';
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale);
 
     const {
       targetField,
       fieldsToSelect,
       sourceSchema: { uid: sourceUid },
       targetSchema: { uid: targetUid },
-      currentEntityId,
+      currentEntity: { id: currentEntityId },
     } = validation;
 
     const entity = await strapi.db.query(sourceUid).findOne({
