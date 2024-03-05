@@ -31,7 +31,6 @@ import {
   useAPIErrorHandler,
   useNotification,
   useTracking,
-  RelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -39,6 +38,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
+import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';

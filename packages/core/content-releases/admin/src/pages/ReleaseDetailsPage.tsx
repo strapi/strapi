@@ -24,7 +24,6 @@ import {
   CheckPermissions,
   PageSizeURLQuery,
   PaginationURLQuery,
-  RelativeTime,
   Table,
   useAPIErrorHandler,
   useNotification,
@@ -48,6 +47,7 @@ import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
