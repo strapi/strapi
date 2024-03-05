@@ -107,7 +107,8 @@ class ContentManagerPlugin {
     ...DEFAULT_ACTIONS,
     ...DEFAULT_TABLE_ROW_ACTIONS,
     ...DEFAULT_HEADER_ACTIONS,
-    HistoryAction,
+    // TODO: also check license before adding history action
+    ...(window.strapi.future.isEnabled('history') ? [HistoryAction] : []),
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel, ReviewWorkflowsPanel];
   headerActions: HeaderActionComponent[] = [];

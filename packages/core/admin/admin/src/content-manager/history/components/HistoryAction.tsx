@@ -21,11 +21,6 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   const navigate = useNavigate();
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-  // TODO also check license
-  if (!window.strapi.future.isEnabled('history')) {
-    return null;
-  }
-
   return {
     icon: <StyledClock />,
     label: formatMessage({
