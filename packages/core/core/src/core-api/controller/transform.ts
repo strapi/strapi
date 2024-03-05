@@ -26,13 +26,18 @@ function isDZEntries(property: unknown): property is (Entry & { __component: UID
   return Array.isArray(property);
 }
 
+interface TransformOptions {
+  contentType?: Schema.ContentType | Schema.Component;
+  /**
+   * @deprecated this option is deprecated and will be removed in the next major version
+   */
+  useJsonAPIFormat?: boolean;
+}
+
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: {
-    contentType?: Schema.ContentType | Schema.Component;
-    useJsonAPIFormat?: boolean;
-  } = {
+  opts: TransformOptions = {
     useJsonAPIFormat: false,
   }
 ) => {
@@ -68,8 +73,8 @@ function transformComponent(
     return res;
   }
 
-  const { id, documentId, attributes } = res;
-  return { id, documentId, ...attributes };
+  const { id, attributes } = res;
+  return { id, ...attributes };
 }
 
 function transformEntry<T extends Entry | Entry[] | null>(
