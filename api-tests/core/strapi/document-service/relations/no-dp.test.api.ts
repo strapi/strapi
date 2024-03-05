@@ -147,13 +147,14 @@ describe.skip('Document Service relations', () => {
 
   describe('Non DP (Shop) -> DP (Product)', () => {
     const xToOneRelations = ['products_ow', 'products_oo', 'products_mo'];
+    const xToManyRelations = ['products_om', 'products_mm', 'products_mw'];
+    const allRelations = [...xToOneRelations, ...xToManyRelations];
 
     describe('X to One relation', () => {
       it('Connect to both draft and publish version by default', async () => {
-        // Create shop targeting a draft product
+        // Create shop targeting a draft product that also has a published version
         const shop = await shopDocuments.create({
           data: {
-            name: 'Shop1',
             products_mo: { documentId: 'Skate', locale: 'en' },
             products_oo: { documentId: 'Skate', locale: 'en' },
             products_ow: { documentId: 'Skate', locale: 'en' },
@@ -162,12 +163,38 @@ describe.skip('Document Service relations', () => {
           populate: xToOneRelations,
         });
 
-        // Products should be connected to both draft and published version
+        // Products should be connected to both draft and published version,
+        // but should only return the latest version by default
         xToOneRelations.forEach((relation) => {
-          expect(shop[relation]).toMatchObject([
-            { name: 'Skate-En', locale: 'en', publishedAt: null },
-            { name: 'Skate-En', locale: 'en', publishedAt: expect.any(String) },
-          ]);
+          expect(shop[relation]).toMatchObject({
+            name: 'Skate-En',
+            locale: 'en',
+            publishedAt: null,
+          });
+        });
+      });
+
+      it('Can get the published version of the relation', async () => {
+        // Create shop targeting a draft product that also has a published version
+        const shop = await shopDocuments.create({
+          data: {
+            products_mo: { documentId: 'Skate', locale: 'en' },
+            products_oo: { documentId: 'Skate', locale: 'en' },
+            products_ow: { documentId: 'Skate', locale: 'en' },
+          },
+          locale: 'en',
+          status: 'published',
+          populate: xToOneRelations,
+        });
+
+        // Products should be connected to both draft and published version,
+        // should return the published version of the relation as status is published
+        xToOneRelations.forEach((relation) => {
+          expect(shop[relation]).toMatchObject({
+            name: 'Skate-En',
+            locale: 'en',
+            publishedAt: expect.any(String),
+          });
         });
       });
 
@@ -180,6 +207,7 @@ describe.skip('Document Service relations', () => {
             products_oo: { documentId: 'Skate', locale: 'en', status: 'draft' },
             products_ow: { documentId: 'Skate', locale: 'en', status: 'draft' },
           },
+          status: 'published',
           locale: 'en',
         });
 

@@ -13,16 +13,21 @@ import {
   isObject,
   cloneDeep,
   get,
+  has,
   mergeAll,
   isArray,
   isString,
 } from 'lodash/fp';
 import _ from 'lodash';
+
 import parseType from './parse-type';
 import { PaginationError } from './errors';
+import * as contentTypesUtils from './content-types';
 import { isDynamicZoneAttribute, isMorphToRelationalAttribute } from './content-types';
 import { Model } from './types';
 import { isOperator } from './operators';
+
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 type SortOrder = 'asc' | 'desc';
 
@@ -602,6 +607,27 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): Wher
   }
 
   return filters;
+};
+
+const convertStatusParams = (
+  schema?: Model,
+  params: { status?: 'draft' | 'published' } = {},
+  query: Query = {}
+) => {
+  if (!schema) {
+    return;
+  }
+
+  const { status } = params;
+
+  if (!_.isNil(status)) {
+    // NOTE: this is the query layer filters not the document/entity service filters
+    query.filters = ({ meta }: { meta: Model }) => {
+      if (status === 'published') {
+        return { [PUBLISHED_AT_ATTRIBUTE]: { $notNull: true } };
+      }
+    };
+  }
 };
 
 const transformParamsToQuery = (uid: string, params: Params): Query => {

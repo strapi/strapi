@@ -7,6 +7,7 @@ import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
+import { getRelationTargetStatus } from '../utils/dp';
 
 const isNumeric = (value: any): value is number => {
   if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
@@ -147,7 +148,15 @@ const transformDataIdsVisitor = (
                 sourceLocale: opts.locale,
               }
             ),
-            isDraft: opts.isDraft,
+            isDraft: getRelationTargetStatus(
+              // TODO: Get the status from the relation
+              { documentId, locale },
+              {
+                targetUid: target as Common.UID.Schema,
+                sourceUid: opts.uid,
+                sourceStatus: opts.isDraft,
+              }
+            ),
           });
 
           if (entryId) return entryId;

@@ -5,6 +5,7 @@ import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
+import { getRelationTargetStatus } from '../utils/dp';
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
@@ -102,7 +103,11 @@ const extractDataIds = (
               sourceUid: opts.uid,
               sourceLocale: opts.locale,
             }),
-            isDraft: opts.isDraft,
+            isDraft: getRelationTargetStatus(relation, {
+              targetUid: target as Common.UID.Schema,
+              sourceUid: opts.uid,
+              sourceStatus: opts.isDraft,
+            }),
           });
         });
       }
