@@ -517,7 +517,7 @@ const PublishAction: DocumentActionComponent = ({
       setSubmitting(true);
 
       try {
-        const errors = await validate();
+        const { errors } = await validate();
 
         if (errors) {
           toggleNotification({
@@ -614,7 +614,7 @@ const UpdateAction: DocumentActionComponent = ({
     onClick: async () => {
       setSubmitting(true);
       try {
-        const errors = await validate();
+        const { errors } = await validate();
 
         if (errors) {
           toggleNotification({

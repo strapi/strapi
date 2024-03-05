@@ -8,13 +8,34 @@ const schema = yup.object().shape({
       from: yup
         .object()
         .shape({
-          name: yup.string().required(translatedErrors.required),
-          email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
+          name: yup.string().required({
+            id: translatedErrors.required,
+            defaultMessage: 'This field is required',
+          }),
+          email: yup
+            .string()
+            .email({
+              id: translatedErrors.email,
+              defaultMessage: 'This is not a valid email',
+            })
+            .required({
+              id: translatedErrors.required,
+              defaultMessage: 'This field is required',
+            }),
         })
         .required(),
-      response_email: yup.string().email(translatedErrors.email),
-      object: yup.string().required(translatedErrors.required),
-      message: yup.string().required(translatedErrors.required),
+      response_email: yup.string().email({
+        id: translatedErrors.email,
+        defaultMessage: 'This is not a valid email',
+      }),
+      object: yup.string().required({
+        id: translatedErrors.required,
+        defaultMessage: 'This field is required',
+      }),
+      message: yup.string().required({
+        id: translatedErrors.required,
+        defaultMessage: 'This field is required',
+      }),
     })
     .required(translatedErrors.required),
 });

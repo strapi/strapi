@@ -343,10 +343,31 @@ const FORM_LAYOUT = [
 ];
 
 const FORM_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required(translatedErrors.required),
+  firstname: yup.string().trim().required({
+    id: translatedErrors.required,
+    defaultMessage: 'This field is required',
+  }),
   lastname: yup.string(),
-  email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
-  roles: yup.array().min(1, translatedErrors.required).required(translatedErrors.required),
+  email: yup
+    .string()
+    .email({
+      id: translatedErrors.email,
+      defaultMessage: 'This is not a valid email',
+    })
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'This field is required',
+    }),
+  roles: yup
+    .array()
+    .min(1, {
+      id: translatedErrors.required,
+      defaultMessage: 'This field is required',
+    })
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'This field is required',
+    }),
 });
 
 const STEPPER = {

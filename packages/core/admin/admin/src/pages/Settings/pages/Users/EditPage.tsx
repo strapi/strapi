@@ -45,7 +45,16 @@ import { COMMON_USER_SCHEMA } from './utils/validation';
 const EDIT_VALIDATION_SCHEMA = yup.object().shape({
   ...COMMON_USER_SCHEMA,
   isActive: yup.bool(),
-  roles: yup.array().min(1, translatedErrors.required).required(translatedErrors.required),
+  roles: yup
+    .array()
+    .min(1, {
+      id: translatedErrors.required,
+      defaultMessage: 'This field is required',
+    })
+    .required({
+      id: translatedErrors.required,
+      defaultMessage: 'This field is required',
+    }),
 });
 
 const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 'roles'] as const;
@@ -145,14 +154,11 @@ const EditPage = () => {
   const handleSubmit = async (body: InitialData, actions: FormHelpers<InitialData>) => {
     lockApp?.();
 
-    const { confirmPassword: _confirmPassword, password, ...bodyRest } = body;
+    const { confirmPassword: _confirmPassword, ...bodyRest } = body;
 
     const res = await updateUser({
       id,
       ...bodyRest,
-      // The password should not be sent if it wasn't changed,
-      // it leads to a validation error if the string is empty
-      password: password === '' ? undefined : password,
     });
 
     if ('error' in res && isBaseQueryError(res.error)) {

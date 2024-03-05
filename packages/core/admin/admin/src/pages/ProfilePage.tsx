@@ -47,7 +47,10 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
     // @ts-expect-error – no idea why this is failing.
     .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
       return password || confirmPassword
-        ? passSchema.required(translatedErrors.required)
+        ? passSchema.required({
+            id: translatedErrors.required,
+            defaultMessage: 'This field is required',
+          })
         : passSchema;
     }),
   preferedLanguage: yup.string().nullable(),

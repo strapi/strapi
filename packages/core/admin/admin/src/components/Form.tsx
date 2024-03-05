@@ -58,7 +58,9 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
-  validate: () => Promise<FormErrors<TFormValues> | null>;
+  validate: () => Promise<
+    { data: TFormValues; errors?: never } | { data?: never; errors: FormErrors<TFormValues> }
+  >;
 }
 
 /**
@@ -203,13 +205,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         setErrors({});
 
         if (!props.validationSchema) {
-          return null;
+          return { data: state.values };
         }
 
         try {
-          await props.validationSchema.validate(state.values, { abortEarly: false });
+          const data = await props.validationSchema.validate(state.values, { abortEarly: false });
 
-          return null;
+          return { data };
         } catch (err) {
           if (isErrorYupValidationError(err)) {
             let errors: FormErrors = {};
@@ -229,7 +231,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
               setErrors(errors);
             }
 
-            return errors;
+            return { errors };
           } else {
             // We throw any other errors
             if (process.env.NODE_ENV !== 'production') {
@@ -259,15 +261,15 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       });
 
       try {
-        const errors = await validate();
+        const { data, errors } = await validate();
 
-        if (errors !== null) {
+        if (errors) {
           setErrors(errors);
 
           throw new Error('Submission failed');
         }
 
-        await onSubmit(state.values, {
+        await onSubmit(data, {
           setErrors,
           setValues,
         });
