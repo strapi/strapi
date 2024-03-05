@@ -15,7 +15,6 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   PageSizeURLQuery,
   PaginationURLQuery,
   useAppInfo,
@@ -27,11 +26,11 @@ import {
 import { ExternalLink, GlassesSquare } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
 
 import { ContentBox } from '../../components/ContentBox';
+import { Page } from '../../components/PageHelpers';
+import { useTypedSelector } from '../../core/store/hooks';
 import { useDebounce } from '../../hooks/useDebounce';
-import { selectAdminPermissions } from '../../selectors';
 
 import { NpmPackagesFilters } from './components/NpmPackagesFilters';
 import { NpmPackagesGrid } from './components/NpmPackagesGrid';
@@ -311,13 +310,12 @@ const MarketplacePage = () => {
 };
 
 const ProtectedMarketplacePage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.marketplace?.main);
 
   return (
-    // @ts-expect-error – the selector is not typed.
-    <CheckPagePermissions permissions={permissions.marketplace.main}>
+    <Page.Protect permissions={permissions}>
       <MarketplacePage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

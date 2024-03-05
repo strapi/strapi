@@ -15,8 +15,6 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -32,6 +30,7 @@ import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import {
   useCreateRoleMutation,
@@ -173,6 +172,10 @@ const CreatePage = () => {
     }
   };
 
+  if ((isLoadingPermissionsLayout && isLoadingRole) || !permissionsLayout) {
+    return <Page.Loading />;
+  }
+
   return (
     <Main>
       <Helmet
@@ -306,20 +309,14 @@ const CreatePage = () => {
                       </Grid>
                     </Flex>
                   </Box>
-                  {!isLoadingPermissionsLayout && !isLoadingRole && permissionsLayout ? (
-                    <Box shadow="filterShadow" hasRadius>
-                      <Permissions
-                        isFormDisabled={false}
-                        ref={permissionsRef}
-                        permissions={rolePermissions}
-                        layout={permissionsLayout}
-                      />
-                    </Box>
-                  ) : (
-                    <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                      <LoadingIndicatorPage />
-                    </Box>
-                  )}
+                  <Box shadow="filterShadow" hasRadius>
+                    <Permissions
+                      isFormDisabled={false}
+                      ref={permissionsRef}
+                      permissions={rolePermissions}
+                      layout={permissionsLayout}
+                    />
+                  </Box>
                 </Flex>
               </ContentLayout>
             </>
@@ -350,9 +347,9 @@ const ProtectedCreatePage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <CreatePage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

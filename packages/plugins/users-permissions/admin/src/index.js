@@ -46,7 +46,10 @@ export default {
           },
           id: 'email-templates',
           to: `users-permissions/email-templates`,
-          Component: () => import('./pages/EmailTemplates'),
+          Component: () =>
+            import('./pages/EmailTemplates').then((mod) => ({
+              default: mod.ProtectedEmailTemplatesPage,
+            })),
           permissions: PERMISSIONS.readEmailTemplates,
         },
         {

@@ -8,8 +8,6 @@ import {
   Main,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  NoPermissions,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -24,6 +22,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useOnce } from '../../../../hooks/useOnce';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
@@ -163,7 +162,7 @@ export const ListView = () => {
   };
 
   return (
-    <Main aria-busy={isLoading}>
+    <>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -197,47 +196,56 @@ export const ListView = () => {
           )
         }
       />
-      <ContentLayout>
-        {!canRead && <NoPermissions />}
-        {canRead && apiTokens.length > 0 && (
-          <Table
-            permissions={{ canRead, canDelete, canUpdate }}
-            headers={headers}
-            contentType="api-tokens"
-            isLoading={isLoading}
-            onConfirmDelete={handleDelete}
-            tokens={apiTokens}
-            tokenType={API_TOKEN_TYPE}
-          />
-        )}
-        {canRead && canCreate && apiTokens.length === 0 ? (
-          <EmptyStateLayout
-            icon={<EmptyDocuments width="10rem" />}
-            content={formatMessage({
-              id: 'Settings.apiTokens.addFirstToken',
-              defaultMessage: 'Add your first API Token',
-            })}
-            action={
-              <LinkButton variant="secondary" startIcon={<Plus />} to="/settings/api-tokens/create">
-                {formatMessage({
-                  id: 'Settings.apiTokens.addNewToken',
-                  defaultMessage: 'Add new API Token',
+      {!canRead ? (
+        <Page.NoPermissions />
+      ) : (
+        <Main aria-busy={isLoading}>
+          <ContentLayout>
+            {apiTokens.length > 0 && (
+              <Table
+                permissions={{ canRead, canDelete, canUpdate }}
+                headers={headers}
+                contentType="api-tokens"
+                isLoading={isLoading}
+                onConfirmDelete={handleDelete}
+                tokens={apiTokens}
+                tokenType={API_TOKEN_TYPE}
+              />
+            )}
+            {canCreate && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="10rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.addFirstToken',
+                  defaultMessage: 'Add your first API Token',
                 })}
-              </LinkButton>
-            }
-          />
-        ) : null}
-        {canRead && !canCreate && apiTokens.length === 0 ? (
-          <EmptyStateLayout
-            icon={<EmptyDocuments width="10rem" />}
-            content={formatMessage({
-              id: 'Settings.apiTokens.emptyStateLayout',
-              defaultMessage: 'You don’t have any content yet...',
-            })}
-          />
-        ) : null}
-      </ContentLayout>
-    </Main>
+                action={
+                  <LinkButton
+                    variant="secondary"
+                    startIcon={<Plus />}
+                    to="/settings/api-tokens/create"
+                  >
+                    {formatMessage({
+                      id: 'Settings.apiTokens.addNewToken',
+                      defaultMessage: 'Add new API Token',
+                    })}
+                  </LinkButton>
+                }
+              />
+            ) : null}
+            {!canCreate && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="10rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.emptyStateLayout',
+                  defaultMessage: 'You don’t have any content yet...',
+                })}
+              />
+            ) : null}
+          </ContentLayout>
+        </Main>
+      )}
+    </>
   );
 };
 
@@ -247,8 +255,8 @@ export const ProtectedListView = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

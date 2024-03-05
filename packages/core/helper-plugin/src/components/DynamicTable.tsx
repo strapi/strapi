@@ -96,11 +96,13 @@ const Table = ({
   const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
 
   const content = hasFilters
-    ? {
-        id: 'content-manager.components.TableEmpty.withFilters',
-        defaultMessage: 'There are no {contentType} with the applied filters...',
-        values: { contentType },
-      }
+    ? formatMessage(
+        {
+          id: 'content-manager.components.TableEmpty.withFilters',
+          defaultMessage: 'There are no {contentType} with the applied filters...',
+        },
+        { contentType }
+      )
     : undefined;
 
   const handleConfirmDeleteAll = async () => {

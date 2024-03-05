@@ -15,8 +15,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
   translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -30,6 +28,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
 import {
@@ -178,7 +177,7 @@ export const SingleSignOnPage = () => {
               />
               <ContentLayout>
                 {isSubmitting || isLoadingData ? (
-                  <LoadingIndicatorPage />
+                  <Page.Loading />
                 ) : (
                   <Flex
                     direction="column"
@@ -317,8 +316,8 @@ export const ProtectedSSO = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.sso?.main);
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <SingleSignOnPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

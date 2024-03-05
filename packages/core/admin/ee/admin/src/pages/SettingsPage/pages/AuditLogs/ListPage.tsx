@@ -6,17 +6,11 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
-import {
-  AnErrorOccurred,
-  DynamicTable,
-  useFocusWhenNavigate,
-  useQueryParams,
-  useRBAC,
-  CheckPagePermissions,
-} from '@strapi/helper-plugin';
+import { DynamicTable, useFocusWhenNavigate, useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
+import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { Filters } from '../../../../../../../admin/src/pages/Settings/components/Filters';
 import { SanitizedAdminUserForAuditLogs } from '../../../../../../../shared/contracts/audit-logs';
@@ -93,15 +87,7 @@ const ListPage = () => {
   ] satisfies TableHeader[];
 
   if (hasError) {
-    return (
-      <Layout>
-        <ContentLayout>
-          <Box paddingTop={8}>
-            <AnErrorOccurred />
-          </Box>
-        </ContentLayout>
-      </Layout>
-    );
+    return <Page.Error />;
   }
 
   const isLoading = isLoadingData || isLoadingRBAC;
@@ -157,9 +143,9 @@ const ProtectedListPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

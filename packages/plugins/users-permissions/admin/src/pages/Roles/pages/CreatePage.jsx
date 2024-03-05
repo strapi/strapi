@@ -13,13 +13,13 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -196,7 +196,7 @@ export const CreatePage = () => {
 };
 
 export const ProtectedRolesCreatePage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.createRole}>
+  <Page.Protect permissions={PERMISSIONS.createRole}>
     <CreatePage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

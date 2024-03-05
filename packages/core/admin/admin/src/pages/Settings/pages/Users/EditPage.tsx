@@ -14,7 +14,6 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import {
   GenericInput,
-  LoadingIndicatorPage,
   translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -31,6 +30,7 @@ import { NavLink, Navigate, useLocation, useMatch, useNavigate } from 'react-rou
 import * as yup from 'yup';
 
 import { Update } from '../../../../../../shared/contracts/user';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
@@ -129,45 +129,7 @@ const EditPage = () => {
   const isLoading = isLoadingAdminUsers || !MagicLink || isLoadingRBAC;
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <Helmet
-          title={formatMessage(
-            { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
-            {
-              name: 'Users',
-            }
-          )}
-        />
-        <HeaderLayout
-          primaryAction={
-            <Button disabled startIcon={<Check />} type="button" size="L">
-              {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-            </Button>
-          }
-          title={formatMessage({
-            id: 'app.containers.Users.EditPage.header.label-loading',
-            defaultMessage: 'Edit user',
-          })}
-          navigationAction={
-            <Link
-              as={NavLink}
-              startIcon={<ArrowLeft />}
-              // @ts-expect-error – as component props are not inferred correctly.
-              to="/settings/users?pageSize=10&page=1&sort=firstname"
-            >
-              {formatMessage({
-                id: 'global.back',
-                defaultMessage: 'Back',
-              })}
-            </Link>
-          }
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   type InitialData = Pick<Update.Request['body'], (typeof fieldsToPick)[number]> & {
@@ -477,42 +439,13 @@ const LAYOUT = [
 ] satisfies FormLayout[][];
 
 const ProtectedEditPage = () => {
-  const toggleNotification = useNotification();
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.read);
 
-  const {
-    isLoading,
-    allowedActions: { canRead, canUpdate },
-  } = useRBAC({
-    read: permissions.settings?.users.read ?? [],
-    update: permissions.settings?.users.update ?? [],
-  });
-  const { state } = useLocation();
-  const from = state?.from ?? '/';
-
-  React.useEffect(() => {
-    if (!isLoading) {
-      if (!canRead && !canUpdate) {
-        toggleNotification({
-          type: 'info',
-          message: {
-            id: 'notification.permission.not-allowed-read',
-            defaultMessage: 'You are not allowed to see this document',
-          },
-        });
-      }
-    }
-  }, [isLoading, canRead, canUpdate, toggleNotification]);
-
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
-  if (!canRead && !canUpdate) {
-    return <Navigate to={from} />;
-  }
-
-  return <EditPage />;
+  return (
+    <Page.Protect permissions={permissions}>
+      <EditPage />
+    </Page.Protect>
+  );
 };
 
 export { EditPage, ProtectedEditPage };

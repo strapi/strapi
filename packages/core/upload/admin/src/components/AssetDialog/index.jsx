@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { Page } from '@strapi/admin/strapi-admin';
 import {
   Badge,
   Button,
@@ -16,7 +17,7 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { AnErrorOccurred, NoPermissions, pxToRem, useSelectionState } from '@strapi/helper-plugin';
+import { pxToRem, useSelectionState } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -162,7 +163,7 @@ export const AssetDialog = ({
             })}
           </Typography>
         </ModalHeader>
-        <AnErrorOccurred />
+        <Page.Error />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
@@ -179,7 +180,7 @@ export const AssetDialog = ({
             })}
           </Typography>
         </ModalHeader>
-        <NoPermissions />
+        <Page.NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );

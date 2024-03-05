@@ -5,6 +5,50 @@ It is written in alphabetical order grouped by domain based on _every_ export th
 
 ## Components
 
+### AnErrorOccurred
+
+This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
+
+```tsx
+// Before
+import { AnErrorOccurred } from '@strapi/helper-plugin';
+
+// After
+import { Page } from '@strapi/strapi/admin';
+
+const MyPage = () => {
+  // ...
+
+  if (error) {
+    return <Page.Error />;
+  }
+
+  // ...
+};
+```
+
+### CheckPagePermissions
+
+This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
+
+```tsx
+// Before
+import { CheckPagePermissions } from '@strapi/helper-plugin';
+
+// After
+import { Page } from '@strapi/strapi/admin';
+
+const MyProtectedPage = () => {
+  return (
+    <Page.Protect permissions={[action: 'plugin::my-plugin.read']}>
+      <MyPage />
+    </Page.Protect>
+  );
+};
+```
+
+The behaviour has slightly changed, where previously no permissions would redirect you to the root of the page, now it will render the `NoPermissions` component.
+
 ### ContentBox
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
@@ -13,7 +57,7 @@ This component has been removed and not replaced. If you feel like you need this
 
 This was aliasing the design-system. You should import the component from there:
 
-```ts
+```tsx
 // Before
 import { DateTimePicker } from '@strapi/helper-plugin';
 
@@ -21,11 +65,25 @@ import { DateTimePicker } from '@strapi/helper-plugin';
 import { DateTimePicker } from '@strapi/design-system';
 ```
 
+### EmptyStateLayout
+
+This component has been removed and not replaced. You should use `EmptyStateLayout` from `@strapi/design-system`:
+
+```tsx
+// Before
+import { EmptyStateLayout } from '@strapi/helper-plugin';
+
+// After
+import { EmptyStateLayout } from '@strapi/design-system';
+```
+
+NOTE! the props will be different. Please refer to the documentation for the `EmptyStateLayout` component.
+
 ### Form
 
 This component aliased `Formik`, something we're working towards removing. The `Form` component and it's sibling exports from `@strapi/strapi/admin` should be used instead:
 
-```ts
+```tsx
 // Before
 import { Form } from '@strapi/helper-plugin';
 
@@ -60,7 +118,7 @@ const MyComponent = ({ area, ...compProps }) => {
 
 This was aliasing the design-system and using the `as` prop with `react-router-dom`. You should import the component from there:
 
-```ts
+```tsx
 // Before
 import { Link } from '@strapi/helper-plugin';
 
@@ -81,7 +139,7 @@ const MyLink = () => {
 
 This was aliasing the design-system and using the `as` prop with `react-router-dom`. You should import the component from there:
 
-```ts
+```tsx
 // Before
 import { LinkButton } from '@strapi/helper-plugin';
 
@@ -98,6 +156,28 @@ const MyLink = () => {
 };
 ```
 
+### LoadingIndicatorPage
+
+This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
+
+```tsx
+// Before
+import { LoadingIndicatorPage } from '@strapi/helper-plugin';
+
+// After
+import { Page } from '@strapi/strapi/admin';
+
+const MyPage = () => {
+  // ...
+
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
+  // ...
+};
+```
+
 ### NoContent
 
 This component has been removed and not replaced, you should use the `EmptyStateLayout` component from `@strapi/design-system`.
@@ -105,6 +185,28 @@ This component has been removed and not replaced, you should use the `EmptyState
 ### NoMedia
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### NoPermissions
+
+This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
+
+```tsx
+// Before
+import { NoPermissions } from '@strapi/helper-plugin';
+
+// After
+import { Page } from '@strapi/strapi/admin';
+
+const MyPage = () => {
+  // ...
+
+  if (!canRead) {
+    return <Page.NoPermissions />;
+  }
+
+  // ...
+};
+```
 
 ### NotAllowedInput
 
@@ -132,7 +234,7 @@ This component has been removed and not replaced. If you feel like you need this
 
 This component should be imported from the `@strapi/design-system` package:
 
-```ts
+```tsx
 // Before
 import { Status } from '@strapi/helper-plugin';
 
@@ -159,7 +261,7 @@ This hook has been split into different hooks, each with more ability then it's 
 - useDocumentRBAC
 - useForm
 
-```ts
+```tsx
 // Before
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
@@ -175,7 +277,7 @@ import {
 
 Some common use cases are listed below:
 
-```ts
+```tsx
 // Before
 const { slug, isSingleType, isCreatingEntry } = useCMEditViewDataManager();
 
@@ -185,7 +287,7 @@ const isSingleType = collectionType === 'single-types';
 const isCreatingEntry = id === 'create';
 ```
 
-```ts
+```tsx
 // Before
 const { onPublish, onUnpublish } = useCMEditViewDataManager();
 
@@ -193,7 +295,7 @@ const { onPublish, onUnpublish } = useCMEditViewDataManager();
 const { publish, unpublish } = useDocumentActions();
 ```
 
-```ts
+```tsx
 // Before
 const { layout } = useCMEditViewDataManager();
 
