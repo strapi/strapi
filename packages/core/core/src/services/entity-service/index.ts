@@ -257,7 +257,7 @@ const createDefaultImplementation = ({
       return null;
     }
 
-    const isDraft = contentTypesUtils.isDraft(entityToUpdate);
+    const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
 
     const validData = await entityValidator.validateEntityUpdate(
       model,
@@ -342,7 +342,7 @@ const createDefaultImplementation = ({
     if (!entityToClone) {
       return null;
     }
-    const isDraft = contentTypesUtils.isDraft(entityToClone);
+    const isDraft = contentTypesUtils.isDraft(entityToClone, model);
 
     const validData = await entityValidator.validateEntityUpdate(
       model,

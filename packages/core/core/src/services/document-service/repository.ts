@@ -405,8 +405,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
     count: wrapInTransaction(count),
-    publish: hasDraftAndPublish ? wrapInTransaction(publish) : undefined,
-    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : undefined,
-    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : undefined,
+    publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
+    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
+    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
   };
 };
