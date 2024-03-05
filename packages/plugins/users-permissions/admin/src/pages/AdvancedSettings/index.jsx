@@ -15,11 +15,7 @@ import {
   useNotifyAT,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  Form,
   GenericInput,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -28,7 +24,9 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Page } from '@strapi/strapi/admin';
+import { Formik, Form } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -39,9 +37,9 @@ import layout from './utils/layout';
 import schema from './utils/schema';
 
 const ProtectedAdvancedSettingsPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readAdvancedSettings}>
+  <Page.Protect permissions={PERMISSIONS.readAdvancedSettings}>
     <AdvancedSettingsPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
 
 const AdvancedSettingsPage = () => {
@@ -123,34 +121,21 @@ const AdvancedSettingsPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
     <Main aria-busy={isSubmittingForm}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.advancedSettings'),
-          defaultMessage: 'Advanced Settings',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.advancedSettings'),
+              defaultMessage: 'Advanced Settings',
+            }),
+          }
+        )}
       />
       <Formik
         onSubmit={handleSubmit}
@@ -256,4 +241,4 @@ const AdvancedSettingsPage = () => {
   );
 };
 
-export default ProtectedAdvancedSettingsPage;
+export { ProtectedAdvancedSettingsPage, AdvancedSettingsPage };

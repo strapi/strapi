@@ -13,16 +13,15 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  Form,
-  SettingsPageTitle,
   useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Page } from '@strapi/strapi/admin';
+import { Formik, Form } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
@@ -84,8 +83,12 @@ export const CreatePage = () => {
 
   return (
     <Main>
-      {/* TODO: This needs to be translated */}
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'Roles' }
+        )}
+      />
       <Formik
         enableReinitialize
         initialValues={{ name: '', description: '' }}
@@ -193,7 +196,7 @@ export const CreatePage = () => {
 };
 
 export const ProtectedRolesCreatePage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.createRole}>
+  <Page.Protect permissions={PERMISSIONS.createRole}>
     <CreatePage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

@@ -13,16 +13,16 @@ import {
   SingleSelectOption,
   Typography,
   ModalFooter,
+  EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
-  NoContent,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
 } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
@@ -67,12 +67,13 @@ interface AddActionToReleaseModalProps {
 const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
-    <NoContent
-      content={{
+    <EmptyStateLayout
+      icon={<EmptyDocuments width="10rem" />}
+      content={formatMessage({
         id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
         defaultMessage:
           'No available releases. Open the list of releases and create a new one from there.',
-      }}
+      })}
       action={
         <LinkButton
           // @ts-expect-error - types are not inferred correctly through the as prop.

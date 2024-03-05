@@ -1,12 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import {
-  LoadingIndicatorPage,
-  MenuItem,
-  StrapiAppSetting,
-  StrapiAppSettingLink,
-} from '@strapi/helper-plugin';
+import { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from '@strapi/helper-plugin';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -28,6 +23,7 @@ import {
   InjectionZoneModule,
   InjectionZones,
 } from './components/InjectionZone';
+import { Page } from './components/PageHelpers';
 import { Providers } from './components/Providers';
 import { HOOKS } from './constants';
 import { routes as cmRoutes } from './content-manager/router';
@@ -729,7 +725,7 @@ class StrapiApp {
                       links.map(({ to, Component }) => ({
                         path: `${to}/*`,
                         element: (
-                          <React.Suspense fallback={<LoadingIndicatorPage />}>
+                          <React.Suspense fallback={<Page.Loading />}>
                             <Component />
                           </React.Suspense>
                         ),
@@ -741,7 +737,7 @@ class StrapiApp {
                 ...this.menu.map(({ to, Component }) => ({
                   path: `${to}/*`,
                   element: (
-                    <React.Suspense fallback={<LoadingIndicatorPage />}>
+                    <React.Suspense fallback={<Page.Loading />}>
                       <Component />
                     </React.Suspense>
                   ),

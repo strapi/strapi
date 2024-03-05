@@ -415,6 +415,7 @@ const EnumerationInput = ({
       disabled={disabled}
       error={error}
       hint={hint}
+      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
       label={label}
       name={name}
       // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.

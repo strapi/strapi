@@ -138,7 +138,7 @@ describe('CMReleasesContainer', () => {
       })
     );
 
-    render(<CMReleasesContainer />);
+    render();
 
     const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
     const release1 = await within(informationBox).findByText('01/01/2024 at 11:00 (UTC+01:00)');

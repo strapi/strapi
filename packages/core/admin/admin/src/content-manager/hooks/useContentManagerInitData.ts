@@ -45,7 +45,13 @@ const useContentManagerInitData = (): ContentManagerAppState => {
 
   const state = useTypedSelector((state) => state['content-manager_app']);
 
-  const initialDataQuery = useGetInitialDataQuery();
+  const initialDataQuery = useGetInitialDataQuery(undefined, {
+    /**
+     * TODO: remove this when the CTB has been refactored to use redux-toolkit-query
+     * and it can invalidate the cache on mutation
+     */
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
     if (initialDataQuery.data) {

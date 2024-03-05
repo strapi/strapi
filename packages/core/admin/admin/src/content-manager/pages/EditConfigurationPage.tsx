@@ -1,22 +1,16 @@
 import * as React from 'react';
 
-import {
-  AnErrorOccurred,
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useAPIErrorHandler,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
 
+import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
+import { setIn } from '../../utils/object';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
 import { useDoc } from '../hooks/useDocument';
 import { useDocLayout } from '../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
-import { setIn } from '../utils/object';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
@@ -136,11 +130,11 @@ const EditConfigurationPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   if (errorFieldSizes || error || !schema) {
-    return <AnErrorOccurred />;
+    return <Page.Error />;
   }
 
   return (
@@ -159,9 +153,9 @@ const ProtectedEditConfigurationPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <EditConfigurationPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

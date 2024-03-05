@@ -1,10 +1,10 @@
 import { ReactNode } from 'react';
 
-import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import { useLibrary } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { useForm } from '../../../components/Form';
-import { InputRenderer as FormInputRenderer } from '../../../components/FormInputs/Renderer';
+import { useForm } from '../../../../components/Form';
+import { InputRenderer as FormInputRenderer } from '../../../../components/FormInputs/Renderer';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
@@ -12,6 +12,7 @@ import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
+import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 

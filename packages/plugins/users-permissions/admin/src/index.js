@@ -46,7 +46,10 @@ export default {
           },
           id: 'email-templates',
           to: `users-permissions/email-templates`,
-          Component: () => import('./pages/EmailTemplates'),
+          Component: () =>
+            import('./pages/EmailTemplates').then((mod) => ({
+              default: mod.ProtectedEmailTemplatesPage,
+            })),
           permissions: PERMISSIONS.readEmailTemplates,
         },
         {
@@ -56,7 +59,10 @@ export default {
           },
           id: 'advanced-settings',
           to: `users-permissions/advanced-settings`,
-          Component: () => import('./pages/AdvancedSettings'),
+          Component: () =>
+            import('./pages/AdvancedSettings').then((mod) => ({
+              default: mod.ProtectedAdvancedSettingsPage,
+            })),
           permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]

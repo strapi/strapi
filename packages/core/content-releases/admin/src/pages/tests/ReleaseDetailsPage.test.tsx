@@ -22,6 +22,7 @@ jest.mock('@strapi/helper-plugin', () => ({
  * Mocking the useDocument hook to avoid validation errors for testing
  */
 jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   unstable_useDocument: jest.fn().mockReturnValue({ validate: jest.fn().mockReturnValue({}) }),
 }));
 
@@ -55,6 +56,9 @@ describe('Releases details page', () => {
 
     const releaseSubtitle = await screen.findAllByText('No entries');
     expect(releaseSubtitle[0]).toBeInTheDocument();
+
+    const releaseStatus = screen.getByText('empty');
+    expect(releaseStatus).toBeInTheDocument();
 
     const moreButton = screen.getByRole('button', { name: 'Release edit and delete menu' });
     expect(moreButton).toBeInTheDocument();
@@ -160,7 +164,7 @@ describe('Releases details page', () => {
     expect(tables).toHaveLength(2);
   });
 
-  it('shows the right status', async () => {
+  it('shows the right status for unpublished release', async () => {
     server.use(
       rest.get('/content-releases/:releaseId', (req, res, ctx) =>
         res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
@@ -187,6 +191,10 @@ describe('Releases details page', () => {
     );
     expect(releaseTitle).toBeInTheDocument();
 
+    const releaseStatus = screen.getByText('ready');
+    expect(releaseStatus).toBeInTheDocument();
+    expect(releaseStatus).toHaveStyle(`color: #328048`);
+
     const cat1Row = screen.getByRole('row', { name: /cat1/i });
     expect(within(cat1Row).getByRole('gridcell', { name: 'Ready to publish' })).toBeInTheDocument();
 
@@ -199,5 +207,37 @@ describe('Releases details page', () => {
     expect(
       within(add1Row).getByRole('gridcell', { name: 'Already published' })
     ).toBeInTheDocument();
+  });
+
+  it('shows the right release status for published release', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsAndPublishedHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      )
+    );
+
+    render(
+      <Routes>
+        <Route path="/content-releases/:releaseId" element={<ReleaseDetailsPage />} />
+      </Routes>,
+      {
+        initialEntries: [{ pathname: `/content-releases/3` }],
+      }
+    );
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsAndPublishedHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    const releaseStatus = screen.getByText('done');
+    expect(releaseStatus).toBeInTheDocument();
+    expect(releaseStatus).toHaveStyle(`color: #4945ff`);
   });
 });

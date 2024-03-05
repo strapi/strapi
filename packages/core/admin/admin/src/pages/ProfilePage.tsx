@@ -17,10 +17,8 @@ import {
   FieldAction,
 } from '@strapi/design-system';
 import {
-  Form,
   GenericInput,
   GenericInputProps,
-  LoadingIndicatorPage,
   pxToRem,
   translatedErrors,
   useFocusWhenNavigate,
@@ -30,13 +28,14 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Check, Eye, EyeStriked } from '@strapi/icons';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
+import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
 import { AppState, setAppTheme } from '../reducer';
@@ -181,25 +180,7 @@ const ProfilePage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <Helmet
-          title={formatMessage({
-            id: 'Settings.profile.form.section.helmet.title',
-            defaultMessage: 'User profile',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: 'Settings.profile.form.section.profile.page.title',
-            defaultMessage: 'Profile page',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   const hasLockedRole = dataSSO?.isSSOLocked ?? false;

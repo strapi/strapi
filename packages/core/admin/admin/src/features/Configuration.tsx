@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification, useRBAC, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { useTypedSelector } from '../core/store/hooks';
 import {
   ConfigurationLogo,
   useProjectSettingsQuery,
@@ -75,10 +76,16 @@ const ConfigurationProvider = ({
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['project-settings']
+  );
   const token = useAuth('ConfigurationProvider', (state) => state.token);
+  const {
+    allowedActions: { canRead },
+  } = useRBAC(permissions);
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
-    skip: !token,
+    skip: !token || !canRead,
   });
 
   const [updateProjectSettingsMutation] = useUpdateProjectSettingsMutation();

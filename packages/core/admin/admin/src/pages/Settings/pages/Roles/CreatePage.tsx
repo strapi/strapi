@@ -15,10 +15,6 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  CheckPagePermissions,
-  Form,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -27,12 +23,14 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import {
   useCreateRoleMutation,
@@ -174,9 +172,20 @@ const CreatePage = () => {
     }
   };
 
+  if ((isLoadingPermissionsLayout && isLoadingRole) || !permissionsLayout) {
+    return <Page.Loading />;
+  }
+
   return (
     <Main>
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Roles',
+          }
+        )}
+      />
       <Formik
         initialValues={
           {
@@ -300,20 +309,14 @@ const CreatePage = () => {
                       </Grid>
                     </Flex>
                   </Box>
-                  {!isLoadingPermissionsLayout && !isLoadingRole && permissionsLayout ? (
-                    <Box shadow="filterShadow" hasRadius>
-                      <Permissions
-                        isFormDisabled={false}
-                        ref={permissionsRef}
-                        permissions={rolePermissions}
-                        layout={permissionsLayout}
-                      />
-                    </Box>
-                  ) : (
-                    <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                      <LoadingIndicatorPage />
-                    </Box>
-                  )}
+                  <Box shadow="filterShadow" hasRadius>
+                    <Permissions
+                      isFormDisabled={false}
+                      ref={permissionsRef}
+                      permissions={rolePermissions}
+                      layout={permissionsLayout}
+                    />
+                  </Box>
                 </Flex>
               </ContentLayout>
             </>
@@ -344,9 +347,9 @@ const ProtectedCreatePage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <CreatePage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 
