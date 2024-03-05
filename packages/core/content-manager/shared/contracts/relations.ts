@@ -3,12 +3,12 @@ import { errors } from '@strapi/utils';
 
 type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 
-export type RelationResult = {
+export interface RelationResult {
   documentId: Documents.ID;
   status: Documents.Params.PublicationState.Kind;
   locale?: Documents.Params.Locale;
   [key: string]: unknown;
-};
+}
 
 export interface Pagination {
   page: NonNullable<PaginationQuery['page']>;
