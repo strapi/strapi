@@ -295,7 +295,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
       })}
       name="timezone"
       value={values.timezone || undefined}
-      textValue={values.timezone ? values.timezone.replace('&', ' ') : undefined} // textValue is required to show the updated DST timezone
+      textValue={values.timezone ? values.timezone.replace(/&/, ' ') : undefined} // textValue is required to show the updated DST timezone
       onChange={(timezone) => {
         setFieldValue('timezone', timezone);
       }}
@@ -310,7 +310,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
     >
       {timezoneList.map((timezone) => (
         <ComboboxOption key={timezone.value} value={timezone.value}>
-          {timezone.value.replace('&', ' ')}
+          {timezone.value.replace(/&/, ' ')}
         </ComboboxOption>
       ))}
     </Combobox>
