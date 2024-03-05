@@ -282,7 +282,7 @@ export default {
 
       ctx.body = {
         ...res,
-        results: res.results.map((relation: RelationEntity) => {
+        results: res.results.map((relation) => {
           return {
             ...relation,
             status,
