@@ -34,7 +34,7 @@ const renderAdmin = async (
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
     future: {
-      isEnabled: (name: keyof FeaturesConfig['future']) => {
+      isEnabled: (name: keyof NonNullable<FeaturesConfig['future']>) => {
         return features?.future?.[name] === true;
       },
     },
