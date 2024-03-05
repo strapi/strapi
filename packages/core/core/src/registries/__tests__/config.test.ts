@@ -1,4 +1,3 @@
-import { Strapi } from '@strapi/types';
 import configProvider from '../config';
 
 const logLevel = 'warn';

@@ -226,7 +226,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       return;
     }
 
-    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
+    if (this.strapi.config.get<{ provider: string }>('plugin::upload').provider === 'local') {
       const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -267,7 +267,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
-    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
+    if (this.strapi.config.get<{ provider: string }>('plugin::upload').provider === 'local') {
       assertValidStrapi(this.strapi);
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -345,7 +345,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             buffer: chunk?.buffer,
           };
 
-          const provider = strapi.config.get<{ provider: string }>('plugin.upload').provider;
+          const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
 
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);

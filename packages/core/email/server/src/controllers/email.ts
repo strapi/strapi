@@ -43,7 +43,7 @@ const emailController = {
       to,
       subject: `Strapi test mail to: ${to}`,
       text: `Great! You have correctly configured the Strapi email plugin with the ${strapi.config.get(
-        'plugin.email.provider'
+        'plugin::email.provider'
       )} provider. \r\nFor documentation on how to use the email plugin checkout: https://docs.strapi.io/developer-docs/latest/plugins/email.html`,
     };
 

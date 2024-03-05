@@ -119,7 +119,7 @@ For security reasons, prefer storing the secret in an environment variable and r
 
     const jwtSecret = crypto.randomBytes(16).toString('base64');
 
-    strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
+    strapi.config.set('plugin::users-permissions.jwtSecret', jwtSecret);
 
     if (!process.env.JWT_SECRET) {
       const envPath = process.env.ENV_PATH || '.env';
