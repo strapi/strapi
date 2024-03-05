@@ -6,7 +6,7 @@
  */
 
 import { ReviewWorkflowsPanel } from '../../../../ee/admin/src/content-manager/pages/EditView/components/ReviewWorkflowsPanel';
-import { HistoryAction } from '../../content-manager/history/components/HistoryActions';
+import { HistoryAction } from '../../content-manager/history/components/HistoryAction';
 import {
   DEFAULT_ACTIONS,
   type DocumentActionDescription,
