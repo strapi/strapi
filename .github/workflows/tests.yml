@@ -189,7 +189,7 @@ jobs:
         if: failure()
         with:
           name: ce-playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
   e2e_ee:
@@ -225,13 +225,14 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
+          enableFutureFeatures: true
           jestOptions: --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: ee-playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
   api_ce_pg:
