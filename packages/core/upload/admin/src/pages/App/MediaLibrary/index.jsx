@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, SearchInput } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   BaseCheckbox,
@@ -17,7 +17,6 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPermissions,
-  SearchURLQuery,
   useFocusWhenNavigate,
   usePersistentState,
   useQueryParams,
@@ -298,7 +297,7 @@ export const MediaLibrary = () => {
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                 />
               </ActionContainer>
-              <SearchURLQuery
+              <SearchInput
                 label={formatMessage({
                   id: getTrad('search.label'),
                   defaultMessage: 'Search for an asset',

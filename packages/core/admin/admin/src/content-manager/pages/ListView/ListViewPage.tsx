@@ -16,7 +16,6 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -34,6 +33,7 @@ import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { Page } from '../../../components/PageHelpers';
+import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { capitalise } from '../../../utils/strings';
@@ -303,7 +303,7 @@ const ListViewPage = () => {
         startActions={
           <>
             {list.settings.searchable && (
-              <SearchURLQuery
+              <SearchInput
                 disabled={results.length === 0}
                 label={formatMessage(
                   { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },

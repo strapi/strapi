@@ -11,7 +11,6 @@ export * from './components/FilterListURLQuery';
 export * from './components/FilterPopoverURLQuery';
 export * from './components/PageSizeURLQuery';
 export * from './components/PaginationURLQuery';
-export * from './components/SearchURLQuery';
 
 /* -------------------------------------------------------------------------------------------------
  * Features

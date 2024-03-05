@@ -12,7 +12,6 @@ import {
 } from '@strapi/design-system';
 import {
   DynamicTable,
-  SearchURLQuery,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
@@ -28,6 +27,7 @@ import { useLocation } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
 import { Page } from '../../../../components/PageHelpers';
+import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
@@ -111,7 +111,7 @@ const ListPageCE = () => {
       <ActionLayout
         startActions={
           <>
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage(
                 { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                 { target: title }

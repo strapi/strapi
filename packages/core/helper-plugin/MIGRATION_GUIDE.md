@@ -244,6 +244,18 @@ This component has been removed and not replaced. If you feel like you need this
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
 
+### SearchURLQuery
+
+This component was removed and renamed to `SearchInput` and can now be imported by the `@strapi/strapi` package:
+
+```tsx
+// Before
+import { SearchURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { SearchInput } from '@strapi/strapi/admin';
+```
+
 ### SettingsPageTitle
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
