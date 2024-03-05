@@ -113,7 +113,7 @@ module.exports = ({ env }) => ({
 
 #### Configuration for S3 compatible services
 
-This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
+This plugin may work with S3 compatible services by using the `endpoint`. Scaleway example:
 `./config/plugins.js`
 
 ```js
@@ -127,7 +127,8 @@ module.exports = ({ env }) => ({
           accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
           secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
         },
-        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
+        region: env('SCALEWAY_REGION'), // e.g "fr-par"
+        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
         params: {
           Bucket: env('SCALEWAY_BUCKET'),
         },
