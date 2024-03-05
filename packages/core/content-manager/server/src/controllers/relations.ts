@@ -53,7 +53,12 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
 };
 
 export default {
-  async extractAndValidateRequestInfo(ctx: any, id?: Entity.ID, locale?: Documents.Params.Locale) {
+  async extractAndValidateRequestInfo(
+    ctx: any,
+    id?: Entity.ID,
+    locale?: Documents.Params.Locale,
+    status?: Documents.Params.PublicationState.Kind
+  ) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 
@@ -89,6 +94,10 @@ export default {
     if (id) {
       if (!isSourceComponent) {
         where.documentId = id;
+
+        if (status) {
+          where.publishedAt = status === 'published' ? { $ne: null } : null;
+        }
       } else {
         where.id = id;
       }
@@ -154,8 +163,9 @@ export default {
 
   async find(ctx: any, id: Entity.ID, available: boolean = true) {
     const locale = ctx.request?.query?.locale || null;
+    const status = ctx.request?.query?.status || null;
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale);
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
 
     const {
       targetField,
@@ -185,6 +195,12 @@ export default {
     if (idsToOmit?.length > 0) {
       addFiltersClause(queryParams, {
         documentId: { $notIn: uniq(idsToOmit) },
+      });
+    }
+
+    if (status) {
+      addFiltersClause(queryParams, {
+        publishedAt: status === 'published' ? { $ne: null } : null,
       });
     }
 

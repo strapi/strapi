@@ -69,6 +69,7 @@ export declare namespace FindExisting {
       locale?: string | null;
       _filter?: string;
       _q?: string;
+      status?: Documents.Params.PublicationState.Kind;
       idsToOmit?: Documents.ID[];
       idsToInclude?: Documents.ID[];
     };

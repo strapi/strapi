@@ -725,7 +725,7 @@ describe('Find Relations', () => {
     });
 
     describe('Find Existing', () => {
-      test('Can retrieve the relation(s) for an entity that have some relations', async () => {
+      test('Can retrieve the relation(s) for an entity that has some relations', async () => {
         const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
 
         const res = await rq({
@@ -742,6 +742,21 @@ describe('Find Relations', () => {
           // TODO we aren't accounting for the order of the results here
           expect.arrayContaining(relatedProductDocumentIds)
         );
+      });
+
+      test('Can query by status for existing relations', async () => {
+        const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${id}/${fieldName}`,
+          qs: {
+            status: 'published',
+          },
+        });
+        expect(res.status).toBe(200);
+
+        expect(res.body.results.map((result) => result.publishedAt)).not.toContainEqual(null);
       });
 
       test("Can retrieve the relation(s) for an entity that doesn't have relations yet", async () => {
