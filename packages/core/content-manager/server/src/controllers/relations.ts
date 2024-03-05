@@ -1,11 +1,10 @@
 import { prop, uniq, flow } from 'lodash/fp';
-import { isOperatorOfType, contentTypes } from '@strapi/utils';
+import { isOperatorOfType, contentTypes, mapAsync } from '@strapi/utils';
 import { type Common, type Entity, type Documents } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
-import { areDatesEqual } from '../utils/dates';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
@@ -198,15 +197,20 @@ export default {
       });
     }
 
-    if (status) {
-      addFiltersClause(queryParams, {
-        publishedAt: status === 'published' ? { $ne: null } : null,
-      });
+    // If no status is requested, we find all the draft relations and later update them
+    // with the latest available status
+    addFiltersClause(queryParams, {
+      publishedAt: status === 'published' ? { $ne: null } : null,
+    });
+
+    if (locale) {
+      addFiltersClause(queryParams, { locale });
     }
 
     if (id) {
-      // If we have been given an id (document or entity), we need to filter out the
-      // relations that are already linked to the current id
+      // If finding available we want to add a filter to exclude the
+      // documentIds found by the subQuery
+      // And the opposite if finding existing
       const subQuery = strapi.db.queryBuilder(sourceUid);
 
       // The alias refers to the DB table of the target content type model
@@ -225,13 +229,6 @@ export default {
       } else {
         // If the source is a content type, we need to filter by document id
         where.document_id = id;
-
-        if (status) {
-          where.publishedAt = status === 'published' ? { $ne: null } : null;
-        }
-        if (locale) {
-          where.locale = locale;
-        }
       }
 
       if ((idsToInclude?.length ?? 0) !== 0) {
@@ -245,9 +242,8 @@ export default {
         .getKnexQuery();
 
       addFiltersClause(queryParams, {
-        // If finding available we want to add a filter to exclude the
-        // documentIds found by the subQuery
-        // And the opposite if finding existing
+        // Change the operator based on whether we are looking for available or
+        // existing relations
         documentId: available ? { $notIn: knexSubQuery } : { $in: knexSubQuery },
       });
     }
@@ -263,38 +259,26 @@ export default {
       queryParams
     );
 
-    const resultsGroupedByDocId: Record<string, RelationEntity[]> = res.results.reduce(
-      // TODO improve types
-      (acc: any, result) => {
-        const documentId = result.documentId;
-        acc[documentId] = acc[documentId] || [];
-        acc[documentId].push(result);
-        return acc;
-      },
-      {}
-    );
+    if (status) {
+      // The result will contain all relations in the requested status, and we don't need to find
+      // the latest status for each.
 
-    const latestEntryForEachRelation = Object.values(resultsGroupedByDocId).reduce<
-      RelationEntity[]
-    >((acc, docIdResults) => {
-      if (docIdResults.length === 1) {
-        acc.push(docIdResults[0]);
-      } else {
-        const equalDates = areDatesEqual(docIdResults[0].updatedAt, docIdResults[1].updatedAt, 500);
-        const latestEntry = equalDates
-          ? docIdResults.find((entity) => entity.publishedAt)
-          : docIdResults.sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))[0];
+      ctx.body = res;
+      return;
+    }
 
-        if (latestEntry) {
-          acc.push(latestEntry);
-        }
-      }
-      return acc;
-    }, []);
-
+    // No specific status was requested, we should find the latest available status for each relation
+    const documentMetadata = getService('document-metadata');
     ctx.body = {
       ...res,
-      results: latestEntryForEachRelation,
+      results: await mapAsync(res.results, async (relation: RelationEntity) => {
+        const { data: documentWithLatestStatus } =
+          await documentMetadata.formatDocumentWithMetadata(targetUid, relation, {
+            availableStatus: true,
+          });
+
+        return documentWithLatestStatus;
+      }),
     };
   },
 

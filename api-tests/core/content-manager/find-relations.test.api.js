@@ -126,7 +126,7 @@ const shopModel = () => ({
 });
 
 // Add an appropriate publishedAt check based on the presence of a published version
-const addPublishedAtCheck = (data, documentId) => {
+const addStatusCheck = (data, documentId) => {
   if (!documentId) {
     return { publishedAt: null };
   }
@@ -140,9 +140,9 @@ const addPublishedAtCheck = (data, documentId) => {
       (publishedProduct) => publishedProduct.documentId === documentId
     )
   ) {
-    return { publishedAt: expect.anything() };
+    return { status: 'published' };
   }
-  return { publishedAt: null };
+  return { status: 'draft' };
 };
 
 const allRelations = {
@@ -604,7 +604,7 @@ describe('Find Relations', () => {
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((product) => ({
                 documentId: product.documentId,
-                ...addPublishedAtCheck(data, product.documentId),
+                ...addStatusCheck(data, product.documentId),
               }))
           );
 
@@ -649,7 +649,7 @@ describe('Find Relations', () => {
           .map((product) => ({
             documentId: product.documentId,
             locale: product.locale,
-            ...addPublishedAtCheck(data, product.documentId),
+            ...addStatusCheck(data, product.documentId),
           }));
 
         expect(res.body.results).toMatchObject(availableProducts);
@@ -714,7 +714,7 @@ describe('Find Relations', () => {
               .map((product) => ({
                 documentId: product.documentId,
                 locale: product.locale,
-                ...addPublishedAtCheck(data, product.documentId),
+                ...addStatusCheck(data, product.documentId),
               }));
 
             expect(res.body.results).toHaveLength(expected.length);
