@@ -56,7 +56,10 @@ export default {
           },
           id: 'advanced-settings',
           to: `users-permissions/advanced-settings`,
-          Component: () => import('./pages/AdvancedSettings'),
+          Component: () =>
+            import('./pages/AdvancedSettings').then((mod) => ({
+              default: mod.ProtectedAdvancedSettingsPage,
+            })),
           permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]

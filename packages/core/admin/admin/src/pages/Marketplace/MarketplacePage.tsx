@@ -16,7 +16,6 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  ContentBox,
   PageSizeURLQuery,
   PaginationURLQuery,
   useAppInfo,
@@ -30,6 +29,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { ContentBox } from '../../components/ContentBox';
 import { useDebounce } from '../../hooks/useDebounce';
 import { selectAdminPermissions } from '../../selectors';
 

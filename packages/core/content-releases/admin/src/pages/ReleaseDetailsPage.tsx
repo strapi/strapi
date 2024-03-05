@@ -17,12 +17,12 @@ import {
   SingleSelectOption,
   Icon,
   Tooltip,
+  EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   LoadingIndicatorPage,
-  NoContent,
   PageSizeURLQuery,
   PaginationURLQuery,
   RelativeTime,
@@ -35,7 +35,15 @@ import {
   AnErrorOccurred,
   useTracking,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import {
+  ArrowLeft,
+  CheckCircle,
+  More,
+  Pencil,
+  Trash,
+  CrossCircle,
+  EmptyDocuments,
+} from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -631,12 +639,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   if (Object.keys(releaseActions).length === 0) {
     return (
       <ContentLayout>
-        <NoContent
-          content={{
-            id: 'content-releases.pages.Details.tab.emptyEntries',
-            defaultMessage:
-              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
-          }}
+        <EmptyStateLayout
           action={
             <LinkButton
               as={ReactRouterLink}
@@ -653,6 +656,12 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
+          icon={<EmptyDocuments width="10rem" />}
+          content={formatMessage({
+            id: 'content-releases.pages.Details.tab.emptyEntries',
+            defaultMessage:
+              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+          })}
         />
       </ContentLayout>
     );

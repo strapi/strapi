@@ -8,23 +8,23 @@ import {
   Flex,
   Typography,
   Box,
+  Status,
 } from '@strapi/design-system';
 import {
   DynamicTable,
   NoPermissions,
   SearchURLQuery,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
-  Status,
   PageSizeURLQuery,
   PaginationURLQuery,
   CheckPagePermissions,
   TableHeader,
 } from '@strapi/helper-plugin';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
@@ -98,7 +98,14 @@ const ListPageCE = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle name="Users" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Users',
+          }
+        )}
+      />
       <HeaderLayout
         primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
@@ -280,15 +287,20 @@ const TABLE_HEADERS = [
     cellFormatter({ isActive }, { formatMessage }) {
       return (
         <Flex>
-          <Status variant={isActive ? 'success' : 'danger'} />
-          <Typography textColor="neutral800">
+          <Status
+            size="S"
+            borderWidth={0}
+            background="transparent"
+            color="neutral800"
+            variant={isActive ? 'success' : 'danger'}
+          >
             {formatMessage({
               id: isActive
                 ? 'Settings.permissions.users.active'
                 : 'Settings.permissions.users.inactive',
               defaultMessage: isActive ? 'Active' : 'Inactive',
             })}
-          </Typography>
+          </Status>
         </Flex>
       );
     },

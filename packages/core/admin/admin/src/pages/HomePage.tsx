@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
-  ContentBox,
   LoadingIndicatorPage,
   useAppInfo,
   useGuidedTour,
@@ -28,6 +27,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';

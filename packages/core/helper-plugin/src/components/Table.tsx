@@ -18,11 +18,11 @@ import {
   Table as DSTable,
   TableProps as DSTableProps,
 } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { CarretDown, Trash } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useQueryParams } from '../hooks/useQueryParams';
-import { SortIcon } from '../icons/SortIcon';
 
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
@@ -314,6 +314,12 @@ const HeaderCell = ({ attribute, mainField, name, label, sortable }: HeaderCellP
     </Th>
   );
 };
+
+const SortIcon = styled(CarretDown)<{
+  isUp?: boolean;
+}>`
+  transform: ${({ isUp = false }) => `rotate(${isUp ? '180' : '0'}deg)`};
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * Root

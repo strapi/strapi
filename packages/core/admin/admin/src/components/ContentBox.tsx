@@ -1,7 +1,7 @@
 import { Flex, FlexProps, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
-export interface ContentBoxProps {
+interface ContentBoxProps {
   title?: string;
   subtitle?: string;
   icon?: FlexProps['children'];
@@ -9,18 +9,6 @@ export interface ContentBoxProps {
   endAction?: FlexProps['children'];
   titleEllipsis?: boolean;
 }
-const IconWrapper = styled(Flex)`
-  margin-right: ${({ theme }) => theme.spaces[6]};
-
-  svg {
-    width: ${32 / 16}rem;
-    height: ${32 / 16}rem;
-  }
-`;
-
-const TypographyWordBreak = styled(Typography)`
-  word-break: break-all;
-`;
 
 const ContentBox = ({
   title,
@@ -52,4 +40,18 @@ const ContentBox = ({
   );
 };
 
+const IconWrapper = styled(Flex)`
+  margin-right: ${({ theme }) => theme.spaces[6]};
+
+  svg {
+    width: ${32 / 16}rem;
+    height: ${32 / 16}rem;
+  }
+`;
+
+const TypographyWordBreak = styled(Typography)`
+  word-break: break-all;
+`;
+
 export { ContentBox };
+export type { ContentBoxProps };

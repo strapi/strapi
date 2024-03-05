@@ -17,7 +17,6 @@ import {
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  SettingsPageTitle,
   translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -27,6 +26,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -128,7 +128,14 @@ export const SingleSignOnPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle name="SSO" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'SSO',
+          }
+        )}
+      />
       <Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
         <Formik
           onSubmit={handleSubmit}

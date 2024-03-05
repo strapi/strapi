@@ -3,7 +3,6 @@ import * as React from 'react';
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -13,6 +12,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
@@ -332,7 +332,12 @@ export const EditView = () => {
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
       <Main>
-        <SettingsPageTitle name="API Tokens" />
+        <Helmet
+          title={formatMessage(
+            { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+            { name: 'API Tokens' }
+          )}
+        />
         <Formik
           validationSchema={schema}
           validateOnChange={false}

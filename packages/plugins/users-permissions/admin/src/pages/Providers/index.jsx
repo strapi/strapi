@@ -19,7 +19,6 @@ import {
   CheckPagePermissions,
   LoadingIndicatorPage,
   onRowClick,
-  SettingsPageTitle,
   stopPropagation,
   useAPIErrorHandler,
   useCollator,
@@ -32,6 +31,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -159,11 +159,16 @@ export const ProvidersPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.providers'),
-          defaultMessage: 'Providers',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.providers'),
+              defaultMessage: 'Providers',
+            }),
+          }
+        )}
       />
       <Main>
         <HeaderLayout

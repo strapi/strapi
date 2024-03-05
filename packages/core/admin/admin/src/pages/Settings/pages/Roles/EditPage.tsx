@@ -4,7 +4,6 @@ import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/de
 import { Link } from '@strapi/design-system/v2';
 import {
   LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useNotification,
   useOverlayBlocker,
@@ -14,6 +13,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
@@ -172,7 +172,14 @@ const EditPage = () => {
 
   return (
     <Main>
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Roles',
+          }
+        )}
+      />
       <Formik
         enableReinitialize
         initialValues={

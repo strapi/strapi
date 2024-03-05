@@ -1,20 +1,25 @@
 import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, LinkButton, Main } from '@strapi/design-system';
+import {
+  ContentLayout,
+  EmptyStateLayout,
+  HeaderLayout,
+  LinkButton,
+  Main,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  NoContent,
   NoPermissions,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -161,7 +166,14 @@ const ListView = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle name="Transfer Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Transfer Tokens',
+          }
+        )}
+      />
       <HeaderLayout
         title={formatMessage({
           id: 'Settings.transferTokens.title',
@@ -205,12 +217,8 @@ const ListView = () => {
             tokenType={TRANSFER_TOKEN_TYPE}
           />
         )}
-        {canRead && canCreate && transferTokens.length === 0 && (
-          <NoContent
-            content={{
-              id: 'Settings.transferTokens.addFirstToken',
-              defaultMessage: 'Add your first Transfer Token',
-            }}
+        {canRead && canCreate && transferTokens.length === 0 ? (
+          <EmptyStateLayout
             action={
               <LinkButton
                 variant="secondary"
@@ -223,16 +231,22 @@ const ListView = () => {
                 })}
               </LinkButton>
             }
+            icon={<EmptyDocuments width="10rem" />}
+            content={formatMessage({
+              id: 'Settings.transferTokens.addFirstToken',
+              defaultMessage: 'Add your first Transfer Token',
+            })}
           />
-        )}
-        {canRead && !canCreate && transferTokens.length === 0 && (
-          <NoContent
-            content={{
+        ) : null}
+        {canRead && !canCreate && transferTokens.length === 0 ? (
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="10rem" />}
+            content={formatMessage({
               id: 'Settings.transferTokens.emptyStateLayout',
               defaultMessage: 'You don’t have any content yet...',
-            }}
+            })}
           />
-        )}
+        ) : null}
       </ContentLayout>
     </Main>
   );

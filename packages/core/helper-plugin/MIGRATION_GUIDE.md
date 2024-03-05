@@ -5,6 +5,10 @@ It is written in alphabetical order grouped by domain based on _every_ export th
 
 ## Components
 
+### ContentBox
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
 ### DateTimePicker
 
 This was aliasing the design-system. You should import the component from there:
@@ -30,6 +34,27 @@ import { Form } from '@strapi/strapi/admin';
 ```
 
 Users should note that any use of the Formik library will no longer work & insted should look at the documentation for the `Form` component.
+
+### InjectionZone
+
+This component has been removed and not replaced. However, you can easily replicate this in your own project by using the `useStrapiApp` hook:
+
+```tsx
+const MyComponent = ({ area, ...compProps }) => {
+  const { getPlugin } = useStrapiApp();
+
+  const [pluginName, page, position] = area.split('.');
+
+  const plugin = getPlugin(pluginName);
+  const components = plugin?.getInjectedComponents(page, position);
+
+  if (!plugin || !components) {
+    return null;
+  }
+
+  return components.map(({ name, Component }) => <Component key={name} {...props} />);
+};
+```
 
 ### Link
 
@@ -71,6 +96,48 @@ const MyLink = () => {
     </LinkButton>
   );
 };
+```
+
+### NoContent
+
+This component has been removed and not replaced, you should use the `EmptyStateLayout` component from `@strapi/design-system`.
+
+### NoMedia
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### NotAllowedInput
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase. You can easily replicate this in your own project by using the `TextInput` from `@strapi/design-system`:
+
+```tsx
+import { TextInput } from '@strapi/design-system';
+
+const MyComponent = (props) => {
+  return (
+    <TextInput disabled placeholder="No permissions to see this field" type="text" {...props} />
+  );
+};
+```
+
+### ReactSelect
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### SettingsPageTitle
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### Status
+
+This component should be imported from the `@strapi/design-system` package:
+
+```ts
+// Before
+import { Status } from '@strapi/helper-plugin';
+
+// After
+import { Status } from '@strapi/design-system';
 ```
 
 ## Content Manager
@@ -135,3 +202,13 @@ const {
   edit: { layout, components },
 } = useDocumentLayout();
 ```
+
+## Icons
+
+### SortIcon
+
+This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
+
+### RemoveRoundedButton
+
+This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.

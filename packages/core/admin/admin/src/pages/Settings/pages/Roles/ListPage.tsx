@@ -20,7 +20,6 @@ import {
   getFetchClient,
   LoadingIndicatorPage,
   SearchURLQuery,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useQueryParams,
@@ -31,6 +30,7 @@ import {
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import produce from 'immer';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -138,7 +138,14 @@ const ListPage = () => {
 
   return (
     <Main>
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Roles',
+          }
+        )}
+      />
       <HeaderLayout
         primaryAction={
           canCreate ? (
