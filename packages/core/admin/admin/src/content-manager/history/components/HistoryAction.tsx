@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/helper-plugin';
-import { Clock } from '@strapi/icons';
+import { History } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 import type { DocumentActionComponent } from '../../../core/apis/content-manager';
 
-const StyledClock = styled(Clock)`
+const StyledHistory = styled(History)`
   path {
     fill: currentColor;
   }
@@ -27,7 +27,7 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   }
 
   return {
-    icon: <StyledClock />,
+    icon: <StyledHistory />,
     label: formatMessage({
       id: 'content-manager.history.document-action',
       defaultMessage: 'Content History',
