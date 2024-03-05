@@ -225,6 +225,13 @@ export default {
       } else {
         // If the source is a content type, we need to filter by document id
         where.document_id = id;
+
+        if (status) {
+          where.publishedAt = status === 'published' ? { $ne: null } : null;
+        }
+        if (locale) {
+          where.locale = locale;
+        }
       }
 
       if ((idsToInclude?.length ?? 0) !== 0) {
