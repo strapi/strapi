@@ -14,12 +14,10 @@ function mockUploadProvider(uploadFunc, props) {
   const { responsiveDimensions = false } = props || {};
 
   const defaultConfig = {
-    plugin: {
-      upload: {
-        breakpoints: {
-          large: 1000,
-          medium: 750,
-        },
+    'plugin::upload': {
+      breakpoints: {
+        large: 1000,
+        medium: 750,
       },
     },
   };
