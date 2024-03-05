@@ -233,6 +233,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       isDraft: true,
       locale: queryParams?.locale,
     });
+
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation

@@ -121,8 +121,7 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
 
 export type NestedParams<TSchemaUID extends Common.UID.Schema> = Params.Pick<
   TSchemaUID,
-  // @ts-expect-error - remove publicationState from the list of keys
-  'fields' | 'filters' | 'populate' | 'sort' | 'plugin' | 'publicationState'
+  'fields' | 'filters' | 'populate' | 'sort' | 'plugin'
 >;
 
 export type Any<TSchemaUID extends Common.UID.Schema> =

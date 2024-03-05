@@ -49,6 +49,7 @@ export default ({ strapi }: Context) => {
         await validate.contentAPI.query(transformedArgs, targetContentType, {
           auth,
         });
+
         const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
           auth,
         });

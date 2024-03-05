@@ -12,6 +12,8 @@ module.exports = () => ({
       apolloServer: {
         tracing: true,
       },
+
+      v4CompatibilityMode: true,
     },
   },
   documentation: {

@@ -1,7 +1,7 @@
 import { CurriedFunction1 } from 'lodash';
 import { isArray, isObject } from 'lodash/fp';
 
-import { getNonWritableAttributes } from '../content-types';
+import { getNonWritableAttributes, constants } from '../content-types';
 import { pipeAsync } from '../async';
 import { throwInvalidParam } from './utils';
 
@@ -12,6 +12,8 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 
 import { Model, Data } from '../types';
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 export interface Options {
   auth?: unknown;
@@ -39,8 +41,14 @@ const createContentAPIValidators = () => {
 
     const transforms = [
       (data: unknown) => {
-        if (isObject(data) && 'id' in data) {
-          throwInvalidParam({ key: 'id' });
+        if (isObject(data)) {
+          if (ID_ATTRIBUTE in data) {
+            throwInvalidParam({ key: ID_ATTRIBUTE });
+          }
+
+          if (DOC_ID_ATTRIBUTE in data) {
+            throwInvalidParam({ key: DOC_ID_ATTRIBUTE });
+          }
         }
       },
       // non-writable attributes

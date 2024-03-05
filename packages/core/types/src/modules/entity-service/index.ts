@@ -44,14 +44,7 @@ export interface EntityService {
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination:offset'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
+      'fields' | 'filters' | '_q' | 'pagination:offset' | 'sort' | 'populate' | 'plugin'
     >
   >(
     uid: TContentTypeUID,
@@ -105,14 +98,7 @@ export interface EntityService {
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
-      | 'fields'
-      | 'populate'
-      | 'pagination'
-      | 'sort'
-      | 'filters'
-      | '_q'
-      | 'publicationState'
-      | 'plugin'
+      'fields' | 'populate' | 'pagination' | 'sort' | 'filters' | '_q' | 'plugin'
     >
   >(
     uid: TContentTypeUID,
@@ -144,14 +130,7 @@ export interface EntityService {
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination:offset'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
+      'fields' | 'filters' | '_q' | 'pagination:offset' | 'sort' | 'populate' | 'plugin'
     >
   >(
     uid: TContentTypeUID,
@@ -165,14 +144,7 @@ export interface EntityService {
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
       TContentTypeUID,
-      | 'fields'
-      | 'filters'
-      | '_q'
-      | 'pagination'
-      | 'sort'
-      | 'populate'
-      | 'publicationState'
-      | 'plugin'
+      'fields' | 'filters' | '_q' | 'pagination' | 'sort' | 'populate' | 'plugin'
     >
   >(
     uid: TContentTypeUID,
