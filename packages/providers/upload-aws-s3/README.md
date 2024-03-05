@@ -178,7 +178,7 @@ module.exports = [
 ];
 ```
 
-If you use dots in your bucket name, the url of the resource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg` so in that case the img-src and media-src directives to add will be `s3.yourRegion.amazonaws.com` without the bucket name in the url.
+If you use dots in your bucket name (`forcePathStyle set to false`), the url of the resource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg` so in that case the img-src and media-src directives to add will be `s3.yourRegion.amazonaws.com` without the bucket name in the url.
 
 ## Bucket CORS Configuration
 
