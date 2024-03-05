@@ -13,7 +13,6 @@ import {
 } from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
   useAPIErrorHandler,
@@ -26,7 +25,7 @@ import {
   translatedErrors,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
@@ -150,6 +149,8 @@ const EditView = () => {
         if (isCreating) {
           const res = await createToken({
             ...body,
+            // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
+            lifespan: body?.lifespan || null,
             permissions,
           });
 
@@ -181,7 +182,7 @@ const EditView = () => {
             tokenType: TRANSFER_TOKEN_TYPE,
           });
 
-          navigate(res.data.id.toString(), {
+          navigate(`../transfer-tokens/${res.data.id.toString()}`, {
             replace: true,
             state: { transferToken: res.data },
           });
@@ -254,7 +255,7 @@ const EditView = () => {
           {
             name: transferToken?.name || '',
             description: transferToken?.description || '',
-            lifespan: transferToken?.lifespan ?? null,
+            lifespan: transferToken?.lifespan || null,
             /**
              * We need to cast the permissions to satisfy the type for `permissions`
              * in the request body incase we don't have a transferToken and instead

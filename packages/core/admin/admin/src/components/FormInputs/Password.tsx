@@ -48,6 +48,7 @@ export const PasswordInput = forwardRef<any, InputProps>(
             )}
           </button>
         }
+        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
         label={label}
         id={name}
         hint={hint}

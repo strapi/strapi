@@ -60,7 +60,7 @@ test.describe('Sign Up', () => {
     await expect(page.getByText('The value must be a lowercase string')).toBeVisible();
 
     await fillEmailAndSubmit('notanemail');
-    await expect(page.getByText('This is an invalid email')).toBeVisible();
+    await expect(page.getByText('This is not a valid email')).toBeVisible();
   });
 
   test("a user cannot submit the form if a password isn't provided or doesn't meet the password validation requirements", async ({

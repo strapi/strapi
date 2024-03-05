@@ -17,7 +17,6 @@ import {
   FieldAction,
 } from '@strapi/design-system';
 import {
-  Form,
   GenericInput,
   GenericInputProps,
   LoadingIndicatorPage,
@@ -30,7 +29,7 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Check, Eye, EyeStriked } from '@strapi/icons';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

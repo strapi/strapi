@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 import { newlineAndIndentContinueMarkdownList } from './utils/continueList';
 
-import type { FieldValue } from '../../../../../components/Form';
-import type { InputProps } from '../../../../../components/FormInputs/types';
+import type { FieldValue } from '../../../../../../components/Form';
+import type { InputProps } from '../../../../../../components/FormInputs/types';
 
 import 'codemirror5/addon/display/placeholder';
 

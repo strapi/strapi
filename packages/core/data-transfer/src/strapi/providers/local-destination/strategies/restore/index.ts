@@ -1,4 +1,5 @@
-import type { LoadedStrapi, Schema } from '@strapi/types';
+import type { LoadedStrapi, Schema, Common } from '@strapi/types';
+import type { Model } from '@strapi/database';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -37,44 +38,75 @@ const deleteEntitiesRecords = async (
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { entities } = options;
-  const query = queries.entity.createEntityQuery(strapi);
-  const contentTypes = Object.values<Schema.ContentType>(
-    strapi.contentTypes as Record<string, Schema.ContentType>
-  );
 
-  const contentTypesToClear = contentTypes.filter((contentType) => {
-    let removeThisContentType = true;
+  const models = strapi.get('models').get() as Model[];
+  const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
 
-    // include means "only include these types" so if it's not in here, it's not being included
-    if (entities?.include) {
-      removeThisContentType = entities.include.includes(contentType.uid);
-    }
+  const contentTypesToClear = contentTypes
+    .filter((contentType) => {
+      let removeThisContentType = true;
 
-    // if something is excluded, remove it. But lack of being excluded doesn't mean it's kept
-    if (entities?.exclude && entities.exclude.includes(contentType.uid)) {
-      removeThisContentType = false;
-    }
+      // include means "only include these types" so if it's not in here, it's not being included
+      if (entities?.include) {
+        removeThisContentType = entities.include.includes(contentType.uid);
+      }
 
-    if (entities?.filters) {
-      removeThisContentType = entities.filters.every((filter) => filter(contentType));
-    }
+      // if something is excluded, remove it. But lack of being excluded doesn't mean it's kept
+      if (entities?.exclude && entities.exclude.includes(contentType.uid)) {
+        removeThisContentType = false;
+      }
 
-    return removeThisContentType;
-  });
+      if (entities?.filters) {
+        removeThisContentType = entities.filters.every((filter) => filter(contentType));
+      }
 
-  const [results, updateResults] = useResults(
-    contentTypesToClear.map((contentType) => contentType.uid)
-  );
+      return removeThisContentType;
+    })
+    .map((contentType) => contentType.uid);
 
-  const deletePromises = contentTypesToClear.map(async (contentType) => {
-    const result = await query(contentType.uid).deleteMany(entities?.params);
+  const modelsToClear = models
+    .filter((model) => {
+      if (contentTypesToClear.includes(model.uid as Common.UID.ContentType)) {
+        return false;
+      }
+
+      let removeThisModel = true;
+
+      // include means "only include these types" so if it's not in here, it's not being included
+      if (entities?.include) {
+        removeThisModel = entities.include.includes(model.uid);
+      }
+
+      // if something is excluded, remove it. But lack of being excluded doesn't mean it's kept
+      if (entities?.exclude && entities.exclude.includes(model.uid)) {
+        removeThisModel = false;
+      }
+
+      return removeThisModel;
+    })
+    .map((model) => model.uid);
+
+  const [results, updateResults] = useResults([...contentTypesToClear, ...modelsToClear]);
+
+  const contentTypeQuery = queries.entity.createEntityQuery(strapi);
+
+  const contentTypePromises = contentTypesToClear.map(async (uid) => {
+    const result = await contentTypeQuery(uid).deleteMany(entities?.params);
 
     if (result) {
-      updateResults(result.count || 0, contentType.uid);
+      updateResults(result.count || 0, uid);
     }
   });
 
-  await Promise.all(deletePromises);
+  const modelsPromises = modelsToClear.map(async (uid) => {
+    const result = await strapi.db.query(uid).deleteMany({});
+
+    if (result) {
+      updateResults(result.count || 0, uid);
+    }
+  });
+
+  await Promise.all([...contentTypePromises, ...modelsPromises]);
 
   return results;
 };

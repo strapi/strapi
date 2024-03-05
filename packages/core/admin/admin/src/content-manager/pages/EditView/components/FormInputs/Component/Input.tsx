@@ -2,7 +2,7 @@ import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { InputProps, useField } from '../../../../../components/Form';
+import { InputProps, useField } from '../../../../../../components/Form';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';

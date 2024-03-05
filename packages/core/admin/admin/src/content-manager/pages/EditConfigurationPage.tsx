@@ -10,13 +10,13 @@ import {
 } from '@strapi/helper-plugin';
 
 import { useTypedSelector } from '../../core/store/hooks';
+import { setIn } from '../../utils/object';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
 import { useDoc } from '../hooks/useDocument';
 import { useDocLayout } from '../hooks/useDocumentLayout';
 import { useUpdateContentTypeConfigurationMutation } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
-import { setIn } from '../utils/object';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 

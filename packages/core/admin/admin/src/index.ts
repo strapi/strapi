@@ -5,6 +5,12 @@
 export * from './render';
 
 /**
+ * components
+ */
+export * from './components/Form';
+export * from './components/FormInputs/Renderer';
+
+/**
  * Hooks
  */
 export { useInjectReducer } from './hooks/useInjectReducer';

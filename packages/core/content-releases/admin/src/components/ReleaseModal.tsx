@@ -298,6 +298,9 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
       onChange={(timezone) => {
         setFieldValue('timezone', timezone);
       }}
+      onTextValueChange={(timezone) => {
+        setFieldValue('timezone', timezone);
+      }}
       onClear={() => {
         setFieldValue('timezone', '');
       }}
