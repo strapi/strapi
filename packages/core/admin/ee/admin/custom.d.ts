@@ -29,7 +29,7 @@ declare global {
       backendURL: string;
       isEE: boolean;
       future: {
-        isEnabled: (name: keyof FeaturesConfig['future']) => boolean;
+        isEnabled: (name: keyof NonNullable<FeaturesConfig['future']>) => boolean;
       };
       features: {
         SSO: 'sso';

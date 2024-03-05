@@ -1,5 +1,5 @@
 export interface FeaturesConfig {
-  future: {
+  future?: {
     contentReleases?: boolean;
     history?: boolean;
   };

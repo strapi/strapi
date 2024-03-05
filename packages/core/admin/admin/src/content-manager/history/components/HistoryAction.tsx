@@ -33,7 +33,24 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
       defaultMessage: 'Content History',
     }),
     onClick: () => navigate({ pathname: 'history', search: pluginsQueryParams }),
-    disabled: !document || !document.id || !model.startsWith('api::'),
+    disabled:
+      /**
+       * The user is creating a new document.
+       * It hasn't been saved yet, so there's no history to go to
+       */
+      !document ||
+      /**
+       * The document has been created but the current dimension has never been saved.
+       * For example, the user is creating a new locale in an existing document,
+       * so there's no history for the document in that locale
+       */
+      !document.id ||
+      /**
+       * History is only available for content types created by the user.
+       * These have the `api::` prefix, as opposed to the ones created by Strapi or plugins,
+       * which start with `admin::` or `plugin::`
+       */
+      !model.startsWith('api::'),
     position: 'header',
   };
 };
