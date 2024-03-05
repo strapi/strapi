@@ -126,6 +126,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       };
     } = {};
 
+    const assetStatus: {
+      [filename: string]: number;
+    } = {};
+
     const stream = await this.#createStageReadStream('assets');
     const pass = new PassThrough({ objectMode: true });
 
@@ -138,11 +142,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (action === 'start') {
             // Each asset has its own stream identified by its assetID
             assets[item.assetID] = { ...item.data, stream: new PassThrough() };
+            assetStatus[item.assetID] = 0;
             await this.writeAsync(pass, assets[item.assetID]);
           }
 
           // Writes the asset data to the created stream
           else if (action === 'stream') {
+            assetStatus[item.assetID] += 1;
             // Converts data into buffer
             const rawBuffer = item.data as unknown as {
               type: 'Buffer';
@@ -151,10 +157,29 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
             const chunk = Buffer.from(rawBuffer.data);
 
             await this.writeAsync(assets[item.assetID].stream, chunk);
+            assetStatus[item.assetID] -= 1;
           }
 
           // The asset has been transferred
           else if (action === 'end') {
+            let endStreamResolve;
+            let endStreamPromise = new Promise<void>((resolve) => {
+              endStreamResolve = resolve;
+            });
+            if (assetStatus[item.assetID] === 0) {
+              endStreamResolve();
+            } else { // wait if end received before previous data finished writing
+              let fn = () => {
+                if (assetStatus[item.assetID] === 0) {
+                  endStreamResolve();
+                } else {
+                  setTimeout(fn, 300)
+                }
+              }
+              setTimeout(fn, 300);
+            }
+            await endStreamPromise;
+
             await new Promise<void>((resolve, reject) => {
               const { stream: assetStream } = assets[item.assetID];
               assetStream
