@@ -37,7 +37,7 @@ const VersionContent = () => {
   return (
     <ContentLayout>
       <Form disabled={true} method="PUT" initialValues={version.data}>
-        <Flex direction="column" alignItems="stretch" gap={6}>
+        <Flex direction="column" alignItems="stretch" gap={6} position="relative">
           {layout.map((panel, index) => {
             if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
               const [row] = panel;
