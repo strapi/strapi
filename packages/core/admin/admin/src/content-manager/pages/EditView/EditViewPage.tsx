@@ -13,7 +13,7 @@ import {
 } from '@strapi/design-system';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Blocker, Form } from '../../../components/Form';
@@ -253,15 +253,17 @@ const getDocumentStatus = (
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedEditViewPage = () => {
-  const { model } = useDoc();
+  const { slug } = useParams<{
+    slug: string;
+  }>();
   const [{ query }] = useQueryParams();
-  const { permissions = [], isLoading, isError } = useSyncRbac(model, query, 'editView');
+  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'editView');
 
   if (isLoading) {
     return <Page.Loading />;
   }
 
-  if (!isLoading && isError) {
+  if ((!isLoading && isError) || !slug) {
     return <Page.Error />;
   }
 

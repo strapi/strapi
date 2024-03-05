@@ -169,7 +169,7 @@ const EditPage = () => {
 
   const isFormDisabled = !isRoleLoading && role.code === 'strapi-super-admin';
 
-  if ((isLoadingPermissionsLayout && isRoleLoading && isLoadingPermissions) || !permissionsLayout) {
+  if (isLoadingPermissionsLayout || isRoleLoading || isLoadingPermissions || !permissionsLayout) {
     return <Page.Loading />;
   }
 
