@@ -13,8 +13,8 @@ interface RelationEntity {
   id: Entity.ID;
   documentId: Documents.ID;
   updatedAt: string | Date;
-  publishedAt?: string | Date; // Assuming this might be used based on your snippet
-  [key: string]: unknown; // To allow for additional properties
+  publishedAt?: string | Date;
+  [key: string]: unknown;
 }
 
 const addFiltersClause = (params: any, filtersClause: any) => {
