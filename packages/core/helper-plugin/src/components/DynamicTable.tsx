@@ -15,13 +15,13 @@ import {
   VisuallyHidden,
   TableProps as DSTableProps,
 } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { CarretDown, Trash } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { SortIcon } from '../icons/SortIcon';
 
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
@@ -382,6 +382,12 @@ const TableHead = ({
     </Thead>
   );
 };
+
+const SortIcon = styled(CarretDown)<{
+  isUp?: boolean;
+}>`
+  transform: ${({ isUp = false }) => `rotate(${isUp ? '180' : '0'}deg)`};
+`;
 
 export { Table as DynamicTable };
 export type { TableProps, TableRowProps, TableHeader, TableHeadProps };

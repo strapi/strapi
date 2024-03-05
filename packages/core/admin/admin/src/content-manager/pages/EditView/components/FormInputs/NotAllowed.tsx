@@ -1,20 +1,12 @@
-import type { ReactNode } from 'react';
-
 import { TextInput } from '@strapi/design-system';
 import { EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import type { InputProps } from '../../../../../components/FormInputs/types';
 import type { Attribute } from '@strapi/types';
 
-interface NotAllowedInputProps {
-  disabled?: boolean;
-  hint?: ReactNode;
-  label: ReactNode;
-  name: string;
-  placeholder?: string;
-  required?: boolean;
-  options?: never;
+interface NotAllowedInputProps extends Omit<InputProps, 'type'> {
   type: Attribute.Kind;
 }
 

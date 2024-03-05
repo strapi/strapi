@@ -17,12 +17,12 @@ import {
   SingleSelectOption,
   Icon,
   Tooltip,
+  EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   LoadingIndicatorPage,
-  NoContent,
   PageSizeURLQuery,
   PaginationURLQuery,
   RelativeTime,
@@ -35,7 +35,15 @@ import {
   AnErrorOccurred,
   useTracking,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import {
+  ArrowLeft,
+  CheckCircle,
+  More,
+  Pencil,
+  Trash,
+  CrossCircle,
+  EmptyDocuments,
+} from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -60,6 +68,8 @@ import {
 import { useTypedDispatch } from '../store/hooks';
 import { getTimezoneOffset } from '../utils/time';
 
+import { getBadgeProps } from './ReleasesPage';
+
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
@@ -78,12 +88,19 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
+const StyledMenuItem = styled(Menu.Item)<{
+  disabled?: boolean;
+  variant?: 'neutral' | 'danger';
+}>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
   span {
     color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
+
+  &:hover {
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
   }
 `;
 
@@ -350,7 +367,13 @@ const ReleaseDetailsLayout = ({
       <HeaderLayout
         title={release.name}
         subtitle={
-          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {numberOfEntriesText +
+                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+            </Typography>
+            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+          </Flex>
         }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
@@ -394,14 +417,7 @@ const ReleaseDetailsLayout = ({
                     width="100%"
                   >
                     <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                      <Flex
-                        paddingTop={2}
-                        paddingBottom={2}
-                        alignItems="center"
-                        gap={2}
-                        hasRadius
-                        width="100%"
-                      >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <PencilIcon />
                         <Typography ellipsis>
                           {formatMessage({
@@ -411,15 +427,12 @@ const ReleaseDetailsLayout = ({
                         </Typography>
                       </Flex>
                     </StyledMenuItem>
-                    <StyledMenuItem disabled={!canDelete} onSelect={toggleWarningSubmit}>
-                      <Flex
-                        paddingTop={2}
-                        paddingBottom={2}
-                        alignItems="center"
-                        gap={2}
-                        hasRadius
-                        width="100%"
-                      >
+                    <StyledMenuItem
+                      disabled={!canDelete}
+                      onSelect={toggleWarningSubmit}
+                      variant="danger"
+                    >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />
                         <Typography ellipsis textColor="danger600">
                           {formatMessage({
@@ -626,12 +639,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   if (Object.keys(releaseActions).length === 0) {
     return (
       <ContentLayout>
-        <NoContent
-          content={{
-            id: 'content-releases.pages.Details.tab.emptyEntries',
-            defaultMessage:
-              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
-          }}
+        <EmptyStateLayout
           action={
             <LinkButton
               as={ReactRouterLink}
@@ -648,6 +656,12 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
+          icon={<EmptyDocuments width="10rem" />}
+          content={formatMessage({
+            id: 'content-releases.pages.Details.tab.emptyEntries',
+            defaultMessage:
+              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+          })}
         />
       </ContentLayout>
     );

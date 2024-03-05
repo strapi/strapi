@@ -1,10 +1,7 @@
 import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
-import {
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 interface LoadingViewProps {
@@ -17,7 +14,12 @@ export const LoadingView = ({ apiTokenName = null }: LoadingViewProps) => {
 
   return (
     <Main aria-busy="true">
-      <SettingsPageTitle name="API Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'API Tokens' }
+        )}
+      />
       <HeaderLayout
         primaryAction={
           <Button disabled startIcon={<Check />} type="button" size="L">

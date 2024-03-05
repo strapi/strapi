@@ -16,7 +16,6 @@ import { Link } from '@strapi/design-system/v2';
 import {
   CheckPagePermissions,
   useOverlayBlocker,
-  SettingsPageTitle,
   LoadingIndicatorPage,
   useAPIErrorHandler,
   useFetchClient,
@@ -24,6 +23,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik, Form } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { NavLink, useMatch } from 'react-router-dom';
@@ -97,8 +97,12 @@ export const EditPage = () => {
 
   return (
     <Main>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'Roles' }
+        )}
+      />
       <Formik
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}

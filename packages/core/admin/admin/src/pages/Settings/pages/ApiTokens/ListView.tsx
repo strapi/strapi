@@ -1,11 +1,15 @@
 import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, LinkButton, Main } from '@strapi/design-system';
+import {
+  ContentLayout,
+  EmptyStateLayout,
+  HeaderLayout,
+  LinkButton,
+  Main,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
-  NoContent,
   NoPermissions,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -13,9 +17,10 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -159,8 +164,12 @@ export const ListView = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="API Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'API Tokens' }
+        )}
+      />
       <HeaderLayout
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
         subtitle={formatMessage({
@@ -201,12 +210,13 @@ export const ListView = () => {
             tokenType={API_TOKEN_TYPE}
           />
         )}
-        {canRead && canCreate && apiTokens.length === 0 && (
-          <NoContent
-            content={{
+        {canRead && canCreate && apiTokens.length === 0 ? (
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="10rem" />}
+            content={formatMessage({
               id: 'Settings.apiTokens.addFirstToken',
               defaultMessage: 'Add your first API Token',
-            }}
+            })}
             action={
               <LinkButton variant="secondary" startIcon={<Plus />} to="/settings/api-tokens/create">
                 {formatMessage({
@@ -216,15 +226,16 @@ export const ListView = () => {
               </LinkButton>
             }
           />
-        )}
-        {canRead && !canCreate && apiTokens.length === 0 && (
-          <NoContent
-            content={{
+        ) : null}
+        {canRead && !canCreate && apiTokens.length === 0 ? (
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="10rem" />}
+            content={formatMessage({
               id: 'Settings.apiTokens.emptyStateLayout',
               defaultMessage: 'You don’t have any content yet...',
-            }}
+            })}
           />
-        )}
+        ) : null}
       </ContentLayout>
     </Main>
   );
