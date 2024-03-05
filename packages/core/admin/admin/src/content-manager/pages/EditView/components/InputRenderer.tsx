@@ -21,6 +21,8 @@ import type { Attribute } from '@strapi/types';
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
+
 /**
  * @internal
  *
@@ -29,11 +31,7 @@ type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : nev
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({
-  visible,
-  hint: providedHint,
-  ...props
-}: DistributiveOmit<EditFieldLayout, 'size'>) => {
+const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
   const { id } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
@@ -210,4 +208,5 @@ const getMinMax = (attribute: Attribute.Any) => {
   }
 };
 
+export type { InputRendererProps };
 export { InputRenderer };

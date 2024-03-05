@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import { Navigate, RouteObject, useLoaderData, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
+import { routes as historyRoutes } from './history/routes';
 
 const Redirect = () => {
   const pathname = useLoaderData() as string;
@@ -160,6 +161,7 @@ const routes: RouteObject[] = [
           };
         },
       },
+      ...historyRoutes,
     ],
   },
 ];
