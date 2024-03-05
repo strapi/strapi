@@ -52,17 +52,6 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
-const mapResults = (results: Array<any>) => {
-  return results.map((result: any) => {
-    if (result.documentId !== undefined) {
-      result.id = result.documentId;
-      delete result.documentId;
-    }
-
-    return result;
-  });
-};
-
 export default {
   async extractAndValidateRequestInfo(ctx: any, id?: Entity.ID, locale?: Documents.Params.Locale) {
     const { userAbility } = ctx.state;
@@ -163,10 +152,7 @@ export default {
     };
   },
 
-  async findAvailable(ctx: any) {
-    await validateFindAvailable(ctx.request.query);
-
-    const { id } = ctx.request.query;
+  async find(ctx: any, id: Entity.ID, available: boolean = true) {
     const locale = ctx.request?.query?.locale || null;
 
     const validation = await this.extractAndValidateRequestInfo(ctx, id, locale);
@@ -202,12 +188,6 @@ export default {
       });
     }
 
-    if (_q) {
-      // searching should be allowed only on mainField for permission reasons
-      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
-    }
-
     if (id) {
       // If we have been given an id (document or entity), we need to filter out the
       // relations that are already linked to the current id
@@ -241,8 +221,18 @@ export default {
         .select(`${alias}.document_id`)
         .getKnexQuery();
 
-      // We add a filter to exclude the documentIds found by the subQuery
-      addFiltersClause(queryParams, { documentId: { $notIn: knexSubQuery } });
+      addFiltersClause(queryParams, {
+        // If finding available we want to add a filter to exclude the
+        // documentIds found by the subQuery
+        // And the opposite if finding existing
+        documentId: available ? { $notIn: knexSubQuery } : { $in: knexSubQuery },
+      });
+    }
+
+    if (_q) {
+      // searching should be allowed only on mainField for permission reasons
+      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
     }
 
     const res = await strapi.entityService.findPage(
@@ -285,57 +275,17 @@ export default {
     };
   },
 
+  async findAvailable(ctx: any) {
+    const { id } = ctx.request.query;
+
+    await validateFindAvailable(ctx.request.query);
+    await this.find(ctx, id, true);
+  },
+
   async findExisting(ctx: any) {
-    await validateFindExisting(ctx.request.query);
     const { id } = ctx.params;
-    const locale = ctx.request?.query?.locale || null;
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale);
-
-    const {
-      targetField,
-      fieldsToSelect,
-      sourceSchema: { uid: sourceUid },
-      targetSchema: { uid: targetUid },
-      currentEntity: { id: currentEntityId },
-    } = validation;
-
-    const entity = await strapi.db.query(sourceUid).findOne({
-      where: { id: currentEntityId },
-      select: ['id'],
-      populate: { [targetField]: { fields: ['id'] } },
-    });
-
-    // Collect all the entity IDs relations in the targetField
-    let resultEntityIds = [];
-    if (entity?.[targetField]) {
-      if (Array.isArray(entity?.[targetField])) {
-        resultEntityIds = entity?.[targetField]?.map((result: any) => result.id);
-      } else {
-        resultEntityIds = entity?.[targetField]?.id ? [entity[targetField].id] : [];
-      }
-    }
-
-    const fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
-    const sort = fields
-      .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
-      .map((field: any) => field);
-
-    const page = await strapi.db.query(targetUid).findPage({
-      select: fields,
-      filters: {
-        // The existing relations will be entries of the target model who's
-        // entity ID is in the list of entity IDs related to the source entity
-        id: { $in: resultEntityIds },
-      },
-      orderBy: sort,
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
-    });
-
-    ctx.body = {
-      ...page,
-      results: Array.isArray(page.results) ? mapResults(page.results) : [],
-    };
+    await validateFindExisting(ctx.request.query);
+    await this.find(ctx, id, false);
   },
 };

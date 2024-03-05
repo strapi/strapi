@@ -1,7 +1,5 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
-
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -726,8 +724,7 @@ describe('Find Relations', () => {
       });
     });
 
-    // TODO
-    describe.skip('Find Existing', () => {
+    describe('Find Existing', () => {
       test('Can retrieve the relation(s) for an entity that have some relations', async () => {
         const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
 
@@ -741,7 +738,7 @@ describe('Find Relations', () => {
         const relatedProductDocumentIds = getRelatedProductDocumentIds(isComponent, fieldName);
 
         expect(res.body.results).toHaveLength(relatedProductDocumentIds.length);
-        expect(res.body.results.map((result) => result.id)).toEqual(
+        expect(res.body.results.map((result) => result.documentId)).toEqual(
           // TODO we aren't accounting for the order of the results here
           expect.arrayContaining(relatedProductDocumentIds)
         );

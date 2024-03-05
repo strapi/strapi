@@ -33,21 +33,21 @@ type RelationResponse =
  * GET /relations/:model/:targetField
  */
 export declare namespace FindAvailable {
+  export interface Params {
+    model: string;
+    targetField: string;
+  }
+
   export interface Request {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       id?: Entity.ID;
       locale?: Documents.Params.Locale;
-      _q?: string;
       _filter?: string;
+      _q?: string;
       idsToOmit?: Documents.ID[];
       idsToInclude?: Documents.ID[];
     };
-  }
-
-  export interface Params {
-    model: string;
-    targetField: string;
   }
 
   export type Response = RelationResponse;
@@ -57,17 +57,21 @@ export declare namespace FindAvailable {
  * GET /relations/:model/:id/:targetField
  */
 export declare namespace FindExisting {
-  export interface Request {
-    body: {};
-    query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
-      locale?: string | null;
-    };
-  }
-
   export interface Params {
     model: string;
     targetField: string;
     id?: Entity.ID;
+  }
+
+  export interface Request {
+    body: {};
+    query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
+      locale?: string | null;
+      _filter?: string;
+      _q?: string;
+      idsToOmit?: Documents.ID[];
+      idsToInclude?: Documents.ID[];
+    };
   }
 
   export type Response = RelationResponse;
