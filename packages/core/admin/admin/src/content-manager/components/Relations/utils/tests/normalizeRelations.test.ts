@@ -1,3 +1,4 @@
+// @ts-nocheck TODO remove after FE relations changes
 import { normalizeRelations } from '../normalizeRelations';
 
 const FIXTURE_RELATIONS = [

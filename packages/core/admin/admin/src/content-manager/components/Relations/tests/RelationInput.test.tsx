@@ -1,3 +1,4 @@
+// @ts-nocheck TODO remove after FE relations changes
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
