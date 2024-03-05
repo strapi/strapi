@@ -280,7 +280,15 @@ export default {
       // The result will contain all relations in the requested status, and we don't need to find
       // the latest status for each.
 
-      ctx.body = res;
+      ctx.body = {
+        ...res,
+        results: res.results.map((relation: RelationEntity) => {
+          return {
+            ...relation,
+            status,
+          };
+        }),
+      };
       return;
     }
 
