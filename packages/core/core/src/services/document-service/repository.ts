@@ -37,11 +37,12 @@ const transformParamsToQuery = curry((uid: Common.UID.Schema, params: any) => {
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
+  const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
   async function findMany(params = {} as any) {
     const query = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       (queryParams) =>
@@ -54,8 +55,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function findFirst(params = {} as any) {
     const query = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       (queryParams) =>
@@ -69,8 +70,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
   async function findOne(documentId: string, params = {} as any) {
     const query = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       (queryParams) =>
@@ -144,9 +145,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function create(params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.setStatusToDraft,
-      DP.statusToData,
-      DP.filterDataPublishedAt,
+      DP.setStatusToDraft(contentType),
+      DP.statusToData(contentType),
+      DP.filterDataPublishedAt(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToData(contentType)
     )(params);
@@ -162,7 +163,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function clone(documentId: string, params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.filterDataPublishedAt,
+      DP.filterDataPublishedAt(contentType),
       i18n.localeToLookup(contentType)
     )(params);
 
@@ -189,7 +190,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const newDocumentId = createDocumentId();
 
     const versions = await mapAsync(entries, async (entryToClone: any) => {
-      const isDraft = contentTypesUtils.isDraft(data);
+      const isDraft = contentTypesUtils.isDraft(data, model);
       // Todo: Merge data with entry to clone
       const validData = await entityValidator.validateEntityUpdate(
         model,
@@ -219,10 +220,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   // NOTE: What happens if user doesn't provide specific publications state and locale to update?
   async function update(documentId: string, params = {} as any) {
     const queryParams = await pipeAsync(
-      DP.setStatusToDraft,
-      DP.statusToLookup,
-      DP.statusToData,
-      DP.filterDataPublishedAt,
+      DP.setStatusToDraft(contentType),
+      DP.statusToLookup(contentType),
+      DP.statusToData(contentType),
+      DP.filterDataPublishedAt(contentType),
       // Default locale will be set if not provided
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
@@ -230,7 +231,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {}, {
-      isDraft: true,
+      isDraft: !params?.data?.publishedAt,
       locale: queryParams?.locale,
     });
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
@@ -248,7 +249,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         model,
         data,
         {
-          isDraft: true, // Always update the draft version
+          isDraft: !params?.data?.publishedAt, // Always update the draft version
           locale: queryParams?.locale,
         },
         entryToUpdate
@@ -288,8 +289,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function count(params = {} as any) {
     const query = await pipeAsync(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultToDraft(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       transformParamsToQuery(uid)
@@ -404,8 +405,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
     count: wrapInTransaction(count),
-    publish: wrapInTransaction(publish),
-    unpublish: wrapInTransaction(unpublish),
-    discardDraft: wrapInTransaction(discardDraft),
+    publish: hasDraftAndPublish ? wrapInTransaction(publish) : undefined,
+    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : undefined,
+    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : undefined,
   };
 };

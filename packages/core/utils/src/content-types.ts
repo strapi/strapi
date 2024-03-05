@@ -109,10 +109,9 @@ const isVisibleAttribute = (model: Model, attributeName: string) => {
 };
 
 const getOptions = (model: Model) =>
-  _.assign({ withDraftAndPublish: true }, _.get(model, 'options', {}));
+  _.assign({ draftAndPublish: true }, _.get(model, 'options', {}));
 
-const hasDraftAndPublish = (model: Model) =>
-  _.get(model, 'options.withDraftAndPublish', true) === true;
+const hasDraftAndPublish = (model: Model) => _.get(model, 'options.draftAndPublish', true) === true;
 
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;

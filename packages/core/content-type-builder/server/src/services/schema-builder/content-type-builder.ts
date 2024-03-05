@@ -103,7 +103,7 @@ export default function createComponentBuilder() {
         })
         .set('options', {
           ...(infos.options ?? {}),
-          withDraftAndPublish: infos.withDraftAndPublish ?? true,
+          draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
@@ -225,7 +225,7 @@ export default function createComponentBuilder() {
         .set(['info', 'description'], infos.description)
         .set('options', {
           ...(infos.options ?? {}),
-          withDraftAndPublish: infos.withDraftAndPublish ?? true,
+          draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));

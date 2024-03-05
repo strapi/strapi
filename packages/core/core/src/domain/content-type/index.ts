@@ -67,6 +67,11 @@ const addTimestamps = (schema: Schema.ContentType) => {
 };
 
 const addDraftAndPublish = (schema: Schema.ContentType) => {
+  // Enable draft and publish by default
+  if (!_.has(schema, 'options.draftAndPublish')) {
+    _.set(schema, 'options.draftAndPublish', true);
+  }
+
   schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
     type: 'datetime',
     configurable: false,

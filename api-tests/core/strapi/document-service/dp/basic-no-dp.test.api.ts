@@ -37,7 +37,7 @@ const shopModel = {
     },
   },
   options: {
-    withDraftAndPublish: false,
+    draftAndPublish: false,
   },
   displayName: 'Shop',
   singularName: 'shop',

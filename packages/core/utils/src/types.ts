@@ -76,7 +76,7 @@ export interface Model {
   };
   options?: {
     populateCreatorFields?: boolean;
-    withDraftAndPublish?: boolean;
+    draftAndPublish?: boolean;
   };
   privateAttributes?: string[];
   attributes: Record<string, AnyAttribute>;
