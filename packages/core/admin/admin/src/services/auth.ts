@@ -9,6 +9,7 @@ import {
   ForgotPassword,
 } from '../../../shared/contracts/authentication';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
+import { Permission } from '../../../shared/contracts/shared';
 import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shared/contracts/users';
 
 import { adminApi } from './api';
@@ -47,6 +48,19 @@ const authService = adminApi.injectEndpoints({
         return res.data;
       },
       invalidatesTags: ['Me'],
+    }),
+    /**
+     * Permissions
+     */
+    checkPermissions: builder.query<
+      boolean[],
+      { permissions: Array<Pick<Permission, 'action' | 'subject'>> }
+    >({
+      query: ({ permissions }) => ({
+        method: 'POST',
+        url: '/admin/permissions/check',
+        data: permissions,
+      }),
     }),
     /**
      * Auth methods
@@ -176,6 +190,7 @@ const authService = adminApi.injectEndpoints({
 });
 
 const {
+  useCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
   useRenewTokenMutation,
@@ -194,6 +209,7 @@ const {
 } = authService;
 
 export {
+  useCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
   useRenewTokenMutation,

@@ -18,22 +18,21 @@ import {
 import {
   ConfirmDialog,
   getFetchClient,
-  LoadingIndicatorPage,
   SearchURLQuery,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useRBAC,
-  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import produce from 'immer';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { selectAdminPermissions } from '../../../../selectors';
@@ -129,16 +128,19 @@ const ListPage = () => {
   const colCount = 6;
 
   if (isLoadingForPermissions) {
-    return (
-      <Main>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
     <Main>
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Roles',
+          }
+        )}
+      />
       <HeaderLayout
         primaryAction={
           canCreate ? (
@@ -355,12 +357,12 @@ const reducer = (state: State, action: Action) =>
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListPage = () => {
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.roles.read);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.roles.main}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

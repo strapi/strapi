@@ -11,11 +11,12 @@ import {
   ComboboxOption,
   CreatableCombobox,
   ComboboxProps,
+  IconButton,
 } from '@strapi/design-system';
-import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+import { Minus, Plus } from '@strapi/icons';
 import { Field, FieldArray, FieldInputProps, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * HeadersInput
@@ -83,7 +84,13 @@ const HeadersInput = () => {
                           style={{ alignSelf: 'center' }}
                           paddingTop={textInputError ? 0 : 5}
                         >
-                          <RemoveRoundedButton
+                          <StyledIconButton
+                            borderRadius={30 / 16}
+                            width={20 / 16}
+                            height={20 / 16}
+                            padding={3 / 16}
+                            alignItems="center"
+                            justifyContent="center"
                             disabled={values.headers.length === 1}
                             onClick={() => remove(index)}
                             label={formatMessage(
@@ -93,7 +100,9 @@ const HeadersInput = () => {
                               },
                               { number: index + 1 }
                             )}
-                          />
+                          >
+                            <Minus />
+                          </StyledIconButton>
                         </Flex>
                       </Flex>
                     </GridItem>
@@ -121,6 +130,15 @@ const HeadersInput = () => {
     </Flex>
   );
 };
+
+const StyledIconButton = styled(IconButton)`
+  svg {
+    width: 0.5rem;
+    rect {
+      fill: ${(props) => props.theme.colors.primary600};
+    }
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * HeaderCombobox

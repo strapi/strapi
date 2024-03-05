@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Flex, Main } from '@strapi/design-system';
-import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
+import { Page } from '../../../components/PageHelpers';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
@@ -102,7 +103,7 @@ const HistoryPage = () => {
   const { permissions, isLoading: isLoadingPermissions } = useSyncRbac(slug!, query, 'History');
 
   if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || isLoadingPermissions) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   /**

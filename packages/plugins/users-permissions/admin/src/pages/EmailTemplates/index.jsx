@@ -2,9 +2,6 @@ import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -13,6 +10,8 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
+import { Page } from '@strapi/strapi/admin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -23,11 +22,10 @@ import EmailForm from './components/EmailForm';
 import EmailTable from './components/EmailTable';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
+  <Page.Protect permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
-
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -122,34 +120,21 @@ const EmailTemplatesPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
     <Main aria-busy={submitMutation.isLoading}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.emailTemplates'),
-          defaultMessage: 'Email templates',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.emailTemplates'),
+              defaultMessage: 'Email templates',
+            }),
+          }
+        )}
       />
       <HeaderLayout
         title={formatMessage({
@@ -171,4 +156,4 @@ const EmailTemplatesPage = () => {
   );
 };
 
-export default ProtectedEmailTemplatesPage;
+export { ProtectedEmailTemplatesPage, EmailTemplatesPage };
