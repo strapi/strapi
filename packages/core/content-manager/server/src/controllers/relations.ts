@@ -208,9 +208,17 @@ export default {
     }
 
     if (id) {
-      // If finding available we want to add a filter to exclude the
-      // documentIds found by the subQuery
-      // And the opposite if finding existing
+      // If finding available relations we want to exclude the
+      // ids of entities that are already related to the source.
+
+      // If finding existing we want to include the ids of entities that are
+      // already related to the source.
+
+      // We specify the source by entityId for components and by documentId for
+      // content types.
+
+      // We also optionally filter the target relations by the requested
+      // status and locale if provided.
       const subQuery = strapi.db.queryBuilder(sourceUid);
 
       // The alias refers to the DB table of the target content type model
@@ -231,6 +239,15 @@ export default {
         where.document_id = id;
       }
 
+      // If a status or locale is requested from the source, we need to only
+      // ever find relations that match that status or locale.
+      if (status) {
+        where[`${alias}.published_at`] = status === 'published' ? { $ne: null } : null;
+      }
+      if (locale) {
+        where[`${alias}.locale`] = locale;
+      }
+
       if ((idsToInclude?.length ?? 0) !== 0) {
         where[`${alias}.document_id`].$notIn = idsToInclude;
       }
@@ -238,13 +255,13 @@ export default {
       const knexSubQuery = subQuery
         .where(where)
         .join({ alias, targetField })
-        .select(`${alias}.document_id`)
+        .select(`${alias}.id`)
         .getKnexQuery();
 
       addFiltersClause(queryParams, {
-        // Change the operator based on whether we are looking for available or
+        // We change the operator based on whether we are looking for available or
         // existing relations
-        documentId: available ? { $notIn: knexSubQuery } : { $in: knexSubQuery },
+        id: available ? { $notIn: knexSubQuery } : { $in: knexSubQuery },
       });
     }
 
