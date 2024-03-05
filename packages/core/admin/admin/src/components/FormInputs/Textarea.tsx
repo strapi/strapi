@@ -6,7 +6,7 @@ import { useFocusInputField } from '@strapi/helper-plugin';
 import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
-import { StringProps } from './types';
+import type { StringProps } from './types';
 
 export const TextareaInput = forwardRef<any, StringProps>(
   ({ name, disabled, hint, label, placeholder, required }, ref) => {

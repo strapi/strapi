@@ -1,5 +1,4 @@
-import type { InputProps } from '../../../../../../../../admin/src/components/Form';
-import type { MessageDescriptor } from 'react-intl';
+import type { FormLayoutInputProps } from '../../../../../../../../admin/src/types/forms';
 
 export const FORM_INITIAL_VALUES = {
   ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
@@ -25,11 +24,4 @@ export const ROLE_LAYOUT = [
         ],
       ]
     : []),
-] satisfies Array<
-  Array<
-    Omit<InputProps, 'label'> & {
-      label: MessageDescriptor;
-      size: number;
-    }
-  >
->;
+] satisfies FormLayoutInputProps[][];

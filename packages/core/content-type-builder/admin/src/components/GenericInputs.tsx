@@ -23,7 +23,7 @@ import {
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
-import { MessageDescriptor, PrimitiveType, useIntl } from 'react-intl';
+import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 
 import type { Attribute } from '@strapi/types';
 

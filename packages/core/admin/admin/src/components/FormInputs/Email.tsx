@@ -6,7 +6,7 @@ import { useFocusInputField } from '@strapi/helper-plugin';
 import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
-import { StringProps } from './types';
+import type { StringProps } from './types';
 
 export const EmailInput = forwardRef<any, StringProps>(
   ({ disabled, label, hint, name, placeholder, required }, ref) => {

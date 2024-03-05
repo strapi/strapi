@@ -20,32 +20,24 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
-import { Form, InputProps, type FormHelpers } from '../../../../../components/Form';
+import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
+import { FormLayoutInputProps } from '../../../../../types/forms';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
-import type { DistributiveOmit } from 'react-redux';
-
 interface ModalFormProps {
   onToggle: () => void;
 }
 
-type FormLayout = Array<
-  Array<
-    DistributiveOmit<InputProps, 'label'> & {
-      label: MessageDescriptor;
-      size: number;
-    }
-  >
->;
+type FormLayout = FormLayoutInputProps[][];
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
@@ -231,6 +223,10 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                                   {...field}
                                   disabled={isDisabled}
                                   label={formatMessage(field.label)}
+                                  placeholder={
+                                    field.placeholder ? formatMessage(field.placeholder) : undefined
+                                  }
+                                  hint={field.hint ? formatMessage(field.hint) : undefined}
                                 />
                               </GridItem>
                             );
@@ -285,14 +281,7 @@ const FORM_INITIAL_VALUES = {
   roles: [],
 };
 
-const ROLE_LAYOUT: Array<
-  Array<
-    DistributiveOmit<InputProps, 'label'> & {
-      label: MessageDescriptor;
-      size: number;
-    }
-  >
-> = [];
+const ROLE_LAYOUT: FormLayout = [];
 
 const FORM_LAYOUT = [
   [
@@ -340,7 +329,7 @@ const FORM_LAYOUT = [
       required: true,
     },
   ],
-];
+] satisfies FormLayout;
 
 const FORM_SCHEMA = yup.object().shape({
   firstname: yup.string().trim().required({

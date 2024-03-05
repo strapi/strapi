@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
-import { StringProps } from './types';
+import type { StringProps } from './types';
 
 export const PasswordInput = forwardRef<any, StringProps>(
   ({ disabled, label, hint, name, placeholder, required }, ref) => {
