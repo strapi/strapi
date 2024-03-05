@@ -30,7 +30,6 @@ import {
 } from './components/InjectionZone';
 import { Providers } from './components/Providers';
 import { HOOKS } from './constants';
-import { InjectedLink } from './content-manager/history/components/InjectedLink';
 import { routes as cmRoutes } from './content-manager/router';
 import { ContentManagerPlugin } from './core/apis/content-manager';
 import { CustomFields } from './core/apis/CustomFields';
@@ -354,14 +353,6 @@ class StrapiApp {
           registerHook: this.registerHook,
         });
       }
-    });
-
-    this.getPlugin('content-manager').apis.con;
-    // TODO: remove once we can add the link via a document action instead
-    this.injectContentManagerComponent('editView', 'right-links', {
-      name: 'history',
-      Component: InjectedLink,
-      slug: 'history',
     });
 
     if (isFunction(customBootstrap)) {

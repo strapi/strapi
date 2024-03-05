@@ -9,21 +9,22 @@ import styled from 'styled-components';
 
 import type { DocumentActionComponent } from '../../../core/apis/content-manager';
 
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
 const StyledClock = styled(Clock)`
   path {
     fill: currentColor;
   }
 `;
 
-const HistoryAction: DocumentActionComponent = ({ documentId, model }) => {
+const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const navigate = useNavigate();
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
+
+  // TODO also check license
+  if (!window.strapi.future.isEnabled('history')) {
+    return null;
+  }
 
   return {
     icon: <StyledClock />,
@@ -32,14 +33,11 @@ const HistoryAction: DocumentActionComponent = ({ documentId, model }) => {
       defaultMessage: 'Content History',
     }),
     onClick: () => navigate({ pathname: 'history', search: pluginsQueryParams }),
-    disabled: documentId == null || !model.startsWith('api::'),
+    disabled: !document || !document.id || !model.startsWith('api::'),
     position: 'header',
   };
 };
 
 HistoryAction.type = 'history';
 
-// TODO check license and feature flag
-const HISTORY_ACTIONS = [HistoryAction];
-
-export { HISTORY_ACTIONS };
+export { HistoryAction };
