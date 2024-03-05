@@ -1,4 +1,4 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, waitFor } from '@tests/utils';
 
 import { EditPage } from '../EditPage';
 
@@ -8,7 +8,7 @@ describe('Users | EditPage', () => {
       initialEntries: ['/settings/users/1'],
     });
 
-    expect(screen.getByRole('heading')).toHaveTextContent('Edit user');
+    await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 
     await screen.findByRole('heading', { name: 'Edit John Doe' });
 

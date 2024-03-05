@@ -6,7 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import ProtectedEmailTemplatesPage from '../index';
+import { EmailTemplatesPage } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -14,7 +14,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
   useRBAC: jest.fn(),
-  CheckPagePermissions: ({ children }) => children,
 }));
 
 const client = new QueryClient({
@@ -29,7 +28,7 @@ const App = (
   <QueryClientProvider client={client}>
     <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
       <ThemeProvider theme={lightTheme}>
-        <ProtectedEmailTemplatesPage />
+        <EmailTemplatesPage />
       </ThemeProvider>
     </IntlProvider>
   </QueryClientProvider>
@@ -138,6 +137,24 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         cursor: pointer;
       }
 
+      .c26 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
       .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -168,24 +185,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c26 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
       }
 
       .c23 path {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
 import { resetPermissions, setPermissions } from '../modules/rbac';
@@ -24,6 +24,7 @@ type UseSyncRbac = (
  * can probably go...
  */
 const useSyncRbac: UseSyncRbac = (collectionTypeUID, query, containerName = 'listView') => {
+  const [isLoading, setIsLoading] = React.useState(true);
   const dispatch = useTypedDispatch();
 
   const collectionTypesRelatedPermissions = useTypedSelector(
@@ -32,7 +33,9 @@ const useSyncRbac: UseSyncRbac = (collectionTypeUID, query, containerName = 'lis
 
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
-  useEffect(() => {
+  React.useEffect(() => {
+    setIsLoading(true);
+
     if (relatedPermissions) {
       dispatch(
         setPermissions({
@@ -43,24 +46,26 @@ const useSyncRbac: UseSyncRbac = (collectionTypeUID, query, containerName = 'lis
           },
         })
       );
-
-      return () => {
-        dispatch(resetPermissions());
-      };
     }
 
-    return () => {};
+    setIsLoading(false);
+
+    return () => {
+      dispatch(resetPermissions());
+    };
   }, [relatedPermissions, dispatch, query, containerName]);
 
   const permissions = useTypedSelector((state) => state['content-manager'].rbac.permissions);
 
   // Check if the permissions are related to the current collectionTypeUID
   const isPermissionMismatch =
-    permissions?.some((permission) => permission.subject !== collectionTypeUID) ?? true;
+    permissions && permissions.some((permission) => permission.subject !== collectionTypeUID)
+      ? true
+      : false;
 
   return {
-    isLoading: permissions === null,
-    isError: isPermissionMismatch,
+    isLoading,
+    isError: !isLoading && isPermissionMismatch,
     permissions,
   };
 };

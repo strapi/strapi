@@ -1,12 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
-import {
-  AppInfoProvider,
-  LoadingIndicatorPage,
-  useGuidedTour,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { AppInfoProvider, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -19,6 +14,7 @@ import { GuidedTourModal } from '../components/GuidedTour/Modal';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Onboarding } from '../components/Onboarding';
+import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { RBACProvider } from '../components/RBACProvider';
@@ -136,7 +132,7 @@ const AdminLayout = () => {
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
   if (isLoadingMenu || isLoadingAppInfo || isLoadingPermissions) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   const refetchPermissions = async () => {

@@ -2,8 +2,6 @@ import * as React from 'react';
 
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -13,9 +11,11 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
+import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import {
   useCreateAPITokenMutation,
@@ -33,7 +33,6 @@ import {
   ApiTokenPermissionsProvider,
 } from './apiTokenPermissions';
 import { FormApiTokenContainer } from './components/FormApiTokenContainer';
-import { LoadingView } from './components/LoadingView';
 import { Permissions } from './components/Permissions';
 import { schema } from './constants';
 import { initialState, reducer } from './reducer';
@@ -326,13 +325,18 @@ export const EditView = () => {
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
 
   if (isLoading) {
-    return <LoadingView apiTokenName={apiToken?.name} />;
+    return <Page.Loading />;
   }
 
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
       <Main>
-        <SettingsPageTitle name="API Tokens" />
+        <Helmet
+          title={formatMessage(
+            { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+            { name: 'API Tokens' }
+          )}
+        />
         <Formik
           validationSchema={schema}
           validateOnChange={false}
@@ -405,8 +409,8 @@ export const ProtectedEditView = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <EditView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

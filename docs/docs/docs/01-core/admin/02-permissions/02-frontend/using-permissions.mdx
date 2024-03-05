@@ -79,15 +79,15 @@ be redirect to the homepage.
 #### Usage
 
 ```tsx
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { Page } from '@strapi/strapi/admin';
 
 const permissions = [{ action: 'plugins::my-plugin.access', subject: null }];
 
 const MyPage = () => {
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <h1>aha you found me</h1>
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 ```
@@ -255,9 +255,9 @@ const MyComponent = () => {
   return !permissions ? (
     <p>Loading...</p>
   ) : (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <h1>aha you found me</h1>
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 ```
