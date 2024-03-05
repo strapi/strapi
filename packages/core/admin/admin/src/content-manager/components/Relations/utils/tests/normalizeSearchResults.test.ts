@@ -2,18 +2,21 @@ import { normalizeSearchResults } from '../normalizeSearchResults';
 
 const FIXTURE_RELATIONS = [
   {
+    documentId: 'Doc3',
     id: 3,
     name: 'Relation 3',
     publishedAt: '2022-08-24T09:29:11.38',
   },
 
   {
+    documentId: 'Doc2',
     id: 2,
     name: 'Relation 2',
     publishedAt: null,
   },
 
   {
+    documentId: 'Doc1',
     id: 1,
     name: 'Relation 1',
     publishedAt: null,
@@ -26,6 +29,7 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
     expect(normalizeSearchResults(FIXTURE_RELATIONS, {})).toMatchInlineSnapshot(`
       [
         {
+          "documentId": "Doc3",
           "id": 3,
           "mainField": undefined,
           "name": "Relation 3",
@@ -33,6 +37,7 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
           "publishedAt": "2022-08-24T09:29:11.38",
         },
         {
+          "documentId": "Doc2",
           "id": 2,
           "mainField": undefined,
           "name": "Relation 2",
@@ -40,6 +45,7 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
           "publishedAt": null,
         },
         {
+          "documentId": "Doc1",
           "id": 1,
           "mainField": undefined,
           "name": "Relation 1",
@@ -58,6 +64,7 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
     ).toMatchInlineSnapshot(`
       [
         {
+          "documentId": "Doc3",
           "id": 3,
           "mainField": "Relation 3",
           "name": "Relation 3",
@@ -65,6 +72,7 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
           "publishedAt": "2022-08-24T09:29:11.38",
         },
         {
+          "documentId": "Doc2",
           "id": 2,
           "mainField": "Relation 2",
           "name": "Relation 2",
@@ -72,6 +80,7 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
           "publishedAt": null,
         },
         {
+          "documentId": "Doc1",
           "id": 1,
           "mainField": "Relation 1",
           "name": "Relation 1",
