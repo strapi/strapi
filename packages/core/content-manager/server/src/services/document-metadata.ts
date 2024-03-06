@@ -1,5 +1,8 @@
-import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
 import { groupBy, pick } from 'lodash/fp';
+
+import { contentTypes } from '@strapi/utils';
+import type { LoadedStrapi as Strapi, Common } from '@strapi/types';
+
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 export interface DocumentVersion {
@@ -119,7 +122,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: Common.UID.SingleType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(uid: Common.UID.ContentType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
     // The status of all documents should be the same
@@ -206,14 +209,23 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   ) {
     if (!document) return document;
 
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(uid));
+
+    // Ignore available status if the content type does not have draft and publish
+    if (!hasDraftAndPublish) {
+      opts.availableStatus = false;
+    }
+
     const meta = await this.getMetadata(uid, document, opts);
 
     // TODO: Sanitize output of metadata
     return {
       data: {
         ...document,
-        // Add status to the document
-        status: this.getStatus(document, meta.availableStatus as any),
+        // Add status to the document only if draft and publish is enabled
+        status: hasDraftAndPublish
+          ? this.getStatus(document, meta.availableStatus as any)
+          : undefined,
       },
       meta,
     };
