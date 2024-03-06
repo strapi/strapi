@@ -36,13 +36,13 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "doc:ts": "typedoc",
+    "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch",
-    "doc:ts": "typedoc",
-    "doc:ts:watch": "typedoc --watch"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",

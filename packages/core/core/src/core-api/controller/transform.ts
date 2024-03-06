@@ -106,10 +106,7 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      const data = transformEntry(
-        property,
-        strapi.contentType(attribute.target)
-      );
+      const data = transformEntry(property, strapi.contentType(attribute.target));
 
       attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
