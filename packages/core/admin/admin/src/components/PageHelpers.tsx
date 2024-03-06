@@ -54,7 +54,7 @@ const Error = (props: ErrorProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <Main height="100vh">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <EmptyStateLayout
           icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
@@ -85,7 +85,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <Main height="100vh">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <EmptyStateLayout
           icon={<EmptyPermissions width="10rem" />}

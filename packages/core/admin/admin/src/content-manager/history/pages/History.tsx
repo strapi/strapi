@@ -100,9 +100,7 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  const { permissions, isLoading: isLoadingPermissions } = useSyncRbac(slug!, query, 'History');
-
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || isLoadingPermissions) {
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
     return <Page.Loading />;
   }
 
@@ -111,19 +109,18 @@ const HistoryPage = () => {
    * - slug for single types
    * - slug _and_ documentId for collection types
    */
-  if (!slug || (!documentId && collectionType === COLLECTION_TYPES)) {
+  if (!slug || (collectionType === COLLECTION_TYPES && !documentId)) {
     return <Navigate to="/content-manager" />;
   }
 
   // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema || !permissions) {
-    return null;
+  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema) {
+    return <Page.Error />;
   }
 
   const selectedVersion = versionsResponse.data.data.find(
     (version) => version.id.toString() === selectedVersionId
   );
-
   if (!selectedVersion) {
     // TODO: handle selected version not found when the designs are ready
     return <Main />;
@@ -155,9 +152,7 @@ const HistoryPage = () => {
         <Flex direction="row" alignItems="flex-start">
           <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
-            <DocumentRBAC permissions={permissions}>
-              <VersionContent />
-            </DocumentRBAC>
+            <VersionContent />
           </Main>
           <VersionsList />
         </Flex>
@@ -166,5 +161,35 @@ const HistoryPage = () => {
   );
 };
 
-export { HistoryPage, HistoryProvider, useHistoryContext };
+/* -------------------------------------------------------------------------------------------------
+ * ProtectedHistoryPage
+ * -----------------------------------------------------------------------------------------------*/
+
+const ProtectedHistoryPage = () => {
+  const { slug } = useParams<{
+    slug: string;
+  }>();
+  const [{ query }] = useQueryParams();
+  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'History');
+
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
+  if ((!isLoading && isError) || !slug) {
+    return <Page.Error />;
+  }
+
+  return (
+    <Page.Protect permissions={permissions}>
+      {({ permissions }) => (
+        <DocumentRBAC permissions={permissions}>
+          <HistoryPage />
+        </DocumentRBAC>
+      )}
+    </Page.Protect>
+  );
+};
+
+export { HistoryPage, ProtectedHistoryPage, HistoryProvider, useHistoryContext };
 export type { HistoryContextValue };

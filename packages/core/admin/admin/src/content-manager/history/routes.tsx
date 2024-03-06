@@ -8,20 +8,20 @@ const routes: RouteObject[] = [
   {
     path: ':collectionType/:slug/:id/history',
     lazy: async () => {
-      const { HistoryPage } = await import('./pages/History');
+      const { ProtectedHistoryPage } = await import('./pages/History');
 
       return {
-        Component: HistoryPage,
+        Component: ProtectedHistoryPage,
       };
     },
   },
   {
     path: ':collectionType/:slug/history',
     lazy: async () => {
-      const { HistoryPage } = await import('./pages/History');
+      const { ProtectedHistoryPage } = await import('./pages/History');
 
       return {
-        Component: HistoryPage,
+        Component: ProtectedHistoryPage,
       };
     },
   },
