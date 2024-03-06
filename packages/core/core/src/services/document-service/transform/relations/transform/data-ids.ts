@@ -147,7 +147,8 @@ const transformDataIdsVisitor = (
                 sourceLocale: opts.locale,
               }
             ),
-            isDraft: opts.isDraft,
+            // @ts-expect-error - TODO: fix types
+            isDraft: !value?.publishedAt && opts.isDraft,
           });
 
           if (entryId) return entryId;
