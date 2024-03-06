@@ -109,6 +109,15 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
 
 /**
  * INDEXES
+ * Note that these methods are generally used to reference full table names + attribute(s), which
+ * may already be shortened strings rather than individual parts.
+ * That is fine and expected to compress the previously incompressible parts of those strings,
+ * because in these cases the relevant information is the table name and we can't really do
+ * any better; shortening the individual parts again might make it even more confusing.
+ *
+ * For example, the fk for mytable_myattr4567d_localizations would become
+ * mytable_myattr4567d_loc63bf2_fk
+ *
  */
 
 export const getIndexName = (names: NameInput, options: NameOptions) => {

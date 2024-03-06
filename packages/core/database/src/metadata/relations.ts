@@ -499,7 +499,7 @@ const createJoinTable = (
     inverseOrderColumnName = identifiers.getInverseOrderColumnName(meta.singularName, options);
   }
 
-  const fkIndexName = identifiers.getFkIndexName(joinTableName, options); // TODO: joinTableName is multipart, can we re-use those parts instead of shortening the combined string?
+  const fkIndexName = identifiers.getFkIndexName(joinTableName, options);
   const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName, options);
 
   const metadataSchema: Meta = {
@@ -544,14 +544,14 @@ const createJoinTable = (
         name: fkIndexName,
         columns: [joinColumnName],
         referencedColumns: [ID],
-        referencedTable: meta.tableName, // TODO: does this need to be wrapped or do we trust meta.tableName to be the right shortened version?
+        referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
       {
         name: invFkIndexName,
         columns: [inverseJoinColumnName],
         referencedColumns: [ID],
-        referencedTable: targetMeta.tableName, // TODO: does this need to be wrapped or do we trust meta.tableName to be the right shortened version?
+        referencedTable: targetMeta.tableName,
         onDelete: 'CASCADE',
       },
     ],
@@ -582,7 +582,7 @@ const createJoinTable = (
       },
     };
     metadataSchema.indexes.push({
-      name: identifiers.getOrderFkIndexName(joinTableName, options), // TODO: should we send joinTableName as parts?
+      name: identifiers.getOrderFkIndexName(joinTableName, options),
       columns: [orderColumnName],
     });
     joinTable.orderColumnName = orderColumnName;
