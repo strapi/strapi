@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 // TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
-import { Page, useLicenseLimits } from '@strapi/admin/strapi-admin';
+import { Page, Pagination, useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Badge,
@@ -25,8 +25,6 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
-  PageSizeURLQuery,
-  PaginationURLQuery,
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
@@ -404,19 +402,13 @@ const ReleasesPage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {response.currentData?.meta?.pagination?.total ? (
-            <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
-              <PageSizeURLQuery
-                options={['8', '16', '32', '64']}
-                defaultValue={response?.currentData?.meta?.pagination?.pageSize.toString()}
-              />
-              <PaginationURLQuery
-                pagination={{
-                  pageCount: response?.currentData?.meta?.pagination?.pageCount || 0,
-                }}
-              />
-            </Flex>
-          ) : null}
+          <Pagination.Root
+            {...response?.currentData?.meta?.pagination}
+            defaultPageSize={response?.currentData?.meta?.pagination?.pageSize}
+          >
+            <Pagination.PageSize options={['8', '16', '32', '64']} />
+            <Pagination.Links />
+          </Pagination.Root>
         </>
       </ContentLayout>
       {releaseModalShown && (

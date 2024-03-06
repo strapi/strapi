@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { Page, SearchInput } from '@strapi/admin/strapi-admin';
+import { Page, SearchInput, Pagination } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   BaseCheckbox,
@@ -39,7 +39,6 @@ import {
   FolderCardCheckbox,
 } from '../../../components/FolderCard';
 import { FolderGridList } from '../../../components/FolderGridList';
-import { PaginationFooter } from '../../../components/PaginationFooter';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
@@ -477,8 +476,10 @@ export const MediaLibrary = () => {
               )}
             </>
           )}
-
-          {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
+          <Pagination.Root {...assetsData.pagination}>
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
         </ContentLayout>
       </Main>
 

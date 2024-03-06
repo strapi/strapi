@@ -15,8 +15,6 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import {
-  PageSizeURLQuery,
-  PaginationURLQuery,
   useAppInfo,
   useFocusWhenNavigate,
   useNotification,
@@ -29,6 +27,7 @@ import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../components/ContentBox';
 import { Page } from '../../components/PageHelpers';
+import { Pagination } from '../../components/Pagination';
 import { useTypedSelector } from '../../core/store/hooks';
 import { useDebounce } from '../../hooks/useDebounce';
 
@@ -269,14 +268,10 @@ const MarketplacePage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {pagination ? (
-            <Box paddingTop={4}>
-              <Flex alignItems="flex-end" justifyContent="space-between">
-                <PageSizeURLQuery options={['12', '24', '50', '100']} defaultValue="24" />
-                <PaginationURLQuery pagination={pagination} />
-              </Flex>
-            </Box>
-          ) : null}
+          <Pagination.Root {...pagination} defaultPageSize={24}>
+            <Pagination.PageSize options={['12', '24', '50', '100']} />
+            <Pagination.Links />
+          </Pagination.Root>
           <Box paddingTop={8}>
             <a
               href="https://strapi.canny.io/plugin-requests"

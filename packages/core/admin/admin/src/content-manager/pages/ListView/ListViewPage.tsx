@@ -22,8 +22,6 @@ import {
   useTracking,
   useAPIErrorHandler,
   useStrapiApp,
-  PaginationURLQuery,
-  PageSizeURLQuery,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -33,6 +31,7 @@ import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { Page } from '../../../components/PageHelpers';
+import { Pagination } from '../../../components/Pagination';
 import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
@@ -459,10 +458,13 @@ const ListViewPage = () => {
               </Table.Body>
             </Table.Content>
           </Table.Root>
-          <Flex alignItems="flex-end" justifyContent="space-between">
-            <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
-            <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
-          </Flex>
+          <Pagination.Root
+            {...pagination}
+            onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
+          >
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
         </Flex>
       </ContentLayout>
     </Main>
