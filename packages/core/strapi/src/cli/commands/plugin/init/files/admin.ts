@@ -10,7 +10,7 @@ export { PluginIcon };
 `;
 
 const APP_CODE = outdent`
-import { AnErrorOccurred } from '@strapi/helper-plugin';
+import { Page } from '@strapi/strapi/admin';
 import { Switch, Route } from 'react-router-dom';
 
 import { PLUGIN_ID } from '../pluginId';
@@ -21,7 +21,7 @@ const App = () => {
   return (
     <Switch>
       <Route index element={<HomePage />} />
-      <Route path="*" element={<AnErrorOccurred />} />
+      <Route path="*" element={<Page.Error />} />
     </Switch>
   );
 };

@@ -122,8 +122,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async getManyAvailableStatus(uid: Common.UID.SingleType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
-    // The status of all documents should be the same
+    // The status and locale of all documents should be the same
     const status = documents[0].publishedAt !== null ? 'published' : 'draft';
+    const locale = documents[0]?.locale;
     const otherStatus = status === 'published' ? 'draft' : 'published';
 
     return strapi.documents(uid).findMany({
@@ -131,6 +132,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
       },
       status: otherStatus,
+      locale,
       fields: ['documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     }) as unknown as DocumentMetadata['availableStatus'];
   },

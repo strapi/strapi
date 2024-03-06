@@ -53,9 +53,9 @@ describe('Roles – EditPage', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders correctly', async () => {
-    const { getByTestId, getByRole, user } = render();
+    const { getByText, getByRole, user } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     expect(getByRole('link', { name: 'Back' })).toBeInTheDocument();
 
@@ -78,9 +78,9 @@ describe('Roles – EditPage', () => {
   });
 
   it('will show an error if the user does not fill the name field', async () => {
-    const { getByRole, user, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.clear(getByRole('textbox', { name: 'Name *' }));
 
@@ -90,9 +90,9 @@ describe('Roles – EditPage', () => {
   });
 
   it('will show an error if the user does not fill out the description field', async () => {
-    const { getByRole, user, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.clear(getByRole('textbox', { name: 'Description *' }));
 
@@ -102,9 +102,9 @@ describe('Roles – EditPage', () => {
   });
 
   it("can update a role's name and description", async () => {
-    const { getByRole, user, getByTestId, getByText } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.type(getByRole('textbox', { name: 'Name *' }), 'test');
     await user.type(getByRole('textbox', { name: 'Description *' }), 'testing');
@@ -118,9 +118,9 @@ describe('Roles – EditPage', () => {
   });
 
   it("can update a role's permissions", async () => {
-    const { getByRole, user, getByText, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.click(getByRole('button', { name: 'Address' }));
 
@@ -135,9 +135,9 @@ describe('Roles – EditPage', () => {
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {
-    const { getByRole, user, getByText, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.click(getByRole('button', { name: 'Address' }));
 

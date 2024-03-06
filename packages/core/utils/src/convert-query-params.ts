@@ -610,7 +610,7 @@ const transformParamsToQuery = (uid: string, params: Params): Query => {
 
   const query: Query = {};
 
-  const { _q, sort, filters, fields, populate, page, pageSize, start, limit } = params;
+  const { _q, sort, filters, fields, populate, page, pageSize, start, limit, ...rest } = params;
 
   if (!isNil(_q)) {
     query._q = _q;
@@ -650,7 +650,10 @@ const transformParamsToQuery = (uid: string, params: Params): Query => {
     query.limit = convertLimitQueryParams(limit);
   }
 
-  return query;
+  return {
+    ...rest,
+    ...query,
+  };
 };
 
 export default {

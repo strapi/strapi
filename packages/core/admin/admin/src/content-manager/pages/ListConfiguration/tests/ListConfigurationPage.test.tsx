@@ -57,10 +57,12 @@ describe('Configure the List View', () => {
     /**
      * For each attribute it should have the following
      */
-    mockData.contentManager.configuration.contentType.layouts.list.forEach((attribute) => {
-      expect(screen.getByRole('button', { name: `Edit ${attribute}` })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: `Delete ${attribute}` })).toBeInTheDocument();
-    });
+    mockData.contentManager.collectionTypeConfiguration.contentType.layouts.list.forEach(
+      (attribute) => {
+        expect(screen.getByRole('button', { name: `Edit ${attribute}` })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: `Delete ${attribute}` })).toBeInTheDocument();
+      }
+    );
 
     expect(screen.getByRole('button', { name: 'Add a field' })).toBeInTheDocument();
   });

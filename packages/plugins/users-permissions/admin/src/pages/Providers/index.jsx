@@ -16,10 +16,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
   onRowClick,
-  SettingsPageTitle,
   stopPropagation,
   useAPIErrorHandler,
   useCollator,
@@ -31,7 +28,9 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -157,13 +156,22 @@ export const ProvidersPage = () => {
     submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });
   };
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <Layout>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.providers'),
-          defaultMessage: 'Providers',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.providers'),
+              defaultMessage: 'Providers',
+            }),
+          }
+        )}
       />
       <Main>
         <HeaderLayout
@@ -172,81 +180,77 @@ export const ProvidersPage = () => {
             defaultMessage: 'Providers',
           })}
         />
-        {isLoading ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <ContentLayout>
-            <Table colCount={3} rowCount={providers.length + 1}>
-              <Thead>
-                <Tr>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+        <ContentLayout>
+          <Table colCount={3} rowCount={providers.length + 1}>
+            <Thead>
+              <Tr>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    <VisuallyHidden>
+                      {formatMessage({
+                        id: 'global.settings',
+                        defaultMessage: 'Settings',
+                      })}
+                    </VisuallyHidden>
+                  </Typography>
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {providers.map((provider) => (
+                <Tr
+                  key={provider.name}
+                  {...onRowClick({
+                    fn: () => handleClickEdit(provider),
+                    condition: canUpdate,
+                  })}
+                >
+                  <Td width="45%">
+                    <Typography fontWeight="semiBold" textColor="neutral800">
+                      {provider.name}
                     </Typography>
-                  </Th>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
+                  </Td>
+                  <Td width="65%">
+                    <Typography
+                      textColor={provider.enabled ? 'success600' : 'danger600'}
+                      data-testid={`enable-${provider.name}`}
+                    >
+                      {provider.enabled
+                        ? formatMessage({
+                            id: 'global.enabled',
+                            defaultMessage: 'Enabled',
+                          })
+                        : formatMessage({
+                            id: 'global.disabled',
+                            defaultMessage: 'Disabled',
+                          })}
                     </Typography>
-                  </Th>
-                  <Th>
-                    <Typography variant="sigma">
-                      <VisuallyHidden>
-                        {formatMessage({
-                          id: 'global.settings',
-                          defaultMessage: 'Settings',
-                        })}
-                      </VisuallyHidden>
-                    </Typography>
-                  </Th>
+                  </Td>
+                  <Td {...stopPropagation}>
+                    {canUpdate && (
+                      <IconButton
+                        onClick={() => handleClickEdit(provider)}
+                        noBorder
+                        icon={<Pencil />}
+                        label="Edit"
+                      />
+                    )}
+                  </Td>
                 </Tr>
-              </Thead>
-              <Tbody>
-                {providers.map((provider) => (
-                  <Tr
-                    key={provider.name}
-                    {...onRowClick({
-                      fn: () => handleClickEdit(provider),
-                      condition: canUpdate,
-                    })}
-                  >
-                    <Td width="45%">
-                      <Typography fontWeight="semiBold" textColor="neutral800">
-                        {provider.name}
-                      </Typography>
-                    </Td>
-                    <Td width="65%">
-                      <Typography
-                        textColor={provider.enabled ? 'success600' : 'danger600'}
-                        data-testid={`enable-${provider.name}`}
-                      >
-                        {provider.enabled
-                          ? formatMessage({
-                              id: 'global.enabled',
-                              defaultMessage: 'Enabled',
-                            })
-                          : formatMessage({
-                              id: 'global.disabled',
-                              defaultMessage: 'Disabled',
-                            })}
-                      </Typography>
-                    </Td>
-                    <Td {...stopPropagation}>
-                      {canUpdate && (
-                        <IconButton
-                          onClick={() => handleClickEdit(provider)}
-                          noBorder
-                          icon={<Pencil />}
-                          label="Edit"
-                        />
-                      )}
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </ContentLayout>
-        )}
+              ))}
+            </Tbody>
+          </Table>
+        </ContentLayout>
       </Main>
       <FormModal
         initialData={data[providerToEditName]}
@@ -269,9 +273,9 @@ export const ProvidersPage = () => {
 };
 
 const ProtectedProvidersPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readProviders}>
+  <Page.Protect permissions={PERMISSIONS.readProviders}>
     <ProvidersPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
 
 export default ProtectedProvidersPage;

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import { useLibrary } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { useForm } from '../../../../components/Form';
@@ -12,6 +12,7 @@ import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
+import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
@@ -19,6 +20,8 @@ import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Attribute } from '@strapi/types';
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 /**
  * @internal
@@ -28,11 +31,7 @@ type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : nev
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({
-  visible,
-  hint: providedHint,
-  ...props
-}: DistributiveOmit<EditFieldLayout, 'size'>) => {
+const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
   const { id } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
@@ -209,4 +208,5 @@ const getMinMax = (attribute: Attribute.Any) => {
   }
 };
 
+export type { InputRendererProps };
 export { InputRenderer };
