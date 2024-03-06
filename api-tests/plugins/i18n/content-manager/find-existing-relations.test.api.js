@@ -122,8 +122,16 @@ describe('i18n - Find existing relations', () => {
       },
     });
 
-    const { documentId: id, name, publishedAt, locale } = data.products[0];
-    const expectedObj = { id, name, publishedAt, locale };
+    const { id, documentId, name, publishedAt, updatedAt, locale } = data.products[0];
+    const expectedObj = {
+      documentId,
+      id,
+      name,
+      locale,
+      publishedAt,
+      updatedAt,
+      status: 'published',
+    };
 
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(expectedObj);
@@ -139,8 +147,16 @@ describe('i18n - Find existing relations', () => {
       },
     });
 
-    const { documentId: id, name, publishedAt, locale } = data.products[1];
-    const expectedObj = { id, name, publishedAt, locale };
+    const { id, documentId, name, publishedAt, updatedAt, locale } = data.products[1];
+    const expectedObj = {
+      documentId,
+      id,
+      name,
+      locale,
+      publishedAt,
+      updatedAt,
+      status: 'published',
+    };
 
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(expectedObj);

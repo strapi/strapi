@@ -1,7 +1,5 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
-
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -127,8 +125,51 @@ const shopModel = () => ({
   },
 });
 
-const addPublishedAtCheck = (value) => {
-  publishedAt: value;
+// Add an appropriate publishedAt check based on the presence of a published version
+const addStatusCheck = (data, documentId) => {
+  if (!documentId) {
+    return { publishedAt: null };
+  }
+  if (!data) {
+    return { publishedAt: null };
+  }
+
+  if (
+    // TODO handle modified status
+    data.products['published'].find(
+      (publishedProduct) => publishedProduct.documentId === documentId
+    )
+  ) {
+    return { status: 'published' };
+  }
+  return { status: 'draft' };
+};
+
+const allRelations = {
+  products_ow: {
+    isComponent: false,
+  },
+  products_oo: {
+    isComponent: false,
+  },
+  products_mo: {
+    isComponent: false,
+  },
+  products_om: {
+    isComponent: false,
+  },
+  products_mm: {
+    isComponent: false,
+  },
+  products_mw: {
+    isComponent: false,
+  },
+  ['myCompo.compo_products_ow']: {
+    isComponent: true,
+  },
+  ['myCompo.compo_products_mw']: {
+    isComponent: true,
+  },
 };
 
 describe('Find Relations', () => {
@@ -156,7 +197,7 @@ describe('Find Relations', () => {
     const [skate, chair, candle, table, porte, fenetre] = await Promise.all([
       strapi.documents(productUid).create({ data: { name: 'Skate' } }),
       strapi.documents(productUid).create({ data: { name: 'Chair' } }),
-      strapi.documents(productUid).create({ data: { name: 'Candel' } }),
+      strapi.documents(productUid).create({ data: { name: 'Candle' } }),
       strapi.documents(productUid).create({ data: { name: 'Table' } }),
       // We create products in French in order to test that we can cant find
       // aviailable relations in a different locale
@@ -176,8 +217,8 @@ describe('Find Relations', () => {
 
     // Publish Skate and Chair
     const [publishedSkate, publishedChair] = await Promise.all([
-      strapi.documents(productUid).publish(productMapping.skate.id),
-      strapi.documents(productUid).publish(productMapping.chair.id),
+      strapi.documents(productUid).publish(productMapping.skate.documentId),
+      strapi.documents(productUid).publish(productMapping.chair.documentId),
     ]);
     data.products.published.push(publishedSkate.versions[0], publishedChair.versions[0]);
 
@@ -195,36 +236,25 @@ describe('Find Relations', () => {
       },
     };
 
-    const populateAllRelations = [
-      'products_ow',
-      'products_oo',
-      'products_mo',
-      'products_om',
-      'products_mm',
-      'products_mw',
-      'myCompo.compo_products_ow',
-      'myCompo.compo_products_mw',
-    ];
-
     // Create 2 draft shops
     const [draftShop, draftEmptyShop] = await Promise.all([
       strapi.documents(shopUid).create({
         data: {
           name: 'Cazotte Shop',
-          products_ow: draftRelations.products_ow.id,
-          products_oo: draftRelations.products_oo.id,
-          products_mo: draftRelations.products_mo.id,
-          products_om: draftRelations.products_om.map((product) => product.id),
-          products_mm: draftRelations.products_mm.map((product) => product.id),
-          products_mw: draftRelations.products_mw.map((product) => product.id),
+          products_ow: draftRelations.products_ow.documentId,
+          products_oo: draftRelations.products_oo.documentId,
+          products_mo: draftRelations.products_mo.documentId,
+          products_om: draftRelations.products_om.map((product) => product.documentId),
+          products_mm: draftRelations.products_mm.map((product) => product.documentId),
+          products_mw: draftRelations.products_mw.map((product) => product.documentId),
           myCompo: {
-            compo_products_ow: draftRelations.myCompo.compo_products_ow.id,
+            compo_products_ow: draftRelations.myCompo.compo_products_ow.documentId,
             compo_products_mw: draftRelations.myCompo.compo_products_mw.map(
-              (product) => product.id
+              (product) => product.documentId
             ),
           },
         },
-        populate: populateAllRelations,
+        populate: Object.keys(allRelations),
       }),
       strapi.documents(shopUid).create({
         data: {
@@ -233,17 +263,17 @@ describe('Find Relations', () => {
             compo_products_mw: [],
           },
         },
-        populate: populateAllRelations,
+        populate: Object.keys(allRelations),
       }),
     ]);
     data.shops.draft.push(draftShop, draftEmptyShop);
 
     // Publish both shops
     const [publishedShop, publishedEmptyShop] = await Promise.all([
-      strapi.documents(shopUid).publish(draftShop.id, {
-        populate: populateAllRelations,
+      strapi.documents(shopUid).publish(draftShop.documentId, {
+        populate: Object.keys(allRelations),
       }),
-      strapi.documents(shopUid).publish(draftEmptyShop.id),
+      strapi.documents(shopUid).publish(draftEmptyShop.documentId),
     ]);
     data.shops.published.push(publishedShop.versions[0], publishedEmptyShop.versions[0]);
 
@@ -259,7 +289,7 @@ describe('Find Relations', () => {
     // Define the ids of the shops we will use for testing
     const testData = {
       component: {
-        // If the target attribute represents a component, the id we use to
+        // If the source of the relation is a component, the id we use to
         // query for relations is the entity id of the component, not the id of the
         // parent entity
         modelUID: compoUid,
@@ -267,9 +297,10 @@ describe('Find Relations', () => {
         idEmptyShop: data.shops.draft[1].myCompo.id,
       },
       entity: {
+        // If the source of the relation is a content type, we use the documentId
         modelUID: shopUid,
-        id: data.shops.draft[0].id,
-        idEmptyShop: data.shops.draft[1].id,
+        id: data.shops.draft[0].documentId,
+        idEmptyShop: data.shops.draft[1].documentId,
       },
     };
     data.testData = testData;
@@ -283,18 +314,18 @@ describe('Find Relations', () => {
   /**
    * Find all the ids of the products that are related to the entity
    */
-  const getRelatedProductIds = (isComponent, status, fieldName) => {
+  const getRelatedProductDocumentIds = (isComponent, fieldName) => {
     let relatedProductIds;
     if (isComponent) {
-      relatedProductIds = data.shopRelations[status].myCompo[fieldName];
+      relatedProductIds = data.shopRelations['draft'].myCompo[fieldName];
     } else {
-      relatedProductIds = data.shopRelations[status][fieldName];
+      relatedProductIds = data.shopRelations['draft'][fieldName];
     }
 
     if (Array.isArray(relatedProductIds)) {
-      relatedProductIds = relatedProductIds.map((relation) => relation?.id);
+      relatedProductIds = relatedProductIds.map((relation) => relation?.documentId);
     } else {
-      relatedProductIds = [relatedProductIds?.id];
+      relatedProductIds = [relatedProductIds?.documentId];
     }
 
     return relatedProductIds.filter(Boolean);
@@ -308,7 +339,6 @@ describe('Find Relations', () => {
           url: `/content-manager/relations/${shopUid}/products_ow`,
           qs: {
             id: 'docIdDoesntExist',
-            status: 'draft',
           },
         });
 
@@ -366,9 +396,6 @@ describe('Find Relations', () => {
         const res = await rq({
           method: 'GET',
           url: `/content-manager/relations/${shopUid}/notADocID/products_ow`,
-          qs: {
-            status: 'draft',
-          },
         });
 
         expect(res.status).toBe(404);
@@ -386,10 +413,7 @@ describe('Find Relations', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${shopUid}/${data.shops.draft[0].id}/unkown`,
-          qs: {
-            status: 'draft',
-          },
+          url: `/content-manager/relations/${shopUid}/${data.testData.entity.id}/unkown`,
         });
 
         expect(res.status).toBe(400);
@@ -407,10 +431,7 @@ describe('Find Relations', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${shopUid}/${data.shops.draft[0].id}/name`,
-          qs: {
-            status: 'draft',
-          },
+          url: `/content-manager/relations/${shopUid}/${data.testData.entity.id}/name`,
         });
 
         expect(res.status).toBe(400);
@@ -509,7 +530,7 @@ describe('Find Relations', () => {
       test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${compoUid}/${data.shops.draft[0].myCompo.id}/unknown`,
+          url: `/content-manager/relations/${compoUid}/${data.testData.component.id}/unknown`,
         });
 
         expect(res.status).toBe(400);
@@ -527,7 +548,7 @@ describe('Find Relations', () => {
       test('Fail when the field exists but is not a relational field', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/${compoUid}/${data.shops.draft[0].myCompo.id}/name`,
+          url: `/content-manager/relations/${compoUid}/${data.testData.component.id}/name`,
         });
 
         expect(res.status).toBe(400);
@@ -546,223 +567,209 @@ describe('Find Relations', () => {
 
   // Run tests against every type of relation in the shop content type, always
   // from the default locale
-  describe.each([
-    ['products_ow', false],
-    ['products_oo', false],
-    ['products_mo', false],
-    ['products_om', false],
-    ['products_mm', false],
-    ['products_mw', false],
-    ['compo_products_ow', true],
-    ['compo_products_mw', true],
-  ])('Relational field (%s) (is in component: %s)', (fieldName, isComponent) => {
-    // Perform the same tests for both draft and published entries
-    // Components don't have a published status
-    const statuses = isComponent ? [['draft']] : [['draft'], ['published']];
+  describe.each(
+    Object.entries(allRelations).map(([fieldName, { isComponent }]) => [
+      fieldName.split('.').at(-1),
+      isComponent,
+    ])
+  )('Relational field (%s) (is in component: %s)', (fieldName, isComponent) => {
+    describe('Find Available', () => {
+      describe.each([[true], [false]])('Can retrieve all available relation(s)', (useEmptyShop) => {
+        test(`when entity ID is ${!useEmptyShop ? 'undefined' : 'an empty entity'}`, async () => {
+          const { modelUID, idEmptyShop } = isComponent
+            ? data.testData.component
+            : data.testData.entity;
 
-    describe.each(statuses)(`Get %s relation(s)`, (status) => {
-      const qs = {
-        status,
-        locale: defaultLocale,
-      };
-
-      describe('Find Available', () => {
-        describe.each([[true], [false]])(
-          'Can retrieve all available relation(s)',
-          (useEmptyShop) => {
-            test(`when entity ID is ${
-              !useEmptyShop ? 'undefined' : 'an empty entity'
-            }`, async () => {
-              const { modelUID, idEmptyShop } = isComponent
-                ? data.testData.component
-                : data.testData.entity;
-              const id = useEmptyShop ? idEmptyShop : undefined;
-
-              const res = await rq({
-                method: 'GET',
-                url: `/content-manager/relations/${modelUID}/${fieldName}`,
-                qs: {
-                  ...qs,
-                  id,
-                },
-              });
-              expect(res.status).toBe(200);
-
-              const productsInThisLocale = data.products[status].filter(
-                // This test is running for the default locale (en)
-                // any products that are in the non default locale should not
-                // be considered available
-                (product) => product.locale === defaultLocale
-              );
-
-              expect(res.body.results.map((result) => result.id)).toMatchObject(
-                productsInThisLocale
-                  // Results form the request should be sorted by name
-                  // but are not necessarily in the same order as data.products
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((product) => product.id)
-              );
-
-              const idsToOmit = [productsInThisLocale[1]?.id].filter(Boolean);
-              const omitIdsRes = await rq({
-                method: 'GET',
-                url: `/content-manager/relations/${modelUID}/${fieldName}`,
-                qs: {
-                  ...qs,
-                  id,
-                  idsToOmit,
-                },
-              });
-
-              expect(omitIdsRes.body.results).toHaveLength(
-                productsInThisLocale
-                  .map((product) => product.id)
-                  .filter((id) => !idsToOmit.includes(id)).length
-              );
-            });
-          }
-        );
-
-        test(`Get relations for ${fieldName}`, async () => {
-          const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+          const id = useEmptyShop ? idEmptyShop : undefined;
 
           const res = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
-              ...qs,
               id,
             },
           });
           expect(res.status).toBe(200);
 
-          // Get the ids of the products that are not already related to this
-          // entity and are in the same locale as the entity
-          const availableProducts = data.products[status]
-            .filter((product) => {
-              return (
-                !getRelatedProductIds(isComponent, status, fieldName).includes(product.id) &&
-                product.locale === defaultLocale
-              );
-            })
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((product) => ({
-              id: product.id,
-              ...addPublishedAtCheck(status === 'published' ? expect().not.toBeNull() : null),
-            }));
-
-          expect(res.body.results).toMatchObject(
-            // The results should be the products that are not already related to the shop
-            availableProducts
+          const productsInThisLocale = data.products['draft'].filter(
+            // Any products that are in the non default locale should not
+            // be considered available
+            (product) => product.locale === defaultLocale
           );
 
-          const idsToOmit = [availableProducts[1]?.id].filter(Boolean);
+          expect(res.body.results).toMatchObject(
+            productsInThisLocale
+              // Results form the request should be sorted by name
+              // this is not necessarily the order of data.products
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((product) => ({
+                documentId: product.documentId,
+                ...addStatusCheck(data, product.documentId),
+              }))
+          );
+
+          const idsToOmit = [productsInThisLocale[1]?.documentId].filter(Boolean);
           const omitIdsRes = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
-              ...qs,
               id,
               idsToOmit,
             },
           });
 
           expect(omitIdsRes.body.results).toHaveLength(
-            availableProducts.filter((product) => !idsToOmit.includes(product.id)).length
+            productsInThisLocale.filter((product) => !idsToOmit.includes(product.documentId)).length
           );
-        });
-
-        describe('Search', () => {
-          const searchTerms = [
-            ['Skate'],
-            ['Candle'],
-            ['Chair'],
-            ['Table'],
-            ['skate'],
-            ['candle'],
-            ['Skate'.substring(0, 3)],
-            ['Candle'.substring(0, 3)],
-            ['Chair'.substring(3)],
-            ['table'.substring(2)],
-            ['nothing'],
-            ['nothing'.substring(0, 3)],
-            [''],
-            ['Fenetre'],
-            ['Porte'],
-          ];
-          describe.each(searchTerms)(`Search with term %s`, (searchTerm) => {
-            test('Can search entity', async () => {
-              const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
-
-              const res = await rq({
-                method: 'GET',
-                url: `/content-manager/relations/${modelUID}/${fieldName}`,
-                qs: {
-                  ...qs,
-                  _q: searchTerm,
-                  id,
-                },
-              });
-              expect(res.status).toBe(200);
-
-              // We expect to get products that are not already related to the entity
-              // that fuzzy match the search query and are in the same locale as the entity
-              const expected = data.products[status]
-                .filter(
-                  (product) =>
-                    new RegExp(searchTerm, 'i').test(product.name) &&
-                    product.locale === defaultLocale &&
-                    !getRelatedProductIds(isComponent, status, fieldName).includes(product.id)
-                )
-                .sort((a, b) => a.name.localeCompare(b.name));
-
-              expect(res.body.results).toHaveLength(expected.length);
-              expect(res.body.results).toMatchObject(
-                expected.map((product) => ({
-                  id: product.id,
-                  name: product.name,
-                  ...addPublishedAtCheck(status === 'published' ? expect().not.toBeNull() : null),
-                }))
-              );
-            });
-          });
         });
       });
 
-      describe('Find Existing', () => {
-        test('Can retrieve the relation(s) for an entity that have some relations', async () => {
-          const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+      test(`Get relations for ${fieldName}`, async () => {
+        const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
 
-          const res = await rq({
-            method: 'GET',
-            url: `/content-manager/relations/${modelUID}/${id}/${fieldName}`,
-            qs,
-          });
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id,
+          },
+        });
+        expect(res.status).toBe(200);
 
-          expect(res.status).toBe(200);
+        const availableProducts = data.products['draft']
+          .filter((product) => {
+            // Get the ids of the products that are not already related to this
+            // entity and are in the same locale as the entity
+            return (
+              !getRelatedProductDocumentIds(isComponent, fieldName).includes(product.documentId) &&
+              product.locale === defaultLocale
+            );
+          })
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((product) => ({
+            documentId: product.documentId,
+            locale: product.locale,
+            ...addStatusCheck(data, product.documentId),
+          }));
 
-          const relatedProductIds = getRelatedProductIds(isComponent, status, fieldName);
+        expect(res.body.results).toMatchObject(availableProducts);
 
-          expect(res.body.results).toHaveLength(relatedProductIds.length);
-          expect(res.body.results.map((result) => result.id)).toEqual(
-            // TODO we aren't accounting for the order of the results here
-            expect.arrayContaining(relatedProductIds)
-          );
+        const idsToOmit = [availableProducts[1]?.documentId].filter(Boolean);
+        const omitIdsRes = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
+          qs: {
+            id,
+            idsToOmit,
+          },
         });
 
-        test("Can retrieve the relation(s) for an entity that doesn't have relations yet", async () => {
-          const { modelUID, idEmptyShop } = isComponent
-            ? data.testData.component
-            : data.testData.entity;
-          const res = await rq({
-            method: 'GET',
-            url: `/content-manager/relations/${modelUID}/${idEmptyShop}/${fieldName}`,
-            qs,
-          });
+        expect(omitIdsRes.body.results).toHaveLength(
+          availableProducts.filter((product) => !idsToOmit.includes(product.documentId)).length
+        );
+      });
 
-          expect(res.status).toBe(200);
-          expect(res.body.results).toHaveLength(0);
+      describe('Search', () => {
+        const searchTerms = [
+          ['Skate'],
+          ['Candle'],
+          ['Chair'],
+          ['Table'],
+          ['skate'],
+          ['candle'],
+          ['Skate'.substring(0, 3)],
+          ['Candle'.substring(0, 3)],
+          ['Chair'.substring(3)],
+          ['table'.substring(2)],
+          ['nothing'],
+          ['nothing'.substring(0, 3)],
+          [''],
+          ['Fenetre'],
+          ['Porte'],
+        ];
+        describe.each(searchTerms)(`Search with term %s`, (searchTerm) => {
+          test('Can search entity', async () => {
+            const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+
+            const res = await rq({
+              method: 'GET',
+              url: `/content-manager/relations/${modelUID}/${fieldName}`,
+              qs: {
+                id,
+                _q: searchTerm,
+              },
+            });
+            expect(res.status).toBe(200);
+
+            // We expect to get products that are not already related to the entity
+            // that fuzzy match the search query and are in the same locale as the entity
+            const expected = data.products['draft']
+              .filter(
+                (product) =>
+                  new RegExp(searchTerm, 'i').test(product.name) &&
+                  product.locale === defaultLocale &&
+                  !getRelatedProductDocumentIds(isComponent, fieldName).includes(product.documentId)
+              )
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((product) => ({
+                documentId: product.documentId,
+                locale: product.locale,
+                ...addStatusCheck(data, product.documentId),
+              }));
+
+            expect(res.body.results).toHaveLength(expected.length);
+            expect(res.body.results).toMatchObject(expected);
+          });
         });
+      });
+    });
+
+    describe('Find Existing', () => {
+      test('Can retrieve the relation(s) for an entity that has some relations', async () => {
+        const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${id}/${fieldName}`,
+        });
+
+        expect(res.status).toBe(200);
+
+        const relatedProductDocumentIds = getRelatedProductDocumentIds(isComponent, fieldName);
+
+        expect(res.body.results).toHaveLength(relatedProductDocumentIds.length);
+        expect(res.body.results.map((result) => result.documentId)).toEqual(
+          // TODO we aren't accounting for the order of the results here
+          expect.arrayContaining(relatedProductDocumentIds)
+        );
+      });
+
+      test('Can query by status for existing relations', async () => {
+        const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${id}/${fieldName}`,
+          qs: {
+            status: 'published',
+          },
+        });
+        expect(res.status).toBe(200);
+
+        expect(res.body.results.map((result) => result.publishedAt)).not.toContainEqual(null);
+      });
+
+      test("Can retrieve the relation(s) for an entity that doesn't have relations yet", async () => {
+        const { modelUID, idEmptyShop } = isComponent
+          ? data.testData.component
+          : data.testData.entity;
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/${modelUID}/${idEmptyShop}/${fieldName}`,
+        });
+
+        expect(res.status).toBe(200);
+        expect(res.body.results).toHaveLength(0);
       });
     });
   });

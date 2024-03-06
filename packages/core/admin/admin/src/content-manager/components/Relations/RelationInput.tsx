@@ -150,7 +150,7 @@ const RelationInput = ({
         .filter(Boolean)
         .map((result) => ({
           ...result,
-          value: result.id,
+          value: result.documentId,
           label: result.mainField,
         })),
     [data]
@@ -267,7 +267,9 @@ const RelationInput = ({
               if (!relationId) {
                 return;
               }
-              onRelationConnect(data.flat().find((opt) => opt.id.toString() === relationId)!);
+              onRelationConnect(
+                data.flat().find((opt) => opt.documentId.toString() === relationId)!
+              );
               updatedRelationsWith.current = 'onChange';
             }}
             onTextValueChange={(text) => {
@@ -278,7 +280,7 @@ const RelationInput = ({
             }}
           >
             {options.map((opt) => {
-              return <Option key={opt.id} {...opt} />;
+              return <Option key={opt.documentId} {...opt} />;
             })}
           </Combobox>
         </ComboboxWrapper>
@@ -323,7 +325,7 @@ const RelationInput = ({
               relations,
               updatePositionOfRelation: handleUpdatePositionOfRelation,
             }}
-            itemKey={(index) => `${relations[index].mainField}_${relations[index].id}`}
+            itemKey={(index) => `${relations[index].mainField}_${relations[index].documentId}`}
             innerElementType="ol"
           >
             {ListItem}
@@ -379,10 +381,10 @@ const ShadowBox = styled(Box)<{ overflowDirection?: 'top-bottom' | 'top' | 'bott
 const Option = ({
   publicationState,
   mainField,
-  id,
-}: Pick<NormalizedRelation, 'id' | 'mainField' | 'publicationState'>) => {
+  documentId,
+}: Pick<NormalizedRelation, 'documentId' | 'mainField' | 'publicationState'>) => {
   const { formatMessage } = useIntl();
-  const stringifiedDisplayValue = (mainField ?? id).toString();
+  const stringifiedDisplayValue = (mainField ?? documentId).toString();
 
   if (publicationState) {
     const isDraft = publicationState === 'draft';
@@ -397,7 +399,7 @@ const Option = ({
     const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);
 
     return (
-      <ComboboxOption value={id.toString()} textValue={stringifiedDisplayValue}>
+      <ComboboxOption value={documentId.toString()} textValue={stringifiedDisplayValue}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
           <Typography ellipsis>{stringifiedDisplayValue}</Typography>
@@ -407,7 +409,7 @@ const Option = ({
   }
 
   return (
-    <ComboboxOption value={id.toString()} textValue={stringifiedDisplayValue}>
+    <ComboboxOption value={documentId.toString()} textValue={stringifiedDisplayValue}>
       {stringifiedDisplayValue}
     </ComboboxOption>
   );
@@ -471,7 +473,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     relations,
     updatePositionOfRelation,
   } = data;
-  const { publicationState, href, mainField, id } = relations[index];
+  const { publicationState, href, mainField, documentId } = relations[index];
   const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
 
   return (
@@ -479,14 +481,14 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       ariaDescribedBy={ariaDescribedBy}
       canDrag={canDrag}
       disabled={disabled}
-      displayValue={String(mainField ?? id)}
+      displayValue={String(mainField ?? documentId)}
       iconButtonAriaLabel={iconButtonAriaLabel}
-      id={id}
+      id={documentId}
       index={index}
       name={name}
       endAction={
         <DisconnectButton
-          data-testid={`remove-relation-${id}`}
+          data-testid={`remove-relation-${documentId}`}
           disabled={disabled}
           type="button"
           onClick={() => onRelationDisconnect(relations[index])}
@@ -507,12 +509,12 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       updatePositionOfRelation={updatePositionOfRelation}
     >
       <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-        <Tooltip description={mainField ?? `${id}`}>
+        <Tooltip description={mainField ?? `${documentId}`}>
           {href ? (
-            <LinkEllipsis to={href}>{mainField ?? id}</LinkEllipsis>
+            <LinkEllipsis to={href}>{mainField ?? documentId}</LinkEllipsis>
           ) : (
             <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-              {mainField ?? id}
+              {mainField ?? documentId}
             </Typography>
           )}
         </Tooltip>

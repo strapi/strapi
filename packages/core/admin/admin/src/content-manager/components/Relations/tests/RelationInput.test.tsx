@@ -1,3 +1,4 @@
+// @ts-nocheck TODO remove after FE relations changes
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,6 +13,7 @@ import { NormalizedRelation } from '../utils/normalizeRelations';
 const FIXTURES_RELATIONS = {
   data: [
     {
+      documentId: 'Doc1',
       id: 1,
       href: '/',
       mainField: 'Relation 1',
@@ -19,6 +21,7 @@ const FIXTURES_RELATIONS = {
       publishedAt: '',
     },
     {
+      documentId: 'Doc2',
       id: 2,
       href: '',
       mainField: 'Relation 2',
@@ -26,6 +29,7 @@ const FIXTURES_RELATIONS = {
       publishedAt: '',
     },
     {
+      documentId: 'Doc3',
       id: 3,
       href: '',
       mainField: 'Relation 3',
@@ -42,6 +46,7 @@ const FIXTURES_RELATIONS = {
 const FIXTURES_SEARCH = {
   data: [
     {
+      documentId: 'Doc4',
       id: 4,
       mainField: 'Relation 4',
       publicationState: 'draft',
@@ -194,11 +199,23 @@ describe.skip('RelationInput', () => {
     test('should scroll to the bottom when a new relation has been added & scroll to the top when load more is clicked', async () => {
       const data = [
         ...FIXTURES_RELATIONS.data,
-        { id: 4, mainField: 'Relation 4', publicationState: 'draft', publishedAt: '' },
-        { id: 5, mainField: 'Relation 5', publicationState: 'draft', publishedAt: '' },
+        {
+          documentId: 'Doc4',
+          mainField: 'Relation 4',
+          publicationState: 'draft',
+          publishedAt: '',
+        },
+        {
+          documentId: 'Doc5',
+          id: 5,
+          mainField: 'Relation 5',
+          publicationState: 'draft',
+          publishedAt: '',
+        },
       ] satisfies NormalizedRelation[];
 
       const newRelation = {
+        documentId: 'Doc6',
         id: 6,
         mainField: 'Relation 6',
         publicationState: 'draft',
@@ -247,6 +264,7 @@ describe.skip('RelationInput', () => {
             ...FIXTURES_RELATIONS,
             data: [
               {
+                documentId: 'Doc7',
                 id: 7,
                 mainField: 'Relation 7',
                 publicationState: false,

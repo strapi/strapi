@@ -54,8 +54,10 @@ const relationsApi = contentManagerApi.injectEndpoints({
            * Relations will always have unique IDs, so we can therefore assume
            * that we only need to push the new items to the cache.
            */
-          const existingIds = currentCache.results.map((item) => item.id);
-          const uniqueNewItems = newItems.results.filter((item) => !existingIds.includes(item.id));
+          const existingIds = currentCache.results.map((item) => item.documentId);
+          const uniqueNewItems = newItems.results.filter(
+            (item) => !existingIds.includes(item.documentId)
+          );
           currentCache.results.push(...uniqueNewItems);
           currentCache.pagination = newItems.pagination;
         }
@@ -111,8 +113,10 @@ const relationsApi = contentManagerApi.injectEndpoints({
            * Relations will always have unique IDs, so we can therefore assume
            * that we only need to push the new items to the cache.
            */
-          const existingIds = currentCache.results.map((item) => item.id);
-          const uniqueNewItems = newItems.results.filter((item) => !existingIds.includes(item.id));
+          const existingIds = currentCache.results.map((item) => item.documentId);
+          const uniqueNewItems = newItems.results.filter(
+            (item) => !existingIds.includes(item.documentId)
+          );
           currentCache.results.push(...uniqueNewItems);
           currentCache.pagination = newItems.pagination;
         }

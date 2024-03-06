@@ -3,10 +3,12 @@ import { errors } from '@strapi/utils';
 
 type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 
-export type RelationResult = Documents.AnyDocument & {
-  publishedAt: string | null;
+export interface RelationResult {
+  documentId: Documents.ID;
+  status: Documents.Params.PublicationState.Kind;
   locale?: Documents.Params.Locale;
-};
+  [key: string]: unknown;
+}
 
 export interface Pagination {
   page: NonNullable<PaginationQuery['page']>;
@@ -31,22 +33,21 @@ type RelationResponse =
  * GET /relations/:model/:targetField
  */
 export declare namespace FindAvailable {
+  export interface Params {
+    model: string;
+    targetField: string;
+  }
+
   export interface Request {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       id?: Entity.ID;
       locale?: Documents.Params.Locale;
-      status?: Documents.Params.PublicationState.Kind;
-      _q?: string;
       _filter?: string;
+      _q?: string;
       idsToOmit?: Documents.ID[];
       idsToInclude?: Documents.ID[];
     };
-  }
-
-  export interface Params {
-    model: string;
-    targetField: string;
   }
 
   export type Response = RelationResponse;
@@ -56,18 +57,22 @@ export declare namespace FindAvailable {
  * GET /relations/:model/:id/:targetField
  */
 export declare namespace FindExisting {
-  export interface Request {
-    body: {};
-    query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
-      locale?: string | null;
-      status?: Documents.Params.PublicationState.Kind;
-    };
-  }
-
   export interface Params {
     model: string;
     targetField: string;
     id?: Entity.ID;
+  }
+
+  export interface Request {
+    body: {};
+    query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
+      locale?: string | null;
+      _filter?: string;
+      _q?: string;
+      status?: Documents.Params.PublicationState.Kind;
+      idsToOmit?: Documents.ID[];
+      idsToInclude?: Documents.ID[];
+    };
   }
 
   export type Response = RelationResponse;

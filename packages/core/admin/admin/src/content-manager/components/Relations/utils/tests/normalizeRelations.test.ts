@@ -1,19 +1,22 @@
+// @ts-nocheck TODO remove after FE relations changes
 import { normalizeRelations } from '../normalizeRelations';
 
 const FIXTURE_RELATIONS = [
   {
     id: 3,
+    documentId: 'Doc3',
     name: 'Relation 3',
     publishedAt: '2022-08-24T09:29:11.38',
   },
-
   {
     id: 2,
+    documentId: 'Doc2',
     name: 'Relation 2',
     publishedAt: '',
   },
   {
     id: 1,
+    documentId: 'Doc1',
     name: 'Relation 1',
     publishedAt: null,
   },
@@ -28,9 +31,9 @@ describe('RelationInputDataManager || normalizeRelations', () => {
         mainFieldName: '',
       })
     ).toStrictEqual([
-      expect.objectContaining({ href: '/content-manager/collection-types/something/3' }),
-      expect.objectContaining({ href: '/content-manager/collection-types/something/2' }),
-      expect.objectContaining({ href: '/content-manager/collection-types/something/1' }),
+      expect.objectContaining({ href: '/content-manager/collection-types/something/Doc3' }),
+      expect.objectContaining({ href: '/content-manager/collection-types/something/Doc2' }),
+      expect.objectContaining({ href: '/content-manager/collection-types/something/Doc1' }),
     ]);
   });
 
@@ -44,6 +47,7 @@ describe('RelationInputDataManager || normalizeRelations', () => {
     ).toMatchInlineSnapshot(`
       [
         {
+          "documentId": "Doc3",
           "id": 3,
           "mainField": undefined,
           "name": "Relation 3",
@@ -51,6 +55,7 @@ describe('RelationInputDataManager || normalizeRelations', () => {
           "publishedAt": "2022-08-24T09:29:11.38",
         },
         {
+          "documentId": "Doc2",
           "id": 2,
           "mainField": undefined,
           "name": "Relation 2",
@@ -58,6 +63,7 @@ describe('RelationInputDataManager || normalizeRelations', () => {
           "publishedAt": "",
         },
         {
+          "documentId": "Doc1",
           "id": 1,
           "mainField": undefined,
           "name": "Relation 1",

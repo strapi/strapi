@@ -6,7 +6,15 @@ import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
 
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
+const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
+
+interface RelationEntity {
+  id: Entity.ID;
+  documentId: Documents.ID;
+  updatedAt: string | Date;
+  publishedAt?: string | Date;
+  [key: string]: unknown;
+}
 
 const addFiltersClause = (params: any, filtersClause: any) => {
   params.filters = params.filters || {};
@@ -43,23 +51,12 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
-const mapResults = (results: Array<any>) => {
-  return results.map((result: any) => {
-    if (result.documentId !== undefined) {
-      result.id = result.documentId;
-      delete result.documentId;
-    }
-
-    return result;
-  });
-};
-
 export default {
   async extractAndValidateRequestInfo(
     ctx: any,
     id?: Entity.ID,
-    status?: Documents.Params.PublicationState.Kind,
-    locale?: Documents.Params.Locale
+    locale?: Documents.Params.Locale,
+    status?: Documents.Params.PublicationState.Kind
   ) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
@@ -88,17 +85,21 @@ export default {
       }
     }
 
-    const where: Record<string, any> = {};
-    if (!isSourceComponent) {
-      where.locale = locale;
-      where.publishedAt = status === 'published' ? { $ne: null } : null;
-    }
-
-    let currentEntity = { id: null };
     if (id) {
+      const where: Record<string, any> = {};
+
       if (!isSourceComponent) {
         where.documentId = id;
+
+        if (status) {
+          where.publishedAt = status === 'published' ? { $ne: null } : null;
+        }
+        if (locale) {
+          where.locale = locale;
+        }
       } else {
+        // If the source is a component, we only need to filter by the
+        // component's entity id
         where.id = id;
       }
 
@@ -107,14 +108,15 @@ export default {
         .populateFromQuery(permissionQuery)
         .build();
 
-      currentEntity = await strapi.db.query(model).findOne({
+      const currentEntity = await strapi.db.query(model).findOne({
         where,
         populate,
       });
 
-      // If an Id is provided we are asking to find the relations (available or
-      // existing) on an existing entity. We need to check if the entity exists
+      // We need to check if the entity exists
       // and if the user has the permission to read it in this way
+      // There may be multiple entities (publication states) under this
+      // documentId + locale. We only need to check if one exists
       if (!currentEntity) {
         throw new errors.NotFoundError();
       }
@@ -138,8 +140,15 @@ export default {
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq([mainField, PUBLISHED_AT_ATTRIBUTE, 'documentId']);
-    if (locale) {
+    const fieldsToSelect = uniq([
+      mainField,
+      PUBLISHED_AT_ATTRIBUTE,
+      UPDATED_AT_ATTRIBUTE,
+      'documentId',
+    ]);
+
+    // @ts-expect-error TODO improve i18n detection
+    if (targetSchema?.pluginOptions?.i18n?.localized) {
       fieldsToSelect.push('locale');
     }
 
@@ -150,26 +159,21 @@ export default {
       sourceSchema,
       targetSchema,
       targetField,
-      currentEntityId: currentEntity?.id,
     };
   },
 
-  async findAvailable(ctx: any) {
-    await validateFindAvailable(ctx.request.query);
-
-    const { id } = ctx.request.query;
+  async find(ctx: any, id: Entity.ID, available: boolean = true) {
     const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status || 'draft';
+    const status = ctx.request?.query?.status || null;
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
+    const validation = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
 
     const {
       targetField,
       fieldsToSelect,
       mainField,
-      sourceSchema: { uid: sourceUid },
+      sourceSchema: { uid: sourceUid, modelType: sourceModelType },
       targetSchema: { uid: targetUid },
-      currentEntityId,
     } = validation;
 
     const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
@@ -187,41 +191,56 @@ export default {
       ...permissionQuery,
     };
 
-    const isPublished = status === 'published';
-    // Only ever findAvailable (e.g. populate relation select) on a draft entry
+    // If no status is requested, we find all the draft relations and later update them
+    // with the latest available status
     addFiltersClause(queryParams, {
-      [PUBLISHED_AT_ATTRIBUTE]: isPublished ? { $ne: null } : null,
+      publishedAt: status === 'published' ? { $ne: null } : null,
     });
 
-    // We are looking for available content type relations and should be
-    // filtering by valid documentIds only
-    if (idsToOmit?.length > 0) {
-      addFiltersClause(queryParams, {
-        documentId: { $notIn: uniq(idsToOmit) },
-      });
+    if (locale) {
+      addFiltersClause(queryParams, { locale });
     }
 
-    if (_q) {
-      // searching should be allowed only on mainField for permission reasons
-      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
-    }
+    if (id) {
+      // If finding available relations we want to exclude the
+      // ids of entities that are already related to the source.
 
-    if (currentEntityId) {
-      // If we have been given an entity id, we need to filter out the
-      // relations that are already linked to the current entity
+      // If finding existing we want to include the ids of entities that are
+      // already related to the source.
+
+      // We specify the source by entityId for components and by documentId for
+      // content types.
+
+      // We also optionally filter the target relations by the requested
+      // status and locale if provided.
       const subQuery = strapi.db.queryBuilder(sourceUid);
 
-      // The alias refers to the DB table of the target model
+      // The alias refers to the DB table of the target content type model
       const alias = subQuery.getAlias();
 
       const where: Record<string, any> = {
-        id: currentEntityId,
         [`${alias}.id`]: { $notNull: true },
-        // Always find available draft entries, as we will be potentially
-        // connecting them from the CM edit view
-        [`${alias}.published_at`]: { $notNull: isPublished },
+        [`${alias}.document_id`]: { $notNull: true },
       };
+
+      const isSourceComponent = sourceModelType === 'component';
+      if (isSourceComponent) {
+        // If the source is a component, we need to filter by the component's
+        // numeric entity id
+        where.id = id;
+      } else {
+        // If the source is a content type, we need to filter by document id
+        where.document_id = id;
+      }
+
+      // If a status or locale is requested from the source, we need to only
+      // ever find relations that match that status or locale.
+      if (status) {
+        where[`${alias}.published_at`] = status === 'published' ? { $ne: null } : null;
+      }
+      if (locale) {
+        where[`${alias}.locale`] = locale;
+      }
 
       if ((idsToInclude?.length ?? 0) !== 0) {
         where[`${alias}.document_id`].$notIn = idsToInclude;
@@ -233,74 +252,85 @@ export default {
         .select(`${alias}.id`)
         .getKnexQuery();
 
-      addFiltersClause(queryParams, { id: { $notIn: knexSubQuery } });
+      addFiltersClause(queryParams, {
+        // We change the operator based on whether we are looking for available or
+        // existing relations
+        id: available ? { $notIn: knexSubQuery } : { $in: knexSubQuery },
+      });
     }
 
-    // We find a page of the targeted model (relation) to display in the
-    // relation select component in the CM edit view
+    if (_q) {
+      // Apply a filter to the mainField based on the search query and filter operator
+      // searching should be allowed only on mainField for permission reasons
+      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+    }
+
+    if (idsToOmit?.length > 0) {
+      // If we have ids to omit, we should filter them out
+      addFiltersClause(queryParams, {
+        documentId: { $notIn: uniq(idsToOmit) },
+      });
+    }
+
     const res = await strapi.entityService.findPage(
       targetUid as Common.UID.ContentType,
       queryParams
     );
 
+    if (status) {
+      // The result will contain all relations in the requested status, and we don't need to find
+      // the latest status for each.
+
+      ctx.body = {
+        ...res,
+        results: res.results.map((relation) => {
+          return {
+            ...relation,
+            status,
+          };
+        }),
+      };
+      return;
+    }
+
+    // No specific status was requested, we should find the latest available status for each relation
+    const documentMetadata = getService('document-metadata');
+
+    // Get any available statuses for the returned relations
+    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
+      targetUid,
+      res.results
+    );
+
     ctx.body = {
       ...res,
-      results: Array.isArray(res.results) ? mapResults(res.results) : [],
+      results: res.results.map((relation) => {
+        const availableStatuses =
+          documentsAvailableStatus.filter(
+            (availableDocument: RelationEntity) =>
+              availableDocument.documentId === relation.documentId
+          ) ?? [];
+
+        return {
+          ...relation,
+          status: documentMetadata.getStatus(relation, availableStatuses),
+        };
+      }),
     };
   },
 
+  async findAvailable(ctx: any) {
+    const { id } = ctx.request.query;
+
+    await validateFindAvailable(ctx.request.query);
+    await this.find(ctx, id, true);
+  },
+
   async findExisting(ctx: any) {
-    await validateFindExisting(ctx.request.query);
     const { id } = ctx.params;
-    const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status || 'draft';
 
-    const validation = await this.extractAndValidateRequestInfo(ctx, id, status, locale);
-
-    const {
-      targetField,
-      fieldsToSelect,
-      sourceSchema: { uid: sourceUid },
-      targetSchema: { uid: targetUid },
-      currentEntityId,
-    } = validation;
-
-    const entity = await strapi.db.query(sourceUid).findOne({
-      where: { id: currentEntityId },
-      select: ['id'],
-      populate: { [targetField]: { fields: ['id'] } },
-    });
-
-    // Collect all the entity IDs relations in the targetField
-    let resultEntityIds = [];
-    if (entity?.[targetField]) {
-      if (Array.isArray(entity?.[targetField])) {
-        resultEntityIds = entity?.[targetField]?.map((result: any) => result.id);
-      } else {
-        resultEntityIds = entity?.[targetField]?.id ? [entity[targetField].id] : [];
-      }
-    }
-
-    const fields: Array<string> = locale ? [...fieldsToSelect, 'locale'] : fieldsToSelect;
-    const sort = fields
-      .filter((field: any) => !['id', 'locale', 'publishedAt'].includes(field))
-      .map((field: any) => field);
-
-    const page = await strapi.db.query(targetUid).findPage({
-      select: fields,
-      filters: {
-        // The existing relations will be entries of the target model who's
-        // entity ID is in the list of entity IDs related to the source entity
-        id: { $in: resultEntityIds },
-      },
-      orderBy: sort,
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
-    });
-
-    ctx.body = {
-      ...page,
-      results: Array.isArray(page.results) ? mapResults(page.results) : [],
-    };
+    await validateFindExisting(ctx.request.query);
+    await this.find(ctx, id, false);
   },
 };
