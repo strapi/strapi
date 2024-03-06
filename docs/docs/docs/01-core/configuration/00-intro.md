@@ -50,7 +50,7 @@ NOTE: Most of this is defined by Knex, be careful when adding options that they 
 
 #### api
 
-Content API configuraiton, for example the 'rest.maxLimit' option to set the maximum `limit` available in a query.
+Content API configuration, for example the 'rest.maxLimit' option to set the maximum `limit` available in a query.
 
 #### features
 
@@ -60,7 +60,8 @@ Feature flags for enabling and configuring future features that would be breakin
 
 Contains plugin configurations, with each root-level value the id of a plugin, for example, 'users-permissions'
 
-IMPORTANT: Plugins is an exception to the normal namespacing in config.get(). An example plugins.js file has this shape:
+IMPORTANT: Plugins are not loaded like other Strapi configurations into the `plugins.` namespace, because they are loaded during the module loading.
+That means that in an example plugins.js file like below, its values are accessible at, for example, `strapi.config.get('plugin::graphql.endpoint')`
 
 ```
 module.exports = () => ({
@@ -79,8 +80,6 @@ module.exports = () => ({
   },
 });
 ```
-
-However, the `config` attribute is flattened and removed so that its values are accessible at, for example, `strapi.config.get('plugin::graphql.endpoint')`
 
 NOTE: Because this configuration contains user and plugin keys and Strapi does not yet provide a method to extend the definitions, this configuration is not strictly typed and will not be loaded from the environment variables
 
