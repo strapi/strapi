@@ -319,6 +319,44 @@ const {
 } = useDocumentLayout();
 ```
 
+## Hooks
+
+### useCallbackRef
+
+This component has been removed. You should import it from the `@strapi/design-system` package:
+
+```tsx
+// Before
+import { useCallbackRef } from '@strapi/helper-plugin';
+
+// After
+import { useCallbackRef } from '@strapi/design-system';
+```
+
+### useCollator
+
+This component has been removed. You should import it from the `@strapi/design-system` package:
+
+```tsx
+// Before
+import { useCollator } from '@strapi/helper-plugin';
+
+// After
+import { useCollator } from '@strapi/design-system';
+```
+
+### useFilter
+
+This component has been removed. You should import it from the `@strapi/design-system` package:
+
+```tsx
+// Before
+import { useFilter } from '@strapi/helper-plugin';
+
+// After
+import { useFilter } from '@strapi/design-system';
+```
+
 ## Icons
 
 ### SortIcon

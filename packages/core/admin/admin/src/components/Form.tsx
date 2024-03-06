@@ -8,8 +8,10 @@ import {
   Flex,
   Icon,
   Typography,
+  useCallbackRef,
+  useComposedRefs,
 } from '@strapi/design-system';
-import { TranslationMessage, useCallbackRef } from '@strapi/helper-plugin';
+import { TranslationMessage } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
@@ -18,7 +20,6 @@ import { useIntl } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
 import { getIn, setIn } from '../utils/object';
-import { useComposedRefs } from '../utils/refs';
 
 import { createContext } from './Context';
 

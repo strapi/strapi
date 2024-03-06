@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { useCollator } from '@strapi/helper-plugin';
+import { Flex, Grid, GridItem, Typography, useCollator } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useForm } from '../../../../components/Form';
