@@ -1,10 +1,10 @@
 import { errors } from '@strapi/utils';
-import type { Common, Strapi, UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
 
-const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
+const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async findMany(ctx) {
       const contentTypeUid = ctx.query.contentType as UID.ContentType;
@@ -37,7 +37,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
 
       return { data: results, meta: { pagination } };
     },
-  } satisfies Common.Controller;
+  } satisfies Core.Controller;
 };
 
 export { createHistoryVersionController };

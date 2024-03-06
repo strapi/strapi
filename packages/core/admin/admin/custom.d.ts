@@ -7,7 +7,7 @@ import { type ReactEditor } from 'slate-react';
 
 import { type LinkEditor } from './src/content-manager/pages/EditView/components/FormInputs/BlocksInput/plugins/withLinks';
 
-import type { Schema, Attribute } from '@strapi/types';
+import type { Schema, Modules } from '@strapi/types';
 
 declare module 'styled-components' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface

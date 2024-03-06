@@ -1,4 +1,4 @@
-import type { Entity, UID } from '@strapi/types';
+import type { Data, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -8,7 +8,7 @@ import { type errors } from '@strapi/utils';
  */
 export interface CreateHistoryVersion {
   contentType: UID.ContentType;
-  relatedDocumentId: Entity.ID;
+  relatedDocumentId: Data.ID;
   locale: string | null;
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
@@ -21,10 +21,10 @@ interface Locale {
 }
 
 export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, 'locale'> {
-  id: Entity.ID;
+  id: Data.ID;
   createdAt: string;
   createdBy?: {
-    id: Entity.ID;
+    id: Data.ID;
     firstname?: string;
     lastname?: string;
     username?: string;
@@ -50,7 +50,7 @@ export declare namespace GetHistoryVersions {
     };
     query: {
       contentType: UID.ContentType;
-      documentId?: Entity.ID;
+      documentId?: Data.ID;
       locale?: string;
     };
   }
