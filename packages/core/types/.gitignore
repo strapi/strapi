@@ -101,3 +101,5 @@ package-lock.json
 ############################
 
 coverage
+
+./docs

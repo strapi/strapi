@@ -40,7 +40,9 @@
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "pack-up watch",
+    "doc:ts": "typedoc",
+    "doc:ts:watch": "typedoc --watch"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
@@ -52,7 +54,8 @@
     "@strapi/utils": "4.20.3",
     "commander": "8.3.0",
     "koa": "2.13.4",
-    "node-schedule": "2.1.0"
+    "node-schedule": "2.1.0",
+    "typedoc": "0.25.10"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.20.3",
