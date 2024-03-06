@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 
 import { Form } from '../../../components/Form';
+import { Page } from '../../../components/PageHelpers';
 import {
   InputRenderer,
   type InputRendererProps,

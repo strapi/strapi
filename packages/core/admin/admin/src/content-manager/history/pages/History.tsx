@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Main } from '@strapi/design-system';
+import { Box, Flex, Main } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
@@ -100,10 +100,6 @@ const HistoryPage = () => {
     }
   }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
-    return <Page.Loading />;
-  }
-
   /**
    * Ensure that we have the necessary data to render the page:
    * - slug for single types
@@ -113,17 +109,22 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema) {
-    return <Page.Error />;
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || !selectedVersionId) {
+    return <Page.Loading />;
   }
 
-  const selectedVersion = versionsResponse.data.data.find(
+  if (
+    !versionsResponse.isError &&
+    (!versionsResponse.data?.data || versionsResponse.data.data.length === 0)
+  ) {
+    return <Page.NoData />;
+  }
+
+  const selectedVersion = versionsResponse.data?.data.find(
     (version) => version.id.toString() === selectedVersionId
   );
-  if (!selectedVersion) {
-    // TODO: handle selected version not found when the designs are ready
-    return <Main />;
+  if (versionsResponse.isError || !layout || !schema || !selectedVersion) {
+    return <Page.Error />;
   }
 
   return (
@@ -150,7 +151,7 @@ const HistoryPage = () => {
         mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
-          <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
+          <Main grow={1} overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
             <VersionContent />
           </Main>
@@ -177,19 +178,25 @@ const ProtectedHistoryPage = () => {
   }
 
   if ((!isLoading && isError) || !slug) {
-    return <Page.Error />;
+    return (
+      <Box height="100vh">
+        <Page.Error />
+      </Box>
+    );
   }
 
   return (
-    <Page.Protect permissions={permissions}>
-      {({ permissions }) => (
-        <DocumentRBAC permissions={permissions}>
-          <HistoryPage />
-        </DocumentRBAC>
-      )}
-    </Page.Protect>
+    <Box height="100vh">
+      <Page.Protect permissions={permissions}>
+        {({ permissions }) => (
+          <DocumentRBAC permissions={permissions}>
+            <HistoryPage />
+          </DocumentRBAC>
+        )}
+      </Page.Protect>
+    </Box>
   );
 };
 
-export { HistoryPage, ProtectedHistoryPage, HistoryProvider, useHistoryContext };
+export { ProtectedHistoryPage, HistoryProvider, useHistoryContext };
 export type { HistoryContextValue };
