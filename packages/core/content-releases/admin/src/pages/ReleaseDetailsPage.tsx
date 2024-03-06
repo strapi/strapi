@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { AnyAction } from '@reduxjs/toolkit';
 import { unstable_useDocument } from '@strapi/admin/strapi-admin';
 import {
   Button,
