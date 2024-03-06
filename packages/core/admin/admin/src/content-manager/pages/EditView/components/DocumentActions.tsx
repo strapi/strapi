@@ -281,18 +281,39 @@ const DocumentActionsMenu = ({
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
-            <React.Fragment key={action.id}>
-              <Menu.Item
-                disabled={action.disabled}
-                /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
-                onSelect={handleClick(action)}
-              >
+            <Menu.Item
+              disabled={action.disabled}
+              /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
+              onSelect={handleClick(action)}
+              display="block"
+              key={action.id}
+            >
+              <Flex justifyContent="space-between" gap={4}>
                 <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
                   {action.icon}
                   {action.label}
                 </Flex>
-              </Menu.Item>
-            </React.Fragment>
+                {/* TODO: remove this in 5.1 release */}
+                {action.id.startsWith('HistoryAction') && (
+                  <Flex
+                    alignItems="center"
+                    background="alternative100"
+                    borderStyle="solid"
+                    borderColor="alternative200"
+                    borderWidth="1px"
+                    height={5}
+                    paddingLeft={2}
+                    paddingRight={2}
+                    hasRadius
+                    color="alternative600"
+                  >
+                    <Typography variant="sigma" fontWeight="bold" lineHeight={1}>
+                      {formatMessage({ id: 'global.new', defaultMessage: 'New' })}
+                    </Typography>
+                  </Flex>
+                )}
+              </Flex>
+            </Menu.Item>
           );
         })}
         {children}
