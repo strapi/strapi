@@ -5,7 +5,6 @@ import contentTypesServiceFactory from '../content-types';
 
 jest.mock('../localizations', () => {
   return () => ({
-    syncLocalizations: jest.fn(async () => {}),
     syncNonLocalizedAttributes: jest.fn(async () => {}),
   });
 });
@@ -15,7 +14,7 @@ const localizations = localizationsServiceFactory();
 const locales = localesServiceFactory();
 const contentTypes = contentTypesServiceFactory();
 
-const { syncLocalizations, syncNonLocalizedAttributes } = jest.mocked(localizations);
+const { syncNonLocalizedAttributes } = jest.mocked(localizations);
 
 const model = {
   pluginOptions: {
@@ -80,7 +79,6 @@ describe('Entity service decorator', () => {
   });
 
   beforeEach(() => {
-    syncLocalizations.mockClear();
     syncNonLocalizedAttributes.mockClear();
   });
 
@@ -204,25 +202,6 @@ describe('Entity service decorator', () => {
       expect(defaultService.create).toHaveBeenCalledWith('test-model', input);
     });
 
-    test('Calls syncLocalizations if model is localized', async () => {
-      const entry = {
-        id: 1,
-        localizations: [{ id: 2 }],
-      };
-
-      const defaultService = {
-        create: jest.fn(() => Promise.resolve(entry)),
-      };
-
-      const service = decorator(defaultService);
-
-      const input = { data: { title: 'title ' } };
-      await service.create('test-model', input);
-
-      expect(defaultService.create).toHaveBeenCalledWith('test-model', input);
-      expect(syncLocalizations).toHaveBeenCalledWith(entry, { model });
-    });
-
     test('Skip processing if model is not localized', async () => {
       const entry = {
         id: 1,
@@ -239,7 +218,6 @@ describe('Entity service decorator', () => {
       const output = await service.create('non-localized-model', input);
 
       expect(defaultService.create).toHaveBeenCalledWith('non-localized-model', input);
-      expect(syncLocalizations).not.toHaveBeenCalled();
       expect(output).toStrictEqual(entry);
     });
   });
