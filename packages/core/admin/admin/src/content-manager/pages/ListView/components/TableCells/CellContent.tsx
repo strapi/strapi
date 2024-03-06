@@ -7,6 +7,7 @@ import { useDoc } from '../../../../hooks/useDocument';
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';
 import { MediaSingle, MediaMultiple } from './Media';
+import { RelationMultiple, RelationSingle } from './Relations';
 
 import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Attribute, Entity } from '@strapi/types';
@@ -16,7 +17,7 @@ interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
   rowId: Entity.ID;
 }
 
-const CellContent = ({ content, mainField, attribute }: CellContentProps) => {
+const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
   const { components } = useDoc();
 
   if (!hasContent(content, mainField, attribute)) {
@@ -31,18 +32,13 @@ const CellContent = ({ content, mainField, attribute }: CellContentProps) => {
 
       return <MediaMultiple content={content} />;
 
-    /**
-     * TODO: re-add relations to the ListView – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
-     */
-    // case 'relation': {
-    //   if (isSingleRelation(attribute.relation)) {
-    //     return <RelationSingle mainField={mainField} content={content} />;
-    //   }
+    case 'relation': {
+      if (isSingleRelation(attribute.relation)) {
+        return <RelationSingle mainField={mainField} content={content} />;
+      }
 
-    //   return (
-    //     <RelationMultiple mainField={mainField} content={content} name={name} entityId={rowId} />
-    //   );
-    // }
+      return <RelationMultiple rowId={rowId} mainField={mainField} content={content} name={name} />;
+    }
 
     case 'component':
       if (attribute.repeatable) {
