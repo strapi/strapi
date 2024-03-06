@@ -60,7 +60,7 @@ type GetPopulatableKeysWithoutTarget<TSchemaUID extends UID.Schema> = Exclude<
  * Fragment populate notation for polymorphic attributes
  */
 export type Fragment<TMaybeTargets extends UID.Schema> = {
-  on?: { [key: string]: boolean | NestedParams<TMaybeTargets> };
+  on?: { [TKey in TMaybeTargets]: boolean | NestedParams<TKey> };
 };
 
 type PopulateClause<

@@ -80,7 +80,13 @@ export interface Strapi extends Container {
   bootstrap(): Promise<Strapi>;
   startWebhooks(): Promise<void>;
   runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
-  getModel<TSchemaUID extends UID.Schema>(uid: TSchemaUID): Schema.Schema<TSchemaUID>;
+  getModel<TSchemaUID extends UID.Schema>(
+    uid: TSchemaUID
+  ): TSchemaUID extends UID.ContentType
+    ? Schema.ContentType<TSchemaUID>
+    : TSchemaUID extends UID.Component
+    ? Schema.Component<TSchemaUID>
+    : never;
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 
