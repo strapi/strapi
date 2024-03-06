@@ -8,11 +8,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalLayout,
-  Textarea,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { GenericInput } from '@strapi/helper-plugin';
-import { Form, Formik } from 'formik';
+import { Form, InputRenderer } from '@strapi/strapi/admin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -51,88 +49,63 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
           </Crumb>
         </Breadcrumbs>
       </ModalHeader>
-      <Formik
-        onSubmit={onSubmit}
-        initialValues={template}
-        validateOnChange={false}
-        validationSchema={schema}
-        enableReinitialize
-      >
-        {({ errors, values, handleChange, isSubmitting }) => {
+      <Form onSubmit={onSubmit} initialValues={template} validationSchema={schema}>
+        {({ isSubmitting }) => {
           return (
-            <Form>
+            <>
               <ModalBody>
                 <Grid gap={5}>
-                  <GridItem col={6} s={12}>
-                    <GenericInput
-                      intlLabel={{
+                  {[
+                    {
+                      label: formatMessage({
                         id: getTrad('PopUpForm.Email.options.from.name.label'),
                         defaultMessage: 'Shipper name',
-                      }}
-                      name="options.from.name"
-                      onChange={handleChange}
-                      value={values.options.from.name}
-                      error={errors?.options?.from?.name}
-                      type="text"
-                    />
-                  </GridItem>
-                  <GridItem col={6} s={12}>
-                    <GenericInput
-                      intlLabel={{
+                      }),
+                      name: 'options.from.name',
+                      size: 6,
+                      type: 'string',
+                    },
+                    {
+                      label: formatMessage({
                         id: getTrad('PopUpForm.Email.options.from.email.label'),
                         defaultMessage: 'Shipper email',
-                      }}
-                      name="options.from.email"
-                      onChange={handleChange}
-                      value={values.options.from.email}
-                      error={errors?.options?.from?.email}
-                      type="text"
-                    />
-                  </GridItem>
-                  <GridItem col={6} s={12}>
-                    <GenericInput
-                      intlLabel={{
+                      }),
+                      name: 'options.from.email',
+                      size: 6,
+                      type: 'string',
+                    },
+                    {
+                      label: formatMessage({
                         id: getTrad('PopUpForm.Email.options.response_email.label'),
                         defaultMessage: 'Response email',
-                      }}
-                      name="options.response_email"
-                      onChange={handleChange}
-                      value={values.options.response_email}
-                      error={errors?.options?.response_email}
-                      type="text"
-                    />
-                  </GridItem>
-                  <GridItem col={6} s={12}>
-                    <GenericInput
-                      intlLabel={{
+                      }),
+                      name: 'options.response_email',
+                      size: 6,
+                      type: 'string',
+                    },
+                    {
+                      label: formatMessage({
                         id: getTrad('PopUpForm.Email.options.object.label'),
                         defaultMessage: 'Subject',
-                      }}
-                      name="options.object"
-                      onChange={handleChange}
-                      value={values.options.object}
-                      error={errors?.options?.object}
-                      type="text"
-                    />
-                  </GridItem>
-                  <GridItem col={12} s={12}>
-                    <Textarea
-                      label={formatMessage({
+                      }),
+                      name: 'options.object',
+                      size: 6,
+                      type: 'string',
+                    },
+                    {
+                      label: formatMessage({
                         id: getTrad('PopUpForm.Email.options.message.label'),
                         defaultMessage: 'Message',
-                      })}
-                      id="options.message"
-                      onChange={handleChange}
-                      value={values.options.message}
-                      error={
-                        errors?.options?.message &&
-                        formatMessage({
-                          id: errors.options.message,
-                          defaultMessage: errors.options.message,
-                        })
-                      }
-                    />
-                  </GridItem>
+                      }),
+                      name: 'options.message',
+                      size: 12,
+                      type: 'text',
+                    },
+                  ].map(({ size, ...field }) => (
+                    <GridItem key={field.name} col={size}>
+                      <InputRenderer {...field} />
+                    </GridItem>
+                  ))}
                 </Grid>
               </ModalBody>
               <ModalFooter
@@ -147,10 +120,10 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
                   </Button>
                 }
               />
-            </Form>
+            </>
           );
         }}
-      </Formik>
+      </Form>
     </ModalLayout>
   );
 };

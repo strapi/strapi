@@ -1,12 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { useCollator } from '@strapi/helper-plugin';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-import { useForm, type InputProps } from '../../../../components/Form';
+import { useForm } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { FormLayoutInputProps } from '../../../../types/forms';
 import { useDoc } from '../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';
@@ -131,15 +132,7 @@ const Settings = () => {
   );
 };
 
-const SETTINGS_FORM_LAYOUT: Array<
-  Array<
-    Omit<InputProps, 'label' | 'hint'> & {
-      label: MessageDescriptor;
-      hint?: MessageDescriptor;
-      size: number;
-    }
-  >
-> = [
+const SETTINGS_FORM_LAYOUT: FormLayoutInputProps[][] = [
   [
     {
       label: {
