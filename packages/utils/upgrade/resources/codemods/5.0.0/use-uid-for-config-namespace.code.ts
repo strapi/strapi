@@ -6,36 +6,32 @@ import { Transform } from 'jscodeshift';
  * Ignores api followed by 'rest' or 'responses' because those are the valid Strapi api config values in v4
  */
 const transform: Transform = (file, api) => {
-  const jscodeshift = api.jscodeshift;
-  const root = jscodeshift(file.source);
+  const j = api.jscodeshift;
+  const root = j(file.source);
 
   const ignoreList = ['api.rest', 'api.responses'];
 
   ['get', 'has', 'set'].forEach((configMethod) => {
     root
-      .find(jscodeshift.CallExpression, {
+      .find(j.CallExpression, {
         callee: {
           type: 'MemberExpression',
+          object: {
+            type: 'MemberExpression',
+            object: { type: 'Identifier', name: 'strapi' },
+            property: { type: 'Identifier', name: 'config' },
+          },
           property: { type: 'Identifier', name: configMethod },
         },
-        arguments: [
-          {
-            type: 'Literal',
-            value: (literalValue: unknown) =>
-              typeof literalValue === 'string' &&
-              (literalValue.startsWith('plugin.') || literalValue.startsWith('api.')),
-          },
-        ],
+        // Note: we can't filter by arguments because it won't find them in typescript files
       })
       .forEach((path) => {
         const argumentNode = path.node.arguments[0];
-        if (
-          argumentNode &&
-          argumentNode.type === 'Literal' &&
-          typeof argumentNode.value === 'string'
-        ) {
-          const value = argumentNode.value as string;
-          if (ignoreList.some((ignoreItem) => value.startsWith(ignoreItem))) {
+        if (j.StringLiteral.check(argumentNode)) {
+          const value = argumentNode.value;
+          const isTargeted = value.startsWith('plugin.') || value.startsWith('api.');
+          const isIgnored = ignoreList.some((ignoreItem) => value.startsWith(ignoreItem));
+          if (!isTargeted || isIgnored) {
             return;
           }
           argumentNode.value = value.replace('.', '::');

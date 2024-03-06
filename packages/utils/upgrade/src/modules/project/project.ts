@@ -86,6 +86,7 @@ export class Project implements ProjectInterface {
       runInBand: true,
       verbose: 0,
       babel: true,
+      parser: 'ts',
     });
     const jsonRunner = jsonRunnerFactory(jsonFiles, { dry, cwd: this.cwd });
 
