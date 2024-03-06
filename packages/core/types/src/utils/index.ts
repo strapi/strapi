@@ -30,7 +30,7 @@ export * from './json';
 export type Get<TValue, TKey extends keyof TValue> = TValue[TKey];
 
 /**
- * `Simplify` is a type used to flatten intersection types.
+ * `Flatten intersection types.
  *
  * It acts upon each constituent type within the provided intersection, and extracts its properties
  * to form a new, unified object type where properties do not retain their original type-specific
@@ -66,7 +66,7 @@ export type Get<TValue, TKey extends keyof TValue> = TValue[TKey];
  *
  * Thus, it may not be suitable in situations where retaining the distinction between types present in the intersection is important.
  */
-export type Simplify<T extends unknown> = { [TKey in keyof T]: T[TKey] };
+export type Simplify<T> = { [TKey in keyof T]: T[TKey] };
 
 /**
  * Utility type that creates a new type by excluding properties from the left type ({@link TLeft}) that exist in the right type ({@link TRight}).

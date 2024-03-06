@@ -1,4 +1,4 @@
-import type { Extends, Not } from './';
+import type { Extends, Not } from ".";
 
 /**
  * The `Values` type extracts the type of the values stored in arrays or tuples.

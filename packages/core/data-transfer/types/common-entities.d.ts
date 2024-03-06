@@ -1,5 +1,5 @@
 import type { Readable } from 'stream';
-import type { Public, Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 export interface IMetadata {
   strapi?: {

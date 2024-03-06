@@ -104,7 +104,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
  * type J = { title: 'asc', author: { name: 'asc' } }; // ✅
  * type K = { author: { email: 'asc', role: { name: 'desc' } } }; // ✅
  */
-export type Any<TSchemaUID extends UID.Schema> = { foo: string };
-// | StringNotation<TSchemaUID>
-// | ArrayNotation<TSchemaUID>
-// | ObjectNotation<TSchemaUID>;
+export type Any<TSchemaUID extends UID.Schema> =
+  | StringNotation<TSchemaUID>
+  | ArrayNotation<TSchemaUID>
+  | ObjectNotation<TSchemaUID>;

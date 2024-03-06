@@ -7,7 +7,7 @@ import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
-import type { Core, Modules, Struct, UID, Schema } from '@strapi/types';
+import type { Core, Modules, UID, Schema } from '@strapi/types';
 
 import loadConfiguration from './configuration';
 

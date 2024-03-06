@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
-import type { Modules, Internal, UID, Data, Utils, Schema } from '@strapi/types';
+import type { Modules, UID, Data, Utils, Schema } from '@strapi/types';
 
 type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,

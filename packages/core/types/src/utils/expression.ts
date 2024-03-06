@@ -1,4 +1,4 @@
-import type { Array, Constants } from './';
+import type { Array, Constants } from ".";
 
 /**
  * The `IsNever` type checks if a given type {@link TValue} strictly equals to `never`.

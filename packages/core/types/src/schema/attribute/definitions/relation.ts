@@ -1,4 +1,4 @@
-import type { AttributeNamesByType, Attribute } from '../../../schema';
+import type { AttributeNamesByType, Attribute } from '../..';
 import type { ContentType } from '../../../data';
 import type { Guard, String, Extends, If, Intersect } from '../../../utils';
 import type * as UID from '../../../uid';
@@ -215,6 +215,7 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> =
     : never;
 
 // TODO: [TS2] Maybe try to simplify this, so that it doesn't require a PhD to understand
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace RelationKind {
   type GetOppositePlurality<TPlurality extends RelationKind.Left | RelationKind.Right> = {
     one: 'many';

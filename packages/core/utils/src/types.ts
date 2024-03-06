@@ -8,7 +8,7 @@ export type Data = {
   [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
 };
 
-export interface Config extends Record<string, unknown> {}
+export type Config = Record<string, unknown>;
 
 export interface Attribute {
   type: string;

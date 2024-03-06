@@ -8,7 +8,6 @@ import type {
   If,
   MatchFirst,
   StrictEqual,
-  Extends,
   IsNotNever,
 } from '../../../../utils';
 

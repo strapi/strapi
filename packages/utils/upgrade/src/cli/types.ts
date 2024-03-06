@@ -28,7 +28,7 @@ export interface UpgradeCommandOptions extends CLIUpgradeOptions {
   codemodsTarget?: Version.SemVer;
 }
 
-export interface CodemodsCommandOptions extends CLICodemodsOptions {}
+export type CodemodsCommandOptions = CLICodemodsOptions;
 
 // COMMANDS
 

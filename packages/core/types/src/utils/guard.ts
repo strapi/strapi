@@ -58,6 +58,7 @@ export type Never<TValue, TFallback = unknown> = OfTypes<[never], TValue, TFallb
  * type Y = Guard.EmptyObject<MyObj, string>;  // Y: string
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type EmptyObject<TValue, TFallback = unknown> = OfTypes<[{}], TValue, TFallback>;
 
 /**

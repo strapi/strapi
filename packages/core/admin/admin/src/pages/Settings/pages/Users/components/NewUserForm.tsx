@@ -20,7 +20,6 @@ import {
   translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
-import type { Data } from '@strapi/types';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -32,6 +31,8 @@ import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
+
+import type { Data } from '@strapi/types';
 
 interface ModalFormProps {
   onToggle: () => void;

@@ -1,10 +1,10 @@
-import type { Data } from '@strapi/types';
-
 import * as Permissions from '../../../shared/contracts/permissions';
 import * as Roles from '../../../shared/contracts/roles';
 import * as Users from '../../../shared/contracts/user';
 
 import { adminApi } from './api';
+
+import type { Data } from '@strapi/types';
 
 const usersService = adminApi.injectEndpoints({
   endpoints: (builder) => ({

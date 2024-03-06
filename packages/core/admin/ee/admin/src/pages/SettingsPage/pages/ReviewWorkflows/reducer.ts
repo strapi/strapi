@@ -1,4 +1,3 @@
-import type { Struct } from '@strapi/types';
 import { createDraft, produce } from 'immer';
 
 import {
@@ -24,6 +23,8 @@ import {
   ACTION_UPDATE_WORKFLOW,
   STAGE_COLOR_DEFAULT,
 } from './constants';
+
+import type { Struct } from '@strapi/types';
 
 export type CurrentWorkflow = Partial<
   Pick<Workflow, 'name' | 'contentTypes' | 'stages' | 'id'> & {

@@ -11,7 +11,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import type { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useField } from '../../../../../../../admin/src/components/Form';
@@ -26,6 +25,8 @@ import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewW
 import { useGetStagesQuery, useUpdateStageMutation } from '../../../../services/reviewWorkflows';
 
 import { STAGE_ATTRIBUTE_NAME } from './constants';
+
+import type { Data } from '@strapi/types';
 
 export const StageSelect = () => {
   const { collectionType, model, id } = useDoc();

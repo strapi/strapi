@@ -1,7 +1,6 @@
-import type { Router, Controller, Service, Policy, Middleware } from '../core';
+import type { Router, Controller, Service, Policy, Middleware, Strapi } from ".";
 import type { ContentType } from '../schema';
 
-import type { Strapi } from './';
 
 export interface Module {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;

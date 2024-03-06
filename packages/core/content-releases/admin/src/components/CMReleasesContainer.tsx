@@ -23,7 +23,6 @@ import {
   useQueryParams,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
-import type { UID } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -38,6 +37,8 @@ import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
+
+import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * AddActionToReleaseModal

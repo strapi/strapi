@@ -1,10 +1,10 @@
 import { isNil, isArray, prop, xor, eq, map, differenceWith } from 'lodash/fp';
 import pmap from 'p-map';
+import type { Data } from '@strapi/types';
 import { getService } from '../../utils';
 import permissionDomain, { CreatePermissionPayload } from '../../domain/permission';
 import type { AdminUser, Permission } from '../../../../shared/contracts/shared';
 import { Action } from '../../domain/action';
-import type { Data } from '@strapi/types';
 
 /**
  * Delete permissions of roles in database

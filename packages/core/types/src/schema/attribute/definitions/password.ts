@@ -1,5 +1,5 @@
 import type { Intersect } from '../../../utils';
-import type { Attribute } from '../../../schema';
+import type { Attribute } from '../..';
 
 export type Password = Intersect<
   [

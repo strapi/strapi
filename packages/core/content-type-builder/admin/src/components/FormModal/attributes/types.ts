@@ -1,5 +1,4 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import type { Schema } from '@strapi/types';
 import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
@@ -15,6 +14,8 @@ import {
   NAME_REGEX,
   validators,
 } from './validation/common';
+
+import type { Schema } from '@strapi/types';
 
 export const attributeTypes = {
   date(usedAttributeNames: Array<string>, reservedNames: Array<string>) {

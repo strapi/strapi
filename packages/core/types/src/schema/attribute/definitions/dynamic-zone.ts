@@ -2,7 +2,7 @@ import type * as Data from '../../../data';
 
 import type * as UID from '../../../uid';
 import type { Array, Intersect } from '../../../utils';
-import type { Attribute } from '../../../schema';
+import type { Attribute } from "../..";
 
 export interface DynamicZoneProperties<TComponentsUID extends UID.Component[]> {
   components: TComponentsUID;

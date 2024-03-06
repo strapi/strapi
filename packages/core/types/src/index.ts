@@ -1,3 +1,5 @@
+import type { LoadedStrapi } from './core';
+
 export type * as Core from './core';
 export type * as Data from './data';
 export type * as Internal from './internal';
@@ -9,10 +11,11 @@ export type * as Utils from './utils';
 export type * as Struct from './struct';
 export type * as UID from './uid';
 
-import type { LoadedStrapi } from './core';
-
 declare global {
+  // eslint-disable-next-line vars-on-top,no-var
   var strapi: LoadedStrapi;
+
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface Global {
       strapi: LoadedStrapi;

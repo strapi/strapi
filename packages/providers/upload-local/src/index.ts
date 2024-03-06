@@ -4,9 +4,6 @@ import path from 'path';
 import fse from 'fs-extra';
 import * as utils from '@strapi/utils';
 
-// Note: This loads global.strapi
-import '@strapi/types';
-
 interface File {
   name: string;
   alternativeText?: string;
