@@ -7942,7 +7942,6 @@ __metadata:
     "@strapi/logger": "npm:4.20.3"
     "@strapi/pack-up": "npm:4.20.3"
     "@strapi/permissions": "npm:4.20.3"
-    "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/utils": "npm:4.20.3"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"

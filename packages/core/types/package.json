@@ -40,8 +40,6 @@
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
@@ -59,7 +57,6 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "4.20.3",
-    "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
