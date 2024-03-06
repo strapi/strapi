@@ -1,5 +1,5 @@
 import { prop, uniq, flow } from 'lodash/fp';
-import { isOperatorOfType, contentTypes, mapAsync } from '@strapi/utils';
+import { isOperatorOfType, contentTypes } from '@strapi/utils';
 import { type Common, type Entity, type Documents } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
@@ -305,7 +305,7 @@ export default {
 
     ctx.body = {
       ...res,
-      results: await mapAsync(res.results, async (relation: RelationEntity) => {
+      results: res.results.map((relation) => {
         const availableStatuses =
           documentsAvailableStatus.filter(
             (availableDocument: RelationEntity) =>
