@@ -1,6 +1,6 @@
 {
   "name": "@strapi/pack-up",
-  "version": "4.20.3",
+  "version": "4.20.4",
   "description": "Simple tools for creating interoperable CJS & ESM packages.",
   "keywords": [
     "strapi",
@@ -83,11 +83,11 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.20.3",
+    "@strapi/pack-up": "4.20.4",
     "@types/git-url-parse": "9.0.1",
     "@types/ini": "1.3.31",
     "@types/prompts": "2.4.4",
-    "eslint-config-custom": "4.20.3",
+    "eslint-config-custom": "4.20.4",
     "rimraf": "3.0.2"
   },
   "engines": {
