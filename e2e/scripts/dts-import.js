@@ -49,6 +49,19 @@ export const resetDatabaseAndImportDataFromPath = async (filePath) => {
   engine.diagnostics.onDiagnostic(console.log);
 
   try {
+    // reset the transfer token to allow the transfer if it's been wiped (that is, not included in previous import data)
+    const res = await fetch(
+      `http://127.0.0.1:${process.env.PORT ?? 1337}/api/config/resettransfertoken`,
+      {
+        method: 'POST',
+      }
+    );
+  } catch (err) {
+    console.error('Token reset failed.' + JSON.stringify(err, null, 2));
+    process.exit(1);
+  }
+
+  try {
     await engine.transfer();
   } catch {
     console.error('Import process failed.');

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.20.3",
+  "version": "4.20.4",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -57,7 +57,7 @@
     "tar": "6.1.13"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.20.3",
+    "@strapi/pack-up": "4.20.4",
     "copyfiles": "2.4.1"
   },
   "engines": {
