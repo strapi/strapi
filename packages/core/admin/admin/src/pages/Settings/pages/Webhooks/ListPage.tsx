@@ -4,7 +4,6 @@ import {
   useNotifyAT,
   ActionLayout,
   BaseCheckbox,
-  Box,
   Button,
   ContentLayout,
   EmptyStateLayout,
@@ -26,20 +25,19 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
-  CheckPagePermissions,
   ConfirmDialog,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 
 import { useWebhooks } from './hooks/useWebhooks';
@@ -158,9 +156,20 @@ const ListPage = () => {
   const numberOfWebhooks = webhooks?.length ?? 0;
   const webhooksToDeleteLength = webhooksToDelete.length;
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <Layout>
-      <SettingsPageTitle name="Webhooks" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Webhooks',
+          }
+        )}
+      />
       <Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
@@ -217,11 +226,7 @@ const ListPage = () => {
           />
         )}
         <ContentLayout>
-          {isLoading ? (
-            <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-              <LoadingIndicatorPage />
-            </Box>
-          ) : numberOfWebhooks > 0 ? (
+          {numberOfWebhooks > 0 ? (
             <Table
               colCount={5}
               rowCount={numberOfWebhooks + 1}
@@ -422,9 +427,9 @@ const ProtectedListPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

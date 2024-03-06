@@ -15,7 +15,8 @@ const historyVersion: Model = {
     },
     relatedDocumentId: {
       type: 'string',
-      column: { notNullable: true },
+      // TODO: notNullable should be true once history can record publish actions
+      column: { notNullable: false },
     },
     locale: {
       type: 'string',
