@@ -7,7 +7,6 @@ import {
   Flex,
   Icon,
   IconButton,
-  Status,
   TextButton,
   Tooltip,
   Typography,
@@ -27,7 +26,6 @@ import styled from 'styled-components';
 import { RelationResult } from '../../../../../../../../content-manager/dist/shared/contracts/relations';
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { useComposedRefs } from '../../../../../utils/refs';
-import { capitalise } from '../../../../../utils/strings';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../hooks/useDocument';
@@ -39,6 +37,7 @@ import {
 import { useGetRelationsQuery, useLazySearchRelationsQuery } from '../../../../services/relations';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
+import { DocumentStatus } from '../DocumentStatus';
 
 import type { EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Attribute } from '@strapi/types';
@@ -414,18 +413,11 @@ interface OptionProps extends Contracts.Relations.RelationResult {
 }
 
 const Option = ({ documentId, textValue, status }: OptionProps) => {
-  const statusVariant =
-    status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
-
   return (
     <ComboboxOption value={documentId} textValue={textValue}>
       <Flex gap={2} justifyContent="space-between">
         <Typography ellipsis>{textValue}</Typography>
-        <Status showBullet={false} size={'S'} variant={statusVariant}>
-          <Typography as="span" variant="omega" fontWeight="bold">
-            {capitalise(status)}
-          </Typography>
-        </Status>
+        <DocumentStatus status={status} />
       </Flex>
     </ComboboxOption>
   );
@@ -701,8 +693,6 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   const { formatMessage } = useIntl();
 
   const { href, documentId, label, status } = relations[index];
-  const statusVariant =
-    status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<
@@ -785,11 +775,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                   )}
                 </Tooltip>
               </Box>
-              <Status showBullet={false} size={'S'} variant={statusVariant}>
-                <Typography as="span" variant="omega" fontWeight="bold">
-                  {capitalise(status)}
-                </Typography>
-              </Status>
+              <DocumentStatus status={status} />
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>
@@ -859,4 +845,4 @@ const RelationItemPlaceholder = () => (
   />
 );
 
-export { RelationsField as RelationsInput };
+export { RelationsField as RelationsInput, FlexWrapper, DisconnectButton, LinkEllipsis };
