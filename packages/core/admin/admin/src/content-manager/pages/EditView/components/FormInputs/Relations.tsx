@@ -65,6 +65,20 @@ interface RelationsFormValue {
   disconnect?: Relation[];
 }
 
+/**
+ * TODO: we get a rather ugly flash when we remove a single relation from the list leaving
+ * no other relations when we press save. The initial relation re-renders, probably because
+ * of the lag in the Form cleaning it's "disconnect" array, whilst our data has not been invalidated.
+ *
+ * Could we invalidate relation data on the document actions? Should we?
+ */
+
+/**
+ * @internal
+ * @description The relations field holds a lot of domain logic for handling relations which is rather complicated
+ * At present we do not expose this to plugin developers, however, they are able to overwrite it themselves should
+ * they wish to do so.
+ */
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -89,6 +103,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         },
       },
       {
+        refetchOnMountOrArgChange: true,
         skip: !id,
         selectFromResult: (result) => {
           return {
@@ -145,7 +160,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         alignItems="stretch"
         wrap="wrap"
       >
-        <Flex direction="column" alignItems="start" gap={2} width="100%">
+        <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <RelationsInput
             disabled={isDisabled}
             id={id}
@@ -170,7 +185,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
               })}
             </TextButton>
           ) : null}
-        </Flex>
+        </StyledFlex>
         <RelationsList
           data={relations}
           disabled={isDisabled}
@@ -182,6 +197,16 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     );
   }
 );
+
+/**
+ * TODO: this can be removed once we stop shipping Inputs with
+ * labels wrapped round in DS@2.
+ */
+const StyledFlex = styled(Flex)`
+  & > div {
+    width: 100%;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * Relation Transformations
