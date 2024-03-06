@@ -10,13 +10,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
-
-    await page.evaluate(() => {
-      // Remove after Scheduling Beta release
-      window.strapi.future = {
-        isEnabled: () => true,
-      };
-    });
   });
 
   test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
@@ -71,7 +64,9 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       })
       .click();
 
-    const formattedDate = new Date().toLocaleDateString('en-US', {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',

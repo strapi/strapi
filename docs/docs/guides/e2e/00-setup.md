@@ -81,6 +81,14 @@ Playwright enables reliable end-to-end testing for modern web apps. It's cross b
 
 For more information check out their [docs](https://playwright.dev/docs/intro). If you're struggling with their APIs, then check out their specific [API documentation](https://playwright.dev/docs/api/class-playwright).
 
+## Running tests with environment variables
+
+To set specific environment variables for your tests, a `.env` file can be created in the root of the e2e folder. This is useful if you need to run tests with a Strapi license or set future flags.
+
+## Running tests with future flags
+
+If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
+
 ## What makes a good end to end test?
 
 This is the million dollar question. E2E tests typically test complete user flows that touch numerous points of the application it's testing, we're not interested in what happens during a process, only the user perspective and end results. Consider writing them with your story hat on. E.g. "As a user I want to create a new entity, publish that entity, and then be able to retrieve its data from the content API".

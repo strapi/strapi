@@ -292,6 +292,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
         id: 'content-releases.modal.form.input.label.timezone',
         defaultMessage: 'Timezone',
       })}
+      autocomplete={{ type: 'list', filter: 'contains' }}
       name="timezone"
       value={values.timezone || undefined}
       textValue={values.timezone ? values.timezone.replace('_', ' ') : undefined} // textValue is required to show the updated DST timezone
