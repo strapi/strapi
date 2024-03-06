@@ -93,6 +93,20 @@ import { Form } from '@strapi/strapi/admin';
 
 Users should note that any use of the Formik library will no longer work & insted should look at the documentation for the `Form` component.
 
+### GenericInput
+
+This component has been removed and refactored to become the `InputRenderer` component exported from `@strapi/strapi/admin`. You should use the `InputRenderer` component from there:
+
+```tsx
+// Before
+import { GenericInput } from '@strapi/helper-plugin';
+
+// After
+import { InputRenderer } from '@strapi/strapi/admin';
+```
+
+Note, that the `InputRenderer` component has a different API, and you should refer to the documentation for the `InputRenderer` component.
+
 ### InjectionZone
 
 This component has been removed and not replaced. However, you can easily replicate this in your own project by using the `useStrapiApp` hook:
