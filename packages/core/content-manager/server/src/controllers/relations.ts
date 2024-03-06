@@ -85,19 +85,21 @@ export default {
       }
     }
 
-    const where: Record<string, any> = {};
-    if (!isSourceComponent && locale) {
-      where.locale = locale;
-    }
-
     if (id) {
+      const where: Record<string, any> = {};
+
       if (!isSourceComponent) {
         where.documentId = id;
 
         if (status) {
           where.publishedAt = status === 'published' ? { $ne: null } : null;
         }
+        if (locale) {
+          where.locale = locale;
+        }
       } else {
+        // If the source is a component, we only need to filter by the
+        // component's entity id
         where.id = id;
       }
 
@@ -189,14 +191,6 @@ export default {
       ...permissionQuery,
     };
 
-    // We are looking for available content type relations and should be
-    // filtering by valid documentIds only
-    if (idsToOmit?.length > 0) {
-      addFiltersClause(queryParams, {
-        documentId: { $notIn: uniq(idsToOmit) },
-      });
-    }
-
     // If no status is requested, we find all the draft relations and later update them
     // with the latest available status
     addFiltersClause(queryParams, {
@@ -266,9 +260,17 @@ export default {
     }
 
     if (_q) {
+      // Apply a filter to the mainField based on the search query and filter operator
       // searching should be allowed only on mainField for permission reasons
       const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
       addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+    }
+
+    if (idsToOmit?.length > 0) {
+      // If we have ids to omit, we should filter them out
+      addFiltersClause(queryParams, {
+        documentId: { $notIn: uniq(idsToOmit) },
+      });
     }
 
     const res = await strapi.entityService.findPage(
@@ -294,15 +296,26 @@ export default {
 
     // No specific status was requested, we should find the latest available status for each relation
     const documentMetadata = getService('document-metadata');
+
+    // Get any available statuses for the returned relations
+    const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(
+      targetUid,
+      res.results
+    );
+
     ctx.body = {
       ...res,
       results: await mapAsync(res.results, async (relation: RelationEntity) => {
-        const { data: documentWithLatestStatus } =
-          await documentMetadata.formatDocumentWithMetadata(targetUid, relation, {
-            availableStatus: true,
-          });
+        const availableStatuses =
+          documentsAvailableStatus.filter(
+            (availableDocument: RelationEntity) =>
+              availableDocument.documentId === relation.documentId
+          ) ?? [];
 
-        return documentWithLatestStatus;
+        return {
+          ...relation,
+          status: documentMetadata.getStatus(relation, availableStatuses),
+        };
       }),
     };
   },
