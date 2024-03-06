@@ -22,6 +22,7 @@ jest.mock('../../../utils', () => ({
           cannot: {
             read: jest.fn(() => false),
           },
+          sanitizeQuery: jest.fn((query) => query),
         })),
       };
     }
@@ -29,6 +30,10 @@ jest.mock('../../../utils', () => ({
 }));
 
 describe('History version controller', () => {
+  beforeEach(() => {
+    mockFindVersionsPage.mockClear();
+  });
+
   describe('findMany', () => {
     it('should require contentType and documentId for collection types', () => {
       const ctx = {
@@ -134,5 +139,61 @@ describe('History version controller', () => {
     expect(mockFindVersionsPage).toHaveBeenCalled();
     expect(response.data.length).toBe(1);
     expect(response.meta.pagination).toBeDefined();
+  });
+
+  it('applies pagination params', async () => {
+    const ctx = {
+      state: {
+        userAbility: {},
+      },
+      query: {
+        contentType: 'api::test.test',
+      },
+    };
+
+    const historyVersionController = createHistoryVersionController({
+      // @ts-expect-error - we're not mocking the entire strapi object
+      strapi: { getModel: jest.fn(() => ({ kind: 'singleType' })) },
+    });
+
+    /**
+     * Applies default pagination params
+     */
+    mockFindVersionsPage.mockResolvedValueOnce({
+      results: [],
+      pagination: {
+        page: 1,
+        pageSize: 10,
+      },
+    });
+    // @ts-expect-error partial context
+    const mockResponse = await historyVersionController.findMany(ctx);
+    expect(mockFindVersionsPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 1,
+        pageSize: 10,
+      })
+    );
+    expect(mockResponse.meta.pagination.page).toBe(1);
+    expect(mockResponse.meta.pagination.pageSize).toBe(10);
+
+    /**
+     * Prevents invalid pagination params
+     */
+    mockFindVersionsPage.mockResolvedValueOnce({
+      results: [],
+      pagination: {},
+    });
+    // @ts-expect-error partial context
+    await historyVersionController.findMany({
+      ...ctx,
+      query: { ...ctx.query, page: '-1', pageSize: '1000' },
+    });
+    expect(mockFindVersionsPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 1,
+        pageSize: 10,
+      })
+    );
   });
 });

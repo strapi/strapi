@@ -4,23 +4,27 @@ import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
 
-const validatePagination = ({ page, pageSize }: { page: any; pageSize: any }) => {
+/**
+ * Parses pagination params and makes sure they're within valid ranges
+ */
+const getValidPagination = ({ page, pageSize }: { page: any; pageSize: any }) => {
   let pageNumber = 1;
   let pageSizeNumber = 10;
 
   if (page) {
+    const parsedPage = parseInt(page, 10);
     pageNumber = parseInt(page, 10);
 
-    if (Number.isNaN(pageNumber) || pageNumber < 1) {
-      throw new errors.PaginationError('invalid pageNumber param');
+    if (!Number.isNaN(parsedPage) && parsedPage >= 1) {
+      pageNumber = parsedPage;
     }
   }
 
   if (pageSize) {
-    pageSizeNumber = parseInt(pageSize, 10);
+    const parsedPageSize = parseInt(pageSize, 10);
 
-    if (Number.isNaN(pageSizeNumber) || pageSizeNumber < 1 || pageSizeNumber > 100) {
-      throw new errors.PaginationError('invalid pageSize param');
+    if (!Number.isNaN(parsedPageSize) && parsedPageSize >= 1 && parsedPageSize <= 100) {
+      pageSizeNumber = parsedPageSize;
     }
   }
 
@@ -59,7 +63,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
 
       const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
         ...params,
-        ...validatePagination({ page: params.page, pageSize: params.pageSize }),
+        ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
       });
 
       return { data: results, meta: { pagination } };
