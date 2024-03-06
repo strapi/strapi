@@ -216,6 +216,9 @@ interface TransformationContext extends Pick<RelationsFieldProps, 'mainField'> {
   href: string;
 }
 
+/**
+ * @description Removes relations that are in the `disconnect` array of the field
+ */
 const removeDisconnected =
   ({ field }: TransformationContext) =>
   (relations: RelationResult[]): RelationResult[] =>
@@ -227,6 +230,10 @@ const removeDisconnected =
       );
     });
 
+/**
+ * @description Adds a label and href to the relation object we use this to render
+ * a better UI where we can link to the relation and display a human-readable label.
+ */
 const addLabelAndHref =
   ({ mainField, href }: TransformationContext) =>
   (relations: RelationResult[]): Relation[] =>
@@ -248,6 +255,10 @@ interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   model: string;
 }
 
+/**
+ * @description Contains all the logic for the combobox that can search
+ * for relations and then add them to the field's connect array.
+ */
 const RelationsInput = ({
   disabled,
   hint,
@@ -274,6 +285,12 @@ const RelationsInput = ({
 
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
 
+  /**
+   * Because we're using a lazy query, we need to trigger the search
+   * when the component mounts and when the search params change.
+   * We also need to trigger the search when the field value changes
+   * so that we can filter out the relations that are already connected.
+   */
   React.useEffect(() => {
     searchForTrigger({
       model,
@@ -388,38 +405,21 @@ const RelationsInput = ({
       }}
     >
       {options.map((opt) => {
+        const textValue =
+          mainField && opt[mainField] && typeof opt[mainField] === 'string'
+            ? (opt[mainField] as string)
+            : opt.documentId;
+
         return (
-          <Option
-            key={opt.documentId}
-            textValue={
-              mainField && opt[mainField] && typeof opt[mainField] === 'string'
-                ? (opt[mainField] as string)
-                : opt.documentId
-            }
-            {...opt}
-          />
+          <ComboboxOption key={opt.documentId} value={opt.documentId} textValue={textValue}>
+            <Flex gap={2} justifyContent="space-between">
+              <Typography ellipsis>{textValue}</Typography>
+              <DocumentStatus status={opt.status} />
+            </Flex>
+          </ComboboxOption>
         );
       })}
     </Combobox>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Option
- * -----------------------------------------------------------------------------------------------*/
-
-interface OptionProps extends Contracts.Relations.RelationResult {
-  textValue: string;
-}
-
-const Option = ({ documentId, textValue, status }: OptionProps) => {
-  return (
-    <ComboboxOption value={documentId} textValue={textValue}>
-      <Flex gap={2} justifyContent="space-between">
-        <Typography ellipsis>{textValue}</Typography>
-        <DocumentStatus status={status} />
-      </Flex>
-    </ComboboxOption>
   );
 };
 
@@ -846,3 +846,4 @@ const RelationItemPlaceholder = () => (
 );
 
 export { RelationsField as RelationsInput, FlexWrapper, DisconnectButton, LinkEllipsis };
+export type { RelationsFieldProps };

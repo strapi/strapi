@@ -105,7 +105,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
           url: `/content-manager/relations/${model}/${targetField}`,
           method: 'GET',
           config: {
-            params: params,
+            params,
           },
         };
       },
