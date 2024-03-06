@@ -913,13 +913,12 @@ const ReleaseDetailsPage = () => {
   };
 
   const handleDeleteRelease = async () => {
+    push('/plugins/content-releases');
     const response = await deleteRelease({
       id: releaseId,
     });
 
-    if ('data' in response) {
-      push('/plugins/content-releases');
-    } else if (isAxiosError(response.error)) {
+    if (!('data' in response) && isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
         type: 'warning',
