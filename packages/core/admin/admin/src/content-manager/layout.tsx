@@ -2,20 +2,22 @@
 import * as React from 'react';
 
 import { AnyAction } from '@reduxjs/toolkit';
-import { Layout as DSLayout, Main } from '@strapi/design-system';
-import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
+import { Layout as DSLayout } from '@strapi/design-system';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import produce from 'immer';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from '../components/DragLayer';
+import { Page } from '../components/PageHelpers';
 
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
 import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPreview';
 import { RelationDragPreview } from './components/DragPreviews/RelationDragPreview';
 import { LeftMenu } from './components/LeftMenu';
 import { ItemTypes } from './constants/dragAndDrop';
+import { useIsHistoryRoute } from './history/routes';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
 import { getTranslation } from './utils/translations';
 
@@ -39,6 +41,9 @@ const Layout = () => {
   const { startSection } = useGuidedTour();
   const startSectionRef = React.useRef(startSection);
 
+  // Check if we're on a history route to known if we should render the left menu
+  const isHistoryRoute = useIsHistoryRoute();
+
   React.useEffect(() => {
     if (startSectionRef.current) {
       startSectionRef.current('contentManager');
@@ -47,15 +52,15 @@ const Layout = () => {
 
   if (isLoading) {
     return (
-      <Main aria-busy="true">
+      <>
         <Helmet
           title={formatMessage({
             id: getTranslation('plugin.name'),
             defaultMessage: 'Content Manager',
           })}
         />
-        <LoadingIndicatorPage />
-      </Main>
+        <Page.Loading />
+      </>
     );
   }
 
@@ -95,10 +100,14 @@ const Layout = () => {
           defaultMessage: 'Content Manager',
         })}
       />
-      <DSLayout sideNav={<LeftMenu />}>
-        <DragLayer renderItem={renderDraglayerItem} />
+      {isHistoryRoute ? (
         <Outlet />
-      </DSLayout>
+      ) : (
+        <DSLayout sideNav={<LeftMenu />}>
+          <DragLayer renderItem={renderDraglayerItem} />
+          <Outlet />
+        </DSLayout>
+      )}
     </>
   );
 };

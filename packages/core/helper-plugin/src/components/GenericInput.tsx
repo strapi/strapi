@@ -49,7 +49,7 @@ interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
 
-export interface GenericInputProps<
+interface GenericInputProps<
   TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute
 > {
   attribute?: TAttribute;
@@ -572,4 +572,5 @@ const GenericInput = ({
  */
 const MemoizedGenericInput = React.memo(GenericInput, isEqual);
 
+export type { GenericInputProps, CustomInputProps };
 export { MemoizedGenericInput as GenericInput };

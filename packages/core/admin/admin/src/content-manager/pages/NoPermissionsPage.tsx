@@ -1,10 +1,8 @@
 import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
-import {
-  NoPermissions as NoPermissionsComponent,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { Page } from '../../components/PageHelpers';
 import { getTranslation } from '../utils/translations';
 
 const NoPermissions = () => {
@@ -20,7 +18,7 @@ const NoPermissions = () => {
         })}
       />
       <ContentLayout>
-        <NoPermissionsComponent />
+        <Page.NoPermissions />
       </ContentLayout>
     </Main>
   );

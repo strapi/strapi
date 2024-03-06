@@ -1,18 +1,15 @@
 import * as React from 'react';
 
 import { Main } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Modules } from '@strapi/types';
 import { FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 
 import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
@@ -38,6 +35,7 @@ const cleanData = (
 });
 
 const EditPage = () => {
+  const { formatMessage } = useIntl();
   const match = useMatch('/settings/webhooks/:id');
   const id = match?.params.id;
   const isCreating = id === 'create';
@@ -156,14 +154,21 @@ const EditPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   const [webhook] = webhooks ?? [];
 
   return (
     <Main>
-      <SettingsPageTitle name="Webhooks" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Webhooks',
+          }
+        )}
+      />
       <WebhookForm
         data={webhook}
         handleSubmit={handleSubmit}
@@ -184,9 +189,9 @@ const ProtectedEditPage = () => {
   const permissions = useTypedSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.webhooks.update}>
+    <Page.Protect permissions={permissions.settings?.webhooks.update}>
       <EditPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

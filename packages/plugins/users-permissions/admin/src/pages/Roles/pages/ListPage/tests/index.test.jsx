@@ -11,13 +11,6 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 
 import { RolesListPage } from '../index';
 
-jest.mock('@strapi/design-system', () => ({
-  ...jest.requireActual('@strapi/design-system'),
-  useNotifyAT: () => ({
-    notifyStatus: jest.fn(),
-  }),
-}));
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn().mockImplementation(() => jest.fn()),
@@ -69,14 +62,12 @@ describe('Roles – ListPage', () => {
   it('renders as expected with headers, actions and a table', async () => {
     const { getByRole, queryByText, getByText } = render();
 
-    expect(queryByText('Loading content.')).toBeInTheDocument();
+    await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
     expect(getByRole('heading', { name: 'Roles' })).toBeInTheDocument();
     expect(getByText('List of roles')).toBeInTheDocument();
     expect(getByRole('link', { name: 'Add new role' })).toBeInTheDocument();
     expect(getByRole('button', { name: 'Search' })).toBeInTheDocument();
-
-    await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
     expect(getByRole('grid')).toBeInTheDocument();
     expect(getByRole('gridcell', { name: 'Authenticated' })).toBeInTheDocument();
@@ -84,7 +75,9 @@ describe('Roles – ListPage', () => {
   });
 
   it('should direct me to the new user page when I press the add a new role button', async () => {
-    const { getByRole, getByTestId } = render();
+    const { getByRole, getByTestId, queryByText } = render();
+
+    await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
     await userEvent.click(getByRole('link', { name: 'Add new role' }));
 

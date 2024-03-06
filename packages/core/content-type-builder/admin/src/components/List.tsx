@@ -74,10 +74,10 @@ export const List = ({
         </Thead>
         <EmptyBodyTable
           colSpan={2}
-          content={{
+          content={formatMessage({
             id: getTrad('table.content.create-first-content-type'),
             defaultMessage: 'Create your first Collection-Type',
-          }}
+          })}
         />
       </Table>
     );
@@ -110,7 +110,7 @@ export const List = ({
             </Button>
           }
           colSpan={2}
-          content={
+          content={formatMessage(
             isInContentTypeView
               ? {
                   id: getTrad('table.content.no-fields.collection-type'),
@@ -120,7 +120,7 @@ export const List = ({
                   id: getTrad('table.content.no-fields.component'),
                   defaultMessage: 'Add your first field to this component',
                 }
-          }
+          )}
         />
       </Table>
     );

@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import Cookies from 'js-cookie';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 
+import { Page } from '../../../../admin/src/components/PageHelpers';
 import { useAuth } from '../../../../admin/src/features/Auth';
 
 const AuthResponse = () => {
@@ -46,7 +46,7 @@ const AuthResponse = () => {
     }
   }, [match, redirectToOops, setToken, navigate]);
 
-  return <LoadingIndicatorPage />;
+  return <Page.Loading />;
 };
 
 export { AuthResponse };

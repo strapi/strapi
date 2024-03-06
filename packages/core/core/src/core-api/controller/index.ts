@@ -6,6 +6,7 @@ import type { Core, Struct } from '@strapi/types';
 import { transformResponse } from './transform';
 import { createSingleTypeController } from './single-type';
 import { createCollectionTypeController } from './collection-type';
+import requestCtx from '../../services/request-context';
 
 const isSingleType = (
   contentType: Struct.ContentTypeSchema
@@ -27,7 +28,11 @@ function createController({
 
   const proto: Core.CoreAPI.Controller.Base = {
     transformResponse(data, meta) {
-      return transformResponse(data, meta, { contentType });
+      const ctx = requestCtx.get();
+      return transformResponse(data, meta, {
+        contentType,
+        useJsonAPIFormat: ctx?.headers?.['strapi-response-format'] === 'v4',
+      });
     },
 
     async sanitizeOutput(data, ctx) {

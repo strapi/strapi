@@ -34,6 +34,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--ignore-prompts', 'Ignore all prompts', false)
     .option('--polling', 'Watch for file changes in network directories', false)
     .option('--watch-admin', 'Watch the admin panel for hot changes', true)
+    .option('--no-watch-admin', 'Do not watch the admin panel for hot changes')
     .option('--open', 'Open the admin in your browser', true)
     .description('Start your Strapi application in development mode')
     .action(async (options: DevelopCLIOptions) => {

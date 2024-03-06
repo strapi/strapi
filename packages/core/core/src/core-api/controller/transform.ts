@@ -1,10 +1,11 @@
 import { isNil, isPlainObject } from 'lodash/fp';
-import type { UID, Struct } from '@strapi/types';
+import type { UID, Struct, Data } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
-  meta?: Record<string, unknown>;
-} & Record<string, unknown>;
+  documentId?: Data.DocumentID | null;
+  attributes: Record<string, unknown>;
+};
 
 type TransformedComponent = {
   id: string;
@@ -13,6 +14,7 @@ type TransformedComponent = {
 
 type Entry = {
   id: string;
+  documentId: Data.DocumentID | null;
   [key: string]: Entry | Entry[] | string | number | null | boolean | Date;
 };
 
@@ -24,17 +26,31 @@ function isDZEntries(property: unknown): property is (Entry & { __component: UID
   return Array.isArray(property);
 }
 
+interface TransformOptions {
+  contentType?: Struct.ContentTypeSchema | Struct.ComponentSchema;
+  /**
+   * @deprecated this option is deprecated and will be removed in the next major version
+   */
+  useJsonAPIFormat?: boolean;
+}
+
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Struct.Schema } = {}
+  opts: TransformOptions = {
+    useJsonAPIFormat: false,
+  }
 ) => {
   if (isNil(resource)) {
     return resource;
   }
 
+  if (!isPlainObject(resource) && !Array.isArray(resource)) {
+    throw new Error('Entry must be an object or an array of objects');
+  }
+
   return {
-    data: transformEntry(resource, opts?.contentType),
+    data: opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource,
     meta,
   };
 };
@@ -51,7 +67,14 @@ function transformComponent(
     return data.map((datum) => transformComponent(datum, component));
   }
 
-  return transformEntry(data, component);
+  const res = transformEntry(data, component);
+
+  if (isNil(res)) {
+    return res;
+  }
+
+  const { id, attributes } = res;
+  return { id, ...attributes };
 }
 
 function transformEntry<T extends Entry | Entry[] | null>(
@@ -74,7 +97,7 @@ function transformEntry(
     throw new Error('Entry must be an object');
   }
 
-  const { id, ...properties } = entry;
+  const { id, documentId, ...properties } = entry;
 
   const attributeValues: Record<string, unknown> = {};
 
@@ -83,7 +106,12 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      attributeValues[key] = transformEntry(property, strapi.contentType(attribute.target));
+      const data = transformEntry(
+        property,
+        strapi.contentType(attribute.target)
+      );
+
+      attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
       attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
     } else if (attribute && attribute.type === 'dynamiczone' && isDZEntries(property)) {
@@ -95,7 +123,9 @@ function transformEntry(
         return transformComponent(subProperty, strapi.components[subProperty.__component]);
       });
     } else if (attribute && attribute.type === 'media' && isEntry(property)) {
-      attributeValues[key] = transformEntry(property, strapi.contentType('plugin::upload.file'));
+      const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
+
+      attributeValues[key] = { data };
     } else {
       attributeValues[key] = property;
     }
@@ -103,9 +133,8 @@ function transformEntry(
 
   return {
     id,
-    ...attributeValues,
-    // NOTE: not necessary for now
-    // meta: {},
+    documentId,
+    attributes: attributeValues,
   };
 }
 

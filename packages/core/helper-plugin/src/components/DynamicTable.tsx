@@ -15,13 +15,13 @@ import {
   VisuallyHidden,
   TableProps as DSTableProps,
 } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { CarretDown, Trash } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { SortIcon } from '../icons/SortIcon';
 
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
@@ -96,11 +96,13 @@ const Table = ({
   const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
 
   const content = hasFilters
-    ? {
-        id: 'content-manager.components.TableEmpty.withFilters',
-        defaultMessage: 'There are no {contentType} with the applied filters...',
-        values: { contentType },
-      }
+    ? formatMessage(
+        {
+          id: 'content-manager.components.TableEmpty.withFilters',
+          defaultMessage: 'There are no {contentType} with the applied filters...',
+        },
+        { contentType }
+      )
     : undefined;
 
   const handleConfirmDeleteAll = async () => {
@@ -382,6 +384,12 @@ const TableHead = ({
     </Thead>
   );
 };
+
+const SortIcon = styled(CarretDown)<{
+  isUp?: boolean;
+}>`
+  transform: ${({ isUp = false }) => `rotate(${isUp ? '180' : '0'}deg)`};
+`;
 
 export { Table as DynamicTable };
 export type { TableProps, TableRowProps, TableHeader, TableHeadProps };
