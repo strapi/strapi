@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { AnyAction } from '@reduxjs/toolkit';
 import { unstable_useDocument } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -39,6 +40,7 @@ import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strap
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -838,6 +840,7 @@ const ReleaseDetailsPage = () => {
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const { push } = useHistory();
+  const dispatch = useDispatch();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -919,6 +922,10 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       push('/plugins/content-releases');
+      // manually invalidate the cache for the release
+      setTimeout(() => {
+        dispatch(releaseApi.util.invalidateTags([{ type: 'Release', id: releaseId }]));
+      }, 0);
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({

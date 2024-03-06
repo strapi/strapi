@@ -255,13 +255,6 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-          await queryFulfilled.then(() => {
-            setTimeout(() => {
-              dispatch(releaseApi.util.invalidateTags([{ type: 'Release', id: id }]));
-            }, 50);
-          });
-        },
       }),
     };
   },
