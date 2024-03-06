@@ -58,7 +58,15 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     const [name, { visible, ...field }] = current;
 
     if (!existingFields.includes(name) && visible === true) {
-      acc.push({ ...field, label: field.label ?? name, name, size: fieldSizes[name] });
+      // @ts-expect-error – TODO: i'm not sure why it's convinced that attributes[name] can still be undefined after we've checked it.
+      const size = attributes[name] ? fieldSizes[attributes[name].type] : 12;
+
+      acc.push({
+        ...field,
+        label: field.label ?? name,
+        name,
+        size,
+      });
     }
 
     return acc;
