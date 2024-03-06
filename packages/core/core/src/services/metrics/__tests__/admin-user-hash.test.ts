@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import createContext from "strapi/test/helpers/create-context";
+import createContext from 'strapi/test/helpers/create-context';
 import { generateAdminUserHash } from '../admin-user-hash';
 
 describe('user email hash', () => {

@@ -2,7 +2,7 @@ import type * as Data from '../../../data';
 
 import type * as UID from '../../../uid';
 import type { Constants, If, Intersect } from '../../../utils';
-import type { Attribute } from "../..";
+import type { Attribute } from '../..';
 
 export interface ComponentProperties<
   TComponentUID extends UID.Component,

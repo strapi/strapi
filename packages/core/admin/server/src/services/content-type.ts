@@ -6,7 +6,6 @@ import { getService } from '../utils';
 import actionDomain from '../domain/action';
 import permissionDomain from '../domain/permission';
 
-
 interface FieldOptions {
   prefix?: string; // prefix to add to the path
   nestingLevel?: number; // level of nesting to achieve

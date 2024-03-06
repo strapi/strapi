@@ -1,6 +1,6 @@
 import type * as UID from '../../uid';
 import type { Constants, Guard, And, Extends, IsNotNever } from '../../utils';
-import type { Attribute } from "..";
+import type { Attribute } from '..';
 
 /**
  * Determines if a given attribute type is of a specific kind.

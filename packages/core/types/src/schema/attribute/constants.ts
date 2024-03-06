@@ -1,4 +1,4 @@
-import type { Attribute } from "..";
+import type { Attribute } from '..';
 
 /**
  * Union of every populatable attribute's types extracted from {@link AttributeByName.Kind}.

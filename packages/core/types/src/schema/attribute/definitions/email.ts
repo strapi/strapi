@@ -1,5 +1,5 @@
 import type { Intersect } from '../../../utils';
-import type { Attribute } from "../..";
+import type { Attribute } from '../..';
 
 export type Email = Intersect<
   [

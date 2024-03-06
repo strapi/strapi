@@ -1,7 +1,7 @@
 import type { Logger } from '@strapi/logger';
 import type { Database } from '@strapi/database';
 
-import type * as Core from ".";
+import type * as Core from '.';
 import type * as Modules from '../modules';
 import type * as Schema from '../schema';
 

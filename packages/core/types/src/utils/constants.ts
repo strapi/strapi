@@ -1,7 +1,7 @@
 import type * as Internal from '../internal';
 import type * as UID from '../uid';
 
-import type { NotStrictEqual, Or } from ".";
+import type { NotStrictEqual, Or } from '.';
 
 export type True = true;
 

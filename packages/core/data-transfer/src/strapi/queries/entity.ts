@@ -3,7 +3,6 @@ import { assign, isArray, isEmpty, isObject, map, omit, size } from 'lodash/fp';
 import type { Core, UID, Data, Struct } from '@strapi/types';
 import * as componentsService from '../../utils/components';
 
-
 const sanitizeComponentLikeAttributes = <T extends Struct.Schema>(
   model: T,
   data: Data.Entity<T['uid']>

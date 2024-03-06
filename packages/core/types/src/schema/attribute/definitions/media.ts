@@ -1,5 +1,5 @@
 import type { Constants, If, Intersect } from '../../../utils';
-import type { Attribute } from "../..";
+import type { Attribute } from '../..';
 
 export type MediaTargetUID = 'plugin::upload.file';
 export type MediaKind = 'images' | 'videos' | 'files' | 'audios';

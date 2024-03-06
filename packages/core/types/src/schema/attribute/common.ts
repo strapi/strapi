@@ -1,5 +1,5 @@
 import type * as UID from '../../uid';
-import type { Attribute } from "..";
+import type { Attribute } from '..';
 
 // TODO: [TS2] Where to move this? Common doesn't really make sense :/
 // Any Attribute

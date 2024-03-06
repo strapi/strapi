@@ -1,5 +1,5 @@
 import type { Array, Intersect } from '../../../utils';
-import type { Attribute } from "../..";
+import type { Attribute } from '../..';
 
 export interface EnumerationProperties<TValues extends string[] = []> {
   enum: TValues;
