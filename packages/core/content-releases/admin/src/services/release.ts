@@ -255,7 +255,13 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+        async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+          await queryFulfilled.then(() => {
+            setTimeout(() => {
+              dispatch(releaseApi.util.invalidateTags([{ type: 'Release', id: id }]));
+            }, 50);
+          });
+        },
       }),
     };
   },
