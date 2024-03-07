@@ -837,7 +837,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
+  const { replace } = useHistory();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -918,7 +918,7 @@ const ReleaseDetailsPage = () => {
     });
 
     if ('data' in response) {
-      push('/plugins/content-releases');
+      replace('/plugins/content-releases');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
