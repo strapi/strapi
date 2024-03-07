@@ -255,6 +255,7 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
+        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }],
       }),
     };
   },

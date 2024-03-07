@@ -838,8 +838,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
-  const dispatch = useDispatch();
+  const { replace } = useHistory();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -919,12 +918,10 @@ const ReleaseDetailsPage = () => {
       id: releaseId,
     });
 
+
+
     if ('data' in response) {
-      push('/plugins/content-releases');
-      // manually invalidate the cache for the release
-      setTimeout(() => {
-        dispatch(releaseApi.util.invalidateTags([{ type: 'Release', id: releaseId }]));
-      }, 0);
+      replace('/plugins/content-releases');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
