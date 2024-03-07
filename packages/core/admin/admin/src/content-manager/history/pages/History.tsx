@@ -32,7 +32,11 @@ interface HistoryContextValue {
   id?: string; // null for single types
   layout: EditLayout['layout'];
   selectedVersion: Contracts.HistoryVersions.HistoryVersionDataResponse;
-  versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
+  // Errors are handled outside of the provider, so we exclude errors from the response type
+  versions: Extract<
+    Contracts.HistoryVersions.GetHistoryVersions.Response,
+    { data: Array<Contracts.HistoryVersions.HistoryVersionDataResponse> }
+  >;
   page: number;
   mainField: string;
   schema: Contracts.ContentTypes.ContentType;
@@ -116,7 +120,13 @@ const HistoryPage = () => {
   }
 
   // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema || !permissions) {
+  if (
+    versionsResponse.isError ||
+    !versionsResponse.data?.data ||
+    !layout ||
+    !schema ||
+    !permissions
+  ) {
     return null;
   }
 
