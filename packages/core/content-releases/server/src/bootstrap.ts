@@ -14,11 +14,10 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
 
       async afterDelete(event) {
         try {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const { id } = result;
+            const { id } = result as { id: StrapiEntity.ID };
 
             const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
               where: {
@@ -107,22 +106,26 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
 
       async afterUpdate(event) {
         try {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const isEntryValid = await getEntryValidStatus(
               model.uid as Common.UID.ContentType,
-              result,
+              result as {
+                [key: string]: any;
+                id: StrapiEntity.ID;
+              },
               {
                 strapi,
               }
             );
 
+            const { id: targetId } = result as { id: StrapiEntity.ID };
+
             await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
               where: {
                 target_type: model.uid,
-                target_id: result.id,
+                target_id: targetId,
               },
               data: {
                 isEntryValid,
@@ -133,7 +136,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
               where: {
                 actions: {
                   target_type: model.uid,
-                  target_id: result.id,
+                  target_id: targetId,
                 },
               },
             });

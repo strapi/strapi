@@ -3,6 +3,26 @@ import type { Strapi } from '@strapi/strapi';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
+  const i18nModelUIDs = Object.values(strapi.contentTypes)
+    .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
+    .map((contentType) => contentType.uid);
+
+  if (i18nModelUIDs.length > 0) {
+    strapi.db.lifecycles.subscribe({
+      models: i18nModelUIDs,
+      async afterCreate(event) {
+        await getService('localizations').syncNonLocalizedAttributes(event.result, event.model);
+      },
+      async afterUpdate(event) {
+        await getService('localizations').syncNonLocalizedAttributes(event.result, event.model);
+      },
+      // TODO support bulk events
+      // async afterCreateMany(event) {
+      // },
+      // async afterUpdateMany(event) {
+      // },
+    });
+  }
   strapi.db.lifecycles.subscribe({
     models: ['plugin::i18n.locale'],
 
