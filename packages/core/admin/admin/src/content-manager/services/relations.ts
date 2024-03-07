@@ -50,7 +50,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
       },
       merge: (currentCache, newItems) => {
         if (currentCache.pagination && newItems.pagination) {
-          if (currentCache.pagination.page > newItems.pagination.page) {
+          if (currentCache.pagination.page < newItems.pagination.page) {
             /**
              * Relations will always have unique IDs, so we can therefore assume
              * that we only need to push the new items to the cache.
@@ -62,7 +62,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
             currentCache.results.push(...uniqueNewItems);
             currentCache.pagination = newItems.pagination;
           } else if (
-            currentCache.pagination.page <= newItems.pagination.page &&
+            currentCache.pagination.page >= newItems.pagination.page &&
             newItems.pagination.page === 1
           ) {
             /**
@@ -87,7 +87,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
         if ('results' in response && response.results) {
           return {
             ...response,
-            results: response.results.reverse(),
+            results: response.results,
           };
         } else {
           return response;
