@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { LoadedStrapi } from '@strapi/types';
 
-import { ACTIONS } from './constants';
+import { ACTIONS, RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from './constants';
 import {
   deleteActionsOnDeleteContentType,
   deleteActionsOnDisableDraftAndPublish,
@@ -21,5 +21,11 @@ export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
       .register(deleteActionsOnDeleteContentType)
       .register(revalidateChangedContentTypes)
       .register(migrateIsValidAndStatusReleases);
+  }
+
+  if (strapi.plugin('graphql')) {
+    // Exclude the release and release action models from the GraphQL schema
+    strapi.plugin('graphql').service('extension').shadowCRUD(RELEASE_MODEL_UID).disable();
+    strapi.plugin('graphql').service('extension').shadowCRUD(RELEASE_ACTION_MODEL_UID).disable();
   }
 };
