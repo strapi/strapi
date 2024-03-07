@@ -80,7 +80,7 @@ const Header = ({
         </Typography>
         <HeaderToolbar />
       </Flex>
-      <DocumentStatus status={capitalise(isCloning ? 'draft' : status)} />
+      <DocumentStatus status={isCloning ? 'draft' : status} />
     </Flex>
   );
 };

@@ -39,6 +39,8 @@ import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
 import { DocumentStatus } from '../DocumentStatus';
 
+import { useComponent } from './ComponentContext';
+
 import type { EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Attribute } from '@strapi/types';
 
@@ -81,7 +83,7 @@ interface RelationsFormValue {
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
     const [currentPage, setCurrentPage] = React.useState(1);
-    const { id, model } = useDoc();
+    const { id: documentId, model: documentModel } = useDoc();
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
     const params = buildValidParams(query);
@@ -89,10 +91,27 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
 
+    const { id: componentId, uid } = useComponent('RelationsField', ({ uid, id }) => ({ id, uid }));
+
+    /**
+     * We'll always have a documentId in a created entry, so we look for a componentId first.
+     * Same with `uid` and `documentModel`.
+     */
+    const id = componentId ? componentId.toString() : documentId;
+    const model = uid ?? documentModel;
+
+    /**
+     * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
+     * Where the above example would a nested field within two components, however
+     * we only require the field on the component not the complete path since we query
+     * individual components. Therefore we split the string and take the last item.
+     */
+    const [targetField] = props.name.split('.').slice(-1);
+
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
         model,
-        targetField: props.name,
+        targetField,
         // below we don't run the query if there is no id.
         id: id!,
         params: {
@@ -292,9 +311,16 @@ const RelationsInput = ({
    * so that we can filter out the relations that are already connected.
    */
   React.useEffect(() => {
+    /**
+     * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
+     * Where the above example would a nested field within two components, however
+     * we only require the field on the component not the complete path since we query
+     * individual components. Therefore we split the string and take the last item.
+     */
+    const [targetField] = name.split('.').slice(-1);
     searchForTrigger({
       model,
-      targetField: name,
+      targetField,
       params: {
         ...buildValidParams(query),
         id: id ?? '',
