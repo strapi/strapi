@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import {
+  Box,
   EmptyStateLayout,
-  EmptyStateLayoutProps,
+  type EmptyStateLayoutProps,
   Flex,
   Icon,
   Loader,
@@ -56,14 +57,16 @@ const Error = (props: ErrorProps) => {
   return (
     <Main height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
-        <EmptyStateLayout
-          icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
-          content={formatMessage({
-            id: 'anErrorOccurred',
-            defaultMessage: 'Woops! Something went wrong. Please, try again.',
-          })}
-          {...props}
-        />
+        <Box minWidth="50%">
+          <EmptyStateLayout
+            icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
+            content={formatMessage({
+              id: 'anErrorOccurred',
+              defaultMessage: 'Woops! Something went wrong. Please, try again.',
+            })}
+            {...props}
+          />
+        </Box>
       </Flex>
     </Main>
   );
@@ -87,14 +90,16 @@ const NoPermissions = (props: NoPermissionsProps) => {
   return (
     <Main height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
-        <EmptyStateLayout
-          icon={<EmptyPermissions width="10rem" />}
-          content={formatMessage({
-            id: 'app.components.EmptyStateLayout.content-permissions',
-            defaultMessage: "You don't have the permissions to access that content",
-          })}
-          {...props}
-        />
+        <Box minWidth="50%">
+          <EmptyStateLayout
+            icon={<EmptyPermissions width="10rem" />}
+            content={formatMessage({
+              id: 'app.components.EmptyStateLayout.content-permissions',
+              defaultMessage: "You don't have the permissions to access that content",
+            })}
+            {...props}
+          />
+        </Box>
       </Flex>
     </Main>
   );
@@ -117,15 +122,17 @@ const NoData = (props: NoDataProps) => {
 
   return (
     <Main height="100%">
-      <Flex alignItems="center" height="100%" justifyContent="center">
-        <EmptyStateLayout
-          icon={<EmptyDocuments width="10rem" />}
-          content={formatMessage({
-            id: 'app.components.EmptyStateLayout.content-document',
-            defaultMessage: 'No content found',
-          })}
-          {...props}
-        />
+      <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
+        <Box minWidth="50%">
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="10rem" />}
+            content={formatMessage({
+              id: 'app.components.EmptyStateLayout.content-document',
+              defaultMessage: 'No content found',
+            })}
+            {...props}
+          />
+        </Box>
       </Flex>
     </Main>
   );

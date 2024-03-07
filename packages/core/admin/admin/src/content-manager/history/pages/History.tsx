@@ -47,7 +47,6 @@ const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>(
 const HistoryPage = () => {
   const headerId = React.useId();
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
   const {
     slug,
     id: documentId,
@@ -91,15 +90,6 @@ const HistoryPage = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // Make sure the user lands on a selected history version
-  React.useEffect(() => {
-    const versions = versionsResponse.data?.data;
-
-    if (!query.id && !versionsResponse.isLoading && versions?.[0]) {
-      navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
-    }
-  }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
-
   /**
    * Ensure that we have the necessary data to render the page:
    * - slug for single types
@@ -109,15 +99,26 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || !selectedVersionId) {
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
     return <Page.Loading />;
   }
 
+  // It was a success, handle empty data
   if (
     !versionsResponse.isError &&
-    (!versionsResponse.data?.data || versionsResponse.data.data.length === 0)
+    (!versionsResponse.data || !versionsResponse.data?.data.length)
   ) {
     return <Page.NoData />;
+  }
+
+  // We have data, handle selected version
+  if (versionsResponse.data?.data.length && !selectedVersionId) {
+    return (
+      <Navigate
+        to={`?${stringify({ ...query, id: versionsResponse?.data?.data[0].id })}`}
+        replace
+      />
+    );
   }
 
   const selectedVersion = versionsResponse.data?.data.find(
