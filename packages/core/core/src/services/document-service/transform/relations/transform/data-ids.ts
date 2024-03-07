@@ -7,6 +7,7 @@ import { ShortHand, LongHand, ID, GetId } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
+import { getRelationTargetStatus } from '../utils/dp';
 
 const isNumeric = (value: any): value is number => {
   if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
@@ -40,7 +41,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     if (!('documentId' in relation)) return relation;
 
     // @ts-expect-error - TODO: Add relation type
-    const entryId = getId(relation.documentId, relation.locale) as T;
+    const entryId = getId(relation.documentId, relation.locale, relation.status) as T;
 
     // If the id is not found, return undefined
     if (!entryId) return undefined;
@@ -64,11 +65,16 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
 
   if (!isObject(relation)) return relation;
 
+  if (!('set' in relation || 'disconnect' in relation || 'connect' in relation)) {
+    return null;
+  }
+
   // set: id[]
   // what if result of mapPrimitive is undefined?
   if ('set' in relation) {
     relation.set = transformPrimitive(relation.set as any, getId);
   }
+
   if ('disconnect' in relation) {
     relation.disconnect = transformPrimitive(relation.disconnect as any, getId);
   }
@@ -135,7 +141,11 @@ const transformDataIdsVisitor = (
         // TODO: Handle this differently
         if (EXCLUDED_FIELDS.includes(key)) return;
 
-        const getId = (documentId: ID, locale?: string): ID | null => {
+        const getId = (
+          documentId: ID,
+          locale?: string,
+          status?: 'draft' | 'published'
+        ): ID | null => {
           const entryId = idMap.get({
             uid: target,
             documentId,
@@ -147,7 +157,15 @@ const transformDataIdsVisitor = (
                 sourceLocale: opts.locale,
               }
             ),
-            isDraft: opts.isDraft,
+            isDraft: getRelationTargetStatus(
+              // TODO: Get the status from the relation
+              { documentId, status },
+              {
+                targetUid: target as Common.UID.Schema,
+                sourceUid: opts.uid,
+                sourceStatus: opts.isDraft,
+              }
+            ),
           });
 
           if (entryId) return entryId;
