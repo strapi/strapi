@@ -917,8 +917,6 @@ const ReleaseDetailsPage = () => {
       id: releaseId,
     });
 
-
-
     if ('data' in response) {
       replace('/plugins/content-releases');
     } else if (isAxiosError(response.error)) {
