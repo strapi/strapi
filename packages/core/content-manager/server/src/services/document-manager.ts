@@ -156,11 +156,6 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     ) {
       const populate = await buildDeepPopulate(uid);
 
-      // Delete all locales if no locale is specified
-      if (opts.locale === undefined) {
-        opts.locale = '*';
-      }
-
       await strapi.documents(uid).delete(id, { ...opts, populate });
 
       // If relations were populated, relations count will be returned instead of the array of relations.
