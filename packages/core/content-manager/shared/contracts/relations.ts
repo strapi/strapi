@@ -5,6 +5,7 @@ type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 
 export interface RelationResult {
   documentId: Documents.ID;
+  id: number;
   status: Documents.Params.PublicationState.Kind;
   locale?: Documents.Params.Locale;
   [key: string]: unknown;

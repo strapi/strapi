@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetRelationsQuery } from '../../../../services/relations';
+import { getRelationLabel } from '../../../../utils/relations';
 import { getTranslation } from '../../../../utils/translations';
 
 import type { CellContentProps } from './CellContent';
@@ -20,9 +21,7 @@ interface RelationSingleProps extends Pick<CellContentProps, 'mainField' | 'cont
 const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
   return (
     <TypographyMaxWidth textColor="neutral800" ellipsis>
-      {mainField && typeof content[mainField] === 'string'
-        ? content[mainField]
-        : content.documentId}
+      {getRelationLabel(content, mainField)}
     </TypographyMaxWidth>
   );
 };
@@ -102,9 +101,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
             {data.results.map((entry) => (
               <Menu.Item key={entry.documentId} disabled>
                 <TypographyMaxWidth ellipsis>
-                  {mainField && typeof entry[mainField] === 'string'
-                    ? (entry[mainField] as string)
-                    : entry.documentId}
+                  {getRelationLabel(entry, mainField)}
                 </TypographyMaxWidth>
               </Menu.Item>
             ))}

@@ -36,6 +36,7 @@ import {
 } from '../../../../hooks/useDragAndDrop';
 import { useGetRelationsQuery, useLazySearchRelationsQuery } from '../../../../services/relations';
 import { buildValidParams } from '../../../../utils/api';
+import { getRelationLabel } from '../../../../utils/relations';
 import { getTranslation } from '../../../../utils/translations';
 import { DocumentStatus } from '../DocumentStatus';
 
@@ -48,6 +49,7 @@ import type { Attribute } from '@strapi/types';
  * RelationsField
  * -----------------------------------------------------------------------------------------------*/
 const RELATIONS_TO_DISPLAY = 5;
+const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
 
 interface Relation extends Contracts.Relations.RelationResult {
   href: string;
@@ -62,8 +64,8 @@ interface RelationsFieldProps
 }
 
 interface RelationsFormValue {
-  connect?: Relation[];
-  disconnect?: Relation[];
+  connect?: Contracts.Relations.RelationResult[];
+  disconnect?: Contracts.Relations.RelationResult[];
 }
 
 /**
@@ -83,7 +85,8 @@ interface RelationsFormValue {
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
     const [currentPage, setCurrentPage] = React.useState(1);
-    const { id: documentId, model: documentModel } = useDoc();
+    const { document, model: documentModel } = useDoc();
+    const documentId = document?.documentId;
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
     const params = buildValidParams(query);
@@ -256,14 +259,13 @@ const removeDisconnected =
 const addLabelAndHref =
   ({ mainField, href }: TransformationContext) =>
   (relations: RelationResult[]): Relation[] =>
-    relations.map((relation) => ({
-      ...relation,
-      label:
-        mainField && relation[mainField] && typeof relation[mainField] === 'string'
-          ? (relation[mainField] as string)
-          : relation.documentId,
-      href: `${href}/${relation.documentId}`,
-    }));
+    relations.map((relation) => {
+      return {
+        ...relation,
+        label: getRelationLabel(relation, mainField),
+        href: `${href}/${relation.documentId}`,
+      };
+    });
 
 /* -------------------------------------------------------------------------------------------------
  * RelationsInput
@@ -288,6 +290,7 @@ const RelationsInput = ({
   mainField,
   placeholder,
   required,
+  attribute,
 }: RelationsInputProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
   const [searchParams, setSearchParams] = React.useState({
@@ -349,6 +352,8 @@ const RelationsInput = ({
 
   const options = data?.results ?? [];
 
+  const isSingleRelation = ONE_WAY_RELATIONS.includes(attribute.relation);
+
   const handleChange = (relationId?: string) => {
     if (!relationId) {
       return;
@@ -373,7 +378,11 @@ const RelationsInput = ({
       return;
     }
 
-    addFieldRow(`${name}.connect`, relation);
+    if (isSingleRelation) {
+      field.onChange(name, { connect: [relation] });
+    } else {
+      addFieldRow(`${name}.connect`, relation);
+    }
   };
 
   const handleLoadMore = () => {
@@ -431,10 +440,7 @@ const RelationsInput = ({
       }}
     >
       {options.map((opt) => {
-        const textValue =
-          mainField && opt[mainField] && typeof opt[mainField] === 'string'
-            ? (opt[mainField] as string)
-            : opt.documentId;
+        const textValue = getRelationLabel(opt, mainField);
 
         return (
           <ComboboxOption key={opt.documentId} value={opt.documentId} textValue={textValue}>
@@ -599,13 +605,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
    * These relation types will only ever have one item
    * in their list, so you can't reorder a single item!
    */
-  const canReorder = ![
-    'oneWay',
-    'oneToOne',
-    'manyToOne',
-    'oneToManyMorph',
-    'oneToOneMorph',
-  ].includes(relationType);
+  const canReorder = !ONE_WAY_RELATIONS.includes(relationType);
 
   const dynamicListHeight =
     data.length > RELATIONS_TO_DISPLAY

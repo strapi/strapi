@@ -10,7 +10,6 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { useForm } from '../../../../components/Form';
-import { capitalise } from '../../../../utils/strings';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
