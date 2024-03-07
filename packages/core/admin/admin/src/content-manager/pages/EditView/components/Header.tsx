@@ -506,6 +506,9 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
             documentId,
             model,
             collectionType,
+            params: {
+              locale: '*',
+            },
           });
 
           if (!('error' in res)) {
