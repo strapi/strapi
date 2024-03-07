@@ -21,13 +21,13 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const FIELDS_TO_TEST: Array<Field> = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique' },
-  ] as const satisfies Field[];
+  ] as const;
 
   const clickSave = async (page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
@@ -70,7 +70,7 @@ test.describe('Uniqueness', () => {
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
        */
-      const fieldRole = 'role' in field ? field.role : ('textbox' as const);
+      const fieldRole = 'role' in field ? field.role : 'textbox';
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
