@@ -7,17 +7,13 @@
 import * as React from 'react';
 
 import { SkipToContent } from '@strapi/design-system';
-import {
-  LoadingIndicatorPage,
-  TrackingProvider,
-  useAppInfo,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { TrackingProvider, useAppInfo, useNotification } from '@strapi/helper-plugin';
 import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 
+import { Page } from './components/PageHelpers';
 import { ADMIN_PERMISSIONS_CE } from './constants';
 import { useAuth } from './features/Auth';
 import { ConfigurationProvider, ConfigurationProviderProps } from './features/Configuration';
@@ -105,11 +101,11 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
   );
 
   if (initQuery.isLoading) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
-    <React.Suspense fallback={<LoadingIndicatorPage />}>
+    <React.Suspense fallback={<Page.Loading />}>
       <SkipToContent>
         {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
       </SkipToContent>

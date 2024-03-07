@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Box, Flex, Popover, Typography } from '@strapi/design-system';
-import { SortIcon, useCollator } from '@strapi/helper-plugin';
+import { Box, Flex, Popover, Typography, useCollator } from '@strapi/design-system';
+import { CarretDown } from '@strapi/icons';
 import { unstable_useDocument as useDocument } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -82,7 +82,7 @@ const LocaleListCell = ({
           {localesForDocument.join(', ')}
         </Typography>
         <Flex>
-          <SortIcon />
+          <CarretDown />
         </Flex>
       </ActionWrapper>
       {visible && (

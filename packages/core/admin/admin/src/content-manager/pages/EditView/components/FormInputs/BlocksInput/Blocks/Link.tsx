@@ -8,13 +8,13 @@ import {
   FieldLabel,
   Flex,
   Popover,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
-import { composeRefs } from '../../../../../../../utils/refs';
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
 import { isLinkNode, type Block } from '../utils/types';
@@ -96,7 +96,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       !linkUrl ||
       (link.url && link.url === linkUrl && elementText && elementText === linkText);
 
-    const composedRefs = composeRefs(linkRef, forwardedRef);
+    const composedRefs = useComposedRefs(linkRef, forwardedRef);
 
     React.useEffect(() => {
       // Focus on the link input element when the popover opens

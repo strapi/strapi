@@ -17,14 +17,10 @@ import {
   TextInput,
   Typography,
   VisuallyHidden,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
-import {
-  ConfirmDialog,
-  useNotification,
-  NotAllowedInput,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -33,7 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
-import { composeRefs } from '../../../../../../../../admin/src/utils/refs';
+import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,
@@ -224,7 +220,7 @@ export const Stage = ({
       type: DRAG_DROP_TYPES.STAGE,
     });
 
-  const composedRef = composeRefs(stageRef, dropRef);
+  const composedRef = useComposedRefs(stageRef, dropRef);
 
   const colorOptions = AVAILABLE_COLORS.map(({ hex, name }) => ({
     value: hex,

@@ -14,16 +14,15 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  CheckPagePermissions,
   useOverlayBlocker,
-  SettingsPageTitle,
-  LoadingIndicatorPage,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { NavLink, useMatch } from 'react-router-dom';
@@ -92,13 +91,17 @@ export const EditPage = () => {
   };
 
   if (isLoadingRole) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
     <Main>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'Roles' }
+        )}
+      />
       <Formik
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}
@@ -213,7 +216,7 @@ export const EditPage = () => {
 };
 
 export const ProtectedRolesEditPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.updateRole}>
+  <Page.Protect permissions={PERMISSIONS.updateRole}>
     <EditPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

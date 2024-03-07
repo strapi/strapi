@@ -2,45 +2,39 @@ import { getTrad } from '../../../utils';
 
 const layout = [
   {
-    intlLabel: {
+    label: {
       id: getTrad('EditForm.inputToggle.label.email'),
       defaultMessage: 'One account per email address',
     },
-    description: {
+    hint: {
       id: getTrad('EditForm.inputToggle.description.email'),
       defaultMessage:
         'Disallow the user to create multiple accounts using the same email address with different authentication providers.',
     },
     name: 'unique_email',
-    type: 'bool',
-    size: {
-      col: 12,
-      xs: 12,
-    },
+    type: 'boolean',
+    size: 12,
   },
   {
-    intlLabel: {
+    label: {
       id: getTrad('EditForm.inputToggle.label.sign-up'),
       defaultMessage: 'Enable sign-ups',
     },
-    description: {
+    hint: {
       id: getTrad('EditForm.inputToggle.description.sign-up'),
       defaultMessage:
         'When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.',
     },
     name: 'allow_register',
-    type: 'bool',
-    size: {
-      col: 12,
-      xs: 12,
-    },
+    type: 'boolean',
+    size: 12,
   },
   {
-    intlLabel: {
+    label: {
       id: getTrad('EditForm.inputToggle.label.email-reset-password'),
       defaultMessage: 'Reset password page',
     },
-    description: {
+    hint: {
       id: getTrad('EditForm.inputToggle.description.email-reset-password'),
       defaultMessage: "URL of your application's reset password page.",
     },
@@ -49,34 +43,28 @@ const layout = [
       defaultMessage: 'ex: https://youtfrontend.com/reset-password',
     },
     name: 'email_reset_password',
-    type: 'text',
-    size: {
-      col: 6,
-      xs: 12,
-    },
+    type: 'string',
+    size: 12,
   },
   {
-    intlLabel: {
+    label: {
       id: getTrad('EditForm.inputToggle.label.email-confirmation'),
       defaultMessage: 'Enable email confirmation',
     },
-    description: {
+    hint: {
       id: getTrad('EditForm.inputToggle.description.email-confirmation'),
       defaultMessage: 'When enabled (ON), new registered users receive a confirmation email.',
     },
     name: 'email_confirmation',
-    type: 'bool',
-    size: {
-      col: 12,
-      xs: 12,
-    },
+    type: 'boolean',
+    size: 12,
   },
   {
-    intlLabel: {
+    label: {
       id: getTrad('EditForm.inputToggle.label.email-confirmation-redirection'),
       defaultMessage: 'Redirection url',
     },
-    description: {
+    hint: {
       id: getTrad('EditForm.inputToggle.description.email-confirmation-redirection'),
       defaultMessage: 'After you confirmed your email, choose where you will be redirected.',
     },
@@ -85,11 +73,8 @@ const layout = [
       defaultMessage: 'ex: https://youtfrontend.com/email-confirmation',
     },
     name: 'email_confirmation_redirection',
-    type: 'text',
-    size: {
-      col: 6,
-      xs: 12,
-    },
+    type: 'string',
+    size: 12,
   },
 ];
 

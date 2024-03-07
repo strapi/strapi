@@ -1,14 +1,9 @@
 import * as React from 'react';
 
-import {
-  AnErrorOccurred,
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useAPIErrorHandler,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 
+import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
 import { setIn } from '../../utils/object';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
@@ -196,11 +191,11 @@ const ComponentConfigurationPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   if (error || errorSchema || !schema) {
-    return <AnErrorOccurred />;
+    return <Page.Error />;
   }
 
   return (
@@ -285,9 +280,9 @@ const ProtectedComponentConfigurationPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ComponentConfigurationPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

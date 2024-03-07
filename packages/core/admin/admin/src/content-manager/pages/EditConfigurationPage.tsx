@@ -1,14 +1,8 @@
 import * as React from 'react';
 
-import {
-  AnErrorOccurred,
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useAPIErrorHandler,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
 
+import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
 import { setIn } from '../../utils/object';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
@@ -136,11 +130,11 @@ const EditConfigurationPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   if (errorFieldSizes || error || !schema) {
-    return <AnErrorOccurred />;
+    return <Page.Error />;
   }
 
   return (
@@ -159,9 +153,9 @@ const ProtectedEditConfigurationPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <EditConfigurationPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

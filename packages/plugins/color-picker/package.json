@@ -53,9 +53,9 @@
     "watch": "strapi plugin:watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.15.0",
+    "@strapi/design-system": "1.16.0",
     "@strapi/helper-plugin": "4.20.3",
-    "@strapi/icons": "1.15.0",
+    "@strapi/icons": "1.16.0",
     "react-colorful": "5.6.1",
     "react-intl": "6.4.1"
   },

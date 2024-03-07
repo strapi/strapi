@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
+import { Page } from '@strapi/admin/strapi-admin';
 import {
-  LoadingIndicatorPage,
   useAppInfo,
   useAutoReloadOverlayBlocker,
   useFetchClient,
@@ -646,7 +646,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       }}
     >
       {isLoadingForDataToBeSet ? (
-        <LoadingIndicatorPage />
+        <Page.Loading />
       ) : (
         <>
           {children}

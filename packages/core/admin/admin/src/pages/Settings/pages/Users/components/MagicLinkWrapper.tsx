@@ -1,7 +1,9 @@
 import { IconButton } from '@strapi/design-system';
-import { ContentBox, useClipboard, useNotification } from '@strapi/helper-plugin';
+import { useClipboard, useNotification } from '@strapi/helper-plugin';
 import { Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import { ContentBox } from '../../../../../components/ContentBox';
 
 interface MagicLinkWrapperProps {
   children: string;

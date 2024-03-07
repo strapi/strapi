@@ -9,6 +9,7 @@ export * from './render';
  */
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
+export * from './components/PageHelpers';
 
 /**
  * Hooks

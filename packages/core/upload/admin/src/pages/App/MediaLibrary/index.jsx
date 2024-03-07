@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 
+import { Page } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   BaseCheckbox,
@@ -15,9 +16,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
-  AnErrorOccurred,
   CheckPermissions,
-  LoadingIndicatorPage,
   SearchURLQuery,
   useFocusWhenNavigate,
   usePersistentState,
@@ -213,6 +212,14 @@ export const MediaLibrary = () => {
 
   useFocusWhenNavigate();
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
+  if (assetsError || foldersError) {
+    return <Page.Error />;
+  }
+
   return (
     <Layout>
       <Main aria-busy={isLoading}>
@@ -311,10 +318,6 @@ export const MediaLibrary = () => {
               onSuccess={handleBulkActionSuccess}
             />
           )}
-
-          {isLoading && <LoadingIndicatorPage />}
-
-          {(assetsError || foldersError) && <AnErrorOccurred />}
 
           {folderCount === 0 && assetCount === 0 && (
             <EmptyOrNoPermissions

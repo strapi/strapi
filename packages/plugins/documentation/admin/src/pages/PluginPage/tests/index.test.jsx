@@ -54,15 +54,14 @@ describe('PluginPage', () => {
   it('render the plugin page correctly', async () => {
     const { getByRole, queryByText, getByText } = render();
 
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
+
     expect(getByRole('heading', { name: 'Documentation' })).toBeInTheDocument();
     expect(getByText('Configure the documentation plugin')).toBeInTheDocument();
-    expect(queryByText('Plugin is loading')).toBeInTheDocument();
     expect(getByRole('link', { name: 'Open Documentation' })).toHaveAttribute(
       'aria-disabled',
-      'true'
+      'false'
     );
-
-    await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
 
     expect(getByRole('heading', { name: 'Documentation' })).toBeInTheDocument();
     expect(getByText('Configure the documentation plugin')).toBeInTheDocument();
@@ -90,7 +89,7 @@ describe('PluginPage', () => {
     it('should open the documentation', async () => {
       const { getByRole, queryByText, user } = render();
 
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
       expect(getByRole('link', { name: 'Open Documentation' })).toHaveAttribute(
         'href',
@@ -110,7 +109,7 @@ describe('PluginPage', () => {
     it('should regenerate the documentation', async () => {
       const { getByRole, queryByText, user, getByText } = render();
 
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
       expect(getByRole('button', { name: 'Regenerate 2.0.0' })).toBeInTheDocument();
 
@@ -122,7 +121,7 @@ describe('PluginPage', () => {
     it('should delete the documentation', async () => {
       const { getByRole, queryByText, user, getByText } = render();
 
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
       expect(getByRole('button', { name: 'Delete 2.0.0' })).toBeInTheDocument();
 
@@ -144,13 +143,12 @@ describe('PluginPage', () => {
         permissions: [],
       });
 
-      expect(queryByText('Plugin is loading')).toBeInTheDocument();
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
+
       expect(getByRole('link', { name: 'Open Documentation' })).toHaveAttribute(
         'aria-disabled',
         'true'
       );
-
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
 
       expect(getByRole('link', { name: 'Open Documentation' })).toHaveAttribute(
         'aria-disabled',
@@ -163,7 +161,7 @@ describe('PluginPage', () => {
         permissions: [],
       });
 
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
       versions.forEach((version) => {
         expect(getByRole('gridcell', { name: version })).toBeInTheDocument();
@@ -180,7 +178,7 @@ describe('PluginPage', () => {
         permissions: [],
       });
 
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
       versions.forEach((version) => {
         expect(getByRole('gridcell', { name: version })).toBeInTheDocument();
@@ -194,7 +192,7 @@ describe('PluginPage', () => {
         permissions: [],
       });
 
-      await waitFor(() => expect(queryByText('Plugin is loading')).not.toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
       versions.forEach((version) => {
         expect(getByRole('gridcell', { name: version })).toBeInTheDocument();

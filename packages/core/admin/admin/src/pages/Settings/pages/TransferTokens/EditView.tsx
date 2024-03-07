@@ -1,20 +1,7 @@
 import * as React from 'react';
 
+import { Box, ContentLayout, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
 import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Main,
-  Typography,
-} from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -24,12 +11,13 @@ import {
   useTracking,
   translatedErrors,
 } from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import {
   useCreateTransferTokenMutation,
@@ -242,12 +230,19 @@ const EditView = () => {
   const isLoading = !isCreating && !transferToken;
 
   if (isLoading) {
-    return <LoadingView />;
+    return <Page.Loading />;
   }
 
   return (
     <Main>
-      <SettingsPageTitle name="Transfer Tokens" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Transfer Tokens',
+          }
+        )}
+      />
       <Formik
         validationSchema={schema}
         validateOnChange={false}
@@ -318,9 +313,9 @@ const ProtectedEditView = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <EditView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 
@@ -438,41 +433,6 @@ const FormTransferTokenContainer = ({
         </Grid>
       </Flex>
     </Box>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * LoadingView
- * -----------------------------------------------------------------------------------------------*/
-interface LoadingViewProps {
-  transferTokenName?: string;
-}
-
-export const LoadingView = ({ transferTokenName }: LoadingViewProps) => {
-  const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
-
-  return (
-    <Main aria-busy="true">
-      <SettingsPageTitle name="Transfer Tokens" />
-      <HeaderLayout
-        primaryAction={
-          <Button disabled startIcon={<Check />} type="button" size="L">
-            {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-          </Button>
-        }
-        title={
-          transferTokenName ||
-          formatMessage({
-            id: 'Settings.transferTokens.createPage.title',
-            defaultMessage: 'Create Transfer Token',
-          })
-        }
-      />
-      <ContentLayout>
-        <LoadingIndicatorPage />
-      </ContentLayout>
-    </Main>
   );
 };
 
