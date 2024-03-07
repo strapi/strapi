@@ -146,7 +146,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
         if (response.results) {
           return {
             ...response,
-            results: response.results.reverse(),
+            results: response.results,
           };
         } else {
           return response;
