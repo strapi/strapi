@@ -23,13 +23,13 @@ import {
   useNotification,
   useRBAC,
   useTracking,
-  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
@@ -403,8 +403,8 @@ export const ProtectedReviewWorkflowsPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ReviewWorkflowsListView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

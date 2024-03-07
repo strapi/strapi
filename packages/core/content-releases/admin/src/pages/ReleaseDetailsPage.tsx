@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { unstable_useDocument } from '@strapi/admin/strapi-admin';
+import { Page, unstable_useDocument } from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
@@ -17,12 +17,11 @@ import {
   SingleSelectOption,
   Icon,
   Tooltip,
+  EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
-  LoadingIndicatorPage,
-  NoContent,
   PageSizeURLQuery,
   PaginationURLQuery,
   RelativeTime,
@@ -32,10 +31,17 @@ import {
   useQueryParams,
   ConfirmDialog,
   useRBAC,
-  AnErrorOccurred,
   useTracking,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import {
+  ArrowLeft,
+  CheckCircle,
+  More,
+  Pencil,
+  Trash,
+  CrossCircle,
+  EmptyDocuments,
+} from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -297,11 +303,7 @@ const ReleaseDetailsLayout = ({
   };
 
   if (isLoadingDetails) {
-    return (
-      <Main aria-busy={isLoadingDetails}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   if (isError || !release) {
@@ -586,11 +588,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   };
 
   if (isLoading || isReleaseLoading) {
-    return (
-      <ContentLayout>
-        <LoadingIndicatorPage />
-      </ContentLayout>
-    );
+    return <Page.Loading />;
   }
 
   const releaseActions = data?.data;
@@ -621,22 +619,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   }
 
   if (isError || !releaseActions) {
-    return (
-      <ContentLayout>
-        <AnErrorOccurred />
-      </ContentLayout>
-    );
+    return <Page.Error />;
   }
 
   if (Object.keys(releaseActions).length === 0) {
     return (
       <ContentLayout>
-        <NoContent
-          content={{
-            id: 'content-releases.pages.Details.tab.emptyEntries',
-            defaultMessage:
-              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
-          }}
+        <EmptyStateLayout
           action={
             <LinkButton
               as={ReactRouterLink}
@@ -653,6 +642,12 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
+          icon={<EmptyDocuments width="10rem" />}
+          content={formatMessage({
+            id: 'content-releases.pages.Details.tab.emptyEntries',
+            defaultMessage:
+              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+          })}
         />
       </ContentLayout>
     );
@@ -874,9 +869,7 @@ const ReleaseDetailsPage = () => {
         toggleEditReleaseModal={toggleEditReleaseModal}
         toggleWarningSubmit={toggleWarningSubmit}
       >
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
+        <Page.Loading />
       </ReleaseDetailsLayout>
     );
   }

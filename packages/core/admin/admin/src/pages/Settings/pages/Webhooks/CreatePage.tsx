@@ -1,17 +1,17 @@
-import { CheckPagePermissions } from '@strapi/helper-plugin';
-
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
-import { selectAdminPermissions } from '../../../../selectors';
 
 import { EditPage } from './EditPage';
 
 const ProtectedCreatePage = () => {
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.webhooks.create
+  );
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.webhooks.create}>
+    <Page.Protect permissions={permissions}>
       <EditPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

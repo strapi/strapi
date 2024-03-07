@@ -8,27 +8,26 @@ import {
   Flex,
   Typography,
   Box,
+  Status,
 } from '@strapi/design-system';
 import {
   DynamicTable,
-  NoPermissions,
   SearchURLQuery,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
-  Status,
   PageSizeURLQuery,
   PaginationURLQuery,
-  CheckPagePermissions,
   TableHeader,
 } from '@strapi/helper-plugin';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
@@ -47,18 +46,13 @@ const ListPageCE = () => {
   const [isModalOpened, setIsModalOpen] = React.useState(false);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const {
-    allowedActions: { canCreate, canDelete, canRead },
+    allowedActions: { canCreate, canDelete },
   } = useRBAC(permissions.settings?.users);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
-  const { data, isError, isLoading } = useAdminUsers(
-    qs.parse(search, { ignoreQueryPrefix: true }),
-    {
-      skip: !canRead,
-    }
-  );
+  const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
 
   const { pagination, users } = data ?? {};
 
@@ -98,7 +92,14 @@ const ListPageCE = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <SettingsPageTitle name="Users" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Users',
+          }
+        )}
+      />
       <HeaderLayout
         primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
@@ -107,28 +108,24 @@ const ListPageCE = () => {
           defaultMessage: 'All the users who have access to the Strapi admin panel',
         })}
       />
-      {canRead && (
-        <ActionLayout
-          startActions={
-            <>
-              <SearchURLQuery
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: title }
-                )}
-              />
-              {/* @ts-expect-error – TODO: fix the way filters work and are passed around, this will be a headache. */}
-              <Filters displayedFilters={DISPLAYED_HEADERS} />
-            </>
-          }
-        />
-      )}
-
+      <ActionLayout
+        startActions={
+          <>
+            <SearchURLQuery
+              label={formatMessage(
+                { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                { target: title }
+              )}
+            />
+            {/* @ts-expect-error – TODO: fix the way filters work and are passed around, this will be a headache. */}
+            <Filters displayedFilters={DISPLAYED_HEADERS} />
+          </>
+        }
+      />
       <ContentLayout>
-        {!canRead && <NoPermissions />}
         {/* TODO: Replace error message with something better */}
         {isError && <div>TODO: An error occurred</div>}
-        {canRead && (
+        {!isError && (
           <>
             <DynamicTable
               contentType="Users"
@@ -280,15 +277,20 @@ const TABLE_HEADERS = [
     cellFormatter({ isActive }, { formatMessage }) {
       return (
         <Flex>
-          <Status variant={isActive ? 'success' : 'danger'} />
-          <Typography textColor="neutral800">
+          <Status
+            size="S"
+            borderWidth={0}
+            background="transparent"
+            color="neutral800"
+            variant={isActive ? 'success' : 'danger'}
+          >
             {formatMessage({
               id: isActive
                 ? 'Settings.permissions.users.active'
                 : 'Settings.permissions.users.inactive',
               defaultMessage: isActive ? 'Active' : 'Inactive',
             })}
-          </Typography>
+          </Status>
         </Flex>
       );
     },
@@ -350,12 +352,12 @@ const ListPage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListPage = () => {
-  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.main);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.read);
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

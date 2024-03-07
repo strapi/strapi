@@ -1,17 +1,12 @@
 import * as React from 'react';
 
 import { ContentLayout, Divider, Flex, Layout, Main } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useAPIErrorHandler,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
 import { Form, FormProps } from '../../../components/Form';
+import { Page } from '../../../components/PageHelpers';
 import { useTypedSelector } from '../../../core/store/hooks';
 import { setIn } from '../../../utils/object';
 import { SINGLE_TYPES } from '../../constants/collections';
@@ -117,7 +112,7 @@ const ListConfiguration = () => {
   }
 
   if (isLoadingLayout) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
@@ -159,9 +154,9 @@ const ProtectedListConfiguration = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListConfiguration />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

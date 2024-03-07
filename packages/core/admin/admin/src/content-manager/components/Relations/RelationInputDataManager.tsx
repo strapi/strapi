@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { NotAllowedInput } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
 import { MessageDescriptor, useIntl } from 'react-intl';

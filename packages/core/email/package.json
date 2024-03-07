@@ -52,17 +52,19 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.15.0",
+    "@strapi/design-system": "1.16.0",
     "@strapi/helper-plugin": "4.20.3",
-    "@strapi/icons": "1.15.0",
+    "@strapi/icons": "1.16.0",
     "@strapi/provider-email-sendmail": "4.20.3",
     "@strapi/utils": "4.20.3",
     "lodash": "4.17.21",
+    "react-helmet": "6.1.0",
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/admin": "4.20.3",
     "@strapi/pack-up": "4.20.3",
     "@strapi/types": "4.20.3",
     "@testing-library/react": "14.0.0",
@@ -77,6 +79,7 @@
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
+    "@strapi/admin": "^4.20.3",
     "koa": "2.13.4",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",

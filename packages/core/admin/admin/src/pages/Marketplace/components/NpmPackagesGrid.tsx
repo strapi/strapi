@@ -1,17 +1,10 @@
-import {
-  Box,
-  Flex,
-  Grid,
-  GridItem,
-  GridLayout,
-  Icon,
-  Loader,
-  Typography,
-} from '@strapi/design-system';
-import { AnErrorOccurred, AppInfoContextValue } from '@strapi/helper-plugin';
+import { Box, Flex, Grid, GridItem, GridLayout, Icon, Typography } from '@strapi/design-system';
+import { AppInfoContextValue } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+
+import { Page } from '../../../components/PageHelpers';
 
 import { NpmPackageCard, NpmPackageCardProps } from './NpmPackageCard';
 
@@ -39,19 +32,11 @@ const NpmPackagesGrid = ({
   const { formatMessage } = useIntl();
 
   if (status === 'error') {
-    return (
-      <Flex paddingTop={8}>
-        <AnErrorOccurred />
-      </Flex>
-    );
+    return <Page.Error />;
   }
 
   if (status === 'loading') {
-    return (
-      <Flex justifyContent="center" paddingTop={8}>
-        <Loader>Loading content...</Loader>
-      </Flex>
-    );
+    return <Page.Loading />;
   }
 
   const emptySearchMessage = formatMessage(

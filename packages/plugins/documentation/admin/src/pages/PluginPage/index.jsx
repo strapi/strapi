@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 import {
-  Box,
   LinkButton,
   ContentLayout,
   Flex,
@@ -16,16 +15,11 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import {
-  AnErrorOccurred,
-  ConfirmDialog,
   EmptyStateLayout,
-  LoadingIndicatorPage,
-  useFocusWhenNavigate,
-  useRBAC,
-} from '@strapi/helper-plugin';
+} from '@strapi/design-system';
+import { ConfirmDialog, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -71,16 +65,12 @@ const PluginPage = () => {
     defaultMessage: 'Documentation',
   });
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   if (isError) {
-    return (
-      <Layout>
-        <ContentLayout>
-          <Box paddingTop={8}>
-            <AnErrorOccurred />
-          </Box>
-        </ContentLayout>
-      </Layout>
-    );
+    return <Page.Error />;
   }
 
   return (
@@ -107,7 +97,6 @@ const PluginPage = () => {
           }
         />
         <ContentLayout>
-          {isLoading && <LoadingIndicatorPage>Plugin is loading</LoadingIndicatorPage>}
           {data?.docVersions.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>

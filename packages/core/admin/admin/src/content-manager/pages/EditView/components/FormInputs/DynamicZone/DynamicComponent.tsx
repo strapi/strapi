@@ -10,6 +10,7 @@ import {
   GridItem,
   IconButton,
   VisuallyHidden,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { Drag, More, Trash } from '@strapi/icons';
@@ -19,7 +20,6 @@ import styled from 'styled-components';
 
 import { useForm } from '../../../../../../components/Form';
 import { getIn } from '../../../../../../utils/object';
-import { useComposedRefs } from '../../../../../../utils/refs';
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';

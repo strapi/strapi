@@ -3,8 +3,9 @@
 /* eslint-disable check-file/no-index */
 import { lazy, Suspense, useEffect, useRef } from 'react';
 
+import { Page } from '@strapi/admin/strapi-admin';
 import { Layout } from '@strapi/design-system';
-import { CheckPagePermissions, LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
@@ -34,14 +35,14 @@ const App = () => {
   }, []);
 
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.main}>
+    <Page.Protect permissions={PERMISSIONS.main}>
       <Helmet title={title} />
       <FormModalNavigationProvider>
         {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
         {/* @ts-ignore */}
         <DataManagerProvider>
           <Layout sideNav={<ContentTypeBuilderNav />}>
-            <Suspense fallback={<LoadingIndicatorPage />}>
+            <Suspense fallback={<Page.Loading />}>
               <Routes>
                 <Route path="content-types/:uid" element={<ListView />} />
                 <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
@@ -50,7 +51,7 @@ const App = () => {
           </Layout>
         </DataManagerProvider>
       </FormModalNavigationProvider>
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

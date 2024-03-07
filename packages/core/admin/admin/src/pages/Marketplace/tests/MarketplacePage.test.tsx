@@ -24,7 +24,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 const render = () => renderRTL(<MarketplacePage />);
 
 const waitForReload = async () => {
-  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - layout', () => {

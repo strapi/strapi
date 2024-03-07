@@ -1,7 +1,9 @@
 import { IconButton } from '@strapi/design-system';
-import { ContentBox, useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Key } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import { ContentBox } from '../../../../components/ContentBox';
 
 interface TokenBoxProps {
   token?: string;

@@ -1,9 +1,9 @@
-import React, { PropsWithChildren } from 'react';
+import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { SettingsPageTitle } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -24,7 +24,7 @@ const DragLayerRendered = () => {
   );
 };
 
-const Root: React.FC<PropsWithChildren> = ({ children }) => {
+const Root: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <Layout>
       <Main tabIndex={-1}>
@@ -59,9 +59,17 @@ type HeaderProps = {
   subtitle?: React.ReactNode;
 };
 const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, primaryAction }) => {
+  const { formatMessage } = useIntl();
   return (
     <>
-      <SettingsPageTitle name={title} />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: title,
+          }
+        )}
+      />
       <HeaderLayout
         navigationAction={navigationAction}
         primaryAction={primaryAction}

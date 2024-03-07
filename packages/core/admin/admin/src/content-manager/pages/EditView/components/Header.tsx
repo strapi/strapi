@@ -326,6 +326,7 @@ const Information = ({ activeTab }: InformationProps) => {
       padding={5}
       gap={3}
       alignItems="flex-start"
+      width="100%"
     >
       {information.map((info) => (
         <Flex gap={1} direction="column" alignItems="flex-start" key={info.label}>

@@ -54,9 +54,7 @@ describe('SettingsPage', () => {
   it('renders the setting page correctly', async () => {
     const { getByRole, queryByText, getByText } = render();
 
-    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
-
-    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
     expect(getByRole('heading', { name: 'Documentation' })).toBeInTheDocument();
     expect(getByText('Configure the documentation plugin')).toBeInTheDocument();
@@ -81,9 +79,7 @@ describe('SettingsPage', () => {
 
     const { getByLabelText, queryByText } = render();
 
-    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
-
-    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
     expect(getByLabelText('Password')).toBeInTheDocument();
 
@@ -93,9 +89,7 @@ describe('SettingsPage', () => {
   it('should render the password field when the Restricted Access checkbox is checked', async () => {
     const { getByRole, getByLabelText, queryByText } = render();
 
-    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
-
-    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
     fireEvent.click(getByRole('checkbox', { name: 'Restricted Access' }));
 
@@ -107,9 +101,7 @@ describe('SettingsPage', () => {
   it('should allow me to type a password and save that settings change successfully', async () => {
     const { getByRole, getByLabelText, queryByText, user, getByText } = render();
 
-    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
-
-    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
     fireEvent.click(getByRole('checkbox', { name: 'Restricted Access' }));
 

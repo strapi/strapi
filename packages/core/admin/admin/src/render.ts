@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 
-import type { FeaturesService } from '@strapi/types';
+import type { FeaturesConfig, FeaturesService } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: {
@@ -34,7 +34,7 @@ const renderAdmin = async (
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
     future: {
-      isEnabled: (name: keyof FeaturesService['config']) => {
+      isEnabled: (name: keyof NonNullable<FeaturesConfig['future']>) => {
         return features?.future?.[name] === true;
       },
     },

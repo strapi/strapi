@@ -146,6 +146,7 @@ front-workspace.code-workspace
 playwright-report
 test-results
 !e2e/data/*.tar
+e2e/.env
 
 ############################
 # Strapi

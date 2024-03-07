@@ -50,19 +50,16 @@
   "dependencies": {
     "axios": "1.6.0",
     "date-fns": "2.30.0",
-    "formik": "2.4.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "qs": "6.11.1",
-    "react-helmet": "6.1.0",
     "react-intl": "6.4.1",
-    "react-query": "3.39.3",
-    "react-select": "5.7.0"
+    "react-query": "3.39.3"
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "4.20.3",
-    "@strapi/design-system": "1.15.0",
-    "@strapi/icons": "1.15.0",
+    "@strapi/design-system": "1.16.0",
+    "@strapi/icons": "1.16.0",
     "@strapi/pack-up": "4.20.3",
     "@strapi/types": "4.20.3",
     "@strapi/utils": "4.20.3",
@@ -78,12 +75,11 @@
     "rimraf": "3.0.2",
     "styled-components": "5.3.3",
     "typescript": "5.3.2",
-    "vite": "5.0.11",
     "yup": "0.32.9"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.15.0",
-    "@strapi/icons": "1.15.0",
+    "@strapi/design-system": "1.16.0",
+    "@strapi/icons": "1.16.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

@@ -25,9 +25,6 @@ import {
   useStrapiApp,
   PaginationURLQuery,
   PageSizeURLQuery,
-  LoadingIndicatorPage,
-  AnErrorOccurred,
-  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -36,6 +33,7 @@ import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
+import { Page } from '../../../components/PageHelpers';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { capitalise } from '../../../utils/strings';
@@ -249,21 +247,11 @@ const ListViewPage = () => {
   );
 
   if (isLoading) {
-    return (
-      <Main aria-busy={true}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   if (error) {
-    return (
-      <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
-          <AnErrorOccurred />
-        </Flex>
-      </Main>
-    );
+    return <Page.Error />;
   }
 
   const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
@@ -530,29 +518,21 @@ const ProtectedListViewPage = () => {
   const { permissions = [], isLoading, isError } = useSyncRbac(model, query, 'editView');
 
   if (isLoading) {
-    return (
-      <Main aria-busy={true}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
-  if (!isLoading && isError) {
-    return (
-      <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
-          <AnErrorOccurred />
-        </Flex>
-      </Main>
-    );
+  if (isError) {
+    return <Page.Error />;
   }
 
   return (
-    <CheckPagePermissions permissions={permissions}>
-      <DocumentRBAC permissions={permissions}>
-        <ListViewPage />
-      </DocumentRBAC>
-    </CheckPagePermissions>
+    <Page.Protect permissions={permissions}>
+      {({ permissions }) => (
+        <DocumentRBAC permissions={permissions}>
+          <ListViewPage />
+        </DocumentRBAC>
+      )}
+    </Page.Protect>
   );
 };
 

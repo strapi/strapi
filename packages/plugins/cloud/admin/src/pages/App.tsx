@@ -5,10 +5,8 @@
  *
  */
 
-import { AnErrorOccurred } from '@strapi/helper-plugin';
+import { Page } from '@strapi/strapi/admin';
 import { Routes, Route } from 'react-router-dom';
-
-import { pluginId } from '../pluginId';
 
 import { HomePage } from './HomePage';
 
@@ -17,7 +15,7 @@ const App = () => {
     <div>
       <Routes>
         <Route index element={<HomePage />} />
-        <Route path="*" element={<AnErrorOccurred />} />
+        <Route path="*" element={<Page.Error />} />
       </Routes>
     </div>
   );

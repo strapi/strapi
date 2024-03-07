@@ -1,16 +1,14 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
-  AnErrorOccurred,
-  CheckPagePermissions,
-  LoadingIndicatorPage,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
+import { Page } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';
@@ -42,21 +40,11 @@ const SettingsPage = () => {
   const isLoading = isLoadingLocales || isLoadingRBAC;
 
   if (isLoading) {
-    return (
-      <Main aria-busy={true}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   if (error || !Array.isArray(locales)) {
-    return (
-      <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
-          <AnErrorOccurred />
-        </Flex>
-      </Main>
-    );
+    return <Page.Error />;
   }
 
   return (
@@ -92,9 +80,9 @@ const SettingsPage = () => {
 
 const ProtectedSettingsPage = () => {
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.read}>
+    <Page.Protect permissions={PERMISSIONS.read}>
       <SettingsPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 
