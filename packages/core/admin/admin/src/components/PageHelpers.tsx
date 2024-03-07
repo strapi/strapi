@@ -57,16 +57,14 @@ const Error = (props: ErrorProps) => {
   return (
     <Main height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
-        <Box minWidth="50%">
-          <EmptyStateLayout
-            icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
-            content={formatMessage({
-              id: 'anErrorOccurred',
-              defaultMessage: 'Woops! Something went wrong. Please, try again.',
-            })}
-            {...props}
-          />
-        </Box>
+        <EmptyStateLayout
+          icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
+          content={formatMessage({
+            id: 'anErrorOccurred',
+            defaultMessage: 'Woops! Something went wrong. Please, try again.',
+          })}
+          {...props}
+        />
       </Flex>
     </Main>
   );
