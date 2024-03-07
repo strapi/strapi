@@ -1,6 +1,7 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
+import { CMBulkRelease } from './components/CMBulkRelease';
 import { CMReleasesContainer } from './components/CMReleasesContainer';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
@@ -41,6 +42,11 @@ const admin: Plugin.Config.AdminInput = {
       app.injectContentManagerComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
+      });
+      // Insert the Releases container in the 'bulkRelease' zone of the Content Manager's list view
+      app.injectContentManagerComponent('listView', 'bulkRelease', {
+        name: `${pluginId}-link`,
+        Component: CMBulkRelease,
       });
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&

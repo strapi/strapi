@@ -38,7 +38,8 @@ type InjectionZoneArea =
   | 'contentManager.listView.unpublishModalAdditionalInfos'
   | 'contentManager.listView.deleteModalAdditionalInfos'
   | 'contentManager.listView.publishModalAdditionalInfos'
-  | 'contentManager.listView.deleteModalAdditionalInfos';
+  | 'contentManager.listView.deleteModalAdditionalInfos'
+  | 'contentManager.listView.bulkRelease';
 
 type InjectionZoneModule = InjectionZoneArea extends `${infer Word}.${string}` ? Word : never;
 type InjectionZoneContainer = InjectionZoneArea extends `${string}.${infer Word}.${string}`
