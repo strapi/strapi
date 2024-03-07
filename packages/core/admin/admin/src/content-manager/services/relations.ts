@@ -116,20 +116,33 @@ const relationsApi = contentManagerApi.injectEndpoints({
           model: queryArgs.model,
           targetField: queryArgs.targetField,
           _q: queryArgs.params?._q,
+          idsToOmit: queryArgs.params?.idsToOmit,
+          idsToInclude: queryArgs.params?.idsToInclude,
         };
       },
       merge: (currentCache, newItems) => {
-        if (currentCache.results && newItems.results) {
-          /**
-           * Relations will always have unique IDs, so we can therefore assume
-           * that we only need to push the new items to the cache.
-           */
-          const existingIds = currentCache.results.map((item) => item.documentId);
-          const uniqueNewItems = newItems.results.filter(
-            (item) => !existingIds.includes(item.documentId)
-          );
-          currentCache.results.push(...uniqueNewItems);
-          currentCache.pagination = newItems.pagination;
+        if (currentCache.pagination && newItems.pagination) {
+          if (currentCache.pagination.page < newItems.pagination.page) {
+            /**
+             * Relations will always have unique IDs, so we can therefore assume
+             * that we only need to push the new items to the cache.
+             */
+            const existingIds = currentCache.results.map((item) => item.documentId);
+            const uniqueNewItems = newItems.results.filter(
+              (item) => !existingIds.includes(item.documentId)
+            );
+            currentCache.results.push(...uniqueNewItems);
+            currentCache.pagination = newItems.pagination;
+          } else if (
+            currentCache.pagination.page >= newItems.pagination.page &&
+            newItems.pagination.page === 1
+          ) {
+            /**
+             * We're resetting the relations
+             */
+            currentCache.results = newItems.results;
+            currentCache.pagination = newItems.pagination;
+          }
         }
       },
       forceRefetch({ currentArg, previousArg }) {
