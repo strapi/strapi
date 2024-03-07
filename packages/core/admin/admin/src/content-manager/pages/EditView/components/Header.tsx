@@ -446,7 +446,7 @@ const StyledPencil = styled(Pencil)`
 const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
-  const match = useMatch(LIST_PATH);
+  const listViewPathMatch = useMatch(LIST_PATH);
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
   const toggleNotification = useNotification();
@@ -482,7 +482,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
          * and therefore not in a form and shouldn't be
          * trying to set the submitting value.
          */
-        if (!match) {
+        if (!listViewPathMatch) {
           setSubmitting(true);
         }
         try {
@@ -512,7 +512,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
             navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });
           }
         } finally {
-          if (!match) {
+          if (!listViewPathMatch) {
             setSubmitting(false);
           }
         }
