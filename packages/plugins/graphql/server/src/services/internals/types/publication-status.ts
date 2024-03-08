@@ -6,16 +6,14 @@ export default ({ strapi }: Context) => {
 
   return {
     /**
-     * An enum type definition representing a publication state
+     * An enum type definition representing a publication status
      * @type {NexusEnumTypeDef}
      */
     PublicationStatus: enumType({
       name: PUBLICATION_STATUS_TYPE_NAME,
 
       members: {
-        // Published only
         DRAFT: 'draft',
-        // Published & draft
         PUBLISHED: 'published',
       },
     }),

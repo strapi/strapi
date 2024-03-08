@@ -42,10 +42,8 @@ export default ({ strapi }: Context) => {
               resolve: pipe(prop('nodes'), defaultTo([])),
             });
 
-            // TODO: only add if v4 compat is enabled
-            // TODO: remove in next major
             t.nonNull.field('meta', {
-              deprecation: 'Use the `pagination` field instead',
+              deprecation: 'Use the `pageInfo` field instead',
               type: RESPONSE_COLLECTION_META_TYPE_NAME,
               resolve: identity,
             });

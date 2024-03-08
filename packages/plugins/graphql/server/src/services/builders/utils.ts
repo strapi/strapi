@@ -5,18 +5,19 @@ import type { Strapi, Schema } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
 
+type ContentTypeArgsOptions = {
+  multiple?: boolean;
+  isNested?: boolean;
+};
+
 export default ({ strapi }: { strapi: Strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
 
   return {
-    /**
-     * Get every args for a given content type
-     * @param {object} contentType
-     * @param {object} options
-     * @param {boolean} options.multiple
-     * @return {object}
-     */
-    getContentTypeArgs(contentType: Schema.Any, { multiple = true, isNested = false } = {}) {
+    getContentTypeArgs(
+      contentType: Schema.Any,
+      { multiple = true, isNested = false }: ContentTypeArgsOptions = {}
+    ) {
       const { naming } = getService('utils');
       const { args } = getService('internals');
 

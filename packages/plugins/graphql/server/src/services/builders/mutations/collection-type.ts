@@ -1,4 +1,4 @@
-import { extendType, nonNull } from 'nexus';
+import { extendType, nonNull, idArg } from 'nexus';
 import { sanitize } from '@strapi/utils';
 import type * as Nexus from 'nexus';
 import type { Schema } from '@strapi/types';
@@ -77,7 +77,7 @@ export default ({ strapi }: Context) => {
       },
 
       args: {
-        documentId: nonNull('ID'),
+        documentId: nonNull(idArg()),
         status: args.PublicationStatusArg,
         data: nonNull(getContentTypeInputName(contentType)),
       },
@@ -120,7 +120,7 @@ export default ({ strapi }: Context) => {
       },
 
       args: {
-        documentId: nonNull('ID'),
+        documentId: nonNull(idArg()),
       },
 
       async resolve(parent, args) {

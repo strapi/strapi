@@ -45,8 +45,6 @@ export default ({ strapi }: Context) => {
     t: Nexus.blocks.ObjectDefinitionBlock<string>,
     contentType: Schema.SingleType
   ) => {
-    // const { uid } = contentType;
-
     const findQueryName = getFindOneQueryName(contentType);
     const typeName = getTypeName(contentType);
 

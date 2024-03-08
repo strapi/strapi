@@ -329,6 +329,7 @@ export default (context: Context) => {
       return objectType({
         name,
         definition(t) {
+          // add back the old id attribute on contentType if v4 compat is enabled
           if (
             modelType !== 'component' &&
             isNotDisabled(contentType)('id') &&

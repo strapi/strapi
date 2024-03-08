@@ -64,7 +64,7 @@ const getLocaleScalar = ({ nexus }: any) => {
         throw new ValidationError('Locale cannot represent non string type');
       }
 
-      const isValidLocale = ast.value === 'all' || locales.find(propEq('code', ast.value));
+      const isValidLocale = ast.value === '*' || locales.find(propEq('code', ast.value));
 
       if (!isValidLocale) {
         throw new ValidationError('Unknown locale supplied');
