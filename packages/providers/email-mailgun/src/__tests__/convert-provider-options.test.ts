@@ -1,6 +1,6 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
-import Options from 'mailgun.js/interfaces/Options';
+import type Options from 'mailgun.js/interfaces/Options';
 import provider from '../index';
 
 describe('@strapi/provider-email-mailgun', () => {

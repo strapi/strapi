@@ -1,4 +1,4 @@
-import { TransferKind } from '../client';
+import type { TransferKind } from '../client';
 import type { ServerError } from './error';
 
 export type Message<T = unknown> = {

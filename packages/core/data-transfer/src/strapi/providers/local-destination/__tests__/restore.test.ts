@@ -5,7 +5,7 @@ import {
   getContentTypes,
   setGlobalStrapi,
 } from '../../../../__tests__/test-utils';
-import { IConfiguration } from '../../../../../types';
+import type { IConfiguration } from '../../../../../types';
 
 const entities = [
   {

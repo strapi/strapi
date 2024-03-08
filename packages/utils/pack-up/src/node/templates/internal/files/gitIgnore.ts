@@ -1,6 +1,6 @@
 import { outdent } from 'outdent';
 
-import { TemplateFile } from '../../types';
+import type { TemplateFile } from '../../types';
 
 const gitIgnoreFile: TemplateFile = {
   name: '.gitignore',

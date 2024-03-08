@@ -98,4 +98,5 @@ const address = {
 
 type Address = typeof address;
 
-export { address, Address };
+export type { Address };
+export { address };

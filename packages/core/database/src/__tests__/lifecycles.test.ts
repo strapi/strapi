@@ -1,4 +1,5 @@
-import { createLifecyclesProvider, LifecycleProvider, Event, Subscriber } from '../lifecycles';
+import type { LifecycleProvider, Event, Subscriber } from '../lifecycles';
+import { createLifecyclesProvider } from '../lifecycles';
 import type { Database } from '..';
 
 describe('LifecycleProvider', () => {

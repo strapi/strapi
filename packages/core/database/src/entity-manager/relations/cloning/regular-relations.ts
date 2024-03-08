@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import type { Knex } from 'knex';
 
 import { cleanInverseOrderColumn } from '../../regular-relations';
 import type { ID, Relation } from '../../../types';

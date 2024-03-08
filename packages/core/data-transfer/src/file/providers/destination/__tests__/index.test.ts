@@ -5,7 +5,8 @@ jest.mock('fs');
 
 import fs from 'fs-extra';
 import { Writable } from 'stream-chain';
-import { createLocalFileDestinationProvider, ILocalFileDestinationProviderOptions } from '..';
+import type { ILocalFileDestinationProviderOptions } from '..';
+import { createLocalFileDestinationProvider } from '..';
 import * as encryption from '../../../../utils/encryption';
 import { createFilePathFactory, createTarEntryStream } from '../utils';
 

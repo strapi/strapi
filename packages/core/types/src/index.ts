@@ -29,28 +29,8 @@ import type { FeaturesService, FeaturesConfig } from './modules/features';
 
 export type * from './types';
 
-export {
-  Container,
-  Server,
-  EventHub,
-  CronService,
-  Webhook,
-  WebhookRunner,
-  WebhookStore,
-  CoreStore,
-  EntityValidator,
-  EntityService,
-  TelemetryService,
-  RequestContext,
-  CustomFields,
-  FeaturesService,
-  FeaturesConfig,
-  Fetch,
-  AuthenticationService,
-  ContentApi,
-  SanitizersRegistry,
-  ValidatorsRegistry,
-};
+export type { Container, Server, EventHub, CronService, Webhook, WebhookRunner, WebhookStore, CoreStore, EntityValidator, TelemetryService, RequestContext, FeaturesService, FeaturesConfig, Fetch, AuthenticationService, ContentApi, SanitizersRegistry, ValidatorsRegistry };
+export { EntityService, CustomFields };
 
 declare global {
   var strapi: LoadedStrapi;

@@ -1,4 +1,5 @@
-import { format, Logform } from 'winston';
+import type { Logform } from 'winston';
+import { format } from 'winston';
 import logErrors from './log-errors';
 
 const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss.SSS';

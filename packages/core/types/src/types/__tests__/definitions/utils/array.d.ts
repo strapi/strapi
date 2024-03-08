@@ -1,4 +1,4 @@
-import { Utils } from '../../..';
+import type { Utils } from '../../..';
 
 type Obj = {
   foo: 'bar';
@@ -30,7 +30,7 @@ type IsEmptyWithNotEmptyTuple = Utils.Array.IsEmpty<['foo', 'bar']>;
 type IsNotEmptyWithNotEmptyTuple = Utils.Array.IsNotEmpty<['foo', 'bar']>;
 type IsNotEmptyWithEmptyTuple = Utils.Array.IsNotEmpty<[]>;
 
-export {
+export type {
   StringValues,
   NumberValues,
   BoolValues,

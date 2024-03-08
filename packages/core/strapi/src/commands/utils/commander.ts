@@ -3,7 +3,8 @@
  */
 
 import inquirer from 'inquirer';
-import { Command, InvalidOptionArgumentError, Option } from 'commander';
+import type { Command } from 'commander';
+import { InvalidOptionArgumentError, Option } from 'commander';
 import chalk from 'chalk';
 import { isNaN } from 'lodash/fp';
 import { exitWith } from './helpers';

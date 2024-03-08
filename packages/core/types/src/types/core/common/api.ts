@@ -1,3 +1,3 @@
 import type { Common } from '..';
 
-export interface API extends Common.Module {}
+export type API = Common.Module;

@@ -1,5 +1,5 @@
 import { pipeAsync } from '@strapi/utils';
-import { LoadedStrapi as Strapi, EntityService, Common } from '@strapi/types';
+import type { LoadedStrapi as Strapi, EntityService, Common } from '@strapi/types';
 
 const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',

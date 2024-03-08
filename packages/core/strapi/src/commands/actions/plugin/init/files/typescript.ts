@@ -1,4 +1,4 @@
-import { TemplateFile } from '@strapi/pack-up';
+import type { TemplateFile } from '@strapi/pack-up';
 import { outdent } from 'outdent';
 
 interface TsConfigFiles {

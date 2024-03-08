@@ -1,4 +1,5 @@
-import _, { PropertyName } from 'lodash';
+import type { PropertyName } from 'lodash';
+import _ from 'lodash';
 
 type Sanitizer = (value: unknown) => unknown;
 

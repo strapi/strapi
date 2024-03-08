@@ -1,6 +1,6 @@
 import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import { Common, Attribute, EntityService } from '@strapi/types';
+import type { Common, Attribute, EntityService } from '@strapi/types';
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;

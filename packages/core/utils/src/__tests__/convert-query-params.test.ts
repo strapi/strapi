@@ -1,5 +1,5 @@
 import convertQueryParams from '../convert-query-params';
-import { Model } from '../types';
+import type { Model } from '../types';
 
 const schema: Model = {
   kind: 'collectionType',

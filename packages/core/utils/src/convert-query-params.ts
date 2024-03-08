@@ -23,7 +23,7 @@ import parseType from './parse-type';
 import * as contentTypesUtils from './content-types';
 import { PaginationError } from './errors';
 import { isDynamicZoneAttribute, isMorphToRelationalAttribute } from './content-types';
-import { Model } from './types';
+import type { Model } from './types';
 import { isOperator } from './operators';
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;

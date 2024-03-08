@@ -12,7 +12,8 @@ import {
   hasInverseOrderColumn,
   isManyToAny,
 } from './relations';
-import { Metadata, Meta, ComponentLinkMeta } from './metadata';
+import type { Meta, ComponentLinkMeta } from './metadata';
+import { Metadata } from './metadata';
 import type { Attribute, Model, Relation } from '../types';
 
 export type { Metadata, Meta };

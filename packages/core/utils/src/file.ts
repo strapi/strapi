@@ -1,7 +1,8 @@
 /**
  * Utils file containing file treatment utils
  */
-import { Readable, Writable, WritableOptions } from 'node:stream';
+import type { Readable, WritableOptions } from 'node:stream';
+import { Writable } from 'node:stream';
 
 const kbytesToBytes = (kbytes: number) => kbytes * 1000;
 const bytesToKbytes = (bytes: number) => Math.round((bytes / 1000) * 100) / 100;

@@ -1,6 +1,6 @@
 import { has, isNil, mapValues } from 'lodash/fp';
 
-import { Strapi, UID, Schema } from '@strapi/types';
+import type { Strapi, UID, Schema } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { ConfigurationUpdate } from './configuration';
 

@@ -1,4 +1,5 @@
-import glob, { IOptions } from 'glob';
+import type { IOptions } from 'glob';
+import glob from 'glob';
 
 /**
  * Promise based glob

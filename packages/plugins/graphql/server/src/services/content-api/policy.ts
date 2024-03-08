@@ -1,5 +1,5 @@
 import { propOr } from 'lodash/fp';
-import { GraphQLFieldResolver, GraphQLResolveInfo } from 'graphql';
+import type { GraphQLFieldResolver, GraphQLResolveInfo } from 'graphql';
 import { policy as policyUtils, errors } from '@strapi/utils';
 import type { Strapi } from '@strapi/types';
 

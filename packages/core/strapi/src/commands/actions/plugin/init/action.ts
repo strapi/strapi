@@ -3,21 +3,22 @@ import boxen from 'boxen';
 import chalk from 'chalk';
 import getLatestVersion from 'get-latest-version';
 import gitUrlParse from 'git-url-parse';
-import {
+import type {
   InitOptions,
+  TemplateFile } from '@strapi/pack-up';
+import {
   definePackageFeature,
   definePackageOption,
   defineTemplate,
-  init,
-  TemplateFile,
+  init
 } from '@strapi/pack-up';
 import { outdent } from 'outdent';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
 
-import { CLIContext } from '../../../types';
+import type { CLIContext } from '../../../types';
 import { gitIgnoreFile } from './files/gitIgnore';
 
-interface ActionOptions extends Pick<InitOptions, 'silent' | 'debug'> {}
+type ActionOptions = Pick<InitOptions, 'silent' | 'debug'>;
 
 export default async (
   packagePath: string,

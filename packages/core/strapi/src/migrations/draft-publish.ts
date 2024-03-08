@@ -1,5 +1,5 @@
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import { Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;

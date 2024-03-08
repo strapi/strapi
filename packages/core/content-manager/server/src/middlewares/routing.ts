@@ -1,4 +1,4 @@
-import { UID, Common, Schema } from '@strapi/types';
+import type { UID, Common, Schema } from '@strapi/types';
 import type { Context, Next } from 'koa';
 import isNil from 'lodash/isNil';
 

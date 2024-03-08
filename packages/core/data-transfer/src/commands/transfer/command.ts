@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
-import { Command, Option } from 'commander';
+import type { Command } from 'commander';
+import { Option } from 'commander';
 import { getCommanderConfirmMessage, forceOption, parseURL } from '../commander';
 import { exitWith, assertUrlHasProtocol, ifOptions } from '../helpers';
 import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';

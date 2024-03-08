@@ -1,4 +1,4 @@
-import { Common, Shared } from '../types';
+import type { Common, Shared } from '../types';
 import type * as Types from './entity-service';
 
 type Entity = {

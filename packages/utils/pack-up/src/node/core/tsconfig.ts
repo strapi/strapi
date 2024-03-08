@@ -2,7 +2,7 @@ import os from 'os';
 import nodePath from 'path';
 import ts from 'typescript';
 
-import { Logger } from './logger';
+import type { Logger } from './logger';
 
 /**
  * @description Load a tsconfig.json file and return the parsed config

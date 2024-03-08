@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import qs from 'qs';
-import { Ability } from '@casl/ability';
-import { providerFactory } from '@strapi/utils';
+import type { Ability } from '@casl/ability';
+import type { providerFactory } from '@strapi/utils';
 
 import {
   createEngineHooks,
@@ -12,7 +12,7 @@ import {
 import type { PermissionEngineHooks, HookName } from './hooks';
 
 import * as abilities from './abilities';
-import { Permission } from '../domain/permission';
+import type { Permission } from '../domain/permission';
 import type { PermissionRule } from '../types';
 
 export { abilities };

@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import path from 'path';
 import ts from 'typescript';
 
-import { Logger } from '../../core/logger';
+import type { Logger } from '../../core/logger';
 
 const printDiagnostic = (
   diagnostic: ts.Diagnostic,

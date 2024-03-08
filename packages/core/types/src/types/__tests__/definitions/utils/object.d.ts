@@ -1,4 +1,4 @@
-import { Utils } from '../../..';
+import type { Utils } from '../../..';
 
 // Aux
 type Base = { x: 'foo' | 'bar' };
@@ -33,7 +33,7 @@ type ValuesContainNever = Utils.Object.Values<{ foo: 'bar'; bar: 'foo'; foobar: 
 // Replace
 type Replace = Utils.Object.Replace<{ foo: 'bar'; bar: 'foo' }, { foo: 2 }>;
 
-export {
+export type {
   // KeysBy
   KeysByString,
   KeysByNumber,

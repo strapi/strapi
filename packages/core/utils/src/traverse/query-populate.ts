@@ -15,7 +15,7 @@ import {
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
-import { Attribute } from '../types';
+import type { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';
 
 const isKeyword = (keyword: string) => {

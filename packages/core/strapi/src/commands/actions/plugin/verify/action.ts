@@ -1,10 +1,11 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
-import { CheckOptions, check } from '@strapi/pack-up';
+import type { CheckOptions } from '@strapi/pack-up';
+import { check } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import { CLIContext } from '../../../types';
+import type { CLIContext } from '../../../types';
 
-interface ActionOptions extends CheckOptions {}
+type ActionOptions = CheckOptions;
 
 export default async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {

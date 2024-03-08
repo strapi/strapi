@@ -1,11 +1,13 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
-import { ConfigBundle, WatchCLIOptions, watch } from '@strapi/pack-up';
+import type { ConfigBundle, WatchCLIOptions } from '@strapi/pack-up';
+import { watch } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
-import { CLIContext } from '../../../types';
+import type { Export } from '../../../utils/pkg';
+import { loadPkg, validatePkg } from '../../../utils/pkg';
+import type { CLIContext } from '../../../types';
 
-interface ActionOptions extends WatchCLIOptions {}
+type ActionOptions = WatchCLIOptions;
 
 export default async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {

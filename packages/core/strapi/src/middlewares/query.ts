@@ -1,4 +1,5 @@
-import qs, { IParseOptions } from 'qs';
+import type { IParseOptions } from 'qs';
+import qs from 'qs';
 import type Koa from 'koa';
 import type { Strapi, Common } from '@strapi/types';
 

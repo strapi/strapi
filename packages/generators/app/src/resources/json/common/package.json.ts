@@ -1,4 +1,4 @@
-import { Scope } from '../../../types';
+import type { Scope } from '../../../types';
 import engines from './engines';
 
 type OptsScope = Pick<

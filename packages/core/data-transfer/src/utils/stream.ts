@@ -1,4 +1,5 @@
-import { Transform, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { Transform } from 'stream';
 
 type TransformOptions = ConstructorParameters<typeof Transform>[0];
 

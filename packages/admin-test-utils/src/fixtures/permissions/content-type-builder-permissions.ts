@@ -39,4 +39,5 @@ const contentTypeBuilder = [
 
 type ContentTypeBuilder = typeof contentTypeBuilder;
 
-export { contentTypeBuilder, ContentTypeBuilder };
+export type { ContentTypeBuilder };
+export { contentTypeBuilder };

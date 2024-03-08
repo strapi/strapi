@@ -1,6 +1,7 @@
 import { pickBy, has } from 'lodash/fp';
 import type { Common, Schema } from '@strapi/types';
-import { createContentType, ContentTypeDefinition } from '../domain/content-type';
+import type { ContentTypeDefinition } from '../domain/content-type';
+import { createContentType } from '../domain/content-type';
 import { addNamespace, hasNamespace } from '../utils';
 
 type ContentTypesInput = Record<string, ContentTypeDefinition>;

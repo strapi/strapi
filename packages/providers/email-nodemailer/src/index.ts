@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import nodemailer, { SendMailOptions } from 'nodemailer';
+import type { SendMailOptions } from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 interface Settings {
   defaultFrom: string;

@@ -1,6 +1,6 @@
 import type { Knex } from 'knex';
 import type { ID } from '../types';
-import { QueryBuilder } from '../query/query-builder';
+import type { QueryBuilder } from '../query/query-builder';
 
 export type Data = Record<string, unknown>;
 

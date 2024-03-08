@@ -1,5 +1,5 @@
-import { Extensions } from '../../core/exports';
-import { Targets } from '../../createBuildContext';
+import type { Extensions } from '../../core/exports';
+import type { Targets } from '../../createBuildContext';
 
 interface ViteTaskEntry {
   path: string;

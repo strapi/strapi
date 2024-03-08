@@ -1,4 +1,5 @@
-import { Command, Option } from 'commander';
+import type { Command } from 'commander';
+import { Option } from 'commander';
 import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
 import { promptEncryptionKey } from '../commander';
 import action from './action';

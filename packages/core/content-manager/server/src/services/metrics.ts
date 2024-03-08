@@ -1,6 +1,6 @@
 import { intersection, prop } from 'lodash/fp';
 import { relations } from '@strapi/utils';
-import { LoadedStrapi as Strapi, Schema } from '@strapi/types';
+import type { LoadedStrapi as Strapi, Schema } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 
 const { getRelationalFields } = relations;

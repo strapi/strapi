@@ -4,7 +4,7 @@ import { fromRow } from '../transform';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
 import type { Meta } from '../../../metadata';
-import { ID, RelationalAttribute, Relation } from '../../../types';
+import type { ID, RelationalAttribute, Relation } from '../../../types';
 
 type Context = {
   db: Database;

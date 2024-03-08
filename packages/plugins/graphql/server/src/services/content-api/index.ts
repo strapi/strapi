@@ -14,7 +14,7 @@ import {
   registerPolymorphicContentType,
   contentType,
 } from './register-functions';
-import { TypeRegistry } from '../type-registry';
+import type { TypeRegistry } from '../type-registry';
 
 const {
   registerEnumsDefinition,

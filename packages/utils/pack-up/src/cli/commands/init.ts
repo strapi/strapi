@@ -1,5 +1,7 @@
-import { InitOptions, init as nodeInit } from '../../node/init';
+import { init as nodeInit } from '../../node/init';
 import { handleError } from '../errors';
+
+import type { InitOptions } from '../../node/init';
 
 export const init = async (options: InitOptions) => {
   try {

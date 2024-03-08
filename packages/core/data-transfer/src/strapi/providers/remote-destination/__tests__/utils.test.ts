@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import { TRANSFER_PATH } from '../../../remote/constants';
-import { CommandMessage } from '../../../../../types/remote/protocol/client';
+import type { CommandMessage } from '../../../../../types/remote/protocol/client';
 import { createDispatcher } from '../../utils';
 
 jest.useFakeTimers();

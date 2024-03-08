@@ -14,16 +14,5 @@ const allPermissions = [...admin, ...contentManager, ...contentTypeBuilder, ...d
 
 type AdminPermissions = typeof allPermissions;
 
-export {
-  admin,
-  Admin,
-  app,
-  App,
-  contentManager,
-  ContentManager,
-  contentTypeBuilder,
-  ContentTypeBuilder,
-  allPermissions,
-  AdminPermissions,
-  Documentation,
-};
+export type { Admin, App, ContentManager, ContentTypeBuilder, AdminPermissions, Documentation };
+export { admin, app, contentManager, contentTypeBuilder, allPermissions };

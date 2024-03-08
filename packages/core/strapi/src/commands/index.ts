@@ -34,7 +34,7 @@ import verifyPluginCommand from './actions/plugin/verify/command';
 
 import { createLogger } from './utils/logger';
 import { loadTsConfig } from './utils/tsconfig';
-import { CLIContext } from './types';
+import type { CLIContext } from './types';
 
 const strapiCommands = {
   createAdminUser,

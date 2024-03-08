@@ -4,9 +4,8 @@ import os from 'os';
 import * as path from 'path';
 import pkgUp from 'pkg-up';
 
-import { Logger } from './logger';
-
 import type { Export } from './exports';
+import type { Logger } from './logger';
 import type { Runtime } from '../createBuildContext';
 import type { PluginOption } from 'vite';
 
