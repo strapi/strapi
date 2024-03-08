@@ -57,24 +57,27 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
      * Find multiple (or all) locales for a document
      */
     async findLocales(
-      id: string,
+      id: string | undefined,
       uid: Common.UID.CollectionType,
       opts: { populate?: Documents.Params.Pick<any, 'populate'>; locale?: string | string[] | '*' }
     ) {
       // Will look for a specific locale by default
-      const whereQuery: any = {};
+      const where: any = {};
+
+      // Might not have an id if querying a single type
+      if (id) {
+        where.documentId = id;
+      }
 
       // Search in array of locales
       if (Array.isArray(opts.locale)) {
-        whereQuery.locale = { $in: opts.locale };
+        where.locale = { $in: opts.locale };
       } else if (opts.locale && opts.locale !== '*') {
         // Look for a specific locale, ignore if looking for all locales
-        whereQuery.locale = opts.locale;
+        where.locale = opts.locale;
       }
 
-      return strapi.db
-        .query(uid)
-        .findMany({ populate: opts.populate, where: { ...whereQuery, documentId: id } });
+      return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
     async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {

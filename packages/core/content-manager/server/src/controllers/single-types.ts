@@ -159,19 +159,27 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.delete(query);
+    const populate = await buildPopulateFromQuery(sanitizedQuery, model);
+
     const { locale } = getDocumentLocaleAndStatus(query);
+    const documentLocales = await documentManager.findLocales(undefined, model, {
+      populate,
+      locale,
+    });
 
-    const document = await findDocument(sanitizedQuery, model, { locale });
-
-    if (!document) {
+    if (documentLocales.length === 0) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.delete(document)) {
-      return ctx.forbidden();
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.delete(document)) {
+        return ctx.forbidden();
+      }
     }
 
-    const deletedEntity = await documentManager.delete(document.documentId, model, { locale });
+    const deletedEntity = await documentManager.delete(documentLocales.at(0).documentId, model, {
+      locale,
+    });
 
     ctx.body = await permissionChecker.sanitizeOutput(deletedEntity);
   },
