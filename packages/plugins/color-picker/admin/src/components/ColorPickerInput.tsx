@@ -12,6 +12,7 @@ import {
   FocusTrap,
   Popover,
   Typography,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { CarretDown } from '@strapi/icons';
 import { useField, type InputProps } from '@strapi/strapi/admin';
@@ -19,7 +20,6 @@ import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useComposedRefs } from '../hooks/useComposeRefs';
 import { getTrad } from '../utils/getTrad';
 
 const ColorPreview = styled.div`

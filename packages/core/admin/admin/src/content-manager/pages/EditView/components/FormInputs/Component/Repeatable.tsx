@@ -13,6 +13,7 @@ import {
   IconButton,
   Typography,
   KeyboardNavigable,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { useNotification, useQuery } from '@strapi/helper-plugin';
 import { Plus, Drag, Trash } from '@strapi/icons';
@@ -22,7 +23,6 @@ import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
 import { getIn } from '../../../../../../utils/object';
-import { useComposedRefs } from '../../../../../../utils/refs';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';

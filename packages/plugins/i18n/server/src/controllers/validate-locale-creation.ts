@@ -5,6 +5,7 @@ import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
+// TODO: v5 if implemented in the CM => delete this middleware
 const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
   const { model } = ctx.params;
   const { query } = ctx.request;

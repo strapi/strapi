@@ -17,6 +17,7 @@ import {
   TextInput,
   Typography,
   VisuallyHidden,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { ConfirmDialog, useNotification, useTracking } from '@strapi/helper-plugin';
@@ -29,7 +30,6 @@ import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
 import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
-import { composeRefs } from '../../../../../../../../admin/src/utils/refs';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,
@@ -220,7 +220,7 @@ export const Stage = ({
       type: DRAG_DROP_TYPES.STAGE,
     });
 
-  const composedRef = composeRefs(stageRef, dropRef);
+  const composedRef = useComposedRefs(stageRef, dropRef);
 
   const colorOptions = AVAILABLE_COLORS.map(({ hex, name }) => ({
     value: hex,

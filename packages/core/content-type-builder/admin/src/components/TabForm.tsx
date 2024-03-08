@@ -1,7 +1,8 @@
 import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
-import { GenericInput } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
+
+import { GenericInput } from './GenericInputs';
 
 interface TabFormProps {
   form: Array<Record<string, any>>;

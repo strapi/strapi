@@ -67,6 +67,6 @@ export declare namespace GetHistoryVersions {
     | {
         data?: never;
         meta?: never;
-        error?: errors.ApplicationError;
+        error: errors.ApplicationError;
       };
 }
