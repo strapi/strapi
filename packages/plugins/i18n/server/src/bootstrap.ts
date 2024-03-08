@@ -7,32 +7,25 @@ const registerModelsHooks = () => {
     .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
     .map((contentType) => contentType.uid);
 
-  if (i18nModelUIDs.length > 0) {
-    strapi.db.lifecycles.subscribe({
-      models: i18nModelUIDs,
-      async afterCreate(event) {
-        await getService('localizations').syncNonLocalizedAttributes(event.result, event.model);
-      },
-      async afterUpdate(event) {
-        await getService('localizations').syncNonLocalizedAttributes(event.result, event.model);
-      },
-      // TODO support bulk events
-      // async afterCreateMany(event) {
-      // },
-      // async afterUpdateMany(event) {
-      // },
-    });
-  }
-  strapi.db.lifecycles.subscribe({
-    models: ['plugin::i18n.locale'],
+  strapi.documents.use(async (context, next) => {
+    // @ts-expect-error ContentType is not typed correctly on the context
+    const schema = context.contentType;
 
-    async afterCreate() {
-      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
-    },
+    // TODO find all th actions we need the middleware for
+    if (!['create', 'update', 'createEntry'].includes(context.action)) {
+      return next(context);
+    }
 
-    async afterDelete() {
-      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
-    },
+    if (!i18nModelUIDs.includes(schema.uid)) {
+      return next(context);
+    }
+
+    // Collect the result of the document service action and sync non localized
+    // attributes based on the response
+    const result = (await next(context)) as any;
+    await getService('localizations').syncNonLocalizedAttributes(result, schema);
+
+    return result;
   });
 };
 

@@ -1,15 +1,11 @@
 import { isEmpty } from 'lodash/fp';
 
-import { mapAsync } from '@strapi/utils';
 import { getService } from '../utils';
 
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
- * @param {Object} entry entry to update
- * @param {Object} options
- * @param {Object} options.model corresponding model
  */
-const syncNonLocalizedAttributes = async (entry: any, model: any) => {
+const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
   const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
@@ -19,31 +15,28 @@ const syncNonLocalizedAttributes = async (entry: any, model: any) => {
   }
 
   const uid = model.uid;
-  const documentId = entry.documentId;
-  const locale = entry.locale;
+  const documentId = sourceEntry.documentId;
+  const status = sourceEntry?.publishedAt ? 'published' : 'draft';
 
-  // Update every other entry of this documentId across all locales
+  const localesToUpdate = (
+    await strapi.db.query(uid).findMany({
+      where: { documentId, publishedAt: status === 'published' ? { $ne: null } : null },
+      select: ['locale'],
+    })
+  )
+    .filter((entry: any) => sourceEntry.locale !== entry.locale)
+    .map((entry: any) => entry.locale);
 
-  // Find all the other locales for the draft status of this document
-  const otherLocaleEntries = await strapi.documents(uid).findMany({
-    status: 'draft',
-    fields: ['locale'],
-    filters: {
-      $and: [
-        {
-          documentId: {
-            $eq: documentId,
-          },
-        },
-        { locale: { $ne: locale } },
-      ],
+  // Update every other locale entry of this documentId in the same status
+  // We need to support both statuses incase we are working with a content type
+  // without draft and publish enabled
+  return strapi.db.query(uid).updateMany({
+    where: {
+      documentId,
+      publishedAt: status === 'published' ? { $ne: null } : null,
+      locale: { $in: localesToUpdate },
     },
-  });
-
-  await mapAsync(otherLocaleEntries, (otherEntry: any) => {
-    return strapi
-      .documents(uid)
-      .update(documentId, { data: nonLocalizedAttributes, where: { locale: otherEntry.locale } });
+    data: nonLocalizedAttributes,
   });
 };
 
