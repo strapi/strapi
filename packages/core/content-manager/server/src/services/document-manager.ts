@@ -1,4 +1,4 @@
-import { omit, pipe } from 'lodash/fp';
+import { omit, pipe, isNil } from 'lodash/fp';
 
 import { contentTypes, sanitize, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Documents } from '@strapi/types';
@@ -59,7 +59,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     async findLocales(
       id: string,
       uid: Common.UID.CollectionType,
-      opts: { populate: Documents.Params.Pick<any, 'populate'>; locale: string | string[] | '*' }
+      opts: { populate?: Documents.Params.Pick<any, 'populate'>; locale?: string | string[] | '*' }
     ) {
       // Will look for a specific locale by default
       let queryLocale: any = opts.locale;
@@ -70,7 +70,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       }
 
       // Look for any locale
-      if (opts.locale === '*') {
+      if (opts.locale === '*' || isNil(opts.locale)) {
         queryLocale = { $notNull: true };
       }
 
