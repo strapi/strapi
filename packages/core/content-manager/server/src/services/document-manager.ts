@@ -47,7 +47,10 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       uid: Common.UID.CollectionType,
       opts: DocServiceParams<'findOne'>[1] = {}
     ) {
-      return strapi.documents(uid).findOne(id, opts);
+      return strapi
+        .documents(uid)
+        .findOne(id, opts)
+        .then((doc) => mapDocument(uid, doc));
     },
 
     /**
