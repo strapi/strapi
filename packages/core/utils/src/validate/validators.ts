@@ -2,7 +2,7 @@ import { curry, isEmpty, isNil } from 'lodash/fp';
 
 import { pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
-import { isScalarAttribute } from '../content-types';
+import { isScalarAttribute, constants } from '../content-types';
 import {
   traverseQueryFilters,
   traverseQuerySort,
@@ -13,6 +13,8 @@ import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations }
 import { isOperator } from '../operators';
 import { throwInvalidParam } from './utils';
 import type { Model, Data } from '../types';
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
@@ -33,7 +35,7 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
       ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -68,7 +70,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
       ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -91,7 +93,7 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
       ({ key, attribute, value, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -114,7 +116,7 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
       ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 

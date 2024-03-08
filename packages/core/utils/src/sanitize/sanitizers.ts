@@ -2,7 +2,7 @@ import { curry, isEmpty, isNil, isArray, isObject } from 'lodash/fp';
 
 import { pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
-import { isScalarAttribute } from '../content-types';
+import { isScalarAttribute, constants } from '../content-types';
 
 import {
   traverseQueryFilters,
@@ -21,6 +21,8 @@ import {
 import { isOperator } from '../operators';
 
 import type { Model, Data } from '../types';
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
@@ -55,7 +57,7 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
 
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not checking it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -95,7 +97,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
       ({ key, attribute }, { remove }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not checking it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -118,7 +120,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
       ({ key, attribute, value }, { remove }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -141,7 +143,7 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
       ({ key, attribute }, { remove }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not checking it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 

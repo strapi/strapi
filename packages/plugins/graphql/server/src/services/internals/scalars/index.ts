@@ -1,6 +1,4 @@
 import { GraphQLDateTime, GraphQLLong, GraphQLJSON } from 'graphql-scalars';
-// eslint-disable-next-line import/extensions
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { asNexusMethod } from 'nexus';
 
 import TimeScalar from './time';
@@ -12,5 +10,4 @@ export default () => ({
   Time: asNexusMethod(TimeScalar, 'time'),
   Date: asNexusMethod(GraphQLDate, 'date'),
   Long: asNexusMethod(GraphQLLong, 'long'),
-  Upload: asNexusMethod(GraphQLUpload as any, 'upload'),
 });
