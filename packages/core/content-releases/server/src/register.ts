@@ -24,8 +24,9 @@ export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
   }
 
   if (strapi.plugin('graphql')) {
+    const graphqlExtensionService = strapi.plugin('graphql').service('extension');
     // Exclude the release and release action models from the GraphQL schema
-    strapi.plugin('graphql').service('extension').shadowCRUD(RELEASE_MODEL_UID).disable();
-    strapi.plugin('graphql').service('extension').shadowCRUD(RELEASE_ACTION_MODEL_UID).disable();
+    graphqlExtensionService.shadowCRUD(RELEASE_MODEL_UID).disable();
+    graphqlExtensionService.shadowCRUD(RELEASE_ACTION_MODEL_UID).disable();
   }
 };
