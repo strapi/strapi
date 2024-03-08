@@ -119,7 +119,7 @@ const decorator = (service: any) => ({
   async create(uid: any, opts: any = {}) {
     const model = strapi.getModel(uid);
 
-    const { syncLocalizations, syncNonLocalizedAttributes } = getService('localizations');
+    const { syncNonLocalizedAttributes } = getService('localizations');
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {
@@ -131,7 +131,6 @@ const decorator = (service: any) => ({
 
     const entry = await service.create.call(this, uid, opts);
 
-    await syncLocalizations(entry, { model });
     await syncNonLocalizedAttributes(entry, { model });
     return entry;
   },

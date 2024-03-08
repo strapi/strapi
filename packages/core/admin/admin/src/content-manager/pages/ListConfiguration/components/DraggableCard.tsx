@@ -1,12 +1,11 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography, useComposedRefs } from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { useComposedRefs } from '../../../../utils/refs';
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../constants/dragAndDrop';
 import { useDragAndDrop } from '../../../hooks/useDragAndDrop';

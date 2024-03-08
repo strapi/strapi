@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 
-import { useCallbackRef } from '@strapi/helper-plugin';
+import { useCallbackRef } from '@strapi/design-system';
 
 import { useGetRelationsQuery, useLazySearchRelationsQuery } from '../../services/relations';
 
