@@ -1,4 +1,3 @@
-
 import type { GitConfig } from '../core/git';
 import type { Logger } from '../core/logger';
 import type { PromptObject } from 'prompts';

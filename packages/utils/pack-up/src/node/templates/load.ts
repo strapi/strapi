@@ -5,7 +5,6 @@ import { resolve } from 'path';
 import type { TemplateOrTemplateResolver } from './types';
 import type { Logger } from '../core/logger';
 
-
 /**
  * @internal
  *

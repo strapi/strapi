@@ -4,7 +4,6 @@ import ora from 'ora';
 import os from 'os';
 import { resolve } from 'path';
 
-
 import { loadConfig } from './core/config';
 import { isError } from './core/errors';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';

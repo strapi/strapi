@@ -1,6 +1,5 @@
 import path from 'path';
 
-
 import type { Extensions } from './core/exports';
 import type { BuildContext, Runtime } from './createBuildContext';
 import type { DtsBuildTask } from './tasks/dts/build';

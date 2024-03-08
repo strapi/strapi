@@ -2,7 +2,6 @@ import fs from 'fs/promises';
 import ora from 'ora';
 import os from 'os';
 
-
 import { loadConfig, type Config } from './core/config';
 import { isError } from './core/errors';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';

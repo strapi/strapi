@@ -5,7 +5,6 @@ import { outdent } from 'outdent';
 import { isError } from '../../core/errors';
 import { definePackageFeature, definePackageOption, defineTemplate } from '../create';
 
-
 import { editorConfigFile } from './files/editorConfig';
 import { gitIgnoreFile } from './files/gitIgnore';
 import { prettierFile, prettierIgnoreFile } from './files/prettier';

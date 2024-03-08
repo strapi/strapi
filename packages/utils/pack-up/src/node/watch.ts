@@ -2,7 +2,6 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { Observable, distinctUntilChanged, scan, startWith, switchMap } from 'rxjs';
 
-
 import { CONFIG_FILE_NAMES, loadConfig } from './core/config';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';

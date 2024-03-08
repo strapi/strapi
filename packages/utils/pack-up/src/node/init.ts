@@ -1,6 +1,5 @@
 import { resolve } from 'path';
 
-
 import { isError } from './core/errors';
 import { ensurePackagePathIsViable } from './core/files';
 import { createLogger } from './core/logger';

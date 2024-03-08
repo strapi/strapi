@@ -7,7 +7,12 @@ import prompts from 'prompts';
 import { isError } from '../core/errors';
 import { parseGlobalGitConfig } from '../core/git';
 
-import type { Template, TemplateFeature, TemplateOption, TemplateOrTemplateResolver } from './types';
+import type {
+  Template,
+  TemplateFeature,
+  TemplateOption,
+  TemplateOrTemplateResolver,
+} from './types';
 import type { Logger } from '../core/logger';
 import type { Config as PrettierConfig } from 'prettier';
 

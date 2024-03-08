@@ -5,7 +5,8 @@ import type {
   PutObjectCommandInput,
   CompleteMultipartUploadCommandOutput,
   AbortMultipartUploadCommandOutput,
-  S3ClientConfig } from '@aws-sdk/client-s3';
+  S3ClientConfig,
+} from '@aws-sdk/client-s3';
 import {
   S3Client,
   GetObjectCommand,

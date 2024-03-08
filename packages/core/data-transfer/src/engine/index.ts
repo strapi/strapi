@@ -37,12 +37,8 @@ import type { Diff } from '../utils/json';
 import { compareSchemas, validateProvider } from './validation';
 
 import { TransferEngineError, TransferEngineValidationError } from './errors';
-import type {
-  IDiagnosticReporter,
-  ErrorDiagnosticSeverity } from './diagnostic';
-import {
-  createDiagnosticReporter
-} from './diagnostic';
+import type { IDiagnosticReporter, ErrorDiagnosticSeverity } from './diagnostic';
+import { createDiagnosticReporter } from './diagnostic';
 import type { DataTransferError } from '../errors';
 import * as utils from '../utils';
 import { ProviderTransferError } from '../errors/providers';

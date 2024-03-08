@@ -4,13 +4,12 @@ import { WebSocket } from 'ws';
 
 import type { Client, Server } from '../../../types/remote/protocol';
 
-import type {
-  ProviderErrorDetails } from '../../errors/providers';
+import type { ProviderErrorDetails } from '../../errors/providers';
 import {
   ProviderError,
   ProviderTransferError,
   ProviderInitializationError,
-  ProviderValidationError
+  ProviderValidationError,
 } from '../../errors/providers';
 
 interface IDispatcherState {

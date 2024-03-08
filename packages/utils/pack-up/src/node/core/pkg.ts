@@ -12,7 +12,6 @@ import * as yup from 'yup';
 import type { Export } from './exports';
 import type { Logger } from './logger';
 
-
 const record = (value: unknown) =>
   yup
     .object(
