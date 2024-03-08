@@ -121,8 +121,6 @@ describe('metadata', () => {
             ? [auxComponent, buildModelWith(modelAttributes)]
             : [buildModelWith(modelAttributes)];
           const results = createMetadata(models as any, options);
-          // console.log('model', buildModelWith(modelAttributes));
-          // print(results);
 
           expect(results).toBeInstanceOf(Map);
           expect(results).toEqualMap(new Map(expectedMetadata as any));
@@ -194,8 +192,6 @@ describe('metadata', () => {
             ? [auxComponent, buildModelWith(modelAttributes)]
             : [buildModelWith(modelAttributes)];
           const results = createMetadata(models as any, options);
-          // console.log('model', buildModelWith(modelAttributes));
-          print(results);
 
           expect(results).toBeInstanceOf(Map);
           expect(results).toEqualMap(new Map(expectedMetadata as any));
@@ -204,11 +200,3 @@ describe('metadata', () => {
     });
   });
 });
-
-const print = (myMap: any) => {
-  const mapArray = Array.from(myMap.entries());
-
-  // Print as JSON
-
-  console.log('results:', JSON.stringify(mapArray, null, 2));
-};
