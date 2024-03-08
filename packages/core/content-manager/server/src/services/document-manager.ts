@@ -67,15 +67,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       // Search in array of locales
       if (Array.isArray(opts.locale)) {
         whereQuery.locale = { $in: opts.locale };
-      }
-
-      // Look for any locale
-      if (opts.locale === '*') {
-        whereQuery.locale = { $exists: true };
-      }
-
-      // Look for a specific locale
-      if (opts.locale) {
+      } else if (opts.locale && opts.locale !== '*') {
+        // Look for a specific locale, ignore if looking for all locales
         whereQuery.locale = opts.locale;
       }
 
