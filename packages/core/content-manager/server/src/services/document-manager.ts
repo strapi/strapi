@@ -42,11 +42,38 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
   };
 
   return {
-    async findOne(id: string, uid: Common.UID.CollectionType, opts = {}) {
-      return strapi
-        .documents(uid)
-        .findOne(id, opts)
-        .then((doc) => mapDocument(uid, doc));
+    async findOne(
+      id: string,
+      uid: Common.UID.CollectionType,
+      opts: DocServiceParams<'findOne'>[1] = {}
+    ) {
+      return strapi.documents(uid).findOne(id, opts);
+    },
+
+    /**
+     * Find multiple (or all) locales for a document
+     */
+    async findLocales(
+      id: string,
+      uid: Common.UID.CollectionType,
+      opts: { populate: Documents.Params.Pick<any, 'populate'>; locale: string | string[] | '*' }
+    ) {
+      // Will look for a specific locale by default
+      let queryLocale: any = opts.locale;
+
+      // Search in array of locales
+      if (Array.isArray(opts.locale)) {
+        queryLocale = { $in: opts.locale };
+      }
+
+      // Look for any locale
+      if (opts.locale === '*') {
+        queryLocale = { $notNull: true };
+      }
+
+      return strapi.db
+        .query(uid)
+        .findMany({ populate: opts.populate, where: { documentId: id, locale: queryLocale } });
     },
 
     async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
