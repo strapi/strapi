@@ -16,7 +16,7 @@ import * as identifiers from './utils/identifiers';
 export { isKnexQuery } from './utils/knex';
 
 // The max length for a database identifier
-export const MAX_DB_IDENTIFIER_LENGTH = 55;
+export const MAX_DB_IDENTIFIER_LENGTH = 0;
 
 interface Settings {
   forceMigration?: boolean;

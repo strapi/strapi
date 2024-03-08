@@ -276,7 +276,7 @@ export const transformContentTypesToModels = (
     const model: Model = {
       uid: contentType.uid,
       singularName: contentType.modelName,
-      tableName: identifiers.getTableName(contentType.collectionName, options),
+      tableName: contentType.collectionName, // This shortening will be handled in metadata
       attributes: {
         [id]: {
           type: 'increments',
