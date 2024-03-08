@@ -6,7 +6,7 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
 import { Page } from '../../../components/PageHelpers';
@@ -115,7 +115,7 @@ const HistoryPage = () => {
   if (versionsResponse.data?.data.length && !selectedVersionId) {
     return (
       <Navigate
-        to={`?${stringify({ ...query, id: versionsResponse?.data?.data[0].id })}`}
+        to={{ search: stringify({ ...query, id: versionsResponse?.data?.data[0].id }) }}
         replace
       />
     );
