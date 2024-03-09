@@ -3,7 +3,6 @@
  */
 import parseType from './parse-type';
 import * as policy from './policy';
-import { templateConfiguration } from './template-configuration';
 import { handleYupError, validateYupSchema, validateYupSchemaSync } from './validators';
 import * as yup from './yup';
 
@@ -50,7 +49,6 @@ export {
   machineID,
   parseType,
   policy,
-  templateConfiguration,
   yup,
   handleYupError,
   validateYupSchema,
