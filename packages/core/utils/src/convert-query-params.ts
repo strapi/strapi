@@ -13,7 +13,6 @@ import {
   isObject,
   cloneDeep,
   get,
-  has,
   mergeAll,
   isArray,
   isString,
@@ -76,7 +75,9 @@ export interface Params {
   start?: number | string;
   page?: number | string;
   pageSize?: number | string;
+  // TODO V5: Remove this
   publicationState?: 'live' | 'preview';
+  status?: 'draft' | 'published';
 }
 
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
@@ -609,25 +610,18 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): Wher
   return filters;
 };
 
-const convertStatusParams = (
-  schema?: Model,
-  params: { status?: 'draft' | 'published' } = {},
-  query: Query = {}
-) => {
-  if (!schema) {
-    return;
-  }
+const convertStatusParams = (status?: 'draft' | 'published', query: Query = {}) => {
+  // NOTE: this is the query layer filters not the document/entity service filters
+  query.filters = ({ meta }: { meta: Model }) => {
+    const contentType = strapi.contentTypes[meta.uid];
 
-  const { status } = params;
+    // Ignore if target model has disabled DP, as it doesn't make sense to filter by its status
+    if (contentType && !contentTypesUtils.hasDraftAndPublish(contentType)) {
+      return {};
+    }
 
-  if (!_.isNil(status)) {
-    // NOTE: this is the query layer filters not the document/entity service filters
-    query.filters = ({ meta }: { meta: Model }) => {
-      if (status === 'published') {
-        return { [PUBLISHED_AT_ATTRIBUTE]: { $notNull: true } };
-      }
-    };
-  }
+    return { [PUBLISHED_AT_ATTRIBUTE]: { $null: status === 'draft' } };
+  };
 };
 
 const transformParamsToQuery = (uid: string, params: Params): Query => {
@@ -636,7 +630,12 @@ const transformParamsToQuery = (uid: string, params: Params): Query => {
 
   const query: Query = {};
 
-  const { _q, sort, filters, fields, populate, page, pageSize, start, limit, ...rest } = params;
+  const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
+    params;
+
+  if (!isNil(status)) {
+    convertStatusParams(status, query);
+  }
 
   if (!isNil(_q)) {
     query._q = _q;

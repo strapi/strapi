@@ -1,5 +1,5 @@
-import { Strapi, Entity, Documents } from '@strapi/types';
-import { mapAsync, contentTypes } from '@strapi/utils';
+import { Strapi, Entity } from '@strapi/types';
+import { mapAsync } from '@strapi/utils';
 
 /**
  * TODO: Find a better way to encode keys than this
@@ -79,20 +79,14 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
       await mapAsync(
         Object.values(idsByUidAndLocale),
         async ({ uid, locale, documentIds, isDraft }: any) => {
-          const hasDraftAndPublish = contentTypes.hasDraftAndPublish(uid);
-
           const findParams = {
-            select: ['id', 'documentId', 'locale'],
+            select: ['id', 'documentId', 'locale', 'publishedAt'],
             where: {
               documentId: { $in: documentIds },
               locale,
+              publishedAt: isDraft ? null : { $ne: null },
             },
           } as any;
-
-          if (hasDraftAndPublish) {
-            findParams.select.push('publishedAt');
-            findParams.where.publishedAt = isDraft ? null : { $ne: null };
-          }
 
           const result = await strapi?.db?.query(uid).findMany(findParams);
 
@@ -102,7 +96,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
               documentId,
               uid,
               locale,
-              isDraft: hasDraftAndPublish ? !publishedAt : undefined,
+              isDraft: !publishedAt,
             });
             loadedIds.set(key, id);
           });

@@ -24,7 +24,9 @@ const handlePrimitive = (
   if (isLongHand(relation)) {
     // { documentId, locale? }
     if ('documentId' in relation) {
-      return [{ documentId: relation.documentId, locale: relation.locale }];
+      return [
+        { documentId: relation.documentId, locale: relation.locale, status: relation.status },
+      ];
     }
     // { id }
     return [];
@@ -62,12 +64,12 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 
       // { connect: { id: id, position: { before: id } } }
       if (position?.before) {
-        ids.push(...handlePrimitive({ ...position, id: position.before }));
+        ids.push(...handlePrimitive({ ...position, documentId: position.before }));
       }
 
       // { connect: { id: id, position: { after: id } } }
       if (position?.after) {
-        ids.push(...handlePrimitive({ ...position, id: position.after }));
+        ids.push(...handlePrimitive({ ...position, documentIdid: position.after }));
       }
     });
   }
