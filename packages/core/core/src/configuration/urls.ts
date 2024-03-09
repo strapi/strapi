@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import { getCommonPath } from './string-formatting';
-import type { Config } from './types';
+import { strings } from '@strapi/utils';
 
 interface ServerConfig {
   url: string;
@@ -8,7 +7,7 @@ interface ServerConfig {
   port: number | string;
 }
 
-export const getConfigUrls = (config: Config, forAdminBuild = false) => {
+export const getConfigUrls = (config: Record<string, unknown>, forAdminBuild = false) => {
   const serverConfig = config.server as ServerConfig;
   const adminConfig = config.admin;
 
@@ -55,7 +54,7 @@ export const getConfigUrls = (config: Config, forAdminBuild = false) => {
     new URL(adminUrl).origin === new URL(serverUrl).origin &&
     !forAdminBuild
   ) {
-    adminPath = adminUrl.replace(getCommonPath(serverUrl, adminUrl), '');
+    adminPath = adminUrl.replace(strings.getCommonPath(serverUrl, adminUrl), '');
     adminPath = `/${_.trim(adminPath, '/')}`;
   } else if (adminUrl.startsWith('http')) {
     adminPath = new URL(adminUrl).pathname;
@@ -70,7 +69,7 @@ export const getConfigUrls = (config: Config, forAdminBuild = false) => {
 
 const getAbsoluteUrl =
   (adminOrServer: 'admin' | 'server') =>
-  (config: Config, forAdminBuild = false) => {
+  (config: Record<string, unknown>, forAdminBuild = false) => {
     const { serverUrl, adminUrl } = getConfigUrls(config, forAdminBuild);
     const url = adminOrServer === 'server' ? serverUrl : adminUrl;
 

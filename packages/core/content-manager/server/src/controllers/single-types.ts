@@ -1,5 +1,5 @@
 import { Common } from '@strapi/types';
-import { setCreatorFields, pipeAsync, errors } from '@strapi/utils';
+import { setCreatorFields, async, errors } from '@strapi/utils';
 
 import { getDocumentLocaleAndStatus } from './utils/dimensions';
 import { getService } from '../utils';
@@ -57,7 +57,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
     ? setCreatorFields({ user, isEdition: true })
     : setCreatorFields({ user });
 
-  const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
+  const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
 
   // If version is not found, but document exists,
   // the intent is to create a new document locale
@@ -252,7 +252,7 @@ export default {
         await documentManager.discardDraft(document.documentId, model, { locale });
       }
 
-      ctx.body = await pipeAsync(
+      ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
@@ -287,7 +287,7 @@ export default {
       return ctx.forbidden();
     }
 
-    ctx.body = await pipeAsync(
+    ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)

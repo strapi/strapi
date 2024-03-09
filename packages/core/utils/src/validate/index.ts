@@ -2,7 +2,7 @@ import { CurriedFunction1 } from 'lodash';
 import { isArray, isObject } from 'lodash/fp';
 
 import { getNonWritableAttributes, constants } from '../content-types';
-import { pipeAsync } from '../async';
+import { pipe as pipeAsync } from '../async';
 import { throwInvalidParam } from './utils';
 
 import * as visitors from './visitors';

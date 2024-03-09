@@ -1,6 +1,6 @@
 import { curry, isEmpty, isNil } from 'lodash/fp';
 
-import { pipeAsync } from '../async';
+import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
 import { isScalarAttribute, constants } from '../content-types';
 import {

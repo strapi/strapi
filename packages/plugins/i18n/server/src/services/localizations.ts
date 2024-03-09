@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash/fp';
 
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../utils';
 
 const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
@@ -27,7 +27,7 @@ const syncNonLocalizedAttributes = async (entry: any, { model }: any) => {
 
     // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
     // TODO: use a transaction to avoid deadlocks
-    await mapAsync(
+    await async.map(
       entry.localizations,
       (localization: any) => updateLocalization(localization.id),
       {
