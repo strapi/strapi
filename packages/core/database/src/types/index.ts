@@ -62,7 +62,7 @@ export interface ScalarAttribute extends BaseAttribute {
 export interface JoinColumn {
   name: string;
   referencedColumn: string;
-  referencedTable?: string;
+  referencedTable: string;
   columnType?: ScalarAttribute['type'];
 }
 

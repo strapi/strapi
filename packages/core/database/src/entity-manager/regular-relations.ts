@@ -47,15 +47,49 @@ const deletePreviousOneToAnyRelations = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  await createQueryBuilder(joinTable.name, db)
+  // attribute.
+  const con = db.getConnection();
+
+  /**
+   * TODO: This is a short term solution, to not steal relations from the same document.
+   *
+   * DELETE FROM :joinTable:
+   * WHERE :joinColumn: NOT IN (
+   *   SELECT id
+   *   FROM :sourceTable:
+   *   WHERE document_id IN (
+   *    SELECT document_id
+   *    FROM :sourceTable:
+   *    WHERE id = :id
+   *   )
+   * )
+   * AND :inverseJoinColumn: IN (:relIdsToadd)
+   * AND :joinTable.on
+   *
+   */
+  const getDocumentEntryIds = con
+    .from(joinColumn.referencedTable)
+    // Get all child ids of the document id
+    .select('id')
+    .where(
+      'document_id',
+      con
+        .from(joinColumn.referencedTable)
+        // get document id related to the current id
+        .select('document_id')
+        .where('id', id)
+    );
+
+  // Will delete inverse relations that are not from the same document
+  await con
     .delete()
-    .where({
-      [inverseJoinColumn.name]: relIdsToadd,
-      [joinColumn.name]: { $ne: id },
-    })
+    .from(joinTable.name)
+    // Exclude the ids of the current document
+    .whereNotIn(joinColumn.name, getDocumentEntryIds)
+    // Include all of the ids that are being connected
+    .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
-    .transacting(trx)
-    .execute();
+    .transacting(trx);
 
   await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd, transaction: trx });
 };
