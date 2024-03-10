@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { map, isEmpty } from 'lodash/fp';
+import { map, isEmpty, toArray } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import {
@@ -22,6 +22,23 @@ declare module 'knex' {
     }
   }
 }
+
+const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID | ID[]) => {
+  return (
+    con
+      .from(tableName)
+      // Get all child ids of the document id
+      .select('id')
+      .where(
+        'document_id',
+        con
+          .from(tableName)
+          // get document id related to the current id
+          .select('document_id')
+          .whereIn('id', toArray(id))
+      )
+  );
+};
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -47,7 +64,6 @@ const deletePreviousOneToAnyRelations = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  // attribute.
   const con = db.getConnection();
 
   /**
@@ -60,32 +76,19 @@ const deletePreviousOneToAnyRelations = async ({
    *   WHERE document_id IN (
    *    SELECT document_id
    *    FROM :sourceTable:
-   *    WHERE id = :id
+   *    WHERE id = :idc
    *   )
    * )
    * AND :inverseJoinColumn: IN (:relIdsToadd)
    * AND :joinTable.on
    *
    */
-  const getDocumentEntryIds = con
-    .from(joinColumn.referencedTable)
-    // Get all child ids of the document id
-    .select('id')
-    .where(
-      'document_id',
-      con
-        .from(joinColumn.referencedTable)
-        // get document id related to the current id
-        .select('document_id')
-        .where('id', id)
-    );
-
   // Will delete inverse relations that are not from the same document
   await con
     .delete()
     .from(joinTable.name)
     // Exclude the ids of the current document
-    .whereNotIn(joinColumn.name, getDocumentEntryIds)
+    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(con, joinColumn.referencedTable!, id))
     // Include all of the ids that are being connected
     .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
@@ -112,6 +115,7 @@ const deletePreviousAnyToOneRelations = async ({
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
+  const con = db.getConnection();
 
   if (!isAnyToOne(attribute)) {
     throw new Error('deletePreviousAnyToOneRelations can only be called for anyToOne relations');
@@ -145,15 +149,17 @@ const deletePreviousAnyToOneRelations = async ({
 
     // handling oneToOne
   } else {
-    await createQueryBuilder(joinTable.name, db)
+    await con
       .delete()
-      .where({
-        [joinColumn.name]: id,
-        [inverseJoinColumn.name]: { $ne: relIdToadd },
-      })
+      .from(joinTable.name)
+      .where(joinColumn.name, id)
+      // Exclude the ids of the current document
+      .whereNotIn(
+        inverseJoinColumn.name,
+        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+      )
       .where(joinTable.on || {})
-      .transacting(trx)
-      .execute();
+      .transacting(trx);
   }
 };
 
