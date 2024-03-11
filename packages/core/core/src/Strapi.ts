@@ -503,7 +503,16 @@ class Strapi extends Container implements StrapiI {
       ...this.get('models').get(),
     ];
 
-    this.db = await Database.init({ ...this.config.get('database'), models });
+    // TODO: add support to metadata model conversion to accept models with nametoken arrays instead of only string and then remove this
+    const modelsFull = [
+      ...utils.transformContentTypesToModels(
+        [...Object.values(this.contentTypes), ...Object.values(this.components)],
+        { maxLength: 0 }
+      ),
+      ...this.get('models').get(),
+    ];
+
+    this.db = await Database.init({ ...this.config.get('database'), models, modelsFull });
 
     this.store = createCoreStore({ db: this.db });
     this.webhookStore = createWebhookStore({ db: this.db });

@@ -54,7 +54,10 @@ export const getJoinTableName = (
   attributeName: string,
   options: NameOptions
 ) => {
-  return getName([collectionName, attributeName], { suffix: 'links', ...options });
+  return getName([collectionName, attributeName], {
+    suffix: options.maxLength ? 'lnk' : 'links',
+    ...options,
+  });
 };
 
 export const getMorphTableName = (
@@ -62,7 +65,10 @@ export const getMorphTableName = (
   attributeName: string,
   options: NameOptions
 ) => {
-  return getName([collectionName, attributeName], { suffix: 'morphs', ...options });
+  return getName([collectionName, attributeName], {
+    suffix: options.maxLength ? 'mph' : 'morphs',
+    ...options,
+  });
 };
 
 /**
@@ -85,11 +91,15 @@ export const getInverseJoinColumnAttributeIdName = (
 };
 
 export const getOrderColumnName = (singularName: string, options: NameOptions) => {
-  return getName(singularName, { suffix: 'order', ...options });
+  return getName(singularName, { suffix: options.maxLength ? 'ord' : 'order', ...options });
 };
 
 export const getInverseOrderColumnName = (singularName: string, options: NameOptions) => {
-  return getName(singularName, { suffix: 'order', prefix: 'inv', ...options });
+  return getName(singularName, {
+    suffix: options.maxLength ? 'ord' : 'order',
+    prefix: 'inv',
+    ...options,
+  });
 };
 
 /**
@@ -121,7 +131,7 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
  */
 
 export const getIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'index', ...options });
+  return getName(names, { suffix: options.maxLength ? 'idx' : 'index', ...options });
 };
 
 export const getFkIndexName = (names: NameInput, options: NameOptions) => {
@@ -129,21 +139,21 @@ export const getFkIndexName = (names: NameInput, options: NameOptions) => {
 };
 
 export const getInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'inv_fk', ...options });
+  return getName(names, { suffix: options.maxLength ? 'ifk' : 'inv_fk', ...options });
 };
 
 export const getOrderFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_fk', ...options });
+  return getName(names, { suffix: options.maxLength ? 'ofk' : 'order_fk', ...options });
 };
 
 export const getOrderInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_inv_fk', ...options });
+  return getName(names, { suffix: options.maxLength ? 'oifk' : 'order_inv_fk', ...options });
 };
 
 export const getUniqueIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'unique', ...options });
+  return getName(names, { suffix: options.maxLength ? 'uq' : 'unique', ...options });
 };
 
 export const getPrimaryIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'primary', ...options });
+  return getName(names, { suffix: options.maxLength ? 'pk' : 'primary', ...options });
 };
