@@ -29,6 +29,8 @@ type IdentifierDiffs = {
   columns: NameDiff<{ index: number; key: string; tableName: string; columnName: string }>[];
 };
 
+// TODO: This is being run even on the creation of a new project, which means that
+
 export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
@@ -74,7 +76,6 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
   },
 };
 
-// TODO: I didn't actually write this yet
 type IndexDiff = NameDiff<{ index: number; key: string; tableName: string; indexName: string }>;
 
 const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
