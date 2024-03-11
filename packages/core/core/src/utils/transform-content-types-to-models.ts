@@ -13,17 +13,28 @@ const { identifiers } = utils;
  * Therefore we have to keep an additional set of helpers/extensions to the database naming methods
  */
 
-export const COMPONENT_JOIN_TABLE_SUFFIX = 'components';
-export const DZ_JOIN_TABLE_SUFFIX = 'components';
-export const COMPONENT_INVERSE_COLUMN_NAME = 'component';
-export const COMPONENT_TYPE_COLUMN = 'component_type';
+export const COMPONENT_JOIN_TABLE_SUFFIX = (options: MetadataOptions) =>
+  options.maxLength ? 'cmps' : 'components';
+
+export const DZ_JOIN_TABLE_SUFFIX = (options: MetadataOptions) =>
+  options.maxLength ? 'cmps' : 'components';
+
+export const COMPONENT_INVERSE_COLUMN_NAME = (options: MetadataOptions) =>
+  options.maxLength ? 'cmp' : 'component';
+
+export const COMPONENT_TYPE_COLUMN = (options: MetadataOptions) =>
+  options.maxLength ? 'cmptype' : 'component_type';
+
 export const ENTITY = 'entity';
 
 export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) =>
-  identifiers.getTableName(collectionName, { suffix: COMPONENT_JOIN_TABLE_SUFFIX, ...options });
+  identifiers.getTableName(collectionName, {
+    suffix: COMPONENT_JOIN_TABLE_SUFFIX(options),
+    ...options,
+  });
 
 export const getDzJoinTableName = (collectionName: string, options: MetadataOptions) =>
-  identifiers.getTableName(collectionName, { suffix: DZ_JOIN_TABLE_SUFFIX, ...options });
+  identifiers.getTableName(collectionName, { suffix: DZ_JOIN_TABLE_SUFFIX(options), ...options });
 
 const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
 
@@ -50,7 +61,7 @@ export const transformAttribute = (
       const joinTableName = getComponentJoinTableName(contentType.collectionName, options);
       const joinColumnEntityName = identifiers.getJoinColumnAttributeIdName(ENTITY, options);
       const joinColumnInverseName = identifiers.getJoinColumnAttributeIdName(
-        COMPONENT_INVERSE_COLUMN_NAME,
+        COMPONENT_INVERSE_COLUMN_NAME(options),
         options
       );
 
@@ -86,9 +97,10 @@ export const transformAttribute = (
       const joinTableName = getDzJoinTableName(contentType.collectionName, options);
       const joinColumnEntityName = identifiers.getJoinColumnAttributeIdName(ENTITY, options);
       const joinColumnInverseName = identifiers.getJoinColumnAttributeIdName(
-        COMPONENT_INVERSE_COLUMN_NAME,
+        COMPONENT_INVERSE_COLUMN_NAME(options),
         options
       );
+      const compTypeColumn = COMPONENT_TYPE_COLUMN(options);
 
       return {
         type: 'relation',
@@ -107,7 +119,7 @@ export const transformAttribute = (
               referencedColumn: id,
             },
             typeColumn: {
-              name: COMPONENT_TYPE_COLUMN,
+              name: compTypeColumn,
             },
             typeField: '__component',
           },
@@ -117,7 +129,7 @@ export const transformAttribute = (
           orderBy: {
             order: 'asc',
           },
-          pivotColumns: [joinColumnEntityName, joinColumnInverseName, field, COMPONENT_TYPE_COLUMN],
+          pivotColumns: [joinColumnEntityName, joinColumnInverseName, field, compTypeColumn],
         },
       };
     }
@@ -163,10 +175,11 @@ const createCompoLinkModel = (
 
   const entityId = identifiers.getJoinColumnAttributeIdName(ENTITY, options);
   const componentId = identifiers.getJoinColumnAttributeIdName(
-    COMPONENT_INVERSE_COLUMN_NAME,
+    COMPONENT_INVERSE_COLUMN_NAME(options),
     options
   );
   const fkIndex = identifiers.getFkIndexName([contentType.collectionName, ENTITY], options);
+  const compTypeColumn = COMPONENT_TYPE_COLUMN(options);
 
   return {
     // TODO: make sure there can't be any conflicts with a prefix
@@ -189,7 +202,7 @@ const createCompoLinkModel = (
           unsigned: true,
         },
       },
-      [COMPONENT_TYPE_COLUMN]: {
+      [compTypeColumn]: {
         type: 'string',
       },
       [field]: {
@@ -209,11 +222,8 @@ const createCompoLinkModel = (
         columns: [field],
       },
       {
-        name: identifiers.getIndexName(
-          [contentType.collectionName, COMPONENT_TYPE_COLUMN],
-          options
-        ),
-        columns: [COMPONENT_TYPE_COLUMN],
+        name: identifiers.getIndexName([contentType.collectionName, compTypeColumn], options),
+        columns: [compTypeColumn],
       },
       {
         name: fkIndex,
@@ -222,7 +232,7 @@ const createCompoLinkModel = (
       {
         // NOTE: since we don't include attribute names, we need to be careful not to create another unique index
         name: identifiers.getUniqueIndexName([contentType.collectionName], options),
-        columns: [entityId, componentId, field, COMPONENT_TYPE_COLUMN],
+        columns: [entityId, componentId, field, compTypeColumn],
         type: 'unique',
       },
     ],

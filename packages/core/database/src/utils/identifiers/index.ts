@@ -1,3 +1,13 @@
+/**
+ * This file contains utility functions for generating names used in the database.
+ * These names include table names, column names, join table names, index names, and more.
+ * The generated names can be customized with prefixes, suffixes, and maximum length.
+ * These utility functions are used throughout the codebase to ensure consistent and standardized naming conventions in the database.
+ *
+ * The reason for checking maxLength for suffixes and prefixes and using the long ones from Strapi 4 is so that we always
+ * have access to the full length names, in particular for migration purposes, but also so that (in theory) the feature
+ * could be disabled and stay compatible with v4 database structure.
+ */
 import _ from 'lodash/fp';
 import { getNameFromTokens } from './shortener';
 
@@ -151,11 +161,11 @@ export const getOrderInverseFkIndexName = (names: NameInput, options: NameOption
 };
 
 export const getIdColumnIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'id_column_index', ...options });
+  return getName(names, { suffix: options.maxLength ? 'idix' : 'id_column_index', ...options });
 };
 
 export const getOrderIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_index', ...options });
+  return getName(names, { suffix: options.maxLength ? 'oidx' : 'order_index', ...options });
 };
 
 export const getUniqueIndexName = (names: NameInput, options: NameOptions) => {
