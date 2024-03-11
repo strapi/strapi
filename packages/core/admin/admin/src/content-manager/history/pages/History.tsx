@@ -103,7 +103,7 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching) {
     return <Page.Loading />;
   }
 
@@ -159,7 +159,7 @@ const HistoryPage = () => {
         mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
-          <Main grow={1} overflow="auto" labelledBy={headerId}>
+          <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
             <VersionContent />
           </Main>
