@@ -10,7 +10,7 @@ import {
   type DocumentActionComponent,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useI18n } from '../hooks/useI18n';
