@@ -151,42 +151,18 @@ describe('Relations interactions with disabled DP content types', () => {
     const allRelations = [...xToOneRelations, ...xToManyRelations];
 
     describe('X to X relation', () => {
-      // This will not happen, and we can connect publish as default
       it(
-        'Connect to the draft version by default',
+        'Connect to both draft and publish versions if not specified',
         testInTransaction(async () => {
-          // Create shop targeting a draft product that also has a published version
-          const shop = await shopDocuments.create({
-            data: {
-              products_mo: { documentId: 'Skate', locale: 'en' },
-              products_oo: { documentId: 'Skate', locale: 'en' },
-              products_ow: { documentId: 'Skate', locale: 'en' },
-            },
-            locale: 'en',
-            populate: xToOneRelations,
-          });
-
-          // Products should be connected to the draft version by default
-          xToOneRelations.forEach((relation) => {
-            expect(shop[relation]).toMatchObject({
-              name: 'Skate-En',
-              locale: 'en',
-              publishedAt: null,
-            });
-          });
-        })
-      );
-
-      it(
-        'Connect to the root status of the new shop',
-        testInTransaction(async () => {
-          // Relations should connect to the status version that matches the shop status (published)
-          // NOTE: We are connecting to the published version without modifying the draft version
+          // Create and populate the published versions of the relations
           const shopPublished = await shopDocuments.create({
             data: {
               products_mo: { documentId: 'Skate', locale: 'en' },
               products_oo: { documentId: 'Skate', locale: 'en' },
               products_ow: { documentId: 'Skate', locale: 'en' },
+              products_om: [{ documentId: 'Skate', locale: 'en' }],
+              products_mm: [{ documentId: 'Skate', locale: 'en' }],
+              products_mw: [{ documentId: 'Skate', locale: 'en' }],
             },
             locale: 'en',
             status: 'published',
@@ -201,7 +177,7 @@ describe('Relations interactions with disabled DP content types', () => {
             });
           });
 
-          // Relations should connect to the status version that matches the shop status (draft)
+          // Create and populate the draft versions of the relations
           const shopDraft = await shopDocuments.create({
             data: {
               products_mo: { documentId: 'Skate', locale: 'en' },

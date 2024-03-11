@@ -15,6 +15,18 @@ const isNumeric = (value: any): value is number => {
   return !Number.isNaN(parsed);
 };
 
+/**
+ * Transform primitive relation representation to entry ids
+ *
+ *  docId -> id
+ *  [docId] -> [id]
+ *  { documentID, locale, status } -> { id }
+ *  [{ documentID, locale, status }] -> [{ id }]
+ *
+ * Note: There are scenarios where a single documentID can map to multiple ids.
+ * By default the returned format will match the input format.
+ * Only when the docID maps to multiple ids, an array will always be returned, regardless of the input format.
+ */
 const transformPrimitive = <T extends ShortHand | LongHand>(
   relation: T | T[] | null | undefined,
   getIds: GetIds
@@ -37,7 +49,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     // Return it with the same format for consistency
     if (ids?.length === 1) return ids[0];
 
-    // Return an array if it multiple ids are found
+    // Return an array if multiple ids are found
     return ids;
   }
 
@@ -67,6 +79,12 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
   return undefined;
 };
 
+/**
+ *
+ * @param relation
+ * @param getIds
+ * @returns
+ */
 const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>,
   getIds: GetIds
@@ -105,9 +123,9 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
 
         if (Array.isArray(result)) {
           position.before = result[0]?.id;
+        } else {
+          position.before = result?.id;
         }
-
-        position.before = result?.id;
       }
 
       // { connect: { id: id, position: { after: id } } }
@@ -116,9 +134,9 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
 
         if (Array.isArray(result)) {
           position.after = result[0]?.id;
+        } else {
+          position.after = result?.id;
         }
-
-        position.after = result?.id;
       }
 
       return { ...relation, position };
@@ -167,11 +185,13 @@ const transformDataIdsVisitor = (
           locale?: string,
           status?: 'draft' | 'published'
         ): ID[] | null => {
+          // locale to connect to
           const targetLocale = getRelationTargetLocale(
             { documentId, locale },
             { targetUid: target, sourceUid: opts.uid, sourceLocale: opts.locale }
           );
 
+          // status(es) to connect to
           const targetStatuses = getRelationTargetStatus(
             { documentId, status },
             { targetUid: target, sourceUid: opts.uid, sourceStatus: opts.isDraft }
