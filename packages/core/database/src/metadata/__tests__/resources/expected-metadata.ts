@@ -646,6 +646,265 @@ export const expectedMetadataResults = {
         },
       ],
     ],
+    morphToMany: [
+      [
+        'default.long-component-name',
+        {
+          uid: 'default.long-component-name',
+          singularName: 'long-component-name',
+          tableName: 'components_default_long_component_names',
+          attributes: {
+            id: {
+              type: 'increments',
+              columnName: 'id',
+            },
+            longcomponentname: {
+              type: 'string',
+              columnName: 'longcomponentname',
+            },
+            complex: {
+              type: 'relation',
+              relation: 'oneToOne',
+              target: 'api::complex.complex',
+              joinTable: {
+                name: 'components_default_long_component_names_complex_links',
+                joinColumn: {
+                  name: 'long_component_name_id',
+                  referencedColumn: 'id',
+                },
+                inverseJoinColumn: {
+                  name: 'complex_id',
+                  referencedColumn: 'id',
+                },
+                pivotColumns: ['long_component_name_id', 'complex_id'],
+              },
+            },
+            complexes: {
+              type: 'relation',
+              relation: 'oneToMany',
+              target: 'api::complex.complex',
+              joinTable: {
+                name: 'components_default_long_component_names_complexes_links',
+                joinColumn: {
+                  name: 'long_component_name_id',
+                  referencedColumn: 'id',
+                },
+                inverseJoinColumn: {
+                  name: 'complex_id',
+                  referencedColumn: 'id',
+                },
+                pivotColumns: ['long_component_name_id', 'complex_id'],
+                orderColumnName: 'complex_order',
+                orderBy: {
+                  complex_order: 'asc',
+                },
+              },
+            },
+          },
+          lifecycles: {},
+          indexes: [],
+          foreignKeys: [],
+          columnToAttribute: {
+            id: 'id',
+            longcomponentname: 'longcomponentname',
+            complex: 'complex',
+            complexes: 'complexes',
+          },
+        },
+      ],
+      [
+        'api::complex.complex',
+        {
+          uid: 'api::complex.complex',
+          singularName: 'complex',
+          tableName: 'complexes',
+          attributes: {
+            id: {
+              type: 'increments',
+              columnName: 'id',
+            },
+            documentId: {
+              type: 'string',
+              columnName: 'document_id',
+            },
+            morphToMany: {
+              type: 'relation',
+              relation: 'morphToMany',
+              joinTable: {
+                name: 'complexes_components',
+                joinColumn: {
+                  name: 'entity_id',
+                  referencedColumn: 'id',
+                },
+                inverseJoinColumn: {
+                  name: 'component_id',
+                  referencedColumn: 'id',
+                },
+                on: {
+                  field: 'repeatable',
+                },
+                orderColumnName: 'order',
+                orderBy: {
+                  order: 'asc',
+                },
+                pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
+              },
+            },
+          },
+          lifecycles: {},
+          indexes: [],
+          foreignKeys: [],
+          columnToAttribute: {
+            id: 'id',
+            document_id: 'documentId',
+            morphToMany: 'morphToMany',
+          },
+        },
+      ],
+      [
+        'components_default_long_component_names_complex_links',
+        {
+          singularName: 'components_default_long_component_names_complex_links',
+          uid: 'components_default_long_component_names_complex_links',
+          tableName: 'components_default_long_component_names_complex_links',
+          attributes: {
+            id: {
+              type: 'increments',
+              columnName: 'id',
+            },
+            long_component_name_id: {
+              type: 'integer',
+              column: {
+                unsigned: true,
+              },
+              columnName: 'long_component_name_id',
+            },
+            complex_id: {
+              type: 'integer',
+              column: {
+                unsigned: true,
+              },
+              columnName: 'complex_id',
+            },
+          },
+          indexes: [
+            {
+              name: 'components_default_long_component_names_complex_links_fk',
+              columns: ['long_component_name_id'],
+            },
+            {
+              name: 'components_default_long_component_names_complex_links_inv_fk',
+              columns: ['complex_id'],
+            },
+            {
+              name: 'components_default_long_component_names_complex_links_unique',
+              columns: ['long_component_name_id', 'complex_id'],
+              type: 'unique',
+            },
+          ],
+          foreignKeys: [
+            {
+              name: 'components_default_long_component_names_complex_links_fk',
+              columns: ['long_component_name_id'],
+              referencedColumns: ['id'],
+              referencedTable: 'components_default_long_component_names',
+              onDelete: 'CASCADE',
+            },
+            {
+              name: 'components_default_long_component_names_complex_links_inv_fk',
+              columns: ['complex_id'],
+              referencedColumns: ['id'],
+              referencedTable: 'complexes',
+              onDelete: 'CASCADE',
+            },
+          ],
+          lifecycles: {},
+          columnToAttribute: {
+            id: 'id',
+            long_component_name_id: 'long_component_name_id',
+            complex_id: 'complex_id',
+          },
+        },
+      ],
+      [
+        'components_default_long_component_names_complexes_links',
+        {
+          singularName: 'components_default_long_component_names_complexes_links',
+          uid: 'components_default_long_component_names_complexes_links',
+          tableName: 'components_default_long_component_names_complexes_links',
+          attributes: {
+            id: {
+              type: 'increments',
+              columnName: 'id',
+            },
+            long_component_name_id: {
+              type: 'integer',
+              column: {
+                unsigned: true,
+              },
+              columnName: 'long_component_name_id',
+            },
+            complex_id: {
+              type: 'integer',
+              column: {
+                unsigned: true,
+              },
+              columnName: 'complex_id',
+            },
+            complex_order: {
+              type: 'float',
+              column: {
+                unsigned: true,
+                defaultTo: null,
+              },
+              columnName: 'complex_order',
+            },
+          },
+          indexes: [
+            {
+              name: 'components_default_long_component_names_complexes_links_fk',
+              columns: ['long_component_name_id'],
+            },
+            {
+              name: 'components_default_long_component_names_complexes_links_inv_fk',
+              columns: ['complex_id'],
+            },
+            {
+              name: 'components_default_long_component_names_complexes_links_unique',
+              columns: ['long_component_name_id', 'complex_id'],
+              type: 'unique',
+            },
+            {
+              name: 'components_default_long_component_names_complexes_links_order_fk',
+              columns: ['complex_order'],
+            },
+          ],
+          foreignKeys: [
+            {
+              name: 'components_default_long_component_names_complexes_links_fk',
+              columns: ['long_component_name_id'],
+              referencedColumns: ['id'],
+              referencedTable: 'components_default_long_component_names',
+              onDelete: 'CASCADE',
+            },
+            {
+              name: 'components_default_long_component_names_complexes_links_inv_fk',
+              columns: ['complex_id'],
+              referencedColumns: ['id'],
+              referencedTable: 'complexes',
+              onDelete: 'CASCADE',
+            },
+          ],
+          lifecycles: {},
+          columnToAttribute: {
+            id: 'id',
+            long_component_name_id: 'long_component_name_id',
+            complex_id: 'complex_id',
+            complex_order: 'complex_order',
+          },
+        },
+      ],
+    ],
   },
   components: {
     repeatable: [

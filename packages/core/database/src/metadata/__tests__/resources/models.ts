@@ -102,6 +102,31 @@ export const attributes = {
         mappedBy: 'complexeshasandbelongstomanycomplexes',
       },
     },
+    morphToMany: {
+      morphToMany: {
+        type: 'relation',
+        relation: 'morphToMany',
+        joinTable: {
+          name: 'complexes_components',
+          joinColumn: {
+            name: 'entity_id',
+            referencedColumn: 'id',
+          },
+          inverseJoinColumn: {
+            name: 'component_id',
+            referencedColumn: 'id',
+          },
+          on: {
+            field: 'repeatable',
+          },
+          orderColumnName: 'order',
+          orderBy: {
+            order: 'asc',
+          },
+          pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
+        },
+      },
+    },
   },
   components: {
     single: {
