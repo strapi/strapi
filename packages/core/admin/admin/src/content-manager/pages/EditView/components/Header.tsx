@@ -50,11 +50,7 @@ interface HeaderProps {
   title?: string;
 }
 
-const Header = ({
-  isCreating,
-  status = 'draft',
-  title: documentTitle = 'Untitled',
-}: HeaderProps) => {
+const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: HeaderProps) => {
   const { formatMessage } = useIntl();
   const isCloning = useMatch(CLONE_PATH) !== null;
 
@@ -89,11 +85,13 @@ const Header = ({
         </Typography>
         <HeaderToolbar />
       </Flex>
-      <Status showBullet={false} size={'S'} variant={isCloning ? 'primary' : statusVariant}>
-        <Typography as="span" variant="omega" fontWeight="bold">
-          {capitalise(isCloning ? 'draft' : status)}
-        </Typography>
-      </Status>
+      {status ? (
+        <Status showBullet={false} size={'S'} variant={isCloning ? 'primary' : statusVariant}>
+          <Typography as="span" variant="omega" fontWeight="bold">
+            {capitalise(isCloning ? 'draft' : status)}
+          </Typography>
+        </Status>
+      ) : null}
     </Flex>
   );
 };

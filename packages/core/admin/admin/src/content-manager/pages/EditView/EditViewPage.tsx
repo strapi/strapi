@@ -54,11 +54,24 @@ const EditViewPage = () => {
     };
   }>(null);
 
+  const {
+    document,
+    meta,
+    isLoading: isLoadingDocument,
+    schema,
+    components,
+    collectionType,
+    id,
+    model,
+  } = useDoc();
+
+  const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
+
   React.useEffect(() => {
-    if (tabApi.current) {
+    if (tabApi.current && hasDraftAndPublished) {
       tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
     }
-  }, [status]);
+  }, [hasDraftAndPublished, status]);
 
   useOnce(() => {
     /**
@@ -76,16 +89,6 @@ const EditViewPage = () => {
   });
 
   const isLoadingActionsRBAC = useDocumentRBAC('EditViewPage', (state) => state.isLoading);
-  const {
-    document,
-    meta,
-    isLoading: isLoadingDocument,
-    schema,
-    components,
-    collectionType,
-    id,
-    model,
-  } = useDoc();
 
   const isSingleType = collectionType === SINGLE_TYPES;
 
@@ -158,14 +161,14 @@ const EditViewPage = () => {
   return (
     <Main paddingLeft={10} paddingRight={10}>
       <Form
-        disabled={status === 'published'}
+        disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validationSchema={createYupSchema(schema?.attributes, components)}
       >
         <Header
           isCreating={isCreatingDocument}
-          status={getDocumentStatus(document, meta)}
+          status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
           title={documentTitle}
         />
         <TabGroup
@@ -175,23 +178,25 @@ const EditViewPage = () => {
             id: getTranslation('containers.edit.tabs.label'),
             defaultMessage: 'Document status',
           })}
-          initialSelectedTabIndex={status === 'published' ? 1 : 0}
+          initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
           onTabChange={handleTabChange}
         >
-          <Tabs>
-            <StatusTab>
-              {formatMessage({
-                id: getTranslation('containers.edit.tabs.draft'),
-                defaultMessage: 'draft',
-              })}
-            </StatusTab>
-            <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
-              {formatMessage({
-                id: getTranslation('containers.edit.tabs.published'),
-                defaultMessage: 'published',
-              })}
-            </StatusTab>
-          </Tabs>
+          {hasDraftAndPublished ? (
+            <Tabs>
+              <StatusTab>
+                {formatMessage({
+                  id: getTranslation('containers.edit.tabs.draft'),
+                  defaultMessage: 'draft',
+                })}
+              </StatusTab>
+              <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
+                {formatMessage({
+                  id: getTranslation('containers.edit.tabs.published'),
+                  defaultMessage: 'published',
+                })}
+              </StatusTab>
+            </Tabs>
+          ) : null}
           <Grid paddingTop={8} gap={4}>
             <GridItem col={9} s={12}>
               <TabPanels>

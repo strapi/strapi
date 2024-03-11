@@ -187,24 +187,32 @@ const ListViewPage = () => {
       };
     });
 
-    formattedHeaders.push({
-      attribute: {
-        type: 'custom',
-      },
-      name: 'status',
-      label: {
-        id: getTranslation(`containers.list.table-headers.status`),
-        defaultMessage: 'status',
-      },
-      searchable: false,
-      sortable: false,
-    } satisfies ListFieldLayout);
+    if (schema?.options?.draftAndPublish) {
+      formattedHeaders.push({
+        attribute: {
+          type: 'custom',
+        },
+        name: 'status',
+        label: {
+          id: getTranslation(`containers.list.table-headers.status`),
+          defaultMessage: 'status',
+        },
+        searchable: false,
+        sortable: false,
+      } satisfies ListFieldLayout);
+    }
 
     if (reviewWorkflowColumns) {
       formattedHeaders.push(...reviewWorkflowColumns);
     }
     return formattedHeaders;
-  }, [displayedHeaders, list, reviewWorkflowColumns, runHookWaterfall]);
+  }, [
+    displayedHeaders,
+    list,
+    reviewWorkflowColumns,
+    runHookWaterfall,
+    schema?.options?.draftAndPublish,
+  ]);
 
   /* -------------------------------------------------------------------------------------------------
    * Methods
