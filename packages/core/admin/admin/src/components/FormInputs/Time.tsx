@@ -32,7 +32,7 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
         }}
         onClear={() => field.onChange(name, undefined)}
         required={required}
-        value={field.value}
+        value={field.value ?? ''}
       />
     );
   }
