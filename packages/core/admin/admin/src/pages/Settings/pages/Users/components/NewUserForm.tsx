@@ -32,7 +32,6 @@ import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
-import type { DistributiveOmit } from 'react-redux';
 import type { Data } from '@strapi/types';
 
 interface ModalFormProps {
