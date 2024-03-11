@@ -141,6 +141,9 @@ class Strapi extends Container implements StrapiI {
 
   entityValidator?: EntityValidator;
 
+  /**
+   * @deprecated `strapi.entityService` will be removed in the next major version
+   */
   entityService?: EntityService.EntityService;
 
   documents?: Documents.Service;
@@ -508,8 +511,6 @@ class Strapi extends Container implements StrapiI {
     this.entityService = createEntityService({
       strapi: this,
       db: this.db,
-      eventHub: this.eventHub,
-      entityValidator: this.entityValidator,
     });
 
     this.documents = createDocumentService(this);

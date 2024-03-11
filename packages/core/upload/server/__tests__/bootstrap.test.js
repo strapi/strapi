@@ -49,7 +49,6 @@ describe('Upload plugin bootstrap function', () => {
             },
             extensions: {
               contentManager: { entityManager: { addSignedFileUrlsToAdmin: jest.fn() } },
-              core: { entityService: { addSignedFileUrlsToEntityService: jest.fn() } },
             },
           },
         },

@@ -54,7 +54,8 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
       const stagePermissions = await stagePermissionsService.registerMany(permissions);
 
       // Update the stage with its new permissions
-      await strapi.entityService.update(STAGE_MODEL_UID, numericalStageId, {
+      await strapi.db.query(STAGE_MODEL_UID).update({
+        where: { id: numericalStageId },
         data: {
           permissions: stagePermissions.flat().map((permission: any) => permission.id),
         },

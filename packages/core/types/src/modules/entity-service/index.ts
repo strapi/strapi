@@ -1,5 +1,5 @@
 import type { Attribute, Common, Utils } from '../../types';
-import type { PartialEntity, Entity, Result, PaginatedResult } from './result';
+import type { PartialEntity, Result, PaginatedResult } from './result';
 import type * as Params from './params';
 
 export type UploadFile = (
@@ -14,9 +14,10 @@ export * from './plugin';
 
 type WrapAction = Omit<keyof EntityService, 'wrapParams' | 'wrapResult' | 'emitEvent'>;
 
+/**
+ * @deprecated will be removed in the next major version
+ */
 export interface EntityService {
-  uploadFiles: UploadFile;
-
   wrapParams<
     TResult extends object = object,
     TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
@@ -26,6 +27,9 @@ export interface EntityService {
     options?: { uid: TContentTypeUID; action: WrapAction }
   ): Promise<TResult> | TResult;
 
+  /**
+   * @deprecated will be removed in the next major version
+   */
   wrapResult<
     TResult = any,
     TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
@@ -34,12 +38,6 @@ export interface EntityService {
     options?: { uid: TContentTypeUID; action: WrapAction; [key: string]: unknown }
   ): Promise<TResult> | TResult;
 
-  emitEvent<TContentTypeUID extends Common.UID.ContentType>(
-    uid: TContentTypeUID,
-    event: string,
-    entity: Entity<TContentTypeUID>
-  ): Promise<void>;
-  // TODO: Split in 2 different signatures for both single types & collection types
   findMany<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
@@ -59,6 +57,9 @@ export interface EntityService {
     >
   >;
 
+  /**
+   * @deprecated will be removed in the next major version
+   */
   findOne<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
@@ -68,6 +69,9 @@ export interface EntityService {
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
+  /**
+   * @deprecated will be removed in the next major version
+   */
   delete<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
@@ -77,23 +81,32 @@ export interface EntityService {
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
+  /**
+   * @deprecated will be removed in the next major version
+   */
   create<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data' | 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams>>;
 
+  /**
+   * @deprecated will be removed in the next major version
+   */
   update<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'fields' | 'populate'>
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
     params?: TParams
   ): Promise<Result<TContentTypeUID, TParams> | null>;
 
+  /**
+   * @deprecated will be removed in the next major version
+   */
   findPage<
     TContentTypeUID extends Common.UID.ContentType,
     TParams extends Params.Pick<
@@ -105,59 +118,16 @@ export interface EntityService {
     params?: TParams
   ): Promise<PaginatedResult<TContentTypeUID, TParams>>;
 
-  clone<
-    TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
-  >(
-    uid: TContentTypeUID,
-    cloneId: Params.Attribute.ID,
-    params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams> | null>;
-
   /**
-   * @deprecated
+   * @deprecated will be removed in the next major version
    */
-  deleteMany<TContentTypeUID extends Common.UID.ContentType>(
-    uid: TContentTypeUID,
-    params: Params.Pick<TContentTypeUID, 'filters' | '_q'>
-  ): Promise<{ count: number }>;
-
-  /**
-   * TODO: seems the same as findMany, it's not returning count by default
-   * @deprecated
-   */
-  findWithRelationCounts<
-    TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      'fields' | 'filters' | '_q' | 'pagination:offset' | 'sort' | 'populate' | 'plugin'
-    >
-  >(
-    uid: TContentTypeUID,
-    params?: TParams
-  ): Promise<Result<TContentTypeUID, TParams>[]>;
-
-  /**
-   * @deprecated
-   */
-  findWithRelationCountsPage<
-    TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<
-      TContentTypeUID,
-      'fields' | 'filters' | '_q' | 'pagination' | 'sort' | 'populate' | 'plugin'
-    >
-  >(
-    uid: TContentTypeUID,
-    params?: TParams
-  ): Promise<PaginatedResult<TContentTypeUID, TParams>>;
-
   count<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     params?: Params.Pick<TContentTypeUID, 'filters' | '_q'>
   ): Promise<number>;
 
   /**
-   * TODO: Considering making this API public include providing a valid return type
+   * @deprecated
    * @internal
    */
   load<
@@ -171,7 +141,7 @@ export interface EntityService {
   ): Promise<any>;
 
   /**
-   * TODO: Considering making this API public include providing a valid return type
+   * @deprecated
    * @internal
    */
   loadPages<

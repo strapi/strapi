@@ -107,6 +107,9 @@ export interface Strapi extends Container {
   webhookStore?: WebhookStore;
   store?: CoreStore;
   entityValidator?: EntityValidator;
+  /**
+   * @deprecated will be removed in the next major
+   */
   entityService?: EntityService.EntityService;
   documents?: Documents.Service;
   telemetry: TelemetryService;

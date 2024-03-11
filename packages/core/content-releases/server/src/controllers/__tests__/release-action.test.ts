@@ -55,19 +55,6 @@ describe('Release Action controller', () => {
           draftAndPublish: true,
         },
       });
-      // @ts-expect-error Ignore missing properties
-      global.strapi.entityService = {
-        findOne: jest.fn().mockReturnValue({
-          actions: [
-            {
-              contentType: 'api::category.category',
-              entry: {
-                id: 2,
-              },
-            },
-          ],
-        }),
-      };
 
       const ctx = {
         state: {
