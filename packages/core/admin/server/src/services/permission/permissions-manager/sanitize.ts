@@ -17,7 +17,7 @@ import {
   cloneDeep,
 } from 'lodash/fp';
 
-import { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } from '@strapi/utils';
+import { contentTypes, traverseEntity, sanitize, async, traverse } from '@strapi/utils';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const {
@@ -55,7 +55,7 @@ export default ({ action, ability, model }: any) => {
     // TODO: sanitize relations to admin users in all sanitizers
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
-    const sanitizeFilters = pipeAsync(
+    const sanitizeFilters = async.pipe(
       traverse.traverseQueryFilters(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
       traverse.traverseQueryFilters(omitHiddenFields, { schema }),
@@ -70,7 +70,7 @@ export default ({ action, ability, model }: any) => {
       )
     );
 
-    const sanitizeSort = pipeAsync(
+    const sanitizeSort = async.pipe(
       traverse.traverseQuerySort(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
       traverse.traverseQuerySort(omitHiddenFields, { schema }),
@@ -85,7 +85,7 @@ export default ({ action, ability, model }: any) => {
       )
     );
 
-    const sanitizePopulate = pipeAsync(
+    const sanitizePopulate = async.pipe(
       traverse.traverseQueryPopulate(expandWildcardPopulate, { schema }),
       traverse.traverseQueryPopulate(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
@@ -93,7 +93,7 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQueryPopulate(removePassword, { schema })
     );
 
-    const sanitizeFields = pipeAsync(
+    const sanitizeFields = async.pipe(
       traverse.traverseQueryFields(removeDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFields(omitHiddenFields, { schema }),
       traverse.traverseQueryFields(removePassword, { schema })
@@ -127,7 +127,7 @@ export default ({ action, ability, model }: any) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
-    return pipeAsync(
+    return async.pipe(
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove unallowed fields from admin::user relations
@@ -144,7 +144,7 @@ export default ({ action, ability, model }: any) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
 
-    return pipeAsync(
+    return async.pipe(
       // Remove fields hidden from the admin
       traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)

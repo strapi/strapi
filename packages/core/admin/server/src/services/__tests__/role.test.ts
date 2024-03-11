@@ -964,7 +964,7 @@ describe('Role', () => {
           action: 'someAction',
           actionParameters: {},
           conditions: [],
-          properties: { fields: null },
+          properties: { fields: [] },
           subject: null,
         },
       ];

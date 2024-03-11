@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 import { trim, has } from 'lodash/fp';
-import { errors, stringEquals } from '@strapi/utils';
+import { errors, strings } from '@strapi/utils';
 import { getService } from '../../utils';
 import { token } from '../../validation/transfer';
 
@@ -101,7 +101,7 @@ export default {
        * as a Number in case it is supposed to be an integer. It remains
        * as a string. This way we avoid issues with integers in the db.
        */
-      if (!!nameAlreadyTaken && !stringEquals(nameAlreadyTaken.id, id)) {
+      if (!!nameAlreadyTaken && !strings.isEqual(nameAlreadyTaken.id, id)) {
         throw new ApplicationError('Name already taken');
       }
     }

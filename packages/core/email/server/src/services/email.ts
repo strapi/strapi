@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { keysDeep, template } from '@strapi/utils';
+import { objects, template } from '@strapi/utils';
 
 import type {
   EmailConfig,
@@ -36,7 +36,7 @@ const sendTemplatedEmail = (
     );
   }
 
-  const allowedInterpolationVariables = keysDeep(data);
+  const allowedInterpolationVariables = objects.keysDeep(data);
   const interpolate = createStrictInterpolationRegExp(allowedInterpolationVariables, 'g');
 
   const templatedAttributes = attributes.reduce(

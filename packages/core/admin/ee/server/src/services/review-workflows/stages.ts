@@ -1,5 +1,5 @@
 import { Entity, LoadedStrapi as Strapi } from '@strapi/types';
-import { mapAsync, reduceAsync, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../../constants/workflows';
 import { getService } from '../../utils';
@@ -43,7 +43,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       );
 
       // Create stage permissions
-      await reduceAsync(stagesList)(async (_, stage, idx) => {
+      await async.reduce(stagesList)(async (_, stage, idx) => {
         // Ignore stages without permissions
         if (!stage.permissions || stage.permissions.length === 0) {
           return;
@@ -52,7 +52,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
         const stagePermissions = stage.permissions;
         const stageId = stages[idx].id;
 
-        const permissions = await mapAsync(
+        const permissions = await async.map(
           stagePermissions,
           // Register each stage permission
           (permission: any) =>
@@ -83,7 +83,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       if (destStage.permissions) {
         await this.deleteStagePermissions([srcStage]);
 
-        const permissions = await mapAsync(destStage.permissions, (permission: any) =>
+        const permissions = await async.map(destStage.permissions, (permission: any) =>
           stagePermissionsService.register({
             roleId: permission.role,
             action: permission.action,
@@ -154,14 +154,14 @@ export default ({ strapi }: { strapi: Strapi }) => {
         const createdStagesIds = map('id', createdStages);
 
         // Update the workflow stages
-        await mapAsync(updated, (destStage: any) => {
+        await async.map(updated, (destStage: any) => {
           const srcStage = srcStages.find((s: any) => s.id === destStage.id);
 
           return this.update(srcStage, destStage);
         });
 
         // Delete the stages that are not in the new stages list
-        await mapAsync(deleted, async (stage: any) => {
+        await async.map(deleted, async (stage: any) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
@@ -173,7 +173,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypesToMigrate, (contentTypeUID: any) => {
+          await async.map(contentTypesToMigrate, (contentTypeUID: any) => {
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,

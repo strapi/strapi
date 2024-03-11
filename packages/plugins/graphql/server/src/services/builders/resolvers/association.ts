@@ -1,5 +1,5 @@
 import { get } from 'lodash/fp';
-import { sanitize, validate, pipeAsync, errors } from '@strapi/utils';
+import { sanitize, validate, async, errors } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -78,7 +78,7 @@ export default ({ strapi }: Context) => {
           const unwrapData = get(attributeName);
 
           // Sanitizer definition
-          const sanitizeMorphAttribute = pipeAsync(wrapData, sanitizeData, unwrapData);
+          const sanitizeMorphAttribute = async.pipe(wrapData, sanitizeData, unwrapData);
 
           return sanitizeMorphAttribute(data);
         }
