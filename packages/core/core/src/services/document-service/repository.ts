@@ -45,11 +45,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
-      (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, {
-          status: queryParams.status,
-          locale: queryParams.locale,
-        }),
+      transformParamsDocumentId(uid),
       transformParamsToQuery(uid)
     )(params || {});
 
@@ -62,11 +58,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
-      (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, {
-          status: queryParams.status,
-          locale: queryParams.locale,
-        }),
+      transformParamsDocumentId(uid),
       transformParamsToQuery(uid)
     )(params);
 
@@ -80,11 +72,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
-      (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, {
-          status: queryParams.status,
-          locale: queryParams.locale,
-        }),
+      transformParamsDocumentId(uid),
       transformParamsToQuery(uid),
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
@@ -122,10 +110,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params, {
-      status: params.status,
-      locale: params.locale,
-    });
+    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
 
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
@@ -134,7 +119,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       throw new Error('Create requires data attribute');
     }
 
-    const validData = await entityValidator.validateEntityCreation(contentType, data, {
+    const validData = await entityValidator.validateEntityCreation(contentType, data as object, {
       // Note: publishedAt value will always be set when DP is disabled
       isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
@@ -238,10 +223,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.localeToData(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {}, {
-      status: params.status,
-      locale: queryParams?.locale,
-    });
+    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
