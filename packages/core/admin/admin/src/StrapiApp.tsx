@@ -22,6 +22,7 @@ import {
 import { Providers } from './components/Providers';
 import { HOOKS } from './constants';
 import { Components, Component } from './core/apis/Components';
+import { ContentManagerPlugin } from './core/apis/content-manager';
 import { CustomFields } from './core/apis/CustomFields';
 import { Field, Fields } from './core/apis/Fields';
 import { Middleware, Middlewares } from './core/apis/Middlewares';
@@ -104,6 +105,11 @@ class StrapiApp {
   settings: Record<string, StrapiAppSetting>;
   translations: StrapiApp['configurations']['translations'];
 
+  /**
+   * APIs
+   */
+  private contentManager = new ContentManagerPlugin();
+
   constructor({ adminConfig, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.customConfigurations = adminConfig?.config ?? {};
     this.customBootstrapConfiguration = adminConfig?.bootstrap;
@@ -142,6 +148,8 @@ class StrapiApp {
         links: [],
       },
     };
+
+    this.registerPlugin(this.contentManager.config);
   }
 
   addComponents = (components: Component | Component[]) => {
