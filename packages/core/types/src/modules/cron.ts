@@ -1,10 +1,15 @@
-import type { Job } from 'node-schedule';
+import type {
+  Job,
+  RecurrenceRule,
+  RecurrenceSpecDateRange,
+  RecurrenceSpecObjLit,
+} from 'node-schedule';
 
 import type { Strapi } from '..';
 
 interface JobSpec {
   job: Job;
-  options: string | number | Date;
+  options: RecurrenceRule | RecurrenceSpecDateRange | RecurrenceSpecObjLit | Date | string | number;
   name: string | null;
 }
 
@@ -14,7 +19,13 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: string;
+      options:
+        | RecurrenceRule
+        | RecurrenceSpecDateRange
+        | RecurrenceSpecObjLit
+        | Date
+        | string
+        | number;
     };
 
 interface Tasks {
