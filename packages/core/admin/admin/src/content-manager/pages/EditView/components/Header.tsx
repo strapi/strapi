@@ -1,13 +1,6 @@
 import * as React from 'react';
 
-import {
-  Flex,
-  Icon,
-  SingleSelect,
-  SingleSelectOption,
-  Status,
-  Typography,
-} from '@strapi/design-system';
+import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { RelativeTime, useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
@@ -17,7 +10,6 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { useForm } from '../../../../components/Form';
-import { capitalise } from '../../../../utils/strings';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -34,6 +26,7 @@ import { CLONE_PATH } from '../../../router';
 import { getDisplayName } from '../../../utils/users';
 
 import { DocumentActionsMenu } from './DocumentActions';
+import { DocumentStatus } from './DocumentStatus';
 
 import type {
   ContentManagerPlugin,
@@ -65,9 +58,6 @@ const Header = ({
       })
     : documentTitle;
 
-  const statusVariant =
-    status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
-
   return (
     <Flex direction="column" alignItems="flex-start" paddingTop={8} paddingBottom={4} gap={3}>
       {/* TODO: implement back button behaviour, track issue - https://strapi-inc.atlassian.net/browse/CONTENT-2173 */}
@@ -89,11 +79,7 @@ const Header = ({
         </Typography>
         <HeaderToolbar />
       </Flex>
-      <Status showBullet={false} size={'S'} variant={isCloning ? 'primary' : statusVariant}>
-        <Typography as="span" variant="omega" fontWeight="bold">
-          {capitalise(isCloning ? 'draft' : status)}
-        </Typography>
-      </Status>
+      <DocumentStatus status={isCloning ? 'draft' : status} />
     </Flex>
   );
 };

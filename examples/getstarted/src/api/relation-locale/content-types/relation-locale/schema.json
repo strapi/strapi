@@ -67,6 +67,12 @@
       },
       "component": "basic.relation",
       "required": true
+    },
+    "category": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::category.category",
+      "inversedBy": "relation"
     }
   }
 }
