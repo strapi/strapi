@@ -79,7 +79,6 @@ describe('i18n - Content API', () => {
       expect(statusCode).toBe(200);
       expect(body.data).toMatchObject({
         locale: 'en',
-        localizations: [],
         name: 'category in english',
       });
       data.categories.push(res.body.data);

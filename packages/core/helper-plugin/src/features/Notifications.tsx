@@ -1,10 +1,9 @@
 import * as React from 'react';
 
-import { Alert, AlertVariant, Flex } from '@strapi/design-system';
+import { Alert, AlertVariant, Flex, useCallbackRef } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
-import { useCallbackRef } from '../hooks/useCallbackRef';
 import { TranslationMessage } from '../types';
 
 /**

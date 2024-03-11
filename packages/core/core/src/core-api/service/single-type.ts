@@ -10,12 +10,12 @@ export class SingleTypeService extends CoreService implements CoreApi.Service.Si
     this.contentType = contentType;
   }
 
-  async getDocumentId(opts = {}) {
+  async getDocumentId() {
     const { uid } = this.contentType;
 
-    return strapi
-      .documents(uid)
-      .findFirst(opts)
+    return strapi.db
+      .query(uid)
+      .findOne()
       .then((document) => document?.documentId as string);
   }
 
@@ -28,8 +28,7 @@ export class SingleTypeService extends CoreService implements CoreApi.Service.Si
   async createOrUpdate(params = {}) {
     const { uid } = this.contentType;
 
-    const fetchParams = this.getFetchParams(params);
-    const documentId = await this.getDocumentId({ status: fetchParams.status });
+    const documentId = await this.getDocumentId();
 
     if (documentId) {
       return strapi.documents(uid).update(documentId, this.getFetchParams(params));

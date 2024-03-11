@@ -62,6 +62,5 @@ describe('convert-query-params', () => {
   test.todo('convertLimitQueryParams');
   test.todo('convertPopulateQueryParams');
   test.todo('convertFieldsQueryParams');
-  test.todo('convertPublicationStateParams');
   test.todo('transformParamsToQuery');
 });

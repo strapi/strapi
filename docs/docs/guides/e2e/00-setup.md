@@ -75,6 +75,14 @@ The test-app you create uses a [template](https://docs.strapi.io/developer-docs/
 
 If you add anything to the template, be sure to add this information to [the docs](/testing/e2e/app-template).
 
+## Running tests with environment variables
+
+To set specific environment variables for your tests, a `.env` file can be created in the root of the e2e folder. This is useful if you need to run tests with a Strapi license or set future flags.
+
+## Running tests with future flags
+
+If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
+
 ## What is Playwright?
 
 Playwright enables reliable end-to-end testing for modern web apps. It's cross browser, cross platform and cross language. At Strapi we use it for Javascript automated testing.

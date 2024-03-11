@@ -6,7 +6,7 @@ const urlJoin = require('url-join');
 const {
   template: { createStrictInterpolationRegExp },
   errors,
-  keysDeep,
+  objects,
 } = require('@strapi/utils');
 
 const { getService } = require('../utils');
@@ -235,7 +235,7 @@ module.exports = ({ strapi }) => ({
   },
 
   template(layout, data) {
-    const allowedTemplateVariables = keysDeep(data);
+    const allowedTemplateVariables = objects.keysDeep(data);
 
     // Create a strict interpolation RegExp based on possible variable names
     const interpolate = createStrictInterpolationRegExp(allowedTemplateVariables, 'g');

@@ -27,6 +27,9 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
   ).toBeVisible();
 };
 
+/**
+ * Skip tests on v5 until Releases + Scheduling are migrated to v5
+ */
 describeOnCondition(/*edition === 'EE'*/ false)('Release page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');

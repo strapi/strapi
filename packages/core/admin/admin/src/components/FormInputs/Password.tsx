@@ -1,16 +1,15 @@
 import { forwardRef, useState } from 'react';
 
-import { Icon, TextInput } from '@strapi/design-system';
+import { Icon, TextInput, useComposedRefs } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
-import { InputProps } from './types';
+import type { StringProps } from './types';
 
-export const PasswordInput = forwardRef<any, InputProps>(
+export const PasswordInput = forwardRef<any, StringProps>(
   ({ disabled, label, hint, name, placeholder, required }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const { formatMessage } = useIntl();

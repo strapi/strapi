@@ -6,7 +6,7 @@ import { getService } from '../utils';
 const { contentTypes, sanitize } = utils;
 const { ApplicationError, NotFoundError } = utils.errors;
 
-const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = contentTypes;
+const { isSingleType, getWritableAttributes } = contentTypes;
 
 /**
  * Returns all locales for an entry
@@ -78,22 +78,6 @@ const createSanitizer = (contentType: any) => {
   return { sanitizeInput, sanitizeInputFiles };
 };
 
-/**
- * Returns a handler to handle localizations creation in the core api
- * @param {object} contentType
- * @returns {(object) => void}
- */
-const createLocalizationHandler = (contentType: any) => {
-  const handler = createCreateLocalizationHandler(contentType);
-
-  return (ctx: any = {}) => {
-    const { id } = ctx.params;
-    const data = ctx.request.body ?? {};
-
-    return handler({ id, data });
-  };
-};
-
 const createCreateLocalizationHandler =
   (contentType: any) =>
   async (args: any = {}) => {
@@ -143,52 +127,6 @@ const createCreateLocalizationHandler =
 
     return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
   };
-
-/**
- * Returns a route config to handle localizations creation in the core api
- * @param {object} contentType
- * @returns {{ method: string, path: string, handler: string, config: { policies: string[] }}}
- */
-const createLocalizationRoute = (contentType: any) => {
-  const { modelName } = contentType;
-
-  const routePrefix = getContentTypeRoutePrefix(contentType);
-  const routePath = isSingleType(contentType)
-    ? `/${routePrefix}/localizations`
-    : `/${routePrefix}/:id/localizations`;
-
-  return {
-    method: 'POST',
-    path: routePath,
-    handler: `${modelName}.createLocalization`,
-    config: {
-      policies: [],
-    },
-  };
-};
-
-/**
- * Adds a route & an action to the core api controller of a content type to allow creating new localizations
- * @param {object} contentType
- */
-const addCreateLocalizationAction = (contentType: any) => {
-  const { modelName, apiName } = contentType;
-
-  // in case we add i18N to a content type that is not in an api
-  if (!apiName) {
-    return;
-  }
-
-  const localizationRoute: any = createLocalizationRoute(contentType);
-
-  strapi.api[apiName].routes[modelName].routes.push(localizationRoute);
-
-  strapi.get('controllers').extend(`api::${apiName}.${modelName}`, (controller: any) => {
-    return Object.assign(controller, {
-      createLocalization: createLocalizationHandler(contentType),
-    });
-  });
-};
 
 const mergeCustomizer = (dest: any, src: any) => {
   if (typeof dest === 'string') {
@@ -275,7 +213,6 @@ const addGraphqlLocalizationAction = (contentType: any) => {
 };
 
 const coreApi = () => ({
-  addCreateLocalizationAction,
   addGraphqlLocalizationAction,
   createSanitizer,
   createCreateLocalizationHandler,

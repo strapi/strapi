@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import { Navigate, RouteObject, useLoaderData, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
+import { routes as historyRoutes } from './history/routes';
 
 const Redirect = () => {
   const pathname = useLoaderData() as string;
@@ -43,6 +44,8 @@ const CollectionTypePages = () => {
 
 const CLONE_RELATIVE_PATH = ':collectionType/:slug/clone/:origin';
 const CLONE_PATH = `/content-manager/${CLONE_RELATIVE_PATH}`;
+const LIST_RELATIVE_PATH = ':collectionType/:slug';
+const LIST_PATH = `/content-manager/${LIST_RELATIVE_PATH}`;
 
 const routes: RouteObject[] = [
   {
@@ -61,7 +64,7 @@ const routes: RouteObject[] = [
        * for simplicity
        */
       {
-        path: 'collectionType/:model',
+        path: 'collectionType/:slug',
         loader: ({ params }) => {
           const slug = params.slug;
 
@@ -79,7 +82,7 @@ const routes: RouteObject[] = [
         element: <Redirect />,
       },
       {
-        path: ':collectionType/:slug',
+        path: LIST_RELATIVE_PATH,
         lazy: async () => {
           return {
             Component: CollectionTypePages,
@@ -160,8 +163,9 @@ const routes: RouteObject[] = [
           };
         },
       },
+      ...historyRoutes,
     ],
   },
 ];
 
-export { routes, CLONE_PATH };
+export { routes, CLONE_PATH, LIST_PATH };
