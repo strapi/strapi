@@ -15,18 +15,30 @@ export const getRelationTargetStatus = (
 ) => {
   // Ignore if the target content type does not have draft and publish enabled
   const targetContentType = strapi.getModel(opts.targetUid);
-  if (!contentTypes.hasDraftAndPublish(targetContentType)) {
-    return false;
+  const sourceContentType = strapi.getModel(opts.sourceUid);
+
+  const targetHasDP = contentTypes.hasDraftAndPublish(targetContentType);
+  const sourceHasDP = contentTypes.hasDraftAndPublish(sourceContentType);
+
+  if (!targetHasDP) {
+    return [false];
   }
 
-  // priority: 'relation status' -> 'source status' -> 'draft'
+  // priority:
+  // DP Enabled 'relation status' -> 'source status' -> 'draft'
+  // DP Disabled 'relation status' -> 'draft' and 'published'
   if (relation.status) {
-    return relation.status === 'draft';
+    return [relation.status === 'draft'];
+  }
+
+  // Connect to both draft and published versions if dp is disabled and relation does not specify a status
+  if (!sourceHasDP) {
+    return [true, false];
   }
 
   if (!isNil(opts.sourceStatus)) {
-    return opts.sourceStatus;
+    return [opts.sourceStatus];
   }
 
-  return true;
+  return [true];
 };

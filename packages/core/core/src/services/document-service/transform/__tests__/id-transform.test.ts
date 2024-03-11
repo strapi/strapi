@@ -10,9 +10,6 @@ const findManyQueries = {
   [CATEGORY_UID]: findCategories,
 } as Record<string, jest.Mock>;
 
-// TODO: Relation between published documents
-// TODO: Relation between non localized and localized documents
-// TODO: Relation between ct with D&P enabled and ct with D&P disabled
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],

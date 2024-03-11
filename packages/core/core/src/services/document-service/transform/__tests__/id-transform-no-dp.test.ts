@@ -10,7 +10,6 @@ const findManyQueries = {
   [SHOP_UID]: findShops,
 } as Record<string, jest.Mock>;
 
-// TODO: Relation between published documents
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],
@@ -82,7 +81,7 @@ describe('Transform relational data', () => {
       });
     });
 
-    it('Connect to the root status', async () => {
+    it('Connect to to both draft and publish by default', async () => {
       // Should connect to the default locale if not provided in the relation
       const { data } = await transformParamsDocumentId(
         SHOP_UID,
@@ -100,68 +99,59 @@ describe('Transform relational data', () => {
         { locale: 'en', isDraft: true }
       );
 
+      // Transform relations to connect to the draft and published versions of the products
+      // If published version is not available, it should connect to the draft version
       expect(data).toMatchObject({
         name: 'test',
-        products: [{ id: 'product-1-en-draft' }, { id: 'product-2-en-draft' }],
-        product: { id: 'product-1-en-draft' },
-      });
-
-      // Should connect to published versions of the products
-      const { data: publishedData } = await transformParamsDocumentId(
-        SHOP_UID,
-        {
-          data: {
-            name: 'test',
-            products: [
-              { documentId: 'product-1', locale: 'en' },
-              { documentId: 'product-2', locale: 'en' },
-            ],
-            product: { documentId: 'product-1', locale: 'en' },
-          },
-        },
-        // Should connect to published versions of the products
-        { locale: 'en', isDraft: false, allowMissingId: true }
-      );
-
-      expect(publishedData).toMatchObject({
-        name: 'test',
-        products: [{ id: 'product-1-en-published' }],
-        product: null,
+        products: [
+          { id: 'product-1-en-draft' },
+          { id: 'product-1-en-published' },
+          { id: 'product-2-en-draft' },
+        ],
+        product: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }],
       });
     });
 
     it('Connect and reorder', async () => {
       // Should connect and reorder the relations,
       const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
+        SHOP_UID,
         {
           data: {
             name: 'test',
-            categories: {
+            products: {
               connect: [
                 {
-                  documentId: 'category-1',
-                  locale: 'fr',
-                  position: { before: 'category-2', locale: 'en' },
-                },
-                {
-                  documentId: 'category-2',
+                  documentId: 'product-1',
                   locale: 'en',
-                  position: { after: 'category-1', locale: 'fr' },
+                  position: { before: 'product-2', locale: 'en' }, // Should expect draft by default
                 },
               ],
             },
+            product: {
+              connect: {
+                documentId: 'product-1',
+                locale: 'en',
+                position: { before: 'product-2', locale: 'en' }, // Should expect draft by default
+              },
+            },
           },
         },
-        { isDraft: true }
+        { isDraft: true, locale: 'en' }
       );
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: {
+        products: {
           connect: [
-            { id: 'category-1-fr-draft', position: { before: 'category-2-en-draft' } },
-            { id: 'category-2-en-draft', position: { after: 'category-1-fr-draft' } },
+            { id: 'product-1-en-draft', position: { before: 'product-2-en-draft' } },
+            { id: 'product-1-en-published', position: { before: 'product-2-en-draft' } },
+          ],
+        },
+        product: {
+          connect: [
+            { id: 'product-1-en-draft', position: { before: 'product-2-en-draft' } },
+            { id: 'product-1-en-published', position: { before: 'product-2-en-draft' } },
           ],
         },
       });

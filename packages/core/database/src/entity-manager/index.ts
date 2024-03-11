@@ -962,7 +962,8 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             if (isPartialUpdate) {
               if (isAnyToOne(attribute)) {
-                cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
+                // TODO: V5 find a fix to connect multiple versions of a document at the same time on xToOne relations
+                // cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
               const relIdsToDelete = toIds(

@@ -96,20 +96,27 @@ const extractDataIds = (
         const target = attribute.target;
         if (!target) return;
 
+        // If not connecting to any version on disabled d&p, we should connect to both draft and published relations at the same time
         extractedIds.forEach((relation) => {
-          idMap.add({
-            uid: target,
-            documentId: relation.documentId,
-            locale: getRelationTargetLocale(relation, {
-              targetUid: target as Common.UID.Schema,
-              sourceUid: opts.uid,
-              sourceLocale: opts.locale,
-            }),
-            isDraft: getRelationTargetStatus(relation, {
-              targetUid: target as Common.UID.Schema,
-              sourceUid: opts.uid,
-              sourceStatus: opts.isDraft,
-            }),
+          const targetLocale = getRelationTargetLocale(relation, {
+            targetUid: target as Common.UID.Schema,
+            sourceUid: opts.uid,
+            sourceLocale: opts.locale,
+          });
+
+          const targetStatuses = getRelationTargetStatus(relation, {
+            targetUid: target as Common.UID.Schema,
+            sourceUid: opts.uid,
+            sourceStatus: opts.isDraft,
+          });
+
+          targetStatuses.forEach((status) => {
+            idMap.add({
+              uid: target,
+              documentId: relation.documentId,
+              locale: targetLocale,
+              isDraft: status,
+            });
           });
         });
       }
