@@ -1,22 +1,7 @@
-import fs from 'fs';
 import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import type { Database } from '../..';
-
-/**
- * Quick guide to testing this:
- * - set MAX_DB_IDENTIFIER_LENGTH to 0
- * - delete your database
- * - remove this migration from the migrations array
- * - start strapi (to create a full-length identifiers db)
- * - stop strapi
- * - set MAX_DB_IDENTIFIER_LENGTH to 55
- * - add this migration back to the migrations array
- * - (optional) if just debugging, add a process.exit(1) at the bottom of this migration so it doesn't actually complete and make you start over
- * - start up strapi
- * - the table names should all be migrated to the new table
- */
 
 type NameDiff<T> = {
   short: T;
@@ -34,7 +19,6 @@ type IdentifierDiffs = {
 export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
-    console.log('Starting migration');
     const md = db.metadata;
     const mdfull = db.metadataFull;
 
@@ -44,32 +28,35 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
 
     // migrate indexes before tables so we know to target the original tableName
     for (const indexDiff of diffs.indexes) {
-      console.log(`renaming ${indexDiff.full.indexName} to ${indexDiff.short.indexName}`);
       await renameIndex(knex, db, indexDiff);
     }
 
     // migrate columns before table names so we know to target the original tableName
     for (const columnDiff of diffs.columns) {
       const { full, short } = columnDiff;
-      const tableName = full.tableName.split('.')[0];
+      const tableName = full.tableName;
 
-      await knex.schema.table(tableName, (table) => {
-        table.renameColumn(full.columnName, short.columnName);
-        console.log(`renaming ${tableName}.${short.columnName} to ${short.columnName}`);
-      });
+      const hasTable = await knex.schema.hasTable(tableName);
+
+      if (hasTable) {
+        await knex.schema.table(tableName, async (table) => {
+          const hasColumn = await knex.schema.hasColumn(tableName, full.columnName);
+
+          if (hasColumn) {
+            table.renameColumn(full.columnName, short.columnName);
+          }
+        });
+      }
     }
 
     // migrate table names
     for (const tableDiff of diffs.tables) {
-      console.log(`renaming ${tableDiff.full.tableName} to ${tableDiff.short.tableName}`);
-      await knex.schema.renameTable(tableDiff.full.tableName, tableDiff.short.tableName);
+      const hasTable = await knex.schema.hasTable(tableDiff.full.tableName);
+
+      if (hasTable) {
+        await knex.schema.renameTable(tableDiff.full.tableName, tableDiff.short.tableName);
+      }
     }
-
-    fs.writeFileSync('mig-diff-useful.json', JSON.stringify(diffs, null, 2));
-
-    // TODO: remove this, just exiting on dev to ensure we never complete the migration
-    // process.exit(1);
-    console.log('DONE!');
   },
   async down() {
     throw new Error('not implemented');
@@ -82,6 +69,7 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
   const client = knex.client.driverName;
   const short = diff.short;
   const full = diff.full;
+
   if (full.indexName === short.indexName) {
     console.log(`not renaming index ${full.indexName} because name hasn't changed`);
     return;
