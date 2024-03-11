@@ -80,10 +80,11 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
 };
 
 /**
- *
- * @param relation
- * @param getIds
- * @returns
+ * Transform ids in any type of relation input value
+ *  - set: [docId]
+ *  - disconnect: [docId]
+ *  - connect: [docId]
+ * Or using any of the other primitive representations
  */
 const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>,

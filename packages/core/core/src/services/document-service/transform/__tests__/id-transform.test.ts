@@ -54,18 +54,16 @@ describe('Transform relational data', () => {
 
   describe('Shorthand syntax', () => {
     it('Shorthand syntax', async () => {
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: ['doc1', 'doc2', 'doc3'],
-            category: 'doc4',
-            relatedProducts: ['doc1', 'doc2', 'doc3'],
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: ['doc1', 'doc2', 'doc3'],
+          category: 'doc4',
+          relatedProducts: ['doc1', 'doc2', 'doc3'],
         },
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toEqual({
         name: 'test',
@@ -76,17 +74,15 @@ describe('Transform relational data', () => {
     });
 
     it('Should ignore number values', async () => {
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: [1, 2, 'doc1'],
-            category: 4,
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: [1, 2, 'doc1'],
+          category: 4,
         },
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toEqual({
         name: 'test',
@@ -98,17 +94,15 @@ describe('Transform relational data', () => {
 
   describe('Longhand syntax', () => {
     it('Longhand syntax', async () => {
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: [{ documentId: 'doc1' }, { documentId: 'doc2' }, { documentId: 'doc3' }],
-            category: { documentId: 'doc4' },
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: [{ documentId: 'doc1' }, { documentId: 'doc2' }, { documentId: 'doc3' }],
+          category: { documentId: 'doc4' },
         },
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -118,17 +112,15 @@ describe('Transform relational data', () => {
     });
 
     it('Longhand syntax with id', async () => {
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: [{ id: 1 }],
-            category: { id: 2 },
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: [{ id: 1 }],
+          category: { id: 2 },
         },
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -138,17 +130,15 @@ describe('Transform relational data', () => {
     });
 
     it('Document id takes priority over id', async () => {
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: [{ id: 1, documentId: 'doc2' }],
-            category: { id: 2, documentId: 'doc4' },
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: [{ id: 1, documentId: 'doc2' }],
+          category: { id: 2, documentId: 'doc4' },
         },
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -159,17 +149,15 @@ describe('Transform relational data', () => {
   });
 
   it('Set', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { set: ['doc1', 'doc2', 'doc3'] },
-          category: { set: 'doc4' },
-        },
+    const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+      data: {
+        name: 'test',
+        categories: { set: ['doc1', 'doc2', 'doc3'] },
+        category: { set: 'doc4' },
       },
-      { locale: 'en', status: 'draft' }
-    );
+      locale: 'en',
+      status: 'draft',
+    });
 
     expect(data).toEqual({
       name: 'test',
@@ -179,17 +167,15 @@ describe('Transform relational data', () => {
   });
 
   it('Connect', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { connect: ['doc1', 'doc2', 'doc3'] },
-          category: { connect: 'doc4' },
-        },
+    const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+      data: {
+        name: 'test',
+        categories: { connect: ['doc1', 'doc2', 'doc3'] },
+        category: { connect: 'doc4' },
       },
-      { locale: 'en', status: 'draft' }
-    );
+      locale: 'en',
+      status: 'draft',
+    });
 
     expect(data).toEqual({
       name: 'test',
@@ -199,17 +185,15 @@ describe('Transform relational data', () => {
   });
 
   it('Connect before', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { connect: [{ documentId: 'doc1', position: { before: 'doc2' } }] },
-          category: { connect: 'doc4' },
-        },
+    const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+      data: {
+        name: 'test',
+        categories: { connect: [{ documentId: 'doc1', position: { before: 'doc2' } }] },
+        category: { connect: 'doc4' },
       },
-      { locale: 'en', status: 'draft' }
-    );
+      locale: 'en',
+      status: 'draft',
+    });
 
     expect(data).toMatchObject({
       name: 'test',
@@ -219,17 +203,15 @@ describe('Transform relational data', () => {
   });
 
   it('Connect after', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { connect: [{ documentId: 'doc1', position: { after: 'doc2' } }] },
-          category: { connect: 'doc4' },
-        },
+    const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+      data: {
+        name: 'test',
+        categories: { connect: [{ documentId: 'doc1', position: { after: 'doc2' } }] },
+        category: { connect: 'doc4' },
       },
-      { locale: 'en', status: 'draft' }
-    );
+      locale: 'en',
+      status: 'draft',
+    });
 
     expect(data).toMatchObject({
       name: 'test',
@@ -239,17 +221,15 @@ describe('Transform relational data', () => {
   });
 
   it('Disconnect', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: { disconnect: ['doc1', 'doc2', 'doc3'] },
-          category: { disconnect: 'doc4' },
-        },
+    const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+      data: {
+        name: 'test',
+        categories: { disconnect: ['doc1', 'doc2', 'doc3'] },
+        category: { disconnect: 'doc4' },
       },
-      { locale: 'en', status: 'draft' }
-    );
+      locale: 'en',
+      status: 'draft',
+    });
 
     expect(data).toEqual({
       name: 'test',
@@ -259,25 +239,23 @@ describe('Transform relational data', () => {
   });
 
   it('Multiple', async () => {
-    const { data } = await transformParamsDocumentId(
-      PRODUCT_UID,
-      {
-        data: {
-          name: 'test',
-          categories: {
-            set: ['doc1', 'doc2', 'doc3'],
-            connect: ['doc4', 'doc5'],
-            disconnect: ['doc6', 'doc7'],
-          },
-          category: {
-            set: 'doc8',
-            connect: 'doc9',
-            disconnect: 'doc10',
-          },
+    const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+      data: {
+        name: 'test',
+        categories: {
+          set: ['doc1', 'doc2', 'doc3'],
+          connect: ['doc4', 'doc5'],
+          disconnect: ['doc6', 'doc7'],
+        },
+        category: {
+          set: 'doc8',
+          connect: 'doc9',
+          disconnect: 'doc10',
         },
       },
-      { locale: 'en', status: 'draft' }
-    );
+      locale: 'en',
+      status: 'draft',
+    });
 
     expect(data).toEqual({
       name: 'test',

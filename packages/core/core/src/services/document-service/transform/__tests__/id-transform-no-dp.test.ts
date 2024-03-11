@@ -59,20 +59,18 @@ describe('Transform relational data', () => {
 
   describe('Non DP (shop) -> DP (product)', () => {
     it('Connect to multiple status of products', async () => {
-      const { data } = await transformParamsDocumentId(
-        SHOP_UID,
-        {
-          data: {
-            name: 'test',
-            products: [
-              { documentId: 'product-1', locale: 'en', status: 'published' },
-              { documentId: 'product-2', locale: 'en', status: 'draft' },
-            ],
-            product: { documentId: 'product-1', locale: 'en', status: 'draft' },
-          },
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          products: [
+            { documentId: 'product-1', locale: 'en', status: 'published' },
+            { documentId: 'product-2', locale: 'en', status: 'draft' },
+          ],
+          product: { documentId: 'product-1', locale: 'en', status: 'draft' },
         },
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -83,21 +81,19 @@ describe('Transform relational data', () => {
 
     it('Connect to to both draft and publish by default', async () => {
       // Should connect to the default locale if not provided in the relation
-      const { data } = await transformParamsDocumentId(
-        SHOP_UID,
-        {
-          data: {
-            name: 'test',
-            products: [
-              { documentId: 'product-1', locale: 'en' },
-              { documentId: 'product-2', locale: 'en' },
-            ],
-            product: { documentId: 'product-1', locale: 'en' },
-          },
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          products: [
+            { documentId: 'product-1', locale: 'en' },
+            { documentId: 'product-2', locale: 'en' },
+          ],
+          product: { documentId: 'product-1', locale: 'en' },
         },
         // Should connect to draft versions of the products
-        { locale: 'en', status: 'draft' }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       // Transform relations to connect to the draft and published versions of the products
       // If published version is not available, it should connect to the draft version
@@ -114,31 +110,29 @@ describe('Transform relational data', () => {
 
     it('Connect and reorder', async () => {
       // Should connect and reorder the relations,
-      const { data } = await transformParamsDocumentId(
-        SHOP_UID,
-        {
-          data: {
-            name: 'test',
-            products: {
-              connect: [
-                {
-                  documentId: 'product-1',
-                  locale: 'en',
-                  position: { before: 'product-2', locale: 'en' }, // Should expect draft by default
-                },
-              ],
-            },
-            product: {
-              connect: {
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          products: {
+            connect: [
+              {
                 documentId: 'product-1',
                 locale: 'en',
                 position: { before: 'product-2', locale: 'en' }, // Should expect draft by default
               },
+            ],
+          },
+          product: {
+            connect: {
+              documentId: 'product-1',
+              locale: 'en',
+              position: { before: 'product-2', locale: 'en' }, // Should expect draft by default
             },
           },
         },
-        { status: 'draft', locale: 'en' }
-      );
+        status: 'draft',
+        locale: 'en',
+      });
 
       expect(data).toMatchObject({
         name: 'test',

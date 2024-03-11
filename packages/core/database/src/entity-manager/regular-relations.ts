@@ -23,7 +23,8 @@ declare module 'knex' {
   }
 }
 
-const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID | ID[]) => {
+//  TODO: This is a short term solution, to not steal relations from the same document.
+const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID) => {
   return (
     con
       .from(tableName)
@@ -66,23 +67,6 @@ const deletePreviousOneToAnyRelations = async ({
 
   const con = db.getConnection();
 
-  /**
-   * TODO: This is a short term solution, to not steal relations from the same document.
-   *
-   * DELETE FROM :joinTable:
-   * WHERE :joinColumn: NOT IN (
-   *   SELECT id
-   *   FROM :sourceTable:
-   *   WHERE document_id IN (
-   *    SELECT document_id
-   *    FROM :sourceTable:
-   *    WHERE id = :idc
-   *   )
-   * )
-   * AND :inverseJoinColumn: IN (:relIdsToadd)
-   * AND :joinTable.on
-   *
-   */
   await con
     .delete()
     .from(joinTable.name)
