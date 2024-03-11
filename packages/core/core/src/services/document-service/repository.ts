@@ -161,10 +161,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.localeToLookup(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {}, {
-      isDraft: true,
-      locale: queryParams?.locale,
-    });
+    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any);
     // Param parsing
 
@@ -184,7 +181,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const newDocumentId = createDocumentId();
 
     const versions = await mapAsync(entries, async (entryToClone: any) => {
-      const isDraft = contentTypesUtils.isDraft(data, model);
+      const isDraft = contentTypesUtils.isDraft(data as object, model);
       // Todo: Merge data with entry to clone
       const validData = await entityValidator.validateEntityUpdate(
         model,

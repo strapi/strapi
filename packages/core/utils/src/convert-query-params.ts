@@ -616,7 +616,7 @@ const convertStatusParams = (status?: 'draft' | 'published', query: Query = {}) 
     const contentType = strapi.contentTypes[meta.uid];
 
     // Ignore if target model has disabled DP, as it doesn't make sense to filter by its status
-    if (contentType && !contentTypesUtils.hasDraftAndPublish(contentType)) {
+    if (!contentType || !contentTypesUtils.hasDraftAndPublish(contentType)) {
       return {};
     }
 
