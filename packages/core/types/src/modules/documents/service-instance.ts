@@ -1,7 +1,16 @@
-import type { Common } from '../..';
+import type { Common, Attribute, Schema, EntityService } from '../..';
 import type { ID } from '.';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-enigne';
+
+// TODO: move to common place
+type ComponentBody = {
+  [key: string]: Attribute.GetValue<
+    | Attribute.Component<Common.UID.Component, false>
+    | Attribute.Component<Common.UID.Component, true>
+    | Attribute.DynamicZone
+  >;
+};
 
 export type ServiceInstance<
   TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
@@ -54,4 +63,22 @@ export type ServiceInstance<
     documentId: ID,
     params?: TParams
   ) => Result.DiscardDraft<TContentTypeUID, TParams>;
+
+  updateComponents: <
+    TUID extends Common.UID.Schema,
+    TData extends EntityService.Params.Data.Input<TUID>
+  >(
+    uid: TUID,
+    entityToUpdate: {
+      id: EntityService.Params.Attribute.ID;
+    },
+    data: TData
+  ) => Promise<ComponentBody>;
+
+  omitComponentData: (
+    contentType: Schema.ContentType | Schema.Component,
+    data: EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>
+  ) => Partial<
+    EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>
+  >;
 };

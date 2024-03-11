@@ -403,5 +403,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     publish: wrapInTransaction(publish),
     unpublish: wrapInTransaction(unpublish),
     discardDraft: wrapInTransaction(discardDraft),
+    /**
+     * @internal
+     * These methods are exposed for use within document service middlewares
+     */
+    updateComponents,
+    omitComponentData,
   };
 };

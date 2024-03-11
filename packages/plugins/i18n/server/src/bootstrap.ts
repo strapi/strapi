@@ -11,8 +11,7 @@ const registerModelsHooks = () => {
     // @ts-expect-error ContentType is not typed correctly on the context
     const schema = context.contentType;
 
-    // TODO find all th actions we need the middleware for
-    if (!['create', 'update', 'createEntry'].includes(context.action)) {
+    if (!['create', 'update'].includes(context.action)) {
       return next(context);
     }
 

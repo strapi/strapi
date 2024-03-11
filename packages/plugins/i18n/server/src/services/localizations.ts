@@ -8,8 +8,7 @@ import { getService } from '../utils';
 const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
-
+  const nonLocalizedAttributes = copyNonLocalizedAttributes(model, sourceEntry);
   if (isEmpty(nonLocalizedAttributes)) {
     return;
   }
@@ -18,25 +17,34 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
   const documentId = sourceEntry.documentId;
   const status = sourceEntry?.publishedAt ? 'published' : 'draft';
 
-  const localesToUpdate = (
-    await strapi.db.query(uid).findMany({
-      where: { documentId, publishedAt: status === 'published' ? { $ne: null } : null },
-      select: ['locale'],
-    })
-  )
-    .filter((entry: any) => sourceEntry.locale !== entry.locale)
-    .map((entry: any) => entry.locale);
+  // Find all the entries that need to be updated
+  // Every other entry of the document in the same status but a different locale
+  const entriesToUpdate = await strapi.db.query(uid).findMany({
+    where: {
+      documentId,
+      publishedAt: status === 'published' ? { $ne: null } : null,
+      locale: { $ne: sourceEntry.locale },
+    },
+    select: ['locale', 'id'],
+  });
+
+  for (const entry of entriesToUpdate) {
+    await strapi.documents(uid).updateComponents(uid, entry, nonLocalizedAttributes as any);
+  }
+
+  const entryData = await strapi.documents(uid).omitComponentData(model, nonLocalizedAttributes);
+  const localesToUpdate = entriesToUpdate.map((entry) => entry.locale);
 
   // Update every other locale entry of this documentId in the same status
   // We need to support both statuses incase we are working with a content type
   // without draft and publish enabled
-  return strapi.db.query(uid).updateMany({
+  await strapi.db.query(uid).updateMany({
     where: {
       documentId,
       publishedAt: status === 'published' ? { $ne: null } : null,
       locale: { $in: localesToUpdate },
     },
-    data: nonLocalizedAttributes,
+    data: entryData,
   });
 };
 
