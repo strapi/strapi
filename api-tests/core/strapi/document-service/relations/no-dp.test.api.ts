@@ -313,52 +313,60 @@ describe('Relations interactions with disabled DP content types', () => {
     });
 
     describe('X to One relation', () => {
-      it.only('Can consecutively connect to draft and published versions', async () => { // testInTransaction(async () => {
-        // XToOne relations are not connected with an array,
-        // the only way to connect both draft and published versions
-        // is to make two separate requests
+      it(
+        'Can consecutively connect to draft and published versions',
+        testInTransaction(async () => {
+          // XToOne relations are not connected with an array,
+          // the only way to connect both draft and published versions
+          // is to make two separate requests
 
-        // Create shop targeting a draft product
-        const shop = await shopDocuments.create({
-          data: {
-            products_ow: { documentId: 'Skate', locale: 'en', status: 'draft' },
-            products_oo: { documentId: 'Skate', locale: 'en', status: 'draft' },
-            products_mo: { documentId: 'Skate', locale: 'en', status: 'draft' },
-          },
-        });
+          // Create shop targeting a draft product
+          const shop = await shopDocuments.create({
+            data: {
+              products_ow: { documentId: 'Skate', locale: 'en', status: 'draft' },
+              products_oo: { documentId: 'Skate', locale: 'en', status: 'draft' },
+              products_mo: { documentId: 'Skate', locale: 'en', status: 'draft' },
+            },
+          });
 
-        // Update to connect to the published version
-        await shopDocuments.update(shop.documentId, {
-          data: {
-            products_ow: { documentId: 'Skate', locale: 'en', status: 'published' },
-            products_oo: { documentId: 'Skate', locale: 'en', status: 'published' },
-            products_mo: { documentId: 'Skate', locale: 'en', status: 'published' },
-          },
-        });
+          // Update to connect to the published version too
+          await shopDocuments.update(shop.documentId, {
+            data: {
+              products_ow: {
+                connect: [{ documentId: 'Skate', locale: 'en', status: 'published' }],
+              },
+              products_oo: {
+                connect: [{ documentId: 'Skate', locale: 'en', status: 'published' }],
+              },
+              products_mo: {
+                connect: [{ documentId: 'Skate', locale: 'en', status: 'published' }],
+              },
+            },
+          });
 
-        // Fetch the shop to check if the relations are connected to the draft and published versions
-        const draftShop = await shopDocuments.findOne(shop.documentId, {
-          populate: xToOneRelations,
-          status: 'draft',
-        });
+          // Fetch the shop to check if the relations are connected to the draft and published versions
+          const draftShop = await shopDocuments.findOne(shop.documentId, {
+            populate: xToOneRelations,
+            status: 'draft',
+          });
 
-        const publishedShop = await shopDocuments.findOne(shop.documentId, {
-          populate: xToOneRelations,
-          status: 'published',
-        });
+          const publishedShop = await shopDocuments.findOne(shop.documentId, {
+            populate: xToOneRelations,
+            status: 'published',
+          });
 
-        const draftRelation = { name: 'Skate-En', publishedAt: null };
-        const publishedRelation = { name: 'Skate-En', publishedAt: expect.any(String) };
+          const draftRelation = { name: 'Skate-En', publishedAt: null };
+          const publishedRelation = { name: 'Skate-En', publishedAt: expect.any(String) };
 
-        expect(draftShop.products_ow).toMatchObject(draftRelation);
-        expect(draftShop.products_oo).toMatchObject(draftRelation);
-        expect(draftShop.products_mo).toMatchObject(draftRelation);
+          expect(draftShop.products_ow).toMatchObject(draftRelation);
+          expect(draftShop.products_oo).toMatchObject(draftRelation);
+          expect(draftShop.products_mo).toMatchObject(draftRelation);
 
-        expect(publishedShop.products_ow).toMatchObject(publishedRelation);
-        expect(publishedShop.products_oo).toMatchObject(publishedRelation);
-        expect(publishedShop.products_mo).toMatchObject(publishedRelation);
-      });
-      // );
+          expect(publishedShop.products_ow).toMatchObject(publishedRelation);
+          expect(publishedShop.products_oo).toMatchObject(publishedRelation);
+          expect(publishedShop.products_mo).toMatchObject(publishedRelation);
+        })
+      );
     });
 
     describe('X to Many relation', () => {

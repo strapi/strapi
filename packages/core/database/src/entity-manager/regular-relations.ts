@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { map, isEmpty, toArray } from 'lodash/fp';
+import { map, isEmpty } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import {
@@ -35,7 +35,7 @@ const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID | ID[])
           .from(tableName)
           // get document id related to the current id
           .select('document_id')
-          .whereIn('id', toArray(id))
+          .where('id', id)
       )
   );
 };
@@ -83,7 +83,6 @@ const deletePreviousOneToAnyRelations = async ({
    * AND :joinTable.on
    *
    */
-  // Will delete inverse relations that are not from the same document
   await con
     .delete()
     .from(joinTable.name)
@@ -123,15 +122,17 @@ const deletePreviousAnyToOneRelations = async ({
   // handling manyToOne
   if (isManyToAny(attribute)) {
     // if the database integrity was not broken relsToDelete is supposed to be of length 1
-    const relsToDelete = await createQueryBuilder(joinTable.name, db)
+    const relsToDelete = await con
+      // await createQueryBuilder(joinTable.name, db)
       .select(inverseJoinColumn.name)
-      .where({
-        [joinColumn.name]: id,
-        [inverseJoinColumn.name]: { $ne: relIdToadd },
-      })
+      .from(joinTable.name)
+      .where(joinColumn.name, id)
+      .whereNotIn(
+        inverseJoinColumn.name,
+        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+      )
       .where(joinTable.on || {})
-      .transacting(trx)
-      .execute<{ [key: string]: ID }[]>();
+      .transacting(trx);
 
     const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
 

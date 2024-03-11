@@ -317,6 +317,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         where: { id },
         select: params.select,
         populate: params.populate,
+        filters: params.filters,
       });
 
       await db.lifecycles.run('afterCreate', uid, { params, result }, states);
@@ -404,6 +405,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         where: { id },
         select: params.select,
         populate: params.populate,
+        filters: params.filters,
       });
 
       await db.lifecycles.run('afterUpdate', uid, { params, result }, states);
