@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { ApplicationError } = require('@strapi/utils').errors;
-const { mapAsync } = require('@strapi/utils');
+const { async } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/admin/upload');
@@ -79,7 +79,7 @@ module.exports = {
     const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
     // Sign file urls for private providers
-    const signedFiles = await mapAsync(uploadedFiles, getService('file').signFileUrls);
+    const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);
 
     ctx.body = await pm.sanitizeOutput(signedFiles, { action: ACTIONS.read });
   },

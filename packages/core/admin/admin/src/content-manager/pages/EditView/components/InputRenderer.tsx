@@ -17,10 +17,9 @@ import { RelationsInput } from './FormInputs/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
+import type { DistributiveOmit } from '../../../../types/utils';
 import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Attribute } from '@strapi/types';
-
-type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 

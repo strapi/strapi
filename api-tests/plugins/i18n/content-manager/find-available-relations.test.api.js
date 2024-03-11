@@ -117,14 +117,8 @@ describe('i18n - Find available relations', () => {
       qs: { locale: 'en', status: 'published' },
     });
 
-    const { documentId, id, name, locale, publishedAt, updatedAt } = data.products[1];
     const expectedObj = {
-      id,
-      documentId,
-      name,
-      locale,
-      publishedAt,
-      updatedAt,
+      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[1]),
       status: 'published',
     };
     expect(res.body.results).toHaveLength(1);
@@ -138,14 +132,8 @@ describe('i18n - Find available relations', () => {
       qs: { locale: 'it', status: 'published' },
     });
 
-    const { documentId, id, name, locale, publishedAt, updatedAt } = data.products[0];
     const expectedObj = {
-      id,
-      documentId,
-      name,
-      locale,
-      publishedAt,
-      updatedAt,
+      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[0]),
       status: 'published',
     };
     expect(res.body.results).toHaveLength(1);

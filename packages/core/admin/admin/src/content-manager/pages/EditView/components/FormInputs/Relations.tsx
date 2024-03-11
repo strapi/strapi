@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
   VisuallyHidden,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
@@ -25,7 +26,6 @@ import styled from 'styled-components';
 
 import { RelationResult } from '../../../../../../../../content-manager/dist/shared/contracts/relations';
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
-import { useComposedRefs } from '../../../../../utils/refs';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../hooks/useDocument';

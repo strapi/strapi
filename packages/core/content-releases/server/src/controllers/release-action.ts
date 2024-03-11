@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
@@ -68,7 +68,7 @@ const releaseActionController = {
      * sanitizeOutput doesn't work if you use it directly on the Release Action model, it doesn't sanitize the entries
      * So, we need to sanitize manually each entry inside a Release Action
      */
-    const sanitizedResults = await mapAsync(results, async (action: any) => ({
+    const sanitizedResults = await async.map(results, async (action: any) => ({
       ...action,
       entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
     }));

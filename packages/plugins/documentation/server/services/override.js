@@ -31,7 +31,7 @@ module.exports = ({ strapi }) => {
      */
     registerOverride(override, { pluginOrigin, excludeFromGeneration = [] } = {}) {
       const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
-        strapi.config.get('plugin.documentation')
+        strapi.config.get('plugin::documentation')
       );
       // Don't apply the override if the plugin is not in the list of plugins that need documentation
       if (pluginOrigin && !pluginsThatNeedDocumentation.includes(pluginOrigin)) return;

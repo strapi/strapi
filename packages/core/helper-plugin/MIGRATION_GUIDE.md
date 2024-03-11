@@ -93,6 +93,20 @@ import { Form } from '@strapi/strapi/admin';
 
 Users should note that any use of the Formik library will no longer work & insted should look at the documentation for the `Form` component.
 
+### GenericInput
+
+This component has been removed and refactored to become the `InputRenderer` component exported from `@strapi/strapi/admin`. You should use the `InputRenderer` component from there:
+
+```tsx
+// Before
+import { GenericInput } from '@strapi/helper-plugin';
+
+// After
+import { InputRenderer } from '@strapi/strapi/admin';
+```
+
+Note, that the `InputRenderer` component has a different API, and you should refer to the documentation for the `InputRenderer` component.
+
 ### InjectionZone
 
 This component has been removed and not replaced. However, you can easily replicate this in your own project by using the `useStrapiApp` hook:
@@ -222,9 +236,69 @@ const MyComponent = (props) => {
 };
 ```
 
+### PageSizeURLQuery
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Pagination`:
+
+```tsx
+// Before
+import { PageSizeURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { Pagination } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Pagination.Root>
+      <Pagination.PageSize />
+    </Pagination.Root>
+  );
+};
+```
+
+Note, there were some slightly behavioural changes i.e. the PageSize won't render if the lowest pageSize is 10 but you only have 9 entries. Due to the refactor some props will have moved and changed, please look at the documentation for the Pagination component for more info.
+
+### PaginationURLQueryProps
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Pagination`:
+
+```tsx
+// Before
+import { PaginationURLQueryProps } from '@strapi/helper-plugin';
+
+// After
+import { Pagination } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Pagination.Root pageCount={2}>
+      <Pagination.Links />
+    </Pagination.Root>
+  );
+};
+```
+
+Note, there were some slightly behavioural changes i.e. the Links won't render if there are less than 2 pages. Due to the refactor some props will have moved and changed, please look at the documentation for the Pagination component for more info.
+
 ### ReactSelect
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### RelativeTime
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### SearchURLQuery
+
+This component was removed and renamed to `SearchInput` and can now be imported by the `@strapi/strapi` package:
+
+```tsx
+// Before
+import { SearchURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { SearchInput } from '@strapi/strapi/admin';
+```
 
 ### SettingsPageTitle
 
@@ -303,6 +377,44 @@ const { layout } = useCMEditViewDataManager();
 const {
   edit: { layout, components },
 } = useDocumentLayout();
+```
+
+## Hooks
+
+### useCallbackRef
+
+This component has been removed. You should import it from the `@strapi/design-system` package:
+
+```tsx
+// Before
+import { useCallbackRef } from '@strapi/helper-plugin';
+
+// After
+import { useCallbackRef } from '@strapi/design-system';
+```
+
+### useCollator
+
+This component has been removed. You should import it from the `@strapi/design-system` package:
+
+```tsx
+// Before
+import { useCollator } from '@strapi/helper-plugin';
+
+// After
+import { useCollator } from '@strapi/design-system';
+```
+
+### useFilter
+
+This component has been removed. You should import it from the `@strapi/design-system` package:
+
+```tsx
+// Before
+import { useFilter } from '@strapi/helper-plugin';
+
+// After
+import { useFilter } from '@strapi/design-system';
 ```
 
 ## Icons

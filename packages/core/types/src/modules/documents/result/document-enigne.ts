@@ -43,7 +43,7 @@ export type Update<
   TParams extends Params.Update<TContentTypeUID>
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
-export type Count = Promise<number | null>;
+export type Count = Promise<number>;
 
 export type Publish<
   TContentTypeUID extends Common.UID.ContentType,

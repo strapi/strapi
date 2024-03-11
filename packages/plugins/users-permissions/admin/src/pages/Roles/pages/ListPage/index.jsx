@@ -14,14 +14,13 @@ import {
   useNotifyAT,
   VisuallyHidden,
   EmptyStateLayout,
+  useCollator,
+  useFilter,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   ConfirmDialog,
-  SearchURLQuery,
-  useCollator,
-  useFilter,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
@@ -29,7 +28,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, SearchInput } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -73,7 +72,7 @@ export const RolesListPage = () => {
     enabled: canRead,
   });
 
-  const { includes } = useFilter(locale, {
+  const { contains } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -120,7 +119,7 @@ export const RolesListPage = () => {
   };
 
   const sortedRoles = (roles || [])
-    .filter((role) => includes(role.name, _q) || includes(role.description, _q))
+    .filter((role) => contains(role.name, _q) || contains(role.description, _q))
     .sort(
       (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.description, b.description)
     );
@@ -172,7 +171,7 @@ export const RolesListPage = () => {
 
         <ActionLayout
           startActions={
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage({
                 id: 'app.component.search.label',
                 defaultMessage: 'Search',

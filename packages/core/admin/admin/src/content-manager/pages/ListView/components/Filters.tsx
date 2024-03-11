@@ -1,12 +1,17 @@
 import * as React from 'react';
 
-import { Button, Combobox, ComboboxOption, ComboboxProps } from '@strapi/design-system';
+import {
+  Button,
+  Combobox,
+  ComboboxOption,
+  ComboboxProps,
+  useCollator,
+} from '@strapi/design-system';
 import {
   FilterData,
   FilterListURLQuery,
   FilterPopoverURLQuery,
   findMatchingPermissions,
-  useCollator,
   useQueryParams,
   useRBACProvider,
   useTracking,

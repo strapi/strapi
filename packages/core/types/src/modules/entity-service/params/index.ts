@@ -6,7 +6,6 @@ import type * as Pagination from './pagination';
 import type * as Fields from './fields';
 import type * as Filters from './filters';
 import type * as Populate from './populate';
-import type * as PublicationState from './publication-state';
 import type * as Data from './data';
 import type * as Search from './search';
 
@@ -38,8 +37,6 @@ export type Pick<
     [HasMember<TKind, 'pagination'>, Pagination.Any],
     [HasMember<TKind, 'pagination:offset'>, Pagination.OffsetNotation],
     [HasMember<TKind, 'pagination:page'>, Pagination.PageNotation],
-    // Publication State
-    [HasMember<TKind, 'publicationState'>, PublicationState.Param],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
@@ -68,7 +65,6 @@ export type Kind =
   | 'pagination'
   | 'pagination:offset'
   | 'pagination:page'
-  | 'publicationState'
   | 'plugin'
   | 'data'
   | 'data:partial'
@@ -77,4 +73,4 @@ export type Kind =
 
 type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
 
-export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };
+export type { Sort, Pagination, Fields, Filters, Populate, Data, Attribute };

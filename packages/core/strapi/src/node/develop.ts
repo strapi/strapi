@@ -1,5 +1,5 @@
 import * as tsUtils from '@strapi/typescript-utils';
-import { joinBy } from '@strapi/utils';
+import { strings } from '@strapi/utils';
 import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -16,10 +16,6 @@ import type { ViteWatcher } from './vite/watch';
 import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
-  /**
-   * @default false
-   */
-  ignorePrompts?: boolean;
   /**
    * Which bundler to use for building.
    *
@@ -78,19 +74,16 @@ const develop = async ({
   polling,
   logger,
   tsconfig,
-  ignorePrompts,
   watchAdmin,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
 
   if (cluster.isPrimary) {
-    const { didInstall } = await checkRequiredDependencies({ cwd, logger, ignorePrompts }).catch(
-      (err) => {
-        logger.error(err.message);
-        process.exit(1);
-      }
-    );
+    const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
+      logger.error(err.message);
+      process.exit(1);
+    });
 
     if (didInstall) {
       return;
@@ -285,7 +278,7 @@ const develop = async ({
           '**/public',
           '**/public/**',
           strapiInstance.dirs.static.public,
-          joinBy('/', strapiInstance.dirs.static.public, '**'),
+          strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
           '**/*.db*',
           '**/exports/**',
           '**/dist/**',

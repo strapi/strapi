@@ -43,8 +43,6 @@ export interface Module {
   controllers: Record<string, Common.Controller>;
 }
 
-const uidToPath = (uid: string) => uid.replace('::', '.');
-
 // Removes the namespace from a map with keys prefixed with a namespace
 const removeNamespacedKeys = <T extends Record<string, unknown>>(map: T, namespace: string) => {
   return _.mapKeys(map, (value, key) => removeNamespace(key, namespace));
@@ -100,13 +98,13 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       strapi.get('policies').add(namespace, rawModule.policies);
       strapi.get('middlewares').add(namespace, rawModule.middlewares);
       strapi.get('controllers').add(namespace, rawModule.controllers);
-      strapi.get('config').set(uidToPath(namespace), rawModule.config);
+      strapi.get('config').set(namespace, rawModule.config);
     },
     get routes() {
       return rawModule.routes ?? {};
     },
     config(path: string, defaultValue: unknown) {
-      return strapi.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);
+      return strapi.get('config').get(`${namespace}.${path}`, defaultValue);
     },
     contentType(ctName: Common.UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);

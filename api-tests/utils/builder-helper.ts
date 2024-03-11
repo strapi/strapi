@@ -51,8 +51,6 @@ const bootstrapBuilder = ({ fixtures, schemas, locales }: BuilderResources, buil
 export const createTestSetup = async (
   resources: BuilderResources
 ): Promise<BuilderHelperReturn> => {
-  const { fixtures, schemas } = resources;
-
   const builder = createTestBuilder();
   bootstrapBuilder(resources, builder);
   await builder.build();

@@ -1,13 +1,12 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton } from '@strapi/design-system';
+import { Box, Flex, IconButton, useComposedRefs } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled, { CSSProperties, css } from 'styled-components';
 
-import { composeRefs } from '../../../../../../utils/refs';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
 import { getTranslation } from '../../../../../utils/translations';
@@ -164,7 +163,7 @@ const DragAndDropElement = ({
       },
     });
 
-  const composedBoxRefs = composeRefs(blockRef, dropRef);
+  const composedBoxRefs = useComposedRefs(blockRef, dropRef);
 
   // Set Drag direction before loosing state while dragging
   React.useEffect(() => {

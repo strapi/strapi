@@ -1,5 +1,5 @@
 /* eslint-disable no-template-curly-in-string */
-import { yup, startsWithANumber } from '@strapi/utils';
+import { yup, strings } from '@strapi/utils';
 import _ from 'lodash';
 import { TestConfig } from 'yup';
 
@@ -57,7 +57,7 @@ export const isValidKey = (key: string): CommonTestConfig => ({
 export const isValidEnum: CommonTestConfig = {
   name: 'isValidEnum',
   message: '${path} should not start with number',
-  test: (val) => val === '' || !startsWithANumber(val as string),
+  test: (val) => val === '' || !strings.startsWithANumber(val as string),
 };
 
 export const areEnumValuesUnique: CommonTestConfig = {

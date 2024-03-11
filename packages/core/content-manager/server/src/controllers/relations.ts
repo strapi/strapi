@@ -56,7 +56,7 @@ export default {
     ctx: any,
     id?: Entity.ID,
     locale?: Documents.Params.Locale,
-    status?: Documents.Params.PublicationState.Kind
+    status?: Documents.Params.PublicationStatus.Kind
   ) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;

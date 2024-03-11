@@ -7,7 +7,7 @@ import type * as Pagination from './pagination';
 import type * as Fields from './fields';
 import type * as Filters from './filters';
 import type * as Populate from './populate';
-import type * as PublicationState from './status';
+import type * as PublicationStatus from './status';
 import type * as Data from './data';
 import type * as Search from './search';
 
@@ -41,8 +41,8 @@ export type Pick<
     [HasMember<TKind, 'pagination'>, Pagination.Any],
     [HasMember<TKind, 'pagination:offset'>, Pagination.OffsetNotation],
     [HasMember<TKind, 'pagination:page'>, Pagination.PageNotation],
-    // Publication State
-    [HasMember<TKind, 'status'>, PublicationState.Param],
+    // Publication Status
+    [HasMember<TKind, 'status'>, PublicationStatus.Param],
     // Locale
     [HasMember<TKind, 'locale'>, { locale?: Locale }], // TODO: also allow arrays ?
     // Plugin
@@ -88,4 +88,4 @@ type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Exten
 
 export type All = Pick<Common.UID.Schema, Kind>;
 
-export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };
+export type { Sort, Pagination, Fields, Filters, Populate, Data, Attribute, PublicationStatus };

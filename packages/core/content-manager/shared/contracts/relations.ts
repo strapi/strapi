@@ -6,7 +6,7 @@ type PaginationQuery = EntityService.Params.Pagination.PageNotation;
 export interface RelationResult {
   documentId: Documents.ID;
   id: number;
-  status: Documents.Params.PublicationState.Kind;
+  status: Documents.Params.PublicationStatus.Kind;
   locale?: Documents.Params.Locale;
   [key: string]: unknown;
 }
@@ -70,7 +70,7 @@ export declare namespace FindExisting {
       locale?: string | null;
       _filter?: string;
       _q?: string;
-      status?: Documents.Params.PublicationState.Kind;
+      status?: Documents.Params.PublicationStatus.Kind;
       idsToOmit?: Documents.ID[];
       idsToInclude?: Documents.ID[];
     };

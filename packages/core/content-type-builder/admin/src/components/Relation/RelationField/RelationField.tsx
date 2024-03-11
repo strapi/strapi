@@ -1,7 +1,7 @@
 import { Box, Divider, Flex, Typography } from '@strapi/design-system';
-import { GenericInput } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../../utils/getTrad';
+import { GenericInput } from '../../GenericInputs';
 
 import { RelationTargetPicker } from './RelationTargetPicker/RelationTargetPicker';
 

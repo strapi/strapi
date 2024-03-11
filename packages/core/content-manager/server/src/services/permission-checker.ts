@@ -1,4 +1,4 @@
-import { pipeAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { LoadedStrapi as Strapi, EntityService, Common } from '@strapi/types';
 
 const ACTIONS = {
@@ -76,7 +76,7 @@ const createPermissionChecker =
     };
 
     const sanitizedQuery = (query: Query, action: { action?: string } = {}) => {
-      return pipeAsync(
+      return async.pipe(
         (q: Query) => sanitizeQuery(q, action),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);

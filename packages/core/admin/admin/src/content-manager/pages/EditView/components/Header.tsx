@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { RelativeTime, useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { useForm } from '../../../../components/Form';
+import { RelativeTime } from '../../../../components/RelativeTime';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -22,7 +23,7 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { CLONE_PATH } from '../../../router';
+import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { getDisplayName } from '../../../utils/users';
 
 import { DocumentActionsMenu } from './DocumentActions';
@@ -432,6 +433,7 @@ const StyledPencil = styled(Pencil)`
 const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const listViewPathMatch = useMatch(LIST_PATH);
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
   const toggleNotification = useNotification();
@@ -462,7 +464,14 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
         </Flex>
       ),
       onConfirm: async () => {
-        setSubmitting(true);
+        /**
+         * If we have a match, we're in the list view
+         * and therefore not in a form and shouldn't be
+         * trying to set the submitting value.
+         */
+        if (!listViewPathMatch) {
+          setSubmitting(true);
+        }
         try {
           if (!documentId && collectionType !== SINGLE_TYPES) {
             console.error(
@@ -480,13 +489,19 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
             return;
           }
 
-          const res = await deleteAction({ documentId, model, collectionType });
+          const res = await deleteAction({
+            documentId,
+            model,
+            collectionType,
+          });
 
           if (!('error' in res)) {
             navigate({ pathname: `../${collectionType}/${model}` }, { replace: true });
           }
         } finally {
-          setSubmitting(false);
+          if (!listViewPathMatch) {
+            setSubmitting(false);
+          }
         }
       },
     },
