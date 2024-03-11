@@ -94,7 +94,12 @@ export default {
         if (status) {
           where.publishedAt = status === 'published' ? { $ne: null } : null;
         }
-        if (locale) {
+
+        const isSourceLocalized = strapi
+          .plugin('i18n')
+          .service('content-types')
+          .isLocalizedContentType(sourceSchema);
+        if (locale && isSourceLocalized) {
           where.locale = locale;
         }
       } else {
@@ -147,8 +152,12 @@ export default {
       'documentId',
     ]);
 
-    // @ts-expect-error TODO improve i18n detection
-    if (targetSchema?.pluginOptions?.i18n?.localized) {
+    const isTargetLocalized = strapi
+      .plugin('i18n')
+      .service('content-types')
+      .isLocalizedContentType(targetSchema);
+
+    if (isTargetLocalized) {
       fieldsToSelect.push('locale');
     }
 
@@ -156,6 +165,8 @@ export default {
       attribute,
       fieldsToSelect,
       mainField,
+      source: { schema: sourceSchema },
+      target: { schema: targetSchema, isLocalized: isTargetLocalized },
       sourceSchema,
       targetSchema,
       targetField,
@@ -172,8 +183,13 @@ export default {
       targetField,
       fieldsToSelect,
       mainField,
-      sourceSchema: { uid: sourceUid, modelType: sourceModelType },
-      targetSchema: { uid: targetUid },
+      source: {
+        schema: { uid: sourceUid, modelType: sourceModelType },
+      },
+      target: {
+        schema: { uid: targetUid },
+        isLocalized: isTargetLocalized,
+      },
     } = validation;
 
     const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
@@ -197,7 +213,9 @@ export default {
       publishedAt: status === 'published' ? { $ne: null } : null,
     });
 
-    if (locale) {
+    // We will only filter by locale if the target content type is localized
+    const filterByLocale = isTargetLocalized && locale;
+    if (filterByLocale) {
       addFiltersClause(queryParams, { locale });
     }
 
@@ -238,7 +256,7 @@ export default {
       if (status) {
         where[`${alias}.published_at`] = status === 'published' ? { $ne: null } : null;
       }
-      if (locale) {
+      if (filterByLocale) {
         where[`${alias}.locale`] = locale;
       }
 
