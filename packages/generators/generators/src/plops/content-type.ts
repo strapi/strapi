@@ -2,7 +2,7 @@ import { join } from 'path';
 import { NodePlopAPI, ActionType } from 'plop';
 import slugify from '@sindresorhus/slugify';
 import fs from 'fs-extra';
-import * as utils from '@strapi/utils';
+import { strings } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 
 import getDestinationPrompts from './prompts/get-destination-prompts';
@@ -29,7 +29,7 @@ export default (plop: NodePlopAPI) => {
           default: config.singularName,
           message: 'Name of the new API?',
           async validate(input) {
-            if (!utils.isKebabCase(input)) {
+            if (!strings.isKebabCase(input)) {
               return 'Value must be in kebab-case';
             }
 

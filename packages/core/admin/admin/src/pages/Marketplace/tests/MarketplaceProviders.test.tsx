@@ -30,7 +30,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 const LocationDisplay = () => {
   const location = useLocation();
 
-  return <span>{location.search}</span>;
+  return <span data-testId="location">{location.search}</span>;
 };
 
 const render = () =>
@@ -221,7 +221,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, user, getByText } = render();
+    const { getByRole, user } = render();
 
     await waitForReload();
 
@@ -240,7 +240,9 @@ describe('Marketplace page - providers tab', () => {
     await user.click(getByRole('button', { name: 'Made by Strapi' }));
 
     await waitForReload();
-    expect(getByText('?npmPackageType=provider&sort=name:asc&page=1')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?npmPackageType=provider&sort=name:asc&page=1"`
+    );
   });
 
   it('only filters in the providers tab', async () => {
@@ -296,9 +298,9 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    expect(
-      screen.getByText('?npmPackageType=provider&sort=submissionDate:desc&page=1')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?npmPackageType=provider&sort=submissionDate:desc&page=1"`
+    );
   });
 
   it('shows github stars and weekly downloads count for each provider', async () => {
@@ -340,16 +342,22 @@ describe('Marketplace page - providers tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByText('?npmPackageType=provider&sort=name:asc&page=2')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=2&npmPackageType=provider&sort=name%3Aasc"`
+    );
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByText('?npmPackageType=provider&sort=name:asc&page=1')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=1&npmPackageType=provider&sort=name%3Aasc"`
+    );
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByText('?npmPackageType=provider&sort=name:asc&page=3')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=3&npmPackageType=provider&sort=name%3Aasc"`
+    );
   });
 });

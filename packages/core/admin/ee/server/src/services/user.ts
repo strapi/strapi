@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { pipe, map, castArray, toNumber } from 'lodash/fp';
-import { stringIncludes } from '@strapi/utils';
-import { errors } from '@strapi/utils';
+import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
 import constants from '../../../../server/src/services/constants';
 import { getService } from '../utils';
@@ -70,7 +69,7 @@ const updateById = async (id: any, attributes: any) => {
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
     const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
-    const willRemoveSuperAdminRole = !stringIncludes(attributes.roles, superAdminRole.id);
+    const willRemoveSuperAdminRole = !arrays.includesString(attributes.roles, superAdminRole.id);
 
     if (lastAdminUser && willRemoveSuperAdminRole) {
       throw new ValidationError('You must have at least one user with super admin role.');

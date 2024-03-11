@@ -18,7 +18,6 @@ import {
 import {
   ConfirmDialog,
   getFetchClient,
-  SearchURLQuery,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useQueryParams,
@@ -33,6 +32,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../components/PageHelpers';
+import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { selectAdminPermissions } from '../../../../selectors';
@@ -165,7 +165,7 @@ const ListPage = () => {
       {canRead && (
         <ActionLayout
           startActions={
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage(
                 { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                 {

@@ -48,11 +48,11 @@ describe('Test Graphql API create localization', () => {
       data: { code: 'fr', name: 'French' },
     });
 
-    localeId = locale.id;
+    localeId = locale.documentId;
   });
 
   afterAll(async () => {
-    await strapi.query('plugin::i18n.locale').delete({ where: { id: localeId } });
+    await strapi.query('plugin::i18n.locale').delete({ where: { documentId: localeId } });
     await strapi.query('api::recipe.recipe').deleteMany();
     await strapi.destroy();
     await builder.cleanup();
@@ -64,7 +64,7 @@ describe('Test Graphql API create localization', () => {
         mutation createRecipe($data: RecipeInput!) {
           createRecipe(data: $data) {
             data {
-              id
+              documentId
               attributes {
                 name
                 locale
@@ -94,14 +94,14 @@ describe('Test Graphql API create localization', () => {
       },
     });
 
-    const recipeId = createResponse.body.data.createRecipe.data.id;
+    const recipeId = createResponse.body.data.createRecipe.data.documentId;
 
-    const createLocalizationResponse = await graphqlQuery({
+    const updateRecipeResponse = await graphqlQuery({
       query: /* GraphQL */ `
-        mutation createRecipeLocalization($id: ID!, $locale: I18NLocaleCode, $data: RecipeInput!) {
-          createRecipeLocalization(id: $id, locale: $locale, data: $data) {
+        mutation updateRecipe($documentId: ID!, $locale: I18NLocaleCode, $data: RecipeInput!) {
+          updateRecipe(documentId: $documentId, locale: $locale, data: $data) {
             data {
-              id
+              documentId
               attributes {
                 name
                 locale
@@ -111,7 +111,7 @@ describe('Test Graphql API create localization', () => {
         }
       `,
       variables: {
-        id: recipeId,
+        documentId: recipeId,
         locale: 'fr',
         data: {
           name: 'Recipe Name fr',
@@ -119,8 +119,8 @@ describe('Test Graphql API create localization', () => {
       },
     });
 
-    expect(createLocalizationResponse.statusCode).toBe(200);
-    expect(createLocalizationResponse.body.data.createRecipeLocalization).toMatchObject({
+    expect(updateRecipeResponse.statusCode).toBe(200);
+    expect(updateRecipeResponse.body.data.updateRecipe).toMatchObject({
       data: {
         attributes: {
           name: 'Recipe Name fr',

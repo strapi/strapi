@@ -1,7 +1,7 @@
 'use strict';
 
 import { omit } from 'lodash/fp';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createRequest } from 'api-tests/request';
@@ -812,7 +812,7 @@ describe.skip('Review workflows', () => {
 
       // Move half of the entries to the last stage,
       // and the other half to the first stage
-      await mapAsync(products.results, async (entity) =>
+      await async.map(products.results, async (entity) =>
         updateEntry(productUID, entity.id, {
           [ENTITY_STAGE_ATTRIBUTE]: entity.id % 2 ? defaultStage.id : secondStage.id,
         })

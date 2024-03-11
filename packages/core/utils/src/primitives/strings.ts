@@ -14,11 +14,6 @@ const toRegressedEnumValue = (value: string) =>
     separator: '_',
   });
 
-const getCommonBeginning = (...strings: string[]) =>
-  _.takeWhile(strings[0], (char, index) => strings.every((string) => string[index] === char)).join(
-    ''
-  );
-
 const getCommonPath = (...paths: string[]) => {
   const [segments, ...otherSegments] = paths.map((it) => _.split(it, '/'));
   return _.join(
@@ -27,20 +22,7 @@ const getCommonPath = (...paths: string[]) => {
   );
 };
 
-const escapeQuery = (query: string, charsToEscape: string, escapeChar = '\\') => {
-  return query
-    .split('')
-    .reduce(
-      (escapedQuery, char) =>
-        charsToEscape.includes(char)
-          ? `${escapedQuery}${escapeChar}${char}`
-          : `${escapedQuery}${char}`,
-      ''
-    );
-};
-
-const stringIncludes = (arr: unknown[], val: unknown) => arr.map(String).includes(String(val));
-const stringEquals = (a: unknown, b: unknown) => String(a) === String(b);
+const isEqual = (a: unknown, b: unknown) => String(a) === String(b);
 const isCamelCase = (value: string) => /^[a-z][a-zA-Z0-9]+$/.test(value);
 const isKebabCase = (value: string) => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
 const startsWithANumber = (value: string) => /^[0-9]/.test(value);
@@ -63,11 +45,8 @@ const toKebabCase = (value: string) => kebabCase(value);
 export {
   nameToSlug,
   nameToCollectionName,
-  getCommonBeginning,
   getCommonPath,
-  escapeQuery,
-  stringIncludes,
-  stringEquals,
+  isEqual,
   isCamelCase,
   isKebabCase,
   toKebabCase,

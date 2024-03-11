@@ -1,5 +1,5 @@
 import type { Strapi, Schema } from '@strapi/types';
-import type { TypeRegistry } from '../../../type-registry';
+import type { TypeRegistry } from '../../type-registry';
 
 const registerInputsDefinition = (
   contentType: Schema.Any,
