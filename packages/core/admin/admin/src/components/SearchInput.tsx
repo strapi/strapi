@@ -1,13 +1,11 @@
 import * as React from 'react';
 
 import { Icon, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
+import { useQueryParams, type TrackingEvent, useTracking } from '@strapi/helper-plugin';
 import { Search as SearchIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { TrackingEvent, useTracking } from '../features/Tracking';
-import { useQueryParams } from '../hooks/useQueryParams';
-
-export interface SearchURLQueryProps {
+interface SearchInputProps {
   disabled?: boolean;
   label: string;
   placeholder?: string;
@@ -15,13 +13,13 @@ export interface SearchURLQueryProps {
   trackedEventDetails?: TrackingEvent['properties'];
 }
 
-const SearchURLQuery = ({
+const SearchInput = ({
   disabled,
   label,
   placeholder,
   trackedEvent,
   trackedEventDetails,
-}: SearchURLQueryProps) => {
+}: SearchInputProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const iconButtonRef = React.useRef<HTMLButtonElement>(null);
 
@@ -67,7 +65,7 @@ const SearchURLQuery = ({
         <Searchbar
           ref={inputRef}
           name="search"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          onChange={(e) => setValue(e.target.value)}
           value={value}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={handleClear}
@@ -91,4 +89,5 @@ const SearchURLQuery = ({
   );
 };
 
-export { SearchURLQuery };
+export { SearchInput };
+export type { SearchInputProps };

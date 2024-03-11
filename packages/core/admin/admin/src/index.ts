@@ -10,6 +10,8 @@ export * from './render';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export * from './components/Pagination';
+export * from './components/SearchInput';
 
 /**
  * Hooks

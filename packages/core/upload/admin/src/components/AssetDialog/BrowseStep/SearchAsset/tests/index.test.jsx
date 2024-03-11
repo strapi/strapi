@@ -22,7 +22,7 @@ const makeApp = (queryValue) => (
   </ThemeProvider>
 );
 
-describe('<SearchURLQuery />', () => {
+describe('SearchAsset', () => {
   it('renders and matches the snapshot', () => {
     const { container } = render(makeApp(null));
 
