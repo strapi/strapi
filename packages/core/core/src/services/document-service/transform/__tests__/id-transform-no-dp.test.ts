@@ -71,7 +71,7 @@ describe('Transform relational data', () => {
             product: { documentId: 'product-1', locale: 'en', status: 'draft' },
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -96,7 +96,7 @@ describe('Transform relational data', () => {
           },
         },
         // Should connect to draft versions of the products
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       // Transform relations to connect to the draft and published versions of the products
@@ -137,7 +137,7 @@ describe('Transform relational data', () => {
             },
           },
         },
-        { isDraft: true, locale: 'en' }
+        { status: 'draft', locale: 'en' }
       );
 
       expect(data).toMatchObject({

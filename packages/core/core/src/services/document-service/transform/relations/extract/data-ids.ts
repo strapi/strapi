@@ -84,7 +84,7 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; isDraft?: boolean }
+  opts: { uid: Common.UID.Schema; locale?: string | null; status?: 'draft' | 'published' }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
@@ -104,18 +104,18 @@ const extractDataIds = (
             sourceLocale: opts.locale,
           });
 
-          const targetStatuses = getRelationTargetStatus(relation, {
+          const targetStatus = getRelationTargetStatus(relation, {
             targetUid: target as Common.UID.Schema,
             sourceUid: opts.uid,
-            sourceStatus: opts.isDraft,
+            sourceStatus: opts.status,
           });
 
-          targetStatuses.forEach((status) => {
+          targetStatus.forEach((status) => {
             idMap.add({
               uid: target,
               documentId: relation.documentId,
               locale: targetLocale,
-              isDraft: status,
+              status,
             });
           });
         });

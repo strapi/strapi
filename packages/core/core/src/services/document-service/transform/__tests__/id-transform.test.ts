@@ -64,7 +64,7 @@ describe('Transform relational data', () => {
             relatedProducts: ['doc1', 'doc2', 'doc3'],
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toEqual({
@@ -85,7 +85,7 @@ describe('Transform relational data', () => {
             category: 4,
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toEqual({
@@ -107,7 +107,7 @@ describe('Transform relational data', () => {
             category: { documentId: 'doc4' },
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -127,7 +127,7 @@ describe('Transform relational data', () => {
             category: { id: 2 },
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -147,7 +147,7 @@ describe('Transform relational data', () => {
             category: { id: 2, documentId: 'doc4' },
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -168,7 +168,7 @@ describe('Transform relational data', () => {
           category: { set: 'doc4' },
         },
       },
-      { locale: 'en', isDraft: true }
+      { locale: 'en', status: 'draft' }
     );
 
     expect(data).toEqual({
@@ -188,7 +188,7 @@ describe('Transform relational data', () => {
           category: { connect: 'doc4' },
         },
       },
-      { locale: 'en', isDraft: true }
+      { locale: 'en', status: 'draft' }
     );
 
     expect(data).toEqual({
@@ -208,7 +208,7 @@ describe('Transform relational data', () => {
           category: { connect: 'doc4' },
         },
       },
-      { locale: 'en', isDraft: true }
+      { locale: 'en', status: 'draft' }
     );
 
     expect(data).toMatchObject({
@@ -228,7 +228,7 @@ describe('Transform relational data', () => {
           category: { connect: 'doc4' },
         },
       },
-      { locale: 'en', isDraft: true }
+      { locale: 'en', status: 'draft' }
     );
 
     expect(data).toMatchObject({
@@ -248,7 +248,7 @@ describe('Transform relational data', () => {
           category: { disconnect: 'doc4' },
         },
       },
-      { locale: 'en', isDraft: true }
+      { locale: 'en', status: 'draft' }
     );
 
     expect(data).toEqual({
@@ -276,7 +276,7 @@ describe('Transform relational data', () => {
           },
         },
       },
-      { locale: 'en', isDraft: true }
+      { locale: 'en', status: 'draft' }
     );
 
     expect(data).toEqual({

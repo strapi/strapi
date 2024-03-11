@@ -99,7 +99,6 @@ const shopModel = {
 };
 
 // TODO: Test relations in components
-
 describe('Relations interactions with disabled DP content types', () => {
   beforeAll(async () => {
     await builder
@@ -129,6 +128,13 @@ describe('Relations interactions with disabled DP content types', () => {
         { documentId: 'Tag1', name: 'Tag1', publishedAt: null },
         { documentId: 'Tag2', name: 'Tag2', publishedAt: null },
         { documentId: 'Tag3', name: 'Tag3', publishedAt: null },
+      ],
+    });
+
+    await strapi.db.query(SHOP_UID).createMany({
+      data: [
+        { documentId: 'Shop1', name: 'Shop1', publishedAt: new Date() },
+        { documentId: 'Shop2', name: 'Shop2', publishedAt: new Date() },
       ],
     });
 
@@ -399,4 +405,27 @@ describe('Relations interactions with disabled DP content types', () => {
       );
     });
   });
+
+  describe('DP (Product) -> Non DP (Shop)', () => {
+    describe('X to X relation', () => {
+      // Can connect to a shop
+      it(
+        'Can connect to a shop',
+        testInTransaction(async () => {
+          const product = await productDocuments.create({
+            data: {
+              name: 'Skate',
+              // Status is ignored
+              shop: { documentId: 'Shop1', status: 'draft' },
+            },
+            populate: ['shop'],
+          });
+
+          expect(product.shop).toMatchObject({ name: 'Shop1' });
+        })
+      );
+    });
+  });
+
+  describe('Non DP (Shop) -> Non DP (Shop)', () => {});
 });

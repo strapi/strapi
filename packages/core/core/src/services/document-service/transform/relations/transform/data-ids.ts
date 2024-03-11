@@ -166,7 +166,7 @@ const transformDataIdsVisitor = (
   opts: {
     uid: Common.UID.Schema;
     locale?: string | null;
-    isDraft?: boolean;
+    status?: 'draft' | 'published';
     allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
   }
 ) => {
@@ -194,7 +194,7 @@ const transformDataIdsVisitor = (
           // status(es) to connect to
           const targetStatuses = getRelationTargetStatus(
             { documentId, status },
-            { targetUid: target, sourceUid: opts.uid, sourceStatus: opts.isDraft }
+            { targetUid: target, sourceUid: opts.uid, sourceStatus: opts.status }
           );
 
           const ids = [];
@@ -207,7 +207,7 @@ const transformDataIdsVisitor = (
               uid: target,
               documentId,
               locale: targetLocale,
-              isDraft: targetStatus,
+              status: targetStatus,
             });
 
             if (entryId) ids.push(entryId);
@@ -215,7 +215,7 @@ const transformDataIdsVisitor = (
 
           if (!ids.length && !opts.allowMissingId) {
             throw new errors.ValidationError(
-              `Document with id "${documentId}", locale "${locale}" not found`
+              `Document with id "${documentId}", locale "${targetLocale}" not found`
             );
           }
 

@@ -46,7 +46,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, { isDraft: params.status === 'draft' }),
+        transformParamsDocumentId(uid, queryParams, {
+          status: queryParams.status,
+          locale: queryParams.locale,
+        }),
       transformParamsToQuery(uid)
     )(params || {});
 
@@ -60,7 +63,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, { isDraft: params.status === 'draft' }),
+        transformParamsDocumentId(uid, queryParams, {
+          status: queryParams.status,
+          locale: queryParams.locale,
+        }),
       transformParamsToQuery(uid)
     )(params);
 
@@ -75,7 +81,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, { isDraft: queryParams.status === 'draft' }),
+        transformParamsDocumentId(uid, queryParams, {
+          status: queryParams.status,
+          locale: queryParams.locale,
+        }),
       transformParamsToQuery(uid),
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
@@ -114,8 +123,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function createEntry(params = {} as any) {
     const { data, ...restParams } = await transformParamsDocumentId(uid, params, {
+      status: params.status,
       locale: params.locale,
-      isDraft: params.status === 'draft',
     });
 
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
@@ -230,7 +239,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {}, {
-      isDraft: params.status === 'draft',
+      status: params.status,
       locale: queryParams?.locale,
     });
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);

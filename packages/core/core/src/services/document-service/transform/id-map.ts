@@ -21,7 +21,7 @@ interface KeyFields {
   uid: string;
   documentId: Entity.ID;
   locale?: string | null;
-  isDraft?: boolean;
+  status?: 'draft' | 'published';
 }
 
 export interface IdMap {
@@ -48,7 +48,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
      * Register a new document id and its corresponding entity id.
      */
     add(keyFields: KeyFields) {
-      const key = encodeKey({ isDraft: false, locale: null, ...keyFields });
+      const key = encodeKey({ status: 'published', locale: null, ...keyFields });
 
       // If the id is already loaded, do nothing
       if (loadedIds.has(key)) return;
@@ -78,13 +78,13 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
       // 2. Query ids
       await mapAsync(
         Object.values(idsByUidAndLocale),
-        async ({ uid, locale, documentIds, isDraft }: any) => {
+        async ({ uid, locale, documentIds, status }: any) => {
           const findParams = {
             select: ['id', 'documentId', 'locale', 'publishedAt'],
             where: {
               documentId: { $in: documentIds },
               locale,
-              publishedAt: isDraft ? null : { $ne: null },
+              publishedAt: status === 'draft' ? null : { $ne: null },
             },
           } as any;
 
@@ -96,7 +96,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
               documentId,
               uid,
               locale,
-              isDraft: !publishedAt,
+              status: publishedAt ? 'published' : 'draft',
             });
             loadedIds.set(key, id);
           });
@@ -111,7 +111,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
      * Get the entity id for a given document id.
      */
     get(keys: KeyFields) {
-      const key = encodeKey({ isDraft: false, locale: null, ...keys });
+      const key = encodeKey({ status: 'published', locale: null, ...keys });
       return loadedIds.get(key);
     },
 

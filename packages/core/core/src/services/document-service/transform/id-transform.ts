@@ -11,7 +11,7 @@ async function transformParamsDocumentId(
   input: { data?: any; fields?: any; populate?: any; [key: string]: any },
   opts: {
     locale?: string | null;
-    isDraft: boolean;
+    status: 'draft' | 'published';
     [key: string]: any;
   }
 ) {

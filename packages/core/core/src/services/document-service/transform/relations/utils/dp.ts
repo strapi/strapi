@@ -5,14 +5,16 @@ import { Common } from '@strapi/types';
 
 import { LongHandDocument } from './types';
 
+type Status = 'draft' | 'published';
+
 export const getRelationTargetStatus = (
   relation: Pick<LongHandDocument, 'documentId' | 'status'>,
   opts: {
     targetUid: Common.UID.Schema;
     sourceUid: Common.UID.Schema;
-    sourceStatus?: boolean;
+    sourceStatus?: Status;
   }
-) => {
+): Status[] => {
   // Ignore if the target content type does not have draft and publish enabled
   const targetContentType = strapi.getModel(opts.targetUid);
   const sourceContentType = strapi.getModel(opts.sourceUid);
@@ -21,24 +23,24 @@ export const getRelationTargetStatus = (
   const sourceHasDP = contentTypes.hasDraftAndPublish(sourceContentType);
 
   if (!targetHasDP) {
-    return [false];
+    return ['published'];
   }
 
   // priority:
   // DP Enabled 'relation status' -> 'source status' -> 'draft'
   // DP Disabled 'relation status' -> 'draft' and 'published'
   if (relation.status) {
-    return [relation.status === 'draft'];
+    return [relation.status];
   }
 
   // Connect to both draft and published versions if dp is disabled and relation does not specify a status
   if (!sourceHasDP) {
-    return [true, false];
+    return ['draft', 'published'];
   }
 
   if (!isNil(opts.sourceStatus)) {
     return [opts.sourceStatus];
   }
 
-  return [true];
+  return ['draft'];
 };

@@ -78,7 +78,7 @@ describe('Transform relational data', () => {
             ],
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -103,7 +103,7 @@ describe('Transform relational data', () => {
             categories: [{ documentId: 'category-1' }],
           },
         },
-        { isDraft: true }
+        { status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -135,7 +135,7 @@ describe('Transform relational data', () => {
             },
           },
         },
-        { isDraft: true }
+        { status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -160,7 +160,7 @@ describe('Transform relational data', () => {
             products: [{ documentId: 'product-1' }, { documentId: 'product-2', locale: 'en' }],
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -179,7 +179,7 @@ describe('Transform relational data', () => {
             relatedCategories: [{ documentId: 'category-1' }],
           },
         },
-        { locale: 'fr', isDraft: true }
+        { locale: 'fr', status: 'draft' }
       );
 
       expect(data).toMatchObject({
@@ -197,7 +197,7 @@ describe('Transform relational data', () => {
             relatedCategories: [{ documentId: 'category-1', locale: 'fr' }],
           },
         },
-        { locale: 'en', isDraft: true }
+        { locale: 'en', status: 'draft' }
       );
 
       expect(promise).rejects.toThrowError();
