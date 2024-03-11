@@ -76,7 +76,7 @@ describe('file', () => {
         },
         config: {
           get: jest.fn((key) => {
-            if (key === 'plugin.upload') {
+            if (key === 'plugin::upload') {
               return {
                 provider: 'private-provider',
               };

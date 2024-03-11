@@ -1,6 +1,6 @@
 'use strict';
 
-const { joinBy } = require('@strapi/utils');
+const { strings } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { ACTIONS, FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const {
@@ -163,7 +163,7 @@ module.exports = {
             .update(
               pathColName,
               strapi.db.connection.raw(replaceQuery, [
-                joinBy('/', destinationFolderPath, existingFolder.pathId),
+                strings.joinBy('/', destinationFolderPath, existingFolder.pathId),
                 pathColName,
                 existingFolder.path.length + 1,
               ])
@@ -178,7 +178,7 @@ module.exports = {
             .update(
               folderPathColName,
               strapi.db.connection.raw(replaceQuery, [
-                joinBy('/', destinationFolderPath, existingFolder.pathId),
+                strings.joinBy('/', destinationFolderPath, existingFolder.pathId),
                 folderPathColName,
                 existingFolder.path.length + 1,
               ])

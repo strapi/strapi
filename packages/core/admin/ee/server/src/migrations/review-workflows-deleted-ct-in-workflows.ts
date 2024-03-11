@@ -1,5 +1,5 @@
 import { difference, keys } from 'lodash/fp';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
 
@@ -12,7 +12,7 @@ async function migrateDeletedCTInWorkflows({ oldContentTypes, contentTypes }: an
   const deletedContentTypes = difference(keys(oldContentTypes), keys(contentTypes)) ?? [];
 
   if (deletedContentTypes.length) {
-    await mapAsync(deletedContentTypes, async (deletedContentTypeUID: unknown) => {
+    await async.map(deletedContentTypes, async (deletedContentTypeUID: unknown) => {
       const workflow = await strapi.query(WORKFLOW_MODEL_UID).findOne({
         select: ['id', 'contentTypes'],
         where: {

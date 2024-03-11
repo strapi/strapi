@@ -1,22 +1,15 @@
-import {
-  ActionLayout,
-  Box,
-  ContentLayout,
-  HeaderLayout,
-  Layout,
-  Main,
-} from '@strapi/design-system';
+import { ActionLayout, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import { DynamicTable, useFocusWhenNavigate, useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
+import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { Filters } from '../../../../../../../admin/src/pages/Settings/components/Filters';
 import { SanitizedAdminUserForAuditLogs } from '../../../../../../../shared/contracts/audit-logs';
 
 import { Modal } from './components/Modal';
-import { PaginationFooter } from './components/PaginationFooter';
 import { TableHeader, TableRows } from './components/TableRows';
 import { useAuditLogsData } from './hooks/useAuditLogsData';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
@@ -130,7 +123,10 @@ const ListPage = () => {
             onOpenModal={(id) => setQuery({ id: `${id}` })}
           />
         </DynamicTable>
-        {auditLogs?.pagination && <PaginationFooter pagination={auditLogs.pagination} />}
+        <Pagination.Root {...auditLogs?.pagination} defaultPageSize={24}>
+          <Pagination.PageSize options={['12', '24', '50', '100']} />
+          <Pagination.Links />
+        </Pagination.Root>
       </ContentLayout>
       {query?.id && <Modal handleClose={() => setQuery({ id: null }, 'remove')} logId={query.id} />}
     </Main>

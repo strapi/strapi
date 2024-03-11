@@ -94,13 +94,19 @@ const useDocument: UseDocument = (args, opts) => {
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { data, isLoading: isLoadingDocument, error } = useGetDocumentQuery(args, opts);
+  const {
+    currentData: data,
+    isLoading: isLoadingDocument,
+    isFetching: isFetchingDocument,
+    error,
+  } = useGetDocumentQuery(args, opts);
 
   const {
     components,
     contentType,
     error: errorSchema,
     isLoading: isLoadingSchema,
+    isFetching: isFetchingSchema,
   } = useGetInitialDataQuery(undefined, {
     selectFromResult: (res) => {
       const contentType = res.data?.contentTypes.find((ct) => ct.uid === args.model);
@@ -118,6 +124,7 @@ const useDocument: UseDocument = (args, opts) => {
 
       return {
         isLoading: res.isLoading,
+        isFetching: res.isFetching,
         error: res.error,
         components: components,
         contentType,
@@ -174,7 +181,7 @@ const useDocument: UseDocument = (args, opts) => {
     [validationSchema]
   );
 
-  const isLoading = isLoadingDocument || isLoadingSchema;
+  const isLoading = isLoadingDocument || isFetchingDocument || isFetchingSchema || isLoadingSchema;
 
   return {
     components,

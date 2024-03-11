@@ -41,7 +41,7 @@ interface UseDragAndDropOptions<
 
 type Identifier = ReturnType<HandlerManager['getHandlerId']>;
 
-type UseDragAndDropReturn = [
+type UseDragAndDropReturn<Element extends HTMLElement = HTMLElement> = [
   props: {
     handlerId: Identifier;
     isDragging: boolean;
@@ -49,7 +49,7 @@ type UseDragAndDropReturn = [
     isOverDropTarget: boolean;
     direction: (typeof DIRECTIONS)[keyof typeof DIRECTIONS] | null;
   },
-  objectRef: React.RefObject<HTMLElement>,
+  objectRef: React.RefObject<Element>,
   dropRef: ConnectDropTarget,
   dragRef: ConnectDragSource,
   dragPreviewRef: ConnectDragPreview
@@ -69,7 +69,8 @@ const useDragAndDrop = <
   TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown } = {
     index: TIndex;
     [key: string]: unknown;
-  }
+  },
+  Element extends HTMLElement = HTMLElement
 >(
   active: boolean,
   {
@@ -84,8 +85,8 @@ const useDragAndDrop = <
     onMoveItem,
     dropSensitivity = DROP_SENSITIVITY.REGULAR,
   }: UseDragAndDropOptions<TIndex, TItem>
-): UseDragAndDropReturn => {
-  const objectRef = React.useRef<HTMLElement>(null);
+): UseDragAndDropReturn<Element> => {
+  const objectRef = React.useRef<Element>(null);
 
   const [{ handlerId, isOver }, dropRef] = useDrop<TItem, void, DropCollectedProps>({
     accept: type,

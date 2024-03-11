@@ -1,7 +1,7 @@
 'use strict';
 
 const { curry } = require('lodash/fp');
-const { traverseEntity, pipeAsync } = require('@strapi/utils');
+const { traverseEntity, async } = require('@strapi/utils');
 
 const { removeUserRelationFromRoleEntities } = require('./visitors');
 
@@ -10,7 +10,7 @@ const sanitizeUserRelationFromRoleEntities = curry((schema, entity) => {
 });
 
 const defaultSanitizeOutput = curry((schema, entity) => {
-  return pipeAsync(sanitizeUserRelationFromRoleEntities(schema))(entity);
+  return async.pipe(sanitizeUserRelationFromRoleEntities(schema))(entity);
 });
 
 module.exports = {

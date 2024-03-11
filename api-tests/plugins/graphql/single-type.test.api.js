@@ -29,7 +29,7 @@ const updateContent = (data) => {
       mutation updateHomePage($data: HomePageInput!) {
         updateHomePage(data: $data) {
           data {
-            id
+            documentId
           }
         }
       }
@@ -66,7 +66,7 @@ describe('Single type Graphql support', () => {
           {
             homePages {
               data {
-                id
+                documentId
               }
             }
           }
@@ -93,7 +93,7 @@ describe('Single type Graphql support', () => {
           {
             homePage {
               data {
-                id
+                documentId
                 attributes {
                   title
                 }
@@ -107,7 +107,7 @@ describe('Single type Graphql support', () => {
       expect(res.body.data).toEqual({
         homePage: {
           data: {
-            id: expect.anything(),
+            documentId: expect.anything(),
             attributes: {
               title: 'Test',
             },
@@ -115,7 +115,7 @@ describe('Single type Graphql support', () => {
         },
       });
 
-      data.id = res.body.data.homePage.data.id;
+      data.documentId = res.body.data.homePage.data.documentId;
     });
   });
 
@@ -125,7 +125,7 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           mutation {
             createHomePage(input: { data: { title: "Test" } }) {
-              id
+              documentId
             }
           }
         `,
@@ -141,13 +141,13 @@ describe('Single type Graphql support', () => {
       );
     });
 
-    test('update a single type does not require id', async () => {
+    test('update a single type does not require documentId', async () => {
       const updateRes = await graphqlQuery({
         query: /* GraphQL */ `
           mutation updateHomePage($data: HomePageInput!) {
             updateHomePage(data: $data) {
               data {
-                id
+                documentId
                 attributes {
                   title
                 }
@@ -166,7 +166,7 @@ describe('Single type Graphql support', () => {
       expect(updateRes.body.data).toEqual({
         updateHomePage: {
           data: {
-            id: data.id,
+            documentId: data.documentId,
             attributes: {
               title: 'New Title',
             },
@@ -179,7 +179,7 @@ describe('Single type Graphql support', () => {
           {
             homePage {
               data {
-                id
+                documentId
                 attributes {
                   title
                 }
@@ -193,7 +193,7 @@ describe('Single type Graphql support', () => {
       expect(getRes.body.data).toEqual({
         homePage: {
           data: {
-            id: data.id,
+            documentId: data.documentId,
             attributes: {
               title: 'New Title',
             },
@@ -207,12 +207,7 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           mutation {
             deleteHomePage {
-              data {
-                id
-                attributes {
-                  title
-                }
-              }
+              documentId
             }
           }
         `,
@@ -221,12 +216,7 @@ describe('Single type Graphql support', () => {
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.body.data).toEqual({
         deleteHomePage: {
-          data: {
-            id: data.id,
-            attributes: {
-              title: 'New Title',
-            },
-          },
+          documentId: data.documentId,
         },
       });
 
@@ -235,7 +225,7 @@ describe('Single type Graphql support', () => {
           {
             homePage {
               data {
-                id
+                documentId
                 attributes {
                   title
                 }
@@ -247,9 +237,7 @@ describe('Single type Graphql support', () => {
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body.data).toEqual({
-        homePage: {
-          data: null,
-        },
+        homePage: null,
       });
     });
   });

@@ -10,33 +10,31 @@ import {
   Td,
   Tr,
   Typography,
-  Status,
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useTracking,
   useAPIErrorHandler,
   useStrapiApp,
-  PaginationURLQuery,
-  PageSizeURLQuery,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { Page } from '../../../components/PageHelpers';
+import { Pagination } from '../../../components/Pagination';
+import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { capitalise } from '../../../utils/strings';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -50,6 +48,7 @@ import { useDeleteDocumentMutation, useGetAllDocumentsQuery } from '../../servic
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
+import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { Filters } from './components/Filters';
 import { Table } from './components/Table';
@@ -266,6 +265,7 @@ const ListViewPage = () => {
 
   return (
     <Main>
+      <Helmet title={`${contentTypeTitle} | Strapi`} />
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(
@@ -303,7 +303,7 @@ const ListViewPage = () => {
         startActions={
           <>
             {list.settings.searchable && (
-              <SearchURLQuery
+              <SearchInput
                 disabled={results.length === 0}
                 label={formatMessage(
                   { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
@@ -362,25 +362,9 @@ const ListViewPage = () => {
                         if (header.name === 'status') {
                           const { status } = rowData;
 
-                          const statusVariant =
-                            status === 'draft'
-                              ? 'primary'
-                              : status === 'published'
-                              ? 'success'
-                              : 'alternative';
-
                           return (
                             <Td key={header.name}>
-                              <Status
-                                maxWidth="min-content"
-                                showBullet={false}
-                                size={'S'}
-                                variant={statusVariant}
-                              >
-                                <Typography as="span" variant="omega" fontWeight="bold">
-                                  {capitalise(status)}
-                                </Typography>
-                              </Status>
+                              <DocumentStatus status={status} maxWidth={'min-content'} />
                             </Td>
                           );
                         }
@@ -459,10 +443,13 @@ const ListViewPage = () => {
               </Table.Body>
             </Table.Content>
           </Table.Root>
-          <Flex alignItems="flex-end" justifyContent="space-between">
-            <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
-            <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
-          </Flex>
+          <Pagination.Root
+            {...pagination}
+            onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
+          >
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
         </Flex>
       </ContentLayout>
     </Main>

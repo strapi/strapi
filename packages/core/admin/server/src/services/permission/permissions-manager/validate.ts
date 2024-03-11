@@ -15,7 +15,7 @@ import {
   isObject,
 } from 'lodash/fp';
 
-import { contentTypes, traverseEntity, traverse, validate, pipeAsync, errors } from '@strapi/utils';
+import { contentTypes, traverseEntity, traverse, validate, async, errors } from '@strapi/utils';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const { ValidationError } = errors;
@@ -53,7 +53,7 @@ export default ({ action, ability, model }: any) => {
     // TODO: validate relations to admin users in all validators
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
-    const validateFilters = pipeAsync(
+    const validateFilters = async.pipe(
       traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
       traverse.traverseQueryFilters(throwPassword, { schema }),
@@ -67,7 +67,7 @@ export default ({ action, ability, model }: any) => {
       )
     );
 
-    const validateSort = pipeAsync(
+    const validateSort = async.pipe(
       traverse.traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
       traverse.traverseQuerySort(throwPassword, { schema }),
@@ -81,12 +81,12 @@ export default ({ action, ability, model }: any) => {
       )
     );
 
-    const validateFields = pipeAsync(
+    const validateFields = async.pipe(
       traverse.traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryFields(throwPassword, { schema })
     );
 
-    const validatePopulate = pipeAsync(
+    const validatePopulate = async.pipe(
       traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, { schema }),
       traverse.traverseQueryPopulate(throwHiddenFields, { schema }),
@@ -120,7 +120,7 @@ export default ({ action, ability, model }: any) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
 
-    return pipeAsync(
+    return async.pipe(
       // Remove fields hidden from the admin
       traverseEntity(throwHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)

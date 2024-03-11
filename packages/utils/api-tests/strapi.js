@@ -17,7 +17,7 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
-  logLevel = 'error',
+  logLevel = 'info',
   bypassAuth = true,
   bootstrap,
 } = {}) => {
