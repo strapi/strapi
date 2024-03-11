@@ -1,7 +1,7 @@
 import { join, extname, basename } from 'path';
 import fse, { existsSync } from 'fs-extra';
 import _ from 'lodash';
-import { isKebabCase, importDefault } from '@strapi/utils';
+import { strings, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
 import type { Core, Struct } from '@strapi/types';
 import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
@@ -30,7 +30,7 @@ const DEFAULT_CONTENT_TYPE = {
 };
 
 // to handle names with numbers in it we first check if it is already in kebabCase
-const normalizeName = (name: string) => (isKebabCase(name) ? name : _.kebabCase(name));
+const normalizeName = (name: string) => (strings.isKebabCase(name) ? name : _.kebabCase(name));
 
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');

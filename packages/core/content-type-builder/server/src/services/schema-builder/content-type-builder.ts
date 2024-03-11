@@ -1,7 +1,7 @@
 import path from 'path';
 import _ from 'lodash';
 
-import { nameToCollectionName, errors } from '@strapi/utils';
+import { strings, errors } from '@strapi/utils';
 import type { Schema, Internal } from '@strapi/types';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
@@ -97,7 +97,10 @@ export default function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
-        .set('collectionName', infos.collectionName || nameToCollectionName(infos.pluralName))
+        .set(
+          'collectionName',
+          infos.collectionName || strings.nameToCollectionName(infos.pluralName)
+        )
         .set('info', {
           singularName: infos.singularName,
           pluralName: infos.pluralName,

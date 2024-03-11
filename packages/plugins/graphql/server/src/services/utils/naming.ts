@@ -207,6 +207,10 @@ export default ({ strapi }: Context) => {
     firstLetterCase: 'lower',
   });
 
+  const getFindConnectionQueryName = (contentType: Struct.Schema) => {
+    return `${getFindQueryName(contentType)}_connection`;
+  };
+
   const getFindOneQueryName = buildCustomTypeNameGenerator({ firstLetterCase: 'lower' });
 
   const getCreateMutationTypeName = buildCustomTypeNameGenerator({
@@ -249,5 +253,6 @@ export default ({ strapi }: Context) => {
     getCreateMutationTypeName,
     getUpdateMutationTypeName,
     getDeleteMutationTypeName,
+    getFindConnectionQueryName,
   };
 };

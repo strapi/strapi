@@ -96,7 +96,7 @@ declare module 'koa' {
     notFound: (response?: string | object) => Koa.Context;
     locked: (response?: string | object) => Koa.Context;
     internalServerError: (response?: string | object) => Koa.Context;
-    notImplemented: (response?: string | object) => Koa.Context;
+    notImplemented: (response?: string | object, data?: Record<string, unknown>) => Koa.Context;
   }
 }
 

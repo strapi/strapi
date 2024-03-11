@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import { prop } from 'lodash/fp';
-import { mapAsync, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import { getService } from '../../utils';
 import { STAGE_TRANSITION_UID } from '../../constants/workflows';
 
@@ -29,7 +29,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       return permissions;
     },
     async registerMany(permissions: any) {
-      return mapAsync(permissions, this.register);
+      return async.map(permissions, this.register);
     },
     async unregister(permissions: any) {
       const permissionIds = permissions.map(prop('id'));

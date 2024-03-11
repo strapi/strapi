@@ -1,10 +1,9 @@
 import { forwardRef } from 'react';
 
-import { DateTimePicker } from '@strapi/design-system';
+import { DateTimePicker, useComposedRefs } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
 import { InputProps } from './types';

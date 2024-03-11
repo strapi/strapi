@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { omit } from 'lodash/fp';
 import dotenv from 'dotenv';
 import type { Core } from '@strapi/types';
-import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from '@strapi/utils';
+import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from './urls';
 
 import loadConfigDir from './config-loader';
 

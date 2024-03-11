@@ -12,16 +12,12 @@ import {
   registerScalars,
   registerInternals,
   registerPolymorphicContentType,
-  contentType,
-} from './register-functions';
-import { TypeRegistry } from '../type-registry';
-
-const {
   registerEnumsDefinition,
   registerInputsDefinition,
   registerFiltersDefinition,
   registerDynamicZonesDefinition,
-} = contentType;
+} from './register-functions';
+import { TypeRegistry } from '../type-registry';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires

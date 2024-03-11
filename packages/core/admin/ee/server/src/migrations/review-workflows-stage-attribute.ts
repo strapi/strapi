@@ -1,6 +1,6 @@
 import semver from 'semver';
 import { getOr } from 'lodash/fp';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { STAGE_MODEL_UID } from '../constants/workflows';
 import { findTables } from '../utils/persisted-tables';
 
@@ -24,7 +24,7 @@ async function migrateStageAttribute({ oldContentTypes, contentTypes }: any) {
     const newAttributeTableName = 'strapi_stage';
     const tables = await findTables({ strapi }, new RegExp(oldAttributeTableName));
 
-    await mapAsync(tables, async (tableName: string) => {
+    await async.map(tables, async (tableName: string) => {
       const newTableName = tableName.replace(oldAttributeTableName, newAttributeTableName);
       const alreadyHasNextTable = await strapi.db.connection.schema.hasTable(newTableName);
 

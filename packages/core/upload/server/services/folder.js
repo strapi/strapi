@@ -1,7 +1,7 @@
 'use strict';
 
 const { keys, sortBy, omit, map, isUndefined } = require('lodash/fp');
-const { joinBy, setCreatorFields } = require('@strapi/utils');
+const { strings, setCreatorFields } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 
@@ -17,7 +17,7 @@ const setPathIdAndPath = async (folder) => {
 
   return Object.assign(folder, {
     pathId,
-    path: joinBy('/', parentPath, pathId),
+    path: strings.joinBy('/', parentPath, pathId),
   });
 };
 
@@ -166,7 +166,7 @@ const update = async (id, { name, parent }, { user }) => {
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
             pathColumnName,
             existingFolder.path,
-            joinBy('/', destinationFolderPath, existingFolder.pathId),
+            strings.joinBy('/', destinationFolderPath, existingFolder.pathId),
           ])
         );
 
@@ -181,7 +181,7 @@ const update = async (id, { name, parent }, { user }) => {
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
             folderPathColumnName,
             existingFolder.path,
-            joinBy('/', destinationFolderPath, existingFolder.pathId),
+            strings.joinBy('/', destinationFolderPath, existingFolder.pathId),
           ])
         );
 

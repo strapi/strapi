@@ -121,7 +121,7 @@ describe('Test Graphql API End to End', () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           query posts($myDatetime: DateTime!) {
-            posts(filters: { myDatetime: { gt: $myDatetime } }) {
+            posts_connection(filters: { myDatetime: { gt: $myDatetime } }) {
               data {
                 attributes {
                   myDatetime
@@ -140,7 +140,7 @@ describe('Test Graphql API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toEqual({
         data: {
-          posts: {
+          posts_connection: {
             data: [],
           },
         },

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _ from 'lodash';
 import { defaults } from 'lodash/fp';
-import { stringIncludes, errors } from '@strapi/utils';
+import { arrays, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import type {
@@ -75,7 +75,7 @@ const updateById = async (
   if (_.has(attributes, 'roles')) {
     const lastAdminUser = await isLastSuperAdminUser(id);
     const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
-    const willRemoveSuperAdminRole = !stringIncludes(attributes.roles!, superAdminRole.id);
+    const willRemoveSuperAdminRole = !arrays.includesString(attributes.roles!, superAdminRole.id);
 
     if (lastAdminUser && willRemoveSuperAdminRole) {
       throw new ValidationError('You must have at least one user with super admin role.');
@@ -214,7 +214,6 @@ const register = async ({
  * Find one user
  */
 const findOne = async (id: Data.ID, populate = ['roles']) => {
-  // @ts-ignore - Migrate id type to StrapiID
   return strapi.entityService.findOne('admin::user', id, { populate });
 };
 

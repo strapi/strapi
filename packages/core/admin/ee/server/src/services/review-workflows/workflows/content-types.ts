@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { difference, merge } from 'lodash/fp';
 import { getService } from '../../../utils';
 import { WORKFLOW_MODEL_UID } from '../../../constants/workflows';
@@ -32,7 +32,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       const workflowsService = getService('workflows', { strapi });
       const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
-      await mapAsync(
+      await async.map(
         created,
         async (uid: any) => {
           // Content Types should only be assigned to one workflow
@@ -43,7 +43,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
             // Updates all existing entities stages links to the new stage
             await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
             // Transfer content types from the previous workflow(s)
-            await mapAsync(srcWorkflows, (srcWorkflow: any) =>
+            await async.map(srcWorkflows, (srcWorkflow: any) =>
               this.transferContentTypes(srcWorkflow, uid)
             );
           }
@@ -59,7 +59,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         { concurrency: 1 }
       );
 
-      await mapAsync(deleted, async (uid: any) => {
+      await async.map(deleted, async (uid: any) => {
         await updateContentTypeConfig(uid, false);
         await stagesService.deleteAllEntitiesStage(uid, {});
       });

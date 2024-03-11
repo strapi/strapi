@@ -6,8 +6,6 @@ import {
 } from '@apollo/server/plugin/landingPage/default';
 import { koaMiddleware } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
-// eslint-disable-next-line import/extensions
-import graphqlUploadKoa from 'graphql-upload/graphqlUploadKoa.js';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
@@ -21,23 +19,6 @@ const merge = mergeWith((a, b) => {
     return a.concat(b);
   }
 });
-
-/**
- * Register the upload middleware powered by graphql-upload in Strapi
- * @param {object} strapi
- * @param {string} path
- */
-const useUploadMiddleware = (strapi: Core.Strapi, path: string): void => {
-  const uploadMiddleware = graphqlUploadKoa();
-
-  strapi.server.app.use((ctx, next) => {
-    if (ctx.path === path) {
-      return uploadMiddleware(ctx, next);
-    }
-
-    return next();
-  });
-};
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   // Generate the GraphQL schema for the content API
@@ -99,9 +80,6 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
-
-  // Register the upload middleware
-  useUploadMiddleware(strapi, path);
 
   try {
     // server.start() must be called before using server.applyMiddleware()

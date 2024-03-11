@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Flex,
@@ -7,9 +7,10 @@ import {
   BaseCheckbox,
   TextButton,
   Typography,
+  useCollator,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { CheckPermissions, useCollator, useTracking, useQueryParams } from '@strapi/helper-plugin';
+import { CheckPermissions, useTracking, useQueryParams } from '@strapi/helper-plugin';
 import { Cog, Layer } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';

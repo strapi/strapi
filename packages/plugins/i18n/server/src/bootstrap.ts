@@ -3,25 +3,6 @@ import type { Core } from '@strapi/strapi';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
-  const i18nModelUIDs = Object.values(strapi.contentTypes)
-    .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
-    .map((contentType) => contentType.uid);
-
-  if (i18nModelUIDs.length > 0) {
-    // TODO V5 : to remove ?
-    // Should this code exist? It's putting business logic on the query engine
-    // whereas it should maybe stay on the entity service layer ?
-    strapi.db.lifecycles.subscribe({
-      models: i18nModelUIDs,
-      async beforeCreate(event) {
-        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
-      },
-      async beforeCreateMany(event) {
-        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
-      },
-    });
-  }
-
   strapi.db.lifecycles.subscribe({
     models: ['plugin::i18n.locale'],
 
@@ -41,6 +22,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const { initDefaultLocale } = getService('locales');
   const { sectionsBuilder, actions, engine } = getService('permissions');
 
+  // TODO: v5 handled in the document service or via document service middlewares
   // Entity Service
   (strapi.entityService as any).decorate(decorator);
 

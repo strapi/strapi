@@ -3,7 +3,6 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { strapiFactory } from '@strapi/core';
-import { getConfigUrls } from '@strapi/utils';
 import { Core, Modules } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
@@ -76,7 +75,8 @@ const createBuildContext = async <TOptions extends BaseOptions>({
       serveAdminPanel: false,
     });
 
-  const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
+  const serverUrl = strapiInstance.config.get<string>('server.url');
+  const adminPath = strapiInstance.config.get<string>('admin.path');
 
   const appDir = strapiInstance.dirs.app.root;
 

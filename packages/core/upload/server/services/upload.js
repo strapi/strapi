@@ -15,7 +15,7 @@ const _ = require('lodash');
 const { extension } = require('mime-types');
 const {
   sanitize,
-  nameToSlug,
+  strings,
   contentTypes: contentTypesUtils,
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
@@ -32,7 +32,7 @@ const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constan
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
 const generateFileName = (name) => {
-  const baseName = nameToSlug(name, { separator: '_', lowercase: false });
+  const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
 };

@@ -1,5 +1,5 @@
 import * as tsUtils from '@strapi/typescript-utils';
-import { joinBy } from '@strapi/utils';
+import { strings } from '@strapi/utils';
 import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -285,7 +285,7 @@ const develop = async ({
           '**/public',
           '**/public/**',
           strapiInstance.dirs.static.public,
-          joinBy('/', strapiInstance.dirs.static.public, '**'),
+          strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
           '**/*.db*',
           '**/exports/**',
           '**/dist/**',

@@ -1,6 +1,6 @@
 import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
-import { pipeAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from './utils';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
@@ -55,7 +55,7 @@ const syncAuthSettings = async () => {
 
 const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
-  const permissionsInDB = await pipeAsync(
+  const permissionsInDB = await async.pipe(
     strapi.query('admin::api-token-permission').findMany,
     map('action')
   )();

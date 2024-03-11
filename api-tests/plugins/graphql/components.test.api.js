@@ -130,7 +130,7 @@ describe('Test Graphql Components API End to End', () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            labels {
+            labels_connection {
               data {
                 id
                 attributes {
@@ -159,21 +159,21 @@ describe('Test Graphql Components API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          labels: {
+          labels_connection: {
             data: expect.arrayContaining(data.labels),
           },
         },
       });
 
       // assign for later use
-      data.labels = res.body.data.labels.data;
+      data.labels = res.body.data.labels_connection.data;
     });
 
     test('Entity with repeatable component filters', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            labels {
+            labels_connection {
               data {
                 id
                 attributes {
@@ -202,7 +202,7 @@ describe('Test Graphql Components API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          labels: {
+          labels_connection: {
             data: expect.arrayContaining(data.labels),
           },
         },

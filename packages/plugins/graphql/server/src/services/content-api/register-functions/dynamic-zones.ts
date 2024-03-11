@@ -1,5 +1,5 @@
 import type { Core, Struct } from '@strapi/types';
-import type { TypeRegistry } from '../../../type-registry';
+import type { TypeRegistry } from '../../type-registry';
 
 const registerDynamicZonesDefinition = (
   contentType: Struct.Schema,
