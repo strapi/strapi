@@ -1,12 +1,9 @@
 import { forwardRef } from 'react';
 
-import { TextInput } from '@strapi/design-system';
+import { TextInput, useComposedRefs } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 
-import { useComposedRefs } from '../../utils/refs';
-import { useField } from '../Form';
-
-import { InputProps } from './types';
+import { type InputProps, useField } from '../Form';
 
 /**
  * TODO: fix the ref type when the design system is fixed.

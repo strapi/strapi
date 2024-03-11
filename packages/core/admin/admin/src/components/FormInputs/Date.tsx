@@ -1,10 +1,9 @@
 import { forwardRef } from 'react';
 
-import { DatePicker } from '@strapi/design-system';
+import { DatePicker, useComposedRefs } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -16,6 +15,7 @@ const DateInput = forwardRef<HTMLInputElement, InputProps>(
     const fieldRef = useFocusInputField(name);
 
     const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
+    const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
 
     return (
       <DatePicker
@@ -34,7 +34,7 @@ const DateInput = forwardRef<HTMLInputElement, InputProps>(
         onClear={() => field.onChange(name, undefined)}
         placeholder={placeholder}
         required={required}
-        selectedDate={field.value}
+        selectedDate={value}
       />
     );
   }

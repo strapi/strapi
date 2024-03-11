@@ -12,17 +12,25 @@ export default ({ strapi }: Context) => {
      */
     buildRelationResponseCollectionDefinition(contentType: Schema.ContentType) {
       const name = naming.getRelationResponseCollectionName(contentType);
-      const entityName = naming.getEntityName(contentType);
+      const typeName = naming.getTypeName(contentType);
 
       return objectType({
         name,
 
         definition(t) {
-          t.nonNull.list.field('data', {
-            type: nonNull(entityName),
+          t.nonNull.list.field('nodes', {
+            type: nonNull(typeName),
 
             resolve: pipe(prop('nodes'), defaultTo([])),
           });
+
+          if (strapi.plugin('graphql').config('v4CompatibilityMode', false)) {
+            t.nonNull.list.field('data', {
+              deprecation: 'Use `nodes` field instead',
+              type: nonNull(typeName),
+              resolve: pipe(prop('nodes'), defaultTo([])),
+            });
+          }
         },
       });
     },

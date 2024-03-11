@@ -28,7 +28,7 @@ type PipeArgs<F extends AnyFunc[], PrevReturn = Parameters<F[0]>[0]> = F extends
     : []
   : [];
 
-export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
+export function pipe<F extends AnyFunc[], FirstFn extends F[0]>(
   ...fns: PipeArgs<F> extends F ? F : PipeArgs<F>
 ) {
   type Args = Parameters<FirstFn>;
@@ -51,9 +51,9 @@ export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
   };
 }
 
-export const mapAsync = curry(pMap);
+export const map = curry(pMap);
 
-export const reduceAsync =
+export const reduce =
   (mixedArray: any[]) =>
   async <T>(iteratee: AnyFunc, initialValue?: T) => {
     let acc = initialValue;
@@ -62,11 +62,3 @@ export const reduceAsync =
     }
     return acc;
   };
-
-export const forEachAsync = async <T, R>(
-  array: T[],
-  func: pMap.Mapper<T, R>,
-  options: pMap.Options
-) => {
-  await pMap(array, func, options);
-};

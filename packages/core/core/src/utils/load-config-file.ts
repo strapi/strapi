@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { templateConfiguration, env, importDefault } from '@strapi/utils';
+import { env, importDefault } from '@strapi/utils';
 
 const loadJsFile = (file: string) => {
   try {
@@ -23,7 +23,7 @@ const loadJsFile = (file: string) => {
 
 const loadJSONFile = (file: string) => {
   try {
-    return templateConfiguration(JSON.parse(fs.readFileSync(file).toString()));
+    return JSON.parse(fs.readFileSync(file).toString());
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Could not load json config file ${file}: ${error.message}`);

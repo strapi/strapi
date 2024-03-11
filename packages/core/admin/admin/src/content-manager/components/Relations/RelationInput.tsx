@@ -15,6 +15,7 @@ import {
   FlexProps,
   ComboboxOption,
   ComboboxProps,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { pxToRem, useFocusInputField } from '@strapi/helper-plugin';
 import { Cross, Drag, Refresh } from '@strapi/icons';
@@ -23,7 +24,6 @@ import { useIntl } from 'react-intl';
 import { FixedSizeList, FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
-import { composeRefs } from '../../../utils/refs';
 import { ItemTypes } from '../../constants/dragAndDrop';
 import {
   UseDragAndDropOptions,
@@ -617,7 +617,7 @@ const RelationItem = ({
       dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
     });
 
-  const composedRefs = composeRefs(relationRef, dragRef);
+  const composedRefs = useComposedRefs(relationRef, dragRef);
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage());

@@ -16,6 +16,11 @@ export default {
   async register({ strapi }: { strapi: Strapi }) {
     const contentTypes = strapi.get('content-types');
     if (!contentTypes.keys().includes('admin::audit-log')) {
+      const { schema } = auditLogContentType;
+      Object.assign(schema, {
+        plugin: 'admin',
+        globalId: `admin-${schema.info.singularName}`,
+      });
       strapi.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
     }
 

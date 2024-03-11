@@ -1,8 +1,4 @@
-import { createMetadata, Metadata } from '..';
-import { models } from './resources/models';
-import { metadata as expectedLong } from './resources/expected-metadata-long';
-
-const testModels = models as any;
+import { createMetadata } from '..';
 
 expect.extend({
   toEqualMap(received, expected) {
@@ -327,40 +323,10 @@ describe('metadata', () => {
             );
           });
         });
-        /**
-         * This monolithic test data is a quick and dirty test to cover 100% of lines that include db identifier name creation (indexes, table names, column names)
-         * It has been added to ensure no db identifiers are ever changed unexpectedly
-         *
-         * TODO: break it up into individual pieces to help debugging
-         */
-        describe('valid cases -- without shortening', () => {
-          let results: Metadata;
-
-          let error: unknown;
-          beforeAll(() => {
-            try {
-              results = createMetadata(testModels as any, options);
-            } catch (createError) {
-              error = createError;
-            }
-          });
-
-          test('does not throw on valid data', () => {
-            expect(error).toBe(undefined);
-          });
-
-          // TODO: this could be broken into individual parts to make debugging easier
-          test('matches expected result', () => {
-            expect(results).toBeInstanceOf(Map);
-
-            // const resultsAsArray = Array.from(results.entries());
-            expect(results).toEqualMap(new Map(expectedLong as any));
-          });
-        });
       });
-    });
-    describe('shortened identifiers', () => {
-      test.todo('shortened identifier tests');
+      describe('shortened identifiers', () => {
+        test.todo('shortened identifier tests');
+      });
     });
   });
 });

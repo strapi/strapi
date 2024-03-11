@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, GridItem, IconButton, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Grid,
+  GridItem,
+  IconButton,
+  Typography,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { Link, Menu } from '@strapi/design-system/v2';
 import { Cog, Cross, Drag, Pencil, Plus } from '@strapi/icons';
 import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-indexing';
@@ -10,7 +18,6 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../components/Form';
-import { useComposedRefs } from '../../../utils/refs';
 import { ItemTypes } from '../../constants/dragAndDrop';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { getTranslation } from '../../utils/translations';

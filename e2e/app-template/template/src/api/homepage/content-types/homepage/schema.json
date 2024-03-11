@@ -8,7 +8,11 @@
     "description": ""
   },
   "options": {},
-  "pluginOptions": {},
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "title": {
       "type": "string"

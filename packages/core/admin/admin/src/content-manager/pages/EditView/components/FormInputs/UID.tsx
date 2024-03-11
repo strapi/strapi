@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FieldAction, Flex, TextInput, Typography } from '@strapi/design-system';
+import { FieldAction, Flex, TextInput, Typography, useComposedRefs } from '@strapi/design-system';
 import {
   useAPIErrorHandler,
   useFocusInputField,
@@ -14,7 +14,6 @@ import styled, { keyframes } from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { useComposedRefs } from '../../../../../utils/refs';
 import { useDoc } from '../../../../hooks/useDocument';
 import {
   useGenerateUIDMutation,

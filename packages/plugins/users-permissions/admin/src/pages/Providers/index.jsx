@@ -14,12 +14,12 @@ import {
   Tr,
   Typography,
   VisuallyHidden,
+  useCollator,
 } from '@strapi/design-system';
 import {
   onRowClick,
   stopPropagation,
   useAPIErrorHandler,
-  useCollator,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,

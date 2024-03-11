@@ -1,9 +1,8 @@
 import { forwardRef } from 'react';
 
-import { Checkbox } from '@strapi/design-system';
+import { Checkbox, useComposedRefs } from '@strapi/design-system';
 import { useFocusInputField } from '@strapi/helper-plugin';
 
-import { useComposedRefs } from '../../utils/refs';
 import { useField } from '../Form';
 
 import { InputProps } from './types';

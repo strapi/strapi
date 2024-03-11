@@ -47,11 +47,19 @@ describe('Default Service', () => {
     describe('Passes the logic down to the entityService', () => {
       test('Creates data when no entity is found', async () => {
         const documentService = {
-          findFirst: jest.fn(() => Promise.resolve(null)),
           create: jest.fn(() => Promise.resolve({ documentId: 1 })),
         };
 
+        const dbInstance = {
+          findOne: jest.fn(() => Promise.resolve(null)),
+        };
+
         const strapi = {
+          db: {
+            query() {
+              return dbInstance;
+            },
+          },
           documents: jest.fn(() => documentService),
           query() {
             return { count() {} };
@@ -65,17 +73,25 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate({ data: input });
 
-        expect(documentService.findFirst).toHaveBeenCalledWith({ status: 'published' });
+        expect(dbInstance.findOne).toHaveBeenCalledWith();
         expect(documentService.create).toHaveBeenCalledWith({ data: input, status: 'published' });
       });
 
       test('Updates data when entity is found', async () => {
         const documentService = {
-          findFirst: jest.fn(() => Promise.resolve({ documentId: 1 })),
           update: jest.fn(() => Promise.resolve({ documentId: 1 })),
         };
 
+        const dbInstance = {
+          findOne: jest.fn(() => Promise.resolve({ documentId: 1 })),
+        };
+
         const strapi = {
+          db: {
+            query() {
+              return dbInstance;
+            },
+          },
           documents: jest.fn(() => documentService),
           query() {
             return { count() {} };
@@ -89,10 +105,7 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate({ data: input });
 
-        expect(documentService.findFirst).toHaveBeenCalledWith({
-          populate: undefined,
-          status: 'published',
-        });
+        expect(dbInstance.findOne).toHaveBeenCalledWith();
 
         expect(documentService.update).toHaveBeenCalledWith(1, {
           data: input,
@@ -102,11 +115,19 @@ describe('Default Service', () => {
 
       test('Delete data when entity is found', async () => {
         const documentService = {
-          findFirst: jest.fn(() => Promise.resolve({ documentId: 1 })),
           delete: jest.fn(() => Promise.resolve({ documentId: 1 })),
         };
 
+        const dbInstance = {
+          findOne: jest.fn(() => Promise.resolve({ documentId: 1 })),
+        };
+
         const strapi = {
+          db: {
+            query() {
+              return dbInstance;
+            },
+          },
           documents: jest.fn(() => documentService),
         };
 
@@ -116,9 +137,7 @@ describe('Default Service', () => {
 
         await service.delete({});
 
-        expect(documentService.findFirst).toHaveBeenCalledWith({
-          populate: undefined,
-        });
+        expect(dbInstance.findOne).toHaveBeenCalledWith();
 
         expect(documentService.delete).toHaveBeenCalledWith(1, { status: 'published' });
       });

@@ -15,6 +15,7 @@ const ALLOWED_CONTENT_TYPES = [
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
   'plugin::i18n.locale',
+  'plugin::content-manager.history-version',
   'plugin::content-releases.release',
   'plugin::content-releases.release-action',
   /**

@@ -83,10 +83,15 @@ const ComponentInput = ({
           <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
         )}
         {!attribute.repeatable && field.value ? (
-          <NonRepeatableComponent attribute={attribute} name={name} {...props} />
+          <NonRepeatableComponent
+            attribute={attribute}
+            name={name}
+            disabled={disabled}
+            {...props}
+          />
         ) : null}
         {attribute.repeatable && (
-          <RepeatableComponent attribute={attribute} name={name} {...props} />
+          <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props} />
         )}
       </Flex>
     </Box>

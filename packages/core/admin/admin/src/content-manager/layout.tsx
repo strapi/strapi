@@ -17,6 +17,7 @@ import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPre
 import { RelationDragPreview } from './components/DragPreviews/RelationDragPreview';
 import { LeftMenu } from './components/LeftMenu';
 import { ItemTypes } from './constants/dragAndDrop';
+import { useIsHistoryRoute } from './history/routes';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
 import { getTranslation } from './utils/translations';
 
@@ -39,6 +40,9 @@ const Layout = () => {
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
   const startSectionRef = React.useRef(startSection);
+
+  // Check if we're on a history route to known if we should render the left menu
+  const isHistoryRoute = useIsHistoryRoute();
 
   React.useEffect(() => {
     if (startSectionRef.current) {
@@ -96,10 +100,14 @@ const Layout = () => {
           defaultMessage: 'Content Manager',
         })}
       />
-      <DSLayout sideNav={<LeftMenu />}>
-        <DragLayer renderItem={renderDraglayerItem} />
+      {isHistoryRoute ? (
         <Outlet />
-      </DSLayout>
+      ) : (
+        <DSLayout sideNav={<LeftMenu />}>
+          <DragLayer renderItem={renderDraglayerItem} />
+          <Outlet />
+        </DSLayout>
+      )}
     </>
   );
 };
