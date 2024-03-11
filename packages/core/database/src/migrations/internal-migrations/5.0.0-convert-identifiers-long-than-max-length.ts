@@ -29,7 +29,7 @@ type IdentifierDiffs = {
   columns: NameDiff<{ index: number; key: string; tableName: string; columnName: string }>[];
 };
 
-// TODO: This is being run even on the creation of a new project, which means that
+// TODO: This is being run even on the creation of a new project, which means that it won't work until we add a check that db exists
 
 export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
