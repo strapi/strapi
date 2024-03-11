@@ -327,11 +327,11 @@ const createMorphToMany = (
         columns: [joinColumnName],
       },
       {
-        name: `${joinTableName}_order_index`,
+        name: identifiers.getOrderIndexName(joinTableName, options),
         columns: [ORDER],
       },
       {
-        name: `${joinTableName}_id_column_index`,
+        name: identifiers.getIdColumnIndexName(joinTableName, options),
         columns: [idColumnName],
       },
     ],

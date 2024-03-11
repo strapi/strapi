@@ -140,6 +140,14 @@ export const getOrderInverseFkIndexName = (names: NameInput, options: NameOption
   return getName(names, { suffix: 'order_inv_fk', ...options });
 };
 
+export const getIdColumnIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'id_column_index', ...options });
+};
+
+export const getOrderIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'order_index', ...options });
+};
+
 export const getUniqueIndexName = (names: NameInput, options: NameOptions) => {
   return getName(names, { suffix: 'unique', ...options });
 };
