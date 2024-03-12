@@ -1,7 +1,7 @@
 import { validateBidirectionalRelations } from './bidirectional';
 
 import type { Database } from '../..';
-import { MetadataOptions } from '../../types';
+import type { MetadataOptions } from '../../types';
 
 /**
  * Validates if relations data and tables are in a valid state before
