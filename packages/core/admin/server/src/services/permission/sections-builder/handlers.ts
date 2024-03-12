@@ -89,6 +89,7 @@ const contentTypesBase = ({
 const subjectsHandlerFor =
   (kind: string) =>
   ({ action, section: contentTypesSection }: { action: Action; section: ContentTypesSection }) => {
+    // TODO: add a type guard for UID.ContentType
     const subjects = action.subjects as Internal.UID.ContentType[];
 
     if (!subjects?.length) {
