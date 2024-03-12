@@ -20,10 +20,18 @@ export const COMPONENT_TYPE_COLUMN = 'component_type';
 export const ENTITY = 'entity';
 
 export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) =>
-  identifiers.getTableName(collectionName, { suffix: COMPONENT_JOIN_TABLE_SUFFIX, ...options });
+  identifiers.getTableName(collectionName, {
+    suffix: COMPONENT_JOIN_TABLE_SUFFIX,
+    snakeCase: false,
+    ...options,
+  });
 
 export const getDzJoinTableName = (collectionName: string, options: MetadataOptions) =>
-  identifiers.getTableName(collectionName, { suffix: DZ_JOIN_TABLE_SUFFIX, ...options });
+  identifiers.getTableName(collectionName, {
+    suffix: DZ_JOIN_TABLE_SUFFIX,
+    snakeCase: false,
+    ...options,
+  });
 
 const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
 
@@ -154,7 +162,6 @@ export const hasComponentsOrDz = (
 
 export const createDocumentId = createId;
 
-// Creates the
 const createCompoLinkModel = (
   contentType: LoadedContentTypeModel,
   options: MetadataOptions
