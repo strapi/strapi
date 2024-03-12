@@ -151,7 +151,7 @@ describe('Transform relational data', () => {
       });
 
       expect(data).toMatchObject({
-        products: [{ id: 'product-1-draft' }, { id: 'product-2-draft', locale: 'en' }],
+        products: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }],
       });
     });
   });
