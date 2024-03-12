@@ -51,9 +51,18 @@ import type { Attribute } from '@strapi/types';
 const RELATIONS_TO_DISPLAY = 5;
 const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
 
-interface Relation extends Contracts.Relations.RelationResult {
+interface RelationPosition extends Pick<Contracts.Relations.RelationResult, 'status' | 'locale'> {
+  before?: string;
+}
+
+interface Relation
+  extends Pick<Contracts.Relations.RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
   href: string;
   label: string;
+  position?: RelationPosition;
+}
+
+interface ConnectRelation extends Omit<Relation, 'href' | 'label'> {
   [key: string]: any;
 }
 
@@ -64,8 +73,8 @@ interface RelationsFieldProps
 }
 
 interface RelationsFormValue {
-  connect?: Contracts.Relations.RelationResult[];
-  disconnect?: Contracts.Relations.RelationResult[];
+  connect?: ConnectRelation[];
+  disconnect?: Pick<Contracts.Relations.RelationResult, 'documentId'>[];
 }
 
 /**
@@ -161,9 +170,11 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         mainField: props.mainField,
       };
 
+      const sortedData = injectConnectArrayIntoDataArray(data.results, field.value?.connect);
+
       const transformations = pipe(removeDisconnected(ctx), filterDuplicates, addLabelAndHref(ctx));
 
-      return transformations([...(field.value?.connect ?? []), ...data.results]);
+      return transformations(sortedData);
     }, [
       data.results,
       field.value,
@@ -239,11 +250,40 @@ interface TransformationContext extends Pick<RelationsFieldProps, 'mainField'> {
 }
 
 /**
+ * @internal
+ * @description Injects the `connect` array into the `data` array, if the item in the connect array has
+ * the position.before property then we use that to find it's home, otherwise we just add it to the end.
+ */
+const injectConnectArrayIntoDataArray = (
+  data: RelationResult[],
+  newRelations: RelationsFormValue['connect'] = []
+) => {
+  const existingRelations: Array<RelationResult | ConnectRelation> = [...data];
+
+  newRelations.forEach((rel) => {
+    const { position } = rel;
+
+    if (position) {
+      const index = existingRelations.findIndex((r) => r.documentId === position.before);
+
+      if (index >= 0) {
+        existingRelations.splice(index, 0, rel);
+        return;
+      }
+    }
+
+    existingRelations.push(rel);
+  });
+
+  return existingRelations;
+};
+
+/**
  * @description Removes relations that are in the `disconnect` array of the field
  */
 const removeDisconnected =
   ({ field }: TransformationContext) =>
-  (relations: RelationResult[]): RelationResult[] =>
+  (relations: Array<RelationResult | ConnectRelation>): Array<RelationResult | ConnectRelation> =>
     relations.filter((relation) => {
       const disconnectedRelations = field?.disconnect ?? [];
 
@@ -269,15 +309,17 @@ const filterDuplicates = (relations: RelationResult[]): RelationResult[] => {
  */
 const addLabelAndHref =
   ({ mainField, href }: TransformationContext) =>
-  (relations: RelationResult[]): Relation[] =>
+  (relations: Array<RelationResult | ConnectRelation>): Relation[] =>
     relations.map((relation) => {
-      const { documentId, locale, position, status } = relation;
+      const { documentId, id, locale, position, status } = relation;
       return {
         documentId,
+        id,
+        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
+        [mainField ?? 'id']: relation[mainField ?? 'id'],
         locale,
         status,
         position,
-        [mainField]: relation[mainField],
         label: getRelationLabel(relation, mainField),
         href: `${href}/${relation.documentId}`,
       };
@@ -492,11 +534,11 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
   const outerListRef = React.useRef<HTMLUListElement>(null);
   const [overflow, setOverflow] = React.useState<'top' | 'bottom' | 'top-bottom'>();
   const [liveText, setLiveText] = React.useState('');
-  const field = useField<RelationsFormValue>(name);
+  const field = useField(name);
   const removeFieldRow = useForm('RelationsList', (state) => state.removeFieldRow);
   const addFieldRow = useForm('RelationsList', (state) => state.addFieldRow);
 
-  const [orderedData, setOrderedData] = React.useState<Relation[]>(data);
+  const [orderedData, setOrderedData] = React.useState(data);
 
   React.useEffect(() => {
     setOrderedData(data);
@@ -538,7 +580,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
 
   const getItemPos = (index: number) => `${index + 1} of ${data.length}`;
 
-  const handleMoveItem: UseDragAndDropOptions['onMoveItem'] = (oldIndex, newIndex) => {
+  const handleMoveItem: UseDragAndDropOptions['onMoveItem'] = (newIndex, oldIndex) => {
     const item = orderedData[oldIndex];
 
     setLiveText(
@@ -601,7 +643,9 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
      * Otherwise, we add it to the connect array with the position information.
      */
     const indexOfRelationInConnectArray =
-      field.value?.connect?.findIndex((rel) => rel.documentId === item.documentId) ?? -1;
+      field.value?.connect?.findIndex(
+        (rel: ConnectRelation) => rel.documentId === item.documentId
+      ) ?? -1;
 
     const afterItem = orderedData[index + 1] ? orderedData[index + 1] : null;
     const newPosition = afterItem
@@ -642,7 +686,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
        * from the connect array
        */
       const indexOfRelationInConnectArray = field.value.connect.findIndex(
-        (rel) => rel.documentId === relation.documentId
+        (rel: ConnectRelation) => rel.documentId === relation.documentId
       );
 
       if (indexOfRelationInConnectArray >= 0) {
