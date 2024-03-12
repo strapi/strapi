@@ -1,7 +1,7 @@
 import { validateRelations } from './relations';
 
 import type { Database } from '..';
-import { MetadataOptions } from '../types';
+import type { MetadataOptions } from '../types';
 
 /**
  * Validate if the database is in a valid state before starting the server.
