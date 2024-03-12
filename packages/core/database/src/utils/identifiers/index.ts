@@ -40,7 +40,11 @@ const replacementMap = {
   primary: 'pk',
 };
 
-const mapIncompressible = (name: string): string | false => {
+const mapIncompressible = (name: string, maxLength: number): string | false => {
+  if (maxLength === 0) {
+    return name;
+  }
+
   if (name in replacementMap) {
     return (replacementMap as any)[name];
   }
@@ -63,11 +67,17 @@ export const getName = (names: NameInput, options: NameOptions) => {
   });
 
   if (options?.suffix) {
-    tokens.push({ name: options.suffix, compressible: mapIncompressible(options.suffix) });
+    tokens.push({
+      name: options.suffix,
+      compressible: mapIncompressible(options.suffix, options.maxLength),
+    });
   }
 
   if (options?.prefix) {
-    tokens.unshift({ name: options.prefix, compressible: mapIncompressible(options.prefix) });
+    tokens.unshift({
+      name: options.prefix,
+      compressible: mapIncompressible(options.prefix, options.maxLength),
+    });
   }
 
   return getNameFromTokens(tokens, { maxLength: options.maxLength, snakeCase: options.snakeCase });
