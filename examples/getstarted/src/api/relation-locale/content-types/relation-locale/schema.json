@@ -7,7 +7,9 @@
     "displayName": "Relations",
     "description": ""
   },
-  "options": {},
+  "options": {
+    "draftAndPublish": true
+  },
   "pluginOptions": {
     "i18n": {
       "localized": true
