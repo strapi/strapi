@@ -23,7 +23,8 @@ const createColumn = (name: string, attribute: Attribute, options: MetadataOptio
   const { type, args = [], ...opts } = getColumnType(attribute);
 
   return {
-    name: identifiers.getColumnName(name, options), // TODO: is this right?
+    // not using snake case for legacy reasons; changing it would require a more complex migration
+    name: identifiers.getName(name, { ...options, snakeCase: false }),
     type,
     args,
     defaultTo: null,
