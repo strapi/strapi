@@ -65,10 +65,10 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     if (!ids?.length) return undefined;
 
     // Return it with the same format for consistency
-    if (ids.length === 1) return { id: ids[0], ...pick(['position', relation as any]) } as T;
+    if (ids.length === 1) return { id: ids[0], ...pick(['position'], relation) } as T;
 
     // Return an array if it multiple ids are found
-    return ids.map((id: ID) => ({ id, ...pick(['position', relation as any]) })) as T[];
+    return ids.map((id: ID) => ({ id, ...pick(['position'], relation) })) as T[];
   }
 
   // id[]
