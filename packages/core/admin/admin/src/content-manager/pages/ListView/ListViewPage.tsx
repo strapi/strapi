@@ -13,7 +13,6 @@ import {
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import {
   useFocusWhenNavigate,
   useQueryParams,
@@ -22,7 +21,7 @@ import {
   useAPIErrorHandler,
   useStrapiApp,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
@@ -35,6 +34,7 @@ import { Page } from '../../../components/PageHelpers';
 import { Pagination } from '../../../components/Pagination';
 import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
+import { BackButton } from '../../../features/BackButton';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -301,17 +301,7 @@ const ListViewPage = () => {
           { number: pagination?.total }
         )}
         title={contentTypeTitle}
-        navigationAction={
-          /**
-           * TODO: sort out back link behaviour, part of https://strapi-inc.atlassian.net/browse/CONTENT-2173
-           */
-          <Link startIcon={<ArrowLeft />}>
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
       />
       <ActionLayout
         endActions={

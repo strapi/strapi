@@ -10,15 +10,14 @@ import {
   HeaderLayout,
   TextInput,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
+import { Check, Play as Publish } from '@strapi/icons';
 import { Webhook } from '@strapi/types';
 import { Field, Form, FormikHelpers, FormikProvider, useFormik } from 'formik';
 import { IntlShape, useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { TriggerWebhook } from '../../../../../../../shared/contracts/webhooks';
+import { BackButton } from '../../../../../features/BackButton';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 
 import { EventTableCE } from './EventsTable';
@@ -140,15 +139,7 @@ const WebhookForm = ({
                 })
               : data?.name
           }
-          navigationAction={
-            // @ts-expect-error – as components props are not inferred correctly.
-            <Link as={NavLink} startIcon={<ArrowLeft />} to="/settings/webhooks">
-              {formatMessage({
-                id: 'global.back',
-                defaultMessage: 'Back',
-              })}
-            </Link>
-          }
+          navigationAction={<BackButton />}
         />
         <ContentLayout>
           <Flex direction="column" alignItems="stretch" gap={4}>

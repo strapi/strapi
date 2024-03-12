@@ -28,7 +28,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { Page, SearchInput } from '@strapi/strapi/admin';
+import { Page, SearchInput, BackButton } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -167,6 +167,7 @@ export const RolesListPage = () => {
               </LinkButton>
             </CheckPermissions>
           }
+          navigationAction={<BackButton />}
         />
 
         <ActionLayout
