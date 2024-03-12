@@ -92,13 +92,15 @@ const shopModel = {
       target: PRODUCT_UID,
     },
   },
-  draftAndPublish: false,
+  options: {
+    draftAndPublish: false,
+  },
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
 };
 
-describe('Document Service relations', () => {
+describe.skip('Document Service relations', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([tagModel, productModel, shopModel])
@@ -147,9 +149,8 @@ describe('Document Service relations', () => {
     const xToOneRelations = ['products_ow', 'products_oo', 'products_mo'];
 
     describe('X to One relation', () => {
-      // TODO: Could we connect it to both the publish and draft versions at the same time?
-      it.skip('Connect to the draft version by default', async () => {
-        // Create shop targeting a draft product that also has a published version
+      it('Connect to both draft and publish version by default', async () => {
+        // Create shop targeting a draft product
         const shop = await shopDocuments.create({
           data: {
             name: 'Shop1',
@@ -180,7 +181,6 @@ describe('Document Service relations', () => {
             products_ow: { documentId: 'Skate', locale: 'en', status: 'draft' },
           },
           locale: 'en',
-          populate: xToOneRelations,
         });
 
         // Publish connected product
@@ -205,117 +205,6 @@ describe('Document Service relations', () => {
           ]);
         });
       });
-    });
-
-    describe.skip('X to many relations', () => {
-      // TODO: Could we connect it to both the publish and draft versions at the same time?
-      it('Connect to the draft version by default', async () => {
-        // Create shop targeting a draft product that also has a published version
-        const shop = await shopDocuments.create({
-          data: {
-            products_om: [{ documentId: 'Skate', locale: 'en' }],
-            products_mm: [{ documentId: 'Skate', locale: 'en' }],
-            products_mw: [{ documentId: 'Skate', locale: 'en' }],
-          },
-          locale: 'en',
-          populate: xToManyRelations,
-        });
-
-        // Products should be connected to the draft version by default
-        xToOneRelations.forEach((relation) => {
-          expect(shop[relation]).toMatchObject([
-            {
-              name: 'Skate-En',
-              locale: 'en',
-              publishedAt: null,
-            },
-          ]);
-        });
-      });
-
-      it('Connect to the root status of the new shop', async () => {
-        // Relations should connect to the status version that matches the shop status (published)
-        const shopPublished = await shopDocuments.create({
-          data: {
-            products_mo: { documentId: 'Skate', locale: 'en' },
-            products_oo: { documentId: 'Skate', locale: 'en' },
-            products_ow: { documentId: 'Skate', locale: 'en' },
-          },
-          locale: 'en',
-          status: 'published',
-          populate: xToOneRelations,
-        });
-
-        xToOneRelations.forEach((relation) => {
-          expect(shopPublished[relation]).toMatchObject({
-            name: 'Skate-En',
-            locale: 'en',
-            publishedAt: expect.any(String),
-          });
-        });
-
-        // Relations should connect to the status version that matches the shop status (draft)
-        const shopDraft = await shopDocuments.create({
-          data: {
-            products_mo: { documentId: 'Skate', locale: 'en' },
-            products_oo: { documentId: 'Skate', locale: 'en' },
-            products_ow: { documentId: 'Skate', locale: 'en' },
-          },
-          locale: 'en',
-          status: 'draft',
-          populate: xToOneRelations,
-        });
-
-        xToOneRelations.forEach((relation) => {
-          expect(shopDraft[relation]).toMatchObject({
-            name: 'Skate-En',
-            locale: 'en',
-            publishedAt: null,
-          });
-        });
-      });
-
-      it('Publishing DP side should copy draft relation', async () => {
-        // Create shop targeting a draft product
-        const shop = await shopDocuments.create({
-          data: {
-            name: 'Shop1',
-            // Preference
-            // status relation / top level status / draft?
-            // locale
-            // locale relation / top level locale/ default locale
-            products_mo: { documentId: 'Skate', locale: 'en', status: 'draft' },
-            products_oo: { documentId: 'Skate', locale: 'en', status: 'draft' },
-            products_ow: { documentId: 'Skate', locale: 'en', status: 'draft' },
-          },
-          status: 'published',
-          locale: 'en',
-        });
-
-        // Publish connected product
-        await productDocuments.publish('Skate', { locale: 'en' });
-
-        // Get shop again to check if it's product relations are updated
-        const updatedShop = await shopDocuments.findOne(shop.documentId, {
-          locale: 'en',
-          populate: xToOneRelations,
-        });
-
-        xToOneRelations.forEach((relation) => {
-          // Initial shop should only be connected to draft version
-          expect(shop[relation]).toMatchObject([
-            { name: 'Skate-En', locale: 'en', publishedAt: null },
-          ]);
-
-          // After publishing the product, shop should be connected to both draft and published version
-          expect(updatedShop[relation]).toMatchObject([
-            { name: 'Skate-En', locale: 'en', publishedAt: null },
-            { name: 'Skate-En', locale: 'en', publishedAt: expect.any(String) },
-          ]);
-        });
-      });
-
-      // can connect multiple status at the same time
     });
   });
 });

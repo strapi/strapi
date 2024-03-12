@@ -12,7 +12,6 @@ async function transformParamsDocumentId(
   opts: {
     locale?: string | null;
     isDraft: boolean;
-    [key: string]: any;
   }
 ) {
   // Transform relational documentIds to entity ids

@@ -5,7 +5,6 @@ import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
-import { getRelationTargetStatus } from '../utils/dp';
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
@@ -24,9 +23,7 @@ const handlePrimitive = (
   if (isLongHand(relation)) {
     // { documentId, locale? }
     if ('documentId' in relation) {
-      return [
-        { documentId: relation.documentId, locale: relation.locale, status: relation.status },
-      ];
+      return [{ documentId: relation.documentId, locale: relation.locale }];
     }
     // { id }
     return [];
@@ -64,12 +61,12 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 
       // { connect: { id: id, position: { before: id } } }
       if (position?.before) {
-        ids.push(...handlePrimitive({ ...position, documentId: position.before }));
+        ids.push(...handlePrimitive({ ...position, id: position.before }));
       }
 
       // { connect: { id: id, position: { after: id } } }
       if (position?.after) {
-        ids.push(...handlePrimitive({ ...position, documentId: position.after }));
+        ids.push(...handlePrimitive({ ...position, id: position.after }));
       }
     });
   }
@@ -105,11 +102,7 @@ const extractDataIds = (
               sourceUid: opts.uid,
               sourceLocale: opts.locale,
             }),
-            isDraft: getRelationTargetStatus(relation, {
-              targetUid: target as Common.UID.Schema,
-              sourceUid: opts.uid,
-              sourceStatus: opts.isDraft,
-            }),
+            isDraft: opts.isDraft,
           });
         });
       }

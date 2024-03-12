@@ -4,8 +4,7 @@ const createSchemaFromAttributes = (
   uid: Common.UID.ContentType,
   attributes: Schema.Attributes,
   singularName?: string,
-  pluralName?: string,
-  options?: Schema.ContentType['options']
+  pluralName?: string
 ): Schema.ContentType => {
   return {
     uid,
@@ -16,10 +15,6 @@ const createSchemaFromAttributes = (
     },
     kind: 'collectionType',
     modelName: uid,
-    options: {
-      draftAndPublish: true,
-      ...options,
-    },
     globalId: uid,
     modelType: 'contentType',
     attributes,
@@ -28,7 +23,6 @@ const createSchemaFromAttributes = (
 
 export const CATEGORY_UID = 'api::category.category' as Common.UID.ContentType;
 export const PRODUCT_UID = 'api::product.product' as Common.UID.ContentType;
-export const SHOP_UID = 'api::shop.shop' as Common.UID.ContentType;
 
 export const models: Record<string, Schema.ContentType> = {
   [CATEGORY_UID]: createSchemaFromAttributes(
@@ -80,46 +74,8 @@ export const models: Record<string, Schema.ContentType> = {
         relation: 'oneToMany',
         target: PRODUCT_UID,
       },
-      shops: {
-        type: 'relation',
-        relation: 'manyToMany',
-        target: SHOP_UID,
-        inversedBy: 'products',
-      },
-      shop: {
-        type: 'relation',
-        relation: 'oneToOne',
-        target: SHOP_UID,
-        inversedBy: 'product',
-      },
     },
     'product',
     'products'
-  ),
-  [SHOP_UID]: createSchemaFromAttributes(
-    SHOP_UID,
-    {
-      id: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
-      products: {
-        type: 'relation',
-        relation: 'manyToMany',
-        target: PRODUCT_UID,
-        mappedBy: 'shop',
-      },
-      product: {
-        type: 'relation',
-        relation: 'oneToOne',
-        target: PRODUCT_UID,
-        mappedBy: 'shops',
-      },
-    },
-    'shop',
-    'shops',
-    { draftAndPublish: false }
   ),
 };
