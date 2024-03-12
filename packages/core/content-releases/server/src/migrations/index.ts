@@ -147,7 +147,7 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
         });
 
         await mapAsync(actions, async (action: ReleaseAction) => {
-          if (action.entry) {
+          if (action.entry && action.release) {
             const populatedEntry = await getPopulatedEntry(contentTypeUID, action.entry.id, {
               strapi,
             });

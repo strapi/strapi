@@ -134,6 +134,73 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     }
   };
 
+  /**
+   * Given a release id, it returns the actions formatted ready to be used to publish them.
+   * First we separate actions by collectiontType and singleType,
+   * Then, we split the collectionType based on the action type (publish/unpublish)
+   */
+  const getFormattedActions = async (releaseId: Release['id']) => {
+    const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+      where: {
+        release: {
+          id: releaseId,
+        },
+      },
+      populate: {
+        entry: {
+          fields: ['id'],
+        },
+      },
+    });
+
+    if (actions.length === 0) {
+      throw new errors.ValidationError('No entries to publish');
+    }
+
+    /**
+     * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
+     * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
+     */
+    const collectionTypeActions: {
+      [key: UID.ContentType]: {
+        entriesToPublishIds: ReleaseAction['entry']['id'][];
+        entriesToUnpublishIds: ReleaseAction['entry']['id'][];
+      };
+    } = {};
+    const singleTypeActions: {
+      uid: UID.ContentType;
+      id: ReleaseAction['entry']['id'];
+      action: ReleaseAction['type'];
+    }[] = [];
+
+    for (const action of actions) {
+      const contentTypeUid = action.contentType;
+
+      if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
+        if (!collectionTypeActions[contentTypeUid]) {
+          collectionTypeActions[contentTypeUid] = {
+            entriesToPublishIds: [],
+            entriesToUnpublishIds: [],
+          };
+        }
+
+        if (action.type === 'publish') {
+          collectionTypeActions[contentTypeUid].entriesToPublishIds.push(action.entry.id);
+        } else {
+          collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
+        }
+      } else {
+        singleTypeActions.push({
+          uid: contentTypeUid,
+          action: action.type,
+          id: action.entry.id,
+        });
+      }
+    }
+
+    return { collectionTypeActions, singleTypeActions };
+  };
+
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
       const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
@@ -579,15 +646,18 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         error,
       }: { release: Pick<Release, 'id' | 'releasedAt' | 'status'>; error: Error } =
         await strapi.db.transaction(async ({ trx }) => {
-          // In this first transaction we don't care about rollback, we are using this transaction only to lock the release
+          /**
+           * We lock the release in this transaction, so any other process trying to publish it will wait until this transaction is finished
+           * In this transaction we don't care about rollback, becasue we want to persist the lock until the end and if it fails we want to change the release status to failed
+           */
           const lockedRelease = (await strapi.db
             ?.queryBuilder(RELEASE_MODEL_UID)
             .where({ id: releaseId })
-            .select(['id', 'releasedAt', 'status'])
+            .select(['id', 'name', 'releasedAt', 'status'])
             .first()
             .transacting(trx)
             .forUpdate()
-            .execute()) as Pick<Release, 'id' | 'releasedAt' | 'status'> | undefined;
+            .execute()) as Pick<Release, 'id' | 'name' | 'releasedAt' | 'status'> | undefined;
 
           if (!lockedRelease) {
             throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -598,71 +668,15 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
           }
 
           if (lockedRelease.status === 'failed') {
-            throw new errors.ValidationError(
-              'Release failed to publish before, change it to try again'
-            );
+            throw new errors.ValidationError('Release failed to publish');
           }
 
           try {
-            strapi.log.info(`[Content Releases] Starting to publish release with id ${releaseId}`);
+            strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
-            // We need to pass the type because entityService.findOne is not returning the right type
-            const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-              where: {
-                release: {
-                  id: releaseId,
-                },
-              },
-              populate: {
-                entry: {
-                  fields: ['id'],
-                },
-              },
-            });
-
-            if (actions.length === 0) {
-              throw new errors.ValidationError('No entries to publish');
-            }
-
-            /**
-             * We separate publish and unpublish actions, grouping them by contentType and extracting only their IDs. Then we can fetch more data for each entry
-             * We need to separate collectionTypes from singleTypes because findMany work as findOne for singleTypes and publishMany can't be used for singleTypes
-             */
-            const collectionTypeActions: {
-              [key: UID.ContentType]: {
-                entriesToPublishIds: ReleaseAction['entry']['id'][];
-                entriesToUnpublishIds: ReleaseAction['entry']['id'][];
-              };
-            } = {};
-            const singleTypeActions: {
-              uid: UID.ContentType;
-              id: ReleaseAction['entry']['id'];
-              action: ReleaseAction['type'];
-            }[] = [];
-            for (const action of actions) {
-              const contentTypeUid = action.contentType;
-
-              if (strapi.contentTypes[contentTypeUid].kind === 'collectionType') {
-                if (!collectionTypeActions[contentTypeUid]) {
-                  collectionTypeActions[contentTypeUid] = {
-                    entriesToPublishIds: [],
-                    entriesToUnpublishIds: [],
-                  };
-                }
-
-                if (action.type === 'publish') {
-                  collectionTypeActions[contentTypeUid].entriesToPublishIds.push(action.entry.id);
-                } else {
-                  collectionTypeActions[contentTypeUid].entriesToUnpublishIds.push(action.entry.id);
-                }
-              } else {
-                singleTypeActions.push({
-                  uid: contentTypeUid,
-                  action: action.type,
-                  id: action.entry.id,
-                });
-              }
-            }
+            const { collectionTypeActions, singleTypeActions } = await getFormattedActions(
+              releaseId
+            );
 
             await strapi.db.transaction(async () => {
               // First we publish all the singleTypes
@@ -682,24 +696,15 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
               }
             });
 
-            // We need to run the update in the same transaction because the release is locked
-            await strapi.db
-              ?.queryBuilder(RELEASE_MODEL_UID)
-              .where({ id: releaseId })
-              .update({
+            const release = await strapi.db.query(RELEASE_MODEL_UID).update({
+              where: {
+                id: releaseId,
+              },
+              data: {
                 status: 'done',
                 releasedAt: new Date(),
-              })
-              .transacting(trx)
-              .execute();
-
-            const release = await strapi.db
-              ?.queryBuilder(RELEASE_MODEL_UID)
-              .where({ id: releaseId })
-              .select(['id', 'releasedAt', 'status'])
-              .transacting(trx)
-              .first()
-              .execute();
+              },
+            });
 
             if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
               dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
