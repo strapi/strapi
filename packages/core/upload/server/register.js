@@ -13,7 +13,7 @@ const spec = require('../documentation/content-api.json');
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
 module.exports = async ({ strapi }) => {
-  strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
+  strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin::upload', {}));
 
   await registerUploadMiddleware({ strapi });
 

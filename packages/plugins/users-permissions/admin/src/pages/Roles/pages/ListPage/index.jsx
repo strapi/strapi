@@ -21,7 +21,6 @@ import { LinkButton } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   ConfirmDialog,
-  SearchURLQuery,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
@@ -29,7 +28,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, SearchInput } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -172,7 +171,7 @@ export const RolesListPage = () => {
 
         <ActionLayout
           startActions={
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage({
                 id: 'app.component.search.label',
                 defaultMessage: 'Search',

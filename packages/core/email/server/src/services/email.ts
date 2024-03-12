@@ -11,7 +11,7 @@ import type {
 
 const { createStrictInterpolationRegExp } = template;
 
-const getProviderSettings = (): EmailConfig => strapi.config.get('plugin.email');
+const getProviderSettings = (): EmailConfig => strapi.config.get('plugin::email');
 
 const send = async (options: SendOptions) => strapi.plugin('email').provider.send(options);
 

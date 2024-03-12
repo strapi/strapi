@@ -1,7 +1,6 @@
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import inquirer from 'inquirer';
 import semver, { SemVer } from 'semver';
 import resolveFrom from 'resolve-from';
 import execa, { CommonOptions, ExecaReturnValue } from 'execa';
@@ -41,11 +40,7 @@ interface DepToInstall {
 const checkRequiredDependencies = async ({
   cwd,
   logger,
-  ignorePrompts,
-}: Pick<
-  BuildOptions,
-  'cwd' | 'logger' | 'ignorePrompts'
->): Promise<CheckRequiredDependenciesResult> => {
+}: Pick<BuildOptions, 'cwd' | 'logger'>): Promise<CheckRequiredDependenciesResult> => {
   const pkg = await readPkgUp({ cwd });
 
   if (!pkg) {
@@ -103,42 +98,19 @@ const checkRequiredDependencies = async ({
       install.map(({ name, wantedVersion }) => `  - ${name}@${wantedVersion}`).join(os.EOL)
     );
 
-    /**
-     * temporary until V5 when we _will_ be enforcing these dependencies as required.
-     */
-    if (process.env.NODE_ENV !== 'development' || ignorePrompts) {
-      return { didInstall: false };
-    }
-
-    /**
-     * This prompt can be removed in V5 & therefore the code underneath can be refactored to
-     * only install the deps and return that we installed deps.
-     */
-    const { install: installAns } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'install',
-      default: true,
-      message:
-        'Would you like to install these dependencies now? These are not required but are recommended, from V5 these will be required.',
+    await installDependencies(install, {
+      cwd,
+      logger,
     });
 
-    if (installAns) {
-      await installDependencies(install, {
-        cwd,
-        logger,
-      });
+    const [file, ...args] = process.argv;
 
-      const [file, ...args] = process.argv;
-
-      /**
-       * Re-run the same command after installation e.g. strapi build because the yarn.lock might
-       * not be the same and could break installations. It's not the best solution, but it works.
-       */
-      await execa(file, args, { cwd, stdio: 'inherit' });
-      return { didInstall: true };
-    }
-
-    return { didInstall: false };
+    /**
+     * Re-run the same command after installation e.g. strapi build because the yarn.lock might
+     * not be the same and could break installations. It's not the best solution, but it works.
+     */
+    await execa(file, args, { cwd, stdio: 'inherit' });
+    return { didInstall: true };
   }
 
   if (review.length) {

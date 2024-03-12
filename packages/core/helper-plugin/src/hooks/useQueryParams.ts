@@ -14,7 +14,7 @@ const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
       return initialParams;
     }
 
-    return parse(searchQuery) as TQuery;
+    return { ...initialParams, ...parse(searchQuery) } as TQuery;
   }, [search, initialParams]);
 
   const setQuery = useCallback(
