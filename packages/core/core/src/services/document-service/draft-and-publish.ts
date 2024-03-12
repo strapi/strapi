@@ -35,17 +35,17 @@ const defaultToDraft: ParamsTransform = (params) => {
 };
 
 /**
- * DP disabled -> set status to published
+ * DP disabled -> ignore status
  * DP enabled -> set status to draft if no status is provided or it's invalid
  */
 const defaultStatus: TransformWithContentType = (contentType, params) => {
   if (!contentTypes.hasDraftAndPublish(contentType)) {
-    return assoc('status', 'published', params);
+    return params;
   }
 
   // Default to draft if no status is provided or it's invalid
   if (!params.status || params.status !== 'published') {
-    return assoc('status', 'draft', params);
+    return defaultToDraft(params);
   }
 
   return params;

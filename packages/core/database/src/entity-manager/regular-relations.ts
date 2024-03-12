@@ -13,7 +13,7 @@ import {
 import { createQueryBuilder } from '../query';
 import { addSchema } from '../utils/knex';
 import type { Database } from '..';
-import type { ID, Relation } from '../types';
+import type { ID, Relation, Model } from '../types';
 
 declare module 'knex' {
   namespace Knex {
@@ -25,6 +25,18 @@ declare module 'knex' {
 
 //  TODO: This is a short term solution, to not steal relations from the same document.
 const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID) => {
+  // Find if the model is a content type or something else (e.g component)
+  // to only get the documentId if it's a content type
+  const models: Model[] = Array.from(strapi.db.metadata.values());
+
+  const isContentType = models.find((model) => {
+    return model.tableName === tableName && model.attributes.documentId;
+  });
+
+  if (!isContentType) {
+    return [id];
+  }
+
   return (
     con
       .from(tableName)
@@ -107,7 +119,6 @@ const deletePreviousAnyToOneRelations = async ({
   if (isManyToAny(attribute)) {
     // if the database integrity was not broken relsToDelete is supposed to be of length 1
     const relsToDelete = await con
-      // await createQueryBuilder(joinTable.name, db)
       .select(inverseJoinColumn.name)
       .from(joinTable.name)
       .where(joinColumn.name, id)

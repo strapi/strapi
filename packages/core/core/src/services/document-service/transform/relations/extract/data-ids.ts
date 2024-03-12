@@ -69,7 +69,7 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 
       // { connect: { id: id, position: { after: id } } }
       if (position?.after) {
-        ids.push(...handlePrimitive({ ...position, documentIdid: position.after }));
+        ids.push(...handlePrimitive({ ...position, documentId: position.after }));
       }
     });
   }

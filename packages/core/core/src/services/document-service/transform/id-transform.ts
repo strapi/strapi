@@ -11,14 +11,12 @@ import { transformPopulate } from './populate';
  */
 async function transformParamsDocumentId(
   uid: Common.UID.Schema,
-  query: Documents.Params.All,
-  opts: { [key: string]: any } = {}
+  query: Documents.Params.All
 ): Promise<Documents.Params.All> {
   // Transform relational documentIds to entity ids
   let data = query.data;
   if (query.data) {
     data = await transformData(query.data, {
-      ...opts,
       locale: query.locale,
       status: query.status,
       uid,
