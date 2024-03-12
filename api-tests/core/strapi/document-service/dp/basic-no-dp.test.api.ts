@@ -36,9 +36,7 @@ const shopModel = {
       type: 'string',
     },
   },
-  options: {
-    draftAndPublish: false,
-  },
+  draftAndPublish: false,
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',

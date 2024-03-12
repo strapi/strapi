@@ -1,4 +1,7 @@
-import { Common } from '@strapi/types';
+import { curry } from 'lodash/fp';
+
+import { Common, Documents } from '@strapi/types';
+
 import { transformData } from './data';
 import { transformFields } from './fields';
 import { transformPopulate } from './populate';
@@ -8,35 +11,37 @@ import { transformPopulate } from './populate';
  */
 async function transformParamsDocumentId(
   uid: Common.UID.Schema,
-  input: { data?: any; fields?: any; populate?: any; [key: string]: any },
-  opts: {
-    locale?: string | null;
-    isDraft: boolean;
-  }
-) {
+  query: Documents.Params.All
+): Promise<Documents.Params.All> {
   // Transform relational documentIds to entity ids
-  let data = input.data;
-  if (input.data) {
-    data = await transformData(input.data, { ...opts, uid });
+  let data = query.data;
+  if (query.data) {
+    data = await transformData(query.data, {
+      locale: query.locale,
+      status: query.status,
+      uid,
+    });
   }
 
   // Make sure documentId is always present in the response
-  let fields = input.fields;
-  if (input.fields) {
-    fields = transformFields(input.fields);
+  let fields = query.fields;
+  if (query.fields) {
+    fields = transformFields(query.fields) as typeof query.fields;
   }
 
-  let populate = input.populate;
-  if (input.populate) {
-    populate = await transformPopulate(input.populate, { ...opts, uid });
+  let populate = query.populate;
+  if (query.populate) {
+    populate = (await transformPopulate(query.populate, { uid })) as typeof query.populate;
   }
 
   return {
-    ...input,
+    ...query,
     data,
     fields,
     populate,
   };
 }
 
-export { transformParamsDocumentId };
+const curriedTransformParamsDocumentId = curry(transformParamsDocumentId);
+
+export { curriedTransformParamsDocumentId as transformParamsDocumentId };

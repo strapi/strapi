@@ -178,6 +178,7 @@ const createDefaultImplementation = ({
   async findOne(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     const entity = await db.query(uid).findOne({ ...query, where: { id: entityId } });
@@ -209,6 +210,7 @@ const createDefaultImplementation = ({
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction
@@ -267,7 +269,7 @@ const createDefaultImplementation = ({
       },
       entityToUpdate
     );
-
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap in transaction
@@ -301,6 +303,7 @@ const createDefaultImplementation = ({
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     let entityToDelete = await db.query(uid).findOne({
@@ -352,6 +355,7 @@ const createDefaultImplementation = ({
       entityToClone
     );
 
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction
