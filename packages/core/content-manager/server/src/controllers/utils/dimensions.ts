@@ -1,3 +1,5 @@
+import { isNil } from 'lodash/fp';
+
 import { errors } from '@strapi/utils';
 
 /**
@@ -6,12 +8,11 @@ import { errors } from '@strapi/utils';
 export const getDocumentLocaleAndStatus = (request: any) => {
   const { locale, status, ...rest } = request || {};
   // Sanitize locale and status
-  // Check locale format is a valid locale identifier
-  if (locale && !/^[a-z]{2}(-[A-Z]{2})?$/.test(locale)) {
-    throw new errors.ValidationError(`Invalid locale format: ${locale}`);
+  if (!isNil(locale) && typeof locale !== 'string') {
+    throw new errors.ValidationError(`Invalid locale: ${locale}`);
   }
 
-  if (status && !['draft', 'published'].includes(status)) {
+  if (!isNil(status) && !['draft', 'published'].includes(status)) {
     throw new errors.ValidationError(`Invalid status: ${status}`);
   }
 
