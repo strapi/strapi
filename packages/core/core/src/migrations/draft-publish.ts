@@ -68,9 +68,12 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
                   return qb.raw('NULL as published_at');
                 }
 
-                if (att === 'updated_at') {
-                  return qb.raw(`'${new Date().getTime()}' as updated_at`);
-                }
+                // TODO: Find a way to insert a date using the correct format
+                //           Before: 1710240975246
+                // With qb.fn.now(): 2021-10-24 09:52:46
+                // if (att === 'updated_at') {
+                //   return qb.raw(`?? as updated_at`, [qb.fn.now()]);
+                // }
 
                 return att;
               })
