@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Page, unstable_useDocument } from '@strapi/admin/strapi-admin';
+import { Page, unstable_useDocument, Pagination } from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
@@ -22,9 +22,6 @@ import {
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
-  PageSizeURLQuery,
-  PaginationURLQuery,
-  RelativeTime,
   Table,
   useAPIErrorHandler,
   useNotification,
@@ -48,6 +45,7 @@ import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
@@ -822,14 +820,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             </Table.Root>
           </Flex>
         ))}
-        <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
-          <PageSizeURLQuery defaultValue={releaseMeta?.pagination?.pageSize.toString()} />
-          <PaginationURLQuery
-            pagination={{
-              pageCount: releaseMeta?.pagination?.pageCount || 0,
-            }}
-          />
-        </Flex>
+        <Pagination.Root
+          {...releaseMeta?.pagination}
+          defaultPageSize={releaseMeta?.pagination?.pageSize}
+        >
+          <Pagination.PageSize />
+          <Pagination.Links />
+        </Pagination.Root>
       </Flex>
     </ContentLayout>
   );

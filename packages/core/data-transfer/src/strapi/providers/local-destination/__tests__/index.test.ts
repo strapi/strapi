@@ -21,7 +21,7 @@ jest.mock('../strategies/restore', () => {
 const strapiCommonProperties = {
   config: {
     get(service) {
-      if (service === 'plugin.upload') {
+      if (service === 'plugin::upload') {
         return { provider: 'local' };
       }
     },

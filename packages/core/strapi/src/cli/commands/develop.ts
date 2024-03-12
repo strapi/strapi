@@ -31,7 +31,6 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--bundler [bundler]', 'Bundler to use (webpack or vite)', 'vite')
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
     .option('--silent', "Don't log anything", false)
-    .option('--ignore-prompts', 'Ignore all prompts', false)
     .option('--polling', 'Watch for file changes in network directories', false)
     .option('--watch-admin', 'Watch the admin panel for hot changes', true)
     .option('--no-watch-admin', 'Do not watch the admin panel for hot changes')

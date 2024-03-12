@@ -162,7 +162,7 @@ class Strapi extends Container implements Core.Strapi {
     const appConfig = loadConfiguration(rootDirs, opts);
 
     // Instantiate the Strapi container
-    this.add('config', registries.config(appConfig))
+    this.add('config', registries.config(appConfig, this))
       .add('content-types', registries.contentTypes())
       .add('components', registries.components())
       .add('services', registries.services(this))
