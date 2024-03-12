@@ -6,7 +6,7 @@ import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
 import type { Database } from '..';
-import { MetadataOptions } from '../types';
+import type { MetadataOptions } from '../types';
 
 export type * from './types';
 
