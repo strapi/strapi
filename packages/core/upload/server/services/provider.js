@@ -7,7 +7,7 @@ const {
 
 module.exports = ({ strapi }) => ({
   async checkFileSize(file) {
-    const { sizeLimit } = strapi.config.get('plugin.upload', {});
+    const { sizeLimit } = strapi.config.get('plugin::upload', {});
     await strapi.plugin('upload').provider.checkFileSize(file, { sizeLimit });
   },
   async upload(file) {

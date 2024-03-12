@@ -1,5 +1,6 @@
 import { within } from '@testing-library/react';
-import { render, screen, waitFor } from '@tests/utils';
+import { render, screen, server, waitFor } from '@tests/utils';
+import { rest } from 'msw';
 
 import { ListPage } from '../ListPage';
 
@@ -44,6 +45,28 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
     });
 
     expect(screen.getAllByRole('gridcell', { name: 'test testing' })).toHaveLength(2);
+  });
+
+  it('should have pagination when theres enough data', async () => {
+    server.use(
+      rest.get('/admin/audit-logs', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            results: [],
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              pageCount: 5,
+              total: 50,
+            },
+          })
+        );
+      })
+    );
+
+    render(<ListPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
 
     expect(screen.getByRole('combobox', { name: 'Entries per page' })).toBeInTheDocument();
 

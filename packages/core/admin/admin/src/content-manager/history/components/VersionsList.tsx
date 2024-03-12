@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, type BoxProps } from '@strapi/design-system';
-import { RelativeTime, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { RelativeTime } from '../../../components/RelativeTime';
 import { getDisplayName } from '../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
@@ -31,7 +32,7 @@ interface StatusData {
 }
 
 interface VersionCardProps {
-  version: Contracts.HistoryVersions.GetHistoryVersions.Response['data'][number];
+  version: Contracts.HistoryVersions.HistoryVersionDataResponse;
   isCurrent: boolean;
 }
 
@@ -144,6 +145,31 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * PaginationButton
+ * -----------------------------------------------------------------------------------------------*/
+
+interface PaginationButtonProps {
+  page: number;
+  children: React.ReactNode;
+}
+
+const PaginationButton = ({ page, children }: PaginationButtonProps) => {
+  const [{ query }] = useQueryParams<{ id?: string }>();
+
+  // Remove the id from the pagination link, so that the history page can redirect
+  // to the id of the first history version in the new page once it's loaded
+  const { id: _id, ...queryRest } = query;
+
+  return (
+    <Link to={{ search: stringify({ ...queryRest, page }) }} style={{ textDecoration: 'none' }}>
+      <Typography variant="omega" textColor="primary600">
+        {children}
+      </Typography>
+    </Link>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * VersionsList
  * -----------------------------------------------------------------------------------------------*/
 
@@ -184,34 +210,54 @@ const VersionsList = () => {
         </Typography>
         <Box background="neutral150" hasRadius padding={1}>
           <Typography variant="sigma" textColor="neutral600">
-            {versions.meta.pagination?.total}
+            {versions.meta.pagination.total}
           </Typography>
         </Box>
       </Flex>
-      <Flex
-        direction="column"
-        gap={4}
-        paddingTop={4}
-        paddingLeft={4}
-        paddingRight={4}
-        paddingBottom={4}
-        as="ul"
-        alignItems="stretch"
-        flex={1}
-        overflow="auto"
-      >
-        {versions.data.map((version, index) => (
-          <li
-            key={version.id}
-            aria-label={formatMessage({
-              id: 'content-manager.history.sidebar.title.version-card.aria-label',
-              defaultMessage: 'Version card',
-            })}
-          >
-            <VersionCard version={version} isCurrent={page === 1 && index === 0} />
-          </li>
-        ))}
-      </Flex>
+      <Box flex={1} overflow="auto">
+        {versions.meta.pagination.page > 1 && (
+          <Box paddingTop={4} textAlign="center">
+            <PaginationButton page={page - 1}>
+              {formatMessage({
+                id: 'content-manager.history.sidebar.show-newer',
+                defaultMessage: 'Show newer versions',
+              })}
+            </PaginationButton>
+          </Box>
+        )}
+        <Flex
+          direction="column"
+          gap={3}
+          paddingTop={5}
+          paddingBottom={5}
+          paddingLeft={4}
+          paddingRight={4}
+          as="ul"
+          alignItems="stretch"
+        >
+          {versions.data.map((version, index) => (
+            <li
+              key={version.id}
+              aria-label={formatMessage({
+                id: 'content-manager.history.sidebar.title.version-card.aria-label',
+                defaultMessage: 'Version card',
+              })}
+            >
+              <VersionCard version={version} isCurrent={page === 1 && index === 0} />
+            </li>
+          ))}
+        </Flex>
+        {versions.meta.pagination.page < versions.meta.pagination.pageCount && (
+          <Box paddingBottom={5} textAlign="center">
+            <PaginationButton page={page + 1}>
+              {formatMessage({
+                id: 'content-manager.history.sidebar.show-older',
+                defaultMessage: 'Show older versions',
+              })}
+            </PaginationButton>
+          </Box>
+        )}
+      </Box>
     </Flex>
   );
 };

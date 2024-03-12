@@ -1,6 +1,6 @@
 import pluralize from 'pluralize';
 import slugify from '@sindresorhus/slugify';
-import * as utils from '@strapi/utils';
+import { strings } from '@strapi/utils';
 
 import type { PromptQuestion } from 'node-plop';
 
@@ -23,7 +23,7 @@ const questions: Array<PromptQuestion> = [
     message: 'Content type singular name',
     default: (answers: Answers) => slugify(answers.displayName),
     validate(input) {
-      if (!utils.isKebabCase(input)) {
+      if (!strings.isKebabCase(input)) {
         return 'Value must be in kebab-case';
       }
 
@@ -40,7 +40,7 @@ const questions: Array<PromptQuestion> = [
         return 'Singular and plural names cannot be the same';
       }
 
-      if (!utils.isKebabCase(input)) {
+      if (!strings.isKebabCase(input)) {
         return 'Value must be in kebab-case';
       }
 

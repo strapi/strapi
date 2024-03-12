@@ -4,6 +4,33 @@ import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
 
+/**
+ * Parses pagination params and makes sure they're within valid ranges
+ */
+const getValidPagination = ({ page, pageSize }: { page: any; pageSize: any }) => {
+  let pageNumber = 1;
+  let pageSizeNumber = 20;
+
+  if (page) {
+    const parsedPage = parseInt(page, 10);
+    pageNumber = parseInt(page, 10);
+
+    if (!Number.isNaN(parsedPage) && parsedPage >= 1) {
+      pageNumber = parsedPage;
+    }
+  }
+
+  if (pageSize) {
+    const parsedPageSize = parseInt(pageSize, 10);
+
+    if (!Number.isNaN(parsedPageSize) && parsedPageSize >= 1 && parsedPageSize <= 100) {
+      pageSizeNumber = parsedPageSize;
+    }
+  }
+
+  return { page: pageNumber, pageSize: pageSizeNumber };
+};
+
 const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
   return {
     async findMany(ctx) {
@@ -18,22 +45,26 @@ const createHistoryVersionController = ({ strapi }: { strapi: Strapi }) => {
         throw new errors.ForbiddenError('contentType and documentId are required');
       }
 
-      const params = ctx.query as HistoryVersions.GetHistoryVersions.Request['query'];
-
       /**
        * There are no permissions specifically for history versions,
        * but we need to check that the user can read the content type
        */
       const permissionChecker = getContentManagerService('permission-checker').create({
         userAbility: ctx.state.userAbility,
-        model: params.contentType,
+        model: ctx.query.contentType,
       });
 
       if (permissionChecker.cannot.read()) {
         return ctx.forbidden();
       }
 
-      const { results, pagination } = await getService(strapi, 'history').findVersionsPage(params);
+      const params: HistoryVersions.GetHistoryVersions.Request['query'] =
+        await permissionChecker.sanitizeQuery(ctx.query);
+
+      const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
+        ...params,
+        ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
+      });
 
       return { data: results, meta: { pagination } };
     },

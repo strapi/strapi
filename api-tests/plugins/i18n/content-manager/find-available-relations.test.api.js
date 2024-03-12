@@ -118,7 +118,7 @@ describe('i18n - Find available relations', () => {
 
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[1])
+      pick(['id', 'name', 'publishedAt', 'documentId'], data.products[1])
     );
   });
 
@@ -131,7 +131,7 @@ describe('i18n - Find available relations', () => {
 
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[0])
+      pick(['id', 'name', 'publishedAt', 'documentId'], data.products[0])
     );
   });
 });

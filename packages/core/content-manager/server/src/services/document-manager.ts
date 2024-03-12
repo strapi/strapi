@@ -42,11 +42,42 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
   };
 
   return {
-    async findOne(id: string, uid: Common.UID.CollectionType, opts = {}) {
+    async findOne(
+      id: string,
+      uid: Common.UID.CollectionType,
+      opts: DocServiceParams<'findOne'>[1] = {}
+    ) {
       return strapi
         .documents(uid)
         .findOne(id, opts)
         .then((doc) => mapDocument(uid, doc));
+    },
+
+    /**
+     * Find multiple (or all) locales for a document
+     */
+    async findLocales(
+      id: string | undefined,
+      uid: Common.UID.CollectionType,
+      opts: { populate?: Documents.Params.Pick<any, 'populate'>; locale?: string | string[] | '*' }
+    ) {
+      // Will look for a specific locale by default
+      const where: any = {};
+
+      // Might not have an id if querying a single type
+      if (id) {
+        where.documentId = id;
+      }
+
+      // Search in array of locales
+      if (Array.isArray(opts.locale)) {
+        where.locale = { $in: opts.locale };
+      } else if (opts.locale && opts.locale !== '*') {
+        // Look for a specific locale, ignore if looking for all locales
+        where.locale = opts.locale;
+      }
+
+      return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
     async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
@@ -155,11 +186,6 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       opts: DocServiceParams<'delete'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
-
-      // Delete all locales if no locale is specified
-      if (opts.locale === undefined) {
-        opts.locale = '*';
-      }
 
       await strapi.documents(uid).delete(id, { ...opts, populate });
 

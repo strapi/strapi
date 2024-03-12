@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { yup, toRegressedEnumValue } from '@strapi/utils';
+import { yup, strings } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 const LIFECYCLES = [
@@ -56,7 +56,7 @@ const contentTypeSchemaValidator = yup.object().shape({
         for (const attrName of Object.keys(attributes)) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
-            const regressedValues = attr.enum.map(toRegressedEnumValue);
+            const regressedValues = attr.enum.map(strings.toRegressedEnumValue);
 
             // should match the GraphQL regex
             if (!regressedValues.every((value: string) => GRAPHQL_ENUM_REGEX.test(value))) {

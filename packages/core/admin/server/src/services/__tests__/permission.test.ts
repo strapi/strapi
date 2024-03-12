@@ -122,7 +122,7 @@ describe('Permission Service', () => {
           action: 'action-1',
           actionParameters: {},
           subject: 'country',
-          properties: { fields: null },
+          properties: { fields: [] },
         },
       ];
 

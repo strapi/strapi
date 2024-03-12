@@ -1,5 +1,5 @@
 import { Strapi, Entity } from '@strapi/types';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 
 /**
  * TODO: Find a better way to encode keys than this
@@ -76,7 +76,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
       }, {});
 
       // 2. Query ids
-      await mapAsync(
+      await async.map(
         Object.values(idsByUidAndLocale),
         async ({ uid, locale, documentIds, status }: any) => {
           const findParams = {

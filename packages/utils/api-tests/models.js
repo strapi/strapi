@@ -167,7 +167,9 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   for (const entry of entries) {
     const dataToCreate = isFunction(entry) ? entry(results) : entry;
     results.push(
-      await strapi.entityService.create(toContentTypeUID(model), { data: dataToCreate })
+      await strapi.entityService.create(toContentTypeUID(model), {
+        data: dataToCreate,
+      })
     );
   }
 

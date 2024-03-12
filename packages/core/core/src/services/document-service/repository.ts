@@ -1,11 +1,6 @@
 import { omit, assoc, curry } from 'lodash/fp';
 
-import {
-  pipeAsync,
-  mapAsync,
-  convertQueryParams,
-  contentTypes as contentTypesUtils,
-} from '@strapi/utils';
+import { async, convertQueryParams, contentTypes as contentTypesUtils } from '@strapi/utils';
 import { Common } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -40,7 +35,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
   async function findMany(params = {} as any) {
-    const query = await pipeAsync(
+    const query = await async.pipe(
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -53,7 +48,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function findFirst(params = {} as any) {
-    const query = await pipeAsync(
+    const query = await async.pipe(
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -67,7 +62,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
   async function findOne(documentId: string, params = {} as any) {
-    const query = await pipeAsync(
+    const query = await async.pipe(
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -89,7 +84,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function deleteFn(documentId: string, params = {} as any) {
-    const query = await pipeAsync(
+    const query = await async.pipe(
       omit('status'),
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
@@ -104,7 +99,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const entriesToDelete = await strapi.db.query(uid).findMany(query);
 
     // Delete all matched entries and its components
-    await mapAsync(entriesToDelete, (entryToDelete: any) => deleteEntry(entryToDelete.id));
+    await async.map(entriesToDelete, (entryToDelete: any) => deleteEntry(entryToDelete.id));
 
     return { deletedEntries: entriesToDelete.length };
   }
@@ -156,7 +151,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function clone(documentId: string, params = {} as any) {
-    const queryParams = await pipeAsync(
+    const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       i18n.localeToLookup(contentType)
     )(params);
@@ -287,7 +282,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function publish(documentId: string, params = {} as any) {
-    const queryParams = await pipeAsync(
+    const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
@@ -308,7 +303,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform draft entry data and create published versions
-    const publishedEntries = await mapAsync(
+    const publishedEntries = await async.map(
       entriesToPublish,
       pipeAsync(
         // Updated at value is used to know if draft has been modified
@@ -331,7 +326,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function unpublish(documentId: string, params = {} as any) {
-    const queryParams = await pipeAsync(
+    const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
@@ -345,7 +340,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function discardDraft(documentId: string, params = {} as any) {
-    const queryParams = await pipeAsync(
+    const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
@@ -367,9 +362,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform published entry data and create draft versions
-    const draftEntries = await mapAsync(
+    const draftEntries = await async.map(
       entriesToDraft,
-      pipeAsync(
+      async.pipe(
         assoc('publishedAt', null),
         assoc('documentId', documentId),
         omit('id'),
