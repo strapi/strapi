@@ -1,4 +1,4 @@
-import { isObject, isNil } from 'lodash/fp';
+import { isObject, isNil, pick } from 'lodash/fp';
 
 import { EntityService, Attribute, Common } from '@strapi/types';
 import { traverseEntity, errors } from '@strapi/utils';
@@ -56,7 +56,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
   // { id }
   if (isLongHand(relation)) {
     // If the id is already an entry id, return it as is
-    if ('id' in relation) return relation;
+    if (!('documentId' in relation)) return relation;
 
     // @ts-expect-error - TODO: Add relation type
     const ids = getIds(relation.documentId, relation.locale, relation.status);
@@ -65,10 +65,10 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
     if (!ids?.length) return undefined;
 
     // Return it with the same format for consistency
-    if (ids.length === 1) return { ...(relation as object), id: ids[0] } as T;
+    if (ids.length === 1) return { id: ids[0], ...pick(['position', relation]) } as T;
 
     // Return an array if it multiple ids are found
-    return ids.map((id: ID) => ({ ...(relation as object), id })) as T[];
+    return ids.map((id: ID) => ({ id, ...pick(['position', relation]) })) as T[];
   }
 
   // id[]
