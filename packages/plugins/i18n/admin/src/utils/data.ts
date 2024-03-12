@@ -63,7 +63,11 @@ const removePasswordAndRelationsFieldFromData = <
   ) => {
     return Object.keys(datum).reduce((acc, current: keyof TDatum) => {
       // @ts-expect-error – TODO: fix the fact we can't assign this.
-      const attribute = schemum.attributes[current] ?? { type: undefined };
+      const attribute = schemum.attributes[current] ?? { type: undefined, visible: false };
+
+      if (attribute.visible === false) {
+        return acc;
+      }
 
       if (attribute.type === 'dynamiczone') {
         const value = datum[current] as Attribute.GetValue<Attribute.DynamicZone>;
