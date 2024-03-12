@@ -60,6 +60,8 @@ import {
 import { useTypedDispatch } from '../store/hooks';
 import { getTimezoneOffset } from '../utils/time';
 
+import { getBadgeProps } from './ReleasesPage';
+
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
@@ -78,12 +80,19 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
+const StyledMenuItem = styled(Menu.Item)<{
+  disabled?: boolean;
+  variant?: 'neutral' | 'danger';
+}>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
   span {
     color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
+
+  &:hover {
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
   }
 `;
 
@@ -343,7 +352,13 @@ export const ReleaseDetailsLayout = ({
       <HeaderLayout
         title={release.name}
         subtitle={
-          numberOfEntriesText + (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {numberOfEntriesText +
+                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+            </Typography>
+            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+          </Flex>
         }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
@@ -387,14 +402,7 @@ export const ReleaseDetailsLayout = ({
                     width="100%"
                   >
                     <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                      <Flex
-                        paddingTop={2}
-                        paddingBottom={2}
-                        alignItems="center"
-                        gap={2}
-                        hasRadius
-                        width="100%"
-                      >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <PencilIcon />
                         <Typography ellipsis>
                           {formatMessage({
@@ -404,15 +412,12 @@ export const ReleaseDetailsLayout = ({
                         </Typography>
                       </Flex>
                     </StyledMenuItem>
-                    <StyledMenuItem disabled={!canDelete} onSelect={toggleWarningSubmit}>
-                      <Flex
-                        paddingTop={2}
-                        paddingBottom={2}
-                        alignItems="center"
-                        gap={2}
-                        hasRadius
-                        width="100%"
-                      >
+                    <StyledMenuItem
+                      disabled={!canDelete}
+                      onSelect={toggleWarningSubmit}
+                      variant="danger"
+                    >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />
                         <Typography ellipsis textColor="danger600">
                           {formatMessage({
@@ -832,7 +837,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
+  const { replace } = useHistory();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -913,7 +918,7 @@ const ReleaseDetailsPage = () => {
     });
 
     if ('data' in response) {
-      push('/plugins/content-releases');
+      replace('/plugins/content-releases');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
