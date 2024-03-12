@@ -15,7 +15,7 @@
  */
 
 import crypto from 'node:crypto';
-import { partition, isInteger, sumBy, snakeCase } from 'lodash/fp';
+import { partition, isInteger, sumBy, snakeCase, isString } from 'lodash/fp';
 
 // We can accept a number of compressible tokens up to:
 // tokens accepted = (MAX_LENGTH / (HASH_LENGTH + MIN_TOKEN_LENGTH) + (tokens * IDENTIFIER_SEPARATER.length))
@@ -26,10 +26,10 @@ export const HASH_SEPARATOR = ''; // no separator is needed, we will just attach
 export const IDENTIFIER_SEPARATOR = '_';
 export const MIN_TOKEN_LENGTH = 3;
 
-type NameToken = {
+export type NameToken = {
   allocatedLength?: number;
   name: string;
-  compressible: boolean;
+  compressible: boolean | string;
 };
 
 type NameTokenWithAllocation = NameToken & { allocatedLength: number };
@@ -63,6 +63,13 @@ export function createHash(data: string, len: number): string {
   const hash = crypto.createHash('shake256', { outputLength: Math.ceil(len / 2) }).update(data);
   return hash.digest('hex').substring(0, len);
 }
+
+// We need to be able to find the full-length name for any shortened name, primarily for migration purposes
+// Therefore we store every name that passes through so we can retrieve the original later
+const nameMap = new Map<string, string>();
+export const getFullName = (shortName: string) => {
+  return nameMap.get(shortName);
+};
 
 /**
  * Generates a string with a max length, appending a hash at the end if necessary to keep it unique
@@ -129,16 +136,19 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
 
   // if it fits, or maxLength is disabled, return full length string
   if (fullLengthName.length <= maxLength || maxLength === 0) {
+    nameMap.set(fullLengthName, fullLengthName);
     return fullLengthName;
   }
 
   // Split tokens by compressibility
   const [compressible, incompressible] = partition(
-    (token: NameToken) => token.compressible,
+    (token: NameToken) => token.compressible === true || isString(token.compressible),
     nameTokens
   );
 
-  const totalIncompressibleLength = sumBy((token: NameToken) => token.name.length)(incompressible);
+  const totalIncompressibleLength = sumBy((token: NameToken) =>
+    isString(token.compressible) ? token.compressible.length : token.name.length
+  )(incompressible);
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
   const availablePerToken = Math.floor(available / compressible.length);
@@ -210,9 +220,21 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
   // Build final string
   const shortenedName = nameTokens
     .map((token) => {
-      if (token.compressible && 'allocatedLength' in token && token.allocatedLength !== undefined) {
+      // if it is compressible, shorten it
+      if (
+        token.compressible === true &&
+        'allocatedLength' in token &&
+        token.allocatedLength !== undefined
+      ) {
         return getShortenedName(token.name, token.allocatedLength);
       }
+
+      // if is is only compressible as a fixed value, use that
+      if (isString(token.compressible)) {
+        return token.compressible;
+      }
+
+      // otherwise return it as-is
       return token.name;
     })
     .join(IDENTIFIER_SEPARATOR);
@@ -224,5 +246,6 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     );
   }
 
+  nameMap.set(shortenedName, fullLengthName);
   return shortenedName;
 }

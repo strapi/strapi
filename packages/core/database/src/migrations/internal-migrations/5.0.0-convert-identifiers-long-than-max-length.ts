@@ -2,29 +2,25 @@ import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import type { Database } from '../..';
+import { getFullName } from '../../utils/identifiers/shortener';
 
 type NameDiff<T> = {
   short: T;
   full: T;
 };
 
+// TODO: key isn't really needed except for debugging, we can remove it
 type IdentifierDiffs = {
   indexes: NameDiff<{ index: number; key: string; tableName: string; indexName: string }>[];
   tables: NameDiff<{ index: number; key: string; tableName: string }>[];
   columns: NameDiff<{ index: number; key: string; tableName: string; columnName: string }>[];
 };
 
-// TODO: This is being run even on the creation of a new project, which means that it won't work until we add a check that db exists
-
 export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
     const md = db.metadata;
-    const mdfull = db.metadataFull;
-
-    // TODO: improve error handling everywhere
-
-    const diffs = getDiffs(md, mdfull);
+    const diffs = findDiffs(md);
 
     // migrate indexes before tables so we know to target the original tableName
     for (const indexDiff of diffs.indexes) {
@@ -121,7 +117,7 @@ const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexNam
   }
 };
 
-function getDiffs(shortMap: Metadata, fullMap: Metadata) {
+const findDiffs = (shortMap: Metadata) => {
   const diffs = {
     tables: [],
     columns: [],
@@ -129,44 +125,85 @@ function getDiffs(shortMap: Metadata, fullMap: Metadata) {
   } as IdentifierDiffs;
 
   const shortArr = Array.from(shortMap.entries());
-  const fullArr = Array.from(fullMap.entries());
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  shortArr.forEach(([key, shortenedObj], index) => {
-    const [, fullObj] = fullArr[index];
-
-    if (shortenedObj.tableName !== fullObj.tableName) {
+  shortArr.forEach(([key, shortObj], index) => {
+    const fullTableName = getFullName(shortObj.tableName);
+    if (!fullTableName) {
+      throw new Error(`Missing full table name for ${shortObj.tableName}`);
+    }
+    // find table name diffs
+    if (shortObj.tableName !== fullTableName) {
       diffs.tables.push({
         full: {
           index,
           key: 'tableName',
-          tableName: fullObj.tableName,
+          tableName: fullTableName,
         },
         short: {
           index,
           key: 'tableName',
-          tableName: shortenedObj.tableName,
+          tableName: shortObj.tableName,
         },
       });
     }
 
+    // find column name diffs
     // eslint-disable-next-line guard-for-in
-    for (const attrKey in shortenedObj.attributes) {
-      const attr1 = shortenedObj.attributes[attrKey] as any;
-      const attr2 = fullObj.attributes[attrKey] as any;
-      if (attr1 && attr2 && attr1.columnName !== attr2.columnName) {
+    for (const attrKey in shortObj.attributes) {
+      if (shortObj.attributes[attrKey].type === 'relation') {
+        continue;
+      }
+
+      // TODO: add more type checks so we don't need any
+      const attr = shortObj.attributes[attrKey] as any;
+      const shortColumnName = attr.columnName;
+      const longColumnName = getFullName(shortColumnName);
+      // console.log(`comparing attribute ${shortColumnName} to ${longColumnName}`);
+
+      if (!shortColumnName || !longColumnName) {
+        throw new Error(`missing column name(s) for attribute ${JSON.stringify(attr, null, 2)}`);
+      }
+      if (shortColumnName && longColumnName && shortColumnName !== longColumnName) {
         diffs.columns.push({
           short: {
             index,
-            tableName: shortenedObj.tableName,
-            key: `attributes.${attrKey}.columnName`,
-            columnName: attr1.columnName,
+            tableName: fullTableName, // NOTE: this means that we must rename columns before tables
+            key: `attributes.${attrKey}`,
+            columnName: shortColumnName,
           },
           full: {
             index,
-            tableName: fullObj.tableName,
-            key: `attributes.${attrKey}.columnName`,
-            columnName: attr2.columnName,
+            tableName: fullTableName,
+            key: `attributes.${attrKey}`,
+            columnName: longColumnName,
+          },
+        });
+      }
+    }
+
+    // find index name diffs
+    // eslint-disable-next-line guard-for-in
+    for (const attrKey in shortObj.indexes) {
+      const shortIndexName = shortObj.indexes[attrKey].name;
+      const longIndexName = getFullName(shortIndexName);
+      if (!longIndexName) {
+        throw new Error(`Missing full index name for ${shortIndexName}`);
+      }
+
+      if (shortIndexName && longIndexName && shortIndexName !== longIndexName) {
+        diffs.indexes.push({
+          short: {
+            index,
+            tableName: fullTableName, // NOTE: this means that we must rename columns before tables
+            key: `indexes.${attrKey}`,
+            indexName: shortIndexName,
+          },
+          full: {
+            index,
+            tableName: fullTableName,
+            key: `indexes.${attrKey}`,
+            indexName: longIndexName,
           },
         });
       }
@@ -174,4 +211,4 @@ function getDiffs(shortMap: Metadata, fullMap: Metadata) {
   });
 
   return diffs;
-}
+};

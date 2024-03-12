@@ -9,7 +9,7 @@
  * could be disabled and stay compatible with v4 database structure.
  */
 import _ from 'lodash/fp';
-import { getNameFromTokens } from './shortener';
+import { NameToken, getNameFromTokens } from './shortener';
 
 // Constants for column names used in naming methods
 export const ID_COLUMN = 'id';
@@ -25,6 +25,28 @@ type NameOptions = {
   snakeCase?: boolean;
 };
 
+// Fixed compression map for suffixes and prefixes
+const replacementMap = {
+  links: 'lnk',
+  order_inv_fk: 'oifk',
+  order: 'ord',
+  morphs: 'mph',
+  index: 'idx',
+  inv_fk: 'ifk',
+  order_fk: 'ofk',
+  id_column_index: 'idix',
+  order_index: 'oidx',
+  unique: 'uq',
+  primary: 'pk',
+};
+
+const mapIncompressible = (name: string): string | false => {
+  if (name in replacementMap) {
+    return (replacementMap as any)[name];
+  }
+  return false;
+};
+
 // Generic name handler that must be used by all helper functions
 /**
  * TODO: we should be requiring snake_case inputs for all names here, but we
@@ -33,7 +55,7 @@ type NameOptions = {
  * final string my_model which generally works but is not entirely safe
  * */
 export const getName = (names: NameInput, options: NameOptions) => {
-  const tokens = _.castArray(names).map((name) => {
+  const tokens: NameToken[] = _.castArray(names).map((name) => {
     return {
       name,
       compressible: true,
@@ -41,11 +63,11 @@ export const getName = (names: NameInput, options: NameOptions) => {
   });
 
   if (options?.suffix) {
-    tokens.push({ name: options.suffix, compressible: false });
+    tokens.push({ name: options.suffix, compressible: mapIncompressible(options.suffix) });
   }
 
   if (options?.prefix) {
-    tokens.unshift({ name: options.prefix, compressible: false });
+    tokens.unshift({ name: options.prefix, compressible: mapIncompressible(options.prefix) });
   }
 
   return getNameFromTokens(tokens, { maxLength: options.maxLength, snakeCase: options.snakeCase });
@@ -65,7 +87,7 @@ export const getJoinTableName = (
   options: NameOptions
 ) => {
   return getName([collectionName, attributeName], {
-    suffix: options.maxLength ? 'lnk' : 'links',
+    suffix: 'links',
     ...options,
   });
 };
@@ -76,7 +98,7 @@ export const getMorphTableName = (
   options: NameOptions
 ) => {
   return getName([collectionName, attributeName], {
-    suffix: options.maxLength ? 'mph' : 'morphs',
+    suffix: 'morphs',
     ...options,
   });
 };
@@ -101,12 +123,12 @@ export const getInverseJoinColumnAttributeIdName = (
 };
 
 export const getOrderColumnName = (singularName: string, options: NameOptions) => {
-  return getName(singularName, { suffix: options.maxLength ? 'ord' : 'order', ...options });
+  return getName(singularName, { suffix: 'order', ...options });
 };
 
 export const getInverseOrderColumnName = (singularName: string, options: NameOptions) => {
   return getName(singularName, {
-    suffix: options.maxLength ? 'ord' : 'order',
+    suffix: 'order',
     prefix: 'inv',
     ...options,
   });
@@ -141,7 +163,7 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
  */
 
 export const getIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'idx' : 'index', ...options });
+  return getName(names, { suffix: 'index', ...options });
 };
 
 export const getFkIndexName = (names: NameInput, options: NameOptions) => {
@@ -149,29 +171,29 @@ export const getFkIndexName = (names: NameInput, options: NameOptions) => {
 };
 
 export const getInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'ifk' : 'inv_fk', ...options });
+  return getName(names, { suffix: 'inv_fk', ...options });
 };
 
 export const getOrderFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'ofk' : 'order_fk', ...options });
+  return getName(names, { suffix: 'order_fk', ...options });
 };
 
 export const getOrderInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'oifk' : 'order_inv_fk', ...options });
+  return getName(names, { suffix: 'order_inv_fk', ...options });
 };
 
 export const getIdColumnIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'idix' : 'id_column_index', ...options });
+  return getName(names, { suffix: 'id_column_index', ...options });
 };
 
 export const getOrderIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'oidx' : 'order_index', ...options });
+  return getName(names, { suffix: 'order_index', ...options });
 };
 
 export const getUniqueIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'uq' : 'unique', ...options });
+  return getName(names, { suffix: 'unique', ...options });
 };
 
 export const getPrimaryIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: options.maxLength ? 'pk' : 'primary', ...options });
+  return getName(names, { suffix: 'primary', ...options });
 };

@@ -16,7 +16,7 @@ import * as identifiers from './utils/identifiers';
 export { isKnexQuery } from './utils/knex';
 
 // The max length for a database identifier
-export const MAX_DB_IDENTIFIER_LENGTH = 55;
+export const DEFAULT_MAX_IDENTIFIER_LENGTH = 55;
 
 interface Settings {
   forceMigration?: boolean;
@@ -40,8 +40,6 @@ class Database {
 
   metadata: Metadata;
 
-  metadataFull: Metadata; // TODO: this is not a good place to put it nor a good name for it
-
   schema: SchemaProvider;
 
   migrations: MigrationProvider;
@@ -59,20 +57,11 @@ class Database {
   }
 
   constructor(config: DatabaseConfig) {
-    // TODO: do we want this to be user-configurable? Probably not
     this.#metadataOptions = {
-      maxLength: config?.settings?.maxIdentifierLength ?? MAX_DB_IDENTIFIER_LENGTH,
+      maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
     };
 
     this.metadata = createMetadata(config.models, this.#metadataOptions);
-
-    // TODO: we can probably do this a better way without storing a second copy of metadata, but the problem is that we (and users) need access to the shortened name, so it can't really be handled in the database layer
-    // but it causes the problem that we need access to the full names somehow. Cleaning this up will come in a later refactoring.
-    // TODO: modelsFull is ideally just a dev hack until createMetadata supports nametoken arrays for values, once it does we switch it back to models
-    this.metadataFull = createMetadata((config as any).modelsFull, {
-      ...this.#metadataOptions,
-      maxLength: 0,
-    });
 
     this.config = {
       ...config,
@@ -191,7 +180,7 @@ class Database {
 }
 
 const utils = { identifiers };
-const constants = { MAX_DB_IDENTIFIER_LENGTH };
+const constants = { DEFAULT_MAX_IDENTIFIER_LENGTH };
 
 export { Database, errors, utils, constants };
 export type { Model, MetadataOptions };
