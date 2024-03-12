@@ -58,13 +58,12 @@ const DynamicZone = ({
     })
   );
 
-  const { value = [], error } = useField<
-    Array<
-      Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
-        __temp_key__: number;
-      }
-    >
-  >(name);
+  type DzWithTempKey =
+    Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
+      __temp_key__: number;
+    };
+
+  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return attribute.components.reduce<
