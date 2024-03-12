@@ -3,12 +3,12 @@
 export type ID = string | number;
 export type ShortHand = ID;
 // Relation can be connected either with an id or document ID
-export type LongHandEntity = { id: ID; position: object };
+export type LongHandEntity = { id: ID; position?: object };
 export type LongHandDocument = {
   documentId: ID;
   locale?: string;
   status?: 'draft' | 'published';
-  position: object;
+  position?: object;
 };
 export type LongHand = LongHandEntity | LongHandDocument;
 
