@@ -115,7 +115,7 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
  * because in these cases the relevant information is the table name and we can't really do
  * any better; shortening the individual parts again might make it even more confusing.
  *
- * For example, the fk for mytable_myattr4567d_localizations would become
+ * So for example, the fk for the table `mytable_myattr4567d_localizations` will become
  * mytable_myattr4567d_loc63bf2_fk
  *
  */
