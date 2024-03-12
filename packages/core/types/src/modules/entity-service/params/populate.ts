@@ -37,7 +37,7 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type D = ['<random_string>']; // ❌
  * type E = ['*']; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Exclude<
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = readonly Exclude<
   StringNotation<TSchemaUID>,
   WildcardNotation
 >[];
