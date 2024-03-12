@@ -79,6 +79,47 @@ import { EmptyStateLayout } from '@strapi/design-system';
 
 NOTE! the props will be different. Please refer to the documentation for the `EmptyStateLayout` component.
 
+### FilterListURLQuery
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Filters`:
+
+```tsx
+// Before
+import { FilterListURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { Filters } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Filters.Root>
+      <Filters.List />
+    </Filters.Root>
+  );
+};
+```
+
+### FilterPopoverURLQueryProps
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Filters`:
+
+```tsx
+// Before
+import { FilterPopoverURLQueryProps } from '@strapi/helper-plugin';
+
+// After
+import { Filters } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Filters.Root>
+      <Filters.Trigger />
+      <Filters.Popover />
+    </Filters.Root>
+  );
+};
+```
+
 ### Form
 
 This component aliased `Formik`, something we're working towards removing. The `Form` component and it's sibling exports from `@strapi/strapi/admin` should be used instead:

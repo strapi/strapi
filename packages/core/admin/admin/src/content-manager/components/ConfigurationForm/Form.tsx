@@ -79,6 +79,7 @@ const ConfigurationForm = ({
   const initialValues: ConfigurationFormData = React.useMemo(() => {
     const transformations = pipe(
       flattenPanels,
+      replaceMainFieldWithNameOnly,
       extractMetadata,
       addTmpSpaceToLayout,
       addTmpKeysToLayout
@@ -186,6 +187,18 @@ const ConfigurationForm = ({
  */
 const flattenPanels = (layout: EditLayout['layout']): EditLayout['layout'][number] =>
   layout.flat(1);
+
+/**
+ * @internal
+ * @description We don't need the mainField object in the layout, we only need the name.
+ */
+const replaceMainFieldWithNameOnly = (layout: EditLayout['layout'][number]) =>
+  layout.map((row) =>
+    row.map((field) => ({
+      ...field,
+      mainField: field.mainField?.name,
+    }))
+  );
 
 /**
  * @internal

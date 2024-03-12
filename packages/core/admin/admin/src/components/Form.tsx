@@ -19,7 +19,7 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
-import { getIn, setIn } from '../utils/object';
+import { getIn, setIn } from '../utils/objects';
 
 import { createContext } from './Context';
 
@@ -124,7 +124,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
     | ((
         props: Pick<
           FormContextValue<TFormValues>,
-          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'resetForm' | 'values'
+          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'values' | 'resetForm' | 'onChange'
         >
       ) => React.ReactNode);
   method: 'POST' | 'PUT';
@@ -436,6 +436,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             ? props.children({
                 modified,
                 disabled,
+                onChange: handleChange,
                 ...state,
                 resetForm,
               })

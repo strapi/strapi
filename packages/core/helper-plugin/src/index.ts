@@ -7,8 +7,6 @@ export * from './components/ConfirmDialog';
 export * from './components/DynamicTable';
 export * from './components/Table';
 export * from './components/EmptyBodyTable';
-export * from './components/FilterListURLQuery';
-export * from './components/FilterPopoverURLQuery';
 
 /* -------------------------------------------------------------------------------------------------
  * Features

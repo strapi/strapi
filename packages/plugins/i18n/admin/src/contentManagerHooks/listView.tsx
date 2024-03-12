@@ -38,7 +38,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
         name: 'locales',
         // @ts-expect-error – ID is seen as number | string; this will change when we move the type over.
         cellFormatter: (props, _header, meta) => <LocaleListCell {...props} {...meta} />,
-      } satisfies ListFieldLayout,
+      },
     ],
     layout,
   };
