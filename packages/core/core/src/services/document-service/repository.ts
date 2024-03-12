@@ -319,7 +319,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         omit('id'),
         // Transform relations to target published versions
         (entry) => {
-          const opts = { uid, locale: entry.locale, isDraft: false, allowMissingId: true };
+          const opts = { uid, locale: entry.locale, status: 'published', allowMissingId: true };
           return transformData(entry, opts);
         },
         // Create the published entry
@@ -375,7 +375,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         omit('id'),
         // Transform relations to target draft versions
         (entry) => {
-          const opts = { uid, locale: entry.locale, isDraft: true, allowMissingId: true };
+          const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
           return transformData(entry, opts);
         },
         // Create the draft entry
