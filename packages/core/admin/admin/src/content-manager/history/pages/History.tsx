@@ -95,6 +95,19 @@ const HistoryPage = () => {
   );
 
   /**
+   * When the page is first mounted, if there's already data in the cache, RTK has a fullfilled
+   * status for the first render, right before it triggers a new request. This means the code
+   * briefly reaches the part that redirects to the first history version (if none is set).
+   * But since that data is stale, that means auto-selecting a version that may not be the most
+   * recent. To avoid this, we identify through requestId if the query is stale despite the
+   * fullfilled status, and show the loader in that case.
+   * This means we essentially don't want cache. We always refetch when the page mounts, and
+   * we always show the loader until we have the most recent data. That's fine for this page.
+   */
+  const initialRequestId = React.useRef(versionsResponse.requestId);
+  const isStaleRequest = versionsResponse.requestId === initialRequestId.current;
+
+  /**
    * Ensure that we have the necessary data to render the page:
    * - slug for single types
    * - slug _and_ documentId for collection types
@@ -103,7 +116,7 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching) {
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching || isStaleRequest) {
     return <Page.Loading />;
   }
 
@@ -130,6 +143,7 @@ const HistoryPage = () => {
     !layout ||
     !schema ||
     !selectedVersion ||
+    // This should not happen as it's covered by versionsResponse.isError, but we need it for TS
     versionsResponse.data.error
   ) {
     return <Page.Error />;
