@@ -1,4 +1,4 @@
-import { omit, pipe, isNil } from 'lodash/fp';
+import { omit, pipe } from 'lodash/fp';
 
 import { contentTypes, sanitize, errors } from '@strapi/utils';
 import type { LoadedStrapi as Strapi, Common, Documents } from '@strapi/types';
