@@ -154,6 +154,9 @@ interface PaginationButtonProps {
 
 const PaginationButton = ({ page, children }: PaginationButtonProps) => {
   const [{ query }] = useQueryParams<{ id?: string }>();
+
+  // Remove the id from the pagination link, so that the history page can redirect
+  // to the id of the first history version in the new page once it's loaded
   const { id: _id, ...queryRest } = query;
 
   return (
