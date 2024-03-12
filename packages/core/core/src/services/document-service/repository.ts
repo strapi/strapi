@@ -133,7 +133,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function create(params = {} as any) {
-    const queryParams = await pipeAsync(
+    const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
       DP.statusToData(contentType),
@@ -175,7 +175,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const newDocumentId = createDocumentId();
 
-    const versions = await mapAsync(entries, async (entryToClone: any) => {
+    const versions = await async.map(entries, async (entryToClone: any) => {
       const isDraft = contentTypesUtils.isDraft(data as object, model);
       // Todo: Merge data with entry to clone
       const validData = await entityValidator.validateEntityUpdate(
@@ -204,7 +204,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function update(documentId: string, params = {} as any) {
-    const queryParams = await pipeAsync(
+    const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
       DP.statusToLookup(contentType),
@@ -270,7 +270,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function count(params = {} as any) {
-    const query = await pipeAsync(
+    const query = await async.pipe(
       DP.defaultStatus(contentType),
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -305,7 +305,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     // Transform draft entry data and create published versions
     const publishedEntries = await async.map(
       entriesToPublish,
-      pipeAsync(
+      async.pipe(
         // Updated at value is used to know if draft has been modified
         // If both versions share the same value, it means the draft has not been modified
         (draft) => assoc('updatedAt', draft.updatedAt, draft),
