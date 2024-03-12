@@ -16,6 +16,7 @@ import * as identifiers from './utils/identifiers';
 export { isKnexQuery } from './utils/knex';
 
 // The max length for a database identifier
+// 0 (zero) means the feature is disabled; any non-zero value causes identifiers to be shortened
 export const MAX_DB_IDENTIFIER_LENGTH = 0;
 
 interface Settings {
