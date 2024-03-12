@@ -114,6 +114,14 @@ describe('metadata', () => {
             auxiliarModels: [auxComponent],
           },
         ],
+        [
+          'relation - Morph to Many',
+          attributes.relations.morphToMany,
+          expectedMetadataResults.relations.morphToMany,
+          {
+            auxiliarModels: [auxComponent],
+          },
+        ],
       ])(
         'matches expected result for %s',
         (_attributeType, modelAttributes, expectedMetadata, opts: TestOptions) => {

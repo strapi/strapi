@@ -7,7 +7,6 @@ import {
   DynamicTable,
   onRowClick,
   pxToRem,
-  RelativeTime,
   useQueryParams,
   useTracking,
   TableProps as DynamicTableProps,
@@ -20,6 +19,7 @@ import styled from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
+import { RelativeTime } from '../../../../components/RelativeTime';
 
 import type { Entity } from '@strapi/types';
 

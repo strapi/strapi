@@ -28,7 +28,7 @@ const waitForReload = async () => {
 const LocationDisplay = () => {
   const location = useLocation();
 
-  return <span>{location.search}</span>;
+  return <span data-testId="location">{location.search}</span>;
 };
 
 const render = () =>
@@ -330,7 +330,7 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(screen.getByText('?page=1')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(`"?page=1"`);
   });
 
   it('only filters in the plugins tab', async () => {
@@ -378,7 +378,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(getByRole('option', { name: 'Newest' }));
 
     await waitForReload();
-    expect(screen.getByText('?sort=submissionDate:desc&page=1')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?sort=submissionDate:desc&page=1"`
+    );
   });
 
   it('shows github stars and weekly downloads count for each plugin', async () => {
@@ -417,16 +419,22 @@ describe('Marketplace page - plugins tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByText('?page=2')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=2"`
+    );
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByText('?page=1')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=1"`
+    );
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByText('?page=3')).toBeInTheDocument();
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=3"`
+    );
   });
 });

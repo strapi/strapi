@@ -1,22 +1,38 @@
-import type { ConfigProvider } from '@strapi/types';
-import _, { PropertyName } from 'lodash';
+import type { ConfigProvider, LoadedStrapi, Strapi } from '@strapi/types';
+import { get, set, has, isString, type PropertyName } from 'lodash';
 
 type Config = Record<string, unknown>;
 
-export default (initialConfig = {}): ConfigProvider => {
+export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvider => {
   const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
+
+  // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change
+  // we will still support certain namespaces, currently only 'plugin.'
+  const transformDeprecatedPaths = (path: PropertyName) => {
+    if (isString(path) && path.startsWith('plugin.')) {
+      const newPath = path.replace('plugin.', 'plugin::');
+
+      // strapi logger may not be loaded yet, so fall back to console
+      (strapi?.log?.warn ?? console.warn)(
+        `Using dot notation for model config namespaces is deprecated, for example "plugin::myplugin" should be used instead of "plugin.myplugin". Modifying requested path ${path} to ${newPath}`
+      );
+      return newPath;
+    }
+
+    return path;
+  };
 
   return {
     ..._config, // TODO: to remove
     get(path: PropertyName, defaultValue?: unknown) {
-      return _.get(_config, path, defaultValue);
+      return get(_config, transformDeprecatedPaths(path), defaultValue);
     },
     set(path: PropertyName, val: unknown) {
-      _.set(_config, path, val);
+      set(_config, transformDeprecatedPaths(path), val);
       return this;
     },
     has(path: PropertyName) {
-      return _.has(_config, path);
+      return has(_config, path);
     },
   };
 };

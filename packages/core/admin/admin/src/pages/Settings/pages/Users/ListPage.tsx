@@ -7,18 +7,14 @@ import {
   Main,
   Flex,
   Typography,
-  Box,
   Status,
 } from '@strapi/design-system';
 import {
   DynamicTable,
-  SearchURLQuery,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
-  PageSizeURLQuery,
-  PaginationURLQuery,
   TableHeader,
 } from '@strapi/helper-plugin';
 import * as qs from 'qs';
@@ -28,6 +24,8 @@ import { useLocation } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
 import { Page } from '../../../../components/PageHelpers';
+import { Pagination } from '../../../../components/Pagination';
+import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
@@ -111,7 +109,7 @@ const ListPageCE = () => {
       <ActionLayout
         startActions={
           <>
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage(
                 { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                 { target: title }
@@ -157,15 +155,10 @@ const ListPageCE = () => {
             >
               <TableRows canDelete={canDelete} />
             </DynamicTable>
-
-            {pagination && (
-              <Box paddingTop={4}>
-                <Flex alignItems="flex-end" justifyContent="space-between">
-                  <PageSizeURLQuery />
-                  <PaginationURLQuery pagination={pagination} />
-                </Flex>
-              </Box>
-            )}
+            <Pagination.Root {...pagination}>
+              <Pagination.PageSize />
+              <Pagination.Links />
+            </Pagination.Root>
           </>
         )}
       </ContentLayout>

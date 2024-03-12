@@ -25,7 +25,7 @@ const deleteByIds = async (ids = []) => {
 
 const signFileUrls = async (file) => {
   const { provider } = strapi.plugins.upload;
-  const { provider: providerConfig } = strapi.config.get('plugin.upload');
+  const { provider: providerConfig } = strapi.config.get('plugin::upload');
   const isPrivate = await provider.isPrivate();
   file.isUrlSigned = false;
 

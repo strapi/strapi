@@ -32,7 +32,11 @@ interface HistoryContextValue {
   id?: string; // null for single types
   layout: EditLayout['layout'];
   selectedVersion: Contracts.HistoryVersions.HistoryVersionDataResponse;
-  versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
+  // Errors are handled outside of the provider, so we exclude errors from the response type
+  versions: Extract<
+    Contracts.HistoryVersions.GetHistoryVersions.Response,
+    { data: Array<Contracts.HistoryVersions.HistoryVersionDataResponse> }
+  >;
   page: number;
   mainField: string;
   schema: Contracts.ContentTypes.ContentType;
@@ -91,6 +95,19 @@ const HistoryPage = () => {
   );
 
   /**
+   * When the page is first mounted, if there's already data in the cache, RTK has a fullfilled
+   * status for the first render, right before it triggers a new request. This means the code
+   * briefly reaches the part that redirects to the first history version (if none is set).
+   * But since that data is stale, that means auto-selecting a version that may not be the most
+   * recent. To avoid this, we identify through requestId if the query is stale despite the
+   * fullfilled status, and show the loader in that case.
+   * This means we essentially don't want cache. We always refetch when the page mounts, and
+   * we always show the loader until we have the most recent data. That's fine for this page.
+   */
+  const initialRequestId = React.useRef(versionsResponse.requestId);
+  const isStaleRequest = versionsResponse.requestId === initialRequestId.current;
+
+  /**
    * Ensure that we have the necessary data to render the page:
    * - slug for single types
    * - slug _and_ documentId for collection types
@@ -99,32 +116,36 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading) {
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching || isStaleRequest) {
     return <Page.Loading />;
   }
 
   // It was a success, handle empty data
-  if (
-    !versionsResponse.isError &&
-    (!versionsResponse.data || !versionsResponse.data?.data.length)
-  ) {
+  if (!versionsResponse.isError && !versionsResponse.data?.data?.length) {
     return <Page.NoData />;
   }
 
   // We have data, handle selected version
-  if (versionsResponse.data?.data.length && !selectedVersionId) {
+  if (versionsResponse.data?.data?.length && !selectedVersionId) {
     return (
       <Navigate
-        to={{ search: stringify({ ...query, id: versionsResponse?.data?.data[0].id }) }}
+        to={{ search: stringify({ ...query, id: versionsResponse.data.data[0].id }) }}
         replace
       />
     );
   }
 
-  const selectedVersion = versionsResponse.data?.data.find(
+  const selectedVersion = versionsResponse.data?.data?.find(
     (version) => version.id.toString() === selectedVersionId
   );
-  if (versionsResponse.isError || !layout || !schema || !selectedVersion) {
+  if (
+    versionsResponse.isError ||
+    !layout ||
+    !schema ||
+    !selectedVersion ||
+    // This should not happen as it's covered by versionsResponse.isError, but we need it for TS
+    versionsResponse.data.error
+  ) {
     return <Page.Error />;
   }
 
@@ -152,7 +173,7 @@ const HistoryPage = () => {
         mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
-          <Main grow={1} overflow="auto" labelledBy={headerId}>
+          <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
             <VersionContent />
           </Main>
