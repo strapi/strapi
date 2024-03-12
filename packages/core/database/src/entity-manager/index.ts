@@ -24,7 +24,7 @@ import {
   uniqWith,
 } from 'lodash/fp';
 
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
@@ -1341,7 +1341,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         return;
       }
 
-      await mapAsync(cloneAttrs, async (attrName: string) => {
+      await async.map(cloneAttrs, async (attrName: string) => {
         const attribute = attributes[attrName];
 
         if (attribute.type !== 'relation') {

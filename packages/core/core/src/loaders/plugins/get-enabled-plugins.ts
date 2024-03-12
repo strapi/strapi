@@ -3,7 +3,7 @@ import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
-import { isKebabCase } from '@strapi/utils';
+import { strings } from '@strapi/utils';
 import type { Strapi } from '@strapi/types';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
@@ -40,7 +40,7 @@ const INTERNAL_PLUGINS = [
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';
 
 const validatePluginName = (pluginName: string) => {
-  if (!isKebabCase(pluginName)) {
+  if (!strings.isKebabCase(pluginName)) {
     throw new Error(`Plugin name "${pluginName}" is not in kebab (an-example-of-kebab-case)`);
   }
 };

@@ -1,18 +1,6 @@
 'use strict';
 
-const path = require('path');
-const os = require('os');
-const mime = require('mime-types');
-const fse = require('fs-extra');
-const {
-  file: { getStreamSize },
-} = require('@strapi/utils');
 const { FILE_MODEL_UID } = require('./constants');
-
-const UPLOAD_MUTATION_NAME = 'upload';
-const MULTIPLE_UPLOAD_MUTATION_NAME = 'multipleUpload';
-const UPDATE_FILE_INFO_MUTATION_NAME = 'updateFileInfo';
-const DELETE_FILE_MUTATION_NAME = 'removeFile';
 
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 
@@ -29,53 +17,18 @@ module.exports = ({ strapi }) => {
     return;
   }
 
-  const { getTypeName, getEntityResponseName } = getGraphQLService('utils').naming;
-  const { toEntityResponse } = getGraphQLService('format').returnTypes;
+  getGraphQLService('extension').shadowCRUD('plugin::upload.folder').disable();
+  getGraphQLService('extension').shadowCRUD('plugin::upload.file').disableMutations();
+
+  const { getTypeName } = getGraphQLService('utils').naming;
 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
-  const fileEntityResponseType = getEntityResponseName(fileModel);
-
-  const { optimize, isOptimizableImage } = getUploadService('image-manipulation');
-
-  /**
-   * Optimize and format a file using the upload services
-   *
-   * @param {object} upload
-   * @param {object} extraInfo
-   * @param {object} metas
-   * @return {Promise<object>}
-   */
-  const formatFile = async (upload, extraInfo, metas) => {
-    const uploadService = getUploadService('upload');
-    const { filename, mimetype, createReadStream } = await upload;
-    const currentFile = await uploadService.formatFileInfo(
-      {
-        filename,
-        /**
-         * in case the mime-type wasn't sent, Strapi tries to guess it
-         * from the file extension, to avoid a corrupt database state
-         */
-        type: mimetype || mime.lookup(filename) || 'application/octet-stream',
-        size: await getStreamSize(createReadStream()),
-      },
-      extraInfo || {},
-      metas
-    );
-    currentFile.getStream = createReadStream;
-
-    if (!(await isOptimizableImage(currentFile))) {
-      return currentFile;
-    }
-
-    return optimize(currentFile);
-  };
-
   /**
    * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
    */
   getGraphQLService('extension').use(({ nexus }) => {
-    const { inputObjectType, extendType, nonNull, list } = nexus;
+    const { inputObjectType, extendType, nonNull } = nexus;
 
     // Represents the input data payload for the file's information
     const fileInfoInputType = inputObjectType({
@@ -93,105 +46,10 @@ module.exports = ({ strapi }) => {
 
       definition(t) {
         /**
-         * Upload a single file
-         */
-        t.field(UPLOAD_MUTATION_NAME, {
-          type: nonNull(fileEntityResponseType),
-
-          args: {
-            refId: 'ID',
-            ref: 'String',
-            field: 'String',
-            info: FILE_INFO_INPUT_TYPE_NAME,
-            file: nonNull('Upload'),
-          },
-
-          async resolve(parent, args) {
-            // create temporary folder to store files for stream manipulation
-            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-            let sanitizedEntity;
-
-            try {
-              const { file: upload, info = {}, ...metas } = args;
-
-              const apiUploadFolderService = getUploadService('api-upload-folder');
-
-              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-              info.folder = apiUploadFolder.id;
-
-              const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
-              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
-              sanitizedEntity = await toEntityResponse(uploadedFile, {
-                args,
-                resourceUID: fileTypeName,
-              });
-            } finally {
-              // delete temporary folder
-              await fse.remove(tmpWorkingDirectory);
-            }
-
-            return sanitizedEntity;
-          },
-        });
-
-        /**
-         * Upload multiple files
-         */
-        t.field(MULTIPLE_UPLOAD_MUTATION_NAME, {
-          type: nonNull(list(fileEntityResponseType)),
-
-          args: {
-            refId: 'ID',
-            ref: 'String',
-            field: 'String',
-            files: nonNull(list('Upload')),
-          },
-
-          async resolve(parent, args) {
-            // create temporary folder to store files for stream manipulation
-            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-            let sanitizedEntities = [];
-
-            try {
-              const { files: uploads, ...metas } = args;
-
-              const apiUploadFolderService = getUploadService('api-upload-folder');
-
-              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-
-              const files = await Promise.all(
-                uploads.map((upload) =>
-                  formatFile(
-                    upload,
-                    { folder: apiUploadFolder.id },
-                    { ...metas, tmpWorkingDirectory }
-                  )
-                )
-              );
-
-              const uploadService = getUploadService('upload');
-
-              const uploadedFiles = await Promise.all(
-                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
-              );
-
-              sanitizedEntities = uploadedFiles.map((file) =>
-                toEntityResponse(file, { args, resourceUID: fileTypeName })
-              );
-            } finally {
-              // delete temporary folder
-              await fse.remove(tmpWorkingDirectory);
-            }
-
-            return sanitizedEntities;
-          },
-        });
-
-        /**
          * Update some information for a given file
          */
-        t.field(UPDATE_FILE_INFO_MUTATION_NAME, {
-          type: nonNull(fileEntityResponseType),
+        t.field('updateUploadFile', {
+          type: nonNull(fileTypeName),
 
           args: {
             id: nonNull('ID'),
@@ -201,17 +59,15 @@ module.exports = ({ strapi }) => {
           async resolve(parent, args) {
             const { id, info } = args;
 
-            const updatedFile = await getUploadService('upload').updateFileInfo(id, info);
-
-            return toEntityResponse(updatedFile, { args, resourceUID: fileTypeName });
+            return getUploadService('upload').updateFileInfo(id, info);
           },
         });
 
         /**
          * Delete & remove a given file
          */
-        t.field(DELETE_FILE_MUTATION_NAME, {
-          type: fileEntityResponseType,
+        t.field('deleteUploadFile', {
+          type: fileTypeName,
 
           args: {
             id: nonNull('ID'),
@@ -226,9 +82,7 @@ module.exports = ({ strapi }) => {
               return null;
             }
 
-            const deletedFile = await getUploadService('upload').remove(file);
-
-            return toEntityResponse(deletedFile, { args, resourceUID: fileTypeName });
+            return getUploadService('upload').remove(file);
           },
         });
       },
@@ -239,23 +93,10 @@ module.exports = ({ strapi }) => {
       resolversConfig: {
         // Use custom scopes for the upload file CRUD operations
         'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
+        'Query.uploadFiles_connection': { auth: { scope: 'plugin::upload.content-api.find' } },
         'Query.uploadFile': { auth: { scope: 'plugin::upload.content-api.findOne' } },
-        'Mutation.createUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
         'Mutation.updateUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
         'Mutation.deleteUploadFile': { auth: { scope: 'plugin::upload.content-api.destroy' } },
-
-        [`Mutation.${UPLOAD_MUTATION_NAME}`]: {
-          auth: { scope: 'plugin::upload.content-api.upload' },
-        },
-        [`Mutation.${MULTIPLE_UPLOAD_MUTATION_NAME}`]: {
-          auth: { scope: 'plugin::upload.content-api.upload' },
-        },
-        [`Mutation.${UPDATE_FILE_INFO_MUTATION_NAME}`]: {
-          auth: { scope: 'plugin::upload.content-api.upload' },
-        },
-        [`Mutation.${DELETE_FILE_MUTATION_NAME}`]: {
-          auth: { scope: 'plugin::upload.content-api.destroy' },
-        },
       },
     };
   });

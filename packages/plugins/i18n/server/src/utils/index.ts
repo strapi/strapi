@@ -3,7 +3,6 @@ import type { PermissionsService } from '../services/permissions';
 import type { ContentTypesService } from '../services/content-types';
 import type { MetricsService } from '../services/metrics';
 import type { EntityServiceDecoratorService } from '../services/entity-service-decorator';
-import type { CoreApiService } from '../services/core-api';
 import type { ISOLocalesService } from '../services/iso-locales';
 import type { LocalizationsService } from '../services/localizations';
 
@@ -15,7 +14,6 @@ type S = {
   ['iso-locales']: ISOLocalesService;
   ['content-types']: ContentTypesService;
   ['entity-service-decorator']: EntityServiceDecoratorService;
-  ['core-api']: CoreApiService;
 };
 
 const getCoreStore = () => {

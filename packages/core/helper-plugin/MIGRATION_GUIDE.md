@@ -236,9 +236,69 @@ const MyComponent = (props) => {
 };
 ```
 
+### PageSizeURLQuery
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Pagination`:
+
+```tsx
+// Before
+import { PageSizeURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { Pagination } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Pagination.Root>
+      <Pagination.PageSize />
+    </Pagination.Root>
+  );
+};
+```
+
+Note, there were some slightly behavioural changes i.e. the PageSize won't render if the lowest pageSize is 10 but you only have 9 entries. Due to the refactor some props will have moved and changed, please look at the documentation for the Pagination component for more info.
+
+### PaginationURLQueryProps
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Pagination`:
+
+```tsx
+// Before
+import { PaginationURLQueryProps } from '@strapi/helper-plugin';
+
+// After
+import { Pagination } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Pagination.Root pageCount={2}>
+      <Pagination.Links />
+    </Pagination.Root>
+  );
+};
+```
+
+Note, there were some slightly behavioural changes i.e. the Links won't render if there are less than 2 pages. Due to the refactor some props will have moved and changed, please look at the documentation for the Pagination component for more info.
+
 ### ReactSelect
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### RelativeTime
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
+### SearchURLQuery
+
+This component was removed and renamed to `SearchInput` and can now be imported by the `@strapi/strapi` package:
+
+```tsx
+// Before
+import { SearchURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { SearchInput } from '@strapi/strapi/admin';
+```
 
 ### SettingsPageTitle
 

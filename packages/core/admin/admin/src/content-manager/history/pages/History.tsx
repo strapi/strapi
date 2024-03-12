@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { Flex, Main } from '@strapi/design-system';
+import { Box, Flex, Main } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
 import { Page } from '../../../components/PageHelpers';
@@ -32,7 +32,11 @@ interface HistoryContextValue {
   id?: string; // null for single types
   layout: EditLayout['layout'];
   selectedVersion: Contracts.HistoryVersions.HistoryVersionDataResponse;
-  versions: Contracts.HistoryVersions.GetHistoryVersions.Response;
+  // Errors are handled outside of the provider, so we exclude errors from the response type
+  versions: Extract<
+    Contracts.HistoryVersions.GetHistoryVersions.Response,
+    { data: Array<Contracts.HistoryVersions.HistoryVersionDataResponse> }
+  >;
   page: number;
   mainField: string;
   schema: Contracts.ContentTypes.ContentType;
@@ -47,7 +51,6 @@ const [HistoryProvider, useHistoryContext] = createContext<HistoryContextValue>(
 const HistoryPage = () => {
   const headerId = React.useId();
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
   const {
     slug,
     id: documentId,
@@ -91,42 +94,59 @@ const HistoryPage = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // Make sure the user lands on a selected history version
-  React.useEffect(() => {
-    const versions = versionsResponse.data?.data;
-
-    if (!query.id && !versionsResponse.isLoading && versions?.[0]) {
-      navigate({ search: stringify({ ...query, id: versions[0].id }) }, { replace: true });
-    }
-  }, [versionsResponse.isLoading, navigate, query.id, versionsResponse.data?.data, query]);
-
-  const { permissions, isLoading: isLoadingPermissions } = useSyncRbac(slug!, query, 'History');
-
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isLoading || isLoadingPermissions) {
-    return <Page.Loading />;
-  }
+  /**
+   * When the page is first mounted, if there's already data in the cache, RTK has a fullfilled
+   * status for the first render, right before it triggers a new request. This means the code
+   * briefly reaches the part that redirects to the first history version (if none is set).
+   * But since that data is stale, that means auto-selecting a version that may not be the most
+   * recent. To avoid this, we identify through requestId if the query is stale despite the
+   * fullfilled status, and show the loader in that case.
+   * This means we essentially don't want cache. We always refetch when the page mounts, and
+   * we always show the loader until we have the most recent data. That's fine for this page.
+   */
+  const initialRequestId = React.useRef(versionsResponse.requestId);
+  const isStaleRequest = versionsResponse.requestId === initialRequestId.current;
 
   /**
    * Ensure that we have the necessary data to render the page:
    * - slug for single types
    * - slug _and_ documentId for collection types
    */
-  if (!slug || (!documentId && collectionType === COLLECTION_TYPES)) {
+  if (!slug || (collectionType === COLLECTION_TYPES && !documentId)) {
     return <Navigate to="/content-manager" />;
   }
 
-  // TODO: real error state when designs are ready
-  if (versionsResponse.isError || !versionsResponse.data || !layout || !schema || !permissions) {
-    return null;
+  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching || isStaleRequest) {
+    return <Page.Loading />;
   }
 
-  const selectedVersion = versionsResponse.data.data.find(
+  // It was a success, handle empty data
+  if (!versionsResponse.isError && !versionsResponse.data?.data?.length) {
+    return <Page.NoData />;
+  }
+
+  // We have data, handle selected version
+  if (versionsResponse.data?.data?.length && !selectedVersionId) {
+    return (
+      <Navigate
+        to={{ search: stringify({ ...query, id: versionsResponse.data.data[0].id }) }}
+        replace
+      />
+    );
+  }
+
+  const selectedVersion = versionsResponse.data?.data?.find(
     (version) => version.id.toString() === selectedVersionId
   );
-
-  if (!selectedVersion) {
-    // TODO: handle selected version not found when the designs are ready
-    return <Main />;
+  if (
+    versionsResponse.isError ||
+    !layout ||
+    !schema ||
+    !selectedVersion ||
+    // This should not happen as it's covered by versionsResponse.isError, but we need it for TS
+    versionsResponse.data.error
+  ) {
+    return <Page.Error />;
   }
 
   return (
@@ -155,9 +175,7 @@ const HistoryPage = () => {
         <Flex direction="row" alignItems="flex-start">
           <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
             <VersionHeader headerId={headerId} />
-            <DocumentRBAC permissions={permissions}>
-              <VersionContent />
-            </DocumentRBAC>
+            <VersionContent />
           </Main>
           <VersionsList />
         </Flex>
@@ -166,5 +184,41 @@ const HistoryPage = () => {
   );
 };
 
-export { HistoryPage, HistoryProvider, useHistoryContext };
+/* -------------------------------------------------------------------------------------------------
+ * ProtectedHistoryPage
+ * -----------------------------------------------------------------------------------------------*/
+
+const ProtectedHistoryPage = () => {
+  const { slug } = useParams<{
+    slug: string;
+  }>();
+  const [{ query }] = useQueryParams();
+  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'History');
+
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
+  if ((!isLoading && isError) || !slug) {
+    return (
+      <Box height="100vh">
+        <Page.Error />
+      </Box>
+    );
+  }
+
+  return (
+    <Box height="100vh">
+      <Page.Protect permissions={permissions}>
+        {({ permissions }) => (
+          <DocumentRBAC permissions={permissions}>
+            <HistoryPage />
+          </DocumentRBAC>
+        )}
+      </Page.Protect>
+    </Box>
+  );
+};
+
+export { ProtectedHistoryPage, HistoryProvider, useHistoryContext };
 export type { HistoryContextValue };

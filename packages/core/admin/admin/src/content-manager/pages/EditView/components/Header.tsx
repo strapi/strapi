@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { RelativeTime, useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { useForm } from '../../../../components/Form';
+import { RelativeTime } from '../../../../components/RelativeTime';
 import { capitalise } from '../../../../utils/strings';
 import {
   CREATED_AT_ATTRIBUTE_NAME,

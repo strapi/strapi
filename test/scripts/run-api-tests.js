@@ -54,6 +54,7 @@ const runAllTests = async (args) => {
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
       JWT_SECRET: 'aSecret',
+      STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE: 'true',
     },
   });
 };

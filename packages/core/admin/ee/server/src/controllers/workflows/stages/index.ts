@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 
 import { Strapi } from '@strapi/types';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { validateUpdateStageOnEntity } from '../../../validation/review-workflows';
 import {
@@ -42,7 +42,7 @@ export default {
     });
 
     ctx.body = {
-      data: await mapAsync(stages, sanitizer),
+      data: await async.map(stages, sanitizer),
     };
   },
   /**
