@@ -89,7 +89,7 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
 const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   relation: EntityService.Params.Attribute.RelationInputValue<T>,
   getIds: GetIds
-): EntityService.Params.Attribute.RelationInputValue<T> => {
+): EntityService.Params.Attribute.RelationInputValue<T> | undefined => {
   const map = transformPrimitive(relation as any, getIds);
   if (map) return map;
 
@@ -98,9 +98,9 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   if (!('set' in relation) && !('disconnect' in relation) && !('connect' in relation)) {
     // The entry id couldn't be found and there are no connection properties in
     // the relation, therefore we want to remove the relation
-    return undefined;
+    return;
   }
-  
+
   // set: id[]
   // what if result of mapPrimitive is undefined?
   if ('set' in relation) {
