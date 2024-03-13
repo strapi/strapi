@@ -62,7 +62,7 @@ const releaseController = {
         };
       });
 
-      const pendingReleasesCount = await strapi.query(RELEASE_MODEL_UID).count({
+      const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
         where: {
           releasedAt: null,
         },
