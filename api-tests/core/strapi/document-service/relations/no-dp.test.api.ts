@@ -35,6 +35,7 @@ const productModel = {
       localized: true,
     },
   },
+  draftAndPublish: true,
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',
@@ -46,7 +47,7 @@ const tagModel = {
   attributes: {
     name: { type: 'string' },
   },
-
+  draftAndPublish: true,
   displayName: 'Tag',
   singularName: 'tag',
   pluralName: 'tags',
