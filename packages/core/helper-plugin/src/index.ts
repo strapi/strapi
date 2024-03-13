@@ -48,7 +48,6 @@ export * from './hooks/useSelectionState';
 export * from './utils/auth';
 export * from './utils/getAPIInnerErrors';
 export * from './utils/getFetchClient';
-export * from './utils/getFileExtension';
 export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/normalizeAPIError';

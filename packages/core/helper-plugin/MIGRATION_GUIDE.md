@@ -437,6 +437,10 @@ This util has been removed and not replaced, use async / await with try / catch 
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### getFileExtension
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### setHexOpacity
 
 This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
