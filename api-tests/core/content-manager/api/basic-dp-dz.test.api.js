@@ -42,6 +42,7 @@ const productWithCompoAndDP = {
       required: true,
     },
   },
+  draftAndPublish: true,
   displayName: 'product with dz and DP',
   singularName: 'product-with-dz-and-dp',
   pluralName: 'product-with-dz-and-dps',

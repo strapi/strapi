@@ -12,6 +12,7 @@ import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { AddComponentButton } from './AddComponentButton';
 import { ComponentPicker } from './ComponentPicker';
@@ -223,6 +224,8 @@ const DynamicZone = ({
     );
   };
 
+  const level = useComponent('DynamicZone', (state) => state.level);
+
   const ariaDescriptionId = React.useId();
 
   return (
@@ -247,20 +250,28 @@ const DynamicZone = ({
             <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
             <ol aria-describedby={ariaDescriptionId}>
               {value.map((field, index) => (
-                <DynamicComponent
+                <ComponentProvider
                   key={field.__temp_key__}
-                  disabled={disabled}
-                  name={name}
-                  index={index}
-                  componentUid={field.__component}
-                  onMoveComponent={handleMoveComponent}
-                  onRemoveComponentClick={handleRemoveComponent(name, index)}
-                  onCancel={handleCancel}
-                  onDropItem={handleDropItem}
-                  onGrabItem={handleGrabItem}
-                  onAddComponent={handleAddComponent}
-                  dynamicComponentsByCategory={dynamicComponentsByCategory}
-                />
+                  level={level + 1}
+                  uid={field.__component}
+                  // id is always a number in a dynamic zone.
+                  id={field.id as number}
+                  type="dynamiczone"
+                >
+                  <DynamicComponent
+                    disabled={disabled}
+                    name={name}
+                    index={index}
+                    componentUid={field.__component}
+                    onMoveComponent={handleMoveComponent}
+                    onRemoveComponentClick={handleRemoveComponent(name, index)}
+                    onCancel={handleCancel}
+                    onDropItem={handleDropItem}
+                    onGrabItem={handleGrabItem}
+                    onAddComponent={handleAddComponent}
+                    dynamicComponentsByCategory={dynamicComponentsByCategory}
+                  />
+                </ComponentProvider>
               ))}
             </ol>
           </Box>

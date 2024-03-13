@@ -12,6 +12,7 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -144,9 +145,9 @@ const EditViewPage = () => {
 
   const handleTabChange = (index: number) => {
     if (index === 0) {
-      setQuery({ status: 'draft' });
+      setQuery({ status: 'draft' }, 'push', true);
     } else {
-      setQuery({ status: 'published' });
+      setQuery({ status: 'published' }, 'push', true);
     }
   };
 
@@ -160,6 +161,7 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
+      <Helmet title={`${documentTitle} | Strapi`} />
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}

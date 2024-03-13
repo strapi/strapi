@@ -20,6 +20,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const productUID = 'api::product.product';
 const model = {
   pluginOptions: {},
+  draftAndPublish: false,
   singularName: 'product',
   pluralName: 'products',
   displayName: 'Product',
@@ -55,11 +56,6 @@ describe.skip('Review workflows', () => {
       method: 'POST',
       url: `/content-manager/collection-types/${uid}`,
       body: data,
-    });
-
-    await requests.admin({
-      method: 'POST',
-      url: `/content-manager/collection-types/${uid}/${body.id}/actions/publish`,
     });
 
     return body;

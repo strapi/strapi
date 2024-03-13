@@ -40,6 +40,7 @@ const productWithDz = {
       required: true,
     },
   },
+  draftAndPublish: true,
   displayName: 'Product with dz',
   singularName: 'product-with-dz',
   pluralName: 'product-with-dzs',

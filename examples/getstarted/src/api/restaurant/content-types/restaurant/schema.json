@@ -10,7 +10,8 @@
   },
   "options": {
     "populateCreatorFields": true,
-    "comment": ""
+    "comment": "",
+    "draftAndPublish": true
   },
   "pluginOptions": {
     "i18n": {

@@ -77,6 +77,7 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'Test Collection Type',
             singularName: 'test-collection-type',
             pluralName: 'test-collection-types',
+            draftAndPublish: true,
             pluginOptions: {
               i18n: {
                 localized: true,
@@ -123,6 +124,7 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'CT with DP',
             singularName: 'ct-with-dp',
             pluralName: 'ct-with-dps',
+            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -240,6 +242,7 @@ describe('Content Type Builder - Content types', () => {
         url: '/content-type-builder/content-types',
         body: {
           contentType: {
+            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -292,6 +295,7 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'new displayName',
             singularName: 'ct-with-dp-new',
             pluralName: 'ct-with-dps-new',
+            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',
@@ -317,6 +321,7 @@ describe('Content Type Builder - Content types', () => {
             displayName: 'new displayName',
             singularName: 'ct-with-dp', // no change
             pluralName: 'ct-with-dps',
+            draftAndPublish: true,
             attributes: {
               title: {
                 type: 'string',

@@ -14,6 +14,8 @@ import type * as Search from './search';
 // Utils
 import type * as Attribute from './attributes';
 
+export type Locale = string;
+
 export type Pick<
   TSchemaUID extends Common.UID.Schema,
   TKind extends Kind
@@ -42,7 +44,7 @@ export type Pick<
     // Publication Status
     [HasMember<TKind, 'status'>, PublicationStatus.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: string }], // TODO: also allow arrays ?
+    [HasMember<TKind, 'locale'>, { locale?: Locale }], // TODO: also allow arrays ?
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
@@ -86,4 +88,4 @@ type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Exten
 
 export type All = Pick<Common.UID.Schema, Kind>;
 
-export type { Sort, Pagination, Fields, Filters, Populate, Data, Attribute };
+export type { Sort, Pagination, Fields, Filters, Populate, Data, Attribute, PublicationStatus };

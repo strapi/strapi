@@ -6,7 +6,9 @@
     "pluralName": "upcoming-matches",
     "displayName": "Upcoming Matches"
   },
-  "options": {},
+  "options": {
+    "draftAndPublish": true
+  },
   "pluginOptions": {},
   "attributes": {
     "title": {
