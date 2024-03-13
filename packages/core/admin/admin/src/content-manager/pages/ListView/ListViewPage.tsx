@@ -10,7 +10,6 @@ import {
   Td,
   Tr,
   Typography,
-  Status,
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
@@ -25,6 +24,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -35,7 +35,6 @@ import { Pagination } from '../../../components/Pagination';
 import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { capitalise } from '../../../utils/strings';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -49,6 +48,7 @@ import { useDeleteDocumentMutation, useGetAllDocumentsQuery } from '../../servic
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
+import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { Filters } from './components/Filters';
 import { Table } from './components/Table';
@@ -273,6 +273,7 @@ const ListViewPage = () => {
 
   return (
     <Main>
+      <Helmet title={`${contentTypeTitle} | Strapi`} />
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(
@@ -369,25 +370,9 @@ const ListViewPage = () => {
                         if (header.name === 'status') {
                           const { status } = rowData;
 
-                          const statusVariant =
-                            status === 'draft'
-                              ? 'primary'
-                              : status === 'published'
-                              ? 'success'
-                              : 'alternative';
-
                           return (
                             <Td key={header.name}>
-                              <Status
-                                maxWidth="min-content"
-                                showBullet={false}
-                                size={'S'}
-                                variant={statusVariant}
-                              >
-                                <Typography as="span" variant="omega" fontWeight="bold">
-                                  {capitalise(status)}
-                                </Typography>
-                              </Status>
+                              <DocumentStatus status={status} maxWidth={'min-content'} />
                             </Td>
                           );
                         }

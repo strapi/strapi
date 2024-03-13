@@ -65,7 +65,15 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     const [name, { visible, ...field }] = current;
 
     if (!existingFields.includes(name) && visible === true) {
-      acc.push({ ...field, label: field.label ?? name, name, size: fieldSizes[name] });
+      const type = attributes[name]?.type;
+      const size = type ? fieldSizes[type] : 12;
+
+      acc.push({
+        ...field,
+        label: field.label ?? name,
+        name,
+        size,
+      });
     }
 
     return acc;

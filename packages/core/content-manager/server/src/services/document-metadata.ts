@@ -39,11 +39,11 @@ const CONTENT_MANAGER_STATUS = {
  * @param threshold The threshold in milliseconds.
  * @returns True if the absolute difference between the dates is less than or equal to the threshold, false otherwise.
  */
-function areDatesEqual(
+const areDatesEqual = (
   date1: Date | string | null,
   date2: Date | string | null,
   threshold: number
-): boolean {
+): boolean => {
   if (!date1 || !date2) {
     return false;
   }
@@ -53,7 +53,7 @@ function areDatesEqual(
   const difference = Math.abs(time1 - time2);
 
   return difference <= threshold;
-}
+};
 
 /**
  * Controls the metadata properties to be returned
