@@ -21,13 +21,13 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST: Array<Field> = [
+  const FIELDS_TO_TEST = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique' },
-  ] as const;
+  ] as const satisfies Array<Field>;
 
   const clickSave = async (page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
