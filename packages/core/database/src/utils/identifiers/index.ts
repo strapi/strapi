@@ -40,15 +40,10 @@ const replacementMap = {
   primary: 'pk',
 };
 
-const mapIncompressible = (name: string, maxLength: number): string | false => {
-  if (maxLength === 0) {
-    return name;
-  }
-
+const mapShortForms = (name: string): string | undefined => {
   if (name in replacementMap) {
     return (replacementMap as any)[name];
   }
-  return false;
 };
 
 // Generic name handler that must be used by all helper functions
@@ -69,18 +64,20 @@ export const getName = (names: NameInput, options: NameOptions) => {
   if (options?.suffix) {
     tokens.push({
       name: options.suffix,
-      compressible: mapIncompressible(options.suffix, options.maxLength),
+      compressible: false,
+      shortForm: mapShortForms(options.suffix),
     });
   }
 
   if (options?.prefix) {
     tokens.unshift({
       name: options.prefix,
-      compressible: mapIncompressible(options.prefix, options.maxLength),
+      compressible: false,
+      shortForm: mapShortForms(options.prefix),
     });
   }
 
-  return getNameFromTokens(tokens, { maxLength: options.maxLength, snakeCase: options.snakeCase });
+  return getNameFromTokens(tokens, options);
 };
 
 /**
