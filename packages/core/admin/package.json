@@ -144,7 +144,8 @@
     "styled-components": "5.3.11",
     "typescript": "5.3.2",
     "use-context-selector": "1.4.1",
-    "yup": "0.32.9"
+    "yup": "0.32.9",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "5.0.0-beta.0",
