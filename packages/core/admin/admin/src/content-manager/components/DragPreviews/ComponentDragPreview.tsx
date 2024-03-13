@@ -1,5 +1,4 @@
 import { Flex, IconButton, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { CarretDown, Drag, Trash } from '@strapi/icons';
 import styled from 'styled-components';
 
@@ -15,7 +14,7 @@ const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => 
       justifyContent="space-between"
       gap={3}
       padding={3}
-      width={pxToRem(300)}
+      width={`${300 / 16}rem`}
     >
       <ToggleButton type="button">
         <Flex gap={6}>
@@ -23,13 +22,13 @@ const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => 
             alignItems="center"
             justifyContent="center"
             background="neutral200"
-            height={pxToRem(32)}
-            width={pxToRem(32)}
+            height={`${32 / 16}rem`}
+            width={`${32 / 16}rem`}
           >
             <CarretDown />
           </DropdownIconWrapper>
 
-          <Flex maxWidth={pxToRem(150)}>
+          <Flex maxWidth={`${150 / 16}rem`}>
             <Typography textColor="neutral700" ellipsis>
               {displayedValue}
             </Typography>

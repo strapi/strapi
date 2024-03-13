@@ -6,7 +6,6 @@ import {
   ConfirmDialog,
   DynamicTable,
   onRowClick,
-  pxToRem,
   useQueryParams,
   useTracking,
   TableProps as DynamicTableProps,
@@ -133,12 +132,12 @@ const TableRows = ({
               condition: canUpdate,
             })}
           >
-            <Td maxWidth={pxToRem(250)}>
+            <Td maxWidth={`${250 / 16}rem`}>
               <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                 {token.name}
               </Typography>
             </Td>
-            <Td maxWidth={pxToRem(250)}>
+            <Td maxWidth={`${250 / 16}rem`}>
               <Typography textColor="neutral800" ellipsis>
                 {token.description}
               </Typography>

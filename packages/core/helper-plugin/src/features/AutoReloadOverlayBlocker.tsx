@@ -7,8 +7,6 @@ import { createPortal } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
-import { pxToRem } from '../utils/pxToRem';
-
 /**
  * TODO: realistically a lot of this logic is isolated to the `core/admin` package.
  * However, we want to expose the `useAutoReloadOverlayBlocker` hook to the plugins.
@@ -147,12 +145,12 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
           </Flex>
           {displayedIcon === 'reload' && (
             <IconBox padding={6} background="primary100" borderColor="primary200">
-              <LoaderReload width={pxToRem(36)} height={pxToRem(36)} />
+              <LoaderReload width={`${36 / 16}rem`} height={`${36 / 16}rem`} />
             </IconBox>
           )}
           {displayedIcon === 'time' && (
             <IconBox padding={6} background="primary100" borderColor="primary200">
-              <Clock width={pxToRem(40)} height={pxToRem(40)} />
+              <Clock width={`${40 / 16}rem`} height={`${40 / 16}rem`} />
             </IconBox>
           )}
           <Box marginTop={2}>
@@ -191,7 +189,7 @@ const Overlay = styled(Flex)`
   left: 0;
   /* TODO: set this up in the theme for consistence z-index values */
   z-index: 1140;
-  padding-top: ${pxToRem(160)};
+  padding-top: ${160 / 16}rem;
 
   & > * {
     position: relative;

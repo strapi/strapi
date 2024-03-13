@@ -1,5 +1,4 @@
 import { Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { CarretDown } from '@strapi/icons';
 import styled from 'styled-components';
 
@@ -24,7 +23,7 @@ export const StageDragPreview = ({ name }: StageDragPreviewType) => {
       hasRadius
       padding={3}
       shadow="tableShadow"
-      width={pxToRem(300)}
+      width={`${300 / 16}rem`}
     >
       <Toggle
         alignItems="center"

@@ -1,7 +1,6 @@
 import React, { forwardRef, useMemo } from 'react';
 
 import { Box, CardAction, Flex } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
@@ -83,7 +82,7 @@ export const FolderCard = forwardRef(
               paddingRight={3}
               paddingTop={2}
             >
-              <StyledFolder width={pxToRem(24)} height={pxToRem(24)} />
+              <StyledFolder width={`${24 / 16}rem`} height={`${24 / 16}rem`} />
             </Box>
 
             {children}

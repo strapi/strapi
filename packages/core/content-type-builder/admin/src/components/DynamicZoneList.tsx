@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -24,10 +23,10 @@ interface DynamicZoneListProps {
 }
 
 const StyledAddIcon = styled(Plus)`
-  width: ${pxToRem(32)};
-  height: ${pxToRem(32)};
-  padding: ${pxToRem(9)};
-  border-radius: ${pxToRem(64)};
+  width: ${32 / 16}rem;
+  height: ${32 / 16}rem;
+  padding: ${9 / 16}rem;
+  border-radius: ${64 / 16}rem;
   background: ${({ theme }) => theme.colors.primary100};
   path {
     fill: ${({ theme }) => theme.colors.primary600};
@@ -35,7 +34,7 @@ const StyledAddIcon = styled(Plus)`
 `;
 
 const FixedBox = styled(Box)`
-  height: ${pxToRem(90)};
+  height: ${90 / 16}rem;
   position: absolute;
   width: 100%;
   top: 0;
@@ -48,13 +47,13 @@ const ScrollableStack = styled(Flex)`
 `;
 
 const ComponentContentBox = styled(Box)`
-  padding-top: ${pxToRem(90)};
+  padding-top: ${90 / 16}rem;
 `;
 
 const ComponentStack = styled(Flex)`
   flex-shrink: 0;
-  width: ${pxToRem(140)};
-  height: ${pxToRem(80)};
+  width: ${140 / 16}rem;
+  height: ${80 / 16}rem;
   justify-content: center;
   align-items: center;
 `;
