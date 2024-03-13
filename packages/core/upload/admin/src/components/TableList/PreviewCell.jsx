@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Avatar, Box, Icon, Initials } from '@strapi/design-system';
-import { getFileExtension, prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
+import { prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -24,6 +24,8 @@ const VideoPreviewWrapper = styled(Box)`
     border-radius: 50%;
   }
 `;
+
+const getFileExtension = (ext) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {

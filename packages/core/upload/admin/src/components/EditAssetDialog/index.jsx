@@ -19,7 +19,7 @@ import {
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { getFileExtension, pxToRem, useTracking } from '@strapi/helper-plugin';
+import { pxToRem, useTracking } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -50,6 +50,8 @@ const fileInfoSchema = yup.object({
   caption: yup.string(),
   folder: yup.number(),
 });
+
+const getFileExtension = (ext) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 export const EditAssetDialog = ({
   onClose,
