@@ -426,3 +426,17 @@ This component has been removed and not replaced. If you feel like you need this
 ### RemoveRoundedButton
 
 This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
+
+## Utils
+
+### awaitToJs
+
+This util has been removed and not replaced, use async / await with try / catch instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### setHexOpacity
+
+This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### wrapAxiosInstance
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
