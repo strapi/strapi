@@ -4,9 +4,9 @@ import { Button, Typography } from '@strapi/design-system';
 import { useTracking, useTableContext } from '@strapi/helper-plugin';
 import { Check, Trash } from '@strapi/icons';
 import { Entity } from '@strapi/types';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { InjectionZone } from '../../../../../components/InjectionZone';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { getTranslation } from '../../../../utils/translations';
 import { InjectionZoneList } from '../InjectionZoneList';
@@ -205,7 +205,6 @@ const BulkActionButtons = ({
           />
         </>
       )}
-      <InjectionZone area="contentManager.listView.bulkRelease" />
       {showDelete && (
         <>
           <Button variant="danger-light" onClick={toggleDeleteDialog}>
@@ -221,6 +220,22 @@ const BulkActionButtons = ({
       )}
     </>
   );
+};
+
+BulkActionButtons.defaultProps = {
+  showPublish: false,
+  showDelete: false,
+  onConfirmDeleteAll() {},
+  onConfirmUnpublishAll() {},
+  refetchData() {},
+};
+
+BulkActionButtons.propTypes = {
+  showPublish: PropTypes.bool,
+  showDelete: PropTypes.bool,
+  onConfirmDeleteAll: PropTypes.func,
+  onConfirmUnpublishAll: PropTypes.func,
+  refetchData: PropTypes.func,
 };
 
 export { BulkActionButtons };

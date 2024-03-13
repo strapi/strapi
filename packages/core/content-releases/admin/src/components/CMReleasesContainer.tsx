@@ -106,8 +106,8 @@ const AddActionToReleaseModal = ({
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
     contentTypeUid,
-    entryId, // TODO: there will be list of selectedEntries
-    hasEntryAttached: false, // TODO: for bulk releases hasEntryAttached should not be checked
+    entryId,
+    hasEntryAttached: false,
   });
 
   const releases = response.data?.data;
@@ -121,7 +121,7 @@ const AddActionToReleaseModal = ({
       locale,
     };
     const response = await createReleaseAction({
-      body: { type: values.type, entry: releaseActionEntry }, // TODO: there will be list of selectedEntries
+      body: { type: values.type, entry: releaseActionEntry },
       params: { releaseId: values.releaseId },
     });
 
@@ -134,7 +134,6 @@ const AddActionToReleaseModal = ({
           defaultMessage: 'Entry added to release',
         }),
       });
-      // trackUsage('willBulkReleaseEntries'); //TODO: Do we need tracking event name "willBulkReleaseEntries"
 
       handleClose();
       return;
@@ -249,7 +248,7 @@ const AddActionToReleaseModal = ({
  * CMReleasesContainer
  * -----------------------------------------------------------------------------------------------*/
 
-const CMReleasesContainer = () => {
+export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage, formatDate, formatTime } = useIntl();
   const {
@@ -429,5 +428,3 @@ const CMReleasesContainer = () => {
     </CheckPermissions>
   );
 };
-
-export { AddActionToReleaseModal, CMReleasesContainer };
