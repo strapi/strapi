@@ -31,6 +31,14 @@ const categoryModel = {
         },
       },
     },
+    nonLocalized: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
+    },
   },
 };
 
@@ -144,6 +152,34 @@ describe('i18n - Content API', () => {
       });
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toEqual('This attribute must be unique');
+    });
+
+    test('when a non localized field is updated in any locale all other locales should be updated in the same way', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::category.category`,
+        body: {
+          nonLocalized: `nonLocalized value`,
+        },
+      });
+
+      // Create a new locale in this document
+      const updatedValue = 'nonLocalized value updated';
+      await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/api::category.category/${res.body.data.documentId}`,
+        body: {
+          locale: 'ko',
+          nonLocalized: updatedValue,
+        },
+      });
+
+      const originalEntryRes = await rq({
+        method: 'GET',
+        url: `/content-manager/collection-types/api::category.category/${res.body.data.documentId}`,
+      });
+
+      expect(originalEntryRes.body.data.nonLocalized).toEqual(updatedValue);
     });
   });
 
