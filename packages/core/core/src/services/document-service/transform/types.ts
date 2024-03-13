@@ -10,5 +10,5 @@ export type Data = {
 export type Options = {
   uid: Common.UID.Schema;
   locale?: string | null;
-  isDraft: boolean;
+  status: 'draft' | 'published';
 };

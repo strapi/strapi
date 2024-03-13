@@ -44,11 +44,7 @@ interface HeaderProps {
   title?: string;
 }
 
-const Header = ({
-  isCreating,
-  status = 'draft',
-  title: documentTitle = 'Untitled',
-}: HeaderProps) => {
+const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: HeaderProps) => {
   const { formatMessage } = useIntl();
   const isCloning = useMatch(CLONE_PATH) !== null;
 
@@ -80,7 +76,7 @@ const Header = ({
         </Typography>
         <HeaderToolbar />
       </Flex>
-      <DocumentStatus status={isCloning ? 'draft' : status} />
+      {status ? <DocumentStatus status={isCloning ? 'draft' : status} /> : null}
     </Flex>
   );
 };
@@ -493,6 +489,9 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
             documentId,
             model,
             collectionType,
+            params: {
+              locale: '*',
+            },
           });
 
           if (!('error' in res)) {
