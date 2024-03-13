@@ -518,10 +518,12 @@ const createJoinTable = (
     joinColumn: {
       name: joinColumnName,
       referencedColumn: ID,
+      referencedTable: meta.tableName,
     },
     inverseJoinColumn: {
       name: inverseJoinColumnName,
       referencedColumn: ID,
+      referencedTable: targetMeta.tableName,
     },
     pivotColumns: [joinColumnName, inverseJoinColumnName],
   } as any;

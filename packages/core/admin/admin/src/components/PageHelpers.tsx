@@ -1,15 +1,16 @@
 import * as React from 'react';
 
 import {
+  Box,
   EmptyStateLayout,
-  EmptyStateLayoutProps,
+  type EmptyStateLayoutProps,
   Flex,
   Icon,
   Loader,
   Main,
 } from '@strapi/design-system';
 import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
-import { EmptyPermissions, ExclamationMarkCircle } from '@strapi/icons';
+import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Permission } from '../../../shared/contracts/shared';
@@ -87,14 +88,49 @@ const NoPermissions = (props: NoPermissionsProps) => {
   return (
     <Main height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
-        <EmptyStateLayout
-          icon={<EmptyPermissions width="10rem" />}
-          content={formatMessage({
-            id: 'app.components.EmptyStateLayout.content-permissions',
-            defaultMessage: "You don't have the permissions to access that content",
-          })}
-          {...props}
-        />
+        <Box minWidth="50%">
+          <EmptyStateLayout
+            icon={<EmptyPermissions width="10rem" />}
+            content={formatMessage({
+              id: 'app.components.EmptyStateLayout.content-permissions',
+              defaultMessage: "You don't have the permissions to access that content",
+            })}
+            {...props}
+          />
+        </Box>
+      </Flex>
+    </Main>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * NoData
+ * -----------------------------------------------------------------------------------------------*/
+interface NoDataProps extends Partial<EmptyStateLayoutProps> {}
+
+/**
+ * @public
+ * @description A component that should be rendered as the page
+ * when there is no data available to display.
+ * This component does not check any permissions, it's up to you to decide
+ * when it should be rendered.
+ */
+const NoData = (props: NoDataProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Main height="100%">
+      <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
+        <Box minWidth="50%">
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="10rem" />}
+            content={formatMessage({
+              id: 'app.components.EmptyStateLayout.content-document',
+              defaultMessage: 'No content found',
+            })}
+            {...props}
+          />
+        </Box>
       </Flex>
     </Main>
   );
@@ -187,6 +223,7 @@ const Page = {
   Loading,
   NoPermissions,
   Protect,
+  NoData,
 };
 
 export { Page };

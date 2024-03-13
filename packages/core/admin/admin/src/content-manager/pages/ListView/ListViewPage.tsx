@@ -16,15 +16,12 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useTracking,
   useAPIErrorHandler,
   useStrapiApp,
-  PaginationURLQuery,
-  PageSizeURLQuery,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -34,6 +31,8 @@ import styled from 'styled-components';
 
 import { InjectionZone } from '../../../components/InjectionZone';
 import { Page } from '../../../components/PageHelpers';
+import { Pagination } from '../../../components/Pagination';
+import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { capitalise } from '../../../utils/strings';
@@ -187,24 +186,32 @@ const ListViewPage = () => {
       };
     });
 
-    formattedHeaders.push({
-      attribute: {
-        type: 'custom',
-      },
-      name: 'status',
-      label: {
-        id: getTranslation(`containers.list.table-headers.status`),
-        defaultMessage: 'status',
-      },
-      searchable: false,
-      sortable: false,
-    } satisfies ListFieldLayout);
+    if (schema?.options?.draftAndPublish) {
+      formattedHeaders.push({
+        attribute: {
+          type: 'custom',
+        },
+        name: 'status',
+        label: {
+          id: getTranslation(`containers.list.table-headers.status`),
+          defaultMessage: 'status',
+        },
+        searchable: false,
+        sortable: false,
+      } satisfies ListFieldLayout);
+    }
 
     if (reviewWorkflowColumns) {
       formattedHeaders.push(...reviewWorkflowColumns);
     }
     return formattedHeaders;
-  }, [displayedHeaders, list, reviewWorkflowColumns, runHookWaterfall]);
+  }, [
+    displayedHeaders,
+    list,
+    reviewWorkflowColumns,
+    runHookWaterfall,
+    schema?.options?.draftAndPublish,
+  ]);
 
   /* -------------------------------------------------------------------------------------------------
    * Methods
@@ -303,7 +310,7 @@ const ListViewPage = () => {
         startActions={
           <>
             {list.settings.searchable && (
-              <SearchURLQuery
+              <SearchInput
                 disabled={results.length === 0}
                 label={formatMessage(
                   { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
@@ -459,10 +466,13 @@ const ListViewPage = () => {
               </Table.Body>
             </Table.Content>
           </Table.Root>
-          <Flex alignItems="flex-end" justifyContent="space-between">
-            <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
-            <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
-          </Flex>
+          <Pagination.Root
+            {...pagination}
+            onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
+          >
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
         </Flex>
       </ContentLayout>
     </Main>

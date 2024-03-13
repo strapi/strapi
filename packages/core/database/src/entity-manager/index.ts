@@ -24,7 +24,7 @@ import {
   uniqWith,
 } from 'lodash/fp';
 
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
@@ -317,6 +317,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         where: { id },
         select: params.select,
         populate: params.populate,
+        filters: params.filters,
       });
 
       await db.lifecycles.run('afterCreate', uid, { params, result }, states);
@@ -404,6 +405,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         where: { id },
         select: params.select,
         populate: params.populate,
+        filters: params.filters,
       });
 
       await db.lifecycles.run('afterUpdate', uid, { params, result }, states);
@@ -960,7 +962,8 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             if (isPartialUpdate) {
               if (isAnyToOne(attribute)) {
-                cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
+                // TODO: V5 find a fix to connect multiple versions of a document at the same time on xToOne relations
+                // cleanRelationData.connect = cleanRelationData.connect?.slice(-1);
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
               const relIdsToDelete = toIds(
@@ -1341,7 +1344,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         return;
       }
 
-      await mapAsync(cloneAttrs, async (attrName: string) => {
+      await async.map(cloneAttrs, async (attrName: string) => {
         const attribute = attributes[attrName];
 
         if (attribute.type !== 'relation') {

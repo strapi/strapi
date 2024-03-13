@@ -5,7 +5,7 @@ import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
-  unstable_useDocument,
+  unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   type DocumentActionComponent,
 } from '@strapi/strapi/admin';
@@ -24,11 +24,18 @@ import type { I18nBaseQuery } from '../types';
  * LocalePickerAction
  * -----------------------------------------------------------------------------------------------*/
 
-const LocalePickerAction: HeaderActionComponent = ({ document, meta }) => {
+const LocalePickerAction: HeaderActionComponent = ({
+  document,
+  meta,
+  model,
+  collectionType,
+  documentId,
+}) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams<I18nBaseQuery>();
   const { hasI18n, canCreate, canRead } = useI18n();
   const { data: locales = [] } = useGetLocalesQuery();
+  const { schema } = useDocument({ model, collectionType, documentId });
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -91,7 +98,7 @@ const LocalePickerAction: HeaderActionComponent = ({ document, meta }) => {
         disabled: !permissionsToCheck.includes(locale.code),
         value: locale.code,
         label: locale.name,
-        startIcon: (
+        startIcon: schema?.options?.draftAndPublish ? (
           <Status
             display="flex"
             paddingLeft="6px"
@@ -106,7 +113,7 @@ const LocalePickerAction: HeaderActionComponent = ({ document, meta }) => {
               {capitalize(status)}
             </Typography>
           </Status>
-        ),
+        ) : null,
       };
     }),
     onSelect: handleSelect,
@@ -114,7 +121,7 @@ const LocalePickerAction: HeaderActionComponent = ({ document, meta }) => {
   };
 };
 
-type UseDocument = typeof unstable_useDocument;
+type UseDocument = typeof useDocument;
 
 const getDocumentStatus = (
   document: ReturnType<UseDocument>['document'],

@@ -3,16 +3,19 @@ import { assoc, curry } from 'lodash/fp';
 import { Schema, Documents } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
-type Transform = (
+type ParamsTransform = (params: Documents.Params.All) => Documents.Params.All;
+
+type TransformWithContentType = (
   contentType: Schema.SingleType | Schema.CollectionType,
   params: Documents.Params.All
 ) => Documents.Params.All;
 
 /**
- * Sets status to draft only
+ * DP enabled -> set status to draft
+ * DP disabled -> Used mostly for parsing relations, so there is not a need for a default.
  */
-const setStatusToDraft: Transform = (contentType, params) => {
-  if (!contentTypes.hasDraftAndPublish(contentType)) {
+const setStatusToDraft: TransformWithContentType = (contentType, params) => {
+  if (!contentTypes.hasDraftAndPublish(contentType) && params.status) {
     return params;
   }
 
@@ -22,14 +25,27 @@ const setStatusToDraft: Transform = (contentType, params) => {
 /**
  * Adds a default status of `draft` to the params
  */
-const defaultToDraft: Transform = (contentType, params) => {
+const defaultToDraft: ParamsTransform = (params) => {
+  // Default to draft if no status is provided or it's invalid
+  if (!params.status || params.status !== 'published') {
+    return assoc('status', 'draft', params);
+  }
+
+  return params;
+};
+
+/**
+ * DP disabled -> ignore status
+ * DP enabled -> set status to draft if no status is provided or it's invalid
+ */
+const defaultStatus: TransformWithContentType = (contentType, params) => {
   if (!contentTypes.hasDraftAndPublish(contentType)) {
     return params;
   }
 
   // Default to draft if no status is provided or it's invalid
   if (!params.status || params.status !== 'published') {
-    return setStatusToDraft(contentType, params);
+    return defaultToDraft(params);
   }
 
   return params;
@@ -38,11 +54,7 @@ const defaultToDraft: Transform = (contentType, params) => {
 /**
  * In mutating actions we don't want user to set the publishedAt attribute.
  */
-const filterDataPublishedAt: Transform = (contentType, params) => {
-  if (!contentTypes.hasDraftAndPublish(contentType)) {
-    return params;
-  }
-
+const filterDataPublishedAt: ParamsTransform = (params) => {
   if (params?.data?.publishedAt) {
     return assoc(['data', 'publishedAt'], null, params);
   }
@@ -53,7 +65,7 @@ const filterDataPublishedAt: Transform = (contentType, params) => {
 /**
  * Add status lookup query to the params
  */
-const statusToLookup: Transform = (contentType, params) => {
+const statusToLookup: TransformWithContentType = (contentType, params) => {
   if (!contentTypes.hasDraftAndPublish(contentType)) {
     return params;
   }
@@ -75,9 +87,8 @@ const statusToLookup: Transform = (contentType, params) => {
 /**
  * Translate publication status parameter into the data that will be saved
  */
-const statusToData: Transform = (contentType, params) => {
+const statusToData: TransformWithContentType = (contentType, params) => {
   if (!contentTypes.hasDraftAndPublish(contentType)) {
-    // Prevent setting publishedAt attribute
     return assoc(['data', 'publishedAt'], new Date(), params);
   }
 
@@ -95,6 +106,7 @@ const statusToData: Transform = (contentType, params) => {
 
 const setStatusToDraftCurry = curry(setStatusToDraft);
 const defaultToDraftCurry = curry(defaultToDraft);
+const defaultStatusCurry = curry(defaultStatus);
 const filterDataPublishedAtCurry = curry(filterDataPublishedAt);
 const statusToLookupCurry = curry(statusToLookup);
 const statusToDataCurry = curry(statusToData);
@@ -102,6 +114,7 @@ const statusToDataCurry = curry(statusToData);
 export {
   setStatusToDraftCurry as setStatusToDraft,
   defaultToDraftCurry as defaultToDraft,
+  defaultStatusCurry as defaultStatus,
   filterDataPublishedAtCurry as filterDataPublishedAt,
   statusToLookupCurry as statusToLookup,
   statusToDataCurry as statusToData,

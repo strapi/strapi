@@ -1,5 +1,6 @@
 import { toUpper, snakeCase, pick, isEmpty } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import { unwrapResolverError } from '@apollo/server/errors';
 import { GraphQLError, type GraphQLFormattedError } from 'graphql';
 
 const { HttpError, ForbiddenError, UnauthorizedError, ApplicationError, ValidationError } = errors;
@@ -32,7 +33,9 @@ function createFormattedError(
  *
  * Intercepts specific Strapi error types to send custom error response codes in the GraphQL response
  */
-export function formatGraphqlError(formattedError: GraphQLFormattedError, originalError: unknown) {
+export function formatGraphqlError(formattedError: GraphQLFormattedError, error: unknown) {
+  const originalError = unwrapResolverError(error);
+
   // If this error doesn't have an associated originalError, it
   if (isEmpty(originalError)) {
     return formattedError;

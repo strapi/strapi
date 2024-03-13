@@ -1,4 +1,4 @@
-import { setCreatorFields, mapAsync, pipeAsync, errors } from '@strapi/utils';
+import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
@@ -26,7 +26,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
 
   const pickPermittedFields = permissionChecker.sanitizeCreateInput;
   const setCreator = setCreatorFields({ user });
-  const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
+  const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
   const { locale, status = 'draft' } = getDocumentLocaleAndStatus(body);
@@ -98,7 +98,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
     ? permissionChecker.sanitizeUpdateInput(documentVersion)
     : permissionChecker.sanitizeCreateInput;
   const setCreator = setCreatorFields({ user, isEdition: true });
-  const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
+  const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
   return documentManager.update(documentVersion?.documentId || id, model, {
@@ -153,9 +153,9 @@ export default {
       return document;
     };
 
-    const results = await mapAsync(
+    const results = await async.map(
       documents,
-      pipeAsync(permissionChecker.sanitizeOutput, setStatus)
+      async.pipe(permissionChecker.sanitizeOutput, setStatus)
     );
 
     ctx.body = {
@@ -290,7 +290,7 @@ export default {
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
     const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
-    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any, excludeNotCreatable);
+    const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
@@ -339,17 +339,21 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(ctx.query);
-    const document = await documentManager.findOne(id, model, { populate, locale });
 
-    if (!document) {
+    // Find locales to delete
+    const documentLocales = await documentManager.findLocales(id, model, { populate, locale });
+
+    if (documentLocales.length === 0) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.delete(document)) {
-      return ctx.forbidden();
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.delete(document)) {
+        return ctx.forbidden();
+      }
     }
 
-    const result = await documentManager.delete(document.documentId, model, { locale });
+    const result = await documentManager.delete(id, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
@@ -529,7 +533,7 @@ export default {
         await documentManager.discardDraft(document.documentId, model, { locale });
       }
 
-      ctx.body = await pipeAsync(
+      ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
         (document) => documentMetadata.formatDocumentWithMetadata(model, document)
@@ -571,7 +575,7 @@ export default {
       return ctx.forbidden();
     }
 
-    ctx.body = await pipeAsync(
+    ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
       (document) => documentMetadata.formatDocumentWithMetadata(model, document)

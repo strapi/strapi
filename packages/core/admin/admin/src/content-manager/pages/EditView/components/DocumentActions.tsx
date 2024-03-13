@@ -29,6 +29,7 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
+import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH } from '../../../router';
 import { buildValidParams } from '../../../utils/api';
@@ -486,6 +487,7 @@ const PublishAction: DocumentActionComponent = ({
   meta,
   document,
 }) => {
+  const { schema } = useDoc();
   const navigate = useNavigate();
   const toggleNotification = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -509,6 +511,10 @@ const PublishAction: DocumentActionComponent = ({
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
     document?.status !== 'modified';
+
+  if (!schema?.options?.draftAndPublish) {
+    return null;
+  }
 
   return {
     /**
@@ -740,6 +746,7 @@ const UnpublishAction: DocumentActionComponent = ({
   document,
 }) => {
   const { formatMessage } = useIntl();
+  const { schema } = useDoc();
   const canPublish = useDocumentRBAC('UnpublishAction', ({ canPublish }) => canPublish);
   const { unpublish } = useDocumentActions();
   const [{ query }] = useQueryParams();
@@ -755,6 +762,10 @@ const UnpublishAction: DocumentActionComponent = ({
       setShouldKeepDraft(e.target.value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
     }
   };
+
+  if (!schema?.options?.draftAndPublish) {
+    return null;
+  }
 
   return {
     disabled:
@@ -890,10 +901,15 @@ const DiscardAction: DocumentActionComponent = ({
   document,
 }) => {
   const { formatMessage } = useIntl();
+  const { schema } = useDoc();
   const canUpdate = useDocumentRBAC('DiscardAction', ({ canUpdate }) => canUpdate);
   const { discard } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  if (!schema?.options?.draftAndPublish) {
+    return null;
+  }
 
   return {
     disabled: !canUpdate || activeTab === 'published' || document?.status !== 'modified',

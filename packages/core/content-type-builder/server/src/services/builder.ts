@@ -9,6 +9,7 @@ export const getReservedNames = () => {
       'upload',
       'then', // https://github.com/strapi/strapi/issues/15557
       'rest', // https://github.com/strapi/strapi/issues/13643
+      'document',
     ],
     // attributes are compared with snake_case(name), so only snake_case is needed here and camelCase + UPPER_CASE matches will still be caught
     attributes: [

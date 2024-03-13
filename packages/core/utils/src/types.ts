@@ -8,8 +8,6 @@ export type Data = {
   [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
 };
 
-export interface Config extends Record<string, unknown> {}
-
 export interface Attribute {
   type: string;
   writable?: boolean;
@@ -97,7 +95,7 @@ declare module 'koa' {
     notFound: (response?: string | object) => Koa.Context;
     locked: (response?: string | object) => Koa.Context;
     internalServerError: (response?: string | object) => Koa.Context;
-    notImplemented: (response?: string | object) => Koa.Context;
+    notImplemented: (response?: string | object, data?: Record<string, unknown>) => Koa.Context;
   }
 }
 

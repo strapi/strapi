@@ -18,11 +18,19 @@ import {
   isString,
 } from 'lodash/fp';
 import _ from 'lodash';
+
 import parseType from './parse-type';
 import { PaginationError } from './errors';
-import { isDynamicZoneAttribute, isMorphToRelationalAttribute } from './content-types';
+import {
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
+  constants,
+  hasDraftAndPublish,
+} from './content-types';
 import { Model } from './types';
 import { isOperator } from './operators';
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
 
 type SortOrder = 'asc' | 'desc';
 
@@ -46,7 +54,6 @@ export interface PopulateObjectParams {
   fields?: FieldsParams;
   filters?: FiltersParams;
   populate?: string | string[] | PopulateAttributesParams;
-  publicationState?: 'live' | 'preview';
   on?: PopulateAttributesParams;
   count?: boolean;
   ordering?: unknown;
@@ -71,7 +78,7 @@ export interface Params {
   start?: number | string;
   page?: number | string;
   pageSize?: number | string;
-  publicationState?: 'live' | 'preview';
+  status?: 'draft' | 'published';
 }
 
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
@@ -489,7 +496,7 @@ const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery 
 
   if (typeof fields === 'string') {
     const fieldsValues = fields.split(',').map((value) => _.trim(value));
-    return _.uniq(['id', ...fieldsValues]);
+    return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
   }
 
   if (isStringArray(fields)) {
@@ -498,14 +505,14 @@ const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery 
       .flatMap((value) => convertFieldsQueryParams(value, depth + 1))
       .filter((v) => !isNil(v)) as string[];
 
-    return _.uniq(['id', ...fieldsValues]);
+    return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...fieldsValues]);
   }
 
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
 const isValidSchemaAttribute = (key: string, schema?: Model) => {
-  if (key === 'id') {
+  if ([DOC_ID_ATTRIBUTE, ID_ATTRIBUTE].includes(key)) {
     return true;
   }
 
@@ -604,13 +611,32 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema?: Model): Wher
   return filters;
 };
 
+const convertStatusParams = (status?: 'draft' | 'published', query: Query = {}) => {
+  // NOTE: this is the query layer filters not the document/entity service filters
+  query.filters = ({ meta }: { meta: Model }) => {
+    const contentType = strapi.contentTypes[meta.uid];
+
+    // Ignore if target model has disabled DP, as it doesn't make sense to filter by its status
+    if (!contentType || !hasDraftAndPublish(contentType)) {
+      return {};
+    }
+
+    return { [PUBLISHED_AT_ATTRIBUTE]: { $null: status === 'draft' } };
+  };
+};
+
 const transformParamsToQuery = (uid: string, params: Params): Query => {
   // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
   const schema = strapi.getModel(uid);
 
   const query: Query = {};
 
-  const { _q, sort, filters, fields, populate, page, pageSize, start, limit, ...rest } = params;
+  const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
+    params;
+
+  if (!isNil(status)) {
+    convertStatusParams(status, query);
+  }
 
   if (!isNil(_q)) {
     query._q = _q;

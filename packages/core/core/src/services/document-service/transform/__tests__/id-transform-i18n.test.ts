@@ -61,25 +61,20 @@ describe('Transform relational data', () => {
   describe('Non I18n (products) -> I18n (categories)', () => {
     it('Connect to locales of the same category document', async () => {
       //
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: [
-              { documentId: 'category-1', locale: 'en' },
-              { documentId: 'category-1', locale: 'fr' },
-              { documentId: 'category-2', locale: 'en' },
-            ],
-            category: { documentId: 'category-4', locale: 'en' },
-            relatedProducts: [
-              { documentId: 'product-1' },
-              { documentId: 'product-2', locale: null },
-            ],
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: [
+            { documentId: 'category-1', locale: 'en' },
+            { documentId: 'category-1', locale: 'fr' },
+            { documentId: 'category-2', locale: 'en' },
+          ],
+          category: { documentId: 'category-4', locale: 'en' },
+          relatedProducts: [{ documentId: 'product-1' }, { documentId: 'product-2', locale: null }],
         },
-        { locale: 'en', isDraft: true }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -95,16 +90,13 @@ describe('Transform relational data', () => {
 
     it('Connect to the default locale if not provided', async () => {
       // Should connect to the default locale if not provided in the relation
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: [{ documentId: 'category-1' }],
-          },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: [{ documentId: 'category-1' }],
         },
-        { isDraft: true }
-      );
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -114,29 +106,26 @@ describe('Transform relational data', () => {
 
     it('Connect and reorder', async () => {
       // Should connect and reorder the relations,
-      const { data } = await transformParamsDocumentId(
-        PRODUCT_UID,
-        {
-          data: {
-            name: 'test',
-            categories: {
-              connect: [
-                {
-                  documentId: 'category-1',
-                  locale: 'fr',
-                  position: { before: 'category-2', locale: 'en' },
-                },
-                {
-                  documentId: 'category-2',
-                  locale: 'en',
-                  position: { after: 'category-1', locale: 'fr' },
-                },
-              ],
-            },
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: {
+            connect: [
+              {
+                documentId: 'category-1',
+                locale: 'fr',
+                position: { before: 'category-2', locale: 'en' },
+              },
+              {
+                documentId: 'category-2',
+                locale: 'en',
+                position: { after: 'category-1', locale: 'fr' },
+              },
+            ],
           },
         },
-        { isDraft: true }
-      );
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         name: 'test',
@@ -153,18 +142,16 @@ describe('Transform relational data', () => {
   describe('I18n (categories) -> Non I18n (products)', () => {
     it('Ignore locale when connecting to non localized content type', async () => {
       // Should ignore the locale when connecting to non localized content type
-      const { data } = await transformParamsDocumentId(
-        CATEGORY_UID,
-        {
-          data: {
-            products: [{ documentId: 'product-1' }, { documentId: 'product-2', locale: 'en' }],
-          },
+      const { data } = await transformParamsDocumentId(CATEGORY_UID, {
+        data: {
+          products: [{ documentId: 'product-1' }, { documentId: 'product-2', locale: 'en' }],
         },
-        { locale: 'en', isDraft: true }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
-        products: [{ id: 'product-1-draft' }, { id: 'product-2-draft', locale: 'en' }],
+        products: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }],
       });
     });
   });
@@ -172,15 +159,13 @@ describe('Transform relational data', () => {
   describe('I18n (categories) -> I18n (categories)', () => {
     it('Connect to source locale if not provided', async () => {
       // Should connect to the source locale if not provided in the relation
-      const { data } = await transformParamsDocumentId(
-        CATEGORY_UID,
-        {
-          data: {
-            relatedCategories: [{ documentId: 'category-1' }],
-          },
+      const { data } = await transformParamsDocumentId(CATEGORY_UID, {
+        data: {
+          relatedCategories: [{ documentId: 'category-1' }],
         },
-        { locale: 'fr', isDraft: true }
-      );
+        locale: 'fr',
+        status: 'draft',
+      });
 
       expect(data).toMatchObject({
         relatedCategories: [{ id: 'category-1-fr-draft' }],
@@ -189,16 +174,14 @@ describe('Transform relational data', () => {
 
     it('Prevent connecting to invalid locales ', async () => {
       // Should not be able to connect to different locales than the current one
-      const promise = transformParamsDocumentId(
-        CATEGORY_UID,
-        {
-          data: {
-            // Connect to another locale than the current one
-            relatedCategories: [{ documentId: 'category-1', locale: 'fr' }],
-          },
+      const promise = transformParamsDocumentId(CATEGORY_UID, {
+        data: {
+          // Connect to another locale than the current one
+          relatedCategories: [{ documentId: 'category-1', locale: 'fr' }],
         },
-        { locale: 'en', isDraft: true }
-      );
+        locale: 'en',
+        status: 'draft',
+      });
 
       expect(promise).rejects.toThrowError();
     });
