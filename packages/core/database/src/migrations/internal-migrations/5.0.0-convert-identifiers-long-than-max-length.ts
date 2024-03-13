@@ -2,7 +2,7 @@ import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import type { Database, MetadataOptions } from '../..';
-import { getFullName } from '../../utils/identifiers/shortener';
+import { getUnshortenedName } from '../../utils/identifiers/shortener';
 
 type NameDiff<T> = {
   short: T;
@@ -141,7 +141,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shortArr.forEach(([key, shortObj], index) => {
-    const fullTableName = getFullName(shortObj.tableName, options);
+    const fullTableName = getUnshortenedName(shortObj.tableName, options);
     if (!fullTableName) {
       throw new Error(`Missing full table name for ${shortObj.tableName}`);
     }
@@ -171,7 +171,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
       // TODO: add more type checks so we don't need any
       const attr = shortObj.attributes[attrKey] as any;
       const shortColumnName = attr.columnName;
-      const longColumnName = getFullName(shortColumnName, options);
+      const longColumnName = getUnshortenedName(shortColumnName, options);
       // console.log(`comparing attribute ${shortColumnName} to ${longColumnName}`);
 
       if (!shortColumnName || !longColumnName) {
@@ -199,7 +199,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
     // eslint-disable-next-line guard-for-in
     for (const attrKey in shortObj.indexes) {
       const shortIndexName = shortObj.indexes[attrKey].name;
-      const longIndexName = getFullName(shortIndexName, options);
+      const longIndexName = getUnshortenedName(shortIndexName, options);
       if (!longIndexName) {
         throw new Error(`Missing full index name for ${shortIndexName}`);
       }

@@ -66,11 +66,15 @@ export function createHash(data: string, len: number): string {
 // We need to be able to find the full-length name for any shortened name, primarily for migration purposes
 // Therefore we store every name that passes through so we can retrieve the original later
 const nameMap = new Map<string, string>();
-export const getFullName = (shortName: string, options: NameFromTokenOptions) => {
+export const getUnshortenedName = (shortName: string, options: NameFromTokenOptions) => {
   return nameMap.get(serializeKey(shortName, options));
 };
 
-export const setFullName = (shortName: string, options: NameFromTokenOptions, fullName: string) => {
+export const setUnshortenedName = (
+  shortName: string,
+  options: NameFromTokenOptions,
+  fullName: string
+) => {
   nameMap.set(serializeKey(shortName, options), fullName);
 };
 
@@ -136,15 +140,16 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
   // if maxLength == 0 we want the legacy v4 name without any shortening
+  const unshortenedName = nameTokens
+    .map((token) => {
+      if (token.compressible) {
+        return options.snakeCase === false ? token.name : snakeCase(token.name);
+      }
+      return token.name;
+    })
+    .join(IDENTIFIER_SEPARATOR);
   if (maxLength === 0) {
-    return nameTokens
-      .map((token) => {
-        if (token.compressible) {
-          return options.snakeCase === false ? token.name : snakeCase(token.name);
-        }
-        return token.name;
-      })
-      .join(IDENTIFIER_SEPARATOR);
+    return unshortenedName;
   }
 
   const fullLengthName = nameTokens
@@ -157,7 +162,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     .join(IDENTIFIER_SEPARATOR);
 
   if (fullLengthName.length <= maxLength) {
-    setFullName(fullLengthName, options, fullLengthName);
+    setUnshortenedName(fullLengthName, options, unshortenedName);
     return fullLengthName;
   }
 
@@ -264,6 +269,6 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     );
   }
 
-  setFullName(shortenedName, options, fullLengthName);
+  setUnshortenedName(shortenedName, options, unshortenedName);
   return shortenedName;
 }
