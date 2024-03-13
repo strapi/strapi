@@ -31,9 +31,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
   for (const entry of entriesToUpdate) {
     await strapi.documents(uid).updateComponents(uid, entry, nonLocalizedAttributes as any);
   }
-
   const entryData = await strapi.documents(uid).omitComponentData(model, nonLocalizedAttributes);
-  const localesToUpdate = entriesToUpdate.map((entry) => entry.locale);
 
   // Update every other locale entry of this documentId in the same status
   // We need to support both statuses incase we are working with a content type
@@ -42,7 +40,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
     where: {
       documentId,
       publishedAt: status === 'published' ? { $ne: null } : null,
-      locale: { $in: localesToUpdate },
+      locale: { $in: entriesToUpdate.map((entry) => entry.locale) },
     },
     data: entryData,
   });
