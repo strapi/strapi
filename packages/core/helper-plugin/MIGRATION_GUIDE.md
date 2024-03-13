@@ -437,13 +437,19 @@ This util has been removed and not replaced, use async / await with try / catch 
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### getFileExtension
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### pxToRem
 
 This util has been removed and not replaced. You should use directly this code in place of the pxToRem:
 
 ```tsx
 // Before
-pxToRem(32)// After
+pxToRem(
+  32
+) // After
 `${32 / 16}rem`;
 // or
 ('2rem');
