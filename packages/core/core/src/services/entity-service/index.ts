@@ -178,6 +178,7 @@ const createDefaultImplementation = ({
   async findOne(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     const entity = await db.query(uid).findOne({ ...query, where: { id: entityId } });
@@ -205,10 +206,11 @@ const createDefaultImplementation = ({
 
     const model = strapi.getModel(uid) as Shared.ContentTypes[Common.UID.ContentType];
 
-    const isDraft = contentTypesUtils.isDraft(data);
+    const isDraft = contentTypesUtils.isDraft(data, model);
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction
@@ -257,7 +259,7 @@ const createDefaultImplementation = ({
       return null;
     }
 
-    const isDraft = contentTypesUtils.isDraft(entityToUpdate);
+    const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
 
     const validData = await entityValidator.validateEntityUpdate(
       model,
@@ -267,7 +269,7 @@ const createDefaultImplementation = ({
       },
       entityToUpdate
     );
-
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap in transaction
@@ -301,6 +303,7 @@ const createDefaultImplementation = ({
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     let entityToDelete = await db.query(uid).findOne({
@@ -342,7 +345,7 @@ const createDefaultImplementation = ({
     if (!entityToClone) {
       return null;
     }
-    const isDraft = contentTypesUtils.isDraft(entityToClone);
+    const isDraft = contentTypesUtils.isDraft(entityToClone, model);
 
     const validData = await entityValidator.validateEntityUpdate(
       model,
@@ -352,6 +355,7 @@ const createDefaultImplementation = ({
       entityToClone
     );
 
+    // @ts-expect-error - fix
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction

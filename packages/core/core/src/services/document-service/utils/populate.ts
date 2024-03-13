@@ -13,13 +13,13 @@ export const getDeepPopulate = (uid: Common.UID.Schema) => {
         // Ignore createdBy, updatedBy, ...
         const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
         if (isVisible) {
-          acc[attributeName] = { fields: ['document_id', 'locale'] };
+          acc[attributeName] = { select: ['document_id', 'locale'] };
         }
         break;
       }
 
       case 'media': {
-        acc[attributeName] = { fields: ['id'] };
+        acc[attributeName] = { select: ['id'] };
         break;
       }
 

@@ -173,7 +173,7 @@ describe('CM API - Basic', () => {
   });
 
   // TODO: Fix document service validations
-  describe.skip('validators', () => {
+  describe('validators', () => {
     test('Cannot publish a product - minLength', async () => {
       const product = {
         name: 'Product 1',
@@ -188,7 +188,7 @@ describe('CM API - Basic', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product.product/${creationRes.body.documentId}/actions/publish`,
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.data.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -223,7 +223,7 @@ describe('CM API - Basic', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product.product/${creationRes.body.documentId}/actions/publish`,
+        url: `/content-manager/collection-types/api::product.product/${creationRes.body.data.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);

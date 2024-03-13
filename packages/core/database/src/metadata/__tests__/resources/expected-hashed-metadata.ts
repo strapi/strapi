@@ -59,10 +59,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
               },
@@ -204,10 +206,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
                 inverseOrderColumnName: 'complex_order',
@@ -223,10 +227,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
                 orderColumnName: 'complex_order',
@@ -352,10 +358,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
               },
@@ -370,10 +378,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
               },
@@ -482,10 +492,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
                 orderColumnName: 'complex_order',
@@ -505,10 +517,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
                 orderColumnName: 'inv_complex_order',
@@ -649,10 +663,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
+                  referencedTable: 'components_default_l807d8',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['long_component_name_id', 'complex_id'],
               },
@@ -666,10 +682,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
+                  referencedTable: 'components_default_l807d8',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['long_component_name_id', 'complex_id'],
                 orderColumnName: 'complex_order',
@@ -909,10 +927,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
+                  referencedTable: 'components_default_l807d8',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['long_component_name_id', 'complex_id'],
               },
@@ -926,10 +946,12 @@ export const expectedMetadataHashedResults = {
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
+                  referencedTable: 'components_default_l807d8',
                 },
                 inverseJoinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
+                  referencedTable: 'complexes',
                 },
                 pivotColumns: ['long_component_name_id', 'complex_id'],
                 orderColumnName: 'complex_order',
@@ -1170,10 +1192,12 @@ export const expectedMetadataHashedResults = {
               joinColumn: {
                 name: 'long_component_name_id',
                 referencedColumn: 'id',
+                referencedTable: 'components_default_l807d8',
               },
               inverseJoinColumn: {
                 name: 'complex_id',
                 referencedColumn: 'id',
+                referencedTable: 'complexes',
               },
               pivotColumns: ['long_component_name_id', 'complex_id'],
             },
@@ -1187,10 +1211,12 @@ export const expectedMetadataHashedResults = {
               joinColumn: {
                 name: 'long_component_name_id',
                 referencedColumn: 'id',
+                referencedTable: 'components_default_l807d8',
               },
               inverseJoinColumn: {
                 name: 'complex_id',
                 referencedColumn: 'id',
+                referencedTable: 'complexes',
               },
               pivotColumns: ['long_component_name_id', 'complex_id'],
               orderColumnName: 'complex_order',

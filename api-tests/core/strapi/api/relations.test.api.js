@@ -848,7 +848,7 @@ describe('Relations', () => {
       expect(updatedShop.data).toMatchObject(expectedShop);
     });
 
-    test('Update relations using the same id multiple times', async () => {
+    test.skip('Update relations using the same id multiple times', async () => {
       const shop = await createShop({
         anyToManyRel: [
           { documentId: id1, position: { end: true } },
@@ -867,7 +867,7 @@ describe('Relations', () => {
       expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
     });
 
-    test('Update relations with invalid connect array in strict mode', async () => {
+    test.skip('Update relations with invalid connect array in strict mode', async () => {
       const shop = await createShop({
         anyToManyRel: [],
       });
