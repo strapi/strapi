@@ -23,7 +23,7 @@ export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
     <AssetCardBase name={name} extension={extension} {...restProps} variant="Doc">
       <CardAsset
         width="100%"
-        height={size === 'S' ? `${88/ 16}rem` : `${164 / 16}rem`}
+        height={size === 'S' ? `${88 / 16}rem` : `${164 / 16}rem`}
         justifyContent="center"
       >
         <IconWrapper>

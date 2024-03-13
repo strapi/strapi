@@ -51,7 +51,11 @@ const Option = ({ children, data, selectProps, ...props }) => {
               onOptionToggle(value);
             }}
           >
-            <Icon width={`${14 / 16}rem`} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
+            <Icon
+              width={`${14 / 16}rem`}
+              color="neutral500"
+              as={isOpen ? ChevronUp : ChevronDown}
+            />
           </ToggleButton>
         )}
       </Flex>
