@@ -92,7 +92,8 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     // Load entity
-    const entity = (await strapi.entityService.findOne(modelUID, Number(id), {
+    const entity = (await strapi.db.query(modelUID).findOne({
+      where: { id },
       populate: [ENTITY_STAGE_ATTRIBUTE],
     })) as any;
 
@@ -149,7 +150,8 @@ export default {
     }
 
     // Load entity
-    const entity = (await strapi.entityService.findOne(modelUID, Number(id), {
+    const entity = (await strapi.db.query(modelUID).findOne({
+      where: { id },
       populate: [ENTITY_STAGE_ATTRIBUTE],
     })) as any;
 

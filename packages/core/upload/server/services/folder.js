@@ -11,7 +11,10 @@ const setPathIdAndPath = async (folder) => {
   const pathId = max + 1;
   let parentPath = '/';
   if (folder.parent) {
-    const parentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, folder.parent);
+    const parentFolder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id: folder.parent } });
+
     parentPath = parentFolder.path;
   }
 
@@ -29,7 +32,7 @@ const create = async (folderData, { user } = {}) => {
     enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
   }
 
-  const folder = await strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
+  const folder = await strapi.db.query(FOLDER_MODEL_UID).create({ data: enrichedFolder });
 
   strapi.eventHub.emit('media-folder.create', { folder });
 
@@ -92,7 +95,7 @@ const deleteByIds = async (ids = []) => {
 const update = async (id, { name, parent }, { user }) => {
   // only name is updated
   if (isUndefined(parent)) {
-    const existingFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id);
+    const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
 
     if (!existingFolder) {
       return undefined;
@@ -101,7 +104,10 @@ const update = async (id, { name, parent }, { user }) => {
     const newFolder = setCreatorFields({ user, isEdition: true })({ name, parent });
 
     if (isUndefined(parent)) {
-      const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+      const folder = await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .update({ where: { id }, data: newFolder });
+
       return folder;
     }
     // location is updated => using transaction
@@ -193,7 +199,10 @@ const update = async (id, { name, parent }, { user }) => {
 
     // update less critical information (name + updatedBy)
     const newFolder = setCreatorFields({ user, isEdition: true })({ name });
-    const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+
+    const folder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .update({ where: { id }, data: newFolder });
 
     strapi.eventHub.emit('media-folder.update', { folder });
     return folder;

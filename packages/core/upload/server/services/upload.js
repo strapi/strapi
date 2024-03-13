@@ -19,6 +19,7 @@ const {
   contentTypes: contentTypesUtils,
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
+  convertQueryParams,
 } = require('@strapi/utils');
 
 const {
@@ -346,7 +347,7 @@ module.exports = ({ strapi }) => ({
 
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
+    const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
     await this.emitEvent(MEDIA_UPDATE, res);
 
@@ -369,16 +370,27 @@ module.exports = ({ strapi }) => ({
     return res;
   },
 
-  findOne(id, populate) {
-    return strapi.entityService.findOne(FILE_MODEL_UID, id, { populate });
+  findOne(id, populate = {}) {
+    const query = convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, {
+      populate,
+    });
+
+    return strapi.db.query(FILE_MODEL_UID).findOne({
+      where: { id },
+      ...query,
+    });
   },
 
-  findMany(query) {
-    return strapi.entityService.findMany(FILE_MODEL_UID, query);
+  findMany(query = {}) {
+    return strapi.db
+      .query(FILE_MODEL_UID)
+      .findMany(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
   },
 
-  findPage(query) {
-    return strapi.entityService.findPage(FILE_MODEL_UID, query);
+  findPage(query = {}) {
+    return strapi.db
+      .query(FILE_MODEL_UID)
+      .findPage(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
   },
 
   async remove(file) {

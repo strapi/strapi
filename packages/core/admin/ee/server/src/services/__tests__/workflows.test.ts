@@ -6,13 +6,16 @@ jest.mock('../review-workflows/workflows/content-types', () => {
 
 import { LoadedStrapi } from '@strapi/types';
 import workflowsServiceFactory from '../review-workflows/workflows';
-import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows';
+import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE, STAGE_MODEL_UID } from '../../constants/workflows';
+import workflowCT from '../../content-types/workflow';
+import workflowStageCT from '../../content-types/workflow-stage';
+import CTS from '../../../../../server/src/content-types';
 
 const workflowMock = {
   id: 1,
 };
 
-const entityServiceMock: Record<string, any> = {
+const dbMock: Record<string, any> = {
   findOne: jest.fn(() => workflowMock),
   findMany: jest.fn(() => [workflowMock]),
   update: jest.fn(() => [workflowMock]),
@@ -73,13 +76,26 @@ const strapiMock = {
       },
     },
   },
-  entityService: entityServiceMock,
   plugin: jest.fn((name) => pluginsMock[name]),
   service: jest.fn((serviceName) => servicesMock[serviceName]),
   db: {
+    query: () => dbMock,
     transaction: jest.fn((func) => func()),
   },
 } as unknown as LoadedStrapi;
+
+const ctMap: Record<string, any> = {
+  [WORKFLOW_MODEL_UID]: workflowCT.schema,
+  [STAGE_MODEL_UID]: workflowStageCT.schema,
+  ['admin::permission']: CTS.permission.schema,
+  ['admin::role']: CTS.role.schema,
+};
+
+global.strapi = {
+  getModel(uid: string) {
+    return ctMap[uid];
+  },
+} as any;
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
 
@@ -89,25 +105,25 @@ describe('Review workflows - Workflows service', () => {
   });
 
   describe('find', () => {
-    test('Should call entityService with the right model UID and ID', async () => {
+    test('Should call the db with the right model UID and ID', async () => {
       workflowsService.find({ opt1: 1 });
 
-      expect(entityServiceMock.findOne).not.toBeCalled();
-      expect(entityServiceMock.findMany).toBeCalled();
-      expect(entityServiceMock.findMany).toBeCalledWith(WORKFLOW_MODEL_UID, {
+      expect(dbMock.findOne).not.toBeCalled();
+      expect(dbMock.findMany).toBeCalled();
+      expect(dbMock.findMany).toBeCalledWith({
         opt1: 1,
-        filters: {},
+        where: {},
       });
     });
   });
 
   describe('findById', () => {
-    test('Should call entityService with the right model UID', async () => {
+    test('Should call the db with the right model UID', async () => {
       workflowsService.findById(1, {});
 
-      expect(entityServiceMock.findMany).not.toBeCalled();
-      expect(entityServiceMock.findOne).toBeCalled();
-      expect(entityServiceMock.findOne).toBeCalledWith(WORKFLOW_MODEL_UID, 1, {});
+      expect(dbMock.findMany).not.toBeCalled();
+      expect(dbMock.findOne).toBeCalled();
+      expect(dbMock.findOne).toBeCalledWith({ where: { id: 1 } });
     });
   });
 
@@ -147,17 +163,31 @@ describe('Review workflows - Workflows service', () => {
       populate: WORKFLOW_POPULATE,
     };
 
-    test('Should call entityService with the right model UID', async () => {
+    test('Should call the db with the right model UID', async () => {
       await workflowsService.update(workflow, opts);
 
-      expect(entityServiceMock.update).toBeCalledWith(WORKFLOW_MODEL_UID, workflow.id, {
+      expect(dbMock.update).toBeCalledWith({
+        where: {
+          id: workflow.id,
+        },
         data: {
           contentTypes: [uid],
           id: workflow.id,
           name: 'Default',
           stages: workflow.stages.map((stage) => stage.id),
         },
-        populate: WORKFLOW_POPULATE,
+        populate: {
+          stages: {
+            populate: {
+              permissions: {
+                select: ['id', 'documentId', 'action', 'actionParameters'],
+                populate: {
+                  role: { select: ['id', 'documentId', 'name'] },
+                },
+              },
+            },
+          },
+        },
       });
       expect(servicesMock['admin::review-workflows-metrics'].sendDidEditWorkflow).toBeCalled();
     });
@@ -179,16 +209,27 @@ describe('Review workflows - Workflows service', () => {
       populate: WORKFLOW_POPULATE,
     };
 
-    test('Should call entityService with the right model UID', async () => {
+    test('Should call the db with the right model UID', async () => {
       await workflowsService.create(opts);
 
-      expect(entityServiceMock.create).toBeCalledWith(WORKFLOW_MODEL_UID, {
+      expect(dbMock.create).toBeCalledWith({
         data: {
           contentTypes: [uid],
           name: 'Workflow',
           stages: stagesMock.map((stage) => stage.id),
         },
-        populate: WORKFLOW_POPULATE,
+        populate: {
+          stages: {
+            populate: {
+              permissions: {
+                select: ['id', 'documentId', 'action', 'actionParameters'],
+                populate: {
+                  role: { select: ['id', 'documentId', 'name'] },
+                },
+              },
+            },
+          },
+        },
       });
       expect(servicesMock['admin::review-workflows-metrics'].sendDidCreateWorkflow).toBeCalled();
     });

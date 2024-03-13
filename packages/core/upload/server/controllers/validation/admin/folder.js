@@ -18,7 +18,7 @@ const isNameUniqueInFolder = (id) =>
       filters.id = { $ne: id };
 
       if (isUndefined(name)) {
-        const existingFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id);
+        const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
         filters.name = get('name', existingFolder);
       }
     }
@@ -69,12 +69,14 @@ const validateUpdateFolderSchema = (id) =>
           async function (parent) {
             if (isNil(parent)) return true;
 
-            const destinationFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, parent, {
-              fields: ['path'],
+            const destinationFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({
+              select: ['path'],
+              where: { id: parent },
             });
 
-            const currentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id, {
-              fields: ['path'],
+            const currentFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({
+              select: ['path'],
+              where: { id },
             });
 
             if (!destinationFolder || !currentFolder) return true;

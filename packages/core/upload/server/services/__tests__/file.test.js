@@ -8,8 +8,10 @@ describe('file', () => {
   describe('getFolderPath', () => {
     beforeAll(() => {
       global.strapi = {
-        entityService: {
-          findOne: jest.fn(() => ({ path: folderPath })),
+        db: {
+          query() {
+            return { findOne: jest.fn(() => ({ path: folderPath })) };
+          },
         },
       };
     });
