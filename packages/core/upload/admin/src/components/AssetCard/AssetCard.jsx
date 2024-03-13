@@ -4,14 +4,12 @@ import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
 import { AssetDefinition, AssetType } from '../../constants';
-import { createAssetUrl } from '../../utils';
+import { createAssetUrl, getFileExtension } from '../../utils';
 
 import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
-
-const getFileExtension = (ext) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size, local }) => {
   const handleSelect = onSelect ? () => onSelect(asset) : undefined;

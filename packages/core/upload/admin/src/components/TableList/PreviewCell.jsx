@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { AssetType } from '../../constants';
-import { createAssetUrl } from '../../utils';
+import { createAssetUrl, getFileExtension } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
@@ -24,8 +24,6 @@ const VideoPreviewWrapper = styled(Box)`
     border-radius: 50%;
   }
 `;
-
-const getFileExtension = (ext) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {

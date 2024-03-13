@@ -30,7 +30,7 @@ import * as yup from 'yup';
 import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import { findRecursiveFolderByValue, getTrad, getFileExtension } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
@@ -50,8 +50,6 @@ const fileInfoSchema = yup.object({
   caption: yup.string(),
   folder: yup.number(),
 });
-
-const getFileExtension = (ext) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 export const EditAssetDialog = ({
   onClose,

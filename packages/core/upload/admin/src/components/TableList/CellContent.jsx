@@ -5,11 +5,9 @@ import parseISO from 'date-fns/parseISO';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { formatBytes } from '../../utils';
+import { formatBytes, getFileExtension } from '../../utils';
 
 import { PreviewCell } from './PreviewCell';
-
-const getFileExtension = (ext) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 export const CellContent = ({ cellType, contentType, content, name }) => {
   const { formatDate, formatMessage } = useIntl();
