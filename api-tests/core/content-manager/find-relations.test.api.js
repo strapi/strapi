@@ -62,6 +62,7 @@ const productModel = () => ({
   pluralName: 'products',
   description: '',
   collectionName: '',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -80,6 +81,7 @@ const employeeModal = () => ({
   pluralName: 'employees',
   description: '',
   collectionName: '',
+  draftAndPublish: true,
   attributes: {
     name: {
       type: 'string',
@@ -91,6 +93,7 @@ const shopModel = () => ({
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
