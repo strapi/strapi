@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { Avatar, Box, Icon, Initials } from '@strapi/design-system';
-import { getFileExtension, pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { AssetType } from '../../constants';
-import { createAssetUrl, prefixFileUrlWithBackendUrl } from '../../utils';
+import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
