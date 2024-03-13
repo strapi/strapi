@@ -30,12 +30,23 @@ const isUrlForCreation = (url: string) => {
   // [ 'content-manager', 'collection-types', 'api::category.category' ]
   const splitUrl = url.split('/').filter(Boolean);
 
+  // Checking for query params and removed in the
+  const regex: RegExp = /[?]\S/;
+  const indexQueryParam = splitUrl.findIndex(item=>regex.test(item));
+
+  if (indexQueryParam !== -1) {
+    splitUrl.splice(indexQueryParam, 1);
+  }
+
+
   // Get the last element of the array
   // api::category.category / 1 / publish
+  
   const model = splitUrl[splitUrl.length - 1];
 
   // If the model contains :: it means it's a uid
   return model.includes('::');
+  
 };
 
 /**
