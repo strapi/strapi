@@ -112,7 +112,7 @@ export interface Strapi extends Container {
    */
   entityService?: EntityService.EntityService;
   /**
-   * @description Documents API might change in the future.
+   * @description interact with documents within Strapi, this API is currently in beta and is subject to change in the future
    * @beta
    */
   documents?: Documents.Service;
