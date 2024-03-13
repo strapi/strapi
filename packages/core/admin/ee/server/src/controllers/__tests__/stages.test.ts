@@ -12,7 +12,6 @@ describe('Stages', () => {
   const readMock = jest.fn(() => false);
 
   global.strapi = {
-    // @ts-expect-error - only defining the properties we need
     admin: {
       services: {
         'stage-permissions': {
@@ -43,29 +42,31 @@ describe('Stages', () => {
             },
           },
         },
-        // @ts-expect-error - only defining the properties we need
-        service(name) {
-          return this.services[name];
+        service(name: string) {
+          return this.services[name as keyof typeof this.services];
         },
       },
     },
-    plugin(name) {
+    plugin(name: string) {
       return this.plugins[name];
     },
-    entityService: {
-      // @ts-expect-error - only defining the properties we need
-      findOne: jest.fn((_, id) => {
-        if (id === nonExistantEntityId) {
-          return Promise.resolve(null);
-        }
+    db: {
+      query() {
+        return {
+          findOne: jest.fn((opts: { where: { id: number } }) => {
+            if (opts.where.id === nonExistantEntityId) {
+              return Promise.resolve(null);
+            }
 
-        return Promise.resolve({
-          id: entityId,
-          [ENTITY_STAGE_ATTRIBUTE]: { id: entityStageId },
-        });
-      }),
+            return Promise.resolve({
+              id: entityId,
+              [ENTITY_STAGE_ATTRIBUTE]: { id: entityStageId },
+            });
+          }),
+        };
+      },
     },
-  };
+  } as any;
 
   const modelUID = 'UID';
 

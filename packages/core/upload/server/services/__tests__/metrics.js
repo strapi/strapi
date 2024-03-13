@@ -34,10 +34,10 @@ describe('metrics', () => {
             collectionName: () => 'upload_folders',
           };
         },
-        entityService: {
-          count,
-        },
         db: {
+          query() {
+            return { count };
+          },
           metadata: {
             get: () => ({ attributes: { path: { columnName: 'path' } } }),
           },

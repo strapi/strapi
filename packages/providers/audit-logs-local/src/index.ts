@@ -32,29 +32,30 @@ export default {
         const auditLog: Log = { ...rest, user: userId };
 
         // Save to database
-        await strapi.entityService?.create('admin::audit-log', { data: auditLog });
+        await strapi.db?.query('admin::audit-log').create({ data: auditLog });
 
         return this;
       },
 
       findMany(query: Record<string, unknown>) {
-        return strapi.entityService?.findPage('admin::audit-log', {
+        return strapi.db?.query('admin::audit-log').findPage({
           populate: ['user'],
-          fields: ['action', 'date', 'payload'],
+          select: ['action', 'date', 'payload'],
           ...query,
         });
       },
 
       findOne(id: `${number}` | number) {
-        return strapi.entityService?.findOne('admin::audit-log', id, {
+        return strapi.db?.query('admin::audit-log').findOne({
+          where: { id },
           populate: ['user'],
-          fields: ['action', 'date', 'payload'],
+          select: ['action', 'date', 'payload'],
         });
       },
 
       deleteExpiredEvents(expirationDate: Date) {
-        return strapi.entityService?.deleteMany('admin::audit-log', {
-          filters: {
+        return strapi.db?.query('admin::audit-log').deleteMany({
+          where: {
             date: {
               $lt: expirationDate.toISOString(),
             },

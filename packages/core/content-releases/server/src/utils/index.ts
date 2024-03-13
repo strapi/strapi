@@ -16,7 +16,10 @@ export const getPopulatedEntry = async (
   // @ts-expect-error - populateBuilderService should be a function but is returning service
   const populate = await populateBuilderService(contentTypeUid).populateDeep(Infinity).build();
 
-  const entry = await strapi.entityService.findOne(contentTypeUid, entryId, { populate });
+  const entry = await strapi.db.query(contentTypeUid).findOne({
+    where: { id: entryId },
+    populate,
+  });
 
   return entry;
 };

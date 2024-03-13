@@ -1,5 +1,5 @@
-import { RELEASE_MODEL_UID } from '../../constants';
 import createReleaseService from '../release';
+import releaseCT from '../../content-types/release/schema';
 
 const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
@@ -39,6 +39,10 @@ const baseStrapiMock = {
   },
 };
 
+global.strapi = {
+  getModel: jest.fn().mockReturnValue(releaseCT),
+} as any;
+
 const mockUser = {
   id: 1,
   username: 'user',
@@ -61,12 +65,15 @@ describe('release service', () => {
     it('updates the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          update: jest.fn().mockReturnValue({ id: 1, name: 'Release name' }),
-          count: jest.fn(),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            update: jest.fn().mockReturnValue({ id: 1, name: 'Release name' }),
+            count: jest.fn(),
+          }),
         },
       };
+
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
@@ -82,11 +89,14 @@ describe('release service', () => {
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue(null),
-          update: jest.fn().mockReturnValue(null),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue(null),
+            update: jest.fn().mockReturnValue(null),
+          }),
         },
       };
+
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
@@ -102,8 +112,10 @@ describe('release service', () => {
     it('throws an error if the release is already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+          }),
         },
       };
 
@@ -124,12 +136,14 @@ describe('release service', () => {
 
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          update: jest
-            .fn()
-            .mockReturnValue({ id: 1, name: 'Release name', scheduledAt: scheduledDate }),
-          count: jest.fn(),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            update: jest
+              .fn()
+              .mockReturnValue({ id: 1, name: 'Release name', scheduledAt: scheduledDate }),
+            count: jest.fn(),
+          }),
         },
       };
 
@@ -149,10 +163,12 @@ describe('release service', () => {
     it('should remove scheduling if scheduledAt is null', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
-          update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
-          count: jest.fn(),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
+            update: jest.fn().mockReturnValue({ id: 1, name: 'Release name', scheduledAt: null }),
+            count: jest.fn(),
+          }),
         },
       };
 
@@ -174,8 +190,10 @@ describe('release service', () => {
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue(null),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue(null),
+          }),
         },
       };
 
@@ -205,14 +223,6 @@ describe('release service', () => {
 
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          create: jest.fn().mockReturnValue({
-            type: 'publish',
-            entry: { id: 1, contentType: 'api::contentType.contentType' },
-          }),
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          count: jest.fn(),
-        },
         plugin: jest.fn().mockReturnValue({
           service: jest
             .fn()
@@ -222,7 +232,12 @@ describe('release service', () => {
         }),
         db: {
           query: jest.fn().mockReturnValue({
+            create: jest.fn().mockReturnValue({
+              type: 'publish',
+              entry: { id: 1, contentType: 'api::contentType.contentType' },
+            }),
             findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            count: jest.fn(),
             update: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
           }),
         },
@@ -247,8 +262,10 @@ describe('release service', () => {
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue(null),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue(null),
+          }),
         },
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
@@ -273,8 +290,10 @@ describe('release service', () => {
     it('throws an error if the release is already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', releasedAt: new Date() }),
+          }),
         },
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
@@ -302,8 +321,11 @@ describe('release service', () => {
     it('throws an error if the release does not exist', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue(null),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue(null),
+            update: jest.fn(),
+          }),
         },
       };
 
@@ -316,8 +338,11 @@ describe('release service', () => {
     it('throws an error if the release is already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ releasedAt: new Date() }),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ releasedAt: new Date() }),
+            update: jest.fn(),
+          }),
         },
       };
 
@@ -330,8 +355,11 @@ describe('release service', () => {
     it('throws an error if the release have 0 actions', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ releasedAt: null, actions: [] }),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ releasedAt: null, actions: [] }),
+            update: jest.fn(),
+          }),
         },
       };
 
@@ -362,9 +390,17 @@ describe('release service', () => {
         }),
       };
 
+      const findOne = jest.fn();
+      const findMany = jest.fn();
+
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          query: jest.fn(() => ({
+            findOne,
+            findMany,
+            update: jest.fn().mockReturnValue({}),
+          })),
           transaction: jest.fn().mockImplementation((fn) => fn({ onRollback: jest.fn() })),
         },
         plugin: jest.fn().mockReturnValue({
@@ -374,11 +410,6 @@ describe('release service', () => {
               return servicesMock[service];
             }),
         }),
-        entityService: {
-          findOne: jest.fn(),
-          findMany: jest.fn(),
-          update: jest.fn().mockReturnValue({}),
-        },
         contentTypes: {
           collectionType: {
             kind: 'collectionType',
@@ -393,7 +424,7 @@ describe('release service', () => {
       const releaseService = createReleaseService({ strapi: strapiMock });
 
       // We mock the first call to findOne to get the release info
-      strapiMock.entityService.findOne.mockReturnValueOnce({
+      findOne.mockReturnValueOnce({
         releasedAt: null,
         actions: [
           {
@@ -420,20 +451,21 @@ describe('release service', () => {
       });
 
       // We mock the calls to findOne to get singleType entries info
-      strapiMock.entityService.findOne.mockReturnValueOnce({
+      findOne.mockReturnValueOnce({
         id: 3,
       });
 
-      strapiMock.entityService.findOne.mockReturnValueOnce({
+      findOne.mockReturnValueOnce({
         id: 4,
       });
 
-      strapiMock.entityService.findMany.mockReturnValueOnce([
+      findMany.mockReturnValueOnce([
         {
           id: 1,
         },
       ]);
-      strapiMock.entityService.findMany.mockReturnValueOnce([
+
+      findMany.mockReturnValueOnce([
         {
           id: 2,
         },
@@ -480,11 +512,13 @@ describe('release service', () => {
     it('deletes the release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-        },
         db: {
+          query() {
+            return {
+              findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+              delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            };
+          },
           transaction: jest.fn(),
         },
       };
@@ -500,8 +534,12 @@ describe('release service', () => {
     it('throws an error if the release does not exist or was already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue(null),
+        db: {
+          query() {
+            return {
+              findOne: jest.fn().mockReturnValue(null),
+            };
+          },
         },
       };
 
@@ -514,8 +552,10 @@ describe('release service', () => {
     it('throws an error if the release is already published', () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ releasedAt: new Date() }),
+        db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ releasedAt: new Date() }),
+          }),
         },
       };
 
@@ -528,11 +568,11 @@ describe('release service', () => {
     it('removes the scheduling if the release is scheduled', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
-          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-        },
         db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: new Date() }),
+            delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
           transaction: jest.fn(),
         },
       };
@@ -548,11 +588,11 @@ describe('release service', () => {
     it('does not remove the scheduling if the release is not scheduled', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-          delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
-        },
         db: {
+          query: () => ({
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            delete: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
           transaction: jest.fn(),
         },
       };
@@ -664,10 +704,8 @@ describe('release service', () => {
           query: jest.fn().mockReturnValue({
             delete: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
             update: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
+            count: jest.fn(),
           }),
-        },
-        entityService: {
-          count: jest.fn(),
         },
       };
 
@@ -685,6 +723,7 @@ describe('release service', () => {
         db: {
           query: jest.fn().mockReturnValue({
             delete: jest.fn().mockReturnValue(null),
+            updated: jest.fn().mockReturnValue(null),
           }),
         },
       };
@@ -738,10 +777,14 @@ describe('release service', () => {
 
   describe('create', () => {
     it('should set creator fields', async () => {
+      const createFn = jest.fn().mockReturnValue({ id: 1, name: 'test' });
+
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          create: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        db: {
+          query: () => ({
+            create: createFn,
+          }),
         },
       };
 
@@ -750,12 +793,12 @@ describe('release service', () => {
 
       const mockReleaseArgs = {
         name: 'Release name',
-      };
+      } as any;
 
       const release = await releaseService.create(mockReleaseArgs, { user: mockUser });
 
       expect(release).toEqual({ id: 1, name: 'test' });
-      expect(strapiMock.entityService.create).toHaveBeenCalledWith(RELEASE_MODEL_UID, {
+      expect(createFn).toHaveBeenCalledWith({
         data: {
           createdBy: mockUser.id,
           updatedBy: mockUser.id,
@@ -768,8 +811,10 @@ describe('release service', () => {
     it('should create a release', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          create: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+        db: {
+          query: () => ({
+            create: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+          }),
         },
       };
 
@@ -790,8 +835,10 @@ describe('release service', () => {
 
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          create: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: scheduledDate }),
+        db: {
+          query: () => ({
+            create: jest.fn().mockReturnValue({ id: 1, name: 'test', scheduledAt: scheduledDate }),
+          }),
         },
       };
 

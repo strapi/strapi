@@ -1,4 +1,4 @@
-import { setCreatorFields, errors } from '@strapi/utils';
+import { setCreatorFields, errors, convertQueryParams } from '@strapi/utils';
 
 import type { LoadedStrapi, EntityService, UID, Schema } from '@strapi/types';
 
@@ -76,7 +76,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
       ]);
 
-      const release = await strapi.entityService.create(RELEASE_MODEL_UID, {
+      const release = await strapi.db.query(RELEASE_MODEL_UID).create({
         data: {
           ...releaseWithCreatorFields,
           status: 'empty',
@@ -98,19 +98,22 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     },
 
     async findOne(id: GetRelease.Request['params']['id'], query = {}) {
-      const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id, {
-        ...query,
+      const dbQuery = convertQueryParams.transformParamsToQuery(RELEASE_MODEL_UID, query);
+      const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
+        ...dbQuery,
+        where: { id },
       });
 
       return release;
     },
 
     findPage(query?: GetReleases.Request['query']) {
-      return strapi.entityService.findPage(RELEASE_MODEL_UID, {
-        ...query,
+      const dbQuery = convertQueryParams.transformParamsToQuery(RELEASE_MODEL_UID, query ?? {});
+
+      return strapi.db.query(RELEASE_MODEL_UID).findPage({
+        ...dbQuery,
         populate: {
           actions: {
-            // @ts-expect-error Ignore missing properties
             count: true,
           },
         },
@@ -230,7 +233,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         validateScheduledAtIsLaterThanNow(releaseWithCreatorFields.scheduledAt),
       ]);
 
-      const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, id);
+      const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({ where: { id } });
 
       if (!release) {
         throw new errors.NotFoundError(`No release found for id ${id}`);
@@ -240,12 +243,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         throw new errors.ValidationError('Release already published');
       }
 
-      const updatedRelease = await strapi.entityService.update(RELEASE_MODEL_UID, id, {
-        /*
-         * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">>
-         * is not compatible with the type we are passing here: UpdateRelease.Request['body']
-         */
-        // @ts-expect-error see above
+      const updatedRelease = await strapi.db.query(RELEASE_MODEL_UID).update({
+        where: { id },
         data: releaseWithCreatorFields,
       });
 
@@ -281,7 +280,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         validateUniqueEntry(releaseId, action),
       ]);
 
-      const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId);
+      const release = await strapi.db
+        .query(RELEASE_MODEL_UID)
+        .findOne({ where: { id: releaseId } });
 
       if (!release) {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -294,10 +295,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
       const { entry, type } = action;
 
       const populatedEntry = await getPopulatedEntry(entry.contentType, entry.id, { strapi });
-      // @ts-expect-error – TODO: fix this error where populatedEntry _could_ be `null`.
       const isEntryValid = await getEntryValidStatus(entry.contentType, populatedEntry, { strapi });
 
-      const releaseAction = await strapi.entityService.create(RELEASE_ACTION_MODEL_UID, {
+      const releaseAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).create({
         data: {
           type,
           contentType: entry.contentType,
@@ -310,7 +310,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
           },
           release: releaseId,
         },
-        populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
+        populate: { release: { select: ['id'] }, entry: { select: ['id'] } },
       });
 
       this.updateReleaseStatus(releaseId);
@@ -322,22 +322,28 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
       releaseId: GetReleaseActions.Request['params']['releaseId'],
       query?: GetReleaseActions.Request['query']
     ) {
-      const release = await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
-        fields: ['id'],
+      const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
+        where: { id: releaseId },
+        select: ['id'],
       });
 
       if (!release) {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      return strapi.entityService.findPage(RELEASE_ACTION_MODEL_UID, {
-        ...query,
+      const dbQuery = convertQueryParams.transformParamsToQuery(
+        RELEASE_ACTION_MODEL_UID,
+        query ?? {}
+      );
+
+      return strapi.db.query(RELEASE_ACTION_MODEL_UID).findPage({
+        ...dbQuery,
         populate: {
           entry: {
             populate: '*',
           },
         },
-        filters: {
+        where: {
           release: releaseId,
         },
       });
@@ -346,7 +352,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     async countActions(
       query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
     ) {
-      return strapi.entityService.count(RELEASE_ACTION_MODEL_UID, query);
+      const dbQuery = convertQueryParams.transformParamsToQuery(
+        RELEASE_ACTION_MODEL_UID,
+        query ?? {}
+      );
+
+      return strapi.db.query(RELEASE_ACTION_MODEL_UID).count(dbQuery);
     },
 
     async groupActions(actions: ReleaseAction[], groupBy: ReleaseActionGroupBy) {
@@ -461,13 +472,14 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     },
 
     async delete(releaseId: DeleteRelease.Request['params']['id']) {
-      const release = (await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
+      const release: Release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
+        where: { id: releaseId },
         populate: {
           actions: {
-            fields: ['id'],
+            select: ['id'],
           },
         },
-      })) as unknown as Release;
+      });
 
       if (!release) {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -487,7 +499,12 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
             },
           },
         });
-        await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
+
+        await strapi.db.query(RELEASE_MODEL_UID).delete({
+          where: {
+            id: releaseId,
+          },
+        });
       });
 
       if (strapi.features.future.isEnabled('contentReleasesScheduling') && release.scheduledAt) {
@@ -503,21 +520,20 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     async publish(releaseId: PublishRelease.Request['params']['id']) {
       try {
         // We need to pass the type because entityService.findOne is not returning the correct type
-        const releaseWithPopulatedActionEntries = (await strapi.entityService.findOne(
-          RELEASE_MODEL_UID,
-          releaseId,
-          {
+        const releaseWithPopulatedActionEntries: Release = await strapi.db
+          .query(RELEASE_MODEL_UID)
+          .findOne({
+            where: { id: releaseId },
             populate: {
               actions: {
                 populate: {
                   entry: {
-                    fields: ['id'],
+                    select: ['id'],
                   },
                 },
               },
             },
-          }
-        )) as unknown as Release;
+          });
 
         if (!releaseWithPopulatedActionEntries) {
           throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -581,7 +597,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
             // @ts-expect-error - populateBuilderService should be a function but is returning service
             const populate = await populateBuilderService(uid).populateDeep(Infinity).build();
 
-            const entry = await strapi.entityService.findOne(uid, id, { populate });
+            const entry = await strapi.db.query(uid).findOne({ where: { id }, populate });
 
             try {
               if (action === 'publish') {
@@ -616,29 +632,23 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
              * Considering that populate doesn't work well with morph relations we can't get the entries from the Release model
              * So, we need to fetch them manually
              */
-            const entriesToPublish = (await strapi.entityService.findMany(
-              contentTypeUid as UID.ContentType,
-              {
-                filters: {
-                  id: {
-                    $in: entriestoPublishIds,
-                  },
+            const entriesToPublish: Entity[] = await strapi.db.query(contentTypeUid).findMany({
+              where: {
+                id: {
+                  $in: entriestoPublishIds,
                 },
-                populate,
-              }
-            )) as Entity[];
+              },
+              populate,
+            });
 
-            const entriesToUnpublish = (await strapi.entityService.findMany(
-              contentTypeUid as UID.ContentType,
-              {
-                filters: {
-                  id: {
-                    $in: entriesToUnpublishIds,
-                  },
+            const entriesToUnpublish: Entity[] = await strapi.db.query(contentTypeUid).findMany({
+              where: {
+                id: {
+                  $in: entriesToUnpublishIds,
                 },
-                populate,
-              }
-            )) as Entity[];
+              },
+              populate,
+            });
 
             if (entriesToPublish.length > 0) {
               await entityManagerService.publishMany(entriesToPublish, contentTypeUid);
@@ -651,17 +661,13 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         });
 
         // When the transaction fails it throws an error, when it is successful proceed to updating the release
-        const release = (await strapi.entityService.update(RELEASE_MODEL_UID, releaseId, {
+        const release = (await strapi.db.query(RELEASE_MODEL_UID).update({
+          where: { id: releaseId },
           data: {
-            /*
-             * The type returned from the entity service: Partial<Input<"plugin::content-releases.release">> looks like it's wrong
-             */
-            // @ts-expect-error see above
             releasedAt: new Date(),
           },
           populate: {
             actions: {
-              // @ts-expect-error is not expecting count but it is working
               count: true,
             },
           },
