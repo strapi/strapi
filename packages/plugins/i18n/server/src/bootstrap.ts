@@ -3,6 +3,18 @@ import type { Strapi } from '@strapi/strapi';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
+  strapi.db.lifecycles.subscribe({
+    models: ['plugin::i18n.locale'],
+
+    async afterCreate() {
+      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+    },
+
+    async afterDelete() {
+      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+    },
+  });
+
   const i18nModelUIDs = Object.values(strapi.contentTypes)
     .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
     .map((contentType) => contentType.uid);
