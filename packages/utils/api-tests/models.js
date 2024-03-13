@@ -2,6 +2,7 @@
 
 const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
+const componentData = require('../../core/core/src/services/entity-service/components');
 
 const toContentTypeUID = (name) => {
   return name.includes('::') ? name : `api::${name}.${name}`;
@@ -149,7 +150,7 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
     const entries = [];
 
     for (const data of dataMap[model]) {
-      entries.push(await strapi.entityService.create(toContentTypeUID(model), { data }));
+      entries.push(await strapi.db.query(toContentTypeUID(model)).create({ data }));
     }
 
     resultMap[model] = entries;
@@ -162,15 +163,24 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
 
 async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
+
+  const uid = toContentTypeUID(model);
+  const contentType = strapi.getModel(uid);
+
   const results = [];
 
   for (const entry of entries) {
     const dataToCreate = isFunction(entry) ? entry(results) : entry;
-    results.push(
-      await strapi.entityService.create(toContentTypeUID(model), {
-        data: dataToCreate,
-      })
+
+    const componentValidData = await componentData.createComponents(uid, dataToCreate);
+    const entryData = Object.assign(
+      componentData.omitComponentData(contentType, dataToCreate),
+      componentValidData
     );
+
+    const res = await strapi.db.query(uid).create({ data: entryData });
+
+    results.push(res);
   }
 
   await cleanup();

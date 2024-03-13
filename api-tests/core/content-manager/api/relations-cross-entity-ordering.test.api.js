@@ -224,13 +224,10 @@ describe.skip('Relations', () => {
         []
       );
 
-      const updatedShop2 = await strapi.entityService.findOne(
-        'api::shop.shop',
-        shops[1].documentId,
-        {
-          populate: populateShop,
-        }
-      );
+      const updatedShop2 = await strapi.db.query('api::shop.shop').findOne({
+        where: { documentId: shops[1].documentId },
+        populate: populateShop,
+      });
 
       // shop2 relations should be unchanged
       expect(updatedShop2.products_om).toMatchObject([{ id: id1 }, { id: id2 }]);

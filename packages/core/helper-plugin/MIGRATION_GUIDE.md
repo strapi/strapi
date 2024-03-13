@@ -433,6 +433,10 @@ This component has been removed and not replaced. If you feel like you need this
 
 This util has been removed and not replaced, use async / await with try / catch instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### difference
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### prefixFileUrlWithBackendUrl
 
 This util has been removed and not replaced. Use the strapi backendUrl to prefix the relative url if you need. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.

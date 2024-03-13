@@ -49,6 +49,7 @@ const labelModel = {
 };
 
 const labels = [{ name: 'label 1' }, { name: 'label 2' }];
+
 const articles = ({ label: labels }) => {
   const labelIds = labels.map((label) => label.id);
   return [
@@ -112,7 +113,10 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       expect(body).toMatchObject({
         data: {
           labels_connection: {
-            data: labels.map((label) => ({ documentId: expect.any(String), attributes: label })),
+            data: labels.map((label) => ({
+              documentId: expect.any(String),
+              attributes: pick('name', label),
+            })),
           },
         },
       });

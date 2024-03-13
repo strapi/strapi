@@ -60,10 +60,12 @@ const homepageModel = {
 
 const homepages = [
   {
+    document: 'a',
     title: 'homepage title',
     locale: 'en',
   },
   {
+    document: 'a',
     title: '홈페이지 제목',
     locale: 'ko',
   },
@@ -71,10 +73,12 @@ const homepages = [
 
 const categories = [
   {
+    documentId: 'a',
     name: 'post',
     locale: 'en',
   },
   {
+    documentId: 'a',
     name: '게시물',
     locale: 'ko',
   },

@@ -138,17 +138,20 @@ describe('Entity service decorator', () => {
       const emit = jest.fn();
       global.strapi = {
         ...global.strapi,
-        entityService: {
-          findOne: jest.fn(() => {
+        db: {
+          query() {
             return {
-              [ENTITY_STAGE_ATTRIBUTE]: {
-                id: stageFromId,
-                name: `Stage ${stageFromId}`,
-                workflow: { id: workflowId },
-              },
+              findOne: jest.fn(() => {
+                return {
+                  [ENTITY_STAGE_ATTRIBUTE]: {
+                    id: stageFromId,
+                    name: `Stage ${stageFromId}`,
+                    workflow: { id: workflowId },
+                  },
+                };
+              }),
             };
-          }),
-          emitEvent: jest.fn(),
+          },
         },
         getModel: jest.fn(() => ({
           modelName: uid,

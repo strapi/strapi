@@ -23,15 +23,15 @@ Transactions are handled by passing a handler function into `strapi.db.transacti
 ```js
 await strapi.db.transaction(async ({ trx, rollback, commit, onCommit, onRollback }) => {
   // It will implicitly use the transaction
-  await strapi.entityService.create();
-  await strapi.entityService.create();
+  await strapi.db.create();
+  await strapi.db.create();
 });
 ```
 
 After the transaction handler is executed, the transaction is committed if all operations succeed. If any of the operations throws, the transaction is rolled back and the data is restored to its previous state.
 
 :::note
-Every `strapi.entityService` or `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
+Every `strapi.db.query` operation performed in a transaction block will implicitly use the transaction.
 :::
 
 ### Transaction handler properties
@@ -53,11 +53,11 @@ Transactions can be nested. When a transaction is nested, the inner transaction 
 ```js
 await strapi.db.transaction(async () => {
   // It will implicitly use the transaction
-  await strapi.entityService.create();
+  await strapi.db.create();
 
   // Nested transactions will implicitly use the outer transaction
   await strapi.db.transaction(async ({}) => {
-    await strapi.entityService.create();
+    await strapi.db.create();
   });
 });
 ```
@@ -69,8 +69,8 @@ The `onCommit` and `onRollback` hooks can be used to execute code after the tran
 ```js
 await strapi.db.transaction(async ({ onCommit, onRollback }) => {
   // It will implicitly use the transaction
-  await strapi.entityService.create();
-  await strapi.entityService.create();
+  await strapi.db.create();
+  await strapi.db.create();
 
   onCommit(() => {
     // This will be executed after the transaction is committed

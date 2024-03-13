@@ -54,12 +54,9 @@ export default ({ strapi }: Context) => {
           auth,
         });
 
-        const data = await strapi.entityService!.load(
-          contentTypeUID,
-          parent,
-          attributeName,
-          sanitizedQuery
-        );
+        const data = await strapi.db
+          ?.query(contentTypeUID)
+          .load(parent, attributeName, sanitizedQuery);
 
         const info = {
           args: sanitizedQuery,

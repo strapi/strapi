@@ -78,7 +78,7 @@ module.exports = ({ strapi }) => ({
     const averageDeviationDepth = folderNumber !== 0 ? sumOfDeviation / folderNumber : 0;
 
     // File metrics
-    const assetNumber = await strapi.entityService.count(FILE_MODEL_UID);
+    const assetNumber = await strapi.db.query(FILE_MODEL_UID).count();
 
     return {
       assetNumber,

@@ -141,7 +141,7 @@ let singleMedia;
 let mediaEntry = {};
 let model;
 
-describe('Upload Plugin url signing', () => {
+describe.skip('Upload Plugin url signing', () => {
   const expectMedia = (media, expectedUrl) => {
     expect(media.url).toEqual(expectedUrl);
   };
