@@ -46,7 +46,6 @@ export * from './hooks/useSelectionState';
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './utils/auth';
-export * from './utils/awaitToJs';
 export * from './utils/difference';
 export * from './utils/getAPIInnerErrors';
 export * from './utils/getFetchClient';
@@ -58,10 +57,8 @@ export * from './utils/prefixFileUrlWithBackendUrl';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/pxToRem';
 export * from './utils/request';
-export * from './utils/setHexOpacity';
 export * from './utils/stopPropagation';
 export * from './utils/translatedErrors';
-export * from './utils/wrapAxiosInstance';
 
 /* -------------------------------------------------------------------------------------------------
  * Types

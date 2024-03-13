@@ -31,7 +31,9 @@ const getAPIUploadFolder = async () => {
   const storeValue = await getStore().get();
   const folderId = get('id', storeValue);
 
-  const folder = folderId ? await strapi.entityService.findOne(FOLDER_MODEL_UID, folderId) : null;
+  const folder = folderId
+    ? await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id: folderId } })
+    : null;
 
   return isNil(folder) ? createApiUploadFolder() : folder;
 };

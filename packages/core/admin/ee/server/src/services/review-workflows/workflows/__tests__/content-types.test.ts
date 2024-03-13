@@ -45,13 +45,8 @@ const pluginsMock: Record<string, any> = {
   'content-manager': contentManagerPluginMock,
 };
 
-const entityServiceMock = {
-  update: jest.fn(),
-};
-
 const strapiMock = {
   plugin: jest.fn((pluginName) => pluginsMock[pluginName]),
-  entityService: entityServiceMock,
 } as any;
 
 describe('Review Workflows', () => {

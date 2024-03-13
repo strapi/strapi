@@ -6,7 +6,9 @@
     "pluralName": "testings",
     "displayName": "testing"
   },
-  "options": {},
+  "options": {
+    "draftAndPublish": true
+  },
   "attributes": {
     "title": {
       "type": "string"

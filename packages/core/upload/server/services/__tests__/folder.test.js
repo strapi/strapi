@@ -18,9 +18,11 @@ describe('folder', () => {
               }),
             }),
           }),
-        },
-        entityService: {
-          findOne: jest.fn(() => ({ path: `/${folderUID}` })),
+          query() {
+            return {
+              findOne: jest.fn(() => ({ path: `/${folderUID}` })),
+            };
+          },
         },
       };
     });

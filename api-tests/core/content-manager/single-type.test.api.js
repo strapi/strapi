@@ -15,6 +15,7 @@ const ct = {
   displayName: 'single-type-model',
   singularName: 'single-type-model',
   pluralName: 'single-type-models',
+  draftAndPublish: true,
   attributes: {
     title: {
       type: 'string',
@@ -60,7 +61,6 @@ const unpublish = async (discardDraft = false) => {
   });
 };
 
-// TODO: Migrate single types to use document service
 describe('Content Manager single types', () => {
   beforeAll(async () => {
     await builder.addContentType(ct).build();

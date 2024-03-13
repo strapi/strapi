@@ -1,6 +1,6 @@
 import { LoadedStrapi as Strapi } from '@strapi/types';
 import { set, isString, map, get } from 'lodash/fp';
-import { errors } from '@strapi/utils';
+import { convertQueryParams, errors } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../../constants/workflows';
 import { getService } from '../../../utils';
 import { getWorkflowContentTypeFilter } from '../../../utils/review-workflows';
@@ -43,7 +43,13 @@ export default ({ strapi }: { strapi: Strapi }) => {
       const filters = processFilters({ strapi }, opts.filters);
       const populate = processPopulate(opts.populate);
 
-      return strapi.entityService.findMany(WORKFLOW_MODEL_UID, { ...opts, filters, populate });
+      const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, {
+        ...opts,
+        filters,
+        populate,
+      });
+
+      return strapi.db.query(WORKFLOW_MODEL_UID).findMany(query);
     },
 
     /**
@@ -52,9 +58,15 @@ export default ({ strapi }: { strapi: Strapi }) => {
      * @param {object} opts - Options for the query.
      * @returns {Promise<object>} - Workflow object matching the requested ID.
      */
-    findById(id: any, opts: any) {
+    findById(id: any, opts: { populate?: any } = {}) {
       const populate = processPopulate(opts.populate);
-      return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, { ...opts, populate });
+
+      const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, { populate });
+
+      return strapi.db.query(WORKFLOW_MODEL_UID).findOne({
+        ...query,
+        where: { id },
+      });
     },
 
     /**
@@ -63,7 +75,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
      * @returns {Promise<object>} - Workflow object that was just created.
      * @throws {ValidationError} - If the workflow has no stages.
      */
-    async create(opts: any) {
+    async create(opts: { data: any }) {
       let createOpts = { ...opts, populate: WORKFLOW_POPULATE };
 
       workflowsValidationService.validateWorkflowStages(opts.data.stages);
@@ -87,7 +99,9 @@ export default ({ strapi }: { strapi: Strapi }) => {
         metrics.sendDidCreateWorkflow();
 
         // Create Workflow
-        return strapi.entityService.create(WORKFLOW_MODEL_UID, createOpts);
+        return strapi.db
+          .query(WORKFLOW_MODEL_UID)
+          .create(convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, createOpts));
       });
     },
 
@@ -131,8 +145,13 @@ export default ({ strapi }: { strapi: Strapi }) => {
 
         metrics.sendDidEditWorkflow();
 
+        const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, updateOpts);
+
         // Update Workflow
-        return strapi.entityService.update(WORKFLOW_MODEL_UID, workflow.id, updateOpts);
+        return strapi.db.query(WORKFLOW_MODEL_UID).update({
+          ...query,
+          where: { id: workflow.id },
+        });
       });
     },
 
@@ -162,8 +181,12 @@ export default ({ strapi }: { strapi: Strapi }) => {
           destContentTypes: [],
         });
 
+        const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, opts);
         // Delete Workflow
-        return strapi.entityService.delete(WORKFLOW_MODEL_UID, workflow.id, opts);
+        return strapi.db.query(WORKFLOW_MODEL_UID).delete({
+          ...query,
+          where: { id: workflow.id },
+        });
       });
     },
     /**
@@ -171,7 +194,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
      * @returns {Promise<number>} - Total count of workflows.
      */
     count() {
-      return strapi.entityService.count(WORKFLOW_MODEL_UID);
+      return strapi.db.query(WORKFLOW_MODEL_UID).count();
     },
 
     /**
@@ -183,7 +206,6 @@ export default ({ strapi }: { strapi: Strapi }) => {
     async getAssignedWorkflow(uid: any, opts: any = {}) {
       const workflows = await this._getAssignedWorkflows(uid, opts);
 
-      // @ts-expect-error handle workflow null case
       return workflows.length > 0 ? workflows[0] : null;
     },
 
@@ -212,9 +234,11 @@ export default ({ strapi }: { strapi: Strapi }) => {
       const workflow = await this.getAssignedWorkflow(uid, {
         populate: 'stages',
       });
+
       if (!workflow) {
         throw new ApplicationError(`Review workflows is not activated on Content Type ${uid}.`);
       }
+
       return workflow;
     },
 

@@ -12,6 +12,7 @@ const model = {
   pluralName: 'products',
   displayName: 'Product',
   kind: 'collectionType',
+  draftAndPublish: true,
   attributes: {
     name: {
       type: 'string',

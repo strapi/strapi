@@ -8,7 +8,7 @@ const { getService } = require('../utils');
 const getFolderPath = async (folderId) => {
   if (!folderId) return '/';
 
-  const parentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, folderId);
+  const parentFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id: folderId } });
 
   return parentFolder.path;
 };
