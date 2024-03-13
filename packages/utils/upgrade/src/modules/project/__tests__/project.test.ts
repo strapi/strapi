@@ -23,6 +23,8 @@ const srcFiles = {
   'b.ts': 'console.log("b.ts")',
   'c.js': 'console.log("c.js")',
   'd.json': `{ "foo": "bar", "bar": 123 }`,
+  'e.jsx': `console.log('e.jsx')`,
+  'f.tsx': `console.log('f.tsx')`,
 };
 
 const defaultVolume = { 'package.json': packageJSONFile, src: srcFiles };
@@ -92,7 +94,7 @@ describe('Project', () => {
 
       const project = projectFactory(defaultCWD);
 
-      expect(project.files.length).toBe(5);
+      expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
         expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
       );
@@ -111,7 +113,7 @@ describe('Project', () => {
 
       project.refresh();
 
-      expect(project.files.length).toBe(5);
+      expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
         expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
       );
@@ -147,6 +149,22 @@ describe('Project', () => {
       expect(tsFiles).toStrictEqual(
         expect.arrayContaining([srcFilename(defaultCWD, 'a.ts'), srcFilename(defaultCWD, 'b.ts')])
       );
+    });
+
+    test('Get .jsx files only', () => {
+      const project = projectFactory(defaultCWD);
+
+      const tsFiles = project.getFilesByExtensions(['.jsx']);
+
+      expect(tsFiles).toStrictEqual(expect.arrayContaining([srcFilename(defaultCWD, 'e.jsx')]));
+    });
+
+    test('Get .tsx files only', () => {
+      const project = projectFactory(defaultCWD);
+
+      const tsFiles = project.getFilesByExtensions(['.tsx']);
+
+      expect(tsFiles).toStrictEqual(expect.arrayContaining([srcFilename(defaultCWD, 'f.tsx')]));
     });
 
     test('Get both .js and .ts files', () => {
