@@ -1,13 +1,19 @@
-import type { LoadedStrapi } from '@strapi/types';
+import type { Entity, LoadedStrapi } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
 import { HISTORY_VERSION_UID } from '../constants';
-
 import type { HistoryVersions } from '../../../../shared/contracts';
 
 const DEFAULT_RETENTION_DAYS = 90;
+
+type NextDocument = HistoryVersions.CreateHistoryVersion['data'] & {
+  documentId: Entity.ID;
+  locale: string | null;
+  publishedAt: string | null;
+  updatedAt: string | null;
+};
 
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const state: {
@@ -34,7 +40,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
-  // TODO: Refactor so i18n can interact with history without history itself being concerned about i18n
   const getLocaleDictionary = async () => {
     if (!strapi.plugin('i18n')) {
       return {};
@@ -56,16 +61,12 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    data: HistoryVersions.CreateHistoryVersion['data']
+    data: NextDocument
   ) => {
-    try {
-      const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
-      const meta = await documentMetadataService.getMetadata(contentTypeUid, data);
+    const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
+    const meta = await documentMetadataService.getMetadata(contentTypeUid, data);
 
-      return documentMetadataService.getStatus(data, meta.availableStatus);
-    } catch (error) {
-      console.error(error);
-    }
+    return documentMetadataService.getStatus(data, meta.availableStatus);
   };
 
   return {
@@ -89,10 +90,22 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           return next(context);
         }
 
-        const params = context.args.at(-1) as any;
         const result = (await next(context)) as any;
-        const data = context.action === 'publish' ? result.versions[0] : result;
-        const relatedDocumentId = 'documentId' in result ? result.documentId : context.args[0];
+        /**
+         * Publish actions store the created data on the result's versions array.
+         * Otherwise, for create and update, the data is the result.
+         *
+         * TODO: Fix unpublish which is broken since the data that was unpublished is not passed to the middleware
+         */
+        const data: NextDocument = context.action === 'publish' ? result.versions[0] : result;
+
+        /**
+         * The documentId should exist on the created data, fallback to context to handle the broken unpublish action
+         *
+         * TODO: Always get the documentId from the same place (data) once unpublish is fixed
+         */
+        const relatedDocumentId = data.documentId ?? context.args[0];
+        // Compute the status of the version
         const status = await getVersionStatus(contentTypeUid, data);
 
         const fieldsToIgnore = [
@@ -112,8 +125,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              locale: params.locale,
-              // TODO: check if drafts should should be "modified" once D&P is ready
+              locale: data.locale,
               data: omit(fieldsToIgnore, data),
               schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
               relatedDocumentId,

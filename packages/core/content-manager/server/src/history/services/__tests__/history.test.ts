@@ -22,6 +22,16 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockStrapi = {
+  plugins: {
+    'content-manager': {
+      service: jest.fn(() => ({
+        getMetadata: jest.fn().mockResolvedValue([]),
+        getStatus: jest.fn(),
+      })),
+    },
+  },
+  // @ts-expect-error - Ignore
+  plugin: (plugin: string) => mockStrapi.plugins[plugin],
   db: {
     query(uid: UID.ContentType) {
       if (uid === HISTORY_VERSION_UID) {
@@ -110,8 +120,12 @@ describe('history-version service', () => {
 
     // Publish and unpublish actions should be saved in history
     createMock.mockClear();
-    context.action = 'publish';
-    await historyMiddlewareFunction(context, next);
+    const publishContext = {
+      ...context,
+      action: 'publish',
+      versions: [{ documentId: 'document-id' }],
+    };
+    await historyMiddlewareFunction(publishContext, next);
     context.action = 'unpublish';
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(2);
