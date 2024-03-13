@@ -35,6 +35,7 @@ const product = {
       },
     },
   },
+  draftAndPublish: true,
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',

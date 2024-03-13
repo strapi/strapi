@@ -20,6 +20,7 @@ const bedModel = {
   singularName: 'bed',
   pluralName: 'beds',
   kind: 'collectionType',
+  draftAndPublish: true,
   options: {
     noStageAttribute: true,
   },
