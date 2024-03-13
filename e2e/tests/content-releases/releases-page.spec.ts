@@ -10,13 +10,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
-
-    await page.evaluate(() => {
-      // Remove after Scheduling Beta release
-      window.strapi.future = {
-        isEnabled: () => true,
-      };
-    });
   });
 
   test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
@@ -87,8 +80,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         name: 'Time *',
       })
       .click();
-    await page.getByRole('option', { name: '14:00' }).click();
 
+    await page.getByRole('option', { name: '14:00' }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
