@@ -80,7 +80,9 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
        */
       strapi.documents.use(async (context, next) => {
         // Ignore actions that don't mutate documents
-        if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
+        if (
+          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
+        ) {
           return next(context);
         }
         // @ts-expect-error ContentType is not typed correctly on the context
@@ -92,13 +94,15 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
         const result = (await next(context)) as any;
         /**
-         * Publish actions store the created data on the result's versions array.
-         * Otherwise, for create and update, the data is the result.
+         * Publish and discardDraft actions store the created data on the result's versions array.
+         * Otherwise, we assume the data is the result.
          *
          * TODO: Fix unpublish which is broken since the data that was unpublished is not passed to the middleware
          */
-        const data: NextDocument = context.action === 'publish' ? result.versions[0] : result;
-
+        const data: NextDocument =
+          context.action === 'publish' || context.action === 'discardDraft'
+            ? result.versions[0]
+            : result;
         /**
          * The documentId should exist on the created data, fallback to context to handle the broken unpublish action
          *
@@ -107,7 +111,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         const relatedDocumentId = data.documentId ?? context.args[0];
         // Compute the status of the version
         const status = await getVersionStatus(contentTypeUid, data);
-
         const fieldsToIgnore = [
           'createdAt',
           'updatedAt',
