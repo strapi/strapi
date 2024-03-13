@@ -111,6 +111,10 @@ export interface Strapi extends Container {
    * @deprecated will be removed in the next major
    */
   entityService?: EntityService.EntityService;
+  /**
+   * @description Documents API might change in the future.
+   * @beta
+   */
   documents?: Documents.Service;
   telemetry: TelemetryService;
   requestContext: RequestContext;
