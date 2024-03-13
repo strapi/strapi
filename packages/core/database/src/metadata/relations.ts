@@ -340,7 +340,7 @@ const createMorphToMany = (
         name: fkIndexName,
         columns: [joinColumnName],
         referencedColumns: [ID],
-        referencedTable: identifiers.getTableName(meta.tableName, options),
+        referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
     ],
