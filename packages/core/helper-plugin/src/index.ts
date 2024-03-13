@@ -46,7 +46,6 @@ export * from './hooks/useSelectionState';
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './utils/auth';
-export * from './utils/difference';
 export * from './utils/getAPIInnerErrors';
 export * from './utils/getFetchClient';
 export * from './utils/getFileExtension';
