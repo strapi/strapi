@@ -63,6 +63,7 @@ import {
   AutoCloneFailureModal,
   type ProhibitedCloningField,
 } from './components/AutoCloneFailureModal';
+import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { BulkActionButtons } from './components/BulkActions/Buttons';
 import { Filter } from './components/Filter';
 import { Table } from './components/Table';
@@ -712,13 +713,14 @@ const ListViewPage = ({
           <Flex gap={4} direction="column" alignItems="stretch">
             <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
-                <BulkActionButtons
+                {/* <BulkActionButtons
                   showPublish={canPublish && hasDraftAndPublish}
                   showDelete={canDelete}
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
                   refetchData={refetch}
-                />
+                /> */}
+                <BulkActionsRenderer />
               </HelperPluginTable.ActionBar>
               <HelperPluginTable.Content>
                 <HelperPluginTable.Head>

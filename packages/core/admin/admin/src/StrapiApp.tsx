@@ -573,9 +573,11 @@ class StrapiApp {
           customFields={this.customFields}
           localeNames={localeNames}
           getAdminInjectedComponents={this.getAdminInjectedComponents}
+          // @ts-expect-error - TS doesn't like the fact that this can be null
           getPlugin={this.getPlugin}
           messages={this.configurations.translations}
           menu={this.menu}
+          // @ts-expect-error - 'string' index signatures are incompatible
           plugins={this.plugins}
           runHookParallel={this.runHookParallel}
           runHookWaterfall={(name, initialValue, async = false) => {

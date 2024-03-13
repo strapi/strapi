@@ -9,6 +9,7 @@ export interface PluginConfig
 
 export class Plugin implements IPlugin {
   apis: IPlugin['apis'];
+  // @ts-expect-error - TS doesn't like the fact that this can be null
   initializer: IPlugin['initializer'] | null;
   injectionZones: IPlugin['injectionZones'];
   isReady: IPlugin['isReady'];

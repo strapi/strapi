@@ -5,9 +5,14 @@
  * main StrapiApp class.
  */
 
+import {
+  DEFAULT_BULK_ACTIONS,
+  type BulkActionDescription,
+} from '../../content-manager/pages/ListView/components/BulkActions/Actions';
+
 import type { PluginConfig } from './Plugin';
 import type { DescriptionComponent } from '../../components/DescriptionComponentRenderer';
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { Entity } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Types
@@ -17,30 +22,30 @@ type DescriptionReducer<Config extends object> = (prev: Config[]) => Config[];
 
 interface Context {
   /**
-   * This will ONLY be null, if the content-type
-   * does not have draft & published enabled.
-   */
-  activeTab: 'draft' | 'published' | null;
-  /**
    * Will be either 'single-types' | 'collection-types'
    */
   collectionType: string;
   /**
    * this will be undefined if someone is creating an entry.
    */
-  document?: Document;
+  entity?: Document;
   /**
    * this will be undefined if someone is creating an entry.
    */
-  documentId?: string;
-  /**
-   * this will be undefined if someone is creating an entry.
-   */
-  meta?: Contracts.CollectionTypes.DocumentMetadata;
+  id?: Entity.ID;
   /**
    * The current content-type's model.
    */
   model: string;
+}
+
+interface BulkActionComponentProps extends Omit<Context, 'id' | 'entity'> {
+  ids: Entity.ID[];
+}
+
+interface BulkActionComponent
+  extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
+  actionType?: 'delete' | 'publish' | 'unpublish';
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -54,14 +59,34 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
+  bulkActions: BulkActionComponent[] = [...DEFAULT_BULK_ACTIONS];
 
   constructor() {}
+
+  addBulkAction(actions: DescriptionReducer<BulkActionComponent>): void;
+  addBulkAction(actions: BulkActionComponent[]): void;
+  addBulkAction(actions: DescriptionReducer<BulkActionComponent> | BulkActionComponent[]) {
+    if (Array.isArray(actions)) {
+      this.bulkActions = [...this.bulkActions, ...actions];
+    } else if (typeof actions === 'function') {
+      this.bulkActions = actions(this.bulkActions);
+    } else {
+      throw new Error(
+        `Expected the \`actions\` passed to \`addBulkAction\` to be an array or a function, but received ${getPrintableType(
+          actions
+        )}`
+      );
+    }
+  }
 
   get config() {
     return {
       id: 'content-manager',
       name: 'Content Manager',
-      apis: {},
+      apis: {
+        addBulkAction: this.addBulkAction.bind(this),
+        getBulkActions: () => this.bulkActions,
+      },
     } satisfies PluginConfig;
   }
 }
@@ -90,4 +115,4 @@ const getPrintableType = (value: unknown): string => {
 };
 
 export { ContentManagerPlugin };
-export type { Context, DescriptionComponent, DescriptionReducer };
+export type { Context, DescriptionComponent, DescriptionReducer, BulkActionComponent };
