@@ -430,13 +430,11 @@ const createJoinColumn = (
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const targetReferenceTableName = identifiers.getTableName(targetMeta.tableName, options);
-
   const joinColumnName = identifiers.getJoinColumnAttributeIdName(attributeName, options);
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: ID,
-    referencedTable: targetReferenceTableName,
+    referencedTable: targetMeta.tableName,
   };
 
   if ('joinColumn' in attribute) {
@@ -451,7 +449,7 @@ const createJoinColumn = (
     Object.assign(inverseAttribute, {
       joinColumn: {
         name: joinColumn.referencedColumn,
-        referencedColumn: joinColumn.name, // TODO: why not joinColumnName?
+        referencedColumn: joinColumn.name,
       },
     });
   }
@@ -503,8 +501,6 @@ const createJoinTable = (
 
   const fkIndexName = identifiers.getFkIndexName(joinTableName, options);
   const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName, options);
-
-  const referenceTableBase = identifiers.getTableName(meta.tableName, options);
 
   const metadataSchema: Meta = {
     singularName: joinTableName,
