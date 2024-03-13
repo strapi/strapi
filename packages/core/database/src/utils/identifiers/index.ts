@@ -170,40 +170,46 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
  * So for example, the fk for the table `mytable_myattr4567d_localizations` will become
  * mytable_myattr4567d_loc63bf2_fk
  *
+ * Indexes were not snake_cased in v4, so they will not be snake-cased here
+ * However, some (particularly any beyond the base types) will appear to be snake_case because
+ * they accept the joinTableName which is already snake-cased. This results tables that have indexes
+ * with both `someindex_index` along with `some_index_inv_fk`
  */
 
+// base index types
 export const getIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'index', ...options });
+  return getName(names, { suffix: 'index', snakeCase: false, ...options });
 };
 
 export const getFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'fk', ...options });
-};
-
-export const getInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'inv_fk', ...options });
-};
-
-export const getOrderFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_fk', ...options });
-};
-
-export const getOrderInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_inv_fk', ...options });
-};
-
-export const getIdColumnIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'id_column_index', ...options });
-};
-
-export const getOrderIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_index', ...options });
+  return getName(names, { suffix: 'fk', snakeCase: false, ...options });
 };
 
 export const getUniqueIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'unique', ...options });
+  return getName(names, { suffix: 'unique', snakeCase: false, ...options });
 };
 
 export const getPrimaryIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'primary', ...options });
+  return getName(names, { suffix: 'primary', snakeCase: false, ...options });
+};
+
+// custom index types
+export const getInverseFkIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'inv_fk', snakeCase: false, ...options });
+};
+
+export const getOrderFkIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'order_fk', snakeCase: false, ...options });
+};
+
+export const getOrderInverseFkIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'order_inv_fk', snakeCase: false, ...options });
+};
+
+export const getIdColumnIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'id_column_index', snakeCase: false, ...options });
+};
+
+export const getOrderIndexName = (names: NameInput, options: NameOptions) => {
+  return getName(names, { suffix: 'order_index', snakeCase: false, ...options });
 };

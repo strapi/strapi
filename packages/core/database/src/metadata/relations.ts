@@ -340,7 +340,7 @@ const createMorphToMany = (
         name: fkIndexName,
         columns: [joinColumnName],
         referencedColumns: [ID],
-        referencedTable: identifiers.getTableName(meta.tableName, options),
+        referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
     ],
@@ -564,10 +564,12 @@ const createJoinTable = (
     joinColumn: {
       name: joinColumnName,
       referencedColumn: ID,
+      referencedTable: meta.tableName,
     },
     inverseJoinColumn: {
       name: inverseJoinColumnName,
       referencedColumn: ID,
+      referencedTable: targetMeta.tableName,
     },
     pivotColumns: [joinColumnName, inverseJoinColumnName],
   } as any;

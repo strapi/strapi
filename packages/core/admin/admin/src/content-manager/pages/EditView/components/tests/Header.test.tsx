@@ -44,7 +44,7 @@ describe('Header', () => {
     });
 
   it('should render the create entry title when isCreating is true', async () => {
-    const { rerender } = render({ isCreating: true });
+    const { rerender } = render({ isCreating: true, status: 'draft' });
 
     expect(screen.getByRole('heading', { name: 'Create an entry' })).toBeInTheDocument();
     expect(screen.getByText('Draft')).toBeInTheDocument();
@@ -76,6 +76,18 @@ describe('Header', () => {
     rerender(<Header status="modified" />);
 
     expect(screen.getByText('Modified')).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'More actions' })).toBeDisabled()
+    );
+  });
+
+  it('should not render any status if there is no prop', async () => {
+    render();
+
+    expect(screen.queryByText('Draft')).not.toBeInTheDocument();
+    expect(screen.queryByText('Published')).not.toBeInTheDocument();
+    expect(screen.queryByText('Modified')).not.toBeInTheDocument();
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'More actions' })).toBeDisabled()

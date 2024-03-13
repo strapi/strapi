@@ -1,10 +1,10 @@
 import { pick } from 'lodash/fp';
-import type { Common, EntityService } from '@strapi/types';
+import type { Common, Documents } from '@strapi/types';
 
 const pickSelectionParams = <TUID extends Common.UID.ContentType>(
   data: unknown
-): EntityService.Params.Pick<TUID, 'fields' | 'populate'> => {
-  return pick(['fields', 'populate'], data);
+): Documents.Params.Pick<TUID, 'fields' | 'populate' | 'status'> => {
+  return pick(['fields', 'populate', 'status'], data);
 };
 
 export { pickSelectionParams };
