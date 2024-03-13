@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
-import type { Database } from '../..';
+import type { Database, MetadataOptions } from '../..';
 import { getFullName } from '../../utils/identifiers/shortener';
 
 type NameDiff<T> = {
@@ -20,8 +20,21 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
     const md = db.metadata;
-    const diffs = findDiffs(md);
 
+    const maxLength = db.config?.settings?.maxIdentifierLength;
+    if (maxLength === 0) {
+      return;
+    }
+
+    if (maxLength === undefined) {
+      throw new Error('Could not retrieve maxLength from db configuration');
+    }
+
+    const metadataOptions = {
+      maxLength,
+    };
+
+    const diffs = findDiffs(md, metadataOptions);
     // migrate indexes before tables so we know to target the original tableName
     for (const indexDiff of diffs.indexes) {
       await renameIndex(knex, db, indexDiff);
@@ -117,7 +130,7 @@ const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexNam
   }
 };
 
-const findDiffs = (shortMap: Metadata) => {
+const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
   const diffs = {
     tables: [],
     columns: [],
@@ -128,7 +141,7 @@ const findDiffs = (shortMap: Metadata) => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shortArr.forEach(([key, shortObj], index) => {
-    const fullTableName = getFullName(shortObj.tableName);
+    const fullTableName = getFullName(shortObj.tableName, options);
     if (!fullTableName) {
       throw new Error(`Missing full table name for ${shortObj.tableName}`);
     }
@@ -158,7 +171,7 @@ const findDiffs = (shortMap: Metadata) => {
       // TODO: add more type checks so we don't need any
       const attr = shortObj.attributes[attrKey] as any;
       const shortColumnName = attr.columnName;
-      const longColumnName = getFullName(shortColumnName);
+      const longColumnName = getFullName(shortColumnName, options);
       // console.log(`comparing attribute ${shortColumnName} to ${longColumnName}`);
 
       if (!shortColumnName || !longColumnName) {
@@ -186,7 +199,7 @@ const findDiffs = (shortMap: Metadata) => {
     // eslint-disable-next-line guard-for-in
     for (const attrKey in shortObj.indexes) {
       const shortIndexName = shortObj.indexes[attrKey].name;
-      const longIndexName = getFullName(shortIndexName);
+      const longIndexName = getFullName(shortIndexName, options);
       if (!longIndexName) {
         throw new Error(`Missing full index name for ${shortIndexName}`);
       }

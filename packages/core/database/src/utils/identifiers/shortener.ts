@@ -59,8 +59,6 @@ export function createHash(data: string, len: number): string {
     throw new Error(`createHash length must be a positive integer, received ${len}`);
   }
 
-  // TODO: shake256 is based on SHA-3 and is slow, we don't care about cryptographically secure, only uniqueness and speed
-  //       investigate alternatives before releasing this. But it is only run on startup, so it should be fine.
   const hash = crypto.createHash('shake256', { outputLength: Math.ceil(len / 2) }).update(data);
   return hash.digest('hex').substring(0, len);
 }
@@ -68,10 +66,17 @@ export function createHash(data: string, len: number): string {
 // We need to be able to find the full-length name for any shortened name, primarily for migration purposes
 // Therefore we store every name that passes through so we can retrieve the original later
 const nameMap = new Map<string, string>();
-export const getFullName = (shortName: string) => {
-  return nameMap.get(shortName);
+export const getFullName = (shortName: string, options: NameFromTokenOptions) => {
+  return nameMap.get(serializeKey(shortName, options));
 };
 
+export const setFullName = (shortName: string, options: NameFromTokenOptions, fullName: string) => {
+  nameMap.set(serializeKey(shortName, options), fullName);
+};
+
+const serializeKey = (shortName: string, options: NameFromTokenOptions) => {
+  return `${shortName}${options.maxLength}`;
+};
 /**
  * Generates a string with a max length, appending a hash at the end if necessary to keep it unique
  *
@@ -152,7 +157,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     .join(IDENTIFIER_SEPARATOR);
 
   if (fullLengthName.length <= maxLength) {
-    nameMap.set(fullLengthName, fullLengthName);
+    setFullName(fullLengthName, options, fullLengthName);
     return fullLengthName;
   }
 
@@ -259,6 +264,6 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     );
   }
 
-  nameMap.set(shortenedName, fullLengthName);
+  setFullName(shortenedName, options, fullLengthName);
   return shortenedName;
 }

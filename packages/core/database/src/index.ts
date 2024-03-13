@@ -48,20 +48,22 @@ class Database {
 
   entityManager: EntityManager;
 
-  #metadataOptions: MetadataOptions;
-
   static async init(config: DatabaseConfig) {
     const db = new Database(config);
-    await validateDatabase(db, db.#metadataOptions);
+
+    await validateDatabase(db, {
+      maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
+    });
+
     return db;
   }
 
   constructor(config: DatabaseConfig) {
-    this.#metadataOptions = {
+    const metadataOptions = {
       maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
     };
 
-    this.metadata = createMetadata(config.models, this.#metadataOptions);
+    this.metadata = createMetadata(config.models, metadataOptions);
 
     this.config = {
       ...config,
@@ -87,7 +89,7 @@ class Database {
 
     this.connection = createConnection(this.config.connection, { pool: { afterCreate } });
 
-    this.schema = createSchemaProvider(this, this.#metadataOptions);
+    this.schema = createSchemaProvider(this, metadataOptions);
 
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
