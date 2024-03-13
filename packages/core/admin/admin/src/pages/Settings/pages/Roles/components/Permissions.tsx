@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system';
-import { difference } from '@strapi/helper-plugin';
 import produce from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
@@ -17,6 +16,7 @@ import {
   PermissionsDataManagerContextValue,
   PermissionsDataManagerProvider,
 } from '../hooks/usePermissionsDataManager';
+import { difference } from '../utils/difference';
 import { ConditionForm, Form, createDefaultCTForm, createDefaultForm } from '../utils/forms';
 import { GenericLayout, formatLayout } from '../utils/layouts';
 import { formatPermissionsForAPI } from '../utils/permissions';

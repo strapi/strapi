@@ -8,6 +8,7 @@ type ObjectDiff<T> = {
 
 function difference<T extends Record<string, unknown>>(object: T, base: T): ObjectDiff<T> {
   function changes(object: T, base: T): ObjectDiff<T> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return transform(object, (result, value: any, key: keyof ObjectDiff<T>) => {
       if (!isEqual(value, base[key])) {
         result[key] =
