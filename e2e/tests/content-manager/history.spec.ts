@@ -109,8 +109,8 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // The second in the list is the published version
-      await expect(versionCards.nth(1).getByText('Published')).toBeVisible();
-      versionCards.nth(1).click();
+      await expect(previousVersion.getByText('Published')).toBeVisible();
+      previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
 
       // Go back to the entry
@@ -130,8 +130,8 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
       await expect(currentVersion.getByText('Modified')).toBeVisible();
       // Assert the previous version in the list is the expected version
-      await expect(versionCards.nth(1).getByText('Draft')).toBeVisible();
-      versionCards.nth(1).click();
+      await expect(previousVersion.getByText('Draft')).toBeVisible();
+      previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
     });
   });
@@ -189,6 +189,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(idRegex.test(page.url())).toBe(true);
       // Assert the most recent version is the current version
       const currentVersion = versionCards.nth(0);
+      const previousVersion = versionCards.nth(1);
       await expect(currentVersion.getByText('(current)')).toBeVisible();
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toBeDisabled();
@@ -211,7 +212,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // Assert the most recent version is the current version
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
       // Assert the previous version in the list is the expected version
-      versionCards.nth(1).click();
+      previousVersion.click();
       await expect(titleInput).toHaveValue('AFC Richmond');
 
       // Go back to the entry
@@ -230,8 +231,8 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
       // The second in the list is the published version
-      versionCards.nth(1).click();
-      await expect(versionCards.nth(1).getByText('Published')).toBeVisible();
+      previousVersion.click();
+      await expect(previousVersion.getByText('Published')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
 
       // Go back to the entry
@@ -251,8 +252,8 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
       await expect(currentVersion.getByText('Modified')).toBeVisible();
       // Assert the previous version in the list is the expected version
-      await expect(versionCards.nth(1).getByText('Draft')).toBeVisible();
-      versionCards.nth(1).click();
+      await expect(previousVersion.getByText('Draft')).toBeVisible();
+      previousVersion.click();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
     });
   });
