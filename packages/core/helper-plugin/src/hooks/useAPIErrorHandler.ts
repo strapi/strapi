@@ -4,7 +4,6 @@ import { AxiosError } from 'axios';
 import { IntlFormatters, useIntl } from 'react-intl';
 
 import { ApiError } from '../types';
-import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 
 interface UnknownApiError {
@@ -36,6 +35,27 @@ interface YupFormattedError {
   path: string[];
   message: string;
   name: string;
+}
+
+/**
+ * Prefix message with 'apiError.'
+ * TODO: This function is also used in
+ * another util 'normalizeAPIError.ts',
+ * we need to move it to a shared
+ * location when we move this hook and
+ * normalizeAPIError.
+ */
+function getPrefixedId(message: string, callback?: (prefixedMessage: string) => string) {
+  const prefixedMessage = `apiError.${message}`;
+
+  // if a prefix function has been passed in it is used to
+  // prefix the id, e.g. to allow an error message to be
+  // set only for a localization namespace
+  if (typeof callback === 'function') {
+    return callback(prefixedMessage);
+  }
+
+  return prefixedMessage;
 }
 
 /**
