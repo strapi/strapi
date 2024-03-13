@@ -105,7 +105,7 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
   React.useEffect(() => {
     if (state.currentLocationIndex !== prevIndex.current) {
       dispatch({
-        type: 'SET_ABILITY_TO_NAVIGATE',
+        type: 'SET_CAN_GO_BACK',
         payload: state.currentLocationIndex > 1 && state.history.length > 1,
       });
       prevIndex.current = state.currentLocationIndex;
@@ -147,7 +147,7 @@ type HistoryActions =
       type: 'GO_BACK';
     }
   | {
-      type: 'SET_ABILITY_TO_NAVIGATE';
+      type: 'SET_CAN_GO_BACK';
       payload: boolean;
     };
 
@@ -176,7 +176,7 @@ const reducer = (state: HistoryState, action: HistoryActions) =>
         draft.currentLocationIndex = newIndex;
         break;
       }
-      case 'SET_ABILITY_TO_NAVIGATE': {
+      case 'SET_CAN_GO_BACK': {
         draft.canGoBack = action.payload;
         break;
       }
