@@ -8,7 +8,9 @@
     "description": "",
     "name": "Address"
   },
-  "options": {},
+  "options": {
+    "draftAndPublish": false
+  },
   "pluginOptions": {},
   "attributes": {
     "postal_code": {

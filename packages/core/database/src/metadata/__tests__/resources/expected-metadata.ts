@@ -60,10 +60,12 @@ export const metadata = [
             joinColumn: {
               name: 'permission_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_permissions',
             },
             inverseJoinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_roles',
             },
             pivotColumns: ['permission_id', 'role_id'],
             inverseOrderColumnName: 'permission_order',
@@ -129,10 +131,12 @@ export const metadata = [
             joinColumn: {
               name: 'permission_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_permissions',
             },
             inverseJoinColumn: {
               name: 'inv_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_permissions',
             },
             pivotColumns: ['permission_id', 'inv_permission_id'],
             orderColumnName: 'permission_order',
@@ -262,10 +266,12 @@ export const metadata = [
             joinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_users',
             },
             inverseJoinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_roles',
             },
             pivotColumns: ['user_id', 'role_id'],
             orderColumnName: 'role_order',
@@ -349,10 +355,12 @@ export const metadata = [
             joinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_users',
             },
             inverseJoinColumn: {
               name: 'inv_user_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_users',
             },
             pivotColumns: ['user_id', 'inv_user_id'],
             orderColumnName: 'user_order',
@@ -444,10 +452,12 @@ export const metadata = [
             joinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_roles',
             },
             inverseJoinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_users',
             },
             pivotColumns: ['user_id', 'role_id'],
             orderColumnName: 'user_order',
@@ -468,10 +478,12 @@ export const metadata = [
             joinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_roles',
             },
             inverseJoinColumn: {
               name: 'permission_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_permissions',
             },
             pivotColumns: ['permission_id', 'role_id'],
             orderColumnName: 'permission_order',
@@ -540,10 +552,12 @@ export const metadata = [
             joinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_roles',
             },
             inverseJoinColumn: {
               name: 'inv_role_id',
               referencedColumn: 'id',
+              referencedTable: 'admin_roles',
             },
             pivotColumns: ['role_id', 'inv_role_id'],
             orderColumnName: 'role_order',
@@ -647,10 +661,12 @@ export const metadata = [
             joinColumn: {
               name: 'api_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_tokens',
             },
             inverseJoinColumn: {
               name: 'api_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_token_permissions',
             },
             pivotColumns: ['api_token_permission_id', 'api_token_id'],
             orderColumnName: 'api_token_permission_order',
@@ -731,10 +747,12 @@ export const metadata = [
             joinColumn: {
               name: 'api_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_tokens',
             },
             inverseJoinColumn: {
               name: 'inv_api_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_tokens',
             },
             pivotColumns: ['api_token_id', 'inv_api_token_id'],
             orderColumnName: 'api_token_order',
@@ -809,10 +827,12 @@ export const metadata = [
             joinColumn: {
               name: 'api_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_token_permissions',
             },
             inverseJoinColumn: {
               name: 'api_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_tokens',
             },
             pivotColumns: ['api_token_permission_id', 'api_token_id'],
             inverseOrderColumnName: 'api_token_permission_order',
@@ -878,10 +898,12 @@ export const metadata = [
             joinColumn: {
               name: 'api_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_token_permissions',
             },
             inverseJoinColumn: {
               name: 'inv_api_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_api_token_permissions',
             },
             pivotColumns: ['api_token_permission_id', 'inv_api_token_permission_id'],
             orderColumnName: 'api_token_permission_order',
@@ -973,10 +995,12 @@ export const metadata = [
             joinColumn: {
               name: 'transfer_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_tokens',
             },
             inverseJoinColumn: {
               name: 'transfer_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_token_permissions',
             },
             pivotColumns: ['transfer_token_permission_id', 'transfer_token_id'],
             orderColumnName: 'transfer_token_permission_order',
@@ -1057,10 +1081,12 @@ export const metadata = [
             joinColumn: {
               name: 'transfer_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_tokens',
             },
             inverseJoinColumn: {
               name: 'inv_transfer_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_tokens',
             },
             pivotColumns: ['transfer_token_id', 'inv_transfer_token_id'],
             orderColumnName: 'transfer_token_order',
@@ -1134,10 +1160,12 @@ export const metadata = [
             joinColumn: {
               name: 'transfer_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_token_permissions',
             },
             inverseJoinColumn: {
               name: 'transfer_token_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_tokens',
             },
             pivotColumns: ['transfer_token_permission_id', 'transfer_token_id'],
             inverseOrderColumnName: 'transfer_token_permission_order',
@@ -1203,10 +1231,12 @@ export const metadata = [
             joinColumn: {
               name: 'transfer_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_token_permissions',
             },
             inverseJoinColumn: {
               name: 'inv_transfer_token_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_transfer_token_permissions',
             },
             pivotColumns: ['transfer_token_permission_id', 'inv_transfer_token_permission_id'],
             orderColumnName: 'transfer_token_permission_order',
@@ -1232,6 +1262,334 @@ export const metadata = [
         document_id: 'documentId',
         action: 'action',
         token: 'token',
+        created_at: 'createdAt',
+        updated_at: 'updatedAt',
+        published_at: 'publishedAt',
+        createdBy: 'createdBy',
+        updatedBy: 'updatedBy',
+        localizations: 'localizations',
+        locale: 'locale',
+      },
+    },
+  ],
+  [
+    'admin::workflow',
+    {
+      uid: 'admin::workflow',
+      singularName: 'workflow',
+      tableName: 'strapi_workflows',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        documentId: {
+          type: 'string',
+          columnName: 'document_id',
+        },
+        name: {
+          type: 'string',
+          required: true,
+          unique: true,
+          columnName: 'name',
+        },
+        stages: {
+          type: 'relation',
+          target: 'admin::workflow-stage',
+          relation: 'oneToMany',
+          mappedBy: 'workflow',
+          joinTable: {
+            name: 'strapi_workflows_stages_workflow_links',
+            joinColumn: {
+              name: 'workflow_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['workflow_stage_id', 'workflow_id'],
+            orderColumnName: 'workflow_stage_order',
+            orderBy: {
+              workflow_stage_order: 'asc',
+            },
+          },
+        },
+        contentTypes: {
+          type: 'json',
+          required: true,
+          default: [],
+          columnName: 'content_types',
+        },
+        createdAt: {
+          type: 'datetime',
+          columnName: 'created_at',
+        },
+        updatedAt: {
+          type: 'datetime',
+          columnName: 'updated_at',
+        },
+        publishedAt: {
+          type: 'datetime',
+          configurable: false,
+          writable: true,
+          visible: false,
+          columnName: 'published_at',
+        },
+        createdBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          writable: false,
+          visible: false,
+          useJoinTable: false,
+          private: true,
+          owner: true,
+          joinColumn: {
+            name: 'created_by_id',
+            referencedColumn: 'id',
+            referencedTable: 'admin_users',
+          },
+        },
+        updatedBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          writable: false,
+          visible: false,
+          useJoinTable: false,
+          private: true,
+          owner: true,
+          joinColumn: {
+            name: 'updated_by_id',
+            referencedColumn: 'id',
+            referencedTable: 'admin_users',
+          },
+        },
+        localizations: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'admin::workflow',
+          joinTable: {
+            name: 'strapi_workflows_localizations_links',
+            joinColumn: {
+              name: 'workflow_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows',
+            },
+            inverseJoinColumn: {
+              name: 'inv_workflow_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows',
+            },
+            pivotColumns: ['workflow_id', 'inv_workflow_id'],
+            orderColumnName: 'workflow_order',
+            orderBy: {
+              workflow_order: 'asc',
+            },
+          },
+        },
+        locale: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          type: 'string',
+          columnName: 'locale',
+        },
+      },
+      lifecycles: {},
+      indexes: [],
+      foreignKeys: [],
+      columnToAttribute: {
+        id: 'id',
+        document_id: 'documentId',
+        name: 'name',
+        stages: 'stages',
+        content_types: 'contentTypes',
+        created_at: 'createdAt',
+        updated_at: 'updatedAt',
+        published_at: 'publishedAt',
+        createdBy: 'createdBy',
+        updatedBy: 'updatedBy',
+        localizations: 'localizations',
+        locale: 'locale',
+      },
+    },
+  ],
+  [
+    'admin::workflow-stage',
+    {
+      uid: 'admin::workflow-stage',
+      singularName: 'workflow-stage',
+      tableName: 'strapi_workflows_stages',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        documentId: {
+          type: 'string',
+          columnName: 'document_id',
+        },
+        name: {
+          type: 'string',
+          configurable: false,
+          columnName: 'name',
+        },
+        color: {
+          type: 'string',
+          configurable: false,
+          default: '#4945FF',
+          columnName: 'color',
+        },
+        workflow: {
+          type: 'relation',
+          target: 'admin::workflow',
+          relation: 'manyToOne',
+          inversedBy: 'stages',
+          configurable: false,
+          joinTable: {
+            name: 'strapi_workflows_stages_workflow_links',
+            joinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows',
+            },
+            pivotColumns: ['workflow_stage_id', 'workflow_id'],
+            inverseOrderColumnName: 'workflow_stage_order',
+          },
+        },
+        permissions: {
+          type: 'relation',
+          target: 'admin::permission',
+          relation: 'manyToMany',
+          configurable: false,
+          joinTable: {
+            name: 'strapi_workflows_stages_permissions_links',
+            joinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            inverseJoinColumn: {
+              name: 'permission_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_permissions',
+            },
+            pivotColumns: ['workflow_stage_id', 'permission_id'],
+            orderColumnName: 'permission_order',
+            orderBy: {
+              permission_order: 'asc',
+            },
+          },
+        },
+        createdAt: {
+          type: 'datetime',
+          columnName: 'created_at',
+        },
+        updatedAt: {
+          type: 'datetime',
+          columnName: 'updated_at',
+        },
+        publishedAt: {
+          type: 'datetime',
+          configurable: false,
+          writable: true,
+          visible: false,
+          columnName: 'published_at',
+        },
+        createdBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          writable: false,
+          visible: false,
+          useJoinTable: false,
+          private: true,
+          owner: true,
+          joinColumn: {
+            name: 'created_by_id',
+            referencedColumn: 'id',
+            referencedTable: 'admin_users',
+          },
+        },
+        updatedBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          writable: false,
+          visible: false,
+          useJoinTable: false,
+          private: true,
+          owner: true,
+          joinColumn: {
+            name: 'updated_by_id',
+            referencedColumn: 'id',
+            referencedTable: 'admin_users',
+          },
+        },
+        localizations: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'strapi_workflows_stages_localizations_links',
+            joinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            inverseJoinColumn: {
+              name: 'inv_workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['workflow_stage_id', 'inv_workflow_stage_id'],
+            orderColumnName: 'workflow_stage_order',
+            orderBy: {
+              workflow_stage_order: 'asc',
+            },
+          },
+        },
+        locale: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          type: 'string',
+          columnName: 'locale',
+        },
+      },
+      lifecycles: {},
+      indexes: [],
+      foreignKeys: [],
+      columnToAttribute: {
+        id: 'id',
+        document_id: 'documentId',
+        name: 'name',
+        color: 'color',
+        workflow: 'workflow',
+        permissions: 'permissions',
         created_at: 'createdAt',
         updated_at: 'updatedAt',
         published_at: 'publishedAt',
@@ -1369,10 +1727,12 @@ export const metadata = [
             joinColumn: {
               name: 'file_id',
               referencedColumn: 'id',
+              referencedTable: 'files',
             },
             inverseJoinColumn: {
               name: 'folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             pivotColumns: ['file_id', 'folder_id'],
             inverseOrderColumnName: 'file_order',
@@ -1446,10 +1806,12 @@ export const metadata = [
             joinColumn: {
               name: 'file_id',
               referencedColumn: 'id',
+              referencedTable: 'files',
             },
             inverseJoinColumn: {
               name: 'inv_file_id',
               referencedColumn: 'id',
+              referencedTable: 'files',
             },
             pivotColumns: ['file_id', 'inv_file_id'],
             orderColumnName: 'file_order',
@@ -1537,10 +1899,12 @@ export const metadata = [
             joinColumn: {
               name: 'folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             inverseJoinColumn: {
               name: 'inv_folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             pivotColumns: ['folder_id', 'inv_folder_id'],
             inverseOrderColumnName: 'folder_order',
@@ -1556,10 +1920,12 @@ export const metadata = [
             joinColumn: {
               name: 'inv_folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             inverseJoinColumn: {
               name: 'folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             pivotColumns: ['folder_id', 'inv_folder_id'],
             orderColumnName: 'folder_order',
@@ -1578,10 +1944,12 @@ export const metadata = [
             joinColumn: {
               name: 'folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             inverseJoinColumn: {
               name: 'file_id',
               referencedColumn: 'id',
+              referencedTable: 'files',
             },
             pivotColumns: ['file_id', 'folder_id'],
             orderColumnName: 'file_order',
@@ -1656,10 +2024,12 @@ export const metadata = [
             joinColumn: {
               name: 'folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             inverseJoinColumn: {
               name: 'inv_folder_id',
               referencedColumn: 'id',
+              referencedTable: 'upload_folders',
             },
             pivotColumns: ['folder_id', 'inv_folder_id'],
             orderColumnName: 'folder_order',
@@ -1727,6 +2097,16 @@ export const metadata = [
           type: 'datetime',
           columnName: 'scheduled_at',
         },
+        timezone: {
+          type: 'string',
+          columnName: 'timezone',
+        },
+        status: {
+          type: 'enumeration',
+          enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
+          required: true,
+          columnName: 'status',
+        },
         actions: {
           type: 'relation',
           relation: 'oneToMany',
@@ -1737,10 +2117,12 @@ export const metadata = [
             joinColumn: {
               name: 'release_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_releases',
             },
             inverseJoinColumn: {
               name: 'release_action_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_release_actions',
             },
             pivotColumns: ['release_action_id', 'release_id'],
             orderColumnName: 'release_action_order',
@@ -1809,10 +2191,12 @@ export const metadata = [
             joinColumn: {
               name: 'release_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_releases',
             },
             inverseJoinColumn: {
               name: 'inv_release_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_releases',
             },
             pivotColumns: ['release_id', 'inv_release_id'],
             orderColumnName: 'release_order',
@@ -1839,6 +2223,8 @@ export const metadata = [
         name: 'name',
         released_at: 'releasedAt',
         scheduled_at: 'scheduledAt',
+        timezone: 'timezone',
+        status: 'status',
         actions: 'actions',
         created_at: 'createdAt',
         updated_at: 'updatedAt',
@@ -1909,14 +2295,20 @@ export const metadata = [
             joinColumn: {
               name: 'release_action_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_release_actions',
             },
             inverseJoinColumn: {
               name: 'release_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_releases',
             },
             pivotColumns: ['release_action_id', 'release_id'],
             inverseOrderColumnName: 'release_action_order',
           },
+        },
+        isEntryValid: {
+          type: 'boolean',
+          columnName: 'is_entry_valid',
         },
         createdAt: {
           type: 'datetime',
@@ -1978,10 +2370,12 @@ export const metadata = [
             joinColumn: {
               name: 'release_action_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_release_actions',
             },
             inverseJoinColumn: {
               name: 'inv_release_action_id',
               referencedColumn: 'id',
+              referencedTable: 'strapi_release_actions',
             },
             pivotColumns: ['release_action_id', 'inv_release_action_id'],
             orderColumnName: 'release_action_order',
@@ -2002,6 +2396,7 @@ export const metadata = [
         content_type: 'contentType',
         locale: 'locale',
         release: 'release',
+        is_entry_valid: 'isEntryValid',
         created_at: 'createdAt',
         updated_at: 'updatedAt',
         published_at: 'publishedAt',
@@ -2097,10 +2492,12 @@ export const metadata = [
             joinColumn: {
               name: 'test_id',
               referencedColumn: 'id',
+              referencedTable: 'myplugin_test',
             },
             inverseJoinColumn: {
               name: 'inv_test_id',
               referencedColumn: 'id',
+              referencedTable: 'myplugin_test',
             },
             pivotColumns: ['test_id', 'inv_test_id'],
             orderColumnName: 'test_order',
@@ -2117,6 +2514,54 @@ export const metadata = [
           type: 'string',
           columnName: 'locale',
         },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'myplugin_test_strapi_stage_links',
+            joinColumn: {
+              name: 'test_id',
+              referencedColumn: 'id',
+              referencedTable: 'myplugin_test',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['test_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'myplugin_test_strapi_assignee_links',
+            joinColumn: {
+              name: 'test_id',
+              referencedColumn: 'id',
+              referencedTable: 'myplugin_test',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['test_id', 'user_id'],
+          },
+        },
       },
       lifecycles: {},
       indexes: [],
@@ -2132,6 +2577,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -2140,7 +2587,7 @@ export const metadata = [
     {
       uid: 'plugin::i18n.locale',
       singularName: 'locale',
-      tableName: 'i18n_locale',
+      tableName: 'i_18_n_locale',
       attributes: {
         id: {
           type: 'increments',
@@ -2223,10 +2670,12 @@ export const metadata = [
             joinColumn: {
               name: 'locale_id',
               referencedColumn: 'id',
+              referencedTable: 'i_18_n_locale',
             },
             inverseJoinColumn: {
               name: 'inv_locale_id',
               referencedColumn: 'id',
+              referencedTable: 'i_18_n_locale',
             },
             pivotColumns: ['locale_id', 'inv_locale_id'],
             orderColumnName: 'locale_order',
@@ -2294,10 +2743,12 @@ export const metadata = [
             joinColumn: {
               name: 'permission_id',
               referencedColumn: 'id',
+              referencedTable: 'up_permissions',
             },
             inverseJoinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'up_roles',
             },
             pivotColumns: ['permission_id', 'role_id'],
             inverseOrderColumnName: 'permission_order',
@@ -2363,10 +2814,12 @@ export const metadata = [
             joinColumn: {
               name: 'permission_id',
               referencedColumn: 'id',
+              referencedTable: 'up_permissions',
             },
             inverseJoinColumn: {
               name: 'inv_permission_id',
               referencedColumn: 'id',
+              referencedTable: 'up_permissions',
             },
             pivotColumns: ['permission_id', 'inv_permission_id'],
             orderColumnName: 'permission_order',
@@ -2446,10 +2899,12 @@ export const metadata = [
             joinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'up_roles',
             },
             inverseJoinColumn: {
               name: 'permission_id',
               referencedColumn: 'id',
+              referencedTable: 'up_permissions',
             },
             pivotColumns: ['permission_id', 'role_id'],
             orderColumnName: 'permission_order',
@@ -2469,10 +2924,12 @@ export const metadata = [
             joinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'up_roles',
             },
             inverseJoinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'up_users',
             },
             pivotColumns: ['user_id', 'role_id'],
             orderColumnName: 'user_order',
@@ -2541,10 +2998,12 @@ export const metadata = [
             joinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'up_roles',
             },
             inverseJoinColumn: {
               name: 'inv_role_id',
               referencedColumn: 'id',
+              referencedTable: 'up_roles',
             },
             pivotColumns: ['role_id', 'inv_role_id'],
             orderColumnName: 'role_order',
@@ -2663,10 +3122,12 @@ export const metadata = [
             joinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'up_users',
             },
             inverseJoinColumn: {
               name: 'role_id',
               referencedColumn: 'id',
+              referencedTable: 'up_roles',
             },
             pivotColumns: ['user_id', 'role_id'],
             inverseOrderColumnName: 'user_order',
@@ -2738,10 +3199,12 @@ export const metadata = [
             joinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'up_users',
             },
             inverseJoinColumn: {
               name: 'inv_user_id',
               referencedColumn: 'id',
+              referencedTable: 'up_users',
             },
             pivotColumns: ['user_id', 'inv_user_id'],
             orderColumnName: 'user_order',
@@ -2757,6 +3220,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'up_users_strapi_stage_links',
+            joinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'up_users',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['user_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'up_users_strapi_assignee_links',
+            joinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'up_users',
+            },
+            inverseJoinColumn: {
+              name: 'inv_user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['user_id', 'inv_user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -2782,6 +3293,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -2897,10 +3410,12 @@ export const metadata = [
             joinColumn: {
               name: 'address_id',
               referencedColumn: 'id',
+              referencedTable: 'addresses',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['address_id', 'category_id'],
             orderColumnName: 'category_order',
@@ -3080,10 +3595,12 @@ export const metadata = [
             joinColumn: {
               name: 'address_id',
               referencedColumn: 'id',
+              referencedTable: 'addresses',
             },
             inverseJoinColumn: {
               name: 'inv_address_id',
               referencedColumn: 'id',
+              referencedTable: 'addresses',
             },
             pivotColumns: ['address_id', 'inv_address_id'],
             orderColumnName: 'address_order',
@@ -3099,6 +3616,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'addresses_strapi_stage_links',
+            joinColumn: {
+              name: 'address_id',
+              referencedColumn: 'id',
+              referencedTable: 'addresses',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['address_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'addresses_strapi_assignee_links',
+            joinColumn: {
+              name: 'address_id',
+              referencedColumn: 'id',
+              referencedTable: 'addresses',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['address_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -3125,6 +3690,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -3162,10 +3729,12 @@ export const metadata = [
             joinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             inverseJoinColumn: {
               name: 'address_id',
               referencedColumn: 'id',
+              referencedTable: 'addresses',
             },
             pivotColumns: ['address_id', 'category_id'],
             orderColumnName: 'address_order',
@@ -3185,10 +3754,12 @@ export const metadata = [
             joinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             inverseJoinColumn: {
               name: 'temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             pivotColumns: ['temp_id', 'category_id'],
             orderColumnName: 'temp_order',
@@ -3226,10 +3797,12 @@ export const metadata = [
             joinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             inverseJoinColumn: {
               name: 'relation_locale_id',
               referencedColumn: 'id',
+              referencedTable: 'relation_locales',
             },
             pivotColumns: ['relation_locale_id', 'category_id'],
             orderColumnName: 'relation_locale_order',
@@ -3299,10 +3872,12 @@ export const metadata = [
             joinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             inverseJoinColumn: {
               name: 'inv_category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['category_id', 'inv_category_id'],
             orderColumnName: 'category_order',
@@ -3318,6 +3893,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'categories_strapi_stage_links',
+            joinColumn: {
+              name: 'category_id',
+              referencedColumn: 'id',
+              referencedTable: 'categories',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['category_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'categories_strapi_assignee_links',
+            joinColumn: {
+              name: 'category_id',
+              referencedColumn: 'id',
+              referencedTable: 'categories',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['category_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -3339,6 +3962,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -3440,10 +4065,12 @@ export const metadata = [
             joinColumn: {
               name: 'country_id',
               referencedColumn: 'id',
+              referencedTable: 'countries',
             },
             inverseJoinColumn: {
               name: 'inv_country_id',
               referencedColumn: 'id',
+              referencedTable: 'countries',
             },
             pivotColumns: ['country_id', 'inv_country_id'],
             orderColumnName: 'country_order',
@@ -3459,6 +4086,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'countries_strapi_stage_links',
+            joinColumn: {
+              name: 'country_id',
+              referencedColumn: 'id',
+              referencedTable: 'countries',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['country_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'countries_strapi_assignee_links',
+            joinColumn: {
+              name: 'country_id',
+              referencedColumn: 'id',
+              referencedTable: 'countries',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['country_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -3476,6 +4151,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -3587,10 +4264,12 @@ export const metadata = [
             joinColumn: {
               name: 'homepage_id',
               referencedColumn: 'id',
+              referencedTable: 'homepages',
             },
             inverseJoinColumn: {
               name: 'inv_homepage_id',
               referencedColumn: 'id',
+              referencedTable: 'homepages',
             },
             pivotColumns: ['homepage_id', 'inv_homepage_id'],
             orderColumnName: 'homepage_order',
@@ -3606,6 +4285,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'homepages_strapi_stage_links',
+            joinColumn: {
+              name: 'homepage_id',
+              referencedColumn: 'id',
+              referencedTable: 'homepages',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['homepage_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'homepages_strapi_assignee_links',
+            joinColumn: {
+              name: 'homepage_id',
+              referencedColumn: 'id',
+              referencedTable: 'homepages',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['homepage_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -3625,6 +4352,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -3890,10 +4619,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
           },
@@ -3909,10 +4640,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
           },
@@ -3927,10 +4660,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['tag_id', 'kitchensink_id'],
             orderColumnName: 'tag_order',
@@ -3949,10 +4684,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
             inverseOrderColumnName: 'kitchensink_order',
@@ -3968,10 +4705,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
             orderColumnName: 'tag_order',
@@ -3990,10 +4729,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
             orderColumnName: 'tag_order',
@@ -4079,6 +4820,11 @@ export const metadata = [
             pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
           },
         },
+        slug: {
+          type: 'uid',
+          targetField: 'short_text',
+          columnName: 'slug',
+        },
         createdAt: {
           type: 'datetime',
           columnName: 'created_at',
@@ -4139,10 +4885,12 @@ export const metadata = [
             joinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             inverseJoinColumn: {
               name: 'inv_kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             pivotColumns: ['kitchensink_id', 'inv_kitchensink_id'],
             orderColumnName: 'kitchensink_order',
@@ -4158,6 +4906,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'kitchensinks_strapi_stage_links',
+            joinColumn: {
+              name: 'kitchensink_id',
+              referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['kitchensink_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'kitchensinks_strapi_assignee_links',
+            joinColumn: {
+              name: 'kitchensink_id',
+              referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['kitchensink_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -4199,6 +4995,7 @@ export const metadata = [
         custom_field: 'custom_field',
         custom_field_with_default_options: 'custom_field_with_default_options',
         cats: 'cats',
+        slug: 'slug',
         created_at: 'createdAt',
         updated_at: 'updatedAt',
         published_at: 'publishedAt',
@@ -4206,6 +5003,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -4233,10 +5032,12 @@ export const metadata = [
             joinColumn: {
               name: 'like_id',
               referencedColumn: 'id',
+              referencedTable: 'likes',
             },
             inverseJoinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'up_users',
             },
             pivotColumns: ['like_id', 'user_id'],
           },
@@ -4251,10 +5052,12 @@ export const metadata = [
             joinColumn: {
               name: 'like_id',
               referencedColumn: 'id',
+              referencedTable: 'likes',
             },
             inverseJoinColumn: {
               name: 'review_id',
               referencedColumn: 'id',
+              referencedTable: 'reviews',
             },
             pivotColumns: ['like_id', 'review_id'],
             inverseOrderColumnName: 'like_order',
@@ -4320,10 +5123,12 @@ export const metadata = [
             joinColumn: {
               name: 'like_id',
               referencedColumn: 'id',
+              referencedTable: 'likes',
             },
             inverseJoinColumn: {
               name: 'inv_like_id',
               referencedColumn: 'id',
+              referencedTable: 'likes',
             },
             pivotColumns: ['like_id', 'inv_like_id'],
             orderColumnName: 'like_order',
@@ -4339,6 +5144,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'likes_strapi_stage_links',
+            joinColumn: {
+              name: 'like_id',
+              referencedColumn: 'id',
+              referencedTable: 'likes',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['like_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'likes_strapi_assignee_links',
+            joinColumn: {
+              name: 'like_id',
+              referencedColumn: 'id',
+              referencedTable: 'likes',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['like_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -4356,6 +5209,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -4388,10 +5243,12 @@ export const metadata = [
             joinColumn: {
               name: 'menu_id',
               referencedColumn: 'id',
+              referencedTable: 'menus',
             },
             inverseJoinColumn: {
               name: 'menusection_id',
               referencedColumn: 'id',
+              referencedTable: 'menusections',
             },
             pivotColumns: ['menusection_id', 'menu_id'],
             orderColumnName: 'menusection_order',
@@ -4410,10 +5267,12 @@ export const metadata = [
             joinColumn: {
               name: 'menu_id',
               referencedColumn: 'id',
+              referencedTable: 'menus',
             },
             inverseJoinColumn: {
               name: 'restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             pivotColumns: ['restaurant_id', 'menu_id'],
           },
@@ -4478,10 +5337,12 @@ export const metadata = [
             joinColumn: {
               name: 'menu_id',
               referencedColumn: 'id',
+              referencedTable: 'menus',
             },
             inverseJoinColumn: {
               name: 'inv_menu_id',
               referencedColumn: 'id',
+              referencedTable: 'menus',
             },
             pivotColumns: ['menu_id', 'inv_menu_id'],
             orderColumnName: 'menu_order',
@@ -4497,6 +5358,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'menus_strapi_stage_links',
+            joinColumn: {
+              name: 'menu_id',
+              referencedColumn: 'id',
+              referencedTable: 'menus',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['menu_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'menus_strapi_assignee_links',
+            joinColumn: {
+              name: 'menu_id',
+              referencedColumn: 'id',
+              referencedTable: 'menus',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['menu_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -4515,6 +5424,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -4654,10 +5565,12 @@ export const metadata = [
             joinColumn: {
               name: 'menusection_id',
               referencedColumn: 'id',
+              referencedTable: 'menusections',
             },
             inverseJoinColumn: {
               name: 'menu_id',
               referencedColumn: 'id',
+              referencedTable: 'menus',
             },
             pivotColumns: ['menusection_id', 'menu_id'],
             inverseOrderColumnName: 'menusection_order',
@@ -4723,10 +5636,12 @@ export const metadata = [
             joinColumn: {
               name: 'menusection_id',
               referencedColumn: 'id',
+              referencedTable: 'menusections',
             },
             inverseJoinColumn: {
               name: 'inv_menusection_id',
               referencedColumn: 'id',
+              referencedTable: 'menusections',
             },
             pivotColumns: ['menusection_id', 'inv_menusection_id'],
             orderColumnName: 'menusection_order',
@@ -4742,6 +5657,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'menusections_strapi_stage_links',
+            joinColumn: {
+              name: 'menusection_id',
+              referencedColumn: 'id',
+              referencedTable: 'menusections',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['menusection_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'menusections_strapi_assignee_links',
+            joinColumn: {
+              name: 'menusection_id',
+              referencedColumn: 'id',
+              referencedTable: 'menusections',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['menusection_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -4760,6 +5723,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -4869,10 +5834,12 @@ export const metadata = [
             joinColumn: {
               name: 'relation_locale_id',
               referencedColumn: 'id',
+              referencedTable: 'relation_locales',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['relation_locale_id', 'category_id'],
             orderColumnName: 'category_order',
@@ -5051,10 +6018,12 @@ export const metadata = [
             joinColumn: {
               name: 'relation_locale_id',
               referencedColumn: 'id',
+              referencedTable: 'relation_locales',
             },
             inverseJoinColumn: {
               name: 'inv_relation_locale_id',
               referencedColumn: 'id',
+              referencedTable: 'relation_locales',
             },
             pivotColumns: ['relation_locale_id', 'inv_relation_locale_id'],
             orderColumnName: 'relation_locale_order',
@@ -5070,6 +6039,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'relation_locales_strapi_stage_links',
+            joinColumn: {
+              name: 'relation_locale_id',
+              referencedColumn: 'id',
+              referencedTable: 'relation_locales',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['relation_locale_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'relation_locales_strapi_assignee_links',
+            joinColumn: {
+              name: 'relation_locale_id',
+              referencedColumn: 'id',
+              referencedTable: 'relation_locales',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['relation_locale_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -5091,6 +6108,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -5283,10 +6302,12 @@ export const metadata = [
             joinColumn: {
               name: 'restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             inverseJoinColumn: {
               name: 'address_id',
               referencedColumn: 'id',
+              referencedTable: 'addresses',
             },
             pivotColumns: ['restaurant_id', 'address_id'],
           },
@@ -5334,10 +6355,12 @@ export const metadata = [
             joinColumn: {
               name: 'restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['restaurant_id', 'category_id'],
             orderColumnName: 'category_order',
@@ -5391,10 +6414,12 @@ export const metadata = [
             joinColumn: {
               name: 'restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             inverseJoinColumn: {
               name: 'menu_id',
               referencedColumn: 'id',
+              referencedTable: 'menus',
             },
             pivotColumns: ['restaurant_id', 'menu_id'],
           },
@@ -5511,10 +6536,12 @@ export const metadata = [
             joinColumn: {
               name: 'restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             inverseJoinColumn: {
               name: 'inv_restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             pivotColumns: ['restaurant_id', 'inv_restaurant_id'],
             orderColumnName: 'restaurant_order',
@@ -5530,6 +6557,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'restaurants_strapi_stage_links',
+            joinColumn: {
+              name: 'restaurant_id',
+              referencedColumn: 'id',
+              referencedTable: 'restaurants',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['restaurant_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'restaurants_strapi_assignee_links',
+            joinColumn: {
+              name: 'restaurant_id',
+              referencedColumn: 'id',
+              referencedTable: 'restaurants',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['restaurant_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -5564,6 +6639,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -5604,10 +6681,12 @@ export const metadata = [
             joinColumn: {
               name: 'review_id',
               referencedColumn: 'id',
+              referencedTable: 'reviews',
             },
             inverseJoinColumn: {
               name: 'like_id',
               referencedColumn: 'id',
+              referencedTable: 'likes',
             },
             pivotColumns: ['like_id', 'review_id'],
             orderColumnName: 'like_order',
@@ -5625,10 +6704,12 @@ export const metadata = [
             joinColumn: {
               name: 'review_id',
               referencedColumn: 'id',
+              referencedTable: 'reviews',
             },
             inverseJoinColumn: {
               name: 'user_id',
               referencedColumn: 'id',
+              referencedTable: 'up_users',
             },
             pivotColumns: ['review_id', 'user_id'],
           },
@@ -5642,10 +6723,12 @@ export const metadata = [
             joinColumn: {
               name: 'review_id',
               referencedColumn: 'id',
+              referencedTable: 'reviews',
             },
             inverseJoinColumn: {
               name: 'restaurant_id',
               referencedColumn: 'id',
+              referencedTable: 'restaurants',
             },
             pivotColumns: ['review_id', 'restaurant_id'],
           },
@@ -5710,10 +6793,12 @@ export const metadata = [
             joinColumn: {
               name: 'review_id',
               referencedColumn: 'id',
+              referencedTable: 'reviews',
             },
             inverseJoinColumn: {
               name: 'inv_review_id',
               referencedColumn: 'id',
+              referencedTable: 'reviews',
             },
             pivotColumns: ['review_id', 'inv_review_id'],
             orderColumnName: 'review_order',
@@ -5729,6 +6814,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'reviews_strapi_stage_links',
+            joinColumn: {
+              name: 'review_id',
+              referencedColumn: 'id',
+              referencedTable: 'reviews',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['review_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'reviews_strapi_assignee_links',
+            joinColumn: {
+              name: 'review_id',
+              referencedColumn: 'id',
+              referencedTable: 'reviews',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['review_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -5749,6 +6882,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -5781,10 +6916,12 @@ export const metadata = [
             joinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             inverseJoinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             pivotColumns: ['tag_id', 'kitchensink_id'],
             inverseOrderColumnName: 'tag_order',
@@ -5800,10 +6937,12 @@ export const metadata = [
             joinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             inverseJoinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
             orderColumnName: 'kitchensink_order',
@@ -5822,10 +6961,12 @@ export const metadata = [
             joinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             inverseJoinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
             orderColumnName: 'kitchensink_order',
@@ -5845,10 +6986,12 @@ export const metadata = [
             joinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             inverseJoinColumn: {
               name: 'kitchensink_id',
               referencedColumn: 'id',
+              referencedTable: 'kitchensinks',
             },
             pivotColumns: ['kitchensink_id', 'tag_id'],
           },
@@ -5913,10 +7056,12 @@ export const metadata = [
             joinColumn: {
               name: 'tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             inverseJoinColumn: {
               name: 'inv_tag_id',
               referencedColumn: 'id',
+              referencedTable: 'tags',
             },
             pivotColumns: ['tag_id', 'inv_tag_id'],
             orderColumnName: 'tag_order',
@@ -5932,6 +7077,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'tags_strapi_stage_links',
+            joinColumn: {
+              name: 'tag_id',
+              referencedColumn: 'id',
+              referencedTable: 'tags',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['tag_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'tags_strapi_assignee_links',
+            joinColumn: {
+              name: 'tag_id',
+              referencedColumn: 'id',
+              referencedTable: 'tags',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['tag_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -5952,6 +7145,8 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
       },
     },
   ],
@@ -5984,10 +7179,12 @@ export const metadata = [
             joinColumn: {
               name: 'temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['temp_id', 'category_id'],
           },
@@ -6002,10 +7199,12 @@ export const metadata = [
             joinColumn: {
               name: 'temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['temp_id', 'category_id'],
             orderColumnName: 'category_order',
@@ -6025,10 +7224,12 @@ export const metadata = [
             joinColumn: {
               name: 'temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             inverseJoinColumn: {
               name: 'inv_temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             pivotColumns: ['temp_id', 'inv_temp_id'],
             orderColumnName: 'temp_order',
@@ -6048,10 +7249,12 @@ export const metadata = [
             joinColumn: {
               name: 'inv_temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             inverseJoinColumn: {
               name: 'temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             pivotColumns: ['temp_id', 'inv_temp_id'],
             orderColumnName: 'inv_temp_order',
@@ -6134,10 +7337,12 @@ export const metadata = [
             joinColumn: {
               name: 'temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             inverseJoinColumn: {
               name: 'inv_temp_id',
               referencedColumn: 'id',
+              referencedTable: 'temps',
             },
             pivotColumns: ['temp_id', 'inv_temp_id'],
             orderColumnName: 'temp_order',
@@ -6153,6 +7358,54 @@ export const metadata = [
           visible: false,
           type: 'string',
           columnName: 'locale',
+        },
+        strapi_stage: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::workflow-stage',
+          joinTable: {
+            name: 'temps_strapi_stage_links',
+            joinColumn: {
+              name: 'temp_id',
+              referencedColumn: 'id',
+              referencedTable: 'temps',
+            },
+            inverseJoinColumn: {
+              name: 'workflow_stage_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_workflows_stages',
+            },
+            pivotColumns: ['temp_id', 'workflow_stage_id'],
+          },
+        },
+        strapi_assignee: {
+          writable: true,
+          private: false,
+          configurable: false,
+          visible: false,
+          useJoinTable: true,
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'temps_strapi_assignee_links',
+            joinColumn: {
+              name: 'temp_id',
+              referencedColumn: 'id',
+              referencedTable: 'temps',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['temp_id', 'user_id'],
+          },
         },
       },
       lifecycles: {},
@@ -6174,6 +7427,122 @@ export const metadata = [
         updatedBy: 'updatedBy',
         localizations: 'localizations',
         locale: 'locale',
+        strapi_stage: 'strapi_stage',
+        strapi_assignee: 'strapi_assignee',
+      },
+    },
+  ],
+  [
+    'admin::audit-log',
+    {
+      uid: 'admin::audit-log',
+      singularName: 'audit-log',
+      tableName: 'strapi_audit_logs',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        documentId: {
+          type: 'string',
+          columnName: 'document_id',
+        },
+        action: {
+          type: 'string',
+          required: true,
+          columnName: 'action',
+        },
+        date: {
+          type: 'datetime',
+          required: true,
+          columnName: 'date',
+        },
+        user: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          joinTable: {
+            name: 'strapi_audit_logs_user_links',
+            joinColumn: {
+              name: 'audit_log_id',
+              referencedColumn: 'id',
+              referencedTable: 'strapi_audit_logs',
+            },
+            inverseJoinColumn: {
+              name: 'user_id',
+              referencedColumn: 'id',
+              referencedTable: 'admin_users',
+            },
+            pivotColumns: ['audit_log_id', 'user_id'],
+          },
+        },
+        payload: {
+          type: 'json',
+          columnName: 'payload',
+        },
+        createdAt: {
+          type: 'datetime',
+          columnName: 'created_at',
+        },
+        updatedAt: {
+          type: 'datetime',
+          columnName: 'updated_at',
+        },
+        publishedAt: {
+          type: 'datetime',
+          configurable: false,
+          writable: true,
+          visible: false,
+          columnName: 'published_at',
+        },
+        createdBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          writable: false,
+          visible: false,
+          useJoinTable: false,
+          private: true,
+          owner: true,
+          joinColumn: {
+            name: 'created_by_id',
+            referencedColumn: 'id',
+            referencedTable: 'admin_users',
+          },
+        },
+        updatedBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          writable: false,
+          visible: false,
+          useJoinTable: false,
+          private: true,
+          owner: true,
+          joinColumn: {
+            name: 'updated_by_id',
+            referencedColumn: 'id',
+            referencedTable: 'admin_users',
+          },
+        },
+      },
+      lifecycles: {},
+      indexes: [],
+      foreignKeys: [],
+      columnToAttribute: {
+        id: 'id',
+        document_id: 'documentId',
+        action: 'action',
+        date: 'date',
+        user: 'user',
+        payload: 'payload',
+        created_at: 'createdAt',
+        updated_at: 'updatedAt',
+        published_at: 'publishedAt',
+        createdBy: 'createdBy',
+        updatedBy: 'updatedBy',
       },
     },
   ],
@@ -6431,10 +7800,12 @@ export const metadata = [
             joinColumn: {
               name: 'dish_id',
               referencedColumn: 'id',
+              referencedTable: 'components_dishes',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['dish_id', 'category_id'],
           },
@@ -6733,10 +8104,12 @@ export const metadata = [
             joinColumn: {
               name: 'relation_id',
               referencedColumn: 'id',
+              referencedTable: 'components_basic_relations',
             },
             inverseJoinColumn: {
               name: 'category_id',
               referencedColumn: 'id',
+              referencedTable: 'categories',
             },
             pivotColumns: ['relation_id', 'category_id'],
             orderColumnName: 'category_order',
@@ -7717,6 +9090,318 @@ export const metadata = [
     },
   ],
   [
+    'strapi_workflows_localizations_links',
+    {
+      singularName: 'strapi_workflows_localizations_links',
+      uid: 'strapi_workflows_localizations_links',
+      tableName: 'strapi_workflows_localizations_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        workflow_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_id',
+        },
+        inv_workflow_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'inv_workflow_id',
+        },
+        workflow_order: {
+          type: 'float',
+          column: {
+            unsigned: true,
+            defaultTo: null,
+          },
+          columnName: 'workflow_order',
+        },
+      },
+      indexes: [
+        {
+          name: 'strapi_workflows_localizations_links_fk',
+          columns: ['workflow_id'],
+        },
+        {
+          name: 'strapi_workflows_localizations_links_inv_fk',
+          columns: ['inv_workflow_id'],
+        },
+        {
+          name: 'strapi_workflows_localizations_links_unique',
+          columns: ['workflow_id', 'inv_workflow_id'],
+          type: 'unique',
+        },
+        {
+          name: 'strapi_workflows_localizations_links_order_fk',
+          columns: ['workflow_order'],
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'strapi_workflows_localizations_links_fk',
+          columns: ['workflow_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'strapi_workflows_localizations_links_inv_fk',
+          columns: ['inv_workflow_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        workflow_id: 'workflow_id',
+        inv_workflow_id: 'inv_workflow_id',
+        workflow_order: 'workflow_order',
+      },
+    },
+  ],
+  [
+    'strapi_workflows_stages_workflow_links',
+    {
+      singularName: 'strapi_workflows_stages_workflow_links',
+      uid: 'strapi_workflows_stages_workflow_links',
+      tableName: 'strapi_workflows_stages_workflow_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+        workflow_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_id',
+        },
+        workflow_stage_order: {
+          type: 'float',
+          column: {
+            unsigned: true,
+            defaultTo: null,
+          },
+          columnName: 'workflow_stage_order',
+        },
+      },
+      indexes: [
+        {
+          name: 'strapi_workflows_stages_workflow_links_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'strapi_workflows_stages_workflow_links_inv_fk',
+          columns: ['workflow_id'],
+        },
+        {
+          name: 'strapi_workflows_stages_workflow_links_unique',
+          columns: ['workflow_stage_id', 'workflow_id'],
+          type: 'unique',
+        },
+        {
+          name: 'strapi_workflows_stages_workflow_links_order_inv_fk',
+          columns: ['workflow_stage_order'],
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'strapi_workflows_stages_workflow_links_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'strapi_workflows_stages_workflow_links_inv_fk',
+          columns: ['workflow_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        workflow_stage_id: 'workflow_stage_id',
+        workflow_id: 'workflow_id',
+        workflow_stage_order: 'workflow_stage_order',
+      },
+    },
+  ],
+  [
+    'strapi_workflows_stages_permissions_links',
+    {
+      singularName: 'strapi_workflows_stages_permissions_links',
+      uid: 'strapi_workflows_stages_permissions_links',
+      tableName: 'strapi_workflows_stages_permissions_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+        permission_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'permission_id',
+        },
+        permission_order: {
+          type: 'float',
+          column: {
+            unsigned: true,
+            defaultTo: null,
+          },
+          columnName: 'permission_order',
+        },
+      },
+      indexes: [
+        {
+          name: 'strapi_workflows_stages_permissions_links_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'strapi_workflows_stages_permissions_links_inv_fk',
+          columns: ['permission_id'],
+        },
+        {
+          name: 'strapi_workflows_stages_permissions_links_unique',
+          columns: ['workflow_stage_id', 'permission_id'],
+          type: 'unique',
+        },
+        {
+          name: 'strapi_workflows_stages_permissions_links_order_fk',
+          columns: ['permission_order'],
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'strapi_workflows_stages_permissions_links_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'strapi_workflows_stages_permissions_links_inv_fk',
+          columns: ['permission_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_permissions',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        workflow_stage_id: 'workflow_stage_id',
+        permission_id: 'permission_id',
+        permission_order: 'permission_order',
+      },
+    },
+  ],
+  [
+    'strapi_workflows_stages_localizations_links',
+    {
+      singularName: 'strapi_workflows_stages_localizations_links',
+      uid: 'strapi_workflows_stages_localizations_links',
+      tableName: 'strapi_workflows_stages_localizations_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+        inv_workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'inv_workflow_stage_id',
+        },
+        workflow_stage_order: {
+          type: 'float',
+          column: {
+            unsigned: true,
+            defaultTo: null,
+          },
+          columnName: 'workflow_stage_order',
+        },
+      },
+      indexes: [
+        {
+          name: 'strapi_workflows_stages_localizations_links_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'strapi_workflows_stages_localizations_links_inv_fk',
+          columns: ['inv_workflow_stage_id'],
+        },
+        {
+          name: 'strapi_workflows_stages_localizations_links_unique',
+          columns: ['workflow_stage_id', 'inv_workflow_stage_id'],
+          type: 'unique',
+        },
+        {
+          name: 'strapi_workflows_stages_localizations_links_order_fk',
+          columns: ['workflow_stage_order'],
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'strapi_workflows_stages_localizations_links_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'strapi_workflows_stages_localizations_links_inv_fk',
+          columns: ['inv_workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        workflow_stage_id: 'workflow_stage_id',
+        inv_workflow_stage_id: 'inv_workflow_stage_id',
+        workflow_stage_order: 'workflow_stage_order',
+      },
+    },
+  ],
+  [
     'files_related_morphs',
     {
       singularName: 'files_related_morphs',
@@ -8416,6 +10101,136 @@ export const metadata = [
     },
   ],
   [
+    'myplugin_test_strapi_stage_links',
+    {
+      singularName: 'myplugin_test_strapi_stage_links',
+      uid: 'myplugin_test_strapi_stage_links',
+      tableName: 'myplugin_test_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        test_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'test_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'myplugin_test_strapi_stage_links_fk',
+          columns: ['test_id'],
+        },
+        {
+          name: 'myplugin_test_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'myplugin_test_strapi_stage_links_unique',
+          columns: ['test_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'myplugin_test_strapi_stage_links_fk',
+          columns: ['test_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'myplugin_test',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'myplugin_test_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        test_id: 'test_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'myplugin_test_strapi_assignee_links',
+    {
+      singularName: 'myplugin_test_strapi_assignee_links',
+      uid: 'myplugin_test_strapi_assignee_links',
+      tableName: 'myplugin_test_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        test_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'test_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'myplugin_test_strapi_assignee_links_fk',
+          columns: ['test_id'],
+        },
+        {
+          name: 'myplugin_test_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'myplugin_test_strapi_assignee_links_unique',
+          columns: ['test_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'myplugin_test_strapi_assignee_links_fk',
+          columns: ['test_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'myplugin_test',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'myplugin_test_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        test_id: 'test_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'i_18_n_locale_localizations_links',
     {
       singularName: 'i_18_n_locale_localizations_links',
@@ -8473,14 +10288,14 @@ export const metadata = [
           name: 'i_18_n_locale_localizations_links_fk',
           columns: ['locale_id'],
           referencedColumns: ['id'],
-          referencedTable: 'i18n_locale',
+          referencedTable: 'i_18_n_locale',
           onDelete: 'CASCADE',
         },
         {
           name: 'i_18_n_locale_localizations_links_inv_fk',
           columns: ['inv_locale_id'],
           referencedColumns: ['id'],
-          referencedTable: 'i18n_locale',
+          referencedTable: 'i_18_n_locale',
           onDelete: 'CASCADE',
         },
       ],
@@ -8884,6 +10699,136 @@ export const metadata = [
     },
   ],
   [
+    'up_users_strapi_stage_links',
+    {
+      singularName: 'up_users_strapi_stage_links',
+      uid: 'up_users_strapi_stage_links',
+      tableName: 'up_users_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'up_users_strapi_stage_links_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'up_users_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'up_users_strapi_stage_links_unique',
+          columns: ['user_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'up_users_strapi_stage_links_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'up_users',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'up_users_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        user_id: 'user_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'up_users_strapi_assignee_links',
+    {
+      singularName: 'up_users_strapi_assignee_links',
+      uid: 'up_users_strapi_assignee_links',
+      tableName: 'up_users_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+        inv_user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'inv_user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'up_users_strapi_assignee_links_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'up_users_strapi_assignee_links_inv_fk',
+          columns: ['inv_user_id'],
+        },
+        {
+          name: 'up_users_strapi_assignee_links_unique',
+          columns: ['user_id', 'inv_user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'up_users_strapi_assignee_links_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'up_users',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'up_users_strapi_assignee_links_inv_fk',
+          columns: ['inv_user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        user_id: 'user_id',
+        inv_user_id: 'inv_user_id',
+      },
+    },
+  ],
+  [
     'addresses_categories_links',
     {
       singularName: 'addresses_categories_links',
@@ -9053,6 +10998,136 @@ export const metadata = [
     },
   ],
   [
+    'addresses_strapi_stage_links',
+    {
+      singularName: 'addresses_strapi_stage_links',
+      uid: 'addresses_strapi_stage_links',
+      tableName: 'addresses_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        address_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'address_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'addresses_strapi_stage_links_fk',
+          columns: ['address_id'],
+        },
+        {
+          name: 'addresses_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'addresses_strapi_stage_links_unique',
+          columns: ['address_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'addresses_strapi_stage_links_fk',
+          columns: ['address_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'addresses',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'addresses_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        address_id: 'address_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'addresses_strapi_assignee_links',
+    {
+      singularName: 'addresses_strapi_assignee_links',
+      uid: 'addresses_strapi_assignee_links',
+      tableName: 'addresses_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        address_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'address_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'addresses_strapi_assignee_links_fk',
+          columns: ['address_id'],
+        },
+        {
+          name: 'addresses_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'addresses_strapi_assignee_links_unique',
+          columns: ['address_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'addresses_strapi_assignee_links_fk',
+          columns: ['address_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'addresses',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'addresses_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        address_id: 'address_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'categories_localizations_links',
     {
       singularName: 'categories_localizations_links',
@@ -9127,6 +11202,136 @@ export const metadata = [
         category_id: 'category_id',
         inv_category_id: 'inv_category_id',
         category_order: 'category_order',
+      },
+    },
+  ],
+  [
+    'categories_strapi_stage_links',
+    {
+      singularName: 'categories_strapi_stage_links',
+      uid: 'categories_strapi_stage_links',
+      tableName: 'categories_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        category_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'category_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'categories_strapi_stage_links_fk',
+          columns: ['category_id'],
+        },
+        {
+          name: 'categories_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'categories_strapi_stage_links_unique',
+          columns: ['category_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'categories_strapi_stage_links_fk',
+          columns: ['category_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'categories',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'categories_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        category_id: 'category_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'categories_strapi_assignee_links',
+    {
+      singularName: 'categories_strapi_assignee_links',
+      uid: 'categories_strapi_assignee_links',
+      tableName: 'categories_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        category_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'category_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'categories_strapi_assignee_links_fk',
+          columns: ['category_id'],
+        },
+        {
+          name: 'categories_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'categories_strapi_assignee_links_unique',
+          columns: ['category_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'categories_strapi_assignee_links_fk',
+          columns: ['category_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'categories',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'categories_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        category_id: 'category_id',
+        user_id: 'user_id',
       },
     },
   ],
@@ -9209,6 +11414,136 @@ export const metadata = [
     },
   ],
   [
+    'countries_strapi_stage_links',
+    {
+      singularName: 'countries_strapi_stage_links',
+      uid: 'countries_strapi_stage_links',
+      tableName: 'countries_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        country_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'country_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'countries_strapi_stage_links_fk',
+          columns: ['country_id'],
+        },
+        {
+          name: 'countries_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'countries_strapi_stage_links_unique',
+          columns: ['country_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'countries_strapi_stage_links_fk',
+          columns: ['country_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'countries',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'countries_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        country_id: 'country_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'countries_strapi_assignee_links',
+    {
+      singularName: 'countries_strapi_assignee_links',
+      uid: 'countries_strapi_assignee_links',
+      tableName: 'countries_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        country_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'country_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'countries_strapi_assignee_links_fk',
+          columns: ['country_id'],
+        },
+        {
+          name: 'countries_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'countries_strapi_assignee_links_unique',
+          columns: ['country_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'countries_strapi_assignee_links_fk',
+          columns: ['country_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'countries',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'countries_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        country_id: 'country_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'homepages_localizations_links',
     {
       singularName: 'homepages_localizations_links',
@@ -9283,6 +11618,136 @@ export const metadata = [
         homepage_id: 'homepage_id',
         inv_homepage_id: 'inv_homepage_id',
         homepage_order: 'homepage_order',
+      },
+    },
+  ],
+  [
+    'homepages_strapi_stage_links',
+    {
+      singularName: 'homepages_strapi_stage_links',
+      uid: 'homepages_strapi_stage_links',
+      tableName: 'homepages_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        homepage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'homepage_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'homepages_strapi_stage_links_fk',
+          columns: ['homepage_id'],
+        },
+        {
+          name: 'homepages_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'homepages_strapi_stage_links_unique',
+          columns: ['homepage_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'homepages_strapi_stage_links_fk',
+          columns: ['homepage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'homepages',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'homepages_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        homepage_id: 'homepage_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'homepages_strapi_assignee_links',
+    {
+      singularName: 'homepages_strapi_assignee_links',
+      uid: 'homepages_strapi_assignee_links',
+      tableName: 'homepages_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        homepage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'homepage_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'homepages_strapi_assignee_links_fk',
+          columns: ['homepage_id'],
+        },
+        {
+          name: 'homepages_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'homepages_strapi_assignee_links_unique',
+          columns: ['homepage_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'homepages_strapi_assignee_links_fk',
+          columns: ['homepage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'homepages',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'homepages_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        homepage_id: 'homepage_id',
+        user_id: 'user_id',
       },
     },
   ],
@@ -9817,6 +12282,136 @@ export const metadata = [
     },
   ],
   [
+    'kitchensinks_strapi_stage_links',
+    {
+      singularName: 'kitchensinks_strapi_stage_links',
+      uid: 'kitchensinks_strapi_stage_links',
+      tableName: 'kitchensinks_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        kitchensink_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'kitchensink_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'kitchensinks_strapi_stage_links_fk',
+          columns: ['kitchensink_id'],
+        },
+        {
+          name: 'kitchensinks_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'kitchensinks_strapi_stage_links_unique',
+          columns: ['kitchensink_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'kitchensinks_strapi_stage_links_fk',
+          columns: ['kitchensink_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'kitchensinks',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'kitchensinks_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        kitchensink_id: 'kitchensink_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'kitchensinks_strapi_assignee_links',
+    {
+      singularName: 'kitchensinks_strapi_assignee_links',
+      uid: 'kitchensinks_strapi_assignee_links',
+      tableName: 'kitchensinks_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        kitchensink_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'kitchensink_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'kitchensinks_strapi_assignee_links_fk',
+          columns: ['kitchensink_id'],
+        },
+        {
+          name: 'kitchensinks_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'kitchensinks_strapi_assignee_links_unique',
+          columns: ['kitchensink_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'kitchensinks_strapi_assignee_links_fk',
+          columns: ['kitchensink_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'kitchensinks',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'kitchensinks_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        kitchensink_id: 'kitchensink_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'likes_author_links',
     {
       singularName: 'likes_author_links',
@@ -10038,6 +12633,136 @@ export const metadata = [
     },
   ],
   [
+    'likes_strapi_stage_links',
+    {
+      singularName: 'likes_strapi_stage_links',
+      uid: 'likes_strapi_stage_links',
+      tableName: 'likes_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        like_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'like_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'likes_strapi_stage_links_fk',
+          columns: ['like_id'],
+        },
+        {
+          name: 'likes_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'likes_strapi_stage_links_unique',
+          columns: ['like_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'likes_strapi_stage_links_fk',
+          columns: ['like_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'likes',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'likes_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        like_id: 'like_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'likes_strapi_assignee_links',
+    {
+      singularName: 'likes_strapi_assignee_links',
+      uid: 'likes_strapi_assignee_links',
+      tableName: 'likes_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        like_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'like_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'likes_strapi_assignee_links_fk',
+          columns: ['like_id'],
+        },
+        {
+          name: 'likes_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'likes_strapi_assignee_links_unique',
+          columns: ['like_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'likes_strapi_assignee_links_fk',
+          columns: ['like_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'likes',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'likes_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        like_id: 'like_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'menus_localizations_links',
     {
       singularName: 'menus_localizations_links',
@@ -10112,6 +12837,136 @@ export const metadata = [
         menu_id: 'menu_id',
         inv_menu_id: 'inv_menu_id',
         menu_order: 'menu_order',
+      },
+    },
+  ],
+  [
+    'menus_strapi_stage_links',
+    {
+      singularName: 'menus_strapi_stage_links',
+      uid: 'menus_strapi_stage_links',
+      tableName: 'menus_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        menu_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'menu_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'menus_strapi_stage_links_fk',
+          columns: ['menu_id'],
+        },
+        {
+          name: 'menus_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'menus_strapi_stage_links_unique',
+          columns: ['menu_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'menus_strapi_stage_links_fk',
+          columns: ['menu_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'menus',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'menus_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        menu_id: 'menu_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'menus_strapi_assignee_links',
+    {
+      singularName: 'menus_strapi_assignee_links',
+      uid: 'menus_strapi_assignee_links',
+      tableName: 'menus_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        menu_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'menu_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'menus_strapi_assignee_links_fk',
+          columns: ['menu_id'],
+        },
+        {
+          name: 'menus_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'menus_strapi_assignee_links_unique',
+          columns: ['menu_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'menus_strapi_assignee_links_fk',
+          columns: ['menu_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'menus',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'menus_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        menu_id: 'menu_id',
+        user_id: 'user_id',
       },
     },
   ],
@@ -10268,6 +13123,136 @@ export const metadata = [
         menusection_id: 'menusection_id',
         inv_menusection_id: 'inv_menusection_id',
         menusection_order: 'menusection_order',
+      },
+    },
+  ],
+  [
+    'menusections_strapi_stage_links',
+    {
+      singularName: 'menusections_strapi_stage_links',
+      uid: 'menusections_strapi_stage_links',
+      tableName: 'menusections_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        menusection_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'menusection_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'menusections_strapi_stage_links_fk',
+          columns: ['menusection_id'],
+        },
+        {
+          name: 'menusections_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'menusections_strapi_stage_links_unique',
+          columns: ['menusection_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'menusections_strapi_stage_links_fk',
+          columns: ['menusection_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'menusections',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'menusections_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        menusection_id: 'menusection_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'menusections_strapi_assignee_links',
+    {
+      singularName: 'menusections_strapi_assignee_links',
+      uid: 'menusections_strapi_assignee_links',
+      tableName: 'menusections_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        menusection_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'menusection_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'menusections_strapi_assignee_links_fk',
+          columns: ['menusection_id'],
+        },
+        {
+          name: 'menusections_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'menusections_strapi_assignee_links_unique',
+          columns: ['menusection_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'menusections_strapi_assignee_links_fk',
+          columns: ['menusection_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'menusections',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'menusections_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        menusection_id: 'menusection_id',
+        user_id: 'user_id',
       },
     },
   ],
@@ -10437,6 +13422,136 @@ export const metadata = [
         relation_locale_id: 'relation_locale_id',
         inv_relation_locale_id: 'inv_relation_locale_id',
         relation_locale_order: 'relation_locale_order',
+      },
+    },
+  ],
+  [
+    'relation_locales_strapi_stage_links',
+    {
+      singularName: 'relation_locales_strapi_stage_links',
+      uid: 'relation_locales_strapi_stage_links',
+      tableName: 'relation_locales_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        relation_locale_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'relation_locale_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'relation_locales_strapi_stage_links_fk',
+          columns: ['relation_locale_id'],
+        },
+        {
+          name: 'relation_locales_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'relation_locales_strapi_stage_links_unique',
+          columns: ['relation_locale_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'relation_locales_strapi_stage_links_fk',
+          columns: ['relation_locale_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'relation_locales',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'relation_locales_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        relation_locale_id: 'relation_locale_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'relation_locales_strapi_assignee_links',
+    {
+      singularName: 'relation_locales_strapi_assignee_links',
+      uid: 'relation_locales_strapi_assignee_links',
+      tableName: 'relation_locales_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        relation_locale_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'relation_locale_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'relation_locales_strapi_assignee_links_fk',
+          columns: ['relation_locale_id'],
+        },
+        {
+          name: 'relation_locales_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'relation_locales_strapi_assignee_links_unique',
+          columns: ['relation_locale_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'relation_locales_strapi_assignee_links_fk',
+          columns: ['relation_locale_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'relation_locales',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'relation_locales_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        relation_locale_id: 'relation_locale_id',
+        user_id: 'user_id',
       },
     },
   ],
@@ -10727,6 +13842,136 @@ export const metadata = [
     },
   ],
   [
+    'restaurants_strapi_stage_links',
+    {
+      singularName: 'restaurants_strapi_stage_links',
+      uid: 'restaurants_strapi_stage_links',
+      tableName: 'restaurants_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        restaurant_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'restaurant_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'restaurants_strapi_stage_links_fk',
+          columns: ['restaurant_id'],
+        },
+        {
+          name: 'restaurants_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'restaurants_strapi_stage_links_unique',
+          columns: ['restaurant_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'restaurants_strapi_stage_links_fk',
+          columns: ['restaurant_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'restaurants',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'restaurants_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        restaurant_id: 'restaurant_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'restaurants_strapi_assignee_links',
+    {
+      singularName: 'restaurants_strapi_assignee_links',
+      uid: 'restaurants_strapi_assignee_links',
+      tableName: 'restaurants_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        restaurant_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'restaurant_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'restaurants_strapi_assignee_links_fk',
+          columns: ['restaurant_id'],
+        },
+        {
+          name: 'restaurants_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'restaurants_strapi_assignee_links_unique',
+          columns: ['restaurant_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'restaurants_strapi_assignee_links_fk',
+          columns: ['restaurant_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'restaurants',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'restaurants_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        restaurant_id: 'restaurant_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'reviews_author_links',
     {
       singularName: 'reviews_author_links',
@@ -10935,6 +14180,136 @@ export const metadata = [
     },
   ],
   [
+    'reviews_strapi_stage_links',
+    {
+      singularName: 'reviews_strapi_stage_links',
+      uid: 'reviews_strapi_stage_links',
+      tableName: 'reviews_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        review_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'review_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'reviews_strapi_stage_links_fk',
+          columns: ['review_id'],
+        },
+        {
+          name: 'reviews_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'reviews_strapi_stage_links_unique',
+          columns: ['review_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'reviews_strapi_stage_links_fk',
+          columns: ['review_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'reviews',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'reviews_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        review_id: 'review_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'reviews_strapi_assignee_links',
+    {
+      singularName: 'reviews_strapi_assignee_links',
+      uid: 'reviews_strapi_assignee_links',
+      tableName: 'reviews_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        review_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'review_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'reviews_strapi_assignee_links_fk',
+          columns: ['review_id'],
+        },
+        {
+          name: 'reviews_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'reviews_strapi_assignee_links_unique',
+          columns: ['review_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'reviews_strapi_assignee_links_fk',
+          columns: ['review_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'reviews',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'reviews_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        review_id: 'review_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
     'tags_many_to_one_kitchensink_links',
     {
       singularName: 'tags_many_to_one_kitchensink_links',
@@ -11087,6 +14462,136 @@ export const metadata = [
         tag_id: 'tag_id',
         inv_tag_id: 'inv_tag_id',
         tag_order: 'tag_order',
+      },
+    },
+  ],
+  [
+    'tags_strapi_stage_links',
+    {
+      singularName: 'tags_strapi_stage_links',
+      uid: 'tags_strapi_stage_links',
+      tableName: 'tags_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        tag_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'tag_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'tags_strapi_stage_links_fk',
+          columns: ['tag_id'],
+        },
+        {
+          name: 'tags_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'tags_strapi_stage_links_unique',
+          columns: ['tag_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'tags_strapi_stage_links_fk',
+          columns: ['tag_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'tags',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'tags_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        tag_id: 'tag_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'tags_strapi_assignee_links',
+    {
+      singularName: 'tags_strapi_assignee_links',
+      uid: 'tags_strapi_assignee_links',
+      tableName: 'tags_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        tag_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'tag_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'tags_strapi_assignee_links_fk',
+          columns: ['tag_id'],
+        },
+        {
+          name: 'tags_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'tags_strapi_assignee_links_unique',
+          columns: ['tag_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'tags_strapi_assignee_links_fk',
+          columns: ['tag_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'tags',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'tags_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        tag_id: 'tag_id',
+        user_id: 'user_id',
       },
     },
   ],
@@ -11412,6 +14917,201 @@ export const metadata = [
         temp_id: 'temp_id',
         inv_temp_id: 'inv_temp_id',
         temp_order: 'temp_order',
+      },
+    },
+  ],
+  [
+    'temps_strapi_stage_links',
+    {
+      singularName: 'temps_strapi_stage_links',
+      uid: 'temps_strapi_stage_links',
+      tableName: 'temps_strapi_stage_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        temp_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'temp_id',
+        },
+        workflow_stage_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'workflow_stage_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'temps_strapi_stage_links_fk',
+          columns: ['temp_id'],
+        },
+        {
+          name: 'temps_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+        },
+        {
+          name: 'temps_strapi_stage_links_unique',
+          columns: ['temp_id', 'workflow_stage_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'temps_strapi_stage_links_fk',
+          columns: ['temp_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'temps',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'temps_strapi_stage_links_inv_fk',
+          columns: ['workflow_stage_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_workflows_stages',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        temp_id: 'temp_id',
+        workflow_stage_id: 'workflow_stage_id',
+      },
+    },
+  ],
+  [
+    'temps_strapi_assignee_links',
+    {
+      singularName: 'temps_strapi_assignee_links',
+      uid: 'temps_strapi_assignee_links',
+      tableName: 'temps_strapi_assignee_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        temp_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'temp_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'temps_strapi_assignee_links_fk',
+          columns: ['temp_id'],
+        },
+        {
+          name: 'temps_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'temps_strapi_assignee_links_unique',
+          columns: ['temp_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'temps_strapi_assignee_links_fk',
+          columns: ['temp_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'temps',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'temps_strapi_assignee_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        temp_id: 'temp_id',
+        user_id: 'user_id',
+      },
+    },
+  ],
+  [
+    'strapi_audit_logs_user_links',
+    {
+      singularName: 'strapi_audit_logs_user_links',
+      uid: 'strapi_audit_logs_user_links',
+      tableName: 'strapi_audit_logs_user_links',
+      attributes: {
+        id: {
+          type: 'increments',
+          columnName: 'id',
+        },
+        audit_log_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'audit_log_id',
+        },
+        user_id: {
+          type: 'integer',
+          column: {
+            unsigned: true,
+          },
+          columnName: 'user_id',
+        },
+      },
+      indexes: [
+        {
+          name: 'strapi_audit_logs_user_links_fk',
+          columns: ['audit_log_id'],
+        },
+        {
+          name: 'strapi_audit_logs_user_links_inv_fk',
+          columns: ['user_id'],
+        },
+        {
+          name: 'strapi_audit_logs_user_links_unique',
+          columns: ['audit_log_id', 'user_id'],
+          type: 'unique',
+        },
+      ],
+      foreignKeys: [
+        {
+          name: 'strapi_audit_logs_user_links_fk',
+          columns: ['audit_log_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'strapi_audit_logs',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'strapi_audit_logs_user_links_inv_fk',
+          columns: ['user_id'],
+          referencedColumns: ['id'],
+          referencedTable: 'admin_users',
+          onDelete: 'CASCADE',
+        },
+      ],
+      lifecycles: {},
+      columnToAttribute: {
+        id: 'id',
+        audit_log_id: 'audit_log_id',
+        user_id: 'user_id',
       },
     },
   ],

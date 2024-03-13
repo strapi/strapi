@@ -44,6 +44,8 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
 
   addTimestamps(schema);
 
+  // Published at is added regardless of draft and publish being enabled
+  // In case it is not enabled, value will be always published, and it will not contain a draft
   addDraftAndPublish(schema);
 
   addCreatorFields(schema);
@@ -65,6 +67,10 @@ const addTimestamps = (schema: Schema.ContentType) => {
 };
 
 const addDraftAndPublish = (schema: Schema.ContentType) => {
+  if (!_.has(schema, 'options.draftAndPublish')) {
+    _.set(schema, 'options.draftAndPublish', false); // Disabled by default
+  }
+
   schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
     type: 'datetime',
     configurable: false,

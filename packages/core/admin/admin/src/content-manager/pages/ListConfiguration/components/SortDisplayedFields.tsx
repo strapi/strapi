@@ -25,7 +25,10 @@ const SortDisplayedFields = () => {
   const [lastAction, setLastAction] = React.useState<string | null>(null);
   const scrollableContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const values = useForm<FormData['layout']>('SortDisplayedFields', (state) => state.values.layout);
+  const values = useForm<FormData['layout']>(
+    'SortDisplayedFields',
+    (state) => state.values.layout ?? []
+  );
   const addFieldRow = useForm('SortDisplayedFields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('SortDisplayedFields', (state) => state.removeFieldRow);
   const moveFieldRow = useForm('SortDisplayedFields', (state) => state.moveFieldRow);

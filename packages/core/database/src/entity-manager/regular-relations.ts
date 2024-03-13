@@ -13,7 +13,7 @@ import {
 import { createQueryBuilder } from '../query';
 import { addSchema } from '../utils/knex';
 import type { Database } from '..';
-import type { ID, Relation } from '../types';
+import type { ID, Relation, Model } from '../types';
 
 declare module 'knex' {
   namespace Knex {
@@ -22,6 +22,36 @@ declare module 'knex' {
     }
   }
 }
+
+//  TODO: This is a short term solution, to not steal relations from the same document.
+const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID) => {
+  // Find if the model is a content type or something else (e.g component)
+  // to only get the documentId if it's a content type
+  const models: Model[] = Array.from(strapi.db.metadata.values());
+
+  const isContentType = models.find((model) => {
+    return model.tableName === tableName && model.attributes.documentId;
+  });
+
+  if (!isContentType) {
+    return [id];
+  }
+
+  return (
+    con
+      .from(tableName)
+      // Get all child ids of the document id
+      .select('id')
+      .where(
+        'document_id',
+        con
+          .from(tableName)
+          // get document id related to the current id
+          .select('document_id')
+          .where('id', id)
+      )
+  );
+};
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -47,15 +77,17 @@ const deletePreviousOneToAnyRelations = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  await createQueryBuilder(joinTable.name, db)
+  const con = db.getConnection();
+
+  await con
     .delete()
-    .where({
-      [inverseJoinColumn.name]: relIdsToadd,
-      [joinColumn.name]: { $ne: id },
-    })
+    .from(joinTable.name)
+    // Exclude the ids of the current document
+    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(con, joinColumn.referencedTable!, id))
+    // Include all of the ids that are being connected
+    .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
-    .transacting(trx)
-    .execute();
+    .transacting(trx);
 
   await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd, transaction: trx });
 };
@@ -78,6 +110,7 @@ const deletePreviousAnyToOneRelations = async ({
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
+  const con = db.getConnection();
 
   if (!isAnyToOne(attribute)) {
     throw new Error('deletePreviousAnyToOneRelations can only be called for anyToOne relations');
@@ -85,15 +118,16 @@ const deletePreviousAnyToOneRelations = async ({
   // handling manyToOne
   if (isManyToAny(attribute)) {
     // if the database integrity was not broken relsToDelete is supposed to be of length 1
-    const relsToDelete = await createQueryBuilder(joinTable.name, db)
+    const relsToDelete = await con
       .select(inverseJoinColumn.name)
-      .where({
-        [joinColumn.name]: id,
-        [inverseJoinColumn.name]: { $ne: relIdToadd },
-      })
+      .from(joinTable.name)
+      .where(joinColumn.name, id)
+      .whereNotIn(
+        inverseJoinColumn.name,
+        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+      )
       .where(joinTable.on || {})
-      .transacting(trx)
-      .execute<{ [key: string]: ID }[]>();
+      .transacting(trx);
 
     const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
 
@@ -111,15 +145,17 @@ const deletePreviousAnyToOneRelations = async ({
 
     // handling oneToOne
   } else {
-    await createQueryBuilder(joinTable.name, db)
+    await con
       .delete()
-      .where({
-        [joinColumn.name]: id,
-        [inverseJoinColumn.name]: { $ne: relIdToadd },
-      })
+      .from(joinTable.name)
+      .where(joinColumn.name, id)
+      // Exclude the ids of the current document
+      .whereNotIn(
+        inverseJoinColumn.name,
+        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+      )
       .where(joinTable.on || {})
-      .transacting(trx)
-      .execute();
+      .transacting(trx);
   }
 };
 

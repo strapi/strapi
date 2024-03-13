@@ -302,12 +302,12 @@ describe('Core API - Basic + compo', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
+          message: 'compo[0].name must be defined.',
           details: {
             errors: [
               {
                 path: ['compo', '0', 'name'],
-                message: 'compo[0].name must be a `string` type, but the final value was: `null`.',
+                message: 'compo[0].name must be defined.',
                 name: 'ValidationError',
               },
             ],

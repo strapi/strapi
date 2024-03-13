@@ -18,7 +18,7 @@ const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
   }, [search, initialParams]);
 
   const setQuery = useCallback(
-    (nextParams: TQuery, method: 'push' | 'remove' = 'push') => {
+    (nextParams: TQuery, method: 'push' | 'remove' = 'push', replace = false) => {
       let nextQuery = { ...query };
 
       if (method === 'remove') {
@@ -32,7 +32,7 @@ const useQueryParams = <TQuery extends object>(initialParams?: TQuery) => {
         nextQuery = { ...query, ...nextParams };
       }
 
-      navigate({ pathname: '', search: stringify(nextQuery, { encode: false }) });
+      navigate({ search: stringify(nextQuery, { encode: false }) }, { replace });
     },
     [navigate, query]
   );

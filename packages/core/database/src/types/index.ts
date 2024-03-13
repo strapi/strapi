@@ -77,6 +77,7 @@ export interface BaseJoinTable {
   inverseJoinColumn: {
     name: string;
     referencedColumn: string;
+    referencedTable?: string;
   };
 }
 
