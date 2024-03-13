@@ -53,7 +53,6 @@ export * from './utils/getFileExtension';
 export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/normalizeAPIError';
-export * from './utils/prefixFileUrlWithBackendUrl';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/pxToRem';
 export * from './utils/request';

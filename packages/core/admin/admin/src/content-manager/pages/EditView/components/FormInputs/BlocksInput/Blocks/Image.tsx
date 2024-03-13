@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
+import { useLibrary } from '@strapi/helper-plugin';
 import { Picture } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
 import { type Element, Transforms, Editor } from 'slate';
@@ -86,6 +86,10 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
       </ImageWrapper>
     </Box>
   );
+};
+
+const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
+  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
 };
 
 const ImageDialog = () => {

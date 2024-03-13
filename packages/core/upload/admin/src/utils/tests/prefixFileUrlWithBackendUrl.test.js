@@ -1,6 +1,6 @@
-import { prefixFileUrlWithBackendUrl } from '../prefixFileUrlWithBackendUrl';
+import prefixFileUrlWithBackendUrl from '../prefixFileUrlWithBackendUrl';
 
-describe('HELPER_PLUGIN | utils | prefixFileUrlWithBackendUrl', () => {
+describe('prefixFileUrlWithBackendUrl', () => {
   it("should add the strapi back-end url if the file's url startsWith '/'", () => {
     const data = '/upload/test';
     const expected = 'http://localhost:1337/upload/test';

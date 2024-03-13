@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
+import { useLibrary } from '@strapi/helper-plugin';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { useField } from '../../../../../../components/Form';
@@ -25,6 +25,10 @@ interface WysiwygProps extends Omit<InputProps, 'type'> {
   labelAction?: React.ReactNode;
   type: Attribute.RichText['type'];
 }
+
+const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
+  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
+};
 
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
   ({ hint, disabled, label, name, placeholder, required }, forwardedRef) => {

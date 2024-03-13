@@ -1,5 +1,3 @@
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
-
 import {
   type TelemetryProperties,
   type Init,
@@ -19,6 +17,10 @@ interface ConfigurationLogo {
   };
   default: string;
 }
+
+const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
+  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
+};
 
 const admin = adminApi.injectEndpoints({
   endpoints: (builder) => ({
