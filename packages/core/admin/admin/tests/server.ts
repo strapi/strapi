@@ -805,20 +805,29 @@ export const server = setupServer(
         );
       }
     ),
-    rest.get('/content-manager/relations/:contentType/:id/:fieldName', (req, res, ctx) => {
+    rest.get('/content-manager/relations/:model/:id/:fieldName', (req, res, ctx) => {
       return res(
         ctx.json({
           results: [
             {
               id: 1,
+              documentId: 'apples',
+              locale: 'en',
+              status: 'draft',
               name: 'Relation entity 1',
             },
             {
               id: 2,
+              documentId: 'bananas',
+              locale: 'en',
+              status: 'published',
               name: 'Relation entity 2',
             },
             {
               id: 3,
+              documentId: 'pears',
+              locale: 'en',
+              status: 'modified',
               name: 'Relation entity 3',
             },
           ],
@@ -830,20 +839,29 @@ export const server = setupServer(
         })
       );
     }),
-    rest.get('/content-manager/relations/:contentType/:fieldName', (req, res, ctx) => {
+    rest.get('/content-manager/relations/:model/:fieldName', (req, res, ctx) => {
       return res(
         ctx.json({
           results: [
             {
               id: 1,
+              documentId: 'apples',
+              locale: 'en',
+              status: 'draft',
               name: 'Relation entity 1',
             },
             {
               id: 2,
+              documentId: 'bananas',
+              locale: 'en',
+              status: 'published',
               name: 'Relation entity 2',
             },
             {
               id: 3,
+              documentId: 'pears',
+              locale: 'en',
+              status: 'modified',
               name: 'Relation entity 3',
             },
           ],

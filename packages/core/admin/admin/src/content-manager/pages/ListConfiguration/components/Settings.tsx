@@ -38,7 +38,7 @@ const Settings = () => {
   });
   const { schema } = useDoc();
 
-  const layout = useForm<FormData['layout']>('Settings', (state) => state.values.layout);
+  const layout = useForm<FormData['layout']>('Settings', (state) => state.values.layout ?? []);
   const currentSortBy = useForm<FormData['settings']['defaultSortBy']>(
     'Settings',
     (state) => state.values.settings.defaultSortBy
@@ -82,7 +82,7 @@ const Settings = () => {
 
   React.useEffect(() => {
     if (sortOptionsSorted.findIndex((opt) => opt.value === currentSortBy) === -1) {
-      onChange('settings.defaultSortBy', sortOptionsSorted[0].value);
+      onChange('settings.defaultSortBy', sortOptionsSorted[0]?.value);
     }
   }, [currentSortBy, onChange, sortOptionsSorted]);
 

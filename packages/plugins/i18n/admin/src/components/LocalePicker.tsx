@@ -24,11 +24,15 @@ const LocalePicker = () => {
   });
 
   const handleChange = React.useCallback(
-    (code: string) => {
-      setQuery({
-        page: 1,
-        plugins: { ...query.plugins, i18n: { locale: code } },
-      });
+    (code: string, replace = false) => {
+      setQuery(
+        {
+          page: 1,
+          plugins: { ...query.plugins, i18n: { locale: code } },
+        },
+        'push',
+        replace
+      );
     },
     [query.plugins, setQuery]
   );
@@ -45,7 +49,7 @@ const LocalePicker = () => {
     const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
     const defaultLocale = locales.find((locale) => locale.isDefault);
     if (!doesLocaleExist && defaultLocale?.code) {
-      handleChange(defaultLocale.code);
+      handleChange(defaultLocale.code, true);
     }
   }, [hasI18n, handleChange, locales, query.plugins?.i18n?.locale]);
 

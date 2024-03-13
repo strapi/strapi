@@ -19,6 +19,7 @@ const dogModel = {
       required: false,
     },
   },
+  draftAndPublish: true,
   connection: 'default',
   singularName: 'dog',
   pluralName: 'dogs',

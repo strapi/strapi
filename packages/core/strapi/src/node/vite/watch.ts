@@ -18,7 +18,7 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
   const { createServer } = await import('vite');
 
-  const vite = await createServer(config);
+  const vite = await createServer(finalConfig);
 
   ctx.strapi.server.app.use(async (ctx, next) => {
     const url = ctx.url;

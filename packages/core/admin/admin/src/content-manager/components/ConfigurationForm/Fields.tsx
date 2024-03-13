@@ -46,9 +46,9 @@ interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'c
 const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
   const { formatMessage } = useIntl();
 
-  const layout = useForm(
+  const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
-    (state) => state.values.layout as ConfigurationFormData['layout']
+    (state) => state.values.layout ?? []
   );
   const onChange = useForm('Fields', (state) => state.onChange);
   const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
@@ -65,7 +65,15 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     const [name, { visible, ...field }] = current;
 
     if (!existingFields.includes(name) && visible === true) {
-      acc.push({ ...field, label: field.label ?? name, name, size: fieldSizes[name] });
+      const type = attributes[name]?.type;
+      const size = type ? fieldSizes[type] : 12;
+
+      acc.push({
+        ...field,
+        label: field.label ?? name,
+        name,
+        size,
+      });
     }
 
     return acc;

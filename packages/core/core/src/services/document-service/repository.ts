@@ -231,7 +231,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         model,
         data,
         {
-          isDraft: !params?.data?.publishedAt, // Always update the draft version
+          isDraft: !queryParams?.data?.publishedAt, // Always update the draft version
           locale: queryParams?.locale,
         },
         entryToUpdate

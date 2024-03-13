@@ -58,6 +58,9 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 
+// TODO: move somewhere else
+import * as draftAndPublishSync from './migrations/draft-publish';
+
 /**
  * Resolve the working directories based on the instance options.
  *
@@ -464,6 +467,9 @@ class Strapi extends Container implements StrapiI {
   registerInternalHooks() {
     this.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
     this.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
+
+    this.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
+    this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
   }
 
   async register() {

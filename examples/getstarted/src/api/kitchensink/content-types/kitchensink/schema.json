@@ -8,7 +8,9 @@
     "description": "",
     "name": "Kitchen Sink"
   },
-  "options": {},
+  "options": {
+    "draftAndPublish": true
+  },
   "pluginOptions": {},
   "attributes": {
     "short_text": {
