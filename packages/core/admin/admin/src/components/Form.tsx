@@ -56,6 +56,7 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
+  resetForm: () => void;
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
@@ -91,6 +92,9 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
   removeFieldRow: () => {
     throw new Error(ERR_MSG);
   },
+  resetForm: () => {
+    throw new Error(ERR_MSG);
+  },
   setErrors: () => {
     throw new Error(ERR_MSG);
   },
@@ -111,7 +115,7 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
  * -----------------------------------------------------------------------------------------------*/
 
 interface FormHelpers<TFormValues extends FormValues = FormValues>
-  extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues'> {}
+  extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
   extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
@@ -120,7 +124,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
     | ((
         props: Pick<
           FormContextValue<TFormValues>,
-          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'values'
+          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'resetForm' | 'values'
         >
       ) => React.ReactNode);
   method: 'POST' | 'PUT';
@@ -273,6 +277,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         await onSubmit(data, {
           setErrors,
           setValues,
+          resetForm,
         });
 
         dispatch({
@@ -393,6 +398,17 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       []
     );
 
+    const resetForm: FormContextValue['resetForm'] = React.useCallback(() => {
+      dispatch({
+        type: 'RESET_FORM',
+        payload: {
+          errors: {},
+          isSubmitting: false,
+          values: initialValues.current,
+        },
+      });
+    }, []);
+
     const setSubmitting = React.useCallback((isSubmitting: boolean) => {
       dispatch({ type: 'SET_ISSUBMITTING', payload: isSubmitting });
     }, []);
@@ -409,6 +425,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           addFieldRow={addFieldRow}
           moveFieldRow={moveFieldRow}
           removeFieldRow={removeFieldRow}
+          resetForm={resetForm}
           setErrors={setErrors}
           setValues={setValues}
           setSubmitting={setSubmitting}
@@ -420,6 +437,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
                 modified,
                 disabled,
                 ...state,
+                resetForm,
               })
             : props.children}
         </FormProvider>
@@ -477,7 +495,8 @@ type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'SET_ERRORS'; payload: FormErrors<TFormValues> }
   | { type: 'SET_ISSUBMITTING'; payload: boolean }
   | { type: 'SET_INITIAL_VALUES'; payload: TFormValues }
-  | { type: 'SET_VALUES'; payload: TFormValues };
+  | { type: 'SET_VALUES'; payload: TFormValues }
+  | { type: 'RESET_FORM'; payload: FormState<TFormValues> };
 
 const reducer = <TFormValues extends FormValues = FormValues>(
   state: FormState<TFormValues>,
@@ -597,6 +616,13 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         break;
       case 'SET_ISSUBMITTING':
         draft.isSubmitting = action.payload;
+        break;
+      case 'RESET_FORM':
+        // @ts-expect-error – TODO: figure out why this fails ts.
+        draft.values = action.payload.values;
+        // @ts-expect-error – TODO: figure out why this fails ts.
+        draft.errors = action.payload.errors;
+        draft.isSubmitting = action.payload.isSubmitting;
         break;
       default:
         break;
