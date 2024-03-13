@@ -25,6 +25,23 @@ describe('Release Validation service', () => {
         'No content type found for uid api::plop.plop'
       );
     });
+
+    it('throws an error if the content type does not have draftAndPublish enabled', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        contentType: jest.fn().mockReturnValue({
+          options: {},
+        }),
+      };
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      expect(() =>
+        releaseValidationService.validateEntryContentType('api::category.category')
+      ).toThrow(
+        'Content type with uid api::category.category does not have draftAndPublish enabled'
+      );
+    });
   });
 
   describe('validateUniqueEntry', () => {
