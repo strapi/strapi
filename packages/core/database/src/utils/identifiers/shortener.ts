@@ -75,11 +75,19 @@ export const setUnshortenedName = (
   options: NameFromTokenOptions,
   fullName: string
 ) => {
+  // This is protection against cases where a name is shortened twice, for example shortened in a model outside of createMetadata
+  // and then run through the shortener against inside createMetadata, which would do nothing at all but replace the original
+  // name in this mapping
+  if (nameMap.get(serializeKey(shortName, options)) && shortName === fullName) {
+    return;
+  }
+
+  // set the name
   nameMap.set(serializeKey(shortName, options), fullName);
 };
 
 const serializeKey = (shortName: string, options: NameFromTokenOptions) => {
-  return `${shortName}${options.maxLength}`;
+  return `${shortName}.${options.maxLength}`;
 };
 /**
  * Generates a string with a max length, appending a hash at the end if necessary to keep it unique
@@ -139,7 +147,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
   if (!isInteger(maxLength) || maxLength < 0) {
     throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
   }
-  // if maxLength == 0 we want the legacy v4 name without any shortening
+
   const unshortenedName = nameTokens
     .map((token) => {
       if (token.compressible) {
@@ -148,10 +156,14 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
       return token.name;
     })
     .join(IDENTIFIER_SEPARATOR);
+
+  // if maxLength == 0 we want the legacy v4 name without any shortening
   if (maxLength === 0) {
+    setUnshortenedName(unshortenedName, options, unshortenedName);
     return unshortenedName;
   }
 
+  // check the full length name (but with incompressible tokens using shortForms if available)
   const fullLengthName = nameTokens
     .map((token) => {
       if (token.compressible) {

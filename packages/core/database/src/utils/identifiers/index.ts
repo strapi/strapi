@@ -26,18 +26,19 @@ type NameOptions = {
 };
 
 // Fixed compression map for suffixes and prefixes
+// TODO: fix this in the migration
 const replacementMap = {
-  links: 'lnk',
-  order_inv_fk: 'oifk',
-  order: 'ord',
-  morphs: 'mph',
-  index: 'idx',
-  inv_fk: 'ifk',
-  order_fk: 'ofk',
-  id_column_index: 'idix',
-  order_index: 'oidx',
-  unique: 'uq',
-  primary: 'pk',
+  // links: 'lnk',
+  // order_inv_fk: 'oifk',
+  // order: 'ord',
+  // morphs: 'mph',
+  // index: 'idx',
+  // inv_fk: 'ifk',
+  // order_fk: 'ofk',
+  // id_column_index: 'idix',
+  // order_index: 'oidx',
+  // unique: 'uq',
+  // primary: 'pk',
 };
 
 const mapShortForms = (name: string): string | undefined => {

@@ -13,17 +13,17 @@ const { identifiers } = utils;
  * Therefore we have to keep an additional set of helpers/extensions to the database naming methods
  */
 
-export const COMPONENT_JOIN_TABLE_SUFFIX = (options: MetadataOptions) =>
-  options.maxLength ? 'cmps' : 'components';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const COMPONENT_JOIN_TABLE_SUFFIX = (options: MetadataOptions) => 'components';
 
-export const DZ_JOIN_TABLE_SUFFIX = (options: MetadataOptions) =>
-  options.maxLength ? 'cmps' : 'components';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const DZ_JOIN_TABLE_SUFFIX = (options: MetadataOptions) => 'components';
 
-export const COMPONENT_INVERSE_COLUMN_NAME = (options: MetadataOptions) =>
-  options.maxLength ? 'cmp' : 'component';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const COMPONENT_INVERSE_COLUMN_NAME = (options: MetadataOptions) => 'component';
 
-export const COMPONENT_TYPE_COLUMN = (options: MetadataOptions) =>
-  options.maxLength ? 'cmptype' : 'component_type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const COMPONENT_TYPE_COLUMN = (options: MetadataOptions) => 'component_type';
 
 export const ENTITY = 'entity';
 

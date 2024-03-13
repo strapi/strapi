@@ -145,6 +145,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
     if (!fullTableName) {
       throw new Error(`Missing full table name for ${shortObj.tableName}`);
     }
+
     // find table name diffs
     if (shortObj.tableName !== fullTableName) {
       diffs.tables.push({
