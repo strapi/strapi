@@ -5,6 +5,7 @@ import { useLibrary } from '@strapi/helper-plugin';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { useField } from '../../../../../../components/Form';
+import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
@@ -25,10 +26,6 @@ interface WysiwygProps extends Omit<InputProps, 'type'> {
   labelAction?: React.ReactNode;
   type: Attribute.RichText['type'];
 }
-
-const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
-  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
-};
 
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
   ({ hint, disabled, label, name, placeholder, required }, forwardedRef) => {

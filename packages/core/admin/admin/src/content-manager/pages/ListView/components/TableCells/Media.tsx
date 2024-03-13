@@ -4,6 +4,8 @@ import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-s
 import { getFileExtension } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 
+import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
+
 import type { Entity } from '@strapi/types';
 
 interface MediaFile {
@@ -25,10 +27,6 @@ interface MediaFile {
  * -----------------------------------------------------------------------------------------------*/
 
 interface MediaSingleProps extends MediaFile {}
-
-const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
-  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
-};
 
 const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSingleProps) => {
   const fileURL = prefixFileUrlWithBackendUrl(url)!;

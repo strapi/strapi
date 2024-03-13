@@ -8,6 +8,7 @@ import { type Element, Transforms, Editor } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import styled, { css } from 'styled-components';
 
+import { prefixFileUrlWithBackendUrl } from '../../../../../../../utils/urls';
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
 import { type Block } from '../utils/types';
 
@@ -88,9 +89,9 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
   );
 };
 
-const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
-  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
-};
+// const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
+//   return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
+// };
 
 const ImageDialog = () => {
   const [isOpen, setIsOpen] = React.useState(true);

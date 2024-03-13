@@ -7,6 +7,7 @@ import {
   type Plugins,
   type GetLicenseLimitInformation,
 } from '../../../shared/contracts/admin';
+import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
 import { adminApi } from './api';
 
@@ -17,10 +18,6 @@ interface ConfigurationLogo {
   };
   default: string;
 }
-
-const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
-  return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
-};
 
 const admin = adminApi.injectEndpoints({
   endpoints: (builder) => ({
