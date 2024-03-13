@@ -39,13 +39,13 @@ const setModelConfiguration = async (key: string, value: any) => {
 };
 
 const deleteKey = (key: any) => {
-  return strapi
+  return strapi.db
     .query('strapi::core-store')
     .delete({ where: { key: `plugin_content_manager_configuration_${key}` } });
 };
 
 const findByKey = async (key: any) => {
-  const results = await strapi.query('strapi::core-store').findMany({
+  const results = await strapi.db.query('strapi::core-store').findMany({
     where: {
       key: {
         $startsWith: key,

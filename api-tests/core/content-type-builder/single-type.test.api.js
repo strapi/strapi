@@ -158,7 +158,7 @@ describe('Content Type Builder - Content types', () => {
 
       // create data
       for (let i = 0; i < 2; i += 1) {
-        await strapi.query(uid).create({ data: { title: 'Test' } });
+        await strapi.db.query(uid).create({ data: { title: 'Test' } });
       }
 
       const updateRes = await rq({

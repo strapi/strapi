@@ -12,7 +12,7 @@ export const isInitialized = async (strapi: Strapi): Promise<boolean> => {
     }
 
     // test if there is at least one admin
-    const anyAdministrator = await strapi.query('admin::user').findOne({ select: ['id'] });
+    const anyAdministrator = await strapi.db.query('admin::user').findOne({ select: ['id'] });
 
     return !isNil(anyAdministrator);
   } catch (err) {

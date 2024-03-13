@@ -59,7 +59,7 @@ module.exports = ({ strapi }) => {
       throw new Error('Email was not available.');
     }
 
-    const users = await strapi.query('plugin::users-permissions.user').findMany({
+    const users = await strapi.db.query('plugin::users-permissions.user').findMany({
       where: { email },
     });
 
@@ -82,7 +82,7 @@ module.exports = ({ strapi }) => {
     }
 
     // Retrieve default role.
-    const defaultRole = await strapi
+    const defaultRole = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
@@ -95,7 +95,7 @@ module.exports = ({ strapi }) => {
       confirmed: true,
     };
 
-    const createdUser = await strapi
+    const createdUser = await strapi.db
       .query('plugin::users-permissions.user')
       .create({ data: newUser });
 

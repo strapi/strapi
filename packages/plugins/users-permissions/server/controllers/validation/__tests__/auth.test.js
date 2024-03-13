@@ -20,18 +20,20 @@ const mockStrapi = {
       };
     }),
   },
-  query: jest.fn(() => {
-    return {
-      findOne: jest.fn(() => {
-        return {
-          role: 1,
-        };
-      }),
-      count: jest.fn(() => {
-        return 0;
-      }),
-    };
-  }),
+  db: {
+    query: jest.fn(() => {
+      return {
+        findOne: jest.fn(() => {
+          return {
+            role: 1,
+          };
+        }),
+        count: jest.fn(() => {
+          return 0;
+        }),
+      };
+    }),
+  },
   plugins: {
     'users-permissions': {
       controllers: {},
