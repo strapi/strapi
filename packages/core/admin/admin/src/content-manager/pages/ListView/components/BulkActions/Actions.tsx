@@ -22,11 +22,11 @@ import {
   useTracking,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { ExclamationMarkCircle, Trash } from '@strapi/icons';
+import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
-import { useQueryClient } from 'react-query';
+import { useQueryClient, useMutation } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../../components/DescriptionComponentRenderer';
@@ -52,7 +52,7 @@ interface BulkActionDescription {
   /**
    * @default 'secondary'
    */
-  variant?: 'default' | 'secondary' | 'danger-light' | 'success';
+  variant?: 'default' | 'secondary' | 'tertiary' | 'danger-light' | 'success';
 }
 
 interface DialogOptions {
@@ -197,7 +197,9 @@ const BulkActionAction = (action: Action) => {
 interface BulkActionConfirmDialogProps
   extends DialogOptions,
     Pick<DialogProps, 'onClose' | 'isOpen'>,
-    Pick<Action, 'variant'> {}
+    Pick<Action, 'variant'> {
+  confirmButton?: string;
+}
 
 const BulkActionConfirmDialog = ({
   onClose,
@@ -205,6 +207,7 @@ const BulkActionConfirmDialog = ({
   onConfirm,
   title,
   content,
+  confirmButton,
   isOpen,
   variant = 'secondary',
 }: BulkActionConfirmDialogProps) => {
@@ -228,9 +231,7 @@ const BulkActionConfirmDialog = ({
 
   return (
     <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody icon={variant === 'danger-light' && <ExclamationMarkCircle />}>
-        {content}
-      </DialogBody>
+      <DialogBody icon={<ExclamationMarkCircle />}>{content}</DialogBody>
       <DialogFooter
         startAction={
           <Button onClick={handleClose} variant="tertiary">
@@ -243,13 +244,15 @@ const BulkActionConfirmDialog = ({
         endAction={
           <Button
             onClick={handleConfirm}
-            variant={variant}
-            startIcon={variant === 'danger-light' && <Trash />}
+            variant={variant === 'danger-light' ? variant : 'secondary'}
+            startIcon={variant === 'danger-light' ? <Trash /> : <Check />}
           >
-            {formatMessage({
-              id: 'app.components.Button.confirm',
-              defaultMessage: 'Confirm',
-            })}
+            {confirmButton
+              ? confirmButton
+              : formatMessage({
+                  id: 'app.components.Button.confirm',
+                  defaultMessage: 'Confirm',
+                })}
           </Button>
         }
       />
@@ -410,7 +413,115 @@ const DeleteAction: BulkActionComponent = ({ ids, model: slug }) => {
   };
 };
 
-const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [DeleteAction];
+const UnpublishAction: BulkActionComponent = ({ ids, model: slug }) => {
+  const { formatMessage } = useIntl();
+  const { post } = useFetchClient();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+  const contentType = useTypedSelector((state) => state['content-manager_listView'].contentType);
+  const { selectedEntries, setSelectedEntries } = useTableContext();
+  const { data } = useTypedSelector((state) => state['content-manager_listView']);
+  const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
+
+  const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
+  const queryClient = useQueryClient();
+  const hasPublishPermission = useAllowedActions(slug).canPublish;
+
+  const bulkUnpublishMutation = useMutation<
+    Contracts.CollectionTypes.BulkUnpublish.Response,
+    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkUnpublish.Response, 'error'>>>,
+    Contracts.CollectionTypes.BulkUnpublish.Request['body']
+  >(
+    async (body) => {
+      const { data } = await post<
+        Contracts.CollectionTypes.BulkUnpublish.Response,
+        AxiosResponse<Contracts.CollectionTypes.BulkUnpublish.Response>,
+        Contracts.CollectionTypes.BulkUnpublish.Request['body']
+      >(`/content-manager/collection-types/${slug}/actions/bulkUnpublish`, body);
+
+      return data;
+    },
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: {
+            id: 'content-manager.success.record.unpublish',
+            defaultMessage: 'Unpublished',
+          },
+        });
+
+        queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+        setSelectedEntries([]);
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
+
+  const handleConfirmUnpublishAllData = async () => {
+    await bulkUnpublishMutation.mutateAsync({ ids });
+  };
+
+  const showUnpublishButton =
+    hasPublishPermission && selectedEntriesObjects.some((entry) => entry.publishedAt);
+
+  if (!hasPublishPermission || !showUnpublishButton) return null;
+
+  return {
+    actionType: 'unpublish',
+    variant: 'tertiary',
+    label: formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }),
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          <Typography id="confirm-description" textAlign="center">
+            {formatMessage({
+              id: 'popUpWarning.bodyMessage.contentType.unpublish.all',
+              defaultMessage: 'Are you sure you want to unpublish these entries?',
+            })}
+          </Typography>
+          {hasI18nEnabled && (
+            <Box textAlign="center" padding={3}>
+              <Typography textColor="danger500">
+                {formatMessage(
+                  {
+                    id: getTranslation('Settings.list.actions.unpublishAdditionalInfos'),
+                    defaultMessage:
+                      'This will unpublish the active locale versions <em>(from Internationalization)</em>',
+                  },
+                  {
+                    em: (chunks: React.ReactNode) => (
+                      <Typography fontWeight="semiBold" textColor="danger500">
+                        {chunks}
+                      </Typography>
+                    ),
+                  }
+                )}
+              </Typography>
+            </Box>
+          )}
+        </Flex>
+      ),
+      confirmButton: formatMessage({
+        id: 'app.utils.unpublish',
+        defaultMessage: 'Unpublish',
+      }),
+      onConfirm: handleConfirmUnpublishAllData,
+    },
+  };
+};
+
+const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [UnpublishAction, DeleteAction];
 
 export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer };
 export type { BulkActionDescription };
