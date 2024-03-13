@@ -162,7 +162,7 @@ class Strapi extends Container implements StrapiI {
 
   isLoaded: boolean;
 
-  db?: Database;
+  db: Database;
 
   app: any;
 
@@ -232,6 +232,15 @@ class Strapi extends Container implements StrapiI {
     this.customFields = createCustomFields(this);
     this.fetch = utils.createStrapiFetch(this);
     this.features = createFeaturesService(this);
+    this.db = new Database(
+      _.merge(this.config.get('database'), {
+        settings: {
+          migrations: {
+            dir: path.join(this.dirs.app.root, 'database/migrations'),
+          },
+        },
+      })
+    );
 
     utils.createUpdateNotifier(this).notify();
 
@@ -505,7 +514,7 @@ class Strapi extends Container implements StrapiI {
       ...this.get('models').get(),
     ];
 
-    this.db = await Database.init({ ...this.config.get('database'), models });
+    await this.db.init({ models });
 
     this.store = createCoreStore({ db: this.db });
     this.webhookStore = createWebhookStore({ db: this.db });
@@ -625,11 +634,10 @@ class Strapi extends Container implements StrapiI {
   }
 
   /**
-   * Binds queries with a specific model
-   * @param {string} uid
+   * @deprecated Use `strapi.db.query` instead
    */
   query(uid: Common.UID.Schema) {
-    return this.db!.query(uid);
+    return this.db.query(uid);
   }
 }
 

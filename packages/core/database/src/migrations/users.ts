@@ -39,7 +39,7 @@ const migrationResolver: MigrationResolver = ({ name, path, context }) => {
 };
 
 export const createUserMigrationProvider = (db: Database): MigrationProvider => {
-  const dir = path.join(strapi.dirs.app.root, 'database/migrations');
+  const dir = db.config.settings.migrations.dir;
 
   fse.ensureDirSync(dir);
 

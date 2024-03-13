@@ -21,7 +21,7 @@ module.exports = ({ strapi }) => ({
    */
 
   count(params) {
-    return strapi.query('plugin::users-permissions.user').count({ where: params });
+    return strapi.db.query('plugin::users-permissions.user').count({ where: params });
   },
 
   /**
@@ -67,7 +67,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAuthenticatedUser(id) {
-    return strapi
+    return strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { id }, populate: ['role'] });
   },
@@ -85,7 +85,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async remove(params) {
-    return strapi.query('plugin::users-permissions.user').delete({ where: params });
+    return strapi.db.query('plugin::users-permissions.user').delete({ where: params });
   },
 
   validatePassword(password, hash) {

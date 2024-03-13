@@ -17,8 +17,8 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
 
     const stagePermissionsService = getService('stage-permissions');
 
-    const stages = await strapi.query(stageUID).findMany();
-    const roles = await strapi.query(roleUID).findMany();
+    const stages = await strapi.db.query(stageUID).findMany();
+    const roles = await strapi.db.query(roleUID).findMany();
 
     // Collect the permissions to add and group them by stage id.
     const groupedPermissions = {} as any;
