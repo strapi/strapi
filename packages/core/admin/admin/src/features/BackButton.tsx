@@ -119,7 +119,6 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
   React.useLayoutEffect(() => {
     if (isGoingBack.current) {
       isGoingBack.current = false;
-      return;
     } else {
       // this should only occur on link movements, not back/forward clicks
       dispatch({
