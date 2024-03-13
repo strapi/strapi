@@ -139,6 +139,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
       });
 
       refetchPermissions();
+      onClose();
     } catch (err) {
       toggleNotification({
         type: 'warning',
