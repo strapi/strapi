@@ -524,8 +524,8 @@ const createJoinTable = (
     );
   }
 
-  const fkIndexName = identifiers.getFkIndexName(snakeCase(joinTableName), options);
-  const invFkIndexName = identifiers.getInverseFkIndexName(snakeCase(joinTableName), options);
+  const fkIndexName = identifiers.getFkIndexName(joinTableName, options);
+  const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName, options);
 
   const metadataSchema: Meta = {
     singularName: joinTableName,
