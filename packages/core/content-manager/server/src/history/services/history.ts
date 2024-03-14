@@ -1,4 +1,4 @@
-import type { Entity, LoadedStrapi } from '@strapi/types';
+import type { LoadedStrapi, Documents } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
@@ -7,13 +7,6 @@ import { HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
 
 const DEFAULT_RETENTION_DAYS = 90;
-
-type NextDocument = HistoryVersions.CreateHistoryVersion['data'] & {
-  documentId: Entity.ID;
-  locale: string | null;
-  publishedAt: string | null;
-  updatedAt: string | null;
-};
 
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const state: {
@@ -58,12 +51,12 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    data: NextDocument
+    document: Documents.AnyDocument | null
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
-    const meta = await documentMetadataService.getMetadata(contentTypeUid, data);
+    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
 
-    return documentMetadataService.getStatus(data, meta.availableStatus);
+    return documentMetadataService.getStatus(document, meta.availableStatus);
   };
 
   return {
@@ -83,9 +76,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
         // Ignore actions that don't mutate documents
         if (
-          !['create', 'update', 'publish', 'unpublish', 'discardDraft', 'clone'].includes(
-            context.action
-          )
+          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
         ) {
           return next(context);
         }
@@ -98,15 +89,22 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         }
 
         const result = (await next(context)) as any;
-        /**
-         * For create and update actions the data for the version is the result,
-         * otherwise, the data is the first version of the created document
-         */
-        const data: NextDocument =
-          context.action === 'create' || context.action === 'update' ? result : result.versions[0];
 
-        // Compute the status of the version
-        const status = await getVersionStatus(contentTypeUid, data);
+        const documentContext =
+          context.action === 'create'
+            ? // @ts-expect-error The context args are not typed correctly
+              { documentId: result.documentId, locale: context.args[0]?.locale }
+            : { documentId: context.args[0], locale: context.args[1]?.locale };
+
+        const locale = documentContext.locale ?? localesService.getDefaultLocale();
+        const document = await strapi
+          .documents(contentTypeUid)
+          .findOne(documentContext.documentId, {
+            locale,
+            populate: '*',
+          });
+        const status = await getVersionStatus(contentTypeUid, document);
+
         const fieldsToIgnore = [
           'createdAt',
           'updatedAt',
@@ -123,10 +121,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              data: omit(fieldsToIgnore, data),
+              data: omit(fieldsToIgnore, document),
               schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
-              relatedDocumentId: data.documentId,
-              locale: data.locale ?? localesService.getDefaultLocale(),
+              relatedDocumentId: documentContext.documentId,
+              locale,
               status,
             });
           });
