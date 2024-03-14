@@ -1,6 +1,5 @@
 import { LoadedStrapi as Strapi } from '@strapi/types';
-import { utils } from '@strapi/database';
-import { filter, set, forEach, pipe, map, stubTrue, cond, defaultsDeep } from 'lodash/fp';
+import { filter, forEach, pipe, map, defaultsDeep } from 'lodash/fp';
 import { getService } from '../../utils';
 import { getVisibleContentTypesUID, hasStageAttribute } from '../../utils/review-workflows';
 import defaultStages from '../../constants/default-stages.json';
@@ -15,8 +14,6 @@ import {
 
 import { persistTables, removePersistedTablesWithSuffix } from '../../utils/persisted-tables';
 import webhookEvents from '../../constants/webhookEvents';
-
-const { identifiers } = utils;
 
 const DEFAULT_OPTIONS = {
   numberOfWorkflows: MAX_WORKFLOWS,
@@ -81,13 +78,10 @@ function persistStagesJoinTables({ strapi }: { strapi: Strapi }) {
     const getStageTableToPersist = (contentTypeUID: any) => {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID) as any;
-      const joinTableName = identifiers.getUnshortenedName(
-        attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name,
-        { maxLength: 55 }
-      );
+      const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
       return {
         name: joinTableName,
-        dependsOn: [{ name: identifiers.getUnshortenedName(tableName, { maxLength: 55 }) }],
+        dependsOn: [{ name: tableName }],
       };
     };
 

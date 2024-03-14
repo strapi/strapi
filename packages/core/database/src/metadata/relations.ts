@@ -282,7 +282,10 @@ const createMorphToMany = (
   }
 
   const joinTableName = identifiers.getMorphTableName(meta.tableName, attributeName, options);
-  const joinColumnName = identifiers.getMorphColumnJoinTableIdName(meta.singularName, options);
+  const joinColumnName = identifiers.getMorphColumnJoinTableIdName(
+    snakeCase(meta.singularName),
+    options
+  );
   const idColumnName = identifiers.getMorphColumnAttributeIdName(attributeName, options);
   const typeColumnName = identifiers.getMorphColumnTypeName(attributeName, options);
 
@@ -301,6 +304,8 @@ const createMorphToMany = (
         column: {
           unsigned: true,
         },
+        // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
+        columnName: joinColumnName,
       },
       [idColumnName]: {
         type: 'integer',
@@ -430,7 +435,10 @@ const createJoinColumn = (
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(attributeName, options);
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(
+    snakeCase(attributeName),
+    options
+  );
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: ID,
@@ -449,7 +457,7 @@ const createJoinColumn = (
     Object.assign(inverseAttribute, {
       joinColumn: {
         name: joinColumn.referencedColumn,
-        referencedColumn: joinColumn.name,
+        referencedColumn: joinColumnName,
       },
     });
   }
@@ -480,16 +488,20 @@ const createJoinTable = (
     options
   );
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(meta.singularName, options);
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(
+    snakeCase(meta.singularName),
+    options
+  );
+
   let inverseJoinColumnName = identifiers.getJoinColumnAttributeIdName(
-    targetMeta.singularName,
+    snakeCase(targetMeta.singularName),
     options
   );
 
   // if relation is self referencing
   if (joinColumnName === inverseJoinColumnName) {
     inverseJoinColumnName = identifiers.getInverseJoinColumnAttributeIdName(
-      targetMeta.singularName,
+      snakeCase(targetMeta.singularName),
       options
     );
   }
@@ -506,11 +518,14 @@ const createJoinTable = (
 
   // if relation is self referencing
   if (attribute.relation === 'manyToMany' && orderColumnName === inverseOrderColumnName) {
-    inverseOrderColumnName = identifiers.getInverseOrderColumnName(meta.singularName, options);
+    inverseOrderColumnName = identifiers.getInverseOrderColumnName(
+      snakeCase(meta.singularName),
+      options
+    );
   }
 
-  const fkIndexName = identifiers.getFkIndexName(joinTableName, options);
-  const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName, options);
+  const fkIndexName = identifiers.getFkIndexName(snakeCase(joinTableName), options);
+  const invFkIndexName = identifiers.getInverseFkIndexName(snakeCase(joinTableName), options);
 
   const metadataSchema: Meta = {
     singularName: joinTableName,
@@ -525,12 +540,16 @@ const createJoinTable = (
         column: {
           unsigned: true,
         },
+        // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
+        columnName: joinColumnName,
       },
       [inverseJoinColumnName]: {
         type: 'integer',
         column: {
           unsigned: true,
         },
+        // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
+        columnName: inverseJoinColumnName,
       },
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },

@@ -123,7 +123,7 @@ export const getColumnName = (attributeName: string, options: NameOptions) => {
 };
 
 export const getJoinColumnAttributeIdName = (attributeName: string, options: NameOptions) => {
-  return getName(snakeCase(attributeName), { suffix: 'id', ...options });
+  return getName(attributeName, { suffix: 'id', ...options });
 };
 
 export const getInverseJoinColumnAttributeIdName = (

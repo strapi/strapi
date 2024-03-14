@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import { cloneDeep, snakeCase } from 'lodash/fp';
 import * as identifiers from '../utils/identifiers';
 import * as types from '../utils/types';
 import {
@@ -34,7 +34,7 @@ export const createMetadata = (models: Model[], options: MetadataOptions): Metad
   const maxLength = options.maxLength;
 
   // init pass
-  for (const model of _.cloneDeep(models ?? [])) {
+  for (const model of cloneDeep(models ?? [])) {
     // To prevent a breaking change, we can't snake_case here because v4 wasn't using it
     // TODO: We could change this to an alwaysSnakeCase option so that v5 is always snake cased but we can still get the original for migration purposes
     const tableName = identifiers.getTableName(model.tableName, { maxLength });
@@ -89,6 +89,15 @@ export const createMetadata = (models: Model[], options: MetadataOptions): Metad
 };
 
 const createAttribute = (attributeName: string, attribute: Attribute, options: MetadataOptions) => {
-  const columnName = identifiers.getColumnName(attributeName, options);
+  let columnName;
+
+  // if the attribute has already set its own column name, use that
+  // this will prevent us from shortening a name twice
+  if ((attribute as any).columnName) {
+    columnName = (attribute as any).columnName;
+  } else {
+    columnName = identifiers.getColumnName(snakeCase(attributeName), options);
+  }
+
   Object.assign(attribute, { columnName });
 };
