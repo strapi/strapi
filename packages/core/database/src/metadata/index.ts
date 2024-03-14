@@ -37,7 +37,7 @@ export const createMetadata = (models: Model[], options: MetadataOptions): Metad
   for (const model of _.cloneDeep(models ?? [])) {
     // To prevent a breaking change, we can't snake_case here because v4 wasn't using it
     // TODO: We could change this to an alwaysSnakeCase option so that v5 is always snake cased but we can still get the original for migration purposes
-    const tableName = identifiers.getTableName(model.tableName, { maxLength, snakeCase: false });
+    const tableName = identifiers.getTableName(model.tableName, { maxLength });
     metadata.add({
       ...model,
       tableName,

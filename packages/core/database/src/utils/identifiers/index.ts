@@ -8,21 +8,24 @@
  * have access to the full length names, in particular for migration purposes, but also so that (in theory) the feature
  * could be disabled and stay compatible with v4 database structure.
  */
-import _ from 'lodash/fp';
-import { NameToken, getNameFromTokens } from './shortener';
+import _, { snakeCase } from 'lodash/fp';
+
+// Import for use within the module
+import { type NameToken, getNameFromTokens, getUnshortenedName } from './shortener';
+
+// Re-export
+export { type NameToken, getNameFromTokens, getUnshortenedName };
 
 // Constants for column names used in naming methods
 export const ID_COLUMN = 'id';
 export const ORDER_COLUMN = 'order';
 export const FIELD_COLUMN = 'field';
-
 type NameInput = string | string[];
 
 type NameOptions = {
   suffix?: string;
   prefix?: string;
   maxLength: number;
-  snakeCase?: boolean;
 };
 
 // Fixed compression map for suffixes and prefixes
@@ -105,7 +108,7 @@ export const getMorphTableName = (
   attributeName: string,
   options: NameOptions
 ) => {
-  return getName([collectionName, attributeName], {
+  return getName([snakeCase(collectionName), snakeCase(attributeName)], {
     suffix: 'morphs',
     ...options,
   });
@@ -120,14 +123,14 @@ export const getColumnName = (attributeName: string, options: NameOptions) => {
 };
 
 export const getJoinColumnAttributeIdName = (attributeName: string, options: NameOptions) => {
-  return getName(attributeName, { suffix: 'id', ...options });
+  return getName(snakeCase(attributeName), { suffix: 'id', ...options });
 };
 
 export const getInverseJoinColumnAttributeIdName = (
   attributeName: string,
   options: NameOptions
 ) => {
-  return getName(attributeName, { suffix: 'id', prefix: 'inv', ...options });
+  return getName(snakeCase(attributeName), { suffix: 'id', prefix: 'inv', ...options });
 };
 
 export const getOrderColumnName = (singularName: string, options: NameOptions) => {
@@ -146,15 +149,15 @@ export const getInverseOrderColumnName = (singularName: string, options: NameOpt
  * Morph Join Tables
  */
 export const getMorphColumnJoinTableIdName = (singularName: string, options: NameOptions) => {
-  return getName(singularName, { suffix: 'id', ...options });
+  return getName(snakeCase(singularName), { suffix: 'id', ...options });
 };
 
 export const getMorphColumnAttributeIdName = (attributeName: string, options: NameOptions) => {
-  return getName(attributeName, { suffix: 'id', ...options });
+  return getName(snakeCase(attributeName), { suffix: 'id', ...options });
 };
 
 export const getMorphColumnTypeName = (attributeName: string, options: NameOptions) => {
-  return getName(attributeName, { suffix: 'type', ...options });
+  return getName(snakeCase(attributeName), { suffix: 'type', ...options });
 };
 
 /**
@@ -176,38 +179,38 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
 
 // base index types
 export const getIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'index', snakeCase: false, ...options });
+  return getName(names, { suffix: 'index', ...options });
 };
 
 export const getFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'fk', snakeCase: false, ...options });
+  return getName(names, { suffix: 'fk', ...options });
 };
 
 export const getUniqueIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'unique', snakeCase: false, ...options });
+  return getName(names, { suffix: 'unique', ...options });
 };
 
 export const getPrimaryIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'primary', snakeCase: false, ...options });
+  return getName(names, { suffix: 'primary', ...options });
 };
 
 // custom index types
 export const getInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'inv_fk', snakeCase: false, ...options });
+  return getName(names, { suffix: 'inv_fk', ...options });
 };
 
 export const getOrderFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_fk', snakeCase: false, ...options });
+  return getName(names, { suffix: 'order_fk', ...options });
 };
 
 export const getOrderInverseFkIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_inv_fk', snakeCase: false, ...options });
+  return getName(names, { suffix: 'order_inv_fk', ...options });
 };
 
 export const getIdColumnIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'id_column_index', snakeCase: false, ...options });
+  return getName(names, { suffix: 'id_column_index', ...options });
 };
 
 export const getOrderIndexName = (names: NameInput, options: NameOptions) => {
-  return getName(names, { suffix: 'order_index', snakeCase: false, ...options });
+  return getName(names, { suffix: 'order_index', ...options });
 };

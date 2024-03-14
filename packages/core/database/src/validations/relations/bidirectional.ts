@@ -1,3 +1,4 @@
+import { snakeCase } from 'lodash/fp';
 import type { Database } from '../..';
 import type { MetadataOptions, Relation } from '../../types';
 import { getJoinTableName } from '../../utils/identifiers';
@@ -63,13 +64,13 @@ export const validateBidirectionalRelations = async (db: Database, options: Meta
 
     // Generate the join table name based on the relation target table and attribute name.
     const joinTableName = getJoinTableName(
-      modelMetadata.tableName,
-      invRelation.inversedBy,
+      snakeCase(modelMetadata.tableName),
+      snakeCase(invRelation.inversedBy),
       options
     );
     const inverseJoinTableName = getJoinTableName(
-      invModelMetadata.tableName,
-      relation.inversedBy,
+      snakeCase(invModelMetadata.tableName),
+      snakeCase(relation.inversedBy),
       options
     );
 

@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _, { snakeCase } from 'lodash/fp';
 
 import * as identifiers from '../utils/identifiers';
 import type { Meta, Metadata } from './metadata';
@@ -474,7 +474,11 @@ const createJoinTable = (
     return;
   }
 
-  const joinTableName = identifiers.getJoinTableName(meta.tableName, attributeName, options);
+  const joinTableName = identifiers.getJoinTableName(
+    snakeCase(meta.tableName),
+    snakeCase(attributeName),
+    options
+  );
 
   const joinColumnName = identifiers.getJoinColumnAttributeIdName(meta.singularName, options);
   let inverseJoinColumnName = identifiers.getJoinColumnAttributeIdName(

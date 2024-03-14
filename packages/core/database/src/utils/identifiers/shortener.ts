@@ -15,7 +15,7 @@
  */
 
 import crypto from 'node:crypto';
-import { partition, isInteger, sumBy, snakeCase } from 'lodash/fp';
+import { partition, isInteger, sumBy } from 'lodash/fp';
 
 // We can accept a number of compressible tokens up to:
 // tokens accepted = (MAX_LENGTH / (HASH_LENGTH + MIN_TOKEN_LENGTH) + (tokens * IDENTIFIER_SEPARATER.length))
@@ -37,7 +37,6 @@ type NameTokenWithAllocation = NameToken & { allocatedLength: number };
 
 export type NameFromTokenOptions = {
   maxLength: number;
-  snakeCase?: boolean;
 };
 
 /**
@@ -67,7 +66,7 @@ export function createHash(data: string, len: number): string {
 // Therefore we store every name that passes through so we can retrieve the original later
 const nameMap = new Map<string, string>();
 export const getUnshortenedName = (shortName: string, options: NameFromTokenOptions) => {
-  return nameMap.get(serializeKey(shortName, options));
+  return nameMap.get(serializeKey(shortName, options)) ?? shortName;
 };
 
 export const setUnshortenedName = (
@@ -150,9 +149,6 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
 
   const unshortenedName = nameTokens
     .map((token) => {
-      if (token.compressible) {
-        return options.snakeCase === false ? token.name : snakeCase(token.name);
-      }
       return token.name;
     })
     .join(IDENTIFIER_SEPARATOR);
@@ -167,7 +163,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
   const fullLengthName = nameTokens
     .map((token) => {
       if (token.compressible) {
-        return options.snakeCase === false ? token.name : snakeCase(token.name);
+        return token.name;
       }
       return token.shortForm ?? token.name;
     })

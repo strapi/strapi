@@ -24,7 +24,7 @@ const createColumn = (name: string, attribute: Attribute, options: MetadataOptio
 
   return {
     // not using snake case for legacy reasons; changing it would require a more complex migration
-    name: identifiers.getName(name, { ...options, snakeCase: false }),
+    name: identifiers.getName(name, options),
     type,
     args,
     defaultTo: null,

@@ -27,17 +27,16 @@ export const COMPONENT_TYPE_COLUMN = (options: MetadataOptions) => 'component_ty
 
 export const ENTITY = 'entity';
 
+// TODO: we should either support suffix with full+short, or call getNameFromTokens directly to get the correct values in unshortenedName map
 export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) =>
   identifiers.getTableName(collectionName, {
     suffix: COMPONENT_JOIN_TABLE_SUFFIX(options),
-    snakeCase: false,
     ...options,
   });
 
 export const getDzJoinTableName = (collectionName: string, options: MetadataOptions) =>
   identifiers.getTableName(collectionName, {
     suffix: DZ_JOIN_TABLE_SUFFIX(options),
-    snakeCase: false,
     ...options,
   });
 
