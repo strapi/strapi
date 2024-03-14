@@ -15,7 +15,7 @@ const categoryModel = {
   pluralName: 'categories',
   description: '',
   name: 'Category',
-  options: {},
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -153,33 +153,128 @@ describe('i18n - Content API', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toEqual('This attribute must be unique');
     });
+  });
 
-    test('when a non localized field is updated in any locale all other locales should be updated in the same way', async () => {
+  describe('Non localized fields', () => {
+    let documentId = '';
+
+    beforeAll(async () => {
       const res = await rq({
         method: 'POST',
         url: `/content-manager/collection-types/api::category.category`,
         body: {
-          nonLocalized: `nonLocalized value`,
+          nonLocalized: `Test`,
         },
       });
+      documentId = res.body.data.documentId;
+    });
 
-      // Create a new locale in this document
-      const updatedValue = 'nonLocalized value updated';
-      await rq({
-        method: 'PUT',
-        url: `/content-manager/collection-types/api::category.category/${res.body.data.documentId}`,
-        body: {
-          locale: 'ko',
-          nonLocalized: updatedValue,
-        },
-      });
+    test('when a new locale is created with a non localized field value all other locales should be updated in the same way', async () => {
+      const updatedValue = 'New Locale Test';
+
+      let expectedValue = updatedValue;
+      for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
+        expectedValue = `${updatedValue} in ${locale} locale`;
+        // Create a new locale in this document
+        await rq({
+          method: 'PUT',
+          url: `/content-manager/collection-types/api::category.category/${documentId}`,
+          body: {
+            locale,
+            nonLocalized: expectedValue,
+          },
+        });
+      }
 
       const originalEntryRes = await rq({
         method: 'GET',
-        url: `/content-manager/collection-types/api::category.category/${res.body.data.documentId}`,
+        url: `/content-manager/collection-types/api::category.category/${documentId}`,
       });
 
-      expect(originalEntryRes.body.data.nonLocalized).toEqual(updatedValue);
+      // The default locale should now have the value of the last locale created
+      expect(originalEntryRes.body.data.nonLocalized).toEqual(expectedValue);
+    });
+
+    test('when a non localized field value is updated in any locale, all other locales should be updated in the same way', async () => {
+      const expectedValue = 'Update Test';
+
+      await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/api::category.category/${documentId}`,
+        body: {
+          nonLocalized: expectedValue,
+        },
+      });
+
+      for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
+        const localeEntry = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::category.category/${documentId}`,
+          query: {
+            locale,
+          },
+        });
+
+        expect(localeEntry.body.data.nonLocalized).toEqual(expectedValue);
+      }
+    });
+
+    let expectedValue = '';
+    test('when an entry is published with a modified non localized field value, all other drafts should be updated in the same way', async () => {
+      expectedValue = 'Publish Test';
+
+      await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+        body: {
+          nonLocalized: expectedValue,
+        },
+      });
+
+      for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
+        const localeEntry = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::category.category/${documentId}`,
+          query: {
+            locale,
+          },
+        });
+
+        expect(localeEntry.body.data.nonLocalized).toEqual(expectedValue);
+      }
+    });
+
+    test('when a published version is unpublished in a way that updates the draft non localized field value (discradDraft), all other locales should be updated in the same way', async () => {
+      // Firstly update the draft version so it differs from the published version
+      await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/api::category.category/${documentId}`,
+        body: {
+          nonLocalized: 'NA',
+        },
+      });
+
+      // Now unpublish the published version of the default locale, specifying
+      // that we should discard the draft version
+      await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::category.category/${documentId}/actions/unpublish`,
+        body: {
+          discardDraft: true,
+        },
+      });
+
+      for (const locale of ['ko', 'it', 'fr', 'es-AR']) {
+        const localeEntry = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::category.category/${documentId}`,
+          query: {
+            locale,
+          },
+        });
+
+        expect(localeEntry.body.data.nonLocalized).toEqual(expectedValue);
+      }
     });
   });
 

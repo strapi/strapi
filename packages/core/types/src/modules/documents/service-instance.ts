@@ -81,15 +81,12 @@ export type ServiceInstance<
     undefined
   >;
 
-  updateComponents: <
-    TUID extends Common.UID.Schema,
-    TData extends EntityService.Params.Data.Input<TUID>
-  >(
-    uid: TUID,
+  updateComponents: (
+    uid: Common.UID.Schema,
     entityToUpdate: {
       id: EntityService.Params.Attribute.ID;
     },
-    data: TData
+    data: EntityService.Params.Data.Input<Common.UID.Schema>
   ) => Promise<ComponentBody>;
 
   omitComponentData: (

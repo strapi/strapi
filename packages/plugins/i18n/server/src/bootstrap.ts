@@ -15,24 +15,24 @@ const registerModelsHooks = () => {
     },
   });
 
-  const i18nModelUIDs = Object.values(strapi.contentTypes)
-    .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
-    .map((contentType) => contentType.uid);
-
   strapi.documents.use(async (context, next) => {
     // @ts-expect-error ContentType is not typed correctly on the context
     const schema = context.contentType;
 
-    if (!['create', 'update'].includes(context.action)) {
+    if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
       return next(context);
     }
 
-    if (!i18nModelUIDs.includes(schema.uid)) {
+    if (!getService('content-types').isLocalizedContentType(schema)) {
       return next(context);
     }
 
     // Collect the result of the document service action and sync non localized
     // attributes based on the response
+
+    /*
+      result might not contain all the non localizedAttributes (you can pass a populate that would only retrun some nested data and not all of it) we might need to fetch the data with a deepPopulate to be able to copy correctly (only populate the fields you need to copy of course)
+    */
     const result = (await next(context)) as any;
     await getService('localizations').syncNonLocalizedAttributes(result, schema);
 
