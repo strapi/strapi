@@ -135,9 +135,11 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
         />
       );
     default:
+      // These props are not needed for the generic form input renderer.
+      const { unique: _unique, mainField: _mainField, ...restProps } = props;
       return (
         <FormInputRenderer
-          {...props}
+          {...restProps}
           hint={hint}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}

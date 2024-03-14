@@ -1,4 +1,5 @@
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { MainField } from './attributes';
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 /**
  * @internal
@@ -10,9 +11,9 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
  */
 const getRelationLabel = (
   relation: Contracts.Relations.RelationResult,
-  mainField?: string
+  mainField?: MainField
 ): string => {
-  const label = mainField && relation[mainField] ? relation[mainField] : null;
+  const label = mainField && relation[mainField.name] ? relation[mainField.name] : null;
 
   if (typeof label === 'string') {
     return label;

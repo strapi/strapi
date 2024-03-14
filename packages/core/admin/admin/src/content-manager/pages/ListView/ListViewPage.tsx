@@ -23,6 +23,7 @@ import {
   useStrapiApp,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
+import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -43,6 +44,7 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
+import { usePrev } from '../../hooks/usePrev';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { useDeleteDocumentMutation, useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -81,11 +83,19 @@ const ListViewPage = () => {
 
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
+
   const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
 
+  const listLayout = usePrev(list.layout);
   React.useEffect(() => {
-    setDisplayedHeaders(list.layout);
-  }, [list.layout]);
+    /**
+     * ONLY update the displayedHeaders if the document
+     * layout has actually changed in value.
+     */
+    if (!isEqual(listLayout, list.layout)) {
+      setDisplayedHeaders(list.layout);
+    }
+  }, [list.layout, listLayout]);
 
   const handleSetHeaders = (headers: string[]) => {
     setDisplayedHeaders(
@@ -192,21 +202,27 @@ const ListViewPage = () => {
           type: 'custom',
         },
         name: 'status',
-        label: {
+        label: formatMessage({
           id: getTranslation(`containers.list.table-headers.status`),
           defaultMessage: 'status',
-        },
+        }),
         searchable: false,
         sortable: false,
       } satisfies ListFieldLayout);
     }
 
     if (reviewWorkflowColumns) {
-      formattedHeaders.push(...reviewWorkflowColumns);
+      formattedHeaders.push(
+        ...reviewWorkflowColumns.map((column) => ({
+          ...column,
+          label: formatMessage(column.label),
+        }))
+      );
     }
     return formattedHeaders;
   }, [
     displayedHeaders,
+    formatMessage,
     list,
     reviewWorkflowColumns,
     runHookWaterfall,

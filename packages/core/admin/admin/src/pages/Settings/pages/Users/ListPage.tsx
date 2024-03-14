@@ -23,13 +23,13 @@ import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
+import { Filters } from '../../../../components/Filters';
 import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
-import { Filters } from '../../components/Filters';
 
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
@@ -88,6 +88,10 @@ const ListPageCE = () => {
     return null;
   }
 
+  if (isError) {
+    return <Page.Error />;
+  }
+
   return (
     <Main aria-busy={isLoading}>
       <Helmet
@@ -115,14 +119,15 @@ const ListPageCE = () => {
                 { target: title }
               )}
             />
-            {/* @ts-expect-error – TODO: fix the way filters work and are passed around, this will be a headache. */}
-            <Filters displayedFilters={DISPLAYED_HEADERS} />
+            <Filters.Root options={DISPLAYED_HEADERS}>
+              <Filters.Trigger />
+              <Filters.Popover />
+              <Filters.List />
+            </Filters.Root>
           </>
         }
       />
       <ContentLayout>
-        {/* TODO: Replace error message with something better */}
-        {isError && <div>TODO: An error occurred</div>}
         {!isError && (
           <>
             <DynamicTable
@@ -293,30 +298,30 @@ const TABLE_HEADERS = [
 const DISPLAYED_HEADERS = [
   {
     name: 'firstname',
-    metadatas: { label: 'Firstname' },
-    fieldSchema: { type: 'string' },
+    label: 'Firstname',
+    type: 'string',
   },
   {
     name: 'lastname',
-    metadatas: { label: 'Lastname' },
-    fieldSchema: { type: 'string' },
+    label: 'Lastname',
+    type: 'string',
   },
   {
     name: 'email',
-    metadatas: { label: 'Email' },
-    fieldSchema: { type: 'email' },
+    label: 'Email',
+    type: 'email',
   },
   {
     name: 'username',
-    metadatas: { label: 'Username' },
-    fieldSchema: { type: 'string' },
+    label: 'Username',
+    type: 'string',
   },
   {
     name: 'isActive',
-    metadatas: { label: 'Active user' },
-    fieldSchema: { type: 'boolean' },
+    label: 'Active user',
+    type: 'boolean',
   },
-];
+] satisfies Filters.Filter[];
 
 /* -------------------------------------------------------------------------------------------------
  * ListPage

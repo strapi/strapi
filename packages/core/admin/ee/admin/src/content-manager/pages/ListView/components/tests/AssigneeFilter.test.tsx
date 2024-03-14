@@ -1,35 +1,40 @@
-import { render } from '@tests/utils';
+import { render as renderRTL, screen } from '@tests/utils';
 
-import { AssigneeFilter } from '../AssigneeFilter';
+import { Form } from '../../../../../../../../admin/src/components/Form';
+import { AssigneeFilter, AssigneeFilterProps } from '../AssigneeFilter';
 
-describe('Content-Manager | List-view | AssigneeFilter', () => {
-  it('should render all the options fetched from the API', async () => {
-    const mockOnChange = jest.fn();
-    const { getByText, user, getByRole, findByText } = render(
-      <AssigneeFilter onChange={mockOnChange} />
+describe('AssigneeFilter', () => {
+  const render = (props?: Partial<AssigneeFilterProps>) =>
+    renderRTL(
+      <AssigneeFilter name="assignee" type="enumeration" aria-label="Assignee" {...props} />,
+      {
+        renderOptions: {
+          wrapper({ children }) {
+            return <Form method="PUT">{children}</Form>;
+          },
+        },
+      }
     );
 
-    await user.click(getByRole('combobox'));
+  it('should render all the options fetched from the API', async () => {
+    const { user } = render();
 
-    await findByText('John Doe');
+    await user.click(screen.getByRole('combobox'));
 
-    expect(getByText('Kai Doe')).toBeInTheDocument();
+    await screen.findByRole('option', { name: 'John Doe' });
+
+    expect(screen.getByRole('option', { name: 'Kai Doe' })).toBeInTheDocument();
   });
 
   it('should call the onChange function with the selected value', async () => {
-    const mockOnChange = jest.fn();
-    const { getByText, user, getByRole, findByText } = render(
-      <AssigneeFilter onChange={mockOnChange} />
-    );
+    const { user } = render();
 
-    await user.click(getByRole('combobox'));
+    await user.click(screen.getByRole('combobox'));
 
-    await findByText('John Doe');
+    await screen.findByRole('option', { name: 'John Doe' });
 
-    const option = getByText('John Doe');
+    await user.click(screen.getByRole('option', { name: 'John Doe' }));
 
-    await user.click(option);
-
-    expect(mockOnChange).toHaveBeenCalledWith('1');
+    expect(screen.getByRole('combobox')).toHaveValue('John Doe');
   });
 });

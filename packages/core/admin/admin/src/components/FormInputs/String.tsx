@@ -8,28 +8,21 @@ import { type InputProps, useField } from '../Form';
 /**
  * TODO: fix the ref type when the design system is fixed.
  */
-export const StringInput = forwardRef<any, InputProps>(
-  ({ disabled, label, hint, name, placeholder, required }, ref) => {
-    const field = useField(name);
-    const fieldRef = useFocusInputField(name);
+export const StringInput = forwardRef<any, InputProps>(({ ...props }, ref) => {
+  const field = useField(props.name);
+  const fieldRef = useFocusInputField(props.name);
 
-    const composedRefs = useComposedRefs(ref, fieldRef);
+  const composedRefs = useComposedRefs(ref, fieldRef);
 
-    return (
-      <TextInput
-        ref={composedRefs}
-        disabled={disabled}
-        hint={hint}
-        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-        label={label}
-        name={name}
-        error={field.error}
-        defaultValue={field.initialValue}
-        onChange={field.onChange}
-        placeholder={placeholder}
-        required={required}
-        value={field.value ?? ''}
-      />
-    );
-  }
-);
+  return (
+    // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
+    <TextInput
+      ref={composedRefs}
+      error={field.error}
+      defaultValue={field.initialValue}
+      onChange={field.onChange}
+      value={field.value ?? ''}
+      {...props}
+    />
+  );
+});

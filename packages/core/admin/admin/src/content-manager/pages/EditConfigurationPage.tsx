@@ -4,7 +4,7 @@ import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
-import { setIn } from '../../utils/object';
+import { setIn } from '../../utils/objects';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
 import { useDoc } from '../hooks/useDocument';
