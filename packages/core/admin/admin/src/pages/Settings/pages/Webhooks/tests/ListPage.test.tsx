@@ -68,7 +68,7 @@ describe('Webhooks | ListPage', () => {
     fireEvent.click(getByRole('button', { name: 'Delete' }));
 
     await waitFor(async () => {
-      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+      expect(await findByText('Are you sure?')).toBeInTheDocument();
     });
 
     server.use(
@@ -98,7 +98,7 @@ describe('Webhooks | ListPage', () => {
     await user.click(deleteButtons[0]);
 
     await waitFor(async () => {
-      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+      expect(await findByText('Are you sure?')).toBeInTheDocument();
     });
 
     server.use(

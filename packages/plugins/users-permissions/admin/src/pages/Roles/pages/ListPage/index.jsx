@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   ContentLayout,
@@ -20,7 +21,6 @@ import {
 import { LinkButton } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
-  ConfirmDialog,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
@@ -48,7 +48,6 @@ export const RolesListPage = () => {
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
   useFocusWhenNavigate();
 
@@ -112,10 +111,8 @@ export const RolesListPage = () => {
   });
 
   const handleConfirmDelete = async () => {
-    setIsConfirmButtonLoading(true);
     await deleteMutation.mutateAsync(roleToDelete);
     setShowConfirmDelete(!showConfirmDelete);
-    setIsConfirmButtonLoading(false);
   };
 
   const sortedRoles = (roles || [])
@@ -231,9 +228,8 @@ export const RolesListPage = () => {
           )}
         </ContentLayout>
         <ConfirmDialog
-          isConfirmButtonLoading={isConfirmButtonLoading}
           onConfirm={handleConfirmDelete}
-          onToggleDialog={handleShowConfirmDelete}
+          onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Main>

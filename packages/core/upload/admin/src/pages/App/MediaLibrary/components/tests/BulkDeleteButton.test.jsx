@@ -68,7 +68,7 @@ describe('BulkDeleteButton', () => {
       fireEvent.click(getByText('Delete'));
     });
 
-    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    expect(getByText('Are you sure?')).toBeInTheDocument();
 
     act(() => {
       fireEvent.click(getByText('Confirm'));
