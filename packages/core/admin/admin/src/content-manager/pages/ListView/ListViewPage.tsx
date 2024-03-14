@@ -7,8 +7,6 @@ import {
   ContentLayout,
   HeaderLayout,
   Flex,
-  Td,
-  Tr,
   Typography,
   lightTheme,
   ButtonProps,
@@ -33,10 +31,11 @@ import { InjectionZone } from '../../../components/InjectionZone';
 import { Page } from '../../../components/PageHelpers';
 import { Pagination } from '../../../components/Pagination';
 import { SearchInput } from '../../../components/SearchInput';
+import { Table } from '../../../components/Table';
 import { HOOKS } from '../../../constants';
 import { BackButton } from '../../../features/BackButton';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { COLLECTION_TYPES } from '../../constants/collections';
+import { getDisplayName } from '../../../utils/users';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
 import {
@@ -46,14 +45,12 @@ import {
 } from '../../hooks/useDocumentLayout';
 import { usePrev } from '../../hooks/usePrev';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
-import { useDeleteDocumentMutation, useGetAllDocumentsQuery } from '../../services/documents';
+import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
-import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { Filters } from './components/Filters';
-import { Table } from './components/Table';
 import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
@@ -78,8 +75,6 @@ const ListViewPage = () => {
   const toggleNotification = useNotification();
   useFocusWhenNavigate();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
-
-  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
 
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
@@ -192,6 +187,7 @@ const ListViewPage = () => {
     const formattedHeaders = headers.displayedHeaders.map<ListFieldLayout>((header) => {
       return {
         ...header,
+        label: typeof header.label === 'string' ? header.label : formatMessage(header.label),
         name: `${header.name}${header.mainField ? `.${header.mainField}` : ''}`,
       };
     });
@@ -228,46 +224,6 @@ const ListViewPage = () => {
     runHookWaterfall,
     schema?.options?.draftAndPublish,
   ]);
-
-  /* -------------------------------------------------------------------------------------------------
-   * Methods
-   * -----------------------------------------------------------------------------------------------*/
-
-  const [deleteDocument] = useDeleteDocumentMutation();
-  const handleConfirmDeleteData = React.useCallback(
-    async (idToDelete: Documents.ID) => {
-      try {
-        const res = await deleteDocument({
-          model,
-          collectionType: COLLECTION_TYPES,
-          documentId: idToDelete,
-        });
-        if ('error' in res) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(res.error),
-          });
-          return;
-        }
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: getTranslation('success.record.delete'),
-            defaultMessage: 'Deleted document',
-          },
-        });
-      } catch (err) {
-        toggleNotification({
-          type: 'warning',
-          message: {
-            id: 'notification.error',
-            defaultMessage: "Couldn't delete document, an error occurred.",
-          },
-        });
-      }
-    },
-    [deleteDocument, model, toggleNotification, formatAPIError]
-  );
 
   if (isLoading) {
     return <Page.Loading />;
@@ -338,78 +294,62 @@ const ListViewPage = () => {
       />
       <ContentLayout>
         <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} isLoading={isLoading} colCount={tableHeaders.length + 2}>
+          <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
             <Table.ActionBar />
             <Table.Content>
               <Table.Head>
-                {/* Bulk action select all checkbox */}
                 <Table.HeaderCheckboxCell />
-                {/* Dynamic headers based on fields */}
-                {results.length > 0 &&
-                  // @ts-expect-error – this will be fixed when we bring in the table from the helper-plugin and we'll derive the type from there and work backwards.
-                  tableHeaders.map((header) => <Table.HeaderCell key={header.name} {...header} />)}
+                {tableHeaders.map((header: ListFieldLayout) => (
+                  <Table.HeaderCell key={header.name} {...header} />
+                ))}
               </Table.Head>
-              {/* Loading content */}
-              <Table.LoadingBody />
-              {/* Empty content */}
-              <Table.EmptyBody
-                contentType={contentTypeTitle}
-                action={canCreate ? <CreateButton variant="secondary" /> : null}
-              />
-              {/* Content */}
-              <Table.Body
-                onConfirmDelete={handleConfirmDeleteData}
-                isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
-                setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
-              >
-                {results.map((rowData, index) => {
+              <Table.Loading />
+              <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
+              <Table.Body>
+                {results.map((row) => {
                   return (
-                    <Tr
+                    <Table.Row
                       cursor="pointer"
-                      key={rowData.documentId}
-                      onClick={handleRowClick(rowData.documentId)}
+                      key={row.id}
+                      onClick={handleRowClick(row.documentId)}
                     >
-                      <Td>
-                        <Table.CheckboxDataCell rowId={rowData.documentId} index={index} />
-                      </Td>
+                      <Table.CheckboxCell id={row.id} />
                       {tableHeaders.map(({ cellFormatter, ...header }) => {
                         if (header.name === 'status') {
-                          const { status } = rowData;
+                          const { status } = row;
 
                           return (
-                            <Td key={header.name}>
+                            <Table.Cell key={header.name}>
                               <DocumentStatus status={status} maxWidth={'min-content'} />
-                            </Td>
+                            </Table.Cell>
                           );
                         }
                         if (schema?.options?.reviewWorkflows) {
                           if (header.name === 'strapi_stage') {
                             return (
-                              <Td key={header.name}>
-                                {rowData.strapi_stage ? (
+                              <Table.Cell key={header.name}>
+                                {row.strapi_stage ? (
                                   <ReviewWorkflowsColumns.ReviewWorkflowsStageEE
-                                    color={
-                                      rowData.strapi_stage.color ?? lightTheme.colors.primary600
-                                    }
-                                    name={rowData.strapi_stage.name}
+                                    color={row.strapi_stage.color ?? lightTheme.colors.primary600}
+                                    name={row.strapi_stage.name}
                                   />
                                 ) : (
                                   <Typography textColor="neutral800">-</Typography>
                                 )}
-                              </Td>
+                              </Table.Cell>
                             );
                           }
                           if (header.name === 'strapi_assignee') {
                             return (
-                              <Td key={header.name}>
-                                {rowData.strapi_assignee ? (
+                              <Table.Cell key={header.name}>
+                                {row.strapi_assignee ? (
                                   <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
-                                    user={rowData.strapi_assignee}
+                                    user={row.strapi_assignee}
                                   />
                                 ) : (
                                   <Typography textColor="neutral800">-</Typography>
                                 )}
-                              </Td>
+                              </Table.Cell>
                             );
                           }
                         }
@@ -418,40 +358,38 @@ const ListViewPage = () => {
                           // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
                           // In this case, we display a dash
                           return (
-                            <Td key={header.name}>
+                            <Table.Cell key={header.name}>
                               <Typography textColor="neutral800">
-                                {rowData[header.name.split('.')[0]]
-                                  ? getDisplayName(
-                                      rowData[header.name.split('.')[0]],
-                                      formatMessage
-                                    )
+                                {row[header.name.split('.')[0]]
+                                  ? getDisplayName(row[header.name.split('.')[0]], formatMessage)
                                   : '-'}
                               </Typography>
-                            </Td>
+                            </Table.Cell>
                           );
                         }
                         if (typeof cellFormatter === 'function') {
                           return (
-                            <Td key={header.name}>
-                              {cellFormatter(rowData, header, { collectionType, model })}
-                            </Td>
+                            <Table.Cell key={header.name}>
+                              {/* @ts-expect-error – TODO: fix this TS error */}
+                              {cellFormatter(row, header, { collectionType, model })}
+                            </Table.Cell>
                           );
                         }
                         return (
-                          <Td key={header.name}>
+                          <Table.Cell key={header.name}>
                             <CellContent
-                              content={rowData[header.name.split('.')[0]]}
-                              rowId={rowData.documentId}
+                              content={row[header.name.split('.')[0]]}
+                              rowId={row.documentId}
                               {...header}
                             />
-                          </Td>
+                          </Table.Cell>
                         );
                       })}
                       {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
                       <ActionsCell onClick={(e) => e.stopPropagation()}>
-                        <TableActions document={rowData} />
+                        <TableActions document={row} />
                       </ActionsCell>
-                    </Tr>
+                    </Table.Row>
                   );
                 })}
               </Table.Body>
@@ -470,7 +408,7 @@ const ListViewPage = () => {
   );
 };
 
-const ActionsCell = styled(Td)`
+const ActionsCell = styled(Table.Cell)`
   display: flex;
   justify-content: flex-end;
 `;

@@ -7,12 +7,13 @@ export * from './render';
 /**
  * components
  */
+export { BackButton, type BackButtonProps } from './features/BackButton';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
-export { BackButton, type BackButtonProps } from './features/BackButton';
+export * from './components/Table';
 
 /**
  * Hooks
