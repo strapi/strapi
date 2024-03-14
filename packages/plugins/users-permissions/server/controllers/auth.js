@@ -117,10 +117,9 @@ module.exports = {
 
     const { currentPassword, password } = await validateChangePasswordBody(ctx.request.body);
 
-    const user = await strapi.entityService.findOne(
-      'plugin::users-permissions.user',
-      ctx.state.user.id
-    );
+    const user = await strapi.db
+      .query('plugin::users-permissions.user')
+      .findOne({ where: { id: ctx.state.user.id } });
 
     const validPassword = await getService('user').validatePassword(currentPassword, user.password);
 

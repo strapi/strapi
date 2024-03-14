@@ -1,12 +1,11 @@
 import React from 'react';
 
 import { Typography } from '@strapi/design-system';
-import { getFileExtension } from '@strapi/helper-plugin';
 import parseISO from 'date-fns/parseISO';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { formatBytes } from '../../utils';
+import { formatBytes, getFileExtension } from '../../utils';
 
 import { PreviewCell } from './PreviewCell';
 

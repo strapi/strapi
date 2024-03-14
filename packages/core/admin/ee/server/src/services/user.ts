@@ -217,7 +217,7 @@ const sanitizeUser = (user: any) => {
  * Find one user
  */
 const findOne = async (id: any, populate = ['roles']) => {
-  return strapi.entityService.findOne('admin::user', id, { populate });
+  return strapi.db.query('admin::user').findOne({ where: { id }, populate });
 };
 
 const getCurrentActiveUserCount = async () => {

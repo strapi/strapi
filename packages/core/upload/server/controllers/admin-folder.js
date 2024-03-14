@@ -1,6 +1,7 @@
 'use strict';
 
 const { defaultsDeep } = require('lodash/fp');
+const { convertQueryParams } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { FOLDER_MODEL_UID } = require('../constants');
 const { validateCreateFolder, validateUpdateFolder } = require('./validation/admin/folder');
@@ -19,22 +20,25 @@ module.exports = {
     await permissionsManager.validateQuery(ctx.query);
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    const { results } = await strapi.entityService.findWithRelationCountsPage(FOLDER_MODEL_UID, {
-      ...defaultsDeep(
-        {
-          filters: { id },
-          populate: {
-            children: {
-              count: true,
-            },
-            files: {
-              count: true,
+    const { results } = await strapi.db.query(FOLDER_MODEL_UID).findPage(
+      convertQueryParams.transformParamsToQuery(
+        FOLDER_MODEL_UID,
+        defaultsDeep(
+          {
+            filters: { id },
+            populate: {
+              children: {
+                count: true,
+              },
+              files: {
+                count: true,
+              },
             },
           },
-        },
-        query
-      ),
-    });
+          query
+        )
+      )
+    );
 
     if (results.length === 0) {
       return ctx.notFound('folder not found');
@@ -54,21 +58,24 @@ module.exports = {
     await permissionsManager.validateQuery(ctx.query);
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    const results = await strapi.entityService.findWithRelationCounts(FOLDER_MODEL_UID, {
-      ...defaultsDeep(
-        {
-          populate: {
-            children: {
-              count: true,
-            },
-            files: {
-              count: true,
+    const results = await strapi.db.query(FOLDER_MODEL_UID).findMany(
+      convertQueryParams.transformParamsToQuery(
+        FOLDER_MODEL_UID,
+        defaultsDeep(
+          {
+            populate: {
+              children: {
+                count: true,
+              },
+              files: {
+                count: true,
+              },
             },
           },
-        },
-        query
-      ),
-    });
+          query
+        )
+      )
+    );
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(results),

@@ -3,7 +3,7 @@ import assigneeFactory from '../review-workflows/assignees';
 
 const uid = 'uid';
 const fromAssigneeId = 1;
-const entityServiceMock = {
+const dbMock = {
   findOne: jest.fn(() => {
     return {
       [ENTITY_ASSIGNEE_ATTRIBUTE]: {
@@ -11,7 +11,7 @@ const entityServiceMock = {
       },
     };
   }),
-  update: jest.fn((uid, id, { data }) => data),
+  update: jest.fn(({ data }) => data),
 };
 const servicesMock: Record<string, any> = {
   'admin::user': {
@@ -23,7 +23,9 @@ const servicesMock: Record<string, any> = {
 };
 
 const strapiMock = {
-  entityService: entityServiceMock,
+  db: {
+    query: () => dbMock,
+  },
   service: jest.fn((serviceName) => {
     return servicesMock[serviceName];
   }),
@@ -59,9 +61,11 @@ describe('Review workflows - Stages service', () => {
         fromAssigneeId,
         toId
       );
-      expect(entityServiceMock.update).toBeCalledWith(uid, id, {
+
+      expect(dbMock.update).toBeCalledWith({
+        where: { id },
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: toId },
-        fields: [],
+        select: [],
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
       });
     });

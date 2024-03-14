@@ -44,7 +44,7 @@ describe('Default Service', () => {
       expect(service).toBeInstanceOf(SingleTypeService);
     });
 
-    describe('Passes the logic down to the entityService', () => {
+    describe('Passes the logic down to the documentService', () => {
       test('Creates data when no entity is found', async () => {
         const documentService = {
           create: jest.fn(() => Promise.resolve({ documentId: 1 })),
