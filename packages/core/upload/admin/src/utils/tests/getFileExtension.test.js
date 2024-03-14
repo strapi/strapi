@@ -1,6 +1,6 @@
-import { getFileExtension } from '../getFileExtension';
+import getFileExtension from '../getFileExtension';
 
-describe('HELPER PLUGIN | utils | getFileExtension', () => {
+describe('getFileExtension', () => {
   it('should return undefined if ext does not exits', () => {
     const ext = null;
     const expected = null;

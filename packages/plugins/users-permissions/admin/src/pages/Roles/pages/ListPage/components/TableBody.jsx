@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
-import { CheckPermissions, onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
+import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -10,15 +10,15 @@ import styled from 'styled-components';
 
 const EditLink = styled(Link)`
   align-items: center;
-  height: ${pxToRem(32)};
+  height: ${32 / 16}rem;
   display: flex;
   justify-content: center;
   padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: ${pxToRem(32)};
+  width: ${32 / 16}rem;
 
   svg {
-    height: ${pxToRem(12)};
-    width: ${pxToRem(12)};
+    height: ${12 / 16}rem;
+    width: ${12 / 16}rem;
 
     path {
       fill: ${({ theme }) => theme.colors.neutral500};

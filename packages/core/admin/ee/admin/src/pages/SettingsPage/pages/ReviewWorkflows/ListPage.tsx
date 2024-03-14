@@ -18,7 +18,6 @@ import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
   ConfirmDialog,
   onRowClick,
-  pxToRem,
   useAPIErrorHandler,
   useNotification,
   useRBAC,
@@ -41,15 +40,15 @@ import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
   align-items: center;
-  height: ${pxToRem(32)};
+  height: ${32 / 16}rem;
   display: flex;
   justify-content: center;
   padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: ${pxToRem(32)};
+  width: ${32 / 16}rem;
 
   svg {
-    height: ${pxToRem(12)};
-    width: ${pxToRem(12)};
+    height: ${12 / 16}rem;
+    width: ${12 / 16}rem;
 
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
@@ -312,7 +311,7 @@ export const ReviewWorkflowsListView = () => {
                   })}
                   key={`workflow-${workflow.id}`}
                 >
-                  <Td width={pxToRem(250)}>
+                  <Td width={`${250 / 16}rem`}>
                     <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                       {workflow.name}
                     </Typography>

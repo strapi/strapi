@@ -11,7 +11,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { pxToRem, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -122,7 +122,7 @@ const UseCasePage = () => {
           <form onSubmit={(e) => handleSubmit(e, false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
-              <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>
+              <Box paddingTop={6} paddingBottom={1} width={`${250 / 16}rem`}>
                 <TypographyCenter variant="alpha" as="h1" id="usecase-title">
                   {formatMessage({
                     id: 'Usecase.title',

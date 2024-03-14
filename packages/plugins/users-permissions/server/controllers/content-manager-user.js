@@ -17,7 +17,7 @@ const ACTIONS = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const entity = await strapi.query(userModel).findOne({
+  const entity = await strapi.db.query(userModel).findOne({
     where: { id },
     populate: [`${CREATED_BY_ATTRIBUTE}.roles`],
   });
@@ -66,7 +66,7 @@ module.exports = {
 
     await validateCreateUserBody(ctx.request.body);
 
-    const userWithSameUsername = await strapi
+    const userWithSameUsername = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
@@ -75,7 +75,7 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi
+      const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
@@ -94,7 +94,7 @@ module.exports = {
     user.email = _.toLower(user.email);
 
     if (!user.role) {
-      const defaultRole = await strapi
+      const defaultRole = await strapi.db
         .query('plugin::users-permissions.role')
         .findOne({ where: { type: advanced.default_role } });
 
@@ -143,7 +143,7 @@ module.exports = {
     }
 
     if (_.has(body, 'username')) {
-      const userWithSameUsername = await strapi
+      const userWithSameUsername = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
@@ -153,7 +153,7 @@ module.exports = {
     }
 
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi
+      const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: _.toLower(email) } });
 

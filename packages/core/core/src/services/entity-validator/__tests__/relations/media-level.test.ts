@@ -12,14 +12,16 @@ describe('Entity validator | Relations | Media', () => {
     components: {
       'basic.dev-compo': {},
     },
-    query() {
-      return {
-        count: ({
-          where: {
-            id: { $in },
-          },
-        }: any) => existentIDs.filter((value) => $in.includes(value)).length,
-      };
+    db: {
+      query() {
+        return {
+          count: ({
+            where: {
+              id: { $in },
+            },
+          }: any) => existentIDs.filter((value) => $in.includes(value)).length,
+        };
+      },
     },
     errors: {
       badRequest: jest.fn(),

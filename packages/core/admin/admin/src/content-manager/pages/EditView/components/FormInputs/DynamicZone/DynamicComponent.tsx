@@ -19,7 +19,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useForm } from '../../../../../../components/Form';
-import { getIn } from '../../../../../../utils/object';
+import { getIn } from '../../../../../../utils/objects';
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';

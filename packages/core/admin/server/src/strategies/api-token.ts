@@ -58,7 +58,7 @@ export const authenticate = async (ctx: Context) => {
   // @ts-expect-error - FIXME: verify lastUsedAt is defined
   const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
   if (hoursSinceLastUsed >= 1) {
-    await strapi.query('admin::api-token').update({
+    await strapi.db.query('admin::api-token').update({
       where: { id: apiToken.id },
       data: { lastUsedAt: currentDate },
     });

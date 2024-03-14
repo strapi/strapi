@@ -363,7 +363,7 @@ module.exports = ({ strapi }) => ({
 
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
+    const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
     await this.emitEvent(MEDIA_CREATE, res);
 
@@ -409,13 +409,13 @@ module.exports = ({ strapi }) => ({
       }
     }
 
-    const media = await strapi.query(FILE_MODEL_UID).findOne({
+    const media = await strapi.db.query(FILE_MODEL_UID).findOne({
       where: { id: file.id },
     });
 
     await this.emitEvent(MEDIA_DELETE, media);
 
-    return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
+    return strapi.db.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
   },
 
   async uploadToEntity(params, files) {
