@@ -279,16 +279,15 @@ interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
  * for relations and then add them to the field's connect array.
  */
 const RelationsInput = ({
-  disabled,
-  hint,
   id,
-  label,
   model,
   name,
   mainField,
   placeholder,
-  required,
   attribute,
+  unique: _unique,
+  'aria-label': _ariaLabel,
+  ...props
 }: RelationsInputProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
   const [searchParams, setSearchParams] = React.useState({
@@ -398,13 +397,9 @@ const RelationsInput = ({
   return (
     <Combobox
       ref={fieldRef}
+      name={name}
       autocomplete="none"
       error={field.error}
-      name={name}
-      hint={hint}
-      required={required}
-      label={label}
-      disabled={disabled}
       placeholder={
         placeholder ||
         formatMessage({
@@ -436,6 +431,7 @@ const RelationsInput = ({
       onInputChange={(event) => {
         handleSearch(event.currentTarget.value);
       }}
+      {...props}
     >
       {options.map((opt) => {
         const textValue = getRelationLabel(opt, mainField);

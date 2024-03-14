@@ -27,7 +27,7 @@ interface WysiwygProps extends Omit<InputProps, 'type'> {
 }
 
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
-  ({ hint, disabled, label, name, placeholder, required }, forwardedRef) => {
+  ({ hint, disabled, label, name, placeholder, required, labelAction }, forwardedRef) => {
     const field = useField(name);
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const editorRef = React.useRef<EditorFromTextArea>(
@@ -106,7 +106,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     return (
       <Field name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel>{label}</FieldLabel>
+          <FieldLabel action={labelAction}>{label}</FieldLabel>
           <EditorLayout
             isExpandMode={isExpandMode}
             error={field.error}
