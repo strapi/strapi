@@ -494,9 +494,15 @@ const createJoinTable = (
     );
   }
 
-  const orderColumnName = identifiers.getOrderColumnName(targetMeta.singularName, options);
+  const orderColumnName = identifiers.getOrderColumnName(
+    snakeCase(targetMeta.singularName),
+    options
+  );
   // TODO: should this plus the conditional below be rolled into one method?
-  let inverseOrderColumnName = identifiers.getOrderColumnName(meta.singularName, options);
+  let inverseOrderColumnName = identifiers.getOrderColumnName(
+    snakeCase(meta.singularName),
+    options
+  );
 
   // if relation is self referencing
   if (attribute.relation === 'manyToMany' && orderColumnName === inverseOrderColumnName) {
