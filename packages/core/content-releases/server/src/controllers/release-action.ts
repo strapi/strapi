@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 
-import { mapAsync, errors } from '@strapi/utils';
+import { mapAsync } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,

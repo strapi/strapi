@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import { AlreadyOnReleaseError } from '../../services/validation';
 import releaseActionController from '../release-action';
 
 const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
@@ -143,7 +143,7 @@ describe('Release Action controller', () => {
 
     it('should count already added entries and dont throw an error', async () => {
       mockCreateAction.mockRejectedValue(
-        new errors.ValidationError(
+        new AlreadyOnReleaseError(
           'Entry with id 1 and contentType api::contentTypeA.contentTypeA already exists in release with id 1'
         )
       );
