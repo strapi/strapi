@@ -2,8 +2,6 @@ import { Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
 
-import { useDoc } from '../../../../hooks/useDocument';
-
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';
 import { MediaSingle, MediaMultiple } from './Media';
@@ -18,8 +16,6 @@ interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
 }
 
 const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
-  const { components } = useDoc();
-
   if (!hasContent(content, mainField, attribute)) {
     return <Typography textColor="neutral800">-</Typography>;
   }
@@ -42,22 +38,10 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
 
     case 'component':
       if (attribute.repeatable) {
-        return (
-          <RepeatableComponent
-            schema={components[attribute.component]}
-            mainField={mainField}
-            content={content}
-          />
-        );
+        return <RepeatableComponent mainField={mainField} content={content} />;
       }
 
-      return (
-        <SingleComponent
-          schema={components[attribute.component]}
-          mainField={mainField}
-          content={content}
-        />
-      );
+      return <SingleComponent mainField={mainField} content={content} />;
 
     case 'string':
       return (
@@ -93,26 +77,12 @@ const hasContent = (
       return content?.length > 0;
     }
 
-    const value = content?.[mainField];
+    const value = content?.[mainField.name];
 
     // relations, media ... show the id as fallback
-    if (mainField === 'id' && ![undefined, null].includes(value)) {
+    if (mainField.name === 'id' && ![undefined, null].includes(value)) {
       return true;
     }
-
-    /* The ID field reports itself as type `integer`, which makes it
-       impossible to distinguish it from other number fields.
-
-       Biginteger fields need to be treated as strings, as `isNumber`
-       doesn't deal with them.
-    */
-    // if (
-    //   isFieldTypeNumber(mainField.type) &&
-    //   mainField.type !== 'biginteger' &&
-    //   mainField.name !== 'id'
-    // ) {
-    //   return typeof value === 'number';
-    // }
 
     return !isEmpty(value);
   }

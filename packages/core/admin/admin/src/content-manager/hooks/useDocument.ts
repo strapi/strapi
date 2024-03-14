@@ -18,12 +18,12 @@ import { ValidationError } from 'yup';
 
 import { SINGLE_TYPES } from '../constants/collections';
 import { useGetDocumentQuery } from '../services/documents';
-import { useGetInitialDataQuery } from '../services/init';
 import { buildValidParams } from '../utils/api';
 import { createYupSchema } from '../utils/validation';
 
+import { useContentTypeSchema, ComponentsDictionary } from './useContentTypeSchema';
+
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute } from '@strapi/types';
 
 interface UseDocumentArgs {
   collectionType: string;
@@ -33,8 +33,6 @@ interface UseDocumentArgs {
 }
 
 type UseDocumentOpts = Parameters<typeof useGetDocumentQuery>[1];
-
-type ComponentsDictionary = Record<string, Contracts.Components.Component>;
 
 type Document = Contracts.CollectionTypes.FindOne.Response['data'];
 
@@ -101,36 +99,7 @@ const useDocument: UseDocument = (args, opts) => {
     error,
   } = useGetDocumentQuery(args, opts);
 
-  const {
-    components,
-    contentType,
-    error: errorSchema,
-    isLoading: isLoadingSchema,
-    isFetching: isFetchingSchema,
-  } = useGetInitialDataQuery(undefined, {
-    selectFromResult: (res) => {
-      const contentType = res.data?.contentTypes.find((ct) => ct.uid === args.model);
-
-      const componentsByKey = res.data?.components.reduce<ComponentsDictionary>(
-        (acc, component) => {
-          acc[component.uid] = component;
-
-          return acc;
-        },
-        {}
-      );
-
-      const components = extractContentTypeComponents(contentType?.attributes, componentsByKey);
-
-      return {
-        isLoading: res.isLoading,
-        isFetching: res.isFetching,
-        error: res.error,
-        components: components,
-        contentType,
-      };
-    },
-  });
+  const { components, schema, isLoading: isLoadingSchema } = useContentTypeSchema(args.model);
 
   React.useEffect(() => {
     if (error) {
@@ -141,22 +110,13 @@ const useDocument: UseDocument = (args, opts) => {
     }
   }, [toggleNotification, error, formatAPIError, args.collectionType]);
 
-  React.useEffect(() => {
-    if (errorSchema) {
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(errorSchema),
-      });
-    }
-  }, [toggleNotification, errorSchema, formatAPIError]);
-
   const validationSchema = React.useMemo(() => {
-    if (!contentType) {
+    if (!schema) {
       return null;
     }
 
-    return createYupSchema(contentType.attributes, components);
-  }, [contentType, components]);
+    return createYupSchema(schema.attributes, components);
+  }, [schema, components]);
 
   const validate = React.useCallback(
     (document: Document) => {
@@ -181,14 +141,14 @@ const useDocument: UseDocument = (args, opts) => {
     [validationSchema]
   );
 
-  const isLoading = isLoadingDocument || isFetchingDocument || isFetchingSchema || isLoadingSchema;
+  const isLoading = isLoadingDocument || isFetchingDocument || isLoadingSchema;
 
   return {
     components,
     document: data?.data,
     meta: data?.meta,
     isLoading,
-    schema: contentType,
+    schema,
     validate,
   } satisfies ReturnType<UseDocument>;
 };
@@ -232,62 +192,5 @@ const useDoc = () => {
   };
 };
 
-/* -------------------------------------------------------------------------------------------------
- * extractContentTypeComponents
- * -----------------------------------------------------------------------------------------------*/
-/**
- * @internal
- * @description Extracts the components used in a content type's attributes recursively.
- */
-const extractContentTypeComponents = (
-  attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
-  allComponents: ComponentsDictionary = {}
-): ComponentsDictionary => {
-  const getComponents = (attributes: Attribute.Any[]) => {
-    return attributes.reduce<string[]>((acc, attribute) => {
-      /**
-       * If the attribute is a component or dynamiczone, we need to recursively
-       * extract the component UIDs from its attributes.
-       */
-      if (attribute.type === 'component') {
-        const componentAttributes = Object.values(
-          allComponents[attribute.component]?.attributes ?? {}
-        );
-
-        acc.push(attribute.component, ...getComponents(componentAttributes));
-      } else if (attribute.type === 'dynamiczone') {
-        acc.push(
-          ...attribute.components,
-          /**
-           * Dynamic zones have an array of components, so we flatMap over them
-           * performing the same search as above.
-           */
-          ...attribute.components.flatMap((componentUid) => {
-            const componentAttributes = Object.values(
-              allComponents[componentUid]?.attributes ?? {}
-            );
-
-            return getComponents(componentAttributes);
-          })
-        );
-      }
-
-      return acc;
-    }, []);
-  };
-
-  const componentUids = getComponents(Object.values(attributes));
-
-  const uniqueComponentUids = [...new Set(componentUids)];
-
-  const componentsByKey = uniqueComponentUids.reduce<ComponentsDictionary>((acc, uid) => {
-    acc[uid] = allComponents[uid];
-
-    return acc;
-  }, {});
-
-  return componentsByKey;
-};
-
-export { useDocument, useDoc, extractContentTypeComponents };
+export { useDocument, useDoc };
 export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };
