@@ -40,12 +40,9 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
+  const localesService = strapi.plugin('i18n').service('locales');
   const getLocaleDictionary = async () => {
-    if (!strapi.plugin('i18n')) {
-      return {};
-    }
-
-    const locales = (await strapi.plugin('i18n').service('locales').find()) || [];
+    const locales = (await localesService.find()) || [];
     return locales.reduce(
       (
         acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
@@ -79,12 +76,18 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
        * TODO: Fix the types for the middleware
        */
       strapi.documents.use(async (context, next) => {
+        // Ignore requests that are not related to the content manager
+        if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
+          return next(context);
+        }
+
         // Ignore actions that don't mutate documents
         if (
-          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
+          !['create', 'update', 'publish', 'unpublish', 'discardDraft', 'clone'].includes(context.action)
         ) {
           return next(context);
         }
+
         // @ts-expect-error ContentType is not typed correctly on the context
         const contentTypeUid = context.contentType.uid;
         // Ignore content types not created by the user
@@ -94,21 +97,14 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
         const result = (await next(context)) as any;
         /**
-         * Publish and discardDraft actions store the created data on the result's versions array.
-         * Otherwise, we assume the data is the result.
-         *
-         * TODO: Fix unpublish which is broken since the data that was unpublished is not passed to the middleware
+         * For create and update actions the data for the version is the result,
+         * otherwise, the data is the first version of the created document
          */
         const data: NextDocument =
-          context.action === 'publish' || context.action === 'discardDraft'
-            ? result.versions[0]
-            : result;
-        /**
-         * The documentId should exist on the created data, fallback to context to handle the broken unpublish action
-         *
-         * TODO: Always get the documentId from the same place (data) once unpublish is fixed
-         */
-        const relatedDocumentId = data.documentId ?? context.args[0];
+          context.action === 'create' || context.action === 'update' ? result : result.versions[0];
+
+        console.log({ context });
+
         // Compute the status of the version
         const status = await getVersionStatus(contentTypeUid, data);
         const fieldsToIgnore = [
@@ -117,7 +113,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           'publishedAt',
           'createdBy',
           'updatedBy',
-          'localizations',
           'locale',
           'strapi_stage',
           'strapi_assignee',
@@ -128,10 +123,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              locale: data.locale,
               data: omit(fieldsToIgnore, data),
               schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
-              relatedDocumentId,
+              relatedDocumentId: data.documentId,
+              locale: data.locale ?? localesService.getDefaultLocale(),
               status,
             });
           });
