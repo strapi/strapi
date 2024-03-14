@@ -1,12 +1,13 @@
 import type Koa from 'koa';
 
-import { mapAsync } from '@strapi/utils';
+import { mapAsync, errors } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
 } from './validation/release-action';
 import type {
   CreateReleaseAction,
+  CreateManyReleaseActions,
   GetReleaseActions,
   UpdateReleaseAction,
   DeleteReleaseAction,
@@ -26,6 +27,51 @@ const releaseActionController = {
 
     ctx.body = {
       data: releaseAction,
+    };
+  },
+
+  async createMany(ctx: Koa.Context) {
+    const releaseId: CreateManyReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
+    const releaseActionsArgs: CreateManyReleaseActions.Request['body'] = ctx.request.body;
+
+    await Promise.all(
+      releaseActionsArgs.map((releaseActionArgs) => validateReleaseAction(releaseActionArgs))
+    );
+
+    const releaseService = getService('release', { strapi });
+
+    const releaseActions = await strapi.db.transaction(async () => {
+      const releaseActions = await Promise.all(
+        releaseActionsArgs.map(async (releaseActionArgs) => {
+          try {
+            const action = await releaseService.createAction(releaseId, releaseActionArgs);
+
+            return action;
+          } catch (error) {
+            if (
+              error instanceof errors.ValidationError &&
+              error.message ===
+                `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
+            ) {
+              return null;
+            }
+
+            throw error;
+          }
+        })
+      );
+
+      return releaseActions;
+    });
+
+    const newReleaseActions = releaseActions.filter((action) => action !== null);
+
+    ctx.body = {
+      data: newReleaseActions,
+      meta: {
+        entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
+        totalEntries: releaseActions.length,
+      },
     };
   },
 
