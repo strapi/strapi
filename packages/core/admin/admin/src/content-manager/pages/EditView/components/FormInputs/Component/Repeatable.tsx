@@ -22,7 +22,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
-import { getIn } from '../../../../../../utils/object';
+import { getIn } from '../../../../../../utils/objects';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
@@ -374,13 +374,13 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 `;
 
 interface ComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'> {
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+    Pick<RepeatableComponentProps, 'mainField'> {
   attribute: Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
   isOpen?: boolean;
   name: string;
-  mainField?: string;
   onClickToggle: () => void;
   onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
   toggleCollapses: () => void;
@@ -392,7 +392,10 @@ const Component = ({
   index,
   isOpen,
   name,
-  mainField = 'id',
+  mainField = {
+    name: 'id',
+    type: 'integer',
+  },
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
@@ -406,7 +409,7 @@ const Component = ({
   const { layout } = components[attribute.component];
 
   const displayValue = useForm('RepeatableComponent', (state) => {
-    return getIn(state.values, [...name.split('.'), mainField]);
+    return getIn(state.values, [...name.split('.'), mainField.name]);
   });
 
   const accordionRef = React.useRef<HTMLButtonElement>(null!);

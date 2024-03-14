@@ -5,10 +5,10 @@ import { useParams } from 'react-router-dom';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
-import { setIn } from '../../utils/object';
+import { setIn } from '../../utils/objects';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
-import { ComponentsDictionary, extractContentTypeComponents } from '../hooks/useDocument';
+import { ComponentsDictionary, extractContentTypeComponents } from '../hooks/useContentTypeSchema';
 import {
   DEFAULT_SETTINGS,
   EditLayout,
@@ -223,7 +223,7 @@ const formatEditLayout = (
     data.component.layouts.edit,
     schema?.attributes,
     data.component.metadatas,
-    data.components
+    { configurations: data.components, schemas: components }
   );
 
   const componentEditAttributes = Object.entries(data.components).reduce<EditLayout['components']>(

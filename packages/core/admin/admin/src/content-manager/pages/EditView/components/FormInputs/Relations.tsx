@@ -59,9 +59,7 @@ interface Relation extends Contracts.Relations.RelationResult {
 
 interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'> {
-  mainField?: string;
-}
+    Pick<InputProps, 'hint'> {}
 
 interface RelationsFormValue {
   connect?: Contracts.Relations.RelationResult[];
