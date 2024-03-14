@@ -137,13 +137,7 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
       return <ComponentDragPreview displayedValue={item.displayedValue} />;
 
     case ItemTypes.RELATION:
-      return (
-        <RelationDragPreview
-          displayedValue={item.displayedValue}
-          status={item.status}
-          width={item.width}
-        />
-      );
+      return <RelationDragPreview {...item} />;
 
     default:
       return null;

@@ -26,6 +26,7 @@ import styled from 'styled-components';
 
 import { RelationResult } from '../../../../../../../../content-manager/dist/shared/contracts/relations';
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../hooks/useDocument';
@@ -719,25 +720,24 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   const { href, documentId, label, status } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
-    useDragAndDrop<
-      number,
-      { displayedValue: string; status: string; id: string; index: number },
-      HTMLDivElement
-    >(canDrag && !disabled, {
-      type: `${ItemTypes.RELATION}_${name}`,
-      index,
-      item: {
-        displayedValue: label,
-        status,
-        id: documentId,
+    useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
+      canDrag && !disabled,
+      {
+        type: `${ItemTypes.RELATION}_${name}`,
         index,
-      },
-      onMoveItem: handleMoveItem,
-      onDropItem: handleDropItem,
-      onGrabItem: handleGrabItem,
-      onCancel: handleCancel,
-      dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
-    });
+        item: {
+          displayedValue: label,
+          status,
+          id: documentId,
+          index,
+        },
+        onMoveItem: handleMoveItem,
+        onDropItem: handleDropItem,
+        onGrabItem: handleGrabItem,
+        onCancel: handleCancel,
+        dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
+      }
+    );
 
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
@@ -799,7 +799,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                   )}
                 </Tooltip>
               </Box>
-              <DocumentStatus status={status} />
+              {status ? <DocumentStatus status={status} /> : null}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>
