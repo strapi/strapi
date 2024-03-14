@@ -89,10 +89,6 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
   );
 };
 
-// const prefixFileUrlWithBackendUrl = (fileURL?: string): string | undefined => {
-//   return !!fileURL && fileURL.startsWith('/') ? `${window.strapi.backendURL}${fileURL}` : fileURL;
-// };
-
 const ImageDialog = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { editor } = useBlocksEditorContext('ImageDialog');
