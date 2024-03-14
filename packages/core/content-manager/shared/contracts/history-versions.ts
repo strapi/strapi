@@ -1,4 +1,4 @@
-import type { Entity, UID } from '@strapi/types';
+import type { Entity, UID, Schema } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -12,7 +12,7 @@ export interface CreateHistoryVersion {
   locale: string | null;
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
-  schema: Record<string, unknown>;
+  schema: Schema.Attributes;
 }
 
 interface Locale {

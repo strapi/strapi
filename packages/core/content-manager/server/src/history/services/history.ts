@@ -5,6 +5,14 @@ import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../constants';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
+import {
+  CreateHistoryVersion,
+  HistoryVersionDataResponse,
+} from '../../../../shared/contracts/history-versions';
+
+// Needed because the query engine doesn't return any types yet
+type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale' | 'relatedData'> &
+  Pick<CreateHistoryVersion, 'locale'>;
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -148,7 +156,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       );
     },
 
-    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']): Promise<{
+      results: HistoryVersionDataResponse[];
+      pagination: HistoryVersions.Pagination;
+    }> {
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params,
@@ -165,13 +176,58 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         this.getLocaleDictionary(),
       ]);
 
-      const sanitizedResults = results.map((result) => ({
-        ...result,
-        locale: result.locale ? localeDictionary[result.locale] : null,
-        createdBy: result.createdBy
-          ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
-          : null,
-      }));
+      const sanitizedResults = await Promise.all(
+        (results as HistoryVersionQueryResult[]).map(async (result) => {
+          const dataWithRelations = await Object.keys(result.schema).reduce(
+            async (currentDataWithRelations, attributeKey) => {
+              const attributeSchema = result.schema[attributeKey];
+
+              // TODO: handle media
+              // TODO: nested content structures
+              if (
+                attributeSchema.type === 'relation' &&
+                attributeSchema.relation !== 'morphToOne' &&
+                attributeSchema.relation !== 'morphToMany'
+              ) {
+                const shouldFetchSeveral = ['oneToMany', 'manyToMany'].includes(
+                  attributeSchema.relation
+                );
+                const relatedEntries = await Promise.all(
+                  (
+                    (shouldFetchSeveral
+                      ? result.data[attributeKey]
+                      : [result.data[attributeKey]]) as number[]
+                  ).map((id) => {
+                    if (!id) {
+                      return null;
+                    }
+
+                    return strapi.db.query(attributeSchema.target).findOne({ where: { id } });
+                  })
+                );
+
+                return {
+                  ...(await currentDataWithRelations),
+                  [attributeKey]: shouldFetchSeveral ? relatedEntries : relatedEntries[0],
+                };
+              }
+
+              // Not a media or relation, nothing to change
+              return currentDataWithRelations;
+            },
+            Promise.resolve(result.data)
+          );
+
+          return {
+            ...result,
+            data: dataWithRelations,
+            locale: result.locale ? localeDictionary[result.locale] : null,
+            createdBy: result.createdBy
+              ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
+              : undefined,
+          };
+        })
+      );
 
       return {
         results: sanitizedResults,

@@ -1,9 +1,17 @@
 import * as React from 'react';
 
-import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import {
+  Box,
+  ContentLayout,
+  FieldLabel,
+  Flex,
+  Grid,
+  GridItem,
+  Typography,
+} from '@strapi/design-system';
 
-import { Form } from '../../../components/Form';
-import { Page } from '../../../components/PageHelpers';
+import { Form, useField } from '../../../components/Form';
+import { type RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
 import {
   InputRenderer,
   type InputRendererProps,
@@ -11,15 +19,36 @@ import {
 import { useHistoryContext } from '../pages/History';
 
 /* -------------------------------------------------------------------------------------------------
+ * CustomRelationInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomRelationInput = (props: RelationsFieldProps) => {
+  const field = useField(props.name);
+
+  return (
+    <Box>
+      <FieldLabel>{props.label}</FieldLabel>
+      <pre>
+        <Typography as="code">{JSON.stringify(field.value, null, 2)}</Typography>
+      </pre>
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * CustomInputRenderer
  * -----------------------------------------------------------------------------------------------*/
 
 // The renderers for these types will be added in future PRs, they need special handling
-const UNSUPPORTED_TYPES = ['media', 'relation'];
+const UNSUPPORTED_TYPES = ['media'];
 
 const CustomInputRenderer = (props: InputRendererProps) => {
   if (UNSUPPORTED_TYPES.includes(props.type)) {
     return <Typography>TODO: support {props.type}</Typography>;
+  }
+
+  if (props.type === 'relation') {
+    return <CustomRelationInput {...props} />;
   }
 
   return <InputRenderer {...props} />;
