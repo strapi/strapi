@@ -5,8 +5,9 @@ import createSchemaDiff from './diff';
 import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
-import type { Database } from '..';
+import type { Schema } from './types';
 import type { MetadataOptions } from '../types';
+import type { Database } from '..';
 
 export type * from './types';
 
@@ -21,12 +22,25 @@ export interface SchemaProvider {
   reset(): Promise<void>;
   create(): Promise<void>;
   drop(): Promise<void>;
+  schema: Schema;
+}
+
+interface State {
+  schema?: Schema;
 }
 
 export const createSchemaProvider = (db: Database, options: MetadataOptions): SchemaProvider => {
-  const schema = metadataToSchema(db.metadata, options);
-
+  const state: State = {};
+  debug('create schema provider');
   return {
+    get schema() {
+      debug('get schema');
+      if (!state.schema) {
+        state.schema = metadataToSchema(db.metadata, options);
+      }
+
+      return state.schema;
+    },
     builder: createSchemaBuilder(db),
     schemaDiff: createSchemaDiff(db),
     schemaStorage: createSchemaStorage(db),
@@ -46,7 +60,7 @@ export const createSchemaProvider = (db: Database, options: MetadataOptions): Sc
      */
     async create() {
       debug('Created database schema');
-      await this.builder.createSchema(schema);
+      await this.builder.createSchema(this.schema);
     },
 
     /**
@@ -63,13 +77,13 @@ export const createSchemaProvider = (db: Database, options: MetadataOptions): Sc
 
       const DBSchema = await db.dialect.schemaInspector.getSchema();
 
-      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
+      const { status, diff } = await this.schemaDiff.diff(DBSchema, this.schema);
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
       }
 
-      await this.schemaStorage.add(schema);
+      await this.schemaStorage.add(this.schema);
     },
 
     // TODO: support options to migrate softly or forcefully
@@ -91,7 +105,7 @@ export const createSchemaProvider = (db: Database, options: MetadataOptions): Sc
       }
 
       const { hash: oldHash } = oldSchema;
-      const hash = await this.schemaStorage.hashSchema(schema);
+      const hash = await this.schemaStorage.hashSchema(this.schema);
 
       if (oldHash !== hash) {
         debug('Schema changed');

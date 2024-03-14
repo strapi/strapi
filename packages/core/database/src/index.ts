@@ -22,14 +22,28 @@ interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
   maxIdentifierLength?: number;
+  migrations: {
+    dir: string;
+  };
   [key: string]: unknown;
 }
 
 export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
-  models: Model[];
 }
+
+const afterCreate =
+  (db: Database) =>
+  (
+    nativeConnection: unknown,
+    done: (error: Error | null, nativeConnection: unknown) => Promise<void>
+  ) => {
+    // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
+    db.dialect.initialize(nativeConnection).then(() => {
+      return done(null, nativeConnection);
+    });
+  };
 
 class Database {
   connection: Knex;
@@ -48,23 +62,7 @@ class Database {
 
   entityManager: EntityManager;
 
-  static async init(config: DatabaseConfig) {
-    const db = new Database(config);
-
-    await validateDatabase(db, {
-      maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
-    });
-
-    return db;
-  }
-
   constructor(config: DatabaseConfig) {
-    const metadataOptions = {
-      maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
-    };
-
-    this.metadata = createMetadata(config.models, metadataOptions);
-
     this.config = {
       ...config,
       settings: {
@@ -77,17 +75,14 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    const afterCreate = (
-      nativeConnection: unknown,
-      done: (error: Error | null, nativeConnection: unknown) => Promise<void>
-    ) => {
-      // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
-      this.dialect.initialize(nativeConnection).then(() => {
-        return done(null, nativeConnection);
-      });
+    const metadataOptions = {
+      maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
     };
+    this.metadata = createMetadata([], metadataOptions);
 
-    this.connection = createConnection(this.config.connection, { pool: { afterCreate } });
+    this.connection = createConnection(this.config.connection, {
+      pool: { afterCreate: afterCreate(this) },
+    });
 
     this.schema = createSchemaProvider(this, metadataOptions);
 
@@ -95,6 +90,17 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+  }
+
+  async init({ models }: { models: Model[] }) {
+    const metadataOptions = {
+      maxLength: this.config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
+    };
+
+    this.metadata.loadModels(models, metadataOptions);
+
+    await validateDatabase(this, metadataOptions);
+    return this;
   }
 
   query(uid: string) {

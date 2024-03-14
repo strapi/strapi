@@ -114,24 +114,29 @@ describe('i18n - Find available relations', () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/relations/api::shop.shop/products',
+      qs: { locale: 'en', status: 'published' },
     });
 
+    const expectedObj = {
+      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[1]),
+      status: 'published',
+    };
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt', 'documentId'], data.products[1])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 
   test('Can filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/relations/api::shop.shop/products',
-      qs: { locale: 'it' },
+      qs: { locale: 'it', status: 'published' },
     });
 
+    const expectedObj = {
+      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[0]),
+      status: 'published',
+    };
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt', 'documentId'], data.products[0])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 });

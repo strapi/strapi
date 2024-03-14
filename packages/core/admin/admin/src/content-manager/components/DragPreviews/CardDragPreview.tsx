@@ -1,5 +1,4 @@
 import { Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import styled from 'styled-components';
 
@@ -17,7 +16,7 @@ const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => 
       hasRadius
       justifyContent="space-between"
       isSibling={isSibling}
-      max-height={pxToRem(32)}
+      max-height={`${32 / 16}rem`}
       maxWidth="min-content"
     >
       <Flex gap={3}>

@@ -3,10 +3,10 @@ import { DynamicTable, useFocusWhenNavigate, useQueryParams, useRBAC } from '@st
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
+import { Filters } from '../../../../../../../admin/src/components/Filters';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
-import { Filters } from '../../../../../../../admin/src/pages/Settings/components/Filters';
 import { SanitizedAdminUserForAuditLogs } from '../../../../../../../shared/contracts/audit-logs';
 
 import { Modal } from './components/Modal';
@@ -108,7 +108,15 @@ const ListPage = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
-      <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
+      <ActionLayout
+        startActions={
+          <Filters.Root options={displayedFilters}>
+            <Filters.Trigger />
+            <Filters.Popover />
+            <Filters.List />
+          </Filters.Root>
+        }
+      />
       <ContentLayout>
         <DynamicTable
           contentType="Audit logs"

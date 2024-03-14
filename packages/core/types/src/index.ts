@@ -107,7 +107,14 @@ export interface Strapi extends Container {
   webhookStore?: WebhookStore;
   store?: CoreStore;
   entityValidator?: EntityValidator;
+  /**
+   * @deprecated will be removed in the next major
+   */
   entityService?: EntityService.EntityService;
+  /**
+   * @description interact with documents within Strapi, this API is currently in beta and is subject to change in the future
+   * @beta
+   */
   documents?: Documents.Service;
   telemetry: TelemetryService;
   requestContext: RequestContext;
@@ -116,7 +123,7 @@ export interface Strapi extends Container {
   dirs: StrapiDirectories;
   admin?: Common.Module;
   isLoaded: boolean;
-  db?: Database;
+  db: Database;
   app: any;
   EE?: boolean;
   ee: {
@@ -168,6 +175,9 @@ export interface Strapi extends Container {
   getModel<TUID extends Common.UID.Schema>(
     uid: TUID
   ): TUID extends Common.UID.ContentType ? Schema.ContentType : Schema.Component;
+  /**
+   * @deprecated use `strapi.db.query` instead
+   */
   query(uid: Common.UID.Schema): ReturnType<Database['query']>;
 }
 

@@ -69,7 +69,7 @@ const ComponentInput = ({
             icon={<Trash />}
             borderWidth={0}
             onClick={() => {
-              field.onChange(name, undefined);
+              field.onChange(name, null);
             }}
           />
         )}

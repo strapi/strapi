@@ -171,12 +171,12 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     async exists(uid: Common.UID.CollectionType, id?: string) {
       // Collection type
       if (id) {
-        const count = await strapi.query(uid).count({ where: { documentId: id } });
+        const count = await strapi.db.query(uid).count({ where: { documentId: id } });
         return count > 0;
       }
 
       // Single type
-      const count = await strapi.query(uid).count();
+      const count = await strapi.db.query(uid).count();
       return count > 0;
     },
 
@@ -198,11 +198,14 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     // FIXME: handle relations
-    deleteMany(
-      opts: Parameters<typeof strapi.entityService.deleteMany>[1],
-      uid: Common.UID.CollectionType
-    ) {
-      return strapi.entityService.deleteMany(uid, opts);
+    async deleteMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
+      const docs = await strapi.documents(uid).findMany(opts);
+
+      for (const doc of docs) {
+        await strapi.documents!(uid).delete(doc.documentId);
+      }
+
+      return { count: docs.length };
     },
 
     async publish(
@@ -259,7 +262,10 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         data,
       });
       // Get the updated entities since updateMany only returns the count
-      const publishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
+      const publishedEntities = await strapi.db.query(uid).findMany({
+        where: filters,
+        populate,
+      });
       // Emit the publish event for all updated entities
       await Promise.all(
         publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
@@ -284,12 +290,17 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       const populate = await buildDeepPopulate(uid);
 
       // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.query(uid).updateMany({
+      const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
         where: filters,
         data,
       });
+
       // Get the updated entities since updateMany only returns the count
-      const unpublishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
+      const unpublishedEntities = await strapi.db.query(uid).findMany({
+        where: filters,
+        populate,
+      });
+
       // Emit the unpublish event for all updated entities
       await Promise.all(
         unpublishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_UNPUBLISH, doc))
@@ -364,10 +375,12 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         return 0;
       }
 
-      const entities = await strapi.entityService.findMany(uid, {
+      const entities = await strapi.db.query(uid).findMany({
         populate,
-        filters: { id: { $in: ids } },
-        locale,
+        where: {
+          id: { $in: ids },
+          ...(locale ? { locale } : {}),
+        },
       });
 
       const totalNumberDraftRelations: number = entities!.reduce(

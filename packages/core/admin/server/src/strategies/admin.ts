@@ -22,7 +22,7 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  const user = await strapi
+  const user = await strapi.db
     .query('admin::user')
     .findOne({ where: { id: payload.id }, populate: ['roles'] });
 

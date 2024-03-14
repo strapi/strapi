@@ -19,7 +19,7 @@ import {
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { getFileExtension, pxToRem, useTracking } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -30,7 +30,7 @@ import * as yup from 'yup';
 import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import { findRecursiveFolderByValue, getTrad, getFileExtension } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
@@ -41,7 +41,7 @@ import { ReplaceMediaButton } from './ReplaceMediaButton';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
+  min-height: ${() => `calc(60vh + ${80 / 16}rem)`};
 `;
 
 const fileInfoSchema = yup.object({

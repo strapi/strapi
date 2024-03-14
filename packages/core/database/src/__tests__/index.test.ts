@@ -24,15 +24,16 @@ jest.mock('../migrations', () => ({
   createMigrationsProvider: jest.fn(),
 }));
 
+const models = [
+  {
+    uid: 'test',
+    singularName: 'test',
+    tableName: 'strapi_core_store_settings',
+    attributes: {},
+  },
+];
+
 const config: DatabaseConfig = {
-  models: [
-    {
-      uid: 'test',
-      singularName: 'test',
-      tableName: 'strapi_core_store_settings',
-      attributes: {},
-    },
-  ],
   connection: {
     client: 'postgres',
     connection: {
@@ -43,31 +44,39 @@ const config: DatabaseConfig = {
       host: 'localhost',
     },
   },
-  settings: {},
+  settings: {
+    migrations: {
+      dir: 'migrations',
+    },
+  },
 };
 
 describe('Database', () => {
   describe('constructor', () => {
     it('it should intialize if config is provided', async () => {
-      expect(() => Database.init(config)).toBeDefined();
+      expect(() => new Database(config)).toBeDefined();
     });
   });
 
   describe('Transaction', () => {
     it('transaction should be defined', async () => {
-      const db = await Database.init(config);
+      const db = new Database(config);
       expect(db.transaction).toBeDefined();
     });
 
     it('should return value if transaction is complete', async () => {
-      const db = await Database.init(config);
+      const db = new Database(config);
+      await db.init({ models });
+
       const result = await db.transaction(async () => 'test');
       expect(result).toBe('test');
       expect((db.connection as any).commit).toHaveBeenCalledTimes(1);
     });
 
     it('rollback is called incase of error', async () => {
-      const db = await Database.init(config);
+      const db = new Database(config);
+      await db.init({ models });
+
       try {
         await db.transaction(async () => {
           throw new Error('test');
@@ -79,7 +88,8 @@ describe('Database', () => {
     });
 
     it('should throw error', async () => {
-      const db = await Database.init(config);
+      const db = new Database(config);
+      await db.init({ models });
 
       expect(async () => {
         await db.transaction(async () => {

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
-
+import roleContentType from '../../content-types/Role';
 import roleService from '../role';
 
 const {
@@ -31,7 +31,7 @@ describe('Role', () => {
       const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query: () => ({ create: dbCreate, count: dbCount }),
+        db: { query: () => ({ create: dbCreate, count: dbCount }) },
         eventHub: {
           emit: jest.fn(),
         },
@@ -60,7 +60,7 @@ describe('Role', () => {
       const dbFindOne = jest.fn(({ where: { id } }) => Promise.resolve(_.find([role], { id })));
 
       global.strapi = {
-        query: () => ({ findOne: dbFindOne }),
+        db: { query: () => ({ findOne: dbFindOne }) },
       } as any;
 
       const foundRole = await findOne({ id: role.id });
@@ -81,7 +81,7 @@ describe('Role', () => {
       );
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
-        query: () => ({ findOne: dbFindOne, count: dbCount }),
+        db: { query: () => ({ findOne: dbFindOne, count: dbCount }) },
       } as any;
 
       const foundRole = await findOneWithUsersCount({ id: role.id });
@@ -101,10 +101,11 @@ describe('Role', () => {
           description: "Have all permissions. Can't be delete",
         },
       ];
+
       const dbFind = jest.fn(() => Promise.resolve(roles));
 
       global.strapi = {
-        query: () => ({ findMany: dbFind }),
+        db: { query: () => ({ findMany: dbFind }) },
       } as any;
 
       // @ts-expect-error - fix types
@@ -129,14 +130,12 @@ describe('Role', () => {
       const findMany = jest.fn(() => Promise.resolve(roles));
 
       global.strapi = {
-        query: () => ({ count: dbCount }),
-        entityService: {
-          findMany,
-        },
+        getModel: () => roleContentType,
+        db: { query: () => ({ count: dbCount, findMany }) },
       } as any;
 
       const params = {
-        filters: {
+        where: {
           $and: [
             {
               name: {
@@ -149,7 +148,7 @@ describe('Role', () => {
 
       const foundRoles = await findAllWithUsersCount(params);
 
-      expect(findMany).toHaveBeenCalledWith('admin::role', params);
+      expect(findMany).toHaveBeenCalledWith(params);
       expect(foundRoles).toStrictEqual(roles);
     });
   });
@@ -172,7 +171,7 @@ describe('Role', () => {
       const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query: () => ({ update: dbUpdate, count: dbCount }),
+        db: { query: () => ({ update: dbUpdate, count: dbCount }) },
         eventHub: {
           emit: jest.fn(),
         },
@@ -208,7 +207,7 @@ describe('Role', () => {
       const badRequest = jest.fn(() => {});
 
       global.strapi = {
-        query: () => ({ find: dbFind, findOne: dbFindOne, update: dbUpdate }),
+        db: { query: () => ({ find: dbFind, findOne: dbFindOne, update: dbUpdate }) },
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
         errors: { badRequest },
         eventHub: {
@@ -227,7 +226,7 @@ describe('Role', () => {
       const roleId = 1;
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
-        query: () => ({ count: dbCount }),
+        db: { query: () => ({ count: dbCount }) },
       } as any;
 
       const usersCount = await getUsersCount(roleId);
@@ -251,7 +250,7 @@ describe('Role', () => {
       const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => ({ delete: dbDelete, count: dbCount, findOne: dbFindOne }),
+        db: { query: () => ({ delete: dbDelete, count: dbCount, findOne: dbFindOne }) },
         store: () => ({
           get: () => ({
             providers: {
@@ -305,7 +304,7 @@ describe('Role', () => {
       const dbDeleteByRolesIds = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => ({ delete: dbDelete, count: dbCount, findOne: dbFindOne }),
+        db: { query: () => ({ delete: dbDelete, count: dbCount, findOne: dbFindOne }) },
         store: () => ({
           get: () => ({
             providers: {
@@ -340,7 +339,9 @@ describe('Role', () => {
       const dbFindOne = jest.fn(() => ({ id: '1', code: SUPER_ADMIN_CODE }));
 
       global.strapi = {
-        query: () => ({ find: dbFind, findOne: dbFindOne }),
+        db: {
+          query: () => ({ find: dbFind, findOne: dbFindOne }),
+        },
         store: () => ({
           get: () => ({
             providers: {
@@ -360,7 +361,7 @@ describe('Role', () => {
       const dbCount = jest.fn(() => 2);
 
       global.strapi = {
-        query: () => ({ find: dbFind, findOne: dbFindOne, count: dbCount }),
+        db: { query: () => ({ find: dbFind, findOne: dbFindOne, count: dbCount }) },
         store: () => ({
           get: () => ({
             providers: {
@@ -381,7 +382,7 @@ describe('Role', () => {
     test('Count roles without params', async () => {
       const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count: dbCount }),
+        db: { query: () => ({ count: dbCount }) },
       } as any;
 
       const amount = await count();
@@ -393,7 +394,7 @@ describe('Role', () => {
     test('Count roles with params', async () => {
       const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count: dbCount }),
+        db: { query: () => ({ count: dbCount }) },
       } as any;
 
       const params = { foo: 'bar' };
@@ -409,7 +410,7 @@ describe('Role', () => {
       const count = jest.fn(() => Promise.resolve(1));
       const create = jest.fn();
       global.strapi = {
-        query: () => ({ count, create }),
+        db: { query: () => ({ count, create }) },
       } as any;
       await createRolesIfNoneExist();
 
@@ -496,7 +497,7 @@ describe('Role', () => {
       const getPermissionsWithNestedFields = jest.fn(() => permissions.map(createPermission)); // cloned, otherwise it is modified inside createRolesIfNoneExist()
 
       global.strapi = {
-        query: () => ({ count, create }),
+        db: { query: () => ({ count, create }) },
         admin: {
           services: {
             permission: {
@@ -578,7 +579,7 @@ describe('Role', () => {
       const warn = jest.fn();
 
       global.strapi = {
-        query: () => ({ findOne, count }),
+        db: { query: () => ({ findOne, count }) },
         admin: { services: { user: { exists } } },
         log: { warn },
       } as any;
@@ -587,6 +588,7 @@ describe('Role', () => {
 
       expect(warn).toHaveBeenCalledTimes(0);
     });
+
     test("superAdmin role doesn't exist", async () => {
       const findOne = jest.fn(() => undefined);
       const count = jest.fn(() => Promise.resolve(0));
@@ -594,7 +596,7 @@ describe('Role', () => {
       const warn = jest.fn();
 
       global.strapi = {
-        query: () => ({ findOne, count }),
+        db: { query: () => ({ findOne, count }) },
         admin: { services: { user: { exists } } },
         log: { warn },
       } as any;
@@ -603,6 +605,7 @@ describe('Role', () => {
 
       expect(warn).toHaveBeenCalledWith("Your application doesn't have a super admin role.");
     });
+
     test('superAdmin role exist & no user is superAdmin', async () => {
       const findOne = jest.fn(() => ({ id: 1 }));
       const count = jest.fn(() => Promise.resolve(0));
@@ -610,7 +613,7 @@ describe('Role', () => {
       const warn = jest.fn();
 
       global.strapi = {
-        query: () => ({ findOne, count }),
+        db: { query: () => ({ findOne, count }) },
         admin: { services: { user: { exists } } },
         log: { warn },
       } as any;
@@ -627,7 +630,7 @@ describe('Role', () => {
       const createMany = jest.fn();
 
       global.strapi = {
-        query: () => ({ createMany }),
+        db: { query: () => ({ createMany }) },
         admin: { services: { role: { getSuperAdmin } } },
       } as any;
 

@@ -1,5 +1,4 @@
 import { Box, Flex, Layout, Main, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { PageHeader } from './PageHeader';
@@ -16,7 +15,7 @@ const OfflineLayout = () => {
           direction="column"
           alignItems="center"
           justifyContent="center"
-          paddingTop={pxToRem(120)}
+          paddingTop={`${120 / 16}rem`}
         >
           <Box paddingBottom={2}>
             <Typography textColor="neutral700" variant="alpha">

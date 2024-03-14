@@ -58,6 +58,9 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 
+// TODO: move somewhere else
+import * as draftAndPublishSync from './migrations/draft-publish';
+
 /**
  * Resolve the working directories based on the instance options.
  *
@@ -141,6 +144,9 @@ class Strapi extends Container implements StrapiI {
 
   entityValidator?: EntityValidator;
 
+  /**
+   * @deprecated `strapi.entityService` will be removed in the next major version
+   */
   entityService?: EntityService.EntityService;
 
   documents?: Documents.Service;
@@ -159,7 +165,7 @@ class Strapi extends Container implements StrapiI {
 
   isLoaded: boolean;
 
-  db?: Database;
+  db: Database;
 
   app: any;
 
@@ -229,7 +235,18 @@ class Strapi extends Container implements StrapiI {
     this.customFields = createCustomFields(this);
     this.fetch = utils.createStrapiFetch(this);
     this.features = createFeaturesService(this);
+    this.db = new Database(
+      _.merge(this.config.get('database'), {
+        settings: {
+          migrations: {
+            dir: path.join(this.dirs.app.root, 'database/migrations'),
+          },
+          maxIdentifierLength: dbConstants.DEFAULT_MAX_IDENTIFIER_LENGTH,
+        },
+      })
+    );
 
+    console.log('created db');
     utils.createUpdateNotifier(this).notify();
 
     Object.defineProperty<Strapi>(this, 'EE', {
@@ -464,6 +481,9 @@ class Strapi extends Container implements StrapiI {
   registerInternalHooks() {
     this.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
     this.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
+
+    this.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
+    this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
   }
 
   async register() {
@@ -491,19 +511,15 @@ class Strapi extends Container implements StrapiI {
   }
 
   async bootstrap() {
-    // Set the max identifier length in the database
-    const maxLength = dbConstants.DEFAULT_MAX_IDENTIFIER_LENGTH;
-    this.config.set('database.settings.maxIdentifierLength', maxLength);
-
     const models = [
       ...utils.transformContentTypesToModels(
         [...Object.values(this.contentTypes), ...Object.values(this.components)],
-        { maxLength }
+        { maxLength: dbConstants.DEFAULT_MAX_IDENTIFIER_LENGTH }
       ),
       ...this.get('models').get(),
     ];
 
-    this.db = await Database.init({ ...this.config.get('database'), models });
+    await this.db.init({ models });
 
     this.store = createCoreStore({ db: this.db });
     this.webhookStore = createWebhookStore({ db: this.db });
@@ -512,8 +528,6 @@ class Strapi extends Container implements StrapiI {
     this.entityService = createEntityService({
       strapi: this,
       db: this.db,
-      eventHub: this.eventHub,
-      entityValidator: this.entityValidator,
     });
 
     this.documents = createDocumentService(this);
@@ -623,11 +637,10 @@ class Strapi extends Container implements StrapiI {
   }
 
   /**
-   * Binds queries with a specific model
-   * @param {string} uid
+   * @deprecated Use `strapi.db.query` instead
    */
   query(uid: Common.UID.Schema) {
-    return this.db!.query(uid);
+    return this.db.query(uid);
   }
 }
 

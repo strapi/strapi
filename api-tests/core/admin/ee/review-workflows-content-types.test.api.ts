@@ -20,6 +20,7 @@ const baseWorkflow = {
 const productUID = 'api::product.product';
 const productModel = {
   pluginOptions: {},
+  draftAndPublish: true,
   singularName: 'product',
   pluralName: 'products',
   displayName: 'Product',
@@ -34,6 +35,7 @@ const productModel = {
 const articleUID = 'api::article.article';
 const articleModel = {
   pluginOptions: {},
+  draftAndPublish: true,
   singularName: 'article',
   pluralName: 'articles',
   displayName: 'Article',

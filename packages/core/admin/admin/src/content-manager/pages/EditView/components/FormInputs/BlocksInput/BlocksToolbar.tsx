@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
@@ -27,7 +26,7 @@ const ToolbarWrapper = styled(Flex)`
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
-  height: ${pxToRem(24)};
+  height: ${24 / 16}rem;
 `;
 
 const FlexButton = styled(Flex)`

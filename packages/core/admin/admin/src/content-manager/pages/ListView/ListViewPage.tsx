@@ -10,7 +10,6 @@ import {
   Td,
   Tr,
   Typography,
-  Status,
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
@@ -24,7 +23,9 @@ import {
   useStrapiApp,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
+import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -35,7 +36,6 @@ import { Pagination } from '../../../components/Pagination';
 import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
 import { useEnterprise } from '../../../hooks/useEnterprise';
-import { capitalise } from '../../../utils/strings';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -44,11 +44,13 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
+import { usePrev } from '../../hooks/usePrev';
 import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { useDeleteDocumentMutation, useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
+import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
 import { Filters } from './components/Filters';
 import { Table } from './components/Table';
@@ -81,11 +83,19 @@ const ListViewPage = () => {
 
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
+
   const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
 
+  const listLayout = usePrev(list.layout);
   React.useEffect(() => {
-    setDisplayedHeaders(list.layout);
-  }, [list.layout]);
+    /**
+     * ONLY update the displayedHeaders if the document
+     * layout has actually changed in value.
+     */
+    if (!isEqual(listLayout, list.layout)) {
+      setDisplayedHeaders(list.layout);
+    }
+  }, [list.layout, listLayout]);
 
   const handleSetHeaders = (headers: string[]) => {
     setDisplayedHeaders(
@@ -192,21 +202,27 @@ const ListViewPage = () => {
           type: 'custom',
         },
         name: 'status',
-        label: {
+        label: formatMessage({
           id: getTranslation(`containers.list.table-headers.status`),
           defaultMessage: 'status',
-        },
+        }),
         searchable: false,
         sortable: false,
       } satisfies ListFieldLayout);
     }
 
     if (reviewWorkflowColumns) {
-      formattedHeaders.push(...reviewWorkflowColumns);
+      formattedHeaders.push(
+        ...reviewWorkflowColumns.map((column) => ({
+          ...column,
+          label: formatMessage(column.label),
+        }))
+      );
     }
     return formattedHeaders;
   }, [
     displayedHeaders,
+    formatMessage,
     list,
     reviewWorkflowColumns,
     runHookWaterfall,
@@ -273,6 +289,7 @@ const ListViewPage = () => {
 
   return (
     <Main>
+      <Helmet title={`${contentTypeTitle} | Strapi`} />
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(
@@ -369,25 +386,9 @@ const ListViewPage = () => {
                         if (header.name === 'status') {
                           const { status } = rowData;
 
-                          const statusVariant =
-                            status === 'draft'
-                              ? 'primary'
-                              : status === 'published'
-                              ? 'success'
-                              : 'alternative';
-
                           return (
                             <Td key={header.name}>
-                              <Status
-                                maxWidth="min-content"
-                                showBullet={false}
-                                size={'S'}
-                                variant={statusVariant}
-                              >
-                                <Typography as="span" variant="omega" fontWeight="bold">
-                                  {capitalise(status)}
-                                </Typography>
-                              </Status>
+                              <DocumentStatus status={status} maxWidth={'min-content'} />
                             </Td>
                           );
                         }

@@ -29,6 +29,7 @@ async function initDefaultWorkflow({ workflowsService, stagesService }: any) {
   if (wfCount === 0 && stagesCount === 0) {
     const workflow = {
       ...defaultWorkflow,
+      contentTypes: [],
       stages: defaultStages,
     };
 

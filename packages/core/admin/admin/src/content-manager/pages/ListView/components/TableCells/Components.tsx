@@ -15,18 +15,17 @@ import type { Attribute } from '@strapi/types';
 
 interface SingleComponentProps extends Pick<CellContentProps, 'mainField'> {
   content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, false>>;
-  schema: ComponentsDictionary[string];
 }
 
-const SingleComponent = ({ content, mainField, schema }: SingleComponentProps) => {
+const SingleComponent = ({ content, mainField }: SingleComponentProps) => {
   if (!mainField) {
     return null;
   }
 
   return (
-    <Tooltip label={content[mainField]}>
+    <Tooltip label={content[mainField.name]}>
       <SingleComponentTypography textColor="neutral800" ellipsis>
-        <CellValue type={schema.attributes[mainField].type} value={content[mainField]} />
+        <CellValue type={mainField.type} value={content[mainField.name]} />
       </SingleComponentTypography>
     </Tooltip>
   );
@@ -42,10 +41,9 @@ const SingleComponentTypography = styled(Typography)`
 
 interface RepeatableComponentProps extends Pick<CellContentProps, 'mainField'> {
   content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, true>>;
-  schema: ComponentsDictionary[string];
 }
 
-const RepeatableComponent = ({ content, mainField, schema }: RepeatableComponentProps) => {
+const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) => {
   const { formatMessage } = useIntl();
 
   if (!mainField) {
@@ -68,7 +66,7 @@ const RepeatableComponent = ({ content, mainField, schema }: RepeatableComponent
         {content.map((item) => (
           <Menu.Item key={item.id} disabled>
             <RepeatableComponentTypography ellipsis>
-              <CellValue type={schema.attributes[mainField].type} value={item[mainField]} />
+              <CellValue type={mainField.type} value={item[mainField.name]} />
             </RepeatableComponentTypography>
           </Menu.Item>
         ))}

@@ -22,6 +22,7 @@ describe.skip('Admin Permissions - Conditions', () => {
         singularName: 'article',
         pluralName: 'articles',
         displayName: 'Article',
+        draftAndPublish: true,
         attributes: {
           title: {
             type: 'string',
@@ -40,6 +41,7 @@ describe.skip('Admin Permissions - Conditions', () => {
         singularName: 'category',
         pluralName: 'categories',
         displayName: 'Category',
+        draftAndPublish: true,
         attributes: {
           name: {
             type: 'string',

@@ -18,6 +18,7 @@ const productModel = {
   pluralName: 'products',
   description: '',
   collectionName: '',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,

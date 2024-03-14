@@ -40,6 +40,7 @@ const productWithDP = {
       maxLength: 30,
     },
   },
+  draftAndPublish: true,
   displayName: 'product-with-dp',
   singularName: 'product-with-dp',
   pluralName: 'product-with-dps',

@@ -7,6 +7,7 @@ import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
+import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { DefaultTheme } from 'styled-components';
 
@@ -15,6 +16,7 @@ import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/Set
 
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
+import { ErrorElement } from './components/ErrorElement';
 import {
   INJECTION_ZONES,
   InjectionZoneBlock,
@@ -23,8 +25,10 @@ import {
   InjectionZoneModule,
   InjectionZones,
 } from './components/InjectionZone';
+import { LanguageProvider } from './components/LanguageProvider';
 import { Page } from './components/PageHelpers';
 import { Providers } from './components/Providers';
+import { Theme } from './components/Theme';
 import { HOOKS } from './constants';
 import { routes as cmRoutes } from './content-manager/router';
 import { ContentManagerPlugin } from './core/apis/content-manager';
@@ -629,6 +633,15 @@ class StrapiApp {
       [
         {
           path: '/*',
+          errorElement: (
+            <Provider store={store}>
+              <LanguageProvider messages={this.configurations.translations}>
+                <Theme themes={this.configurations.themes}>
+                  <ErrorElement />
+                </Theme>
+              </LanguageProvider>
+            </Provider>
+          ),
           element: <Root strapi={this} localeNames={localeNames} store={store} />,
           children: [
             {

@@ -157,7 +157,7 @@ const getComponents = async <TUID extends Common.UID.Schema>(
     return {} as LoadedComponents<TUID>;
   }
 
-  return strapi.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
+  return strapi.db.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
 };
 
 /*
@@ -281,7 +281,7 @@ const deleteOldComponents = async <TUID extends Common.UID.Schema>(
   attributeName: string,
   componentValue: Attribute.GetValue<Attribute.Component>
 ) => {
-  const previousValue = (await strapi
+  const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
 
@@ -311,7 +311,7 @@ const deleteOldDZComponents = async <TUID extends Common.UID.Schema>(
   attributeName: string,
   dynamiczoneValues: Attribute.GetValue<Attribute.DynamicZone>
 ) => {
-  const previousValue = (await strapi
+  const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as Attribute.GetValue<Attribute.DynamicZone>;
 
@@ -376,7 +376,7 @@ const deleteComponents = async <
     if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
       let value;
       if (loadComponents) {
-        value = await strapi.query(uid).load(entityToDelete, attributeName);
+        value = await strapi.db.query(uid).load(entityToDelete, attributeName);
       } else {
         value = entityToDelete[attributeName as keyof TEntity];
       }
@@ -526,7 +526,7 @@ const createComponent = async <TUID extends Common.UID.Component>(
     assign(componentData)
   );
 
-  return strapi.query(uid).create({ data: transform(data) });
+  return strapi.db.query(uid).create({ data: transform(data) });
 };
 
 // components can have nested compos so this must be recursive
@@ -539,7 +539,7 @@ const updateComponent = async <TUID extends Common.UID.Component>(
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  return strapi.query(uid).update({
+  return strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
@@ -570,7 +570,7 @@ const deleteComponent = async <TUID extends Common.UID.Component>(
   componentToDelete: Attribute.GetValues<TUID>
 ) => {
   await deleteComponents(uid, componentToDelete);
-  await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
+  await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
 const cloneComponent = async <TUID extends Common.UID.Component>(
@@ -593,7 +593,7 @@ const cloneComponent = async <TUID extends Common.UID.Component>(
     assign(componentData)
   );
 
-  return strapi.query(uid).clone(data.id, { data: transform(data) });
+  return strapi.db.query(uid).clone(data.id, { data: transform(data) });
 };
 
 export {

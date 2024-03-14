@@ -223,11 +223,12 @@ module.exports = {
       throw e;
     }
 
-    const updatedFolders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
-      filters: { id: { $in: folderIds } },
+    const updatedFolders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
+      where: { id: { $in: folderIds } },
     });
-    const updatedFiles = await strapi.entityService.findMany(FILE_MODEL_UID, {
-      filters: { id: { $in: fileIds } },
+
+    const updatedFiles = await strapi.db.query(FILE_MODEL_UID).findMany({
+      where: { id: { $in: fileIds } },
     });
 
     strapi.telemetry.send('didBulkMoveMediaLibraryElements', {

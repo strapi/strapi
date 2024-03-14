@@ -303,12 +303,12 @@ describe('Core API - Basic + dz', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'dz[0].name must be a `string` type, but the final value was: `null`.',
+          message: 'dz[0].name must be defined.',
           details: {
             errors: [
               {
                 path: ['dz', '0', 'name'],
-                message: 'dz[0].name must be a `string` type, but the final value was: `null`.',
+                message: 'dz[0].name must be defined.',
                 name: 'ValidationError',
               },
             ],
