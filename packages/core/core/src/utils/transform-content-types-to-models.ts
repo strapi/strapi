@@ -93,7 +93,12 @@ export const transformAttribute = (
           orderBy: {
             order: 'asc',
           },
-          pivotColumns: [joinColumnEntityName, joinColumnInverseName, field, COMPONENT_TYPE_COLUMN],
+          pivotColumns: [
+            joinColumnEntityName,
+            joinColumnInverseName,
+            field,
+            COMPONENT_TYPE_COLUMN(options),
+          ],
         },
       };
     }
