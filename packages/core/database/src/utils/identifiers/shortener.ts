@@ -30,7 +30,7 @@ export type NameToken = {
   allocatedLength?: number;
   name: string;
   compressible: boolean;
-  shortForm?: string; // if compressible is false but maxLength > 0, use this
+  shortName?: string; // if compressible is false but name generator options maxLength > 0, use this instead of name
 };
 
 type NameTokenWithAllocation = NameToken & { allocatedLength: number };
@@ -62,6 +62,7 @@ export function createHash(data: string, len: number): string {
   return hash.digest('hex').substring(0, len);
 }
 
+// TODO: the entire identifiers lib could be a factory and this map could be stored internally instead of globally
 // We need to be able to find the full-length name for any shortened name, primarily for migration purposes
 // Therefore we store every name that passes through so we can retrieve the original later
 const nameMap = new Map<string, string>();
@@ -159,13 +160,13 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     return unshortenedName;
   }
 
-  // check the full length name (but with incompressible tokens using shortForms if available)
+  // check the full length name (but with incompressible tokens using shortNames if available)
   const fullLengthName = nameTokens
     .map((token) => {
       if (token.compressible) {
         return token.name;
       }
-      return token.shortForm ?? token.name;
+      return token.shortName ?? token.name;
     })
     .join(IDENTIFIER_SEPARATOR);
 
@@ -181,7 +182,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
   );
 
   const totalIncompressibleLength = sumBy((token: NameToken) =>
-    token.shortForm !== undefined ? token.shortForm.length : token.name.length
+    token.shortName !== undefined ? token.shortName.length : token.name.length
   )(incompressible);
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
@@ -206,7 +207,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
       }
       return total + minHashedLength;
     }
-    const tokenName = token.shortForm ?? token.name;
+    const tokenName = token.shortName ?? token.name;
     return total + tokenName.length;
   }, nameTokens.length * IDENTIFIER_SEPARATOR.length - 1);
 
@@ -261,8 +262,8 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
       }
 
       // if is is only compressible as a fixed value, use that
-      if (token.shortForm) {
-        return token.shortForm;
+      if (token.shortName) {
+        return token.shortName;
       }
 
       // otherwise return it as-is

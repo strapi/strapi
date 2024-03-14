@@ -20,9 +20,10 @@ export { type NameToken, getNameFromTokens, getUnshortenedName };
 export const ID_COLUMN = 'id';
 export const ORDER_COLUMN = 'order';
 export const FIELD_COLUMN = 'field';
+
 type NameInput = string | string[];
 
-type NameOptions = {
+export type NameOptions = {
   suffix?: string;
   prefix?: string;
   maxLength: number;
@@ -44,7 +45,7 @@ const replacementMap = {
   // primary: 'pk',
 };
 
-const mapShortForms = (name: string): string | undefined => {
+export const mapshortNames = (name: string): string | undefined => {
   if (name in replacementMap) {
     return (replacementMap as any)[name];
   }
@@ -69,7 +70,7 @@ export const getName = (names: NameInput, options: NameOptions) => {
     tokens.push({
       name: options.suffix,
       compressible: false,
-      shortForm: mapShortForms(options.suffix),
+      shortName: mapshortNames(options.suffix),
     });
   }
 
@@ -77,7 +78,7 @@ export const getName = (names: NameInput, options: NameOptions) => {
     tokens.unshift({
       name: options.prefix,
       compressible: false,
-      shortForm: mapShortForms(options.prefix),
+      shortName: mapshortNames(options.prefix),
     });
   }
 
@@ -170,11 +171,6 @@ export const getMorphColumnTypeName = (attributeName: string, options: NameOptio
  *
  * So for example, the fk for the table `mytable_myattr4567d_localizations` will become
  * mytable_myattr4567d_loc63bf2_fk
- *
- * Indexes were not snake_cased in v4, so they will not be snake-cased here
- * However, some (particularly any beyond the base types) will appear to be snake_case because
- * they accept the joinTableName which is already snake-cased. This results tables that have indexes
- * with both `someindex_index` along with `some_index_inv_fk`
  */
 
 // base index types
