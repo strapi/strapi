@@ -1,5 +1,4 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 
 import { STAGE_COLOR_DEFAULT } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
@@ -16,7 +15,7 @@ const ReviewWorkflowsStageEE = ({
   const { themeColorName } = getStageColorByHex(color) ?? {};
 
   return (
-    <Flex alignItems="center" gap={2} maxWidth={pxToRem(300)}>
+    <Flex alignItems="center" gap={2} maxWidth={`${300 / 16}rem`}>
       <Box
         height={2}
         background={color}

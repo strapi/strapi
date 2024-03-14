@@ -119,7 +119,7 @@ export interface Strapi extends Container {
   dirs: StrapiDirectories;
   admin?: Common.Module;
   isLoaded: boolean;
-  db?: Database;
+  db: Database;
   app: any;
   EE?: boolean;
   ee: {
@@ -171,6 +171,9 @@ export interface Strapi extends Container {
   getModel<TUID extends Common.UID.Schema>(
     uid: TUID
   ): TUID extends Common.UID.ContentType ? Schema.ContentType : Schema.Component;
+  /**
+   * @deprecated use `strapi.db.query` instead
+   */
   query(uid: Common.UID.Schema): ReturnType<Database['query']>;
 }
 

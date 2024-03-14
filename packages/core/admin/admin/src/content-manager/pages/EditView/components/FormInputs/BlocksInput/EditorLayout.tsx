@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, FocusTrap, Portal, IconButton, InputWrapper } from '@strapi/design-system';
-import { useLockScroll, pxToRem } from '@strapi/helper-plugin';
+import { useLockScroll } from '@strapi/helper-plugin';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -12,8 +12,8 @@ import { useBlocksEditorContext } from './BlocksEditor';
 
 const CollapseIconButton = styled(IconButton)`
   position: absolute;
-  bottom: ${pxToRem(12)};
-  right: ${pxToRem(12)};
+  bottom: ${12 / 16}rem;
+  right: ${12 / 16}rem;
 `;
 
 const ExpandWrapper = styled(Flex)`

@@ -12,14 +12,16 @@ describe('Entity validator | Relations | Dynamic Zone', () => {
     components: {
       'basic.dev-compo': {},
     },
-    query() {
-      return {
-        count: ({
-          where: {
-            id: { $in },
-          },
-        }: any) => existentIDs.filter((value) => $in.includes(value)).length,
-      };
+    db: {
+      query() {
+        return {
+          count: ({
+            where: {
+              id: { $in },
+            },
+          }: any) => existentIDs.filter((value) => $in.includes(value)).length,
+        };
+      },
     },
     errors: { badRequest: jest.fn() },
     getModel: (uid: string) => models.get(uid),

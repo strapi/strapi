@@ -8,34 +8,28 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const TimeInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ disabled, label, hint, name, required }, ref) => {
-    const { formatMessage } = useIntl();
-    const field = useField<string>(name);
-    const fieldRef = useFocusInputField(name);
+const TimeInput = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  const { formatMessage } = useIntl();
+  const field = useField<string>(props.name);
+  const fieldRef = useFocusInputField(props.name);
 
-    const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
+  const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
 
-    return (
-      <TimePicker
-        ref={composedRefs}
-        clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        disabled={disabled}
-        error={field.error}
-        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-        label={label}
-        id={name}
-        hint={hint}
-        name={name}
-        onChange={(time) => {
-          field.onChange(name, time);
-        }}
-        onClear={() => field.onChange(name, undefined)}
-        required={required}
-        value={field.value}
-      />
-    );
-  }
-);
+  return (
+    // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
+    <TimePicker
+      ref={composedRefs}
+      clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+      error={field.error}
+      id={props.name}
+      onChange={(time) => {
+        field.onChange(props.name, time);
+      }}
+      onClear={() => field.onChange(props.name, undefined)}
+      value={field.value}
+      {...props}
+    />
+  );
+});
 
 export { TimeInput };

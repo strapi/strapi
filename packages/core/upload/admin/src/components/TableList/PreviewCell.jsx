@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Avatar, Box, Icon, Initials } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
+import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -29,7 +29,7 @@ export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {
     return (
       <Initials background="secondary100" textColor="secondary600">
-        <Icon color="secondary500" width={pxToRem(16)} height={pxToRem(16)} as={Folder} />
+        <Icon color="secondary500" width={`${16 / 16}rem`} height={`${16 / 16}rem`} as={Folder} />
       </Initials>
     );
   }

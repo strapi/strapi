@@ -151,8 +151,8 @@ module.exports = ({ strapi }) => ({
   },
 
   async syncPermissions() {
-    const roles = await strapi.query('plugin::users-permissions.role').findMany();
-    const dbPermissions = await strapi.query('plugin::users-permissions.permission').findMany();
+    const roles = await strapi.db.query('plugin::users-permissions.role').findMany();
+    const dbPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany();
 
     const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
 
@@ -178,7 +178,9 @@ module.exports = ({ strapi }) => ({
 
     await Promise.all(
       toDelete.map((action) => {
-        return strapi.query('plugin::users-permissions.permission').delete({ where: { action } });
+        return strapi.db
+          .query('plugin::users-permissions.permission')
+          .delete({ where: { action } });
       })
     );
 
@@ -192,7 +194,7 @@ module.exports = ({ strapi }) => ({
 
         await Promise.all(
           toCreate.map((action) => {
-            return strapi.query('plugin::users-permissions.permission').create({
+            return strapi.db.query('plugin::users-permissions.permission').create({
               data: {
                 action,
                 role: role.id,
@@ -205,10 +207,10 @@ module.exports = ({ strapi }) => ({
   },
 
   async initialize() {
-    const roleCount = await strapi.query('plugin::users-permissions.role').count();
+    const roleCount = await strapi.db.query('plugin::users-permissions.role').count();
 
     if (roleCount === 0) {
-      await strapi.query('plugin::users-permissions.role').create({
+      await strapi.db.query('plugin::users-permissions.role').create({
         data: {
           name: 'Authenticated',
           description: 'Default role given to authenticated user.',
@@ -216,7 +218,7 @@ module.exports = ({ strapi }) => ({
         },
       });
 
-      await strapi.query('plugin::users-permissions.role').create({
+      await strapi.db.query('plugin::users-permissions.role').create({
         data: {
           name: 'Public',
           description: 'Default role given to unauthenticated user.',
@@ -229,7 +231,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async updateUserRole(user, role) {
-    return strapi
+    return strapi.db
       .query('plugin::users-permissions.user')
       .update({ where: { id: user.id }, data: { role } });
   },

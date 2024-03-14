@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { PlusCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -57,8 +56,8 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
 };
 
 const CircleIcon = styled(PlusCircle)`
-  width: ${pxToRem(24)};
-  height: ${pxToRem(24)};
+  width: ${24 / 16}rem;
+  height: ${24 / 16}rem;
   > circle {
     fill: ${({ theme }) => theme.colors.primary200};
   }
