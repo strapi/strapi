@@ -18,6 +18,9 @@ const mockGetRequestContext = jest.fn(() => {
         id: userId,
       },
     },
+    request: {
+      url: '/content-manager/test',
+    },
   };
 });
 
@@ -27,6 +30,11 @@ const mockStrapi = {
       service: jest.fn(() => ({
         getMetadata: jest.fn().mockResolvedValue([]),
         getStatus: jest.fn(),
+      })),
+    },
+    i18n: {
+      service: jest.fn(() => ({
+        getDefaultLocale: jest.fn().mockReturnValue('en'),
       })),
     },
   },
@@ -55,14 +63,14 @@ const mockStrapi = {
       get: jest.fn(),
     },
   },
+  documents: jest.fn(() => ({
+    findOne: jest.fn(),
+  })),
   config: {
     get: () => undefined,
   },
   requestContext: {
     get: mockGetRequestContext,
-  },
-  documents: {
-    use: jest.fn(),
   },
   contentType(uid: UID.ContentType) {
     if (uid === 'api::article.article') {
@@ -76,6 +84,8 @@ const mockStrapi = {
     }
   },
 };
+// @ts-expect-error - ignore
+mockStrapi.documents.use = jest.fn();
 
 // @ts-expect-error - we're not mocking the full Strapi object
 const historyService = createHistoryService({ strapi: mockStrapi });
@@ -88,6 +98,7 @@ describe('history-version service', () => {
   it('inits service only once', () => {
     historyService.bootstrap();
     historyService.bootstrap();
+    // @ts-expect-error - ignore
     expect(mockStrapi.documents.use).toHaveBeenCalledTimes(1);
   });
 
@@ -106,6 +117,7 @@ describe('history-version service', () => {
 
     const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
     await historyService.bootstrap();
+    // @ts-expect-error - ignore
     const historyMiddlewareFunction = mockStrapi.documents.use.mock.calls[0][0];
 
     // Check that we don't break the middleware chain
@@ -120,12 +132,7 @@ describe('history-version service', () => {
 
     // Publish and unpublish actions should be saved in history
     createMock.mockClear();
-    const publishContext = {
-      ...context,
-      action: 'publish',
-      versions: [{ documentId: 'document-id' }],
-    };
-    await historyMiddlewareFunction(publishContext, next);
+    await historyMiddlewareFunction(context, next);
     context.action = 'unpublish';
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(2);

@@ -101,7 +101,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           .documents(contentTypeUid)
           .findOne(documentContext.documentId, {
             locale,
-            populate: '*',
           });
         const status = await getVersionStatus(contentTypeUid, document);
 
