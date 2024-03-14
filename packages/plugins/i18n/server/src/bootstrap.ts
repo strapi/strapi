@@ -47,11 +47,14 @@ const registerModelsHooks = () => {
     // Use the id and populate built from non localized fields to get the full
     // result
     let resultID;
-    if (result.versions) {
+    if (Array.isArray(result?.versions)) {
       resultID = result.versions[0].id;
-    } else {
+    } else if (result?.id) {
       resultID = result.id;
+    } else {
+      return result;
     }
+
     const populatedResult = await strapi.db
       .query(schema.uid)
       .findOne({ where: { id: resultID }, populate: attributesToPopulate });
