@@ -391,12 +391,8 @@ export default {
      * The response contains the union of the two queries.
      */
     const res = await loadRelations({ id: entryId }, targetField, {
-      populate: {
-        [targetField]: {
-          select: ['id', 'documentId', 'locale', 'publishedAt'],
-          ordering: 'desc',
-        },
-      },
+      select: ['id', 'documentId', 'locale', 'publishedAt'],
+      ordering: 'desc',
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
     });
@@ -409,12 +405,8 @@ export default {
     addFiltersClause(permissionQuery, { id: { $in: loadedIds } });
 
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
-      populate: {
-        [targetField]: convertQueryParams.transformParamsToQuery(targetUid, {
-          ...permissionQuery,
-          ordering: 'desc',
-        }),
-      },
+      ...convertQueryParams.transformParamsToQuery(targetUid, permissionQuery),
+      ordering: 'desc',
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
     });
