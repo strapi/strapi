@@ -394,6 +394,7 @@ export default {
       populate: {
         [targetField]: {
           select: ['id', 'documentId', 'locale', 'publishedAt'],
+          ordering: 'desc',
         },
       },
       page: ctx.request.query.page,

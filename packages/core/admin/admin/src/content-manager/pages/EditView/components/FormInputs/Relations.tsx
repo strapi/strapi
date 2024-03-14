@@ -538,12 +538,6 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
   const removeFieldRow = useForm('RelationsList', (state) => state.removeFieldRow);
   const addFieldRow = useForm('RelationsList', (state) => state.addFieldRow);
 
-  const [orderedData, setOrderedData] = React.useState(data);
-
-  React.useEffect(() => {
-    setOrderedData(data);
-  }, [data]);
-
   React.useEffect(() => {
     if (data.length <= RELATIONS_TO_DISPLAY) {
       return setOverflow(undefined);
@@ -581,7 +575,8 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
   const getItemPos = (index: number) => `${index + 1} of ${data.length}`;
 
   const handleMoveItem: UseDragAndDropOptions['onMoveItem'] = (newIndex, oldIndex) => {
-    const item = orderedData[oldIndex];
+    console.log('data', data);
+    const item = data[oldIndex];
 
     setLiveText(
       formatMessage(
@@ -595,16 +590,39 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
         }
       )
     );
+    console.log('my item', item);
+    /**
+     * check if the item we've moved is part of the connect array
+     * if it is, we mutate that existing item to add the position information.
+     *
+     * Otherwise, we add it to the connect array with the position information.
+     */
+    const indexOfRelationInConnectArray =
+      field.value?.connect?.findIndex(
+        (rel: ConnectRelation) => rel.documentId === item.documentId
+      ) ?? -1;
 
-    const updatedData = [...orderedData];
-    const [removed] = updatedData.splice(oldIndex, 1);
-    updatedData.splice(newIndex, 0, removed);
+    console.log('in connect array', indexOfRelationInConnectArray);
 
-    setOrderedData(updatedData);
+    const afterItem = data[newIndex] ? data[newIndex] : null;
+    console.log('afterItem', afterItem);
+    const newPosition = afterItem
+      ? { before: afterItem.documentId, locale: afterItem.locale, status: afterItem.status }
+      : { end: true };
+    console.log('newPosition', newPosition);
+
+    if (indexOfRelationInConnectArray >= 0) {
+      field.onChange(`${name}.connect.${indexOfRelationInConnectArray}`, {
+        ...item,
+        position: newPosition,
+      });
+    } else {
+      addFieldRow(`${name}.connect`, { ...item, position: newPosition });
+    }
   };
 
   const handleGrabItem: UseDragAndDropOptions['onGrabItem'] = (index) => {
-    const item = orderedData[index];
+    const item = data[index];
 
     setLiveText(
       formatMessage(
@@ -621,7 +639,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
   };
 
   const handleDropItem: UseDragAndDropOptions['onDropItem'] = (index) => {
-    const { href: _href, label, ...item } = orderedData[index];
+    const { href: _href, label, ...item } = data[index];
 
     setLiveText(
       formatMessage(
@@ -635,35 +653,10 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
         }
       )
     );
-
-    /**
-     * check if the item we've moved is part of the connect array
-     * if it is, we mutate that existing item to add the position information.
-     *
-     * Otherwise, we add it to the connect array with the position information.
-     */
-    const indexOfRelationInConnectArray =
-      field.value?.connect?.findIndex(
-        (rel: ConnectRelation) => rel.documentId === item.documentId
-      ) ?? -1;
-
-    const afterItem = orderedData[index + 1] ? orderedData[index + 1] : null;
-    const newPosition = afterItem
-      ? { before: afterItem.documentId, locale: afterItem.locale, status: afterItem.status }
-      : { end: true };
-
-    if (indexOfRelationInConnectArray >= 0) {
-      field.onChange(`name${name}.connect.${indexOfRelationInConnectArray}`, {
-        ...item,
-        position: newPosition,
-      });
-    } else {
-      addFieldRow(`${name}.connect`, { ...item, position: newPosition });
-    }
   };
 
   const handleCancel: UseDragAndDropOptions['onCancel'] = (index) => {
-    const item = orderedData[index];
+    const item = data[index];
 
     setLiveText(
       formatMessage(
@@ -724,7 +717,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
         height={dynamicListHeight}
         ref={listRef}
         outerRef={outerListRef}
-        itemCount={orderedData.length}
+        itemCount={data.length}
         itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
         itemData={{
           ariaDescribedBy: ariaDescriptionId,
@@ -736,9 +729,9 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
           handleMoveItem,
           name,
           handleDisconnect,
-          relations: orderedData,
+          relations: data,
         }}
-        itemKey={(index) => orderedData[index].id}
+        itemKey={(index) => data[index].id}
         innerElementType="ol"
       >
         {ListItem}

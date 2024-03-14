@@ -61,10 +61,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
             );
             currentCache.results.push(...uniqueNewItems);
             currentCache.pagination = newItems.pagination;
-          } else if (
-            currentCache.pagination.page >= newItems.pagination.page &&
-            newItems.pagination.page === 1
-          ) {
+          } else if (newItems.pagination.page === 1) {
             /**
              * We're resetting the relations
              */
@@ -133,10 +130,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
             );
             currentCache.results.push(...uniqueNewItems);
             currentCache.pagination = newItems.pagination;
-          } else if (
-            currentCache.pagination.page >= newItems.pagination.page &&
-            newItems.pagination.page === 1
-          ) {
+          } else if (newItems.pagination.page === 1) {
             /**
              * We're resetting the relations
              */
