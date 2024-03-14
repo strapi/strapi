@@ -1,7 +1,8 @@
 import { prop, uniq, flow } from 'lodash/fp';
-import { isOperatorOfType, contentTypes } from '@strapi/utils';
+
+import { isOperatorOfType, contentTypes, errors } from '@strapi/utils';
 import { type Common, type Entity, type Documents } from '@strapi/types';
-import { errors } from '@strapi/utils';
+
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
@@ -295,6 +296,12 @@ export default {
       targetUid as Common.UID.ContentType,
       queryParams
     );
+
+    // Do not return any status if draft and publish is disabled
+    if (!contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))) {
+      ctx.body = res;
+      return;
+    }
 
     if (status) {
       // The result will contain all relations in the requested status, and we don't need to find
