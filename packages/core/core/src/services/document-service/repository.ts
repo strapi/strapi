@@ -161,7 +161,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       where: {
         ...queryParams?.lookup,
         documentId,
-        publishedAt: null, // only clone drafts
+        // DP Enabled: Clone drafts
+        // DP Disabled: Clone only the existing version (published)
+        publishedAt: { $null: hasDraftAndPublish },
       },
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
