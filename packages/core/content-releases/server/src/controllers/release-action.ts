@@ -14,6 +14,7 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
+import { AlreadyOnReleaseError } from '../services/validation';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -48,11 +49,8 @@ const releaseActionController = {
 
             return action;
           } catch (error) {
-            if (
-              error instanceof errors.ValidationError &&
-              error.message ===
-                `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
-            ) {
+            // If the entry is already in the release, we don't want to throw an error, so we catch and ignore it
+            if (error instanceof AlreadyOnReleaseError) {
               return null;
             }
 
