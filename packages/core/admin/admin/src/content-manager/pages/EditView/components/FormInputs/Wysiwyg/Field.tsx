@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
+import { useLibrary } from '@strapi/helper-plugin';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { useField } from '../../../../../../components/Form';
+import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
