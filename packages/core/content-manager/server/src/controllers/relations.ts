@@ -374,16 +374,12 @@ export default {
      */
     const dbQuery = strapi.db.query(sourceUid);
     const loadRelations = relations.isAnyToMany(attribute)
-      ? (...args: Parameters<typeof dbQuery.loadPages>) =>
-          dbQuery
-            .loadPages(...args)
-            // Return array of results
-            .then((res) => res.results)
+      ? (...args: Parameters<typeof dbQuery.loadPages>) => dbQuery.loadPages(...args)
       : (...args: Parameters<typeof dbQuery.load>) =>
           dbQuery
             .load(...args)
             // Ensure response is an array
-            .then((res) => (res ? [res] : []));
+            .then((res) => ({ results: res ? [res] : [] }));
 
     /**
      * If user does not have access to specific relations (custom conditions),
@@ -408,21 +404,24 @@ export default {
      * Add all ids to load in permissionQuery
      * If any of the relations are not accessible, the permissionQuery will exclude them
      */
-    const loadedIds = res.map((item: any) => item.id);
+    const loadedIds = res.results.map((item: any) => item.id);
     addFiltersClause(permissionQuery, { id: { $in: loadedIds } });
 
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
       populate: {
-        [targetField]: convertQueryParams.transformParamsToQuery(targetUid, permissionQuery),
+        [targetField]: convertQueryParams.transformParamsToQuery(targetUid, {
+          ...permissionQuery,
+          ordering: 'desc',
+        }),
       },
-      ordering: 'desc',
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
     });
 
-    const relationsUnion = uniqBy('id', concat(sanitizedRes, res));
+    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {
+      pagination: sanitizedRes.pagination,
       results: await addStatusToRelations(targetUid, relationsUnion),
     };
   },
