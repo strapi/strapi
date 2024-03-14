@@ -50,7 +50,6 @@ export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/normalizeAPIError';
 export * from './utils/prefixPluginTranslations';
-export * from './utils/request';
 export * from './utils/stopPropagation';
 export * from './utils/translatedErrors';
 
