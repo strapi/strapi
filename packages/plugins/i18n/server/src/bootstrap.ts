@@ -30,11 +30,33 @@ const registerModelsHooks = () => {
     // Collect the result of the document service action and sync non localized
     // attributes based on the response
 
-    /*
-      result might not contain all the non localizedAttributes (you can pass a populate that would only retrun some nested data and not all of it) we might need to fetch the data with a deepPopulate to be able to copy correctly (only populate the fields you need to copy of course)
-    */
+    // Build a populate array for all non localized fields within the schema
+    const { getNestedPopulateOfNonLocalizedAttributes, getNonLocalizedAttributes } =
+      getService('content-types');
+
+    const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
+    const attributesToPopulate = [
+      ...nonLocalizedAttributes,
+      ...getNestedPopulateOfNonLocalizedAttributes(schema.uid),
+    ];
+
+    // Get the result of the document service action
     const result = (await next(context)) as any;
-    await getService('localizations').syncNonLocalizedAttributes(result, schema);
+
+    // We may not have received a result with everything populated that we need
+    // Use the id and populate built from non localized fields to get the full
+    // result
+    let resultID;
+    if (result.versions) {
+      resultID = result.versions[0].id;
+    } else {
+      resultID = result.id;
+    }
+    const populatedResult = await strapi.db
+      .query(schema.uid)
+      .findOne({ where: { id: resultID }, populate: attributesToPopulate });
+
+    await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
 
     return result;
   });
