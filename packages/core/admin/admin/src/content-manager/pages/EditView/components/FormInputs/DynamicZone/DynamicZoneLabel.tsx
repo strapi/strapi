@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 
 interface DynamicZoneLabelProps {
   label?: React.ReactNode;
@@ -33,7 +32,7 @@ const DynamicZoneLabel = ({
         color="neutral500"
       >
         <Flex direction="column" justifyContent="center">
-          <Flex maxWidth={pxToRem(356)}>
+          <Flex maxWidth={`${356 / 16}rem`}>
             <Typography variant="pi" textColor="neutral600" fontWeight="bold" ellipsis>
               {label || name}&nbsp;
             </Typography>
@@ -44,7 +43,7 @@ const DynamicZoneLabel = ({
             {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
           </Flex>
           {hint && (
-            <Box paddingTop={1} maxWidth={pxToRem(356)}>
+            <Box paddingTop={1} maxWidth={`${356 / 16}rem`}>
               <Typography variant="pi" textColor="neutral600" ellipsis>
                 {hint}
               </Typography>
