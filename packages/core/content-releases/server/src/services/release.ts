@@ -224,10 +224,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         },
       });
 
-      if (
-        strapi.features.future.isEnabled('contentReleasesScheduling') &&
-        releaseWithCreatorFields.scheduledAt
-      ) {
+      if (releaseWithCreatorFields.scheduledAt) {
         const schedulingService = getService('scheduling', { strapi });
 
         await schedulingService.set(release.id, release.scheduledAt);
@@ -390,16 +387,14 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         data: releaseWithCreatorFields,
       });
 
-      if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-        const schedulingService = getService('scheduling', { strapi });
+      const schedulingService = getService('scheduling', { strapi });
 
-        if (releaseData.scheduledAt) {
-          // set function always cancel the previous job if it exists, so we can call it directly
-          await schedulingService.set(id, releaseData.scheduledAt);
-        } else if (release.scheduledAt) {
-          // When user don't send a scheduledAt and we have one on the release, means that user want to unschedule it
-          schedulingService.cancel(id);
-        }
+      if (releaseData.scheduledAt) {
+        // set function always cancel the previous job if it exists, so we can call it directly
+        await schedulingService.set(id, releaseData.scheduledAt);
+      } else if (release.scheduledAt) {
+        // When user don't send a scheduledAt and we have one on the release, means that user want to unschedule it
+        schedulingService.cancel(id);
       }
 
       this.updateReleaseStatus(id);
@@ -630,7 +625,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         await strapi.entityService.delete(RELEASE_MODEL_UID, releaseId);
       });
 
-      if (strapi.features.future.isEnabled('contentReleasesScheduling') && release.scheduledAt) {
+      if (release.scheduledAt) {
         const schedulingService = getService('scheduling', { strapi });
         await schedulingService.cancel(release.id);
       }
@@ -706,23 +701,19 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
               },
             });
 
-            if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-              dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-                isPublished: true,
-                release,
-              });
-            }
+            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+              isPublished: true,
+              release,
+            });
 
             strapi.telemetry.send('didPublishContentRelease');
 
             return { release, error: null };
           } catch (error) {
-            if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-              dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-                isPublished: false,
-                error,
-              });
-            }
+            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
+              isPublished: false,
+              error,
+            });
 
             // We need to run the update in the same transaction because the release is locked
             await strapi.db
