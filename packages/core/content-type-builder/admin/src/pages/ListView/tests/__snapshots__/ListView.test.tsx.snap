@@ -1057,6 +1057,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
       >
         <a
           aria-current="page"
+          aria-disabled="true"
           class="c2 active"
           disabled=""
           href="/"

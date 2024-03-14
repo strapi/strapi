@@ -216,6 +216,7 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(({ disab
       to={history.at(-1)}
       onClick={handleClick}
       disabled={disabled || !canGoBack}
+      aria-disabled={disabled || !canGoBack}
       startIcon={<ArrowLeft />}
     >
       {formatMessage({
