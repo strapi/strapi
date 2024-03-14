@@ -31,11 +31,11 @@ interface State {
 
 export const createSchemaProvider = (db: Database, options: MetadataOptions): SchemaProvider => {
   const state: State = {};
-  debug('create schema provider');
+
   return {
     get schema() {
-      debug('get schema');
       if (!state.schema) {
+        debug('Creating schema from metadata');
         state.schema = metadataToSchema(db.metadata, options);
       }
 
