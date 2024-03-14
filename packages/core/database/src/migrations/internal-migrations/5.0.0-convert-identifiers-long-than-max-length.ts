@@ -1,8 +1,11 @@
 import type { Knex } from 'knex';
+import createDebug from 'debug';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import type { Database, MetadataOptions } from '../..';
 import { getUnshortenedName } from '../../utils/identifiers/shortener';
+
+const debug = createDebug('strapi::database::migration');
 
 type NameDiff<T> = {
   short: T;
@@ -75,24 +78,38 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
 type IndexDiff = NameDiff<{ index: number; key: string; tableName: string; indexName: string }>;
 
 const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
-  const client = knex.client.driverName;
+  const client = db.config.connection.client;
   const short = diff.short;
   const full = diff.full;
 
   if (full.indexName === short.indexName) {
-    console.log(`not renaming index ${full.indexName} because name hasn't changed`);
+    debug(`not renaming index ${full.indexName} because name hasn't changed`);
     return;
   }
+  debug(`renaming index from ${full} to ${short}`);
 
-  if (client === 'mysql' || client === 'mariadb') {
-    await knex.raw(
-      `ALTER TABLE \`${full.tableName}\` RENAME INDEX \`${full.indexName}\` TO \`${short.indexName}\``
-    );
-  } else if (client === 'pg') {
-    await knex.raw(`ALTER INDEX "${full.indexName}" RENAME TO "${short.indexName}"`);
-  } else {
-    // SQLite doesn't support renaming, so we have to drop and recreate it
-    await recreateIndexSqlite(knex, full.indexName, short.indexName);
+  // If schema creation has never actually run before, none of these will exist, and they will throw an error
+  // we have no way of running an "if exists" other than a per-dialect manual check, which we won't do
+  // because even if it fails for some other reason, the schema sync will recreate them anyway
+  // Therefore, we wrap this in a nested transaction (considering we are running this migration in a transaction)
+  // so that we can suppress the error
+  try {
+    await knex.transaction(async (trx) => {
+      if (client === 'mysql' || client === 'mariadb') {
+        await trx.raw(
+          `ALTER TABLE \`${full.tableName}\` RENAME INDEX \`${full.indexName}\` TO \`${short.indexName}\``
+        );
+      } else if (client === 'pg' || client === 'postgres') {
+        await trx.raw(`ALTER INDEX "${full.indexName}" RENAME TO "${short.indexName}"`);
+      } else if (client === 'sqlite' || client === 'better') {
+        // SQLite doesn't support renaming, so we have to drop and recreate it
+        await recreateIndexSqlite(trx, full.indexName, short.indexName);
+      } else {
+        debug('No db client name matches, not creating index');
+      }
+    });
+  } catch (err) {
+    debug(`error creating index: ${JSON.stringify(err)}`);
   }
 };
 
@@ -100,33 +117,39 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
 // That way, we do not reacreate from the model definition and potentially lose user modifications to it
 const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexName: string) => {
   if (oldIndexName === newIndexName) {
-    console.log(`not dropping and recreating index ${oldIndexName} because it hasn't changed`);
+    debug(`not dropping and recreating index ${oldIndexName} because it hasn't changed`);
   }
 
-  // Get the CREATE INDEX statement used for this index
-  const indexInfo = await knex
-    .select('sql')
-    .from('sqlite_master')
-    .where('type', 'index')
-    .andWhere('name', oldIndexName)
-    .first();
+  try {
+    await knex.transaction(async (trx) => {
+      // Get the CREATE INDEX statement used for this index
+      const indexInfo = await trx
+        .select('sql')
+        .from('sqlite_master')
+        .where('type', 'index')
+        .andWhere('name', oldIndexName)
+        .first();
 
-  if (indexInfo && indexInfo.sql) {
-    // Attempt to precisely target the index name in the CREATE INDEX statement
-    const pattern = new RegExp(
-      `(CREATE\\s+(UNIQUE\\s+)?INDEX\\s+(IF\\s+NOT\\s+EXISTS\\s+)?)${oldIndexName}(\\s+ON)`,
-      'i'
-    );
-    const replacement = `$1${newIndexName}$4`;
-    const newIndexSql = indexInfo.sql.replace(pattern, replacement);
+      if (indexInfo && indexInfo.sql) {
+        // Attempt to precisely target the index name in the CREATE INDEX statement
+        const pattern = new RegExp(
+          `(CREATE\\s+(UNIQUE\\s+)?INDEX\\s+(IF\\s+NOT\\s+EXISTS\\s+)?)${oldIndexName}(\\s+ON)`,
+          'i'
+        );
+        const replacement = `$1${newIndexName}$4`;
+        const newIndexSql = indexInfo.sql.replace(pattern, replacement);
 
-    // Drop the existing index
-    await knex.raw(`DROP INDEX IF EXISTS ??`, [oldIndexName]);
+        // Drop the existing index
+        await trx.raw(`DROP INDEX IF EXISTS ??`, [oldIndexName]);
 
-    // Recreate the index with a new name
-    await knex.raw(newIndexSql);
-  } else {
-    console.log(`Index ${oldIndexName} not found or could not retrieve definition.`);
+        // Recreate the index with a new name
+        await trx.raw(newIndexSql);
+      } else {
+        debug(`sqlite index ${oldIndexName} not found or could not retrieve definition.`);
+      }
+    });
+  } catch (err) {
+    debug(`error recreating sqlite index${JSON.stringify(err)}`);
   }
 };
 
@@ -173,7 +196,6 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
       const attr = shortObj.attributes[attrKey] as any;
       const shortColumnName = attr.columnName;
       const longColumnName = getUnshortenedName(shortColumnName, options);
-      // console.log(`comparing attribute ${shortColumnName} to ${longColumnName}`);
 
       if (!shortColumnName || !longColumnName) {
         throw new Error(`missing column name(s) for attribute ${JSON.stringify(attr, null, 2)}`);
