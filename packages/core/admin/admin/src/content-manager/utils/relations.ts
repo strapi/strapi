@@ -8,8 +8,8 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
  *
  * We fallback to the documentId.
  */
-const getRelationLabel = (
-  relation: Contracts.Relations.RelationResult,
+const getRelationLabel = <TRelation extends Contracts.Relations.RelationResult>(
+  relation: TRelation,
   mainField?: string
 ): string => {
   const label = mainField && relation[mainField] ? relation[mainField] : null;

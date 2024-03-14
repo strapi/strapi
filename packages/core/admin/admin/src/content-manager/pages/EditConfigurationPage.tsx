@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
@@ -138,12 +139,15 @@ const EditConfigurationPage = () => {
   }
 
   return (
-    <ConfigurationForm
-      onSubmit={handleSubmit}
-      attributes={schema.attributes}
-      fieldSizes={fieldSizes}
-      layout={edit}
-    />
+    <>
+      <Helmet title={`Configure ${edit.settings.displayName} Edit View | Strapi`} />
+      <ConfigurationForm
+        onSubmit={handleSubmit}
+        attributes={schema.attributes}
+        fieldSizes={fieldSizes}
+        layout={edit}
+      />
+    </>
   );
 };
 

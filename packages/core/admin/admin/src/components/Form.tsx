@@ -540,7 +540,6 @@ const reducer = <TFormValues extends FormValues = FormValues>(
          */
         const currentField = [...(getIn(state.values, field, []) as Array<any>)];
         const currentRow = currentField[fromIndex];
-        const newIndex = action.payload.toIndex;
 
         const startKey =
           fromIndex > toIndex
@@ -553,7 +552,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         const [newKey] = generateNKeysBetween(startKey, endKey, 1);
 
         currentField.splice(fromIndex, 1);
-        currentField.splice(newIndex, 0, { ...currentRow, __temp_key__: newKey });
+        currentField.splice(toIndex, 0, { ...currentRow, __temp_key__: newKey });
 
         draft.values = setIn(state.values, field, currentField);
 
