@@ -83,7 +83,9 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
         // Ignore actions that don't mutate documents
         if (
-          !['create', 'update', 'publish', 'unpublish', 'discardDraft', 'clone'].includes(context.action)
+          !['create', 'update', 'publish', 'unpublish', 'discardDraft', 'clone'].includes(
+            context.action
+          )
         ) {
           return next(context);
         }
@@ -102,8 +104,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
          */
         const data: NextDocument =
           context.action === 'create' || context.action === 'update' ? result : result.versions[0];
-
-        console.log({ context });
 
         // Compute the status of the version
         const status = await getVersionStatus(contentTypeUid, data);
