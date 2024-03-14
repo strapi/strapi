@@ -215,7 +215,7 @@ const update = async (id, { name, parent }, { user }) => {
  * @returns {Promise<boolean>}
  */
 const exists = async (params = {}) => {
-  const count = await strapi.query(FOLDER_MODEL_UID).count({ where: params });
+  const count = await strapi.db.query(FOLDER_MODEL_UID).count({ where: params });
   return count > 0;
 };
 

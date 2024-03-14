@@ -35,7 +35,6 @@ describe('Release controller', () => {
         },
       };
       global.strapi = {
-        // @ts-expect-error Ignore missing properties
         admin: {
           services: {
             permission: {
@@ -47,10 +46,12 @@ describe('Release controller', () => {
             },
           },
         },
-        query: jest.fn().mockReturnValue({
-          count: jest.fn().mockResolvedValue(2),
-        }),
-      };
+        db: {
+          query: jest.fn().mockReturnValue({
+            count: jest.fn().mockResolvedValue(2),
+          }),
+        },
+      } as any;
 
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
@@ -74,7 +75,6 @@ describe('Release controller', () => {
         },
       };
       global.strapi = {
-        // @ts-expect-error Ignore missing properties
         admin: {
           services: {
             permission: {
@@ -86,7 +86,7 @@ describe('Release controller', () => {
             },
           },
         },
-      };
+      } as any;
 
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
@@ -158,9 +158,7 @@ describe('Release controller', () => {
 
   describe('findOne', () => {
     beforeAll(() => {
-      // @ts-expect-error Ignore global error
       global.strapi = {
-        // @ts-expect-error Ignore global error
         ...global.strapi,
         admin: {
           services: {
@@ -186,7 +184,7 @@ describe('Release controller', () => {
             },
           },
         },
-      };
+      } as any;
     });
 
     it('throws an error if the release does not exists', async () => {

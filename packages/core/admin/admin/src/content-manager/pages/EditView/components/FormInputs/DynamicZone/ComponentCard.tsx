@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 
 import { ComponentIcon, ComponentIconProps } from '../../../../../components/ComponentIcon';
@@ -23,7 +22,7 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
       justifyContent="center"
       alignItems="center"
       shrink={0}
-      height={pxToRem(84)}
+      height={`${84 / 16}rem`}
     >
       <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
         <ComponentIcon icon={icon} />

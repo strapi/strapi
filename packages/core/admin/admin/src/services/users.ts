@@ -39,7 +39,7 @@ const usersService = adminApi.injectEndpoints({
         users: Users.FindAll.Response['data']['results'];
         pagination: Users.FindAll.Response['data']['pagination'] | null;
       },
-      GetUsersParams | void
+      GetUsersParams
     >({
       query: ({ id, ...params } = {}) => ({
         url: `/admin/users/${id ?? ''}`,
@@ -191,7 +191,10 @@ const usersService = adminApi.injectEndpoints({
   overrideExisting: false,
 });
 
-type GetUsersParams = Users.FindOne.Params | (Users.FindAll.Request['query'] & { id?: never });
+type GetUsersParams =
+  | Users.FindOne.Params
+  | (Users.FindAll.Request['query'] & { id?: never })
+  | void;
 type GetRolesParams =
   | Roles.FindRole.Request['params']
   | (Roles.FindRoles.Request['query'] & { id?: never });

@@ -52,7 +52,7 @@ module.exports = {
       const { identifier } = params;
 
       // Check if the user exists.
-      const user = await strapi.query('plugin::users-permissions.user').findOne({
+      const user = await strapi.db.query('plugin::users-permissions.user').findOne({
         where: {
           provider,
           $or: [{ email: identifier.toLowerCase() }, { username: identifier }],
@@ -148,7 +148,7 @@ module.exports = {
       throw new ValidationError('Passwords do not match');
     }
 
-    const user = await strapi
+    const user = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { resetPasswordToken: code } });
 
@@ -215,7 +215,7 @@ module.exports = {
     const advancedSettings = await pluginStore.get({ key: 'advanced' });
 
     // Find the user by email.
-    const user = await strapi
+    const user = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
@@ -300,7 +300,7 @@ module.exports = {
 
     await validateRegisterBody(params);
 
-    const role = await strapi
+    const role = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: settings.default_role } });
 
@@ -319,7 +319,7 @@ module.exports = {
       ],
     };
 
-    const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
+    const conflictingUserCount = await strapi.db.query('plugin::users-permissions.user').count({
       where: { ...identifierFilter, provider },
     });
 
@@ -328,7 +328,7 @@ module.exports = {
     }
 
     if (settings.unique_email) {
-      const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
+      const conflictingUserCount = await strapi.db.query('plugin::users-permissions.user').count({
         where: { ...identifierFilter },
       });
 
@@ -398,7 +398,7 @@ module.exports = {
   async sendEmailConfirmation(ctx) {
     const { email } = await validateSendEmailConfirmationBody(ctx.request.body);
 
-    const user = await strapi.query('plugin::users-permissions.user').findOne({
+    const user = await strapi.db.query('plugin::users-permissions.user').findOne({
       where: { email: email.toLowerCase() },
     });
 
