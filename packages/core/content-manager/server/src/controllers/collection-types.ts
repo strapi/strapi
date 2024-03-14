@@ -227,7 +227,7 @@ export default {
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const [totalEntries, document] = await Promise.all([
-      strapi.query(model).count(),
+      strapi.db.query(model).count(),
       createDocument(ctx),
     ]);
 

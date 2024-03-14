@@ -179,7 +179,7 @@ export const editContentType = async (
   contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
-    const entryCount = await strapi.query(uid).count();
+    const entryCount = await strapi.db.query(uid).count();
     if (entryCount > 1) {
       throw new ApplicationError(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'

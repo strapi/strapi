@@ -5,6 +5,7 @@ import createSchemaDiff from './diff';
 import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
+import type { Schema } from './types';
 import type { Database } from '..';
 
 export type * from './types';
@@ -20,15 +21,27 @@ export interface SchemaProvider {
   reset(): Promise<void>;
   create(): Promise<void>;
   drop(): Promise<void>;
+  schema: Schema;
+}
+
+interface State {
+  schema?: Schema;
 }
 
 /**
  * @type {import('.').default}
  */
 export const createSchemaProvider = (db: Database): SchemaProvider => {
-  const schema = metadataToSchema(db.metadata);
+  const state: State = {};
 
   return {
+    get schema() {
+      if (!state.schema) {
+        state.schema = metadataToSchema(db.metadata);
+      }
+
+      return state.schema;
+    },
     builder: createSchemaBuilder(db),
     schemaDiff: createSchemaDiff(db),
     schemaStorage: createSchemaStorage(db),
@@ -48,7 +61,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
      */
     async create() {
       debug('Created database schema');
-      await this.builder.createSchema(schema);
+      await this.builder.createSchema(this.schema);
     },
 
     /**
@@ -65,13 +78,13 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
 
       const DBSchema = await db.dialect.schemaInspector.getSchema();
 
-      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
+      const { status, diff } = await this.schemaDiff.diff(DBSchema, this.schema);
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
       }
 
-      await this.schemaStorage.add(schema);
+      await this.schemaStorage.add(this.schema);
     },
 
     // TODO: support options to migrate softly or forcefully
@@ -93,7 +106,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       }
 
       const { hash: oldHash } = oldSchema;
-      const hash = await this.schemaStorage.hashSchema(schema);
+      const hash = await this.schemaStorage.hashSchema(this.schema);
 
       if (oldHash !== hash) {
         debug('Schema changed');

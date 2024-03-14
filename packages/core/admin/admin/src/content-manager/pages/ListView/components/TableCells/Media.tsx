@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import styled from 'styled-components';
+
+import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import type { Entity } from '@strapi/types';
 

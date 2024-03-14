@@ -1,5 +1,5 @@
 import { Box, Flex, IconButton, IconButtonProps, Td, Tr, Typography } from '@strapi/design-system';
-import { onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
@@ -41,12 +41,12 @@ const RoleRow = ({
           })
         : {})}
     >
-      <Td maxWidth={pxToRem(130)}>
+      <Td maxWidth={`${130 / 16}rem`}>
         <Typography ellipsis textColor="neutral800">
           {name}
         </Typography>
       </Td>
-      <Td maxWidth={pxToRem(250)}>
+      <Td maxWidth={`${250 / 16}rem`}>
         <Typography ellipsis textColor="neutral800">
           {description}
         </Typography>

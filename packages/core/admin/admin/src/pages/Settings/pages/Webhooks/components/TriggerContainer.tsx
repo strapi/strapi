@@ -1,5 +1,4 @@
 import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Check, Cross, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled, { DefaultTheme, css } from 'styled-components';
@@ -156,7 +155,7 @@ const Message = ({ statusCode, message }: MessageProps) => {
   if (statusCode >= 300) {
     return (
       <Flex justifyContent="flex-end">
-        <Flex maxWidth={pxToRem(250)} justifyContent="flex-end" title={message}>
+        <Flex maxWidth={`${250 / 16}rem`} justifyContent="flex-end" title={message}>
           <Typography ellipsis textColor="neutral600">
             {message}
           </Typography>
