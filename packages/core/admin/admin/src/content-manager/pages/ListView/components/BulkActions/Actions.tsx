@@ -20,7 +20,6 @@ import {
   useFetchClient,
   useAPIErrorHandler,
   useTracking,
-  useRBAC,
 } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
@@ -31,8 +30,10 @@ import { useParams } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../../components/DescriptionComponentRenderer';
 import { useTypedSelector } from '../../../../../core/store/hooks';
-import { generatePermissionsObject } from '../../../../utils/permissions';
 import { getTranslation } from '../../../../utils/translations';
+import { useAllowedActions } from '../../hooks/useAllowedActions';
+
+import { PublishAction } from './PublishAction';
 
 import type {
   BulkActionComponent,
@@ -299,31 +300,9 @@ const BulkActionModal = ({
         </Typography>
       </ModalHeader>
       <ModalBody>{content}</ModalBody>
-      <Box
-        paddingTop={4}
-        paddingBottom={4}
-        paddingLeft={5}
-        paddingRight={5}
-        borderWidth="1px 0 0 0"
-        borderStyle="solid"
-        borderColor="neutral150"
-        background="neutral100"
-      >
-        {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
-      </Box>
+      <>{typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}</>
     </ModalLayout>
   );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * useAllowedActions hook
- * -----------------------------------------------------------------------------------------------*/
-
-const useAllowedActions = (slug: string) => {
-  const viewPermissions = generatePermissionsObject(slug);
-  const permissions = useTypedSelector((state) => state['content-manager_rbacManager'].permissions);
-  const { allowedActions } = useRBAC(viewPermissions, permissions ?? []);
-  return allowedActions;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -396,11 +375,7 @@ const DeleteAction: BulkActionComponent = ({ ids, model: slug }) => {
                       'This will delete the active locale versions <em>(from Internationalization)</em>',
                   },
                   {
-                    em: (chunks: React.ReactNode) => (
-                      <Typography fontWeight="semiBold" textColor="danger500">
-                        {chunks}
-                      </Typography>
-                    ),
+                    em: Emphasis,
                   }
                 )}
               </Typography>
@@ -418,9 +393,8 @@ const UnpublishAction: BulkActionComponent = ({ ids, model: slug }) => {
   const { post } = useFetchClient();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler(getTranslation);
-  const contentType = useTypedSelector((state) => state['content-manager_listView'].contentType);
   const { selectedEntries, setSelectedEntries } = useTableContext();
-  const { data } = useTypedSelector((state) => state['content-manager_listView']);
+  const { data, contentType } = useTypedSelector((state) => state['content-manager_listView']);
   const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
 
   const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
@@ -470,7 +444,7 @@ const UnpublishAction: BulkActionComponent = ({ ids, model: slug }) => {
   const showUnpublishButton =
     hasPublishPermission && selectedEntriesObjects.some((entry) => entry.publishedAt);
 
-  if (!hasPublishPermission || !showUnpublishButton) return null;
+  if (!showUnpublishButton) return null;
 
   return {
     actionType: 'unpublish',
@@ -500,11 +474,7 @@ const UnpublishAction: BulkActionComponent = ({ ids, model: slug }) => {
                       'This will unpublish the active locale versions <em>(from Internationalization)</em>',
                   },
                   {
-                    em: (chunks: React.ReactNode) => (
-                      <Typography fontWeight="semiBold" textColor="danger500">
-                        {chunks}
-                      </Typography>
-                    ),
+                    em: Emphasis,
                   }
                 )}
               </Typography>
@@ -521,7 +491,13 @@ const UnpublishAction: BulkActionComponent = ({ ids, model: slug }) => {
   };
 };
 
-const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [UnpublishAction, DeleteAction];
+const Emphasis = (chunks: React.ReactNode) => (
+  <Typography fontWeight="semiBold" textColor="danger500">
+    {chunks}
+  </Typography>
+);
+
+const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [PublishAction, UnpublishAction, DeleteAction];
 
 export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer };
 export type { BulkActionDescription };

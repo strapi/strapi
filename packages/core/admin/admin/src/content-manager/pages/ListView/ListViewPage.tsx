@@ -713,13 +713,13 @@ const ListViewPage = ({
           <Flex gap={4} direction="column" alignItems="stretch">
             <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
-                {/* <BulkActionButtons
+                <BulkActionButtons
                   showPublish={canPublish && hasDraftAndPublish}
                   showDelete={canDelete}
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
                   refetchData={refetch}
-                /> */}
+                />
                 <BulkActionsRenderer />
               </HelperPluginTable.ActionBar>
               <HelperPluginTable.Content>
