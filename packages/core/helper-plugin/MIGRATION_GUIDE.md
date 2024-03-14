@@ -498,6 +498,25 @@ pxToRem(
 
 If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### request
+
+This util has been removed and not replaced.
+You can use `useFetchClient` from `@strapi/admin/strapi-admin`.
+
+```tsx
+import { useFetchClient } from '@strapi/admin/strapi-admin';
+```
+
+And you can use it like this
+
+```tsx
+const { get } = useFetchClient();
+
+const { data } = await get(requestURL);
+```
+
+If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### setHexOpacity
 
 This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
