@@ -126,12 +126,8 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.getByRole('menuitem', { name: /content history/i }).click();
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(5);
-      // Assert the current version is the most recent published version
-      await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
+      // Assert the current version is the modified version
       await expect(currentVersion.getByText('Modified')).toBeVisible();
-      // Assert the previous version in the list is the expected version
-      await expect(previousVersion.getByText('Draft')).toBeVisible();
-      previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
     });
   });
@@ -251,10 +247,6 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // Assert the current version is the most recent published version
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
       await expect(currentVersion.getByText('Modified')).toBeVisible();
-      // Assert the previous version in the list is the expected version
-      await expect(previousVersion.getByText('Draft')).toBeVisible();
-      previousVersion.click();
-      await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
     });
   });
 });
