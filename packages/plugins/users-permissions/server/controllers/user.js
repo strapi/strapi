@@ -49,7 +49,7 @@ module.exports = {
 
     const { email, username, role } = ctx.request.body;
 
-    const userWithSameUsername = await strapi
+    const userWithSameUsername = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
@@ -58,7 +58,7 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi
+      const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
@@ -74,7 +74,7 @@ module.exports = {
     };
 
     if (!role) {
-      const defaultRole = await strapi
+      const defaultRole = await strapi.db
         .query('plugin::users-permissions.role')
         .findOne({ where: { type: advanced.default_role } });
 
@@ -115,7 +115,7 @@ module.exports = {
     }
 
     if (_.has(ctx.request.body, 'username')) {
-      const userWithSameUsername = await strapi
+      const userWithSameUsername = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
@@ -125,7 +125,7 @@ module.exports = {
     }
 
     if (_.has(ctx.request.body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi
+      const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 

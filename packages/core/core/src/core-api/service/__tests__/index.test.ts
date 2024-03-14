@@ -84,6 +84,7 @@ describe('Default Service', () => {
 
         const dbInstance = {
           findOne: jest.fn(() => Promise.resolve({ documentId: 1 })),
+          count() {},
         };
 
         const strapi = {
@@ -93,9 +94,6 @@ describe('Default Service', () => {
             },
           },
           documents: jest.fn(() => documentService),
-          query() {
-            return { count() {} };
-          },
         };
 
         global.strapi = strapi;

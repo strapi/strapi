@@ -67,7 +67,7 @@ describe('Locales', () => {
       const locales = [{ name: 'French', code: 'fr' }];
       const findMany = jest.fn(() => Promise.resolve(locales));
       const query = jest.fn(() => ({ findMany }));
-      global.strapi = { query } as any;
+      global.strapi = { db: { query } } as any;
       const params = { name: { $contains: 'en' } };
 
       const localesFound = await localesService.find(params);
@@ -80,7 +80,7 @@ describe('Locales', () => {
       const locale = { name: 'French', code: 'fr' };
       const findOne = jest.fn(() => Promise.resolve(locale));
       const query = jest.fn(() => ({ findOne }));
-      global.strapi = { query } as any;
+      global.strapi = { db: { query } } as any;
 
       const localeFound = await localesService.findById(1);
       expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
@@ -92,7 +92,7 @@ describe('Locales', () => {
       const locale = { name: 'French', code: 'fr' };
       const findOne = jest.fn(() => Promise.resolve(locale));
       const query = jest.fn(() => ({ findOne }));
-      global.strapi = { query } as any;
+      global.strapi = { db: { query } } as any;
 
       const localeFound = await localesService.findByCode('fr');
       expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
@@ -105,7 +105,7 @@ describe('Locales', () => {
       const create = jest.fn(() => locale);
       const query = jest.fn(() => ({ create }));
       global.strapi = {
-        query,
+        db: { query },
         plugins: {
           i18n: {
             services: { metrics: fakeMetricsService },
@@ -124,7 +124,7 @@ describe('Locales', () => {
       const update = jest.fn(() => locale);
       const query = jest.fn(() => ({ update }));
       global.strapi = {
-        query,
+        db: { query },
         plugins: {
           i18n: {
             services: { metrics: fakeMetricsService },
@@ -146,7 +146,7 @@ describe('Locales', () => {
       const isLocalizedContentType = jest.fn(() => true);
       const query = jest.fn(() => ({ delete: deleteFn, findOne, deleteMany }));
       global.strapi = {
-        query,
+        db: { query },
         plugins: {
           i18n: {
             services: { metrics: fakeMetricsService, 'content-types': { isLocalizedContentType } },
@@ -167,7 +167,7 @@ describe('Locales', () => {
       const findOne = jest.fn(() => undefined);
       const query = jest.fn(() => ({ delete: deleteFn, findOne }));
       global.strapi = {
-        query,
+        db: { query },
         plugins: {
           i18n: {
             services: { metrics: fakeMetricsService },
@@ -189,10 +189,12 @@ describe('Locales', () => {
       const set = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => ({
-          count,
-          create,
-        }),
+        db: {
+          query: () => ({
+            count,
+            create,
+          }),
+        },
         store: () => ({
           set,
         }),
@@ -222,10 +224,12 @@ describe('Locales', () => {
       const set = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => ({
-          count,
-          create,
-        }),
+        db: {
+          query: () => ({
+            count,
+            create,
+          }),
+        },
         store: () => ({
           set,
         }),

@@ -59,7 +59,7 @@ module.exports = {
     }
 
     // Fetch public role.
-    const publicRole = await strapi
+    const publicRole = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: 'public' } });
 

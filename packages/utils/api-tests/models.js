@@ -130,7 +130,7 @@ const deleteContentTypes = async (modelsUIDs, { strapi } = {}) => {
 async function cleanupModel(uid, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  await strapi.query(uid).deleteMany();
+  await strapi.db.query(uid).deleteMany();
 
   await cleanup();
 }
@@ -191,7 +191,7 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  await strapi
+  await strapi.db
     .query(toContentTypeUID(model))
     .deleteMany({ where: { id: entries.map(prop('id')) } });
 

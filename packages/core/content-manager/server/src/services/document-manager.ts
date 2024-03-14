@@ -171,12 +171,12 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     async exists(uid: Common.UID.CollectionType, id?: string) {
       // Collection type
       if (id) {
-        const count = await strapi.query(uid).count({ where: { documentId: id } });
+        const count = await strapi.db.query(uid).count({ where: { documentId: id } });
         return count > 0;
       }
 
       // Single type
-      const count = await strapi.query(uid).count();
+      const count = await strapi.db.query(uid).count();
       return count > 0;
     },
 
@@ -290,7 +290,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       const populate = await buildDeepPopulate(uid);
 
       // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.query(uid).updateMany({
+      const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
         where: filters,
         data,
       });
