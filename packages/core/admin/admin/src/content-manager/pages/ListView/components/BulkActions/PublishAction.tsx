@@ -402,7 +402,7 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
   const hasPublishPermission = useAllowedActions(slug).canPublish;
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const queryClient = useQueryClient();
-  const showUnpublishButton =
+  const showPublishButton =
     hasPublishPermission && selectedEntriesObjects.some((entry) => !entry.publishedAt);
   const {
     selectedEntries: selectedListViewEntries,
@@ -497,7 +497,7 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
     queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
   };
 
-  if (!showUnpublishButton) return null;
+  if (!showPublishButton) return null;
 
   return {
     actionType: 'publish',
