@@ -17,7 +17,7 @@ import { ComponentProvider, useComponent } from '../ComponentContext';
 import { AddComponentButton } from './AddComponentButton';
 import { ComponentPicker } from './ComponentPicker';
 import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
-import { DynamicZoneLabel } from './DynamicZoneLabel';
+import { DynamicZoneLabel, DynamicZoneLabelProps } from './DynamicZoneLabel';
 
 import type { Attribute } from '@strapi/types';
 
@@ -34,13 +34,15 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 
 interface DynamicZoneProps
   extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'> {}
+    Pick<InputProps, 'hint'>,
+    Pick<DynamicZoneLabelProps, 'labelAction'> {}
 
 const DynamicZone = ({
   attribute,
   disabled,
   hint,
   label,
+  labelAction,
   name,
   required = false,
 }: DynamicZoneProps) => {
@@ -236,7 +238,7 @@ const DynamicZone = ({
             <DynamicZoneLabel
               hint={hint}
               label={label}
-              // labelAction={labelAction}
+              labelAction={labelAction}
               name={name}
               numberOfComponents={dynamicDisplayedComponentsLength}
               required={required}
