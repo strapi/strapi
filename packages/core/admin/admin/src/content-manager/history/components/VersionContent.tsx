@@ -72,6 +72,7 @@ const VersionContent = () => {
             if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
               const [row] = panel;
               const [field] = row;
+
               return (
                 <Grid key={field.name} gap={4}>
                   <GridItem col={12} s={12} xs={12}>
