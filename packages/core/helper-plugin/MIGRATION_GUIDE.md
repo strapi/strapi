@@ -444,10 +444,10 @@ This util has been removed and not replaced. If you feel like you need this util
 ### request
 
 This util has been removed and not replaced.
-You can use `useFetchClient` from `@strapi/strapi/admin`.
+You can use `useFetchClient` from `@strapi/admin/strapi-admin`.
 
 ```tsx
-import { useFetchClient } from '@strapi/strapi/admin';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
 ```
 
 And you can use it like this
