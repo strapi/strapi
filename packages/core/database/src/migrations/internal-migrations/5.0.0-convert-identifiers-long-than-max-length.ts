@@ -120,6 +120,7 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
 const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexName: string) => {
   if (oldIndexName === newIndexName) {
     debug(`not dropping and recreating index ${oldIndexName} because it hasn't changed`);
+    return;
   }
 
   try {
