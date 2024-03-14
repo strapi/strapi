@@ -119,7 +119,6 @@ describe('i18n - Find available relations', () => {
 
     const expectedObj = {
       ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[1]),
-      status: 'published',
     };
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(expectedObj);
@@ -134,7 +133,6 @@ describe('i18n - Find available relations', () => {
 
     const expectedObj = {
       ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[0]),
-      status: 'published',
     };
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(expectedObj);

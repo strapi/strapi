@@ -130,7 +130,6 @@ describe('i18n - Find existing relations', () => {
       locale,
       publishedAt,
       updatedAt,
-      status: 'published',
     };
 
     expect(res.body.results).toHaveLength(1);
@@ -155,7 +154,6 @@ describe('i18n - Find existing relations', () => {
       locale,
       publishedAt,
       updatedAt,
-      status: 'published',
     };
 
     expect(res.body.results).toHaveLength(1);
