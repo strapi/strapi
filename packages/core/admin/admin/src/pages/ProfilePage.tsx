@@ -34,7 +34,7 @@ import { useAuth } from '../features/Auth';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
-import { getFullName } from '../utils/getFullName';
+import { getDisplayName } from '../utils/users';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
@@ -209,7 +209,7 @@ const ProfilePage = () => {
         {({ isSubmitting, modified }) => (
           <>
             <HeaderLayout
-              title={username || getFullName(firstname ?? '', lastname)}
+              title={getDisplayName(user, formatMessage)}
               primaryAction={
                 <Button
                   startIcon={<Check />}

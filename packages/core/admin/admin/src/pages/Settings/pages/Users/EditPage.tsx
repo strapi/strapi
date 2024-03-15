@@ -36,7 +36,7 @@ import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
-import { getFullName } from '../../../../utils/getFullName';
+import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
 import { SelectRoles } from './components/SelectRoles';
@@ -223,9 +223,7 @@ const EditPage = () => {
                     defaultMessage: 'Edit {name}',
                   },
                   {
-                    name:
-                      initialData.username ||
-                      getFullName(initialData?.firstname ?? '', initialData.lastname),
+                    name: getDisplayName(initialData, formatMessage),
                   }
                 )}
                 navigationAction={<BackButton />}

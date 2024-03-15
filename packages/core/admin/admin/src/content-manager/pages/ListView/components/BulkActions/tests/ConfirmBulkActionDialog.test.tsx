@@ -1,10 +1,11 @@
-import { Table, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { errors } from '@strapi/utils';
 import { within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
+import { Table } from '../../../../../../components/Table';
 import {
   ConfirmBulkActionDialog,
   ConfirmBulkActionDialogProps,
@@ -68,7 +69,9 @@ describe('ConfirmDialogPublishAll', () => {
             <Routes>
               <Route
                 path="/content-manager/:collectionType/:slug"
-                element={<Table.Root defaultSelectedEntries={[1, 2]}>{children}</Table.Root>}
+                element={
+                  <Table.Root defaultSelectedRows={[{ id: 1 }, { id: 2 }]}>{children}</Table.Root>
+                }
               />
             </Routes>
           ),

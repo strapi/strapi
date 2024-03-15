@@ -1,17 +1,9 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  ConfirmDialog,
-  DynamicTable,
-  onRowClick,
-  useQueryParams,
-  useTracking,
-  TableProps as DynamicTableProps,
-  TableRowProps,
-} from '@strapi/helper-plugin';
-import { Eye, Pencil, Trash } from '@strapi/icons';
+import { ConfirmDialog, useQueryParams, useTracking } from '@strapi/helper-plugin';
+import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,26 +11,17 @@ import styled from 'styled-components';
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
 import { RelativeTime } from '../../../../components/RelativeTime';
+import { Table as TableImpl } from '../../../../components/Table';
 
 import type { Entity } from '@strapi/types';
-
-interface TokenTableRowData {
-  id: Entity.ID;
-  name: string;
-  description: string;
-  createdAt: string;
-  lastUsedAt: string;
-}
 
 /* -------------------------------------------------------------------------------------------------
  * Table
  * -----------------------------------------------------------------------------------------------*/
 
 interface TableProps
-  extends Pick<
-    DynamicTableProps<TokenTableRowData>,
-    'contentType' | 'onConfirmDelete' | 'headers' | 'isLoading'
-  > {
+  extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken>, 'headers' | 'isLoading'> {
+  onConfirmDelete: (id: Entity.ID) => void;
   permissions: {
     canRead: boolean;
     canDelete: boolean;
@@ -51,143 +34,102 @@ interface TableProps
 const Table = ({
   permissions,
   headers = [],
-  contentType,
   isLoading = false,
   tokens = [],
   onConfirmDelete,
   tokenType,
 }: TableProps) => {
-  const { canDelete, canUpdate, canRead } = permissions;
-
-  /**
-   * TODO: This needs refactoring to the new `Table` component.
-   */
-  return (
-    <DynamicTable
-      headers={headers}
-      contentType={contentType}
-      rows={tokens}
-      withBulkActions={canDelete || canUpdate || canRead}
-      isLoading={isLoading}
-      onConfirmDelete={onConfirmDelete}
-    >
-      <TableRows
-        tokenType={tokenType}
-        permissions={permissions}
-        onConfirmDelete={onConfirmDelete}
-      />
-    </DynamicTable>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * TableRows
- * -----------------------------------------------------------------------------------------------*/
-
-interface TableRowsProps
-  extends Pick<DynamicTableProps<TokenTableRowData>, 'onConfirmDelete'>,
-    Pick<TableRowProps<TokenTableRowData>, 'withBulkActions' | 'rows'>,
-    Pick<TableProps, 'tokenType'> {
-  permissions: {
-    canRead: boolean;
-    canDelete: boolean;
-    canUpdate: boolean;
-  };
-}
-
-const TableRows = ({
-  tokenType,
-  permissions,
-  rows = [],
-  withBulkActions,
-  onConfirmDelete,
-}: TableRowsProps) => {
-  const { canDelete, canUpdate, canRead } = permissions;
-
   const [{ query }] = useQueryParams<{ sort?: string }>();
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const [, sortOrder] = query && query.sort ? query.sort.split(':') : [undefined, 'ASC'];
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
+  const formatter = useCollator(locale);
 
-  const sortedTokens = [...rows].sort((a, b) => {
-    const comparison = a.name.localeCompare(b.name);
-
-    return sortOrder === 'DESC' ? -comparison : comparison;
+  const sortedTokens = [...tokens].sort((a, b) => {
+    return sortOrder === 'DESC'
+      ? formatter.compare(b.name, a.name)
+      : formatter.compare(a.name, b.name);
   });
 
-  return (
-    <Tbody>
-      {sortedTokens.map((token) => {
-        return (
-          <Tr
-            key={token.id}
-            {...onRowClick({
-              fn() {
-                trackUsage('willEditTokenFromList', {
-                  tokenType,
-                });
-                navigate(token.id.toString());
-              },
-              condition: canUpdate,
-            })}
-          >
-            <Td maxWidth={`${250 / 16}rem`}>
-              <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                {token.name}
-              </Typography>
-            </Td>
-            <Td maxWidth={`${250 / 16}rem`}>
-              <Typography textColor="neutral800" ellipsis>
-                {token.description}
-              </Typography>
-            </Td>
-            <Td>
-              <Typography textColor="neutral800">
-                <RelativeTime timestamp={new Date(token.createdAt)} />
-              </Typography>
-            </Td>
-            <Td>
-              {token.lastUsedAt && (
-                <Typography textColor="neutral800">
-                  <RelativeTime
-                    timestamp={new Date(token.lastUsedAt)}
-                    customIntervals={[
-                      {
-                        unit: 'hours',
-                        threshold: 1,
-                        text: formatMessage({
-                          id: 'Settings.apiTokens.lastHour',
-                          defaultMessage: 'last hour',
-                        }),
-                      },
-                    ]}
-                  />
-                </Typography>
-              )}
-            </Td>
+  const { canDelete, canUpdate, canRead } = permissions;
 
-            {withBulkActions && (
-              <Td>
-                <Flex justifyContent="end">
-                  {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
-                  {!canUpdate && canRead && (
-                    <ReadButton tokenName={token.name} tokenId={token.id} />
-                  )}
-                  {canDelete && (
-                    <DeleteButton
-                      tokenName={token.name}
-                      onClickDelete={() => onConfirmDelete?.(token.id)}
-                      tokenType={tokenType}
+  const handleRowClick = (id: Entity.ID) => () => {
+    if (canRead) {
+      trackUsage('willEditTokenFromList', {
+        tokenType,
+      });
+      navigate(id.toString());
+    }
+  };
+
+  return (
+    <TableImpl.Root headers={headers} rows={sortedTokens} isLoading={isLoading}>
+      <TableImpl.Content>
+        <TableImpl.Head>
+          {headers.map((header) => (
+            <TableImpl.HeaderCell key={header.name} {...header} />
+          ))}
+        </TableImpl.Head>
+        <TableImpl.Empty />
+        <TableImpl.Loading />
+        <TableImpl.Body>
+          {sortedTokens.map((token) => (
+            <TableImpl.Row key={token.id} onClick={handleRowClick(token.id)}>
+              <TableImpl.Cell maxWidth={`${250 / 16}rem`}>
+                <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                  {token.name}
+                </Typography>
+              </TableImpl.Cell>
+              <TableImpl.Cell maxWidth={`${250 / 16}rem`}>
+                <Typography textColor="neutral800" ellipsis>
+                  {token.description}
+                </Typography>
+              </TableImpl.Cell>
+              <TableImpl.Cell>
+                <Typography textColor="neutral800">
+                  {/* @ts-expect-error One of the tokens doesn't have createdAt */}
+                  <RelativeTime timestamp={new Date(token.createdAt)} />
+                </Typography>
+              </TableImpl.Cell>
+              <TableImpl.Cell>
+                {token.lastUsedAt && (
+                  <Typography textColor="neutral800">
+                    <RelativeTime
+                      timestamp={new Date(token.lastUsedAt)}
+                      customIntervals={[
+                        {
+                          unit: 'hours',
+                          threshold: 1,
+                          text: formatMessage({
+                            id: 'Settings.apiTokens.lastHour',
+                            defaultMessage: 'last hour',
+                          }),
+                        },
+                      ]}
                     />
-                  )}
-                </Flex>
-              </Td>
-            )}
-          </Tr>
-        );
-      })}
-    </Tbody>
+                  </Typography>
+                )}
+              </TableImpl.Cell>
+              {canUpdate || canRead || canDelete ? (
+                <TableImpl.Cell>
+                  <Flex justifyContent="end">
+                    {canUpdate && <UpdateButton tokenName={token.name} tokenId={token.id} />}
+                    {canDelete && (
+                      <DeleteButton
+                        tokenName={token.name}
+                        onClickDelete={() => onConfirmDelete?.(token.id)}
+                        tokenType={tokenType}
+                      />
+                    )}
+                  </Flex>
+                </TableImpl.Cell>
+              ) : null}
+            </TableImpl.Row>
+          ))}
+        </TableImpl.Body>
+      </TableImpl.Content>
+    </TableImpl.Root>
   );
 };
 
@@ -295,14 +237,6 @@ interface ButtonProps {
   tokenName: string;
   tokenId: Entity.ID;
 }
-
-const ReadButton = ({ tokenName, tokenId }: ButtonProps) => {
-  return (
-    <DefaultButton tokenName={tokenName} tokenId={tokenId} buttonType="read">
-      <Eye />
-    </DefaultButton>
-  );
-};
 
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {
   return (

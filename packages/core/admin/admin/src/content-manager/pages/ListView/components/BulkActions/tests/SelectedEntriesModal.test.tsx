@@ -1,9 +1,10 @@
-import { Table, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { waitForElementToBeRemoved, within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server, screen, fireEvent } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
+import { Table } from '../../../../../../components/Table';
 import { SelectedEntriesModal } from '../SelectedEntriesModal';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -25,7 +26,15 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const render = (props = { onToggle: jest.fn() }) =>
   renderRTL(
-    <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+    <Table.Root
+      defaultSelectedRows={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+      headers={[
+        { name: 'id', label: 'id' },
+        { name: 'name', label: 'name' },
+        { name: 'email', label: 'email' },
+        { name: 'createdAt', label: 'createdAt' },
+      ]}
+    >
       <SelectedEntriesModal {...props} />
     </Table.Root>,
     {

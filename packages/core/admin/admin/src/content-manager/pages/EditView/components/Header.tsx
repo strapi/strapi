@@ -11,6 +11,7 @@ import { DescriptionComponentRenderer } from '../../../../components/Description
 import { useForm } from '../../../../components/Form';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { BackButton } from '../../../../features/BackButton';
+import { getDisplayName } from '../../../../utils/users';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -24,7 +25,6 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
-import { getDisplayName } from '../../../utils/users';
 
 import { DocumentActionsMenu } from './DocumentActions';
 import { DocumentStatus } from './DocumentStatus';
