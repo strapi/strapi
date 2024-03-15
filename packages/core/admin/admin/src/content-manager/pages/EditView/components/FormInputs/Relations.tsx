@@ -220,7 +220,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
          */
         __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [props.mainField ?? 'id']: relation[props.mainField ?? 'id'],
+        [props.mainField?.name ?? 'id']: relation[props.mainField?.name ?? 'id'],
         label: getRelationLabel(relation, props.mainField),
         // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
         href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
@@ -340,7 +340,7 @@ const addLabelAndHref =
       return {
         ...relation,
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [mainField ?? 'id']: relation[mainField ?? 'id'],
+        [mainField?.name ?? 'id']: relation[mainField?.name ?? 'id'],
         label: getRelationLabel(relation, mainField),
         href: `${href}/${relation.documentId}`,
       };
