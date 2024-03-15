@@ -1,0 +1,36 @@
+import { test, expect } from '@playwright/test';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../scripts/dts-import';
+
+test.describe('Create collection type', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
+
+    await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+
+    // close the tutorial modal if it's visible
+    const modal = page.getByRole('button', { name: 'Close' });
+    if (modal.isVisible()) {
+      await modal.click();
+      await expect(modal).not.toBeVisible();
+    }
+  });
+
+  test('Can create a collection type', async ({ page }) => {
+    await page.getByRole('button', { name: 'Create new collection type' }).click();
+
+    await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+
+    const displayName = page.getByLabel('Display name');
+    await displayName.fill('Secret Document');
+
+    const singularId = page.getByLabel('API ID (Singular)');
+    await expect(singularId).toHaveValue('secret-document');
+
+    const pluralId = page.getByLabel('API ID (Plural)');
+    await expect(pluralId).toHaveValue('secret-documents');
+  });
+});
+
