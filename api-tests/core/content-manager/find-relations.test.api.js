@@ -62,6 +62,7 @@ const productModel = () => ({
   pluralName: 'products',
   description: '',
   collectionName: '',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -80,6 +81,7 @@ const employeeModal = () => ({
   pluralName: 'employees',
   description: '',
   collectionName: '',
+  draftAndPublish: true,
   attributes: {
     name: {
       type: 'string',
@@ -91,6 +93,7 @@ const shopModel = () => ({
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -230,14 +233,18 @@ describe('Find Relations', () => {
 
     // Create draft products
     const [skate, chair, candle, table, porte, fenetre] = await Promise.all([
-      strapi.documents(productUid).create({ data: { name: 'Skate' } }),
-      strapi.documents(productUid).create({ data: { name: 'Chair' } }),
-      strapi.documents(productUid).create({ data: { name: 'Candle' } }),
-      strapi.documents(productUid).create({ data: { name: 'Table' } }),
+      strapi.documents(productUid).create({ data: { name: 'Skate' }, status: 'published' }),
+      strapi.documents(productUid).create({ data: { name: 'Chair' }, status: 'published' }),
+      strapi.documents(productUid).create({ data: { name: 'Candle' }, status: 'published' }),
+      strapi.documents(productUid).create({ data: { name: 'Table' }, status: 'published' }),
       // We create products in French in order to test that we can cant find
-      // aviailable relations in a different locale
-      strapi.documents(productUid).create({ data: { name: 'Porte' }, locale: extraLocale }),
-      strapi.documents(productUid).create({ data: { name: 'Fenetre' }, locale: extraLocale }),
+      // available relations in a different locale
+      strapi
+        .documents(productUid)
+        .create({ data: { name: 'Porte' }, locale: extraLocale, status: 'published' }),
+      strapi
+        .documents(productUid)
+        .create({ data: { name: 'Fenetre' }, locale: extraLocale, status: 'published' }),
     ]);
     data[productUid].draft.push(skate, chair, candle, table, porte, fenetre);
 
@@ -333,6 +340,11 @@ describe('Find Relations', () => {
         modelUID: compoUid,
         id: data[shopUid].draft[0].myCompo.id,
         idEmptyShop: data[shopUid].draft[1].myCompo.id,
+      },
+      publishedComponent: {
+        modelUID: compoUid,
+        id: data[shopUid].published[0].myCompo.id,
+        idEmptyShop: undefined,
       },
       entity: {
         // If the source of the relation is a content type, we use the documentId
@@ -822,7 +834,9 @@ describe('Find Relations', () => {
       });
 
       test('Can query by status for existing relations', async () => {
-        const { id, modelUID } = isComponent ? data.testData.component : data.testData.entity;
+        const { id, modelUID } = isComponent
+          ? data.testData.publishedComponent
+          : data.testData.entity;
 
         const res = await rq({
           method: 'GET',
