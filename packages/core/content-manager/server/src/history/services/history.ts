@@ -1,9 +1,9 @@
-import type { LoadedStrapi, Documents } from '@strapi/types';
+import type { LoadedStrapi, Documents, Common } from '@strapi/types';
+import { contentTypes } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
-import { getDeepPopulate } from 'src/services/utils/populate';
 import { HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
 import {
@@ -12,7 +12,7 @@ import {
 } from '../../../../shared/contracts/history-versions';
 
 // Needed because the query engine doesn't return any types yet
-type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale' | 'relatedData'> &
+type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
   Pick<CreateHistoryVersion, 'locale'>;
 
 const DEFAULT_RETENTION_DAYS = 90;
@@ -68,6 +68,61 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return documentMetadataService.getStatus(document, meta.availableStatus);
   };
 
+  /**
+   * Creates a populate object that looks for all the relations that need
+   * to be saved in history, and populates only the id for each of them.
+   */
+  const getDeepPopulate = (uid: Common.UID.Schema) => {
+    const model = strapi.getModel(uid);
+    const attributes = Object.entries(model.attributes);
+
+    return attributes.reduce((acc: any, [attributeName, attribute]) => {
+      switch (attribute.type) {
+        case 'relation': {
+          if (
+            ['createdBy', 'updatedBy', 'strapi_stage', 'strapi_assignee'].includes(attributeName)
+          ) {
+            break;
+          }
+          const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
+          if (isVisible) {
+            acc[attributeName] = { select: ['id'] };
+          }
+          break;
+        }
+
+        case 'media': {
+          acc[attributeName] = { select: ['id'] };
+          break;
+        }
+
+        case 'component': {
+          const populate = getDeepPopulate(attribute.component);
+          acc[attributeName] = { populate };
+          break;
+        }
+
+        case 'dynamiczone': {
+          // Use fragments to populate the dynamic zone components
+          const populatedComponents = (attribute.components || []).reduce(
+            (acc: any, componentUID: Common.UID.Component) => {
+              acc[componentUID] = { populate: getDeepPopulate(componentUID) };
+              return acc;
+            },
+            {}
+          );
+
+          acc[attributeName] = { on: populatedComponents };
+          break;
+        }
+        default:
+          break;
+      }
+
+      return acc;
+    }, {});
+  };
+
   return {
     async bootstrap() {
       // Prevent initializing the service twice
@@ -110,7 +165,9 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           .documents(contentTypeUid)
           .findOne(documentContext.documentId, {
             locale,
+            populate: getDeepPopulate(contentTypeUid),
           });
+
         const status = await getVersionStatus(contentTypeUid, document);
 
         const fieldsToIgnore = [
@@ -211,23 +268,40 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
                 const shouldFetchSeveral = ['oneToMany', 'manyToMany'].includes(
                   attributeSchema.relation
                 );
+
                 const relatedEntries = await Promise.all(
                   (
                     (shouldFetchSeveral
                       ? result.data[attributeKey]
-                      : [result.data[attributeKey]]) as number[]
-                  ).map((id) => {
-                    if (!id) {
+                      : [result.data[attributeKey]]) as Array<{ id: number }>
+                  ).map(async (entry) => {
+                    if (entry == null) {
                       return null;
                     }
 
-                    return strapi.db.query(attributeSchema.target).findOne({ where: { id } });
+                    const relatedEntry = await strapi.db
+                      .query(attributeSchema.target)
+                      .findOne({ where: { id: entry.id } });
+
+                    /**
+                     * Use false to represent when the content a history version is pointing to
+                     * doesn't exist anymore. This will be interpreted by the frontend to display
+                     * a dedicated banner. Why not null? Because we need to differentiate when a
+                     * relation was never provided, and when a relation was provided but no longer
+                     * exists, and JSON doesn't give us many options.
+                     */
+                    if (relatedEntry == null) {
+                      return false;
+                    }
+
+                    return relatedEntry;
                   })
                 );
 
                 return {
                   ...(await currentDataWithRelations),
-                  [attributeKey]: shouldFetchSeveral ? relatedEntries : relatedEntries[0],
+                  [attributeKey]: relatedEntries,
+                  // [attributeKey]: shouldFetchSeveral ? relatedEntries : relatedEntries[0],
                 };
               }
 

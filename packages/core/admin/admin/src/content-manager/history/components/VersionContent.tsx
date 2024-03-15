@@ -28,9 +28,35 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
   return (
     <Box>
       <FieldLabel>{props.label}</FieldLabel>
-      <pre>
-        <Typography as="code">{JSON.stringify(field.value, null, 2)}</Typography>
-      </pre>
+      {field.value.length === 0 ? (
+        <Typography>No content</Typography>
+      ) : (
+        <Flex direction="column" gap={2} alignItems="stretch">
+          {(field.value as Array<Record<string, unknown> | false>).map((relationData, index) => {
+            if (relationData == false) {
+              return <Typography key={index}>Related content no longer exists</Typography>;
+            }
+
+            return (
+              <Flex
+                key={index}
+                paddingTop={2}
+                paddingBottom={2}
+                paddingLeft={4}
+                paddingRight={4}
+                hasRadius
+                borderColor="neutral200"
+                background="neutral150"
+                justifyContent="space-between"
+              >
+                <pre>
+                  <Typography as="code">{JSON.stringify(relationData, null, 2)}</Typography>
+                </pre>
+              </Flex>
+            );
+          })}
+        </Flex>
+      )}
     </Box>
   );
 };
