@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Documents, Common } from '@strapi/types';
+import type { LoadedStrapi, Documents, Common, Entity } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
@@ -70,7 +70,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   /**
    * Creates a populate object that looks for all the relations that need
-   * to be saved in history, and populates only the documentId and locale for each of them.
+   * to be saved in history, and populates only the fields needed to later retrieve the content.
    */
   const getDeepPopulate = (uid: Common.UID.Schema) => {
     const model = strapi.getModel(uid);
@@ -79,11 +79,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return attributes.reduce((acc: any, [attributeName, attribute]) => {
       switch (attribute.type) {
         case 'relation': {
-          if (
-            ['createdBy', 'updatedBy', 'strapi_stage', 'strapi_assignee'].includes(attributeName)
-          ) {
-            break;
-          }
           const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
           if (isVisible) {
             acc[attributeName] = { fields: ['documentId', 'locale'] };
@@ -92,7 +87,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         }
 
         case 'media': {
-          acc[attributeName] = { fields: ['documentId', 'locale'] };
+          acc[attributeName] = { fields: ['id'] };
           break;
         }
 
@@ -278,28 +273,25 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
       const sanitizedResults = await Promise.all(
         (results as HistoryVersionQueryResult[]).map(async (result) => {
-          const dataWithRelations = await Object.keys(result.schema).reduce(
-            async (currentDataWithRelations, attributeKey) => {
-              const attributeSchema = result.schema[attributeKey];
-
-              // TODO: handle media
-              // TODO: handle nested content structures
-              if (
+          const dataWithRelations = await Object.entries(result.schema).reduce(
+            async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+              const isNormalRelation =
                 attributeSchema.type === 'relation' &&
                 attributeSchema.relation !== 'morphToOne' &&
-                attributeSchema.relation !== 'morphToMany'
-              ) {
-                const shouldFetchSeveral = ['oneToMany', 'manyToMany'].includes(
-                  attributeSchema.relation
-                );
+                attributeSchema.relation !== 'morphToMany';
 
+              // TODO: handle nested content structures
+              if (isNormalRelation || attributeSchema.type === 'media') {
+                const attributeValue = result.data[attributeKey];
                 const relationDataPromise = (
-                  (shouldFetchSeveral
-                    ? result.data[attributeKey]
-                    : [result.data[attributeKey]]) as Array<{
-                    documentId: string;
-                    locale: string | null;
-                  } | null>
+                  (Array.isArray(attributeValue) ? attributeValue : [attributeValue]) as Array<
+                    | {
+                        documentId: string;
+                        locale: string | null;
+                      }
+                    | { id: Entity.ID }
+                    | null
+                  >
                 )
                   // Until we implement proper pagination, limit relations to an arbitrary amount
                   .slice(0, 25)
@@ -312,15 +304,34 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
                         return currentRelationData;
                       }
 
-                      // TODO: batch all queries into a findMany
-                      const relatedEntry = await strapi
-                        .documents(attributeSchema.target)
-                        .findOne(entry.documentId, { locale: entry.locale || undefined });
+                      /**
+                       * Adapt the query depending on if the attribute is a media
+                       * or a normal relation. The extra checks are only for type narrowing
+                       */
+                      let relatedEntry;
+                      if (isNormalRelation) {
+                        if ('documentId' in entry) {
+                          relatedEntry = await strapi
+                            .documents(attributeSchema.target)
+                            .findOne(entry.documentId, { locale: entry.locale || undefined });
+                        }
+                      } else if ('id' in entry) {
+                        relatedEntry = await strapi.db
+                          .query('plugin::upload.file')
+                          .findOne({ where: { id: entry.id } });
+                      }
 
                       if (relatedEntry) {
                         currentRelationData.results.push({
                           ...relatedEntry,
-                          status: await getVersionStatus(attributeSchema.target, relatedEntry),
+                          ...(isNormalRelation
+                            ? {
+                                status: await getVersionStatus(
+                                  attributeSchema.target,
+                                  relatedEntry
+                                ),
+                              }
+                            : {}),
                         });
                       } else {
                         // The related content has been deleted

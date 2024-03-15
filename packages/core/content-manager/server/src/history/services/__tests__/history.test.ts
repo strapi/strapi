@@ -87,6 +87,9 @@ const mockStrapi = {
             type: 'component',
             component: 'some.component',
           },
+          media: {
+            type: 'media',
+          },
         },
       };
     }
@@ -100,6 +103,10 @@ const mockStrapi = {
           relation: {
             type: 'relation',
             target: 'api::restaurant.restaurant',
+          },
+          medias: {
+            type: 'media',
+            multiple: true,
           },
         },
       };
@@ -155,10 +162,16 @@ describe('history-version service', () => {
             relation: {
               fields: ['documentId', 'locale'],
             },
+            medias: {
+              fields: ['id'],
+            },
           },
         },
         relation: {
           fields: ['documentId', 'locale'],
+        },
+        media: {
+          fields: ['id'],
         },
       },
     });
@@ -177,6 +190,9 @@ describe('history-version service', () => {
         type: 'component',
         component: 'some.component',
       },
+      media: {
+        type: 'media',
+      },
     });
     expect(createPayload.componentsSchemas).toEqual({
       'some.component': {
@@ -186,6 +202,10 @@ describe('history-version service', () => {
         relation: {
           type: 'relation',
           target: 'api::restaurant.restaurant',
+        },
+        medias: {
+          type: 'media',
+          multiple: true,
         },
       },
     });
@@ -260,6 +280,7 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
+      componentsSchema: {},
       schema: {
         title: {
           type: 'string' as const,

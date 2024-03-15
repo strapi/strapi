@@ -9,6 +9,7 @@ import {
   GridItem,
   Typography,
 } from '@strapi/design-system';
+import { useLibrary } from '@strapi/helper-plugin';
 
 import { Form, useField } from '../../../components/Form';
 import { type RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
@@ -59,22 +60,41 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * CustomMediaInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomMediaInput = (props: InputRendererProps) => {
+  const field = useField(props.name);
+  const library = useLibrary();
+  const MediaLibrary = library.fields!.media as React.ComponentType<
+    InputRendererProps & { multiple: boolean }
+  >;
+
+  return (
+    <Box>
+      <Flex direction="column" gap={2} alignItems="stretch">
+        <Form method="PUT" disabled={true} initialValues={{ [props.name]: field.value.results }}>
+          <MediaLibrary {...props} disabled={true} multiple={field.value.results.length > 1} />
+        </Form>
+        <Typography>{field.value.meta.missingCount} missing relations</Typography>
+      </Flex>
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * CustomInputRenderer
  * -----------------------------------------------------------------------------------------------*/
 
-// The renderers for these types will be added in future PRs, they need special handling
-const UNSUPPORTED_TYPES = ['media'];
-
 const CustomInputRenderer = (props: InputRendererProps) => {
-  if (UNSUPPORTED_TYPES.includes(props.type)) {
-    return <Typography>TODO: support {props.type}</Typography>;
+  switch (props.type) {
+    case 'media':
+      return <CustomMediaInput {...props} />;
+    case 'relation':
+      return <CustomRelationInput {...props} />;
+    default:
+      return <InputRenderer {...props} />;
   }
-
-  if (props.type === 'relation') {
-    return <CustomRelationInput {...props} />;
-  }
-
-  return <InputRenderer {...props} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
