@@ -11,7 +11,6 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import {
   translatedErrors,
   useAPIErrorHandler,
@@ -20,11 +19,11 @@ import {
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Check } from '@strapi/icons';
+import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { NavLink, useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Update } from '../../../../../../shared/contracts/user';
@@ -32,6 +31,7 @@ import { Form, FormHelpers } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { BackButton } from '../../../../features/BackButton';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
@@ -228,19 +228,7 @@ const EditPage = () => {
                       getFullName(initialData?.firstname ?? '', initialData.lastname),
                   }
                 )}
-                navigationAction={
-                  <Link
-                    as={NavLink}
-                    startIcon={<ArrowLeft />}
-                    // @ts-expect-error – as component props are not inferred correctly.
-                    to="/settings/users?pageSize=10&page=1&sort=firstname"
-                  >
-                    {formatMessage({
-                      id: 'global.back',
-                      defaultMessage: 'Back',
-                    })}
-                  </Link>
-                }
+                navigationAction={<BackButton />}
               />
               <ContentLayout>
                 {user?.registrationToken && (

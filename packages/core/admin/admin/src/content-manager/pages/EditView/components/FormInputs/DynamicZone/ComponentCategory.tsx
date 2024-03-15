@@ -9,7 +9,6 @@ import {
   Flex,
   Typography,
 } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -64,7 +63,7 @@ const ComponentCategory = ({
                 justifyContent="center"
                 onClick={onAddComponent(uid)}
                 hasRadius
-                height={pxToRem(84)}
+                height={`${84 / 16}rem`}
                 shrink={0}
                 borderColor="neutral200"
               >

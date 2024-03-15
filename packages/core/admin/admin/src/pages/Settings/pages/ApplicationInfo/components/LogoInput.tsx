@@ -36,7 +36,6 @@ import {
   TextInputProps,
   Typography,
 } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { PicturePlus, Plus, Refresh } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
@@ -375,8 +374,8 @@ const ComputerForm = () => {
               >
                 <Icon
                   color="primary600"
-                  width={pxToRem(60)}
-                  height={pxToRem(60)}
+                  width={`${60 / 16}rem`}
+                  height={`${60 / 16}rem`}
                   as={PicturePlus}
                   aria-hidden
                 />
@@ -494,7 +493,7 @@ const PendingLogoDialog = ({ onChangeLogo }: PendingLogoDialogProps) => {
             })}
           </Button>
         </Flex>
-        <Box maxWidth={pxToRem(180)}>
+        <Box maxWidth={`${180 / 16}rem`}>
           {localImage?.url ? <ImageCardAsset asset={localImage} /> : null}
         </Box>
       </Box>

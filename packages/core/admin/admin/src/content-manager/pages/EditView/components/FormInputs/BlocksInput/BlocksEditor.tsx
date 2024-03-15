@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Expand } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -117,8 +116,8 @@ const EditorDivider = styled(Divider)`
 
 const ExpandIconButton = styled(IconButton)`
   position: absolute;
-  bottom: ${pxToRem(12)};
-  right: ${pxToRem(12)};
+  bottom: ${12 / 16}rem;
+  right: ${12 / 16}rem;
 `;
 
 /**

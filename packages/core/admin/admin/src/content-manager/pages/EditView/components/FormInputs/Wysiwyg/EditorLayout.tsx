@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { BaseButton, Box, Flex, FocusTrap, Portal, Typography } from '@strapi/design-system';
-import { pxToRem, useLockScroll } from '@strapi/helper-plugin';
+import { useLockScroll } from '@strapi/helper-plugin';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -56,7 +56,7 @@ const EditorLayout = ({
                 </BoxWithBorder>
                 <Flex alignItems="start" direction="column" flex={1} height="100%" width="100%">
                   <Flex
-                    height={pxToRem(48)}
+                    height={`${48 / 16}rem`}
                     background="neutral100"
                     justifyContent="flex-end"
                     shrink={0}
