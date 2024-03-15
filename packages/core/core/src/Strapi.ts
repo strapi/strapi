@@ -246,7 +246,6 @@ class Strapi extends Container implements StrapiI {
       })
     );
 
-    console.log('created db');
     utils.createUpdateNotifier(this).notify();
 
     Object.defineProperty<Strapi>(this, 'EE', {
