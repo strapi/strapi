@@ -83,7 +83,6 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
-      versionCards.first().click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // Assert the previous version in the list is the expected version
       const previousVersion = versionCards.nth(1);
@@ -92,29 +91,44 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
       // Go back to the entry
-      // await page.getByRole('link', { name: 'Back' }).click();
+      await page.getByRole('link', { name: 'Back' }).click();
 
       /**
        * Publish
-       *
-       * TODO: Fix publish
-       * The publish action in the middleware used to create history versions has a different shape than the other actions.
-       * This leaves us with null for status and relatedDocumentId in the history version.
-       *
        */
-      // await page.getByRole('button', { name: 'Publish' }).click();
-      // await page.getByRole('link', { name: 'History' }).click();
-      // await page.waitForURL(
-      //   '**/content-manager/collection-types/api::article.article/*/history?plugins\\[i18n\\]\\[locale\\]=en'
-      // );
-      // await expect(versionCards).toHaveCount(3);
-      // // Assert the current version is the most recent published version
-      // await expect(titleInput).toHaveValue('Being from Kansas City');
-      // await expect(currentVersion.getByText('Published')).toBeVisible();
-      // // Assert the previous version in the list is the expected version
-      // await expect(versionCards.nth(1).getByText('Draft')).toBeVisible();
-      // versionCards.nth(1).click();
-      // await expect(titleInput).toHaveValue('Being from Kansas City');
+      await page.getByRole('button', { name: 'Publish' }).click();
+      // Go to the history page
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await page.waitForURL(HISTORY_URL);
+      // Publish also creates a new draft so we expect the count to increase by 2
+      await expect(versionCards).toHaveCount(4);
+      // Assert the current version is the most recent published version
+      await expect(titleInput).toHaveValue('Being from Kansas City');
+      // The current version is the most recent draft
+      await expect(currentVersion.getByText('Draft')).toBeVisible();
+      await expect(titleInput).toHaveValue('Being from Kansas City');
+      // The second in the list is the published version
+      await expect(previousVersion.getByText('Published')).toBeVisible();
+      previousVersion.click();
+      await expect(titleInput).toHaveValue('Being from Kansas City');
+
+      // Go back to the entry
+      await page.getByRole('link', { name: 'Back' }).click();
+
+      /**
+       * Modified
+       */
+      await titleInput.fill('Being from Kansas City, Missouri');
+      await page.getByRole('button', { name: 'Save' }).click();
+      // Go to the history page
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await page.waitForURL(HISTORY_URL);
+      await expect(versionCards).toHaveCount(5);
+      // Assert the current version is the modified version
+      await expect(currentVersion.getByText('Modified')).toBeVisible();
+      await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
     });
   });
 
@@ -171,6 +185,7 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(idRegex.test(page.url())).toBe(true);
       // Assert the most recent version is the current version
       const currentVersion = versionCards.nth(0);
+      const previousVersion = versionCards.nth(1);
       await expect(currentVersion.getByText('(current)')).toBeVisible();
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toBeDisabled();
@@ -191,35 +206,47 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
-      versionCards.first().click();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
       // Assert the previous version in the list is the expected version
-      versionCards.nth(1).click();
+      previousVersion.click();
       await expect(titleInput).toHaveValue('AFC Richmond');
 
       // Go back to the entry
-      // await page.getByRole('link', { name: 'Back' }).click();
+      await page.getByRole('link', { name: 'Back' }).click();
 
       /**
        * Publish
-       *
-       * TODO: Fix publish
-       * The publish action in the middleware used to create history versions has a different shape than the other actions.
-       * This leaves us with null for status and relatedDocumentId in the history version.
-       *
        */
-      // await page.getByRole('button', { name: 'Publish' }).click();
-      // await page.getByRole('link', { name: 'History' }).click();
-      // await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
-      // await expect(versionCards).toHaveCount(3);
-      // // Assert the current version is the most recent published version
-      // await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
-      // // TODO: Assert the version is marked as published when publishing works
-      // await expect(currentVersion.getByText('Published')).toBeVisible();
-      // // Assert the previous version in the list is the expected version
-      // await expect(versionCards.nth(1).getByText('Draft')).toBeVisible();
-      // versionCards.nth(1).click();
-      // await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
+      await page.getByRole('button', { name: 'Publish' }).click();
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
+      // Publish also creates a new draft so we expect the count to increase by 2
+      await expect(versionCards).toHaveCount(4);
+      // The current version is the most recent draft
+      await expect(currentVersion.getByText('Draft')).toBeVisible();
+      await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
+      // The second in the list is the published version
+      previousVersion.click();
+      await expect(previousVersion.getByText('Published')).toBeVisible();
+      await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
+
+      // Go back to the entry
+      await page.getByRole('link', { name: 'Back' }).click();
+
+      /**
+       * Modified
+       */
+      await titleInput.fill('Welcome to AFC Richmond!');
+      await page.getByRole('button', { name: 'Save' }).click();
+      // Go to the history page
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await page.waitForURL(HISTORY_URL);
+      await expect(versionCards).toHaveCount(5);
+      // Assert the current version is the most recent published version
+      await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
+      await expect(currentVersion.getByText('Modified')).toBeVisible();
     });
   });
 });
