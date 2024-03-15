@@ -15,12 +15,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import {
-  onRowClick,
-  useNotification,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { onRowClick, useNotification, useRBAC, useTracking } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';

@@ -12,11 +12,7 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
-import {
-  useOverlayBlocker,
-  useFetchClient,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useOverlayBlocker, useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useAPIErrorHandler, Page, BackButton } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
