@@ -7555,27 +7555,38 @@ __metadata:
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@apidevtools/swagger-parser": "npm:^10.1.0"
+    "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin": "npm:5.0.0-beta.0"
+    "@strapi/admin-test-utils": "npm:5.0.0-beta.0"
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-beta.0"
     "@strapi/strapi": "npm:5.0.0-beta.0"
+    "@strapi/types": "npm:5.0.0-beta.0"
     "@strapi/utils": "npm:5.0.0-beta.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
+    "@types/koa": "npm:2.13.4"
+    "@types/koa-session": "npm:6.4.1"
+    "@types/swagger-ui-dist": "npm:3.30.4"
+    axios: "npm:1.6.8"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.0.0-rc.12"
     formik: "npm:2.4.5"
     fs-extra: "npm:10.1.0"
     immer: "npm:9.0.21"
+    koa: "npm:2.13.4"
+    koa-body: "npm:4.2.0"
+    koa-session: "npm:6.4.0"
     koa-static: "npm:^5.0.0"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
+    openapi-types: "npm:12.1.3"
     path-to-regexp: "npm:6.2.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-helmet: "npm:^6.1.0"
     react-intl: "npm:6.6.2"
-    react-query: "npm:3.39.3"
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:5.3.11"
     swagger-ui-dist: "npm:4.19.0"
@@ -9578,6 +9589,13 @@ __metadata:
     "@types/react": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 3da291b46f03d378a0176c9d034deee7ee0684c5d62e1c5ce82f3be0972918eaa806f45c62e9a4f1c8d24c5ba6571c260caba2493fc7e82b528ac7d15903e2c1
+  languageName: node
+  linkType: hard
+
+"@types/swagger-ui-dist@npm:3.30.4":
+  version: 3.30.4
+  resolution: "@types/swagger-ui-dist@npm:3.30.4"
+  checksum: 9d122200f3922193a42b2a04442a565542d526320c71784a8cf374a99ac7411d1a0148536d687d079540c7cb8b30ec25878345f22ae962318358da510c712642
   languageName: node
   linkType: hard
 
@@ -23294,6 +23312,13 @@ __metadata:
     is-inside-container: "npm:^1.0.0"
     is-wsl: "npm:^2.2.0"
   checksum: b45bcc7a6795804a2f560f0ca9f5e5344114bc40754d10c28a811c0c8f7027356979192931a6a7df2ab9e5bab3058988c99ae55f4fb71db2ce9fc77c40f619aa
+  languageName: node
+  linkType: hard
+
+"openapi-types@npm:12.1.3":
+  version: 12.1.3
+  resolution: "openapi-types@npm:12.1.3"
+  checksum: 9d1d7ed848622b63d0a4c3f881689161b99427133054e46b8e3241e137f1c78bb0031c5d80b420ee79ac2e91d2e727ffd6fc13c553d1b0488ddc8ad389dcbef8
   languageName: node
   linkType: hard
 
