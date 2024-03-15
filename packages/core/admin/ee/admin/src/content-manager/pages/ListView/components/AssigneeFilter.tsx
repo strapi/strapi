@@ -5,8 +5,8 @@ import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../../../../admin/src/components/Filters';
 import { useField } from '../../../../../../../admin/src/components/Form';
-import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
 import { useAdminUsers } from '../../../../../../../admin/src/services/users';
+import { getDisplayName } from '../../../../../../../admin/src/utils/users';
 
 interface AssigneeFilterProps extends Pick<ComboboxProps, 'value' | 'onChange'> {}
 

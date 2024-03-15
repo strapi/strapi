@@ -794,7 +794,7 @@
   "content-manager.containers.list-settings.modal-form.label": "Edit {fieldName}",
   "content-manager.containers.list-settings.modal-form.error": "An error occurred while trying to open the form.",
   "content-manager.containers.edit-settings.modal-form.error": "An error occurred while trying to open the form.",
-  "content-manager.containers.edit-settings.modal-form.label": "Edit {fieldName}",
+  "content-manager.containers.edit-settings.modal-form.label": "Label",
   "content-manager.containers.edit-settings.modal-form.description": "Description",
   "content-manager.containers.edit-settings.modal-form.placeholder": "Placeholder",
   "content-manager.containers.edit-settings.modal-form.mainField": "Entry title",

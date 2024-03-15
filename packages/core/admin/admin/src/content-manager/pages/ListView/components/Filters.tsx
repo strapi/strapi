@@ -13,12 +13,12 @@ import { Filters } from '../../../../components/Filters';
 import { useField } from '../../../../components/Form';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers } from '../../../../services/users';
+import { getDisplayName } from '../../../../utils/users';
 import { CREATOR_FIELDS } from '../../../constants/attributes';
 import { useContentTypeSchema } from '../../../hooks/useContentTypeSchema';
 import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
-import { getDisplayName } from '../../../utils/users';
 
 const REVIEW_WORKFLOW_FILTER_CE: Filters.Filter[] = [];
 

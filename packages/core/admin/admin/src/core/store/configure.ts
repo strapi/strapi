@@ -98,5 +98,15 @@ type Store = ReturnType<typeof configureStoreImpl> & {
 
 type RootState = ReturnType<Store['getState']>;
 
+type Dispatch = Store['dispatch'];
+
 export { configureStoreImpl as configureStore };
-export type { RootState, AppState, RBACState, Store, PreloadState, ContentManagerAppState };
+export type {
+  RootState,
+  Dispatch,
+  AppState,
+  RBACState,
+  Store,
+  PreloadState,
+  ContentManagerAppState,
+};

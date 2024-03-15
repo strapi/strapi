@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
 import { Page } from '../../components/PageHelpers';
@@ -199,12 +200,15 @@ const ComponentConfigurationPage = () => {
   }
 
   return (
-    <ConfigurationForm
-      onSubmit={handleSubmit}
-      attributes={schema.attributes}
-      fieldSizes={fieldSizes}
-      layout={editLayout}
-    />
+    <>
+      <Helmet title={`Configure ${editLayout.settings.displayName} Edit View | Strapi`} />
+      <ConfigurationForm
+        onSubmit={handleSubmit}
+        attributes={schema.attributes}
+        fieldSizes={fieldSizes}
+        layout={editLayout}
+      />
+    </>
   );
 };
 

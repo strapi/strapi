@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { BackButton } from '../../../../../../../admin/src/features/BackButton';
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../admin/src/hooks/useInjectReducer';
@@ -304,7 +305,7 @@ export const ReviewWorkflowsEditPage = () => {
       <FormikProvider value={formik}>
         <Form onSubmit={formik.handleSubmit}>
           <Layout.Header
-            navigationAction={<Layout.Back href="/settings/review-workflows" />}
+            navigationAction={<BackButton />}
             primaryAction={
               canUpdate && (
                 <Button

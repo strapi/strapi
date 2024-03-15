@@ -7,7 +7,7 @@ import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { RelativeTime } from '../../../components/RelativeTime';
-import { getDisplayName } from '../../utils/users';
+import { getDisplayName } from '../../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';

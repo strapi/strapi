@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import {
   useAPIErrorHandler,
   useNotification,
@@ -9,15 +8,15 @@ import {
   useTracking,
   translatedErrors,
 } from '@strapi/helper-plugin';
-import { ArrowLeft } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { NavLink, Navigate, useMatch } from 'react-router-dom';
+import { Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { BackButton } from '../../../../features/BackButton';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
 import {
   useGetRolePermissionLayoutQuery,
@@ -221,15 +220,7 @@ const EditPage = () => {
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
               })}
-              navigationAction={
-                // @ts-expect-error – the props from the component passed as `as` are not correctly inferred.
-                <Link as={NavLink} startIcon={<ArrowLeft />} to="/settings/roles">
-                  {formatMessage({
-                    id: 'global.back',
-                    defaultMessage: 'Back',
-                  })}
-                </Link>
-              }
+              navigationAction={<BackButton />}
             />
             <ContentLayout>
               <Flex direction="column" alignItems="stretch" gap={6}>
