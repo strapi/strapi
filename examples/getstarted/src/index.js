@@ -16,16 +16,7 @@ module.exports = {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  async bootstrap({ strapi }) {
-    // const data = new Array(50).fill(0).map((_, i) => ({
-    //   name: `cat-${i}`,
-    //   locale: 'en',
-    //   publishedAt: null,
-    // }));
-    // await strapi.db.query('api::category.category').createMany({
-    //   data,
-    // });
-  },
+  async bootstrap({ strapi }) {},
 
   /**
    * An asynchronous destroy function that runs before
