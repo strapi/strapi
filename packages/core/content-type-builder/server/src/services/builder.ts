@@ -22,8 +22,7 @@ export const getReservedNames = () => {
       'published_at',
       'created_by_id',
       'updated_by_id',
-
-      // TODO v5: restricting 'locale' would be a breaking change in v4 but we will need it if this is not resolved: https://github.com/strapi/strapi/issues/10181
+      'locale', // conflicts with internal locale field
 
       // not actually breaking but we'll leave it to avoid confusion
       'created_by',
