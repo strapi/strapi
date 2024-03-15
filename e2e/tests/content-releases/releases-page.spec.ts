@@ -80,8 +80,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         name: 'Time *',
       })
       .click();
-    await page.getByRole('option', { name: '14:00' }).click();
 
+    await page.getByRole('option', { name: '14:00' }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');

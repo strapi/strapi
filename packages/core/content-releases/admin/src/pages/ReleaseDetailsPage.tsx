@@ -6,6 +6,7 @@ import {
   Pagination,
   Table,
   BackButton,
+  ConfirmDialog,
   useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -30,7 +31,6 @@ import {
   CheckPermissions,
   useNotification,
   useQueryParams,
-  ConfirmDialog,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
@@ -73,7 +73,6 @@ import type { Schema } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -319,7 +318,6 @@ const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
@@ -358,8 +356,7 @@ const ReleaseDetailsLayout = ({
         subtitle={
           <Flex gap={2} lineHeight={6}>
             <Typography textColor="neutral600" variant="epsilon">
-              {numberOfEntriesText +
-                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
             </Typography>
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
@@ -955,15 +952,15 @@ const ReleaseDetailsPage = () => {
         />
       )}
       <ConfirmDialog
-        bodyText={{
+        isOpen={showWarningSubmit}
+        onClose={toggleWarningSubmit}
+        onConfirm={handleDeleteRelease}
+      >
+        {formatMessage({
           id: 'content-releases.dialog.confirmation-message',
           defaultMessage: 'Are you sure you want to delete this release?',
-        }}
-        isOpen={showWarningSubmit}
-        isConfirmButtonLoading={isDeletingRelease}
-        onToggleDialog={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      />
+        })}
+      </ConfirmDialog>
     </ReleaseDetailsLayout>
   );
 };

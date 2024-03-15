@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button } from '@strapi/design-system';
-import { ConfirmDialog } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -12,7 +12,7 @@ import { useBulkRemove } from '../../../hooks/useBulkRemove';
 export const BulkDeleteButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { isLoading, remove } = useBulkRemove();
+  const { remove } = useBulkRemove();
 
   const handleConfirmRemove = async () => {
     await remove(selected);
@@ -31,9 +31,8 @@ export const BulkDeleteButton = ({ selected, onSuccess }) => {
       </Button>
 
       <ConfirmDialog
-        isConfirmButtonLoading={isLoading}
         isOpen={showConfirmDialog}
-        onToggleDialog={() => setShowConfirmDialog(false)}
+        onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirmRemove}
       />
     </>

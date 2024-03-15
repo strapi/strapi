@@ -24,18 +24,14 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  ConfirmDialog,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
@@ -48,7 +44,6 @@ import { useWebhooks } from './hooks/useWebhooks';
 
 const ListPage = () => {
   const [showModal, setShowModal] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = React.useState<string[]>([]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
   const { formatMessage } = useIntl();
@@ -113,7 +108,6 @@ const ListPage = () => {
 
   const confirmDelete = async () => {
     try {
-      setIsDeleting(true);
       const res = await deleteManyWebhooks({
         ids: webhooksToDelete,
       });
@@ -137,7 +131,6 @@ const ListPage = () => {
         },
       });
     } finally {
-      setIsDeleting(false);
       setShowModal(false);
     }
   };
@@ -409,9 +402,8 @@ const ListPage = () => {
       </Main>
       <ConfirmDialog
         isOpen={showModal}
-        onToggleDialog={() => setShowModal((prev) => !prev)}
+        onClose={() => setShowModal((prev) => !prev)}
         onConfirm={confirmDelete}
-        isConfirmButtonLoading={isDeleting}
       />
     </Layout>
   );

@@ -16,7 +16,6 @@ import {
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
-  ConfirmDialog,
   onRowClick,
   useNotification,
   useRBAC,
@@ -27,6 +26,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
@@ -365,16 +365,16 @@ export const ReviewWorkflowsListView = () => {
         )}
 
         <ConfirmDialog
-          bodyText={{
+          isOpen={!!workflowToDelete}
+          onClose={toggleConfirmDeleteDialog}
+          onConfirm={handleConfirmDeleteDialog}
+        >
+          {formatMessage({
             id: 'Settings.review-workflows.list.page.delete.confirm.body',
             defaultMessage:
               'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
-          }}
-          isConfirmButtonLoading={isDeleting}
-          isOpen={!!workflowToDelete}
-          onToggleDialog={toggleConfirmDeleteDialog}
-          onConfirm={handleConfirmDeleteDialog}
-        />
+          })}
+        </ConfirmDialog>
 
         <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
           <LimitsModal.Title>

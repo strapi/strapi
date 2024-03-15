@@ -49,6 +49,20 @@ const MyProtectedPage = () => {
 
 The behaviour has slightly changed, where previously no permissions would redirect you to the root of the page, now it will render the `NoPermissions` component.
 
+### ConfirmDialog
+
+This component has been moved and refactored. It can imported from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { ConfirmDialog } from '@strapi/helper-plugin';
+
+// After
+import { ConfirmDialog } from '@strapi/strapi/admin';
+```
+
+Please see the documentation for the `ConfirmDialog` component for more information.
+
 ### ContentBox
 
 This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
