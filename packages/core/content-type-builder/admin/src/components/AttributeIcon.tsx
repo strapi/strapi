@@ -1,5 +1,5 @@
 import { Box } from '@strapi/design-system';
-import { pxToRem, useCustomFields, CustomFieldUID } from '@strapi/helper-plugin';
+import { useCustomFields, CustomFieldUID } from '@strapi/helper-plugin';
 import {
   Boolean,
   CollectionType,
@@ -86,7 +86,7 @@ export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIc
   }
 
   return (
-    <IconBox height={pxToRem(24)} width={pxToRem(32)} shrink={0} {...rest} aria-hidden>
+    <IconBox height={`${24 / 16}rem`} width={`${32 / 16}rem`} shrink={0} {...rest} aria-hidden>
       <Box as={Compo} />
     </IconBox>
   );

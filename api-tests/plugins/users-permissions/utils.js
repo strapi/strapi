@@ -1,7 +1,7 @@
 'use strict';
 
 const createAuthenticatedUser = async ({ strapi, userInfo }) => {
-  const defaultRole = await strapi
+  const defaultRole = await strapi.db
     .query('plugin::users-permissions.role')
     .findOne({ where: { type: 'authenticated' } });
 

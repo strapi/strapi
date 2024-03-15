@@ -35,8 +35,10 @@ describe('API Token Auth Strategy', () => {
             },
           },
         },
-        query() {
-          return { update };
+        db: {
+          query() {
+            return { update };
+          },
         },
       } as any;
 
@@ -65,8 +67,10 @@ describe('API Token Auth Strategy', () => {
             },
           },
         },
-        query() {
-          return { update };
+        db: {
+          query() {
+            return { update };
+          },
         },
       } as any;
 
@@ -96,8 +100,10 @@ describe('API Token Auth Strategy', () => {
             },
           },
         },
-        query() {
-          return { update };
+        db: {
+          query() {
+            return { update };
+          },
         },
       } as any;
 

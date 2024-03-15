@@ -20,7 +20,7 @@ const render = ({
         relationType: 'manyToMany',
       }}
       label="relations"
-      mainField="name"
+      mainField={{ name: 'name', type: 'string' }}
       name="relations"
       type="relation"
       {...props}

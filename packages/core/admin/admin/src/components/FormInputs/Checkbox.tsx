@@ -7,27 +7,22 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const CheckboxInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ disabled, label, hint, name, required }, ref) => {
-    const field = useField<boolean>(name);
-    const fieldRef = useFocusInputField(name);
+const CheckboxInput = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  const field = useField<boolean>(props.name);
+  const fieldRef = useFocusInputField(props.name);
 
-    const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
+  const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
 
-    return (
-      <Checkbox
-        disabled={disabled}
-        hint={hint}
-        name={name}
-        onValueChange={(checked) => field.onChange(name, checked)}
-        ref={composedRefs}
-        required={required}
-        value={field.value}
-      >
-        {label}
-      </Checkbox>
-    );
-  }
-);
+  return (
+    <Checkbox
+      onValueChange={(checked) => field.onChange(props.name, checked)}
+      ref={composedRefs}
+      value={field.value}
+      {...props}
+    >
+      {props.label || props['aria-label']}
+    </Checkbox>
+  );
+});
 
 export { CheckboxInput };

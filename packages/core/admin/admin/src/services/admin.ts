@@ -1,5 +1,3 @@
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
-
 import {
   type TelemetryProperties,
   type Init,
@@ -9,6 +7,7 @@ import {
   type Plugins,
   type GetLicenseLimitInformation,
 } from '../../../shared/contracts/admin';
+import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
 import { adminApi } from './api';
 

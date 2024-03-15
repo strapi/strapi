@@ -9,7 +9,7 @@ async function migrateWorkflowsContentTypes({ oldContentTypes, contentTypes }: a
   if (!hadContentTypes && hasContentTypes) {
     // Initialize contentTypes with an empty array and assign only to one
     // workflow the Content Types which were using Review Workflow before.
-    await strapi.query(WORKFLOW_MODEL_UID).updateMany({ data: { contentTypes: [] } });
+    await strapi.db.query(WORKFLOW_MODEL_UID).updateMany({ data: { contentTypes: [] } });
 
     // Find Content Types which were using Review Workflow before
     const contentTypes = pipe([pickBy(get('options.reviewWorkflows')), keys])(oldContentTypes);
@@ -17,7 +17,7 @@ async function migrateWorkflowsContentTypes({ oldContentTypes, contentTypes }: a
     if (contentTypes.length) {
       // Update only one workflow with the contentTypes
       // Before this release there was only one workflow, so this operation is safe.
-      await strapi
+      await strapi.db
         .query(WORKFLOW_MODEL_UID)
         .update({ where: { id: { $notNull: true } }, data: { contentTypes } });
     }
