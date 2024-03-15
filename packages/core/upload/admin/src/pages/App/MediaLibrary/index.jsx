@@ -16,7 +16,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
-  CheckPermissions,
   useFocusWhenNavigate,
   usePersistentState,
   useQueryParams,
@@ -42,7 +41,7 @@ import { FolderGridList } from '../../../components/FolderGridList';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
-import { localStorageKeys, PERMISSIONS, viewOptions } from '../../../constants';
+import { localStorageKeys, viewOptions } from '../../../constants';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
@@ -80,6 +79,7 @@ export const MediaLibrary = () => {
     canUpdate,
     canCopyLink,
     canDownload,
+    canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
   const currentFolderToEditRef = useRef();
@@ -263,7 +263,7 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
-              <CheckPermissions permissions={PERMISSIONS.configureView}>
+              {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     forwardedAs={ReactRouterLink}
@@ -278,7 +278,7 @@ export const MediaLibrary = () => {
                     })}
                   />
                 </ActionContainer>
-              </CheckPermissions>
+              ) : null}
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
                   icon={isGridView ? <List /> : <Grid />}

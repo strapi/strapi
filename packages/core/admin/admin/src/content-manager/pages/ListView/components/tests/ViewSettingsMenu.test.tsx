@@ -32,18 +32,14 @@ const render = (props?: Partial<ViewSettingsMenuProps>) =>
  * react act errors.
  */
 describe('ViewSettingsMenu', () => {
-  it('should show the cog button by default', () => {
-    render();
+  it('should open the popover when you click on the button and render the available tools', async () => {
+    const { user } = render();
 
     expect(
       screen.getByRole('button', {
         name: 'View Settings',
       })
     ).toBeInTheDocument();
-  });
-
-  it('should open the popover when you click on the button and render the available tools', async () => {
-    const { user } = render();
 
     await user.click(
       screen.getByRole('button', {
