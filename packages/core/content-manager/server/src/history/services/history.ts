@@ -181,13 +181,37 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           'strapi_assignee',
         ];
 
+        /**
+         * Store schema of both the fields and the fields of the attributes, as it will let us know
+         * if changes were made in the CTB since a history version was created,
+         * and therefore which fields can be restored and which cannot.
+         */
+        const attributesSchema = strapi.getModel(contentTypeUid).attributes;
+        const componentsSchemas: CreateHistoryVersion['componentsSchemas'] = Object.keys(
+          attributesSchema
+        ).reduce((currentComponentSchemas, key) => {
+          const fieldSchema = attributesSchema[key];
+
+          if (fieldSchema.type === 'component') {
+            const componentSchema = strapi.getModel(fieldSchema.component).attributes;
+            return {
+              ...currentComponentSchemas,
+              [fieldSchema.component]: componentSchema,
+            };
+          }
+
+          // Ignore anything that's not a component
+          return currentComponentSchemas;
+        }, {});
+
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
               data: omit(fieldsToIgnore, document),
-              schema: omit(fieldsToIgnore, strapi.getModel(contentTypeUid).attributes),
+              schema: omit(fieldsToIgnore, attributesSchema),
+              componentsSchemas,
               relatedDocumentId: documentContext.documentId,
               locale,
               status,

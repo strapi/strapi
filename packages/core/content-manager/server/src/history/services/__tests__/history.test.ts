@@ -164,7 +164,31 @@ describe('history-version service', () => {
     });
 
     // Create and update actions should be saved in history
-    expect(createMock).toHaveBeenCalled();
+    const createPayload = createMock.mock.calls.at(-1)[0].data;
+    expect(createPayload.schema).toEqual({
+      title: {
+        type: 'string',
+      },
+      relation: {
+        type: 'relation',
+        target: 'api::category.category',
+      },
+      component: {
+        type: 'component',
+        component: 'some.component',
+      },
+    });
+    expect(createPayload.componentsSchemas).toEqual({
+      'some.component': {
+        title: {
+          type: 'string',
+        },
+        relation: {
+          type: 'relation',
+          target: 'api::restaurant.restaurant',
+        },
+      },
+    });
     context.action = 'update';
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(2);
@@ -212,6 +236,7 @@ describe('history-version service', () => {
           type: 'string' as const,
         },
       },
+      componentsSchemas: {},
       status: 'draft' as const,
     };
 
