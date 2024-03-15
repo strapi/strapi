@@ -60,10 +60,7 @@ export const getComponentJoinColumnInverseName = (options: MetadataOptions) => {
 };
 
 export const getComponentTypeColumn = (options: MetadataOptions) => {
-  return identifiers.getNameFromTokens(
-    [{ name: 'component_type', shortName: 'cmptype', compressible: false }],
-    options
-  );
+  return identifiers.getNameFromTokens([{ name: 'component_type', compressible: false }], options);
 };
 
 export const getComponentFkIndexName = (contentType: string, options: MetadataOptions) => {
