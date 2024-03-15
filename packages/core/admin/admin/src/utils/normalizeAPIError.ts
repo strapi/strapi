@@ -48,6 +48,24 @@ const validateErrorIsYupValidationError = (
 ): err is errors.YupValidationError & { details: { errors: YupFormattedError[] } } =>
   typeof err.details === 'object' && err.details !== null && 'errors' in err.details;
 
+/**
+ * @public
+ * @description Normalize the format of `ResponseError`
+ * in places where the hook `useAPIErrorHandler` can not called
+ * (e.g. outside of a React component).
+ * @example
+ * ```tsx
+ * import { normalizeAPIError } from '@strapi/admin/admin';
+ *
+ * function myFunction() {
+ *  try {
+ *   // ... some code
+ *  } catch (err) {
+ *   const normalizedError = normalizeAPIError(err);
+ *  }
+ * }
+ * ```
+ */
 export function normalizeAPIError(
   apiError: AxiosError<{ error: ApiError }>,
   intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']

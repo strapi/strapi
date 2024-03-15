@@ -13,7 +13,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { getAPIInnerErrors, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
@@ -25,7 +25,7 @@ import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import { getAPIInnerErrors, findRecursiveFolderByValue, getTrad } from '../../utils';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
