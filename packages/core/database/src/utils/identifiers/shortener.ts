@@ -66,6 +66,7 @@ export function createHash(data: string, len: number): string {
 // We need to be able to find the full-length name for any shortened name, primarily for migration purposes
 // Therefore we store every name that passes through so we can retrieve the original later
 const nameMap = new Map<string, string>();
+
 export const getUnshortenedName = (shortName: string, options: NameFromTokenOptions) => {
   return nameMap.get(serializeKey(shortName, options)) ?? shortName;
 };
@@ -73,12 +74,17 @@ export const getUnshortenedName = (shortName: string, options: NameFromTokenOpti
 export const setUnshortenedName = (
   shortName: string,
   options: NameFromTokenOptions,
-  fullName: string
+  fullName: string,
+  overwrite?: boolean
 ) => {
   // This is protection against cases where a name is shortened twice, for example shortened in a model outside of createMetadata
   // and then run through the shortener against inside createMetadata, which would do nothing at all but replace the original
   // name in this mapping
-  if (nameMap.get(serializeKey(shortName, options)) && shortName === fullName) {
+  if (
+    nameMap.get(serializeKey(shortName, options)) &&
+    shortName === fullName &&
+    overwrite !== true
+  ) {
     return;
   }
 
