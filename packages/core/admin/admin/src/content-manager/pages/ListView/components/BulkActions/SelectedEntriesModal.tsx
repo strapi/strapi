@@ -8,8 +8,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Tr,
-  Td,
   IconButton,
   Flex,
   Icon,
@@ -17,8 +15,6 @@ import {
   Loader,
 } from '@strapi/design-system';
 import {
-  useTableContext,
-  Table as HelperPluginTable,
   getYupInnerErrors,
   useQueryParams,
   useNotification,
@@ -32,6 +28,7 @@ import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
+import { Table, useTable } from '../../../../../components/Table';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {
@@ -40,7 +37,6 @@ import {
 } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
-import { Table } from '../Table';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
@@ -123,6 +119,12 @@ interface SelectedEntriesTableContentProps {
   validationErrors: Record<string, EntryValidationTextProps['validationErrors']>;
 }
 
+const TABLE_HEADERS: Table.Header<any, any>[] = [
+  { name: 'id', label: 'id' },
+  { name: 'name', label: 'name' },
+  { name: 'status', label: 'status' },
+];
+
 const SelectedEntriesTableContent = ({
   isPublishing,
   rowsToDisplay = [],
@@ -141,31 +143,29 @@ const SelectedEntriesTableContent = ({
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
 
   return (
-    <HelperPluginTable.Content>
-      <HelperPluginTable.Head>
-        <HelperPluginTable.HeaderCheckboxCell />
-        <HelperPluginTable.HeaderCell attribute={{ type: 'integer' }} label="id" name="id" />
-        {shouldDisplayMainField && (
-          <HelperPluginTable.HeaderCell attribute={{ type: 'string' }} label="name" name="name" />
+    <Table.Content>
+      <Table.Head>
+        <Table.HeaderCheckboxCell />
+        {TABLE_HEADERS.filter((head) => head.name !== 'name' || shouldDisplayMainField).map(
+          (head) => (
+            <Table.HeaderCell key={head.name} {...head} />
+          )
         )}
-        <HelperPluginTable.HeaderCell attribute={{ type: 'string' }} label="status" name="status" />
-      </HelperPluginTable.Head>
-      <HelperPluginTable.LoadingBody />
-      <HelperPluginTable.Body>
+      </Table.Head>
+      <Table.Loading />
+      <Table.Body>
         {rowsToDisplay.map((row, index) => (
-          <Tr key={row.id}>
-            <Td>
-              <Table.CheckboxDataCell rowId={row.id} index={index} />
-            </Td>
-            <Td>
+          <Table.Row key={row.id}>
+            <Table.CheckboxCell id={row.id} />
+            <Table.Cell>
               <Typography>{row.id}</Typography>
-            </Td>
+            </Table.Cell>
             {shouldDisplayMainField && (
-              <Td>
+              <Table.Cell>
                 <Typography>{row[mainField as keyof TableRow]}</Typography>
-              </Td>
+              </Table.Cell>
             )}
-            <Td>
+            <Table.Cell>
               {isPublishing && entriesToPublish.includes(row.id) ? (
                 <Flex gap={2}>
                   <Typography>
@@ -182,8 +182,8 @@ const SelectedEntriesTableContent = ({
                   isPublished={row.publishedAt !== null}
                 />
               )}
-            </Td>
-            <Td>
+            </Table.Cell>
+            <Table.Cell>
               <IconButton
                 forwardedAs={Link}
                 // @ts-expect-error – DS does not correctly infer props from the as prop.
@@ -209,11 +209,11 @@ const SelectedEntriesTableContent = ({
               >
                 <Pencil />
               </IconButton>
-            </Td>
-          </Tr>
+            </Table.Cell>
+          </Table.Row>
         ))}
-      </HelperPluginTable.Body>
-    </HelperPluginTable.Content>
+      </Table.Body>
+    </Table.Content>
   );
 };
 
@@ -248,7 +248,12 @@ const SelectedEntriesModalContent = ({
   validationErrors = {},
 }: SelectedEntriesModalContentProps) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext<TableRow>();
+  const {
+    selectedRows: selectedEntries,
+    rows,
+    selectRow,
+    isLoading,
+  } = useTable('SelectedEntriesModal', (state) => state);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [rowsToDisplay, setRowsToDisplay] = React.useState<Array<TableRow>>([]);
   const [publishedCount, setPublishedCount] = React.useState(0);
@@ -292,7 +297,7 @@ const SelectedEntriesModalContent = ({
       const update = rowsToDisplay.filter((row) => {
         if (entriesToPublish.includes(row.id)) {
           // Deselect the entries that have been published from the modal table
-          onSelectRow({ name: row.id, value: false });
+          selectRow({ name: row.id, value: false });
         }
 
         // Remove the entries that have been published from the table
@@ -398,7 +403,7 @@ const SelectedEntriesModalContent = ({
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={refetchModalData} variant="tertiary" loading={isFetching}>
+            <Button onClick={refetchModalData} variant="tertiary" loading={isLoading}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -434,10 +439,10 @@ interface SelectedEntriesModalProps {
 }
 
 const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
-  const {
-    selectedEntries: selectedListViewEntries,
-    setSelectedEntries: setSelectedListViewEntries,
-  } = useTableContext();
+  const { selectedRows: selectedListViewEntries, selectRow: setSelectedListViewEntries } = useTable(
+    'SelectedEntriesModal',
+    (state) => state
+  );
 
   const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
   // The child table will update this value based on the entries that were published
@@ -497,12 +502,11 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
   }, [components, data, schema]);
 
   return (
-    <HelperPluginTable.Root
+    <Table.Root
       rows={rows}
-      defaultSelectedEntries={selectedListViewEntries}
-      colCount={4}
-      isLoading={isLoading || isLoadingDoc}
-      isFetching={isFetching}
+      defaultSelectedRows={selectedListViewEntries}
+      headers={TABLE_HEADERS}
+      isLoading={isLoading || isLoadingDoc || isFetching}
     >
       <SelectedEntriesModalContent
         setSelectedListViewEntries={setSelectedListViewEntries}
@@ -511,7 +515,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
         refetchModalData={refetch}
         validationErrors={validationErrors}
       />
-    </HelperPluginTable.Root>
+    </Table.Root>
   );
 };
 

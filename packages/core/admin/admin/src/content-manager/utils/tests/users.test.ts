@@ -1,4 +1,4 @@
-import { getDisplayName } from '../users';
+import { getDisplayName } from '../../../utils/users';
 
 const mockFormatMessage = jest.fn((message, values) => {
   return `${values.firstname} ${values.lastname}`;

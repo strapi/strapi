@@ -24,6 +24,7 @@ import {
 
 import type { Filters } from '../../components/Filters';
 import type { InputProps } from '../../components/FormInputs/types';
+import type { Table } from '../../components/Table';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Attribute } from '@strapi/types';
 
@@ -34,18 +35,10 @@ interface LayoutSettings extends Contracts.ContentTypes.Settings {
   icon?: never;
 }
 
-interface ListFieldLayout extends Pick<Filters.Filter, 'label' | 'name' | 'mainField'> {
+interface ListFieldLayout
+  extends Table.Header<Document, ListFieldLayout>,
+    Pick<Filters.Filter, 'mainField'> {
   attribute: Attribute.Any | { type: 'custom' };
-  /**
-   * Typically used by plugins to render a custom cell
-   */
-  cellFormatter?: (
-    data: Document,
-    header: Omit<ListFieldLayout, 'cellFormatter'>,
-    { collectionType, model }: { collectionType: string; model: string }
-  ) => React.ReactNode;
-  searchable?: boolean;
-  sortable?: boolean;
 }
 
 interface ListLayout {
