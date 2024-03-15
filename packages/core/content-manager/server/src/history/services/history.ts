@@ -70,7 +70,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   /**
    * Creates a populate object that looks for all the relations that need
-   * to be saved in history, and populates only the id for each of them.
+   * to be saved in history, and populates only the documentId and locale for each of them.
    */
   const getDeepPopulate = (uid: Common.UID.Schema) => {
     const model = strapi.getModel(uid);
@@ -86,13 +86,13 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           }
           const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
           if (isVisible) {
-            acc[attributeName] = { select: ['id'] };
+            acc[attributeName] = { fields: ['documentId', 'locale'] };
           }
           break;
         }
 
         case 'media': {
-          acc[attributeName] = { select: ['id'] };
+          acc[attributeName] = { fields: ['documentId', 'locale'] };
           break;
         }
 
@@ -272,7 +272,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
                 const relationDataPromise = (
                   (shouldFetchSeveral
                     ? result.data[attributeKey]
-                    : [result.data[attributeKey]]) as Array<{ id: number } | null>
+                    : [result.data[attributeKey]]) as Array<{
+                    documentId: string;
+                    locale: string | null;
+                  } | null>
                 )
                   // Until we implement proper pagination, limit relations to an arbitrary amount
                   .slice(0, 25)
@@ -285,10 +288,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
                         return currentRelationData;
                       }
 
-                      // TODO: batch all queries into a findMany query
-                      const relatedEntry = await strapi.db
-                        .query(attributeSchema.target)
-                        .findOne({ where: { id: entry.id } });
+                      // TODO: batch all queries into a findMany
+                      const relatedEntry = await strapi
+                        .documents(attributeSchema.target)
+                        .findOne(entry.documentId, { locale: entry.locale || undefined });
 
                       if (relatedEntry) {
                         currentRelationData.results.push({
