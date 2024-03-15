@@ -294,14 +294,16 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
                       return false;
                     }
 
-                    return relatedEntry;
+                    return {
+                      ...relatedEntry,
+                      status: await getVersionStatus(attributeSchema.target, relatedEntry),
+                    };
                   })
                 );
 
                 return {
                   ...(await currentDataWithRelations),
                   [attributeKey]: relatedEntries,
-                  // [attributeKey]: shouldFetchSeveral ? relatedEntries : relatedEntries[0],
                 };
               }
 
