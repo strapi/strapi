@@ -476,7 +476,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             types.isRelationalAttribute(attr) &&
             'joinTable' in attr &&
             attr.joinTable &&
-            !attr.joinTable.name.endsWith('_components')
+            !(attr.joinTable.name.endsWith('_components') || attr.joinTable.name.endsWith('_cmps'))
           ) {
             acc.push(attrName);
           }
