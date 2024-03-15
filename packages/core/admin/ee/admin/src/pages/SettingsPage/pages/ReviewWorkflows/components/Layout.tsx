@@ -1,11 +1,8 @@
 import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ArrowLeft } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
 import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 import { DRAG_DROP_TYPES } from '../constants';
@@ -31,23 +28,6 @@ const Root: React.FC<React.PropsWithChildren> = ({ children }) => {
         <ContentLayout>{children}</ContentLayout>
       </Main>
     </Layout>
-  );
-};
-
-type BackProps = {
-  href: string;
-};
-const Back: React.FC<BackProps> = ({ href }) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-    <Link as={NavLink} startIcon={<ArrowLeft />} to={href}>
-      {formatMessage({
-        id: 'global.back',
-        defaultMessage: 'Back',
-      })}
-    </Link>
   );
 };
 
@@ -80,4 +60,4 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, prim
   );
 };
 
-export { Back, DragLayerRendered, Header, Root };
+export { DragLayerRendered, Header, Root };

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { normalizeAPIError } from '@strapi/admin/strapi-admin';
 import {
   Button,
   FieldLabel,
@@ -13,7 +14,6 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { normalizeAPIError } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';

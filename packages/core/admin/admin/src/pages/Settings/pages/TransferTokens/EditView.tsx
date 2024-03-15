@@ -266,7 +266,6 @@ const EditView = () => {
           return (
             <Form>
               <FormHead
-                backUrl="/settings/transfer-tokens"
                 title={{
                   id: 'Settings.transferTokens.createPage.title',
                   defaultMessage: 'TokenCreate Transfer Token',

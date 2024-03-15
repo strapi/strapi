@@ -4,10 +4,10 @@ import { useIntl } from 'react-intl';
 
 import { useField } from '../../../../../../../admin/src/components/Form';
 import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
-import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useAdminUsers } from '../../../../../../../admin/src/services/users';
+import { getDisplayName } from '../../../../../../../admin/src/utils/users';
 import { useUpdateAssigneeMutation } from '../../../../services/reviewWorkflows';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';

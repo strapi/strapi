@@ -65,6 +65,14 @@ import { DateTimePicker } from '@strapi/helper-plugin';
 import { DateTimePicker } from '@strapi/design-system';
 ```
 
+### DynamicTable
+
+This component was previously deprecated and has now been removed. Similar to the deprecation notice, we recommend using the `Table` component from `@strapi/strapi/admin`.
+
+### EmptyBodyTable
+
+This component has been removed and is part of the `Table` component.
+
 ### EmptyStateLayout
 
 This component has been removed and not replaced. You should use `EmptyStateLayout` from `@strapi/design-system`:
@@ -356,6 +364,20 @@ import { Status } from '@strapi/helper-plugin';
 // After
 import { Status } from '@strapi/design-system';
 ```
+
+### Table
+
+This component should be imported from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { Table } from '@strapi/helper-plugin';
+
+// After
+import { Table } from '@strapi/strapi/admin';
+```
+
+Note! some of the props have changed, please refer to the documentation for the `Table` component.
 
 ## Content Manager
 

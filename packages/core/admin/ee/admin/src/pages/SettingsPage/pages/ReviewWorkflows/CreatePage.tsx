@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import { BackButton } from '../../../../../../../admin/src/features/BackButton';
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
@@ -238,7 +239,7 @@ export const ReviewWorkflowsCreatePage = () => {
       <FormikProvider value={formik}>
         <Form onSubmit={formik.handleSubmit}>
           <Layout.Header
-            navigationAction={<Layout.Back href="/settings/review-workflows" />}
+            navigationAction={<BackButton />}
             primaryAction={
               <Button
                 startIcon={<Check />}

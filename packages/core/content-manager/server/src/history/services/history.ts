@@ -1,9 +1,9 @@
-import type { LoadedStrapi } from '@strapi/types';
+import type { LoadedStrapi, Documents } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
-import { HISTORY_VERSION_UID } from '../constants';
 
+import { HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
 
 const DEFAULT_RETENTION_DAYS = 90;
@@ -33,6 +33,32 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
+  const localesService = strapi.plugin('i18n').service('locales');
+  const getLocaleDictionary = async () => {
+    const locales = (await localesService.find()) || [];
+    return locales.reduce(
+      (
+        acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
+        locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
+      ) => {
+        acc[locale.code] = { name: locale.name, code: locale.code };
+
+        return acc;
+      },
+      {}
+    );
+  };
+
+  const getVersionStatus = async (
+    contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
+    document: Documents.AnyDocument | null
+  ) => {
+    const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
+    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
+
+    return documentMetadataService.getStatus(document, meta.availableStatus);
+  };
+
   return {
     async bootstrap() {
       // Prevent initializing the service twice
@@ -43,18 +69,40 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
        * TODO: Fix the types for the middleware
        */
       strapi.documents.use(async (context, next) => {
-        // @ts-expect-error ContentType is not typed correctly on the context
-        const contentTypeUid = context.contentType.uid;
-        const params = context.args.at(-1) as any;
-        // Ignore actions that don't mutate documents
-        if (!['create', 'update', 'publish', 'unpublish'].includes(context.action)) {
+        // Ignore requests that are not related to the content manager
+        if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
           return next(context);
         }
 
+        // Ignore actions that don't mutate documents
+        if (
+          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
+        ) {
+          return next(context);
+        }
+
+        // @ts-expect-error ContentType is not typed correctly on the context
+        const contentTypeUid = context.contentType.uid;
         // Ignore content types not created by the user
         if (!contentTypeUid.startsWith('api::')) {
           return next(context);
         }
+
+        const result = (await next(context)) as any;
+
+        const documentContext =
+          context.action === 'create'
+            ? // @ts-expect-error The context args are not typed correctly
+              { documentId: result.documentId, locale: context.args[0]?.locale }
+            : { documentId: context.args[0], locale: context.args[1]?.locale };
+
+        const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
+        const document = await strapi
+          .documents(contentTypeUid)
+          .findOne(documentContext.documentId, {
+            locale,
+          });
+        const status = await getVersionStatus(contentTypeUid, document);
 
         const fieldsToIgnore = [
           'createdAt',
@@ -62,29 +110,21 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           'publishedAt',
           'createdBy',
           'updatedBy',
-          'localizations',
           'locale',
           'strapi_stage',
           'strapi_assignee',
         ];
-
-        /**
-         * Await the middleware stack because for create actions,
-         * the document ID only exists after the creation, which is later in the stack.
-         */
-        const result = (await next(context)) as any;
 
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              relatedDocumentId: 'documentId' in result ? result.documentId : context.args[0],
-              locale: params.locale,
-              // TODO: check if drafts should should be "modified" once D&P is ready
-              status: params.status,
-              data: omit(fieldsToIgnore, params.data),
+              data: omit(fieldsToIgnore, document),
               schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
+              relatedDocumentId: documentContext.documentId,
+              locale,
+              status,
             });
           });
         });
@@ -126,28 +166,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       });
     },
 
-    /**
-     * TODO: Refactor so i18n can interact history without history itself being concerned about i18n
-     */
-    async getLocaleDictionary() {
-      if (!strapi.plugin('i18n')) {
-        return {};
-      }
-
-      const locales = (await strapi.plugin('i18n').service('locales').find()) || [];
-      return locales.reduce(
-        (
-          acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
-          locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
-        ) => {
-          acc[locale.code] = { name: locale.name, code: locale.code };
-
-          return acc;
-        },
-        {}
-      );
-    },
-
     async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
@@ -162,7 +180,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           populate: ['createdBy'],
           orderBy: [{ createdAt: 'desc' }],
         }),
-        this.getLocaleDictionary(),
+        getLocaleDictionary(),
       ]);
 
       const sanitizedResults = results.map((result) => ({

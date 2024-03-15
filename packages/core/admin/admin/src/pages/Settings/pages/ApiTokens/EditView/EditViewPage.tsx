@@ -357,7 +357,6 @@ export const EditView = () => {
             return (
               <Form>
                 <FormHead
-                  backUrl="/settings/api-tokens"
                   title={{
                     id: 'Settings.apiTokens.createPage.title',
                     defaultMessage: 'Create API Token',

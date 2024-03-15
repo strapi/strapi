@@ -12,19 +12,18 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import {
   useOverlayBlocker,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Check } from '@strapi/icons';
-import { useAPIErrorHandler, Page } from '@strapi/strapi/admin';
+import { Check } from '@strapi/icons';
+import { useAPIErrorHandler, Page, BackButton } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
-import { NavLink, useMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';
 import { PERMISSIONS } from '../../../constants';
@@ -127,14 +126,7 @@ export const EditPage = () => {
               }
               title={role.name}
               subtitle={role.description}
-              navigationAction={
-                <Link as={NavLink} startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
-                  {formatMessage({
-                    id: 'global.back',
-                    defaultMessage: 'Back',
-                  })}
-                </Link>
-              }
+              navigationAction={<BackButton />}
             />
             <ContentLayout>
               <Flex

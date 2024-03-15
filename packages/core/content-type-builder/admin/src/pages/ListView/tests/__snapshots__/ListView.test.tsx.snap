@@ -16,7 +16,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c4 {
   font-size: 0.875rem;
   line-height: 1.43;
-  color: #4945ff;
+  color: #666687;
 }
 
 .c8 {
@@ -690,6 +690,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-text-decoration: none;
   text-decoration: none;
   gap: 8px;
+  pointer-events: none;
   position: relative;
   outline: none;
 }
@@ -699,7 +700,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 }
 
 .c2 svg path {
-  fill: #4945ff;
+  fill: #666687;
 }
 
 .c2:hover {
@@ -1055,8 +1056,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
         class="c1"
       >
         <a
-          class="c2"
-          href="/plugins/content-type-builder/"
+          aria-current="page"
+          aria-disabled="true"
+          class="c2 active"
+          disabled=""
+          href="/"
         >
           <svg
             fill="none"

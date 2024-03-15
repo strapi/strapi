@@ -1,7 +1,7 @@
 import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/users';
+import { getDisplayName } from '../../../../../../../admin/src/utils/users';
 import { SanitizedAdminUser } from '../../../../../../../shared/contracts/shared';
 
 interface ReviewWorkflowsAssigneeEEProps {

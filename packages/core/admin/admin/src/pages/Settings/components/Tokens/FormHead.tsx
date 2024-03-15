@@ -1,12 +1,11 @@
 import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Refresh } from '@strapi/icons';
+import { Check, Refresh } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
+import { BackButton } from '../../../../features/BackButton';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useRegenerateTokenMutation } from '../../../../services/api';
 
@@ -116,7 +115,6 @@ interface FormHeadProps<TToken extends Token | null> {
   canRegenerate: boolean;
   setToken: (token: TToken) => void;
   isSubmitting: boolean;
-  backUrl: string;
   regenerateUrl: string;
 }
 
@@ -127,7 +125,6 @@ export const FormHead = <TToken extends Token | null>({
   canEditInputs,
   canRegenerate,
   isSubmitting,
-  backUrl,
   regenerateUrl,
 }: FormHeadProps<TToken>) => {
   const { formatMessage } = useIntl();
@@ -173,17 +170,7 @@ export const FormHead = <TToken extends Token | null>({
           )
         )
       }
-      navigationAction={
-        <>
-          {/* @ts-expect-error polymorphic */}
-          <Link as={NavLink} startIcon={<ArrowLeft />} to={backUrl}>
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        </>
-      }
+      navigationAction={<BackButton />}
       ellipsis
     />
   );
