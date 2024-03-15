@@ -410,101 +410,6 @@ const deleteComponents = async <
   }
 };
 
-const cloneComponents = async <TUID extends Common.UID.Schema>(
-  uid: TUID,
-  entityToClone: { id: EntityService.Params.Attribute.ID },
-  data: EntityService.Params.Data.Input<TUID>
-) => {
-  const { attributes = {} } = strapi.getModel(uid);
-
-  const componentBody: ComponentBody = {};
-  const componentData = await getComponents(uid, entityToClone);
-
-  for (const attributeName of Object.keys(attributes)) {
-    const attribute = attributes[attributeName];
-
-    // If the attribute is not set or on the component to clone, skip it
-    if (!has(attributeName, data) && !has(attributeName, componentData)) {
-      continue;
-    }
-
-    if (attribute.type === 'component') {
-      const { component: componentUID, repeatable = false } = attribute;
-
-      const componentValue = (
-        attributeName in data
-          ? data[attributeName as keyof typeof data]
-          : componentData[attributeName as keyof typeof componentData]
-      ) as ComponentValue;
-
-      if (componentValue === null) {
-        continue;
-      }
-
-      if (repeatable === true) {
-        if (!Array.isArray(componentValue)) {
-          throw new Error('Expected an array to create repeatable component');
-        }
-
-        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = (await async.map(
-          componentValue,
-          (value: any) => cloneComponent(componentUID, value),
-          { concurrency: isDialectMySQL() ? 1 : Infinity }
-        )) as Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
-
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
-          return {
-            id,
-            __pivot: {
-              field: attributeName,
-              component_type: componentUID,
-            },
-          };
-        });
-      } else {
-        const component = await cloneComponent(componentUID, componentValue);
-        componentBody[attributeName] = component && {
-          id: component.id,
-          __pivot: {
-            field: attributeName,
-            component_type: componentUID,
-          },
-        };
-      }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = has(attributeName, data)
-        ? data[attributeName as keyof typeof data]
-        : componentData[attributeName as keyof typeof componentData];
-
-      if (!Array.isArray(dynamiczoneValues)) {
-        throw new Error('Expected an array to create repeatable component');
-      }
-      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await async.map(
-        dynamiczoneValues,
-        async (value: any) => {
-          const { id } = await cloneComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        },
-        { concurrency: isDialectMySQL() ? 1 : Infinity }
-      );
-      continue;
-    }
-  }
-
-  return componentBody;
-};
 /** *************************
     Component queries
 ************************** */
@@ -573,29 +478,6 @@ const deleteComponent = async <TUID extends Common.UID.Component>(
   await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
-const cloneComponent = async <TUID extends Common.UID.Component>(
-  uid: TUID,
-  data: EntityService.Params.Data.Input<TUID>
-) => {
-  const model = strapi.getModel(uid);
-
-  if (!('id' in data) || typeof data.id === 'undefined') {
-    return createComponent(uid, data);
-  }
-
-  const componentData = await cloneComponents(uid, { id: data.id }, data);
-  const transform = pipe(
-    // Make sure we don't save the component with a pre-defined ID
-    omit('id'),
-    // Remove the component data from the original data object ...
-    (payload) => omitComponentData(model, payload),
-    // ... and assign the newly created component instead
-    assign(componentData)
-  );
-
-  return strapi.db.query(uid).clone(data.id, { data: transform(data) });
-};
-
 export {
   omitComponentData,
   getComponents,
@@ -603,5 +485,4 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
-  cloneComponents,
 };

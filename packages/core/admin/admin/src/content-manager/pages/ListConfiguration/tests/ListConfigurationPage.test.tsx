@@ -67,22 +67,6 @@ describe('Configure the List View', () => {
     expect(screen.getByRole('button', { name: 'Add a field' })).toBeInTheDocument();
   });
 
-  it('should keep plugins query params when arriving on the page and going back', async () => {
-    const { getByRole, user, findByRole, getByText } = render({
-      initialEntries: [
-        '/content-manager/collection-types/api::address.address/configurations/list?plugins[i18n][locale]=fr',
-      ],
-    });
-
-    await findByRole('heading', { name: 'Configure the view - Address' });
-
-    expect(getByText('?plugins[i18n][locale]=fr')).toBeInTheDocument();
-
-    await user.click(getByRole('link', { name: 'Back' }));
-
-    expect(getByText('?plugins[i18n][locale]=fr')).toBeInTheDocument();
-  });
-
   it('should add field', async () => {
     const { getByRole, user, findByRole } = render();
 

@@ -1,13 +1,12 @@
 import * as React from 'react';
 
-import { Page, unstable_useDocument, Pagination } from '@strapi/admin/strapi-admin';
+import { Page, unstable_useDocument, Pagination, BackButton } from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
   Flex,
   HeaderLayout,
   IconButton,
-  Link,
   Main,
   Tr,
   Td,
@@ -30,15 +29,7 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import {
-  ArrowLeft,
-  CheckCircle,
-  More,
-  Pencil,
-  Trash,
-  CrossCircle,
-  EmptyDocuments,
-} from '@strapi/icons';
+import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -367,14 +358,7 @@ const ReleaseDetailsLayout = ({
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
         }
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>

@@ -1,11 +1,8 @@
 import { Button, HeaderLayout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { useQueryParams } from '@strapi/helper-plugin';
-import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
 import { useForm } from '../../../../components/Form';
+import { BackButton } from '../../../../features/BackButton';
 import { capitalise } from '../../../../utils/strings';
 import { getTranslation } from '../../../utils/translations';
 
@@ -15,8 +12,7 @@ interface HeaderProps {
   model: string;
 }
 
-const Header = ({ collectionType, name, model }: HeaderProps) => {
-  const [{ rawQuery }] = useQueryParams();
+const Header = ({ name }: HeaderProps) => {
   const { formatMessage } = useIntl();
 
   const modified = useForm('Header', (state) => state.modified);
@@ -24,20 +20,7 @@ const Header = ({ collectionType, name, model }: HeaderProps) => {
 
   return (
     <HeaderLayout
-      navigationAction={
-        <Link
-          startIcon={<ArrowLeft />}
-          // @ts-expect-error invalid typings
-          to={{
-            pathname: `/content-manager/${collectionType}/${model}`,
-            search: rawQuery,
-          }}
-          id="go-back"
-          as={NavLink}
-        >
-          {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-        </Link>
-      }
+      navigationAction={<BackButton />}
       primaryAction={
         <Button size="S" disabled={!modified} type="submit" loading={isSubmitting}>
           {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
