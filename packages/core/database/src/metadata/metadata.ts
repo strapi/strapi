@@ -96,15 +96,13 @@ export class Metadata extends Map<string, Meta> {
 }
 
 const createAttribute = (attributeName: string, attribute: Attribute, options: MetadataOptions) => {
-  let columnName;
-
   // if the attribute has already set its own column name, use that
   // this will prevent us from shortening a name twice
-  if ((attribute as any).columnName) {
-    columnName = (attribute as any).columnName;
-  } else {
-    columnName = identifiers.getColumnName(snakeCase(attributeName), options);
+  if ('columnName' in attribute && attribute.columnName) {
+    return;
   }
+
+  const columnName = identifiers.getColumnName(snakeCase(attributeName), options);
 
   Object.assign(attribute, { columnName });
 };
