@@ -58,10 +58,10 @@ const setupTestEnvironment = async (generatedAppPath) => {
 yargs
   .parserConfiguration({
     /**
-     * This lets us pass any other arguments to playwright
-     * e.g. the name of a specific test or the project we want to run
+     * When unknown options is false, using -- to separate playwright args from test:e2e args works
+     * When it is true, the script gets confused about additional arguments, with or without using -- to separate commands
      */
-    'unknown-options-as-args': true,
+    'unknown-options-as-args': false,
   })
   .command({
     command: '*',
