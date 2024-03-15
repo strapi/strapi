@@ -29,6 +29,10 @@ export type ServiceInstance<
     params: TParams
   ) => Result.Create<TContentTypeUID, TParams>;
 
+  /**
+   * @internal
+   * Exposed for use within the Strapi Admin Panel
+   */
   clone: <TParams extends Params.Clone<TContentTypeUID>>(
     documentId: ID,
     params: TParams
