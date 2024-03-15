@@ -66,7 +66,6 @@ import type {
   ReleaseAction,
   ReleaseActionGroupBy,
   ReleaseActionEntry,
-  FormattedReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { Schema } from '@strapi/types';
 
