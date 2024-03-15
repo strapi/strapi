@@ -28,15 +28,11 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
   return (
     <Box>
       <FieldLabel>{props.label}</FieldLabel>
-      {field.value.length === 0 ? (
+      {field.value.results.length === 0 ? (
         <Typography>No content</Typography>
       ) : (
         <Flex direction="column" gap={2} alignItems="stretch">
-          {(field.value as Array<Record<string, unknown> | false>).map((relationData, index) => {
-            if (relationData == false) {
-              return <Typography key={index}>Related content no longer exists</Typography>;
-            }
-
+          {(field.value.results as Record<string, unknown>[]).map((relationData, index) => {
             return (
               <Flex
                 key={index}
@@ -55,6 +51,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
               </Flex>
             );
           })}
+          <Typography>{field.value.meta.missingCount} missing relations</Typography>
         </Flex>
       )}
     </Box>

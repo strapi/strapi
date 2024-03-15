@@ -259,7 +259,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
               const attributeSchema = result.schema[attributeKey];
 
               // TODO: handle media
-              // TODO: nested content structures
+              // TODO: handle nested content structures
               if (
                 attributeSchema.type === 'relation' &&
                 attributeSchema.relation !== 'morphToOne' &&
@@ -269,41 +269,47 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
                   attributeSchema.relation
                 );
 
-                const relatedEntries = await Promise.all(
-                  (
-                    (shouldFetchSeveral
-                      ? result.data[attributeKey]
-                      : [result.data[attributeKey]]) as Array<{ id: number }>
-                  ).map(async (entry) => {
-                    if (entry == null) {
-                      return null;
-                    }
+                const relationDataPromise = (
+                  (shouldFetchSeveral
+                    ? result.data[attributeKey]
+                    : [result.data[attributeKey]]) as Array<{ id: number } | null>
+                )
+                  // Until we implement proper pagination, limit relations to an arbitrary amount
+                  .slice(0, 25)
+                  .reduce(
+                    async (currentRelationDataPromise, entry) => {
+                      const currentRelationData = await currentRelationDataPromise;
 
-                    const relatedEntry = await strapi.db
-                      .query(attributeSchema.target)
-                      .findOne({ where: { id: entry.id } });
+                      // Entry can be null if it's a toOne relation
+                      if (!entry) {
+                        return currentRelationData;
+                      }
 
-                    /**
-                     * Use false to represent when the content a history version is pointing to
-                     * doesn't exist anymore. This will be interpreted by the frontend to display
-                     * a dedicated banner. Why not null? Because we need to differentiate when a
-                     * relation was never provided, and when a relation was provided but no longer
-                     * exists, and JSON doesn't give us many options.
-                     */
-                    if (relatedEntry == null) {
-                      return false;
-                    }
+                      // TODO: batch all queries into a findMany query
+                      const relatedEntry = await strapi.db
+                        .query(attributeSchema.target)
+                        .findOne({ where: { id: entry.id } });
 
-                    return {
-                      ...relatedEntry,
-                      status: await getVersionStatus(attributeSchema.target, relatedEntry),
-                    };
-                  })
-                );
+                      if (relatedEntry) {
+                        currentRelationData.results.push({
+                          ...relatedEntry,
+                          status: await getVersionStatus(attributeSchema.target, relatedEntry),
+                        });
+                      } else {
+                        // The related content has been deleted
+                        currentRelationData.meta.missingCount += 1;
+                      }
 
+                      return currentRelationData;
+                    },
+                    Promise.resolve({
+                      results: [] as any[],
+                      meta: { missingCount: 0 },
+                    })
+                  );
                 return {
                   ...(await currentDataWithRelations),
-                  [attributeKey]: relatedEntries,
+                  [attributeKey]: await relationDataPromise,
                 };
               }
 
