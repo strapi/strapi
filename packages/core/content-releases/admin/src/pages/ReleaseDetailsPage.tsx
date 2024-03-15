@@ -670,16 +670,18 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
       }),
       name: 'action',
     },
-    !release.releasedAt
-      ? {
-          label: formatMessage({
-            id: 'content-releases.page.ReleaseDetails.table.header.label.status',
-            defaultMessage: 'status',
-          }),
-          name: 'status',
-        }
-      : null,
-  ].filter((head) => Boolean(head)) as Table.Header<FormattedReleaseAction, any>[];
+    ...(!release.releasedAt
+      ? [
+          {
+            label: formatMessage({
+              id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+              defaultMessage: 'status',
+            }),
+            name: 'status',
+          },
+        ]
+      : []),
+  ];
 
   return (
     <ContentLayout>
