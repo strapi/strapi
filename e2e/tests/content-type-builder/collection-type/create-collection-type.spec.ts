@@ -31,6 +31,18 @@ test.describe('Create collection type', () => {
 
     const pluralId = page.getByLabel('API ID (Plural)');
     await expect(pluralId).toHaveValue('secret-documents');
+
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await expect(page.getByText('Select a field for your collection type')).toBeVisible();
+    await page.getByText('Small or long text').click();
+    await page.getByLabel('Name', { exact: true }).fill('myattribute');
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await waitForRestart(page);
+
+    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 });
 
