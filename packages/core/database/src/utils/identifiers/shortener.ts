@@ -140,14 +140,16 @@ export function getShortenedName(name: string, len: number) {
  * compressed sufficiently, an error is thrown. This function supports dynamic adjustment of token lengths to fit within the
  * maxLength constraint (that is, it will always make use of all available space), while also ensuring the preservation of
  * incompressible tokens.
- *
  * @param {NameToken[]} nameTokens - Array of name tokens
- * @param {number} [maxLength] - Maximum length for the final name string.
+ * @param {NameFromTokenOptions} options - Name token options
  * @returns {string} The generated name string within maxLength.
  * @throws {Error} If the name cannot be shortened to meet maxLength.
  * @internal
  */
-export function getNameFromTokens(nameTokens: NameToken[], options: NameFromTokenOptions) {
+export const getNameFromTokens = (
+  nameTokens: NameToken[],
+  options: NameFromTokenOptions
+): string => {
   const { maxLength } = options;
 
   if (!isInteger(maxLength) || maxLength < 0) {
@@ -286,4 +288,4 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
 
   setUnshortenedName(shortenedName, options, unshortenedName);
   return shortenedName;
-}
+};
