@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../scripts/dts-import';
+import { waitForRestart } from '../../../utils/restart';
 
 test.describe('Create collection type', () => {
   test.beforeEach(async ({ page }) => {
@@ -45,4 +46,3 @@ test.describe('Create collection type', () => {
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 });
-
