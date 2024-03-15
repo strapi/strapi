@@ -27,9 +27,6 @@ const registerModelsHooks = () => {
       return next(context);
     }
 
-    // Collect the result of the document service action and sync non localized
-    // attributes based on the response
-
     // Build a populate array for all non localized fields within the schema
     const { getNestedPopulateOfNonLocalizedAttributes, getNonLocalizedAttributes } =
       getService('content-types');

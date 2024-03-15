@@ -23,6 +23,14 @@ type ComponentBody = {
 const isDialectMySQL = () => strapi.db?.dialect.client === 'mysql';
 
 function omitComponentData(
+  contentType: Schema.ContentType,
+  data: EntityService.Params.Data.Input<Schema.ContentType['uid']>
+): Partial<EntityService.Params.Data.Input<Schema.ContentType['uid']>>;
+function omitComponentData(
+  contentType: Schema.Component,
+  data: EntityService.Params.Data.Input<Schema.Component['uid']>
+): Partial<EntityService.Params.Data.Input<Schema.Component['uid']>>;
+function omitComponentData(
   contentType: Schema.ContentType | Schema.Component,
   data: EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>
 ): Partial<EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>> {

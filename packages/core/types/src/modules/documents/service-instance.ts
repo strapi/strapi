@@ -81,6 +81,10 @@ export type ServiceInstance<
     undefined
   >;
 
+  /**
+   * @internal
+   * Exposed for use within document service middlewares
+   */
   updateComponents: (
     uid: Common.UID.Schema,
     entityToUpdate: {
@@ -89,10 +93,12 @@ export type ServiceInstance<
     data: EntityService.Params.Data.Input<Common.UID.Schema>
   ) => Promise<ComponentBody>;
 
+  /**
+   * @internal
+   * Exposed for use within document service middlewares
+   */
   omitComponentData: (
-    contentType: Schema.ContentType | Schema.Component,
-    data: EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>
-  ) => Partial<
-    EntityService.Params.Data.Input<Schema.ContentType['uid'] | Schema.Component['uid']>
-  >;
+    contentType: Schema.ContentType,
+    data: EntityService.Params.Data.Input<Schema.ContentType['uid']>
+  ) => Partial<EntityService.Params.Data.Input<Schema.ContentType['uid']>>;
 };
