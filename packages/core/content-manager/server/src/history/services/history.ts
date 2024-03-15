@@ -96,7 +96,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
               { documentId: result.documentId, locale: context.args[0]?.locale }
             : { documentId: context.args[0], locale: context.args[1]?.locale };
 
-        const locale = documentContext.locale ?? await localesService.getDefaultLocale();
+        const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
         const document = await strapi
           .documents(contentTypeUid)
           .findOne(documentContext.documentId, {
