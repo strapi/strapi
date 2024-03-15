@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
@@ -10,7 +9,7 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Page } from '@strapi/strapi/admin';
+import { useAPIErrorHandler, Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';

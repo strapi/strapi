@@ -15,12 +15,11 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import {
   useOverlayBlocker,
-  useAPIErrorHandler,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { useAPIErrorHandler, Page } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
