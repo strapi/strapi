@@ -55,11 +55,13 @@ const registerModelsHooks = () => {
       return result;
     }
 
-    const populatedResult = await strapi.db
-      .query(schema.uid)
-      .findOne({ where: { id: resultID }, populate: attributesToPopulate });
+    if (attributesToPopulate.length > 0) {
+      const populatedResult = await strapi.db
+        .query(schema.uid)
+        .findOne({ where: { id: resultID }, populate: attributesToPopulate });
 
-    await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+    }
 
     return result;
   });

@@ -73,7 +73,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableLocales(
+    uid: Common.UID.ContentType,
+    version: DocumentVersion,
+    allVersions: DocumentVersion[]
+  ) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
 
@@ -81,22 +85,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     delete versionsByLocale[version.locale];
 
     // For each locale, get the ones with the same status
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(uid));
     return Object.values(versionsByLocale).map((localeVersions: DocumentVersion[]) => {
       const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
-
       if (!draftVersion) {
-        if (otherVersions.length === 1) {
-          // If there is no draft version, draft and publish is disabled
-          return {
-            ...pick(AVAILABLE_LOCALES_FIELDS, otherVersions[0]),
-            status: this.getStatus(otherVersions[0]),
-          };
+        if (!hasDraftAndPublish) {
+          return pick(
+            AVAILABLE_LOCALES_FIELDS,
+            localeVersions.find((v) => v.publishedAt !== null)
+          );
         }
 
         return;
       }
 
+      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
       return {
         ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
         status: this.getStatus(draftVersion, otherVersions as any),
@@ -196,7 +199,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
 
     const availableLocalesResult = availableLocales
-      ? this.getAvailableLocales(version, versions)
+      ? this.getAvailableLocales(uid, version, versions)
       : [];
 
     const availableStatusResult = availableStatus
