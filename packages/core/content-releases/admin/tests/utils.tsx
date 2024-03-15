@@ -2,6 +2,7 @@
 import * as React from 'react';
 
 import { configureStore } from '@reduxjs/toolkit';
+import { adminTestUtils } from '@strapi/admin/strapi-admin';
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
@@ -28,20 +29,18 @@ interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
 }
-
+const { storeConfig } = adminTestUtils;
 const Providers = ({ children, initialEntries }: ProvidersProps) => {
   const store = configureStore({
-    preloadedState: initialState,
+    preloadedState: { ...storeConfig.preloadedState, ...initialState },
     reducer: {
+      ...adminTestUtils.storeConfig.reducer,
       [releaseApi.reducerPath]: releaseApi.reducer,
-      admin_app: (state = initialState) => state,
-      rbacProvider: (state = initialState) => state,
     },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        immutableCheck: false,
-        serializableCheck: false,
-      }).concat(releaseApi.middleware),
+    middleware: (getDefaultMiddleware) => [
+      ...storeConfig.middleware(getDefaultMiddleware),
+      releaseApi.middleware,
+    ],
   });
 
   // en is the default locale of the admin app.

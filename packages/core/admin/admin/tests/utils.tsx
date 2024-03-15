@@ -50,6 +50,28 @@ interface ProvidersProps {
   initialEntries?: MemoryRouterProps['initialEntries'];
 }
 
+const storeConfig = {
+  preloadedState: initialState,
+  reducer: {
+    [adminApi.reducerPath]: adminApi.reducer,
+    admin_app: appReducer,
+    rbacProvider: RBACReducer,
+    'content-manager_app': cmAppReducer,
+    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
+    'content-manager': contentManagerReducer,
+  },
+  // @ts-expect-error – this fails.
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware({
+      // Disable timing checks for test env
+      immutableCheck: false,
+      serializableCheck: false,
+    }),
+    adminApi.middleware,
+    contentManagerApi.middleware,
+  ],
+};
+
 const Providers = ({ children, initialEntries }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -59,28 +81,10 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     },
   });
 
-  const store = configureStore({
+  const store = configureStore(
     // @ts-expect-error – we've not filled up the entire initial state.
-    preloadedState: initialState,
-    reducer: {
-      [adminApi.reducerPath]: adminApi.reducer,
-      admin_app: appReducer,
-      rbacProvider: RBACReducer,
-      'content-manager_app': cmAppReducer,
-      [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-      'content-manager': contentManagerReducer,
-    },
-    // @ts-expect-error – this fails.
-    middleware: (getDefaultMiddleware) => [
-      ...getDefaultMiddleware({
-        // Disable timing checks for test env
-        immutableCheck: false,
-        serializableCheck: false,
-      }),
-      adminApi.middleware,
-      contentManagerApi.middleware,
-    ],
-  });
+    storeConfig
+  );
 
   const router = createMemoryRouter(
     [
@@ -198,3 +202,4 @@ const renderHook = <
 };
 
 export { render, renderHook, waitFor, server, act, screen, fireEvent };
+export const adminTestUtils = { storeConfig };
