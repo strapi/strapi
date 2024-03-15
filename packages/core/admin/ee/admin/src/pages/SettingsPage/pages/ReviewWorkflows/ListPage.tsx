@@ -18,7 +18,6 @@ import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
   ConfirmDialog,
   onRowClick,
-  useAPIErrorHandler,
   useNotification,
   useRBAC,
   useTracking,
@@ -30,6 +29,7 @@ import styled from 'styled-components';
 
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
+import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 

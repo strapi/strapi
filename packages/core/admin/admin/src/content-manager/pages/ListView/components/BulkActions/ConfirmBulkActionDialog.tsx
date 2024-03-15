@@ -9,15 +9,11 @@ import {
   Typography,
   DialogFooterProps,
 } from '@strapi/design-system';
-import {
-  useTableContext,
-  useNotification,
-  useAPIErrorHandler,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { useTableContext, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';

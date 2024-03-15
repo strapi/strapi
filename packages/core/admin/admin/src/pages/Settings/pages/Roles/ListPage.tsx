@@ -18,7 +18,6 @@ import {
 import {
   ConfirmDialog,
   getFetchClient,
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -35,6 +34,7 @@ import { Page } from '../../../../components/PageHelpers';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';

@@ -19,7 +19,6 @@ import {
   useQueryParams,
   useNotification,
   useTracking,
-  useAPIErrorHandler,
   useStrapiApp,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
@@ -35,6 +34,7 @@ import { Page } from '../../../components/PageHelpers';
 import { Pagination } from '../../../components/Pagination';
 import { SearchInput } from '../../../components/SearchInput';
 import { HOOKS } from '../../../constants';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';

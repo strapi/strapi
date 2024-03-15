@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import { ContentLayout, Divider, Flex, Layout, Main } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
 import { Form, FormProps } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useTypedSelector } from '../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { setIn } from '../../../utils/objects';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { useDoc } from '../../hooks/useDocument';

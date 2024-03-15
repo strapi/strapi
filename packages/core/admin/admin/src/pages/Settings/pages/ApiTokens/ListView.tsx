@@ -8,7 +8,6 @@ import {
   Main,
 } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
   useNotification,
@@ -24,6 +23,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useOnce } from '../../../../hooks/useOnce';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';

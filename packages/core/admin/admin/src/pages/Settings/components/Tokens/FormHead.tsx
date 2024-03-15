@@ -2,11 +2,12 @@ import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Refresh } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useRegenerateTokenMutation } from '../../../../services/api';
 
 import type { Entity } from '@strapi/types';

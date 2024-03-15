@@ -26,7 +26,6 @@ import {
 import { LinkButton } from '@strapi/design-system/v2';
 import {
   ConfirmDialog,
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
@@ -39,6 +38,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 
 import { useWebhooks } from './hooks/useWebhooks';
 

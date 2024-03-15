@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  useAPIErrorHandler,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -19,6 +18,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useGetRolePermissionLayoutQuery,
   useGetRolePermissionsQuery,

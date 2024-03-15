@@ -13,18 +13,14 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import {
-  useNotification,
-  useOverlayBlocker,
-  translatedErrors,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useNotification, useOverlayBlocker, translatedErrors } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
 import { FormLayoutInputProps } from '../../../../../types/forms';
@@ -32,8 +28,6 @@ import { isBaseQueryError } from '../../../../../utils/baseQuery';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
-
-import type { DistributiveOmit } from 'react-redux';
 
 interface ModalFormProps {
   onToggle: () => void;

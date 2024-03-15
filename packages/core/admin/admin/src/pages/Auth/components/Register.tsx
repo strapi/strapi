@@ -5,7 +5,6 @@ import { Link } from '@strapi/design-system/v2';
 import {
   auth,
   translatedErrors,
-  useAPIErrorHandler,
   useGuidedTour,
   useNotification,
   useQuery,
@@ -27,6 +26,7 @@ import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
 import {
   useGetRegistrationInfoQuery,

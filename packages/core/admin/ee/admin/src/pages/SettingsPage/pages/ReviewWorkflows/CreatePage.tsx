@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../admin/src/hooks/useInjectReducer';
 import { isBaseQueryError } from '../../../../../../../admin/src/utils/baseQuery';

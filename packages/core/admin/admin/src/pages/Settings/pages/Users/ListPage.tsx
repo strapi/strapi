@@ -11,7 +11,6 @@ import {
 } from '@strapi/design-system';
 import {
   DynamicTable,
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
@@ -28,6 +27,7 @@ import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 

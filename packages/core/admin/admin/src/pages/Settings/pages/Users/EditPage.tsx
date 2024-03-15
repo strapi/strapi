@@ -14,7 +14,6 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import {
   translatedErrors,
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -32,6 +31,7 @@ import { Form, FormHelpers } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';

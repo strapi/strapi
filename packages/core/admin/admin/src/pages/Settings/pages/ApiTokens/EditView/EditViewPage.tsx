@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useGuidedTour,
   useNotification,
@@ -17,6 +16,7 @@ import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import {
   useCreateAPITokenMutation,
   useGetAPITokenQuery,
