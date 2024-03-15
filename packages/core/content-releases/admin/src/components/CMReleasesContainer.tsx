@@ -261,7 +261,6 @@ export const CMReleasesContainer = () => {
   const isCreatingEntry = id === 'create';
 
   const contentTypeUid = slug as Common.UID.ContentType;
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const canFetch = id != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
@@ -362,7 +361,7 @@ export const CMReleasesContainer = () => {
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
-                  {IsSchedulingEnabled && release.scheduledAt && release.timezone && (
+                  {release.scheduledAt && release.timezone && (
                     <Typography variant="pi" textColor="neutral600">
                       {formatMessage(
                         {
