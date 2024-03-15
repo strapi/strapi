@@ -85,7 +85,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       const draftVersion = localeVersions.find((v) => v.publishedAt === null);
       const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
 
-      if (!draftVersion) return;
+      if (!draftVersion) {
+        if (otherVersions.length === 1) {
+          // If there is no draft version, draft and publish is disabled
+          return {
+            ...pick(AVAILABLE_LOCALES_FIELDS, otherVersions[0]),
+            status: this.getStatus(otherVersions[0]),
+          };
+        }
+
+        return;
+      }
 
       return {
         ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
@@ -143,9 +153,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
     const isDraft = version.publishedAt === null;
 
-    // It can only be a draft if there are no other versions
     if (!otherDocumentStatuses?.length) {
-      return CONTENT_MANAGER_STATUS.DRAFT;
+      // It there are no other versions we take the current version status
+      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
     // Check if there is only a draft version
