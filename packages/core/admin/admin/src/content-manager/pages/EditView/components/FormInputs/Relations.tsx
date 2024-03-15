@@ -463,7 +463,7 @@ const RelationsInput = ({
      * You need to give this relation a correct _temp_key_ but
      * this component doesn't know about those ones, you can't rely
      * on the connect array because that doesn't hold items that haven't
-     * moved. So use a callback to fill in theg gaps when connecting.
+     * moved. So use a callback to fill in the gaps when connecting.
      *
      */
     onChange(relation);
@@ -646,7 +646,7 @@ const RelationsList = ({
     newData.splice(newIndex, 0, { ...currentRow, __temp_key__: newKey });
 
     /**
-     * Now we diff against the server to understand what's difference so we
+     * Now we diff against the server to understand what's different so we
      * can keep the connect array nice and tidy. It also needs reversing because
      * we reverse the relations from the server in the first place.
      */

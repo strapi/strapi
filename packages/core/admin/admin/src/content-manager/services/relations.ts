@@ -170,7 +170,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
 
 /**
  * @internal
- * @description Adds a `__temp_key__` to each component and dynamiczone item. This gives us
+ * @description Adds a `__temp_key__` to each relation item. This gives us
  * a stable identifier regardless of it's ids etc. that we can then use for drag and drop.
  */
 const prepareTempKeys = (
