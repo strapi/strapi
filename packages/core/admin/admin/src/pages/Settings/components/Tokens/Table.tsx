@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { ConfirmDialog, useQueryParams, useTracking } from '@strapi/helper-plugin';
+import { useQueryParams, useTracking } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { Table as TableImpl } from '../../../../components/Table';
 
@@ -225,7 +226,7 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
         icon={<Trash />}
       />
       <ConfirmDialog
-        onToggleDialog={() => setShowConfirmDialog(false)}
+        onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleClickDelete}
         isOpen={showConfirmDialog}
       />

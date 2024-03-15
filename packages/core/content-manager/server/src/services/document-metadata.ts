@@ -85,26 +85,27 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     delete versionsByLocale[version.locale];
 
     // For each locale, get the ones with the same status
-    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(uid));
-    return Object.values(versionsByLocale).map((localeVersions: DocumentVersion[]) => {
-      const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-      if (!draftVersion) {
-        if (!hasDraftAndPublish) {
-          return pick(
-            AVAILABLE_LOCALES_FIELDS,
-            localeVersions.find((v) => v.publishedAt !== null)
-          );
-        }
+    return (
+      Object.values(versionsByLocale)
+        .map((localeVersions: DocumentVersion[]) => {
+          // There will not be a draft and a version counterpart if the content type does not have draft and publish
+          if (!contentTypes.hasDraftAndPublish(strapi.getModel(uid))) {
+            return pick(AVAILABLE_LOCALES_FIELDS, localeVersions[0]);
+          }
 
-        return;
-      }
+          const draftVersion = localeVersions.find((v) => v.publishedAt === null);
+          const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
 
-      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
-      return {
-        ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
-        status: this.getStatus(draftVersion, otherVersions as any),
-      };
-    });
+          if (!draftVersion) return;
+
+          return {
+            ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
+            status: this.getStatus(draftVersion, otherVersions as any),
+          };
+        })
+        // Filter just in case there is a document with no drafts
+        .filter(Boolean)
+    );
   },
 
   /**

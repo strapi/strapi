@@ -6,6 +6,7 @@ import {
   Pagination,
   Table,
   BackButton,
+  ConfirmDialog,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -30,7 +31,6 @@ import {
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
-  ConfirmDialog,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
@@ -73,7 +73,6 @@ import type { Schema } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -955,15 +954,15 @@ const ReleaseDetailsPage = () => {
         />
       )}
       <ConfirmDialog
-        bodyText={{
+        isOpen={showWarningSubmit}
+        onClose={toggleWarningSubmit}
+        onConfirm={handleDeleteRelease}
+      >
+        {formatMessage({
           id: 'content-releases.dialog.confirmation-message',
           defaultMessage: 'Are you sure you want to delete this release?',
-        }}
-        isOpen={showWarningSubmit}
-        isConfirmButtonLoading={isDeletingRelease}
-        onToggleDialog={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      />
+        })}
+      </ConfirmDialog>
     </ReleaseDetailsLayout>
   );
 };
