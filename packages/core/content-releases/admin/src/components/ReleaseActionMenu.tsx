@@ -1,8 +1,9 @@
 import * as React from 'react';
 
+import { useAPIErrorHandler } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
 import { Menu, Link } from '@strapi/design-system/v2';
-import { CheckPermissions, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { CheckPermissions, useNotification } from '@strapi/helper-plugin';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';

@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { Page, unstable_useDocument, Pagination } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  unstable_useDocument,
+  Pagination,
+  useAPIErrorHandler,
+} from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
@@ -23,7 +28,6 @@ import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   Table,
-  useAPIErrorHandler,
   useNotification,
   useQueryParams,
   ConfirmDialog,
@@ -39,6 +43,7 @@ import {
   CrossCircle,
   EmptyDocuments,
 } from '@strapi/icons';
+// import { useAPIErrorHandler } from '@strapi/strapi/admin';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
