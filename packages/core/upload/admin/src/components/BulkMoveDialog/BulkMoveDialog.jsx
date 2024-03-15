@@ -13,7 +13,7 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { normalizeAPIError } from '@strapi/helper-plugin';
+import { normalizeAPIError } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
