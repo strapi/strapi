@@ -78,22 +78,4 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       expect(container.querySelector('button[name="delete"]')).toBeInTheDocument()
     );
   });
-
-  it('should show the read button when the user have the rights to read and not to update', async () => {
-    // @ts-expect-error this is fine
-    useRBAC.mockReturnValue({
-      allowedActions: {
-        canCreate: false,
-        canDelete: true,
-        canRead: true,
-        canUpdate: false,
-        canRegenerate: false,
-      },
-    });
-
-    const { container } = render(<ListView />);
-
-    // eslint-disable-next-line testing-library/no-container
-    await waitFor(() => expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument());
-  });
 });

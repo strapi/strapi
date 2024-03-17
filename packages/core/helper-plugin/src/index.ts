@@ -3,10 +3,6 @@
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './components/CheckPermissions';
-export * from './components/ConfirmDialog';
-export * from './components/DynamicTable';
-export * from './components/Table';
-export * from './components/EmptyBodyTable';
 
 /* -------------------------------------------------------------------------------------------------
  * Features
@@ -49,9 +45,7 @@ export * from './utils/getFetchClient';
 export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/normalizeAPIError';
-export * from './utils/prefixFileUrlWithBackendUrl';
 export * from './utils/prefixPluginTranslations';
-export * from './utils/request';
 export * from './utils/stopPropagation';
 export * from './utils/translatedErrors';
 

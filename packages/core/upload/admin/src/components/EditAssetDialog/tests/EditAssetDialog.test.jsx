@@ -173,7 +173,7 @@ describe('<EditAssetDialog />', () => {
       fireEvent.click(screen.getByLabelText('Delete'));
 
       expect(screen.getByText('Confirmation')).toBeVisible();
-      expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
+      expect(screen.getByText('Are you sure?')).toBeVisible();
     });
 
     it('does not open the delete dialog when the user is not allowed to update', () => {

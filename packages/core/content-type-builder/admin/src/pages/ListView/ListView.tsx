@@ -1,13 +1,13 @@
+import { BackButton } from '@strapi/admin/strapi-admin';
 import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import { useTracking } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Pencil, Plus } from '@strapi/icons';
+import { Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { unstable_usePrompt as usePrompt, useMatch, NavLink } from 'react-router-dom';
+import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
 
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
@@ -169,15 +169,7 @@ const ListView = () => {
           id: getTrad('listView.headerLayout.description'),
           defaultMessage: 'Build the data architecture of your content',
         })}
-        navigationAction={
-          // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-          <Link startIcon={<ArrowLeft />} as={NavLink} to="/plugins/content-type-builder/">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
       />
       <ContentLayout>
         <Flex direction="column" alignItems="stretch" gap={4}>

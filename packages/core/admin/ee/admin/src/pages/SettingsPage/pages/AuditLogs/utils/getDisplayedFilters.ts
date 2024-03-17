@@ -1,7 +1,7 @@
 import { IntlShape } from 'react-intl';
 
 import { Filters } from '../../../../../../../../admin/src/components/Filters';
-import { getDisplayName } from '../../../../../../../../admin/src/content-manager/utils/users';
+import { getDisplayName } from '../../../../../../../../admin/src/utils/users';
 import { SanitizedAdminUser } from '../../../../../../../../shared/contracts/shared';
 import { ComboboxFilter } from '../components/ComboboxFilter';
 

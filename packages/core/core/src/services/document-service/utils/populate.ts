@@ -1,8 +1,15 @@
 import { Common } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
+interface Options {
+  /**
+   * Fields to select when populating relations
+   */
+  relationalFields?: string[];
+}
+
 // We want to build a populate object based on the schema
-export const getDeepPopulate = (uid: Common.UID.Schema) => {
+export const getDeepPopulate = (uid: Common.UID.Schema, opts: Options = {}) => {
   const model = strapi.getModel(uid);
   const attributes = Object.entries(model.attributes);
 
@@ -13,7 +20,7 @@ export const getDeepPopulate = (uid: Common.UID.Schema) => {
         // Ignore createdBy, updatedBy, ...
         const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
         if (isVisible) {
-          acc[attributeName] = { select: ['document_id', 'locale'] };
+          acc[attributeName] = { select: opts.relationalFields };
         }
         break;
       }
@@ -24,7 +31,7 @@ export const getDeepPopulate = (uid: Common.UID.Schema) => {
       }
 
       case 'component': {
-        const populate = getDeepPopulate(attribute.component);
+        const populate = getDeepPopulate(attribute.component, opts);
         acc[attributeName] = { populate };
         break;
       }
@@ -33,7 +40,7 @@ export const getDeepPopulate = (uid: Common.UID.Schema) => {
         // Use fragments to populate the dynamic zone components
         const populatedComponents = (attribute.components || []).reduce(
           (acc: any, componentUID: Common.UID.Component) => {
-            acc[componentUID] = { populate: getDeepPopulate(componentUID) };
+            acc[componentUID] = { populate: getDeepPopulate(componentUID, opts) };
             return acc;
           },
           {}

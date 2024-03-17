@@ -24,6 +24,7 @@ const productModel = {
       type: 'string',
     },
   },
+  draftAndPublish: false,
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',
@@ -48,6 +49,7 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
+  draftAndPublish: false,
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
@@ -57,6 +59,10 @@ const shops = [
   {
     name: 'market',
     locale: 'en',
+  },
+  {
+    name: 'mercato',
+    locale: 'it',
   },
 ];
 

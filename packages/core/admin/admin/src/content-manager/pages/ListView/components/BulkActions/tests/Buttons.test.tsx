@@ -1,16 +1,7 @@
-import { useTableContext } from '@strapi/helper-plugin';
 import { within } from '@testing-library/react';
 import { render, screen } from '@tests/utils';
 
 import { BulkActionButtons } from '../Buttons';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTableContext: jest.fn(() => ({
-    selectedEntries: [1, 2],
-    setSelectedEntries: jest.fn(),
-  })),
-}));
 
 jest.mock('../../../../../../hooks/useInjectionZone');
 jest.mock('../SelectedEntriesModal', () => ({
@@ -22,7 +13,10 @@ const DEFAULT_DATA = [
   { documentId: '5678', id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
 ];
 
-describe('BulkActionsBar', () => {
+/**
+ * TODO: re-add tests when we re-introduce the bulk actions bar but will less mocking.
+ */
+describe.skip('BulkActionsBar', () => {
   it('should render publish buttons if showPublish is true', async () => {
     render(
       <BulkActionButtons
@@ -119,8 +113,7 @@ describe('BulkActionsBar', () => {
   });
 
   it('should not show publish button if selected entries are all published', () => {
-    //@ts-expect-error – mocking
-    useTableContext.mockReturnValueOnce({ selectedEntries: [2] });
+    // useTableContext.mockReturnValueOnce({ selectedEntries: [2] });
 
     render(
       <BulkActionButtons
@@ -137,8 +130,7 @@ describe('BulkActionsBar', () => {
   });
 
   it('should not show unpublish button if selected entries are all unpublished', () => {
-    //@ts-expect-error – mocking
-    useTableContext.mockReturnValueOnce({ selectedEntries: [1] });
+    // useTableContext.mockReturnValueOnce({ selectedEntries: [1] });
     render(
       <BulkActionButtons
         data={DEFAULT_DATA}

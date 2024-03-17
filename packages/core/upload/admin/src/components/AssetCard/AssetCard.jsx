@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
 import { AssetDefinition, AssetType } from '../../constants';
-import { createAssetUrl, getFileExtension } from '../../utils';
+import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 
 import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';
