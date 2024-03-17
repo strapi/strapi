@@ -28,6 +28,18 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 describe('Releases home page', () => {
+  beforeAll(() => {
+    window.strapi.future = {
+      isEnabled: () => true,
+    };
+  });
+
+  afterAll(() => {
+    window.strapi.future = {
+      isEnabled: () => false,
+    };
+  });
+
   it('renders the tab content correctly when there are no releases', async () => {
     server.use(
       rest.get('/content-releases', (req, res, ctx) =>
@@ -58,8 +70,8 @@ describe('Releases home page', () => {
 
     const { user } = render(<ReleasesPage />);
 
-    const releaseSubtitle = await screen.findByText('17 releases');
-    expect(releaseSubtitle).toBeInTheDocument();
+    const pendingTab = await screen.findByText('Pending (17)');
+    expect(pendingTab).toBeInTheDocument();
 
     const firstEntry = screen.getByRole('heading', { level: 3, name: 'entry 1' });
     expect(firstEntry).toBeInTheDocument();

@@ -47,6 +47,9 @@ describe('Release controller', () => {
             },
           },
         },
+        query: jest.fn().mockReturnValue({
+          count: jest.fn().mockResolvedValue(2),
+        }),
       };
 
       // @ts-expect-error partial context

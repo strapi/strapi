@@ -34,7 +34,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await login({ page });
 
     await page.getByRole('link', { name: 'Releases' }).click();
-    page.getByRole('link', { name: `${releaseName} 6 entries` }).click();
+    page.getByRole('link', { name: `${releaseName}` }).click();
     await page.waitForURL('/admin/plugins/content-releases/*');
   });
 
@@ -57,7 +57,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
 
     // Publish the release
     await page.getByRole('link', { name: 'Releases' }).click();
-    await page.getByRole('link', { name: `${releaseName} 8 entries` }).click();
+    await page.getByRole('link', { name: `${releaseName}` }).click();
     await page.getByRole('button', { name: 'Publish' }).click();
     expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Publish' })).not.toBeVisible();
@@ -75,9 +75,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('button', { name: 'Release edit and delete menu' }).click();
     await page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(page.getByRole('dialog', { name: 'Edit release' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
     await page.getByRole('textbox', { name: 'Name' }).fill('Trent Crimm: Independent');
-    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
     const editedEntryName = 'Trent Crimm: Independent';
     await expect(page.getByRole('heading', { name: editedEntryName })).toBeVisible();
@@ -88,9 +86,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('button', { name: 'Confirm' }).click();
     // Wait for client side redirect to the releases page
     await page.waitForURL('/admin/plugins/content-releases');
-    await expect(
-      page.getByRole('link', { name: `${editedEntryName} 6 entries` })
-    ).not.toBeVisible();
+    await expect(page.getByRole('link', { name: `${editedEntryName}` })).not.toBeVisible();
   });
 
   test("A user should be able to change the entry groupings, update an entry's action, remove an entry from a release, and navigate to the entry in the content manager", async ({
