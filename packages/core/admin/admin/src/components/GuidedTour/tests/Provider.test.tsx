@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { useGuidedTour } from '@strapi/helper-plugin/';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { GuidedTourProvider } from '../Provider';
+import { GuidedTourProvider, useGuidedTour } from '../Provider';
 
 describe('GuidedTour', () => {
   afterEach(() => {
@@ -23,7 +22,11 @@ describe('GuidedTour', () => {
 
   it('should update isGuidedTourVisible to true', () => {
     const Test = () => {
-      const { setGuidedTourVisibility, isGuidedTourVisible } = useGuidedTour();
+      const setGuidedTourVisibility = useGuidedTour(
+        'Test',
+        (state) => state.setGuidedTourVisibility
+      );
+      const isGuidedTourVisible = useGuidedTour('Test', (state) => state.isGuidedTourVisible);
 
       React.useEffect(() => {
         setGuidedTourVisibility(true);
@@ -43,7 +46,11 @@ describe('GuidedTour', () => {
 
   it('should update isGuidedTourVisible to false', () => {
     const Test = () => {
-      const { setGuidedTourVisibility, isGuidedTourVisible } = useGuidedTour();
+      const setGuidedTourVisibility = useGuidedTour(
+        'Test',
+        (state) => state.setGuidedTourVisibility
+      );
+      const isGuidedTourVisible = useGuidedTour('Test', (state) => state.isGuidedTourVisible);
 
       React.useEffect(() => {
         setGuidedTourVisibility(false);
@@ -63,7 +70,9 @@ describe('GuidedTour', () => {
 
   it('should update currentStep with setCurrentStep', () => {
     const Test = () => {
-      const { setCurrentStep, currentStep, setSkipped } = useGuidedTour();
+      const setCurrentStep = useGuidedTour('Test', (state) => state.setCurrentStep);
+      const currentStep = useGuidedTour('Test', (state) => state.currentStep);
+      const setSkipped = useGuidedTour('Test', (state) => state.setSkipped);
 
       React.useEffect(() => {
         setSkipped(false);
@@ -94,7 +103,8 @@ describe('GuidedTour', () => {
 
   it('should update guidedTourState with setStepState', () => {
     const Test = () => {
-      const { setStepState, guidedTourState } = useGuidedTour();
+      const setStepState = useGuidedTour('Test', (state) => state.setStepState);
+      const guidedTourState = useGuidedTour('Test', (state) => state.guidedTourState);
 
       return (
         <div>
@@ -123,7 +133,8 @@ describe('GuidedTour', () => {
 
   it('should not update currentStep with startSection when section does not exist', () => {
     const Test = () => {
-      const { startSection, currentStep } = useGuidedTour();
+      const startSection = useGuidedTour('Test', (state) => state.startSection);
+      const currentStep = useGuidedTour('Test', (state) => state.currentStep);
 
       React.useEffect(() => {
         // @ts-expect-error – testing it doesn't do something we don't want it too.
@@ -144,7 +155,9 @@ describe('GuidedTour', () => {
 
   it('should not update currentStep with startSection when first step of section is already done', () => {
     const Test = () => {
-      const { startSection, currentStep, setStepState } = useGuidedTour();
+      const startSection = useGuidedTour('Test', (state) => state.startSection);
+      const setStepState = useGuidedTour('Test', (state) => state.setStepState);
+      const currentStep = useGuidedTour('Test', (state) => state.currentStep);
 
       React.useEffect(() => {
         setStepState('contentTypeBuilder.create', true);
@@ -175,7 +188,8 @@ describe('GuidedTour', () => {
 
   it('should not update currentStep with startSection when previous sections are not done', () => {
     const Test = () => {
-      const { startSection, currentStep } = useGuidedTour();
+      const startSection = useGuidedTour('Test', (state) => state.startSection);
+      const currentStep = useGuidedTour('Test', (state) => state.currentStep);
 
       React.useEffect(() => {
         startSection('contentManager');
@@ -195,7 +209,8 @@ describe('GuidedTour', () => {
 
   it('should update currentStep with startSection when first step of section is not done', async () => {
     const Test = () => {
-      const { startSection, currentStep } = useGuidedTour();
+      const startSection = useGuidedTour('Test', (state) => state.startSection);
+      const currentStep = useGuidedTour('Test', (state) => state.currentStep);
 
       React.useEffect(() => {
         startSection('contentTypeBuilder');

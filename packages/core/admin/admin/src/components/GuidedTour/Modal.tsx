@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -19,20 +19,23 @@ import styled from 'styled-components';
 
 import { LAYOUT_DATA, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
+import { GuidedTourContextValue, useGuidedTour } from './Provider';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourModal
  * -----------------------------------------------------------------------------------------------*/
 
 const GuidedTourModal = () => {
-  const {
-    currentStep,
-    guidedTourState,
-    setCurrentStep,
-    setStepState,
-    isGuidedTourVisible,
-    setSkipped,
-  } = useGuidedTour();
+  const currentStep = useGuidedTour('GuidedTourModal', (state) => state.currentStep);
+  const guidedTourState = useGuidedTour('GuidedTourModal', (state) => state.guidedTourState);
+  const setCurrentStep = useGuidedTour('GuidedTourModal', (state) => state.setCurrentStep);
+  const setStepState = useGuidedTour('GuidedTourModal', (state) => state.setStepState);
+  const isGuidedTourVisible = useGuidedTour(
+    'GuidedTourModal',
+    (state) => state.isGuidedTourVisible
+  );
+  const setSkipped = useGuidedTour('GuidedTourModal', (state) => state.setSkipped);
+
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 

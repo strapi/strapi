@@ -3,9 +3,8 @@
 /* eslint-disable check-file/no-index */
 import { lazy, Suspense, useEffect, useRef } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
 import { Layout } from '@strapi/design-system';
-import { useGuidedTour } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
@@ -25,7 +24,7 @@ const App = () => {
     id: `${pluginId}.plugin.name`,
     defaultMessage: 'Content Types Builder',
   });
-  const { startSection } = useGuidedTour();
+  const startSection = useGuidedTour('App', (state) => state.startSection);
   const startSectionRef = useRef(startSection);
 
   useEffect(() => {

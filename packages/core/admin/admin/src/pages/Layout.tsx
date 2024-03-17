@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
-import { AppInfoProvider, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import { AppInfoProvider, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -11,6 +11,7 @@ import valid from 'semver/functions/valid';
 
 import packageJSON from '../../../package.json';
 import { GuidedTourModal } from '../components/GuidedTour/Modal';
+import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Onboarding } from '../components/Onboarding';
@@ -31,7 +32,10 @@ import { getDisplayName } from '../utils/users';
 const strapiVersion = packageJSON.version;
 
 const AdminLayout = () => {
-  const { setGuidedTourVisibility } = useGuidedTour();
+  const setGuidedTourVisibility = useGuidedTour(
+    'AdminLayout',
+    (state) => state.setGuidedTourVisibility
+  );
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
   const [userId, setUserId] = React.useState<string>();
