@@ -15,7 +15,6 @@ import {
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
-  useTracking,
   useAPIErrorHandler,
   useStrapiApp,
 } from '@strapi/helper-plugin';
@@ -34,6 +33,7 @@ import { SearchInput } from '../../../components/SearchInput';
 import { Table } from '../../../components/Table';
 import { HOOKS } from '../../../constants';
 import { BackButton } from '../../../features/BackButton';
+import { useTracking } from '../../../features/Tracking';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { getDisplayName } from '../../../utils/users';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';

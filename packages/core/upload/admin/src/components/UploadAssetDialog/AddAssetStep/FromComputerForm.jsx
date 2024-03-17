@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, ModalFooter, Typography } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

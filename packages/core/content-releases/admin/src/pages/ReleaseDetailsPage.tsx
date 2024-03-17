@@ -7,6 +7,7 @@ import {
   Table,
   BackButton,
   ConfirmDialog,
+  useTracking,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -31,7 +32,6 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';

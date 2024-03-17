@@ -7,7 +7,7 @@
 import * as React from 'react';
 
 import { SkipToContent } from '@strapi/design-system';
-import { TrackingProvider, useAppInfo, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
@@ -15,11 +15,11 @@ import { Outlet } from 'react-router-dom';
 
 import { Page } from './components/PageHelpers';
 import { ADMIN_PERMISSIONS_CE } from './constants';
-import { useAuth } from './features/Auth';
 import { ConfigurationProvider, ConfigurationProviderProps } from './features/Configuration';
+import { TrackingProvider } from './features/Tracking';
 import { useEnterprise } from './hooks/useEnterprise';
 import { setAdminPermissions } from './reducer';
-import { useInitQuery, useTelemetryPropertiesQuery } from './services/admin';
+import { useInitQuery } from './services/admin';
 import { PermissionMap } from './types/permissions';
 
 interface AppProps extends Omit<ConfigurationProviderProps, 'children' | 'authLogo' | 'menuLogo'> {
@@ -45,62 +45,24 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const appInfo = useAppInfo();
-  const token = useAuth('App', (state) => state.token);
 
   React.useEffect(() => {
     dispatch(setAdminPermissions(adminPermissions));
   }, [adminPermissions, dispatch]);
 
-  const initQuery = useInitQuery();
-  const { uuid, authLogo: customAuthLogo, menuLogo: customMenuLogo } = initQuery.data ?? {};
-
-  const telemetryPropertiesQuery = useTelemetryPropertiesQuery(undefined, {
-    skip: !uuid || !token,
-  });
+  const { data, error, isLoading } = useInitQuery();
+  const { authLogo: customAuthLogo, menuLogo: customMenuLogo } = data ?? {};
 
   React.useEffect(() => {
-    if (initQuery.error) {
+    if (error) {
       toggleNotification({
         type: 'warning',
         message: { id: 'app.containers.App.notification.error.init' },
       });
     }
-  }, [initQuery.error, toggleNotification]);
+  }, [error, toggleNotification]);
 
-  React.useEffect(() => {
-    if (uuid && appInfo.currentEnvironment && telemetryPropertiesQuery.data) {
-      const event = 'didInitializeAdministration';
-      /**
-       * fetch doesn't throw so it doesn't need to be in a try/catch.
-       */
-      fetch('https://analytics.strapi.io/api/v2/track', {
-        method: 'POST',
-        body: JSON.stringify({
-          // This event is anonymous
-          event,
-          userId: '',
-          eventPropeties: {},
-          userProperties: { environment: appInfo.currentEnvironment },
-          groupProperties: { ...telemetryPropertiesQuery.data, projectId: uuid },
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Strapi-Event': event,
-        },
-      });
-    }
-  }, [appInfo.currentEnvironment, telemetryPropertiesQuery.data, uuid]);
-
-  const trackingInfo = React.useMemo(
-    () => ({
-      uuid,
-      telemetryProperties: telemetryPropertiesQuery.data,
-    }),
-    [uuid, telemetryPropertiesQuery.data]
-  );
-
-  if (initQuery.isLoading) {
+  if (isLoading) {
     return <Page.Loading />;
   }
 
@@ -125,7 +87,7 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
         showReleaseNotification={showReleaseNotification}
         showTutorials={showTutorials}
       >
-        <TrackingProvider value={trackingInfo}>
+        <TrackingProvider>
           <Outlet />
         </TrackingProvider>
       </ConfigurationProvider>
