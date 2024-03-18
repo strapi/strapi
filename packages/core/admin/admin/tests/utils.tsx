@@ -51,6 +51,28 @@ interface ProvidersProps {
   storeConfig?: Partial<ConfigureStoreOptions>;
 }
 
+const defaultTestStoreConfig = {
+  preloadedState: initialState,
+  reducer: {
+    [adminApi.reducerPath]: adminApi.reducer,
+    admin_app: appReducer,
+    rbacProvider: RBACReducer,
+    'content-manager_app': cmAppReducer,
+    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
+    'content-manager': contentManagerReducer,
+  },
+  // @ts-expect-error – this fails.
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware({
+      // Disable timing checks for test env
+      immutableCheck: false,
+      serializableCheck: false,
+    }),
+    adminApi.middleware,
+    contentManagerApi.middleware,
+  ],
+};
+
 const Providers = ({ children, initialEntries, storeConfig }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -62,7 +84,7 @@ const Providers = ({ children, initialEntries, storeConfig }: ProvidersProps) =>
 
   const store = configureStore(
     // @ts-expect-error – we've not filled up the entire initial state.
-    storeConfig
+    storeConfig ?? defaultTestStoreConfig
   );
 
   const router = createMemoryRouter(
@@ -141,43 +163,16 @@ export interface RenderOptions {
   };
 }
 
-const defaultTestStoreConfig = {
-  preloadedState: initialState,
-  reducer: {
-    [adminApi.reducerPath]: adminApi.reducer,
-    admin_app: appReducer,
-    rbacProvider: RBACReducer,
-    'content-manager_app': cmAppReducer,
-    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-    'content-manager': contentManagerReducer,
-  },
-  // @ts-expect-error – this fails.
-  middleware: (getDefaultMiddleware) => [
-    ...getDefaultMiddleware({
-      // Disable timing checks for test env
-      immutableCheck: false,
-      serializableCheck: false,
-    }),
-    adminApi.middleware,
-    contentManagerApi.middleware,
-  ],
-};
-
 const render = (
   ui: React.ReactElement,
   { renderOptions, userEventOptions, initialEntries, providerOptions }: RenderOptions = {}
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
-  const { storeConfig = defaultTestStoreConfig, ...restProviderOptions } = providerOptions ?? {};
 
   return {
     ...renderRTL(ui, {
       wrapper: ({ children }) => (
-        <Providers
-          storeConfig={storeConfig}
-          initialEntries={initialEntries}
-          {...restProviderOptions}
-        >
+        <Providers initialEntries={initialEntries} {...providerOptions}>
           <Wrapper>{children}</Wrapper>
         </Providers>
       ),
