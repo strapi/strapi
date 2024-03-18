@@ -24,7 +24,7 @@
     "@strapi/provider-upload-aws-s3": "4.20.5",
     "@strapi/provider-upload-cloudinary": "4.20.5",
     "@strapi/strapi": "4.20.5",
-    "better-sqlite3": "9.0.0",
+    "better-sqlite3": "9.4.3",
     "lodash": "4.17.21",
     "mysql2": "3.6.2",
     "passport-google-oauth2": "0.2.0",
