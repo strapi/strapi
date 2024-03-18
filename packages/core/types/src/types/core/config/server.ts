@@ -11,10 +11,6 @@ export interface DirsProp {
   public?: string;
 }
 
-export interface WebhooksProp {
-  populateRelations?: boolean;
-}
-
 export interface LoggerProp {
   updates?: {
     enabled?: boolean;
@@ -48,7 +44,6 @@ export interface Server {
   globalProxy?: string;
   cron?: CronProp;
   dirs?: DirsProp;
-  webhooks?: WebhooksProp;
   logger?: LoggerProp;
   transfer?: TransferProp;
   admin?: AdminProp;
