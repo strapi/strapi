@@ -75,18 +75,26 @@ export class Project implements ProjectInterface {
   }
 
   private createProjectCodemodsRunners(dry: boolean = false) {
-    const jsonFiles = this.getFilesByExtensions(['.json']);
-    const codeFiles = this.getFilesByExtensions(['.js', '.ts', '.mjs']);
+    const jsonExtensions = constants.PROJECT_DEFAULT_JSON_EXTENSIONS.map<FileExtension>(
+      (ext) => `.${ext}`
+    );
+    const codeExtensions = constants.PROJECT_DEFAULT_CODE_EXTENSIONS.map<FileExtension>(
+      (ext) => `.${ext}`
+    );
+
+    const jsonFiles = this.getFilesByExtensions(jsonExtensions);
+    const codeFiles = this.getFilesByExtensions(codeExtensions);
 
     const codeRunner = codeRunnerFactory(codeFiles, {
       dry,
+      parser: 'ts',
+      runInBand: true,
+      babel: true,
+      extensions: constants.PROJECT_DEFAULT_CODE_EXTENSIONS.join(','),
+      // Don't output any log coming from the runner
       print: false,
       silent: true,
-      extensions: 'js,ts',
-      runInBand: true,
       verbose: 0,
-      babel: true,
-      parser: 'ts',
     });
     const jsonRunner = jsonRunnerFactory(jsonFiles, { dry, cwd: this.cwd });
 

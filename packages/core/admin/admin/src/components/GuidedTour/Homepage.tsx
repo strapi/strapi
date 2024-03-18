@@ -1,15 +1,17 @@
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
 import { LAYOUT_DATA, States, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
+import { GuidedTourContextValue, useGuidedTour } from './Provider';
 
 const GuidedTourHomepage = () => {
-  const { guidedTourState, setSkipped } = useGuidedTour();
+  const guidedTourState = useGuidedTour('GuidedTourHomepage', (state) => state.guidedTourState);
+  const setSkipped = useGuidedTour('GuidedTourHomepage', (state) => state.setSkipped);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 

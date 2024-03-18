@@ -1,5 +1,6 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
+import { PERMISSIONS } from '../src/constants';
 /**
  * This is for the redux store in `utils`.
  * The more we adopt it, the bigger it will get – which is okay.
@@ -16,6 +17,7 @@ const initialState = {
         properties: {},
         conditions: [],
       },
+      ...Object.values(PERMISSIONS).flat(),
     ],
     collectionTypesRelatedPermissions: {
       'api::category.category': {

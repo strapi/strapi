@@ -1,11 +1,10 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
 import {
   useAppInfo,
   useAutoReloadOverlayBlocker,
   useFetchClient,
-  useGuidedTour,
   useNotification,
   useRBACProvider,
   useStrapiApp,
@@ -83,7 +82,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   } = useSelector(makeSelectDataManagerProvider());
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
-  const { setCurrentStep } = useGuidedTour();
+  const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
 
   const { getPlugin } = useStrapiApp();
 

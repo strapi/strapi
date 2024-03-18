@@ -5,12 +5,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { CMReleasesContainer } from '../CMReleasesContainer';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
-}));
-
 const render = (
   initialEntries: string[] = ['/content-manager/collection-types/api::article.article/12345']
 ) =>
@@ -49,14 +43,14 @@ describe('CMReleasesContainer', () => {
   it('should render the container', async () => {
     render();
 
-    const informationBox = screen.getByRole('complementary', { name: 'Releases' });
-    const addToReleaseButton = await screen.findByRole('button', { name: 'Add to release' });
-    expect(informationBox).toBeInTheDocument();
-    expect(addToReleaseButton).toBeInTheDocument();
+    await screen.findByRole('complementary', { name: 'Releases' });
+    await screen.findByRole('button', { name: 'Add to release' });
   });
 
   it('should open and close the add to release modal', async () => {
     const { user } = render();
+
+    await screen.findByRole('complementary', { name: 'Releases' });
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     await user.click(addToReleaseButton);
@@ -81,6 +75,8 @@ describe('CMReleasesContainer', () => {
     );
 
     const { user } = render();
+
+    await screen.findByRole('complementary', { name: 'Releases' });
 
     const addToReleaseButton = screen.getByRole('button', { name: 'Add to release' });
     await user.click(addToReleaseButton);
@@ -140,8 +136,7 @@ describe('CMReleasesContainer', () => {
 
     render();
 
-    const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
-    const release1 = await within(informationBox).findByText('01/01/2024 at 11:00 (UTC+01:00)');
-    expect(release1).toBeInTheDocument();
+    await screen.findByRole('complementary', { name: 'Releases' });
+    expect(screen.getByText('01/01/2024 at 11:00 (UTC+01:00)')).toBeInTheDocument();
   });
 });
