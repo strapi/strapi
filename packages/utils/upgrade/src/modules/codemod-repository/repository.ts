@@ -65,7 +65,7 @@ export class CodemodRepository implements CodemodRepositoryInterface {
   }
 
   findAll() {
-    const entries = Object.entries(this.groups) as Array<[Version.LiteralSemVer, Codemod.List]>;
+    const entries = Object.entries(this.groups);
 
     return entries.map<Codemod.VersionedCollection>(([version, codemods]) => ({
       version: semVerFactory(version),
