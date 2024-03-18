@@ -27,6 +27,10 @@ const MyPage = () => {
 };
 ```
 
+### CheckPermissions
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
 ### CheckPagePermissions
 
 This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
