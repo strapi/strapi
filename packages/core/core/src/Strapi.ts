@@ -223,7 +223,7 @@ class Strapi extends Container implements StrapiI {
     this.startupLogger = utils.createStartupLogger(this);
 
     const logConfig = {
-      level: 'debug',
+      level: 'http', // Strapi defaults to level 'http'
       ...this.config.get('logger'), // DEPRECATED
       ...this.config.get('server.logger.config'),
     };
