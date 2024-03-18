@@ -43,4 +43,9 @@ export type {
   HeaderActionProps,
 } from './core/apis/content-manager';
 
+/**
+ * Utils
+ */
+export { translatedErrors } from './utils/translatedErrors';
+
 export * from './content-manager/exports';

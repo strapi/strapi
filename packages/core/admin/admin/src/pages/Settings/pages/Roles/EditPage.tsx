@@ -6,7 +6,6 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
-  translatedErrors,
 } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -25,12 +24,13 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
   description: yup.string().optional(),
 });
 

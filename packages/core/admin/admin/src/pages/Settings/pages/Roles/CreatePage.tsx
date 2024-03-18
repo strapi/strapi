@@ -17,7 +17,6 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
-  translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { format } from 'date-fns';
@@ -38,6 +37,7 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 
@@ -46,8 +46,8 @@ import { Permissions, PermissionsAPI } from './components/Permissions';
  * -----------------------------------------------------------------------------------------------*/
 
 const CREATE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
-  description: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
+  description: yup.string().required(translatedErrors.required.id),
 });
 
 /**

@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { translatedErrors, useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, Navigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -17,12 +17,13 @@ import {
 } from '../../../layouts/UnauthenticatedLayout';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
   password: yup
     .string()
     .min(8, {
-      id: translatedErrors.minLength,
+      id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
@@ -45,13 +46,13 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       },
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
     }),
   confirmPassword: yup
     .string()
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Confirm password is required',
     })
     .oneOf([yup.ref('password'), null], {

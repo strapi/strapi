@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { translatedErrors, useQuery } from '@strapi/helper-plugin';
+import { useQuery } from '@strapi/helper-plugin';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import {
   Column,
   LayoutContent,
 } from '../../../layouts/UnauthenticatedLayout';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 import type { Login } from '../../../../../shared/contracts/authentication';
 
@@ -28,17 +29,11 @@ const LOGIN_SCHEMA = yup.object().shape({
   email: yup
     .string()
     .email({
-      id: translatedErrors.email,
+      id: translatedErrors.email.id,
       defaultMessage: 'Not a valid email',
     })
-    .required({
-      id: translatedErrors.required,
-      defaultMessage: 'This value is required.',
-    }),
-  password: yup.string().required({
-    id: translatedErrors.required,
-    defaultMessage: 'This value is required.',
-  }),
+    .required(translatedErrors.required),
+  password: yup.string().required(translatedErrors.required),
   rememberMe: yup.bool().nullable(),
 });
 
