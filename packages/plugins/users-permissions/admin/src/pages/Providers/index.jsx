@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   ContentLayout,
   HeaderLayout,
@@ -25,7 +26,6 @@ import {
   useNotification,
   useOverlayBlocker,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import { Page } from '@strapi/strapi/admin';

@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -101,21 +101,13 @@ const queryClient = new QueryClient({
 const renderCompo = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <TrackingProvider>
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <NotificationsProvider>
-              <EditAssetDialog
-                asset={asset}
-                onClose={jest.fn()}
-                canUpdate
-                canCopyLink
-                canDownload
-              />
-            </NotificationsProvider>
-          </IntlProvider>
-        </ThemeProvider>
-      </TrackingProvider>
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <NotificationsProvider>
+            <EditAssetDialog asset={asset} onClose={jest.fn()} canUpdate canCopyLink canDownload />
+          </NotificationsProvider>
+        </IntlProvider>
+      </ThemeProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );

@@ -7,7 +7,6 @@ import {
   useNotification,
   useOverlayBlocker,
   useRBAC,
-  useTracking,
   translatedErrors,
 } from '@strapi/helper-plugin';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
@@ -19,6 +18,7 @@ import * as yup from 'yup';
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
 import {
   useCreateTransferTokenMutation,
   useGetTransferTokenQuery,

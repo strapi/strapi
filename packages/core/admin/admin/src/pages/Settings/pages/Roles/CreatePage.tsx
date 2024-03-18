@@ -16,7 +16,6 @@ import {
 import {
   useNotification,
   useOverlayBlocker,
-  useTracking,
   translatedErrors,
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
@@ -31,6 +30,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useTracking } from '../../../../features/Tracking';
 import {
   useCreateRoleMutation,
   useGetRolePermissionLayoutQuery,

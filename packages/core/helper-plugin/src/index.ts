@@ -10,7 +10,6 @@ export * from './features/Notifications';
 export * from './features/OverlayBlocker';
 export * from './features/RBAC';
 export * from './features/StrapiApp';
-export * from './features/Tracking';
 
 /* -------------------------------------------------------------------------------------------------
  * Hooks
@@ -46,4 +45,4 @@ export * from './utils/translatedErrors';
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export type { TranslationMessage, FilterData } from './types';
+export type { TranslationMessage } from './types';

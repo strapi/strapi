@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Button, Typography } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { Check, Trash } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useTable } from '../../../../../components/Table';
+import { useTracking } from '../../../../../features/Tracking';
 import { getTranslation } from '../../../../utils/translations';
 import { InjectionZoneList } from '../InjectionZoneList';
 

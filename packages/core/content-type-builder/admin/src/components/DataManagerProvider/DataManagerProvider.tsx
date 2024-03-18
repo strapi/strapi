@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
+import { Page, useGuidedTour, useTracking } from '@strapi/admin/strapi-admin';
 import {
   useAppInfo,
   useAutoReloadOverlayBlocker,
@@ -8,7 +8,6 @@ import {
   useNotification,
   useRBACProvider,
   useStrapiApp,
-  useTracking,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';

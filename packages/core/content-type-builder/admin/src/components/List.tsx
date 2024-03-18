@@ -1,5 +1,6 @@
 import { ComponentType, Fragment } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -13,7 +14,6 @@ import {
   Tr,
   Typography,
 } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
