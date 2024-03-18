@@ -78,8 +78,8 @@
     "koa": "2.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "6.21.1",
-    "styled-components": "5.3.3",
+    "react-router-dom": "6.22.3",
+    "styled-components": "5.3.11",
     "tsconfig": "4.20.5",
     "typescript": "5.3.2"
   },
