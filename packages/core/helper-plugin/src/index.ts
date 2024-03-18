@@ -11,7 +11,6 @@ export * from './features/RBAC';
 export * from './hooks/useFetchClient';
 export * from './hooks/useFocusInputField';
 export * from './hooks/usePersistentState';
-export * from './hooks/useQuery';
 export * from './hooks/useQueryParams';
 export * from './hooks/useRBAC';
 export * from './hooks/useSelectionState';

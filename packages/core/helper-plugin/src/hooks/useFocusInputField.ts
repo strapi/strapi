@@ -1,10 +1,8 @@
-import { MutableRefObject, useEffect, useState } from 'react';
+import { MutableRefObject, useEffect, useMemo, useState } from 'react';
 
-import { useQuery } from './useQuery';
+import { useLocation } from 'react-router-dom';
 
 type InputFieldRefs<T extends HTMLElement> = T | { input: MutableRefObject<T> } | null;
-
-type FieldRef = <T extends HTMLElement>(node: InputFieldRefs<T>) => void;
 
 /**
  * @description Given the name of an input field (this does not need to be the name you pass as a prop to the DOM element),
@@ -23,7 +21,8 @@ type FieldRef = <T extends HTMLElement>(node: InputFieldRefs<T>) => void;
 export const useFocusInputField = <T extends HTMLElement>(
   name: string
 ): ((node: InputFieldRefs<T>) => void) => {
-  const search = useQuery();
+  const { search: searchString } = useLocation();
+  const search = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   /**
    * TODO: remove union and just use `HTMLElement`
