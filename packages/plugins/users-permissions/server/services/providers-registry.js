@@ -331,6 +331,21 @@ const getInitialProviders = ({ purest }) => ({
         };
       });
   },
+  async keycloak({ accessToken, providers }) {
+    const keycloak = purest({ provider: 'keycloak' });
+
+    return keycloak
+      .subdomain(providers.keycloak.subdomain)
+      .get('protocol/openid-connect/userinfo')
+      .auth(accessToken)
+      .request()
+      .then(({ body }) => {
+        return {
+          username: body.preferred_username,
+          email: body.email,
+        };
+      });
+  },
 });
 
 module.exports = () => {

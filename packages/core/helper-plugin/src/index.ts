@@ -3,10 +3,6 @@
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './components/CheckPermissions';
-export * from './components/ConfirmDialog';
-export * from './components/DynamicTable';
-export * from './components/Table';
-export * from './components/EmptyBodyTable';
 
 /* -------------------------------------------------------------------------------------------------
  * Features

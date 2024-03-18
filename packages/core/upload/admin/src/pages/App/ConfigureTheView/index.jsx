@@ -1,13 +1,9 @@
 import React, { useReducer, useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button, ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  ConfirmDialog,
-  useFocusWhenNavigate,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useTracking } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -101,17 +97,16 @@ const ConfigureTheView = ({ config }) => {
           </ContentLayout>
 
           <ConfirmDialog
-            bodyText={{
+            isOpen={showWarningSubmit}
+            onClose={toggleWarningSubmit}
+            onConfirm={handleConfirm}
+            variant="success-light"
+          >
+            {formatMessage({
               id: getTrad('config.popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
+            })}
+          </ConfirmDialog>
         </form>
       </Main>
     </Layout>

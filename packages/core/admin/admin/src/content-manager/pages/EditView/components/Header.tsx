@@ -1,9 +1,8 @@
 import * as React from 'react';
 
 import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
 import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
-import { ArrowLeft, Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
+import { Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -11,6 +10,8 @@ import styled from 'styled-components';
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { useForm } from '../../../../components/Form';
 import { RelativeTime } from '../../../../components/RelativeTime';
+import { BackButton } from '../../../../features/BackButton';
+import { getDisplayName } from '../../../../utils/users';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -24,7 +25,6 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
-import { getDisplayName } from '../../../utils/users';
 
 import { DocumentActionsMenu } from './DocumentActions';
 import { DocumentStatus } from './DocumentStatus';
@@ -57,13 +57,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
 
   return (
     <Flex direction="column" alignItems="flex-start" paddingTop={8} paddingBottom={4} gap={3}>
-      {/* TODO: implement back button behaviour, track issue - https://strapi-inc.atlassian.net/browse/CONTENT-2173 */}
-      <Link startIcon={<ArrowLeft />}>
-        {formatMessage({
-          id: 'global.back',
-          defaultMessage: 'Back',
-        })}
-      </Link>
+      <BackButton />
       <Flex
         width="100%"
         justifyContent="space-between"

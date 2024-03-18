@@ -16,7 +16,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
-  ConfirmDialog,
   getFetchClient,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -31,6 +30,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Page } from '../../../../components/PageHelpers';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -61,10 +61,7 @@ const ListPage = () => {
   );
 
   const navigate = useNavigate();
-  const [{ showModalConfirmButtonLoading, roleToDelete }, dispatch] = React.useReducer(
-    reducer,
-    initialState
-  );
+  const [{ roleToDelete }, dispatch] = React.useReducer(reducer, initialState);
 
   const { post } = getFetchClient();
 
@@ -275,8 +272,7 @@ const ListPage = () => {
       <ConfirmDialog
         isOpen={isWarningDeleteAllOpened}
         onConfirm={handleDeleteData}
-        isConfirmButtonLoading={showModalConfirmButtonLoading}
-        onToggleDialog={handleToggleModal}
+        onClose={handleToggleModal}
       />
     </Main>
   );

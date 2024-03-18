@@ -6,8 +6,8 @@
 
 import { useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Checkbox } from '@strapi/design-system';
-import { ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
@@ -79,23 +79,12 @@ export const DraftAndPublishToggle = ({
         {label}
       </Checkbox>
 
-      <ConfirmDialog
-        isOpen={showWarning}
-        onToggleDialog={handleToggle}
-        onConfirm={handleConfirm}
-        bodyText={{
+      <ConfirmDialog isOpen={showWarning} onClose={handleToggle} onConfirm={handleConfirm}>
+        {formatMessage({
           id: getTrad('popUpWarning.draft-publish.message'),
           defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
-        }}
-        leftButtonText={{
-          id: 'components.popUpWarning.button.cancel',
-          defaultMessage: 'No, cancel',
-        }}
-        rightButtonText={{
-          id: getTrad('popUpWarning.draft-publish.button.confirm'),
-          defaultMessage: 'Yes, disable',
-        }}
-      />
+        })}
+      </ConfirmDialog>
     </>
   );
 };
