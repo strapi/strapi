@@ -6,12 +6,12 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system/v2';
-import { useTracking } from '@strapi/helper-plugin';
 import { Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 
 /**

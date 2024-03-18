@@ -7,13 +7,7 @@ import {
   LinkButton,
   Main,
 } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
@@ -24,6 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useOnce } from '../../../../hooks/useOnce';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';

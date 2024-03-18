@@ -7,7 +7,6 @@ import {
   useNotification,
   useRBACProvider,
   useStrapiApp,
-  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
@@ -15,6 +14,7 @@ import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { ContentManagerAppState, SET_INIT_DATA } from '../layout';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';

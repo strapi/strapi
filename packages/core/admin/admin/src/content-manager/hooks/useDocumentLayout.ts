@@ -1,14 +1,10 @@
 import * as React from 'react';
 
 import { SerializedError } from '@reduxjs/toolkit';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useQueryParams,
-  useStrapiApp,
-} from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 
 import { HOOKS } from '../../constants';
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { BaseQueryError } from '../../utils/baseQuery';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { getMainField } from '../utils/attributes';

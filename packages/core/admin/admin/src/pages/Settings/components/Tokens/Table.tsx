@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQueryParams, useTracking } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { SanitizedTransferToken } from '../../../../../../shared/contracts/trans
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { Table as TableImpl } from '../../../../components/Table';
+import { useTracking } from '../../../../features/Tracking';
 
 import type { Entity } from '@strapi/types';
 

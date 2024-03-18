@@ -9,11 +9,12 @@ import {
   Loader,
   Main,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Permission } from '../../../shared/contracts/shared';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
 
 /* -------------------------------------------------------------------------------------------------
@@ -175,11 +176,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
   );
 
-  const {
-    isLoading,
-    error,
-    data = [],
-  } = useCheckPermissionsQuery(
+  const { isLoading, error, data } = useCheckPermissionsQuery(
     {
       permissions: matchingPermissions.map((perm) => ({
         action: perm.action,
@@ -208,7 +205,12 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     return <Error />;
   }
 
-  const canAccess = shouldCheckConditions ? !data.includes(false) : matchingPermissions.length > 0;
+  const { data: permissionsData } = data || {};
+
+  const canAccess =
+    shouldCheckConditions && permissionsData
+      ? !permissionsData.includes(false)
+      : matchingPermissions.length > 0;
 
   if (!canAccess) {
     return <NoPermissions />;

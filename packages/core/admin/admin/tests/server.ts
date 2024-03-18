@@ -11,6 +11,12 @@ import { MockData, mockData } from './mockData';
 export const server = setupServer(
   ...[
     /**
+     * TRACKING
+     */
+    rest.post('https://analytics.strapi.io/api/v2/track', (req, res, ctx) => {
+      return res(ctx.status(200));
+    }),
+    /**
      *
      * ADMIN ROLES
      *

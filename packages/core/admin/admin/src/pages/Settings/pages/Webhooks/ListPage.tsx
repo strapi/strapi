@@ -24,12 +24,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -39,6 +34,7 @@ import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 
 import { useWebhooks } from './hooks/useWebhooks';
 

@@ -19,7 +19,6 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { ExternalLink, GlassesSquare } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
@@ -29,6 +28,7 @@ import { ContentBox } from '../../components/ContentBox';
 import { Page } from '../../components/PageHelpers';
 import { Pagination } from '../../components/Pagination';
 import { useTypedSelector } from '../../core/store/hooks';
+import { useTracking } from '../../features/Tracking';
 import { useDebounce } from '../../hooks/useDebounce';
 
 import { NpmPackagesFilters } from './components/NpmPackagesFilters';

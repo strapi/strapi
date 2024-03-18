@@ -1,6 +1,5 @@
-import { BackButton } from '@strapi/admin/strapi-admin';
+import { BackButton, useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';

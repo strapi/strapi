@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
-import { AppInfoProvider, useTracking } from '@strapi/helper-plugin';
+import { AppInfoProvider } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -22,6 +22,7 @@ import { RBACProvider } from '../components/RBACProvider';
 import { useIsHistoryRoute } from '../content-manager/history/routes';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
+import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';

@@ -14,12 +14,13 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { Page } from '../components/PageHelpers';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../selectors';
 import { useGetPluginsQuery } from '../services/admin';
 
