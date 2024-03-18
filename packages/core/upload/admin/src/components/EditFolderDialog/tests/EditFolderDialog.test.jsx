@@ -13,7 +13,6 @@ import { EditFolderDialog } from '../EditFolderDialog';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
   useFetchClient: jest.fn().mockReturnValue({
     put: jest.fn().mockImplementation({}),
   }),

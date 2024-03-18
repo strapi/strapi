@@ -9,13 +9,13 @@ import {
   Typography,
   DialogFooterProps,
 } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useTable } from '../../../../../components/Table';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';

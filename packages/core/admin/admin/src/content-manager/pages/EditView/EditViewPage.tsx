@@ -11,7 +11,6 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
@@ -21,6 +20,7 @@ import { Blocker, Form, FormHelpers } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useNotification } from '../../../features/Notifications';
 import { useOnce } from '../../../hooks/useOnce';
+import { useQueryParams } from '../../../hooks/useQueryParams';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';

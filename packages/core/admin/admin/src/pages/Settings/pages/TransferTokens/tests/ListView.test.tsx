@@ -6,13 +6,6 @@ import { ListView } from '../ListView';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
-  useQueryParams: jest.fn().mockReturnValue([
-    {
-      query: {
-        sort: 'test:ASC',
-      },
-    },
-  ]),
 }));
 
 describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {

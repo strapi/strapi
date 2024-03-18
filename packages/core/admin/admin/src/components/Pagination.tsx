@@ -9,10 +9,11 @@ import {
   Pagination as PaginationImpl,
   PreviousLink,
 } from '@strapi/design-system/v2';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
+
+import { useQueryParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 

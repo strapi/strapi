@@ -17,7 +17,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -27,6 +26,7 @@ import { useForm } from '../../../../components/Form';
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
 import { NotificationConfig, useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';

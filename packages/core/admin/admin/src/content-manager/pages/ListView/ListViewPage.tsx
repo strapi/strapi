@@ -10,7 +10,6 @@ import {
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
@@ -31,6 +30,7 @@ import { useStrapiApp } from '../../../features/StrapiApp';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { useQueryParams } from '../../../hooks/useQueryParams';
 import { getDisplayName } from '../../../utils/users';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';

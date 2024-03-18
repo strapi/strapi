@@ -14,7 +14,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { getFetchClient, useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { getFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import { produce } from 'immer';
@@ -29,6 +29,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';

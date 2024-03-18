@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Flex, Main } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { Helmet } from 'react-helmet';
@@ -10,6 +9,7 @@ import { Navigate, useParams } from 'react-router-dom';
 
 import { createContext } from '../../../components/Context';
 import { Page } from '../../../components/PageHelpers';
+import { useQueryParams } from '../../../hooks/useQueryParams';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';

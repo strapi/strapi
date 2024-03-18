@@ -1,7 +1,6 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { Page, useQueryParams } from '@strapi/admin/strapi-admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';

@@ -14,7 +14,7 @@ import {
   Tooltip,
   Loader,
 } from '@strapi/design-system';
-import { useQueryParams, TranslationMessage } from '@strapi/helper-plugin';
+import { TranslationMessage } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -25,6 +25,7 @@ import { ValidationError } from 'yup';
 import { Table, useTable } from '../../../../../components/Table';
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { getYupInnerErrors } from '../../../../../utils/getYupInnerErrors';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';

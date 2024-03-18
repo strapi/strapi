@@ -6,7 +6,20 @@ import { IntlFormatters, useIntl } from 'react-intl';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 
-import type { ApiError } from '../types/errors';
+import type { errors } from '@strapi/utils';
+
+type ApiError =
+  | errors.ApplicationError
+  | errors.ForbiddenError
+  | errors.NotFoundError
+  | errors.NotImplementedError
+  | errors.PaginationError
+  | errors.PayloadTooLargeError
+  | errors.PolicyError
+  | errors.RateLimitError
+  | errors.UnauthorizedError
+  | errors.ValidationError
+  | errors.YupValidationError;
 
 interface UnknownApiError {
   /**

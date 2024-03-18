@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { SerializedError } from '@reduxjs/toolkit';
-import { useQueryParams } from '@strapi/helper-plugin';
 
 import { HOOKS } from '../../constants';
 import { useNotification } from '../../features/Notifications';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../hooks/useQueryParams';
 import { BaseQueryError } from '../../utils/baseQuery';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { getMainField } from '../utils/attributes';

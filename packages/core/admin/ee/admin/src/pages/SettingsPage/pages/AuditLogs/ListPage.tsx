@@ -6,7 +6,7 @@ import {
   IconButton,
   Typography,
 } from '@strapi/design-system';
-import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -16,6 +16,7 @@ import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { Table } from '../../../../../../../admin/src/components/Table';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
+import { useQueryParams } from '../../../../../../../admin/src/hooks/useQueryParams';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
 import { Modal } from './components/Modal';

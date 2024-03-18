@@ -62,11 +62,8 @@ jest.mock('../../../../hooks/useFolder');
 jest.mock('../../../../hooks/useAssets');
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  CheckPermissions: jest.fn().mockReturnValue(null),
   useRBAC: jest.fn(),
   useRBACProvider: jest.fn().mockReturnValue({ allPermissions: [] }),
-  useNotification: jest.fn(() => jest.fn()),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
   useSelectionState: jest
     .fn()
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
