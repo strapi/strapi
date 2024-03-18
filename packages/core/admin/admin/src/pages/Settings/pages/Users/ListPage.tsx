@@ -10,12 +10,7 @@ import {
   Status,
   IconButton,
 } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { Helmet } from 'react-helmet';
@@ -29,6 +24,7 @@ import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';

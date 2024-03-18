@@ -2,13 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  auth,
-  translatedErrors,
-  useAPIErrorHandler,
-  useNotification,
-  useQuery,
-} from '@strapi/helper-plugin';
+import { auth, translatedErrors, useNotification, useQuery } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';
@@ -27,6 +21,7 @@ import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
 import { useTracking } from '../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
 import {
   useGetRegistrationInfoQuery,

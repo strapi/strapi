@@ -20,7 +20,6 @@ import {
 import {
   onRowClick,
   stopPropagation,
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
@@ -28,7 +27,7 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

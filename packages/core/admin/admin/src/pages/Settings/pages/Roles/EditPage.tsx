@@ -1,12 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useOverlayBlocker,
-  translatedErrors,
-} from '@strapi/helper-plugin';
+import { useNotification, useOverlayBlocker, translatedErrors } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -18,6 +13,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
 import { useTracking } from '../../../../features/Tracking';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useGetRolePermissionLayoutQuery,
   useGetRolePermissionsQuery,

@@ -2,7 +2,7 @@ import { AxiosError } from 'axios';
 
 import { getPrefixedId } from './getPrefixedId';
 
-import type { ApiError } from '../types';
+import type { ApiError } from '../types/errors';
 import type { errors } from '@strapi/utils';
 
 export interface NormalizeErrorOptions {
@@ -48,6 +48,11 @@ const validateErrorIsYupValidationError = (
 ): err is errors.YupValidationError & { details: { errors: YupFormattedError[] } } =>
   typeof err.details === 'object' && err.details !== null && 'errors' in err.details;
 
+/**
+ * Normalize the format of `ResponseError`
+ * in places where the hook `useAPIErrorHandler` can not called
+ * (e.g. outside of a React component).
+ */
 export function normalizeAPIError(
   apiError: AxiosError<{ error: ApiError }>,
   intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']

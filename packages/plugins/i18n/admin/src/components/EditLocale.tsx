@@ -18,9 +18,9 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Form, FormHelpers } from '@strapi/strapi/admin';
+import { useAPIErrorHandler, Form, FormHelpers } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { UpdateLocale, Locale } from '../../../shared/contracts/locales';

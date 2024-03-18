@@ -3,14 +3,13 @@ import * as React from 'react';
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';

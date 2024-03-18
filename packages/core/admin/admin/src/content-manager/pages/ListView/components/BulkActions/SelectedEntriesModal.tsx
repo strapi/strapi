@@ -19,7 +19,6 @@ import {
   useQueryParams,
   useNotification,
   TranslationMessage,
-  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { Entity } from '@strapi/types';
@@ -29,6 +28,7 @@ import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { Table, useTable } from '../../../../../components/Table';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {

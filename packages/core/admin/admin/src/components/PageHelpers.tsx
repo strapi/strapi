@@ -9,11 +9,12 @@ import {
   Loader,
   Main,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Permission } from '../../../shared/contracts/shared';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
 
 /* -------------------------------------------------------------------------------------------------
