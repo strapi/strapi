@@ -2,6 +2,7 @@ import { Strapi, Documents } from '@strapi/types';
 
 import { createMiddlewareManager } from './middlewares';
 import { createContentTypeRepository } from './repository';
+import { transformParamsDocumentId } from './transform/id-transform';
 
 /**
  * Repository to :
@@ -38,6 +39,9 @@ export const createDocumentService = (strapi: Strapi): Documents.Service => {
   } as Documents.Service;
 
   return Object.assign(factory, {
+    utils: {
+      transformParamsDocumentId,
+    },
     use: middlewares.use.bind(middlewares),
   });
 };

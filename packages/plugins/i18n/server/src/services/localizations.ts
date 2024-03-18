@@ -15,6 +15,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
 
   const uid = model.uid;
   const documentId = sourceEntry.documentId;
+  const locale = sourceEntry.locale;
   const status = sourceEntry?.publishedAt ? 'published' : 'draft';
 
   // Find all the entries that need to be updated
@@ -23,15 +24,21 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
     where: {
       documentId,
       publishedAt: status === 'published' ? { $ne: null } : null,
-      locale: { $ne: sourceEntry.locale },
+      locale: { $ne: locale },
     },
     select: ['locale', 'id'],
   });
 
+  const { data: transformedData } = await strapi.documents.utils.transformParamsDocumentId(uid, {
+    data: nonLocalizedAttributes,
+    locale,
+    status,
+  });
+
   for (const entry of entriesToUpdate) {
-    await strapi.documents(uid).updateComponents(uid, entry, nonLocalizedAttributes as any);
+    await strapi.documents(uid).updateComponents(uid, entry, transformedData as any);
   }
-  const entryData = await strapi.documents(uid).omitComponentData(model, nonLocalizedAttributes);
+  const entryData = await strapi.documents(uid).omitComponentData(model, transformedData as any);
 
   // Update every other locale entry of this documentId in the same status
   // We need to support both statuses incase we are working with a content type
