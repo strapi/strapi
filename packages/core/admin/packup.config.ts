@@ -14,7 +14,7 @@ const config: Config = defineConfig({
       source: './admin/tests/utils.tsx',
       import: './dist/admin/tests/index.mjs',
       require: './dist/admin/tests/index.js',
-      types: './dist/admin/tests/index.d.ts',
+      types: './dist/admin/tests/utils.d.ts',
       tsconfig: './admin/tsconfig.build.json',
       runtime: 'web',
     },

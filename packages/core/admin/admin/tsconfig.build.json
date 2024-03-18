@@ -12,11 +12,11 @@
     "./module.d.ts",
     "../ee/admin",
     "../package.json",
-    "./tests/utils.tsx"
+    "./tests"
   ],
   "exclude": [
     "**/__mocks__",
-    "**/tests",
+    "./src/**/tests",
     "**/*.test.*",
     "../ee/admin/**/*.test.*",
     "../ee/admin/**/__mocks__"

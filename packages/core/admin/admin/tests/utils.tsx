@@ -163,6 +163,11 @@ export interface RenderOptions {
   };
 }
 
+/**
+ * @alpha
+ * @description A custom render function that wraps the component with the necessary providers,
+ * for use of testing components within the Strapi Admin.
+ */
 const render = (
   ui: React.ReactElement,
   { renderOptions, userEventOptions, initialEntries, providerOptions }: RenderOptions = {}
@@ -182,6 +187,11 @@ const render = (
   };
 };
 
+/**
+ * @alpha
+ * @description A custom render-hook function that wraps the component with the necessary providers,
+ * for use of testing hooks within the Strapi Admin.
+ */
 const renderHook = <
   Result,
   Props,

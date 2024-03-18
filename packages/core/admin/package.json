@@ -28,7 +28,7 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-admin/tests": {
-      "types": "./dist/admin/tests/index.d.ts",
+      "types": "./dist/admin/tests/utils.d.ts",
       "source": "./admin/tests/utils.tsx",
       "import": "./dist/admin/tests/index.mjs",
       "require": "./dist/admin/tests/index.js",
