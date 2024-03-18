@@ -1,4 +1,4 @@
-import { normalizeAPIError } from '@strapi/admin/strapi-admin';
+import { normalizeAPIError } from './normalizeAPIError';
 
 /**
  *

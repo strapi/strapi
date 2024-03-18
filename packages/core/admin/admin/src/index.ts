@@ -51,9 +51,4 @@ export type {
 } from './core/apis/content-manager';
 export type { ApiError } from './types/errors';
 
-/**
- * Utils
- */
-export { normalizeAPIError } from './utils/normalizeAPIError';
-
 export * from './content-manager/exports';

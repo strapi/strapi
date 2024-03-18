@@ -550,15 +550,7 @@ This util has been removed and not replaced. If you feel like you need this util
 
 ### normalizeAPIError
 
-This util has been removed. You should import it from the `@strapi/strapi/admin` package:
-
-```tsx
-// Before
-import { normalizeAPIError } from '@strapi/helper-plugin';
-
-// After
-import { normalizeAPIError } from '@strapi/strapi/admin';
-```
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
 ### prefixFileUrlWithBackendUrl
 

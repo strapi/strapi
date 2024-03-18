@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { normalizeAPIError } from '@strapi/admin/strapi-admin';
 import {
   Button,
   FieldLabel,
@@ -23,6 +22,7 @@ import { AssetDefinition, FolderDefinition } from '../../constants';
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getTrad } from '../../utils';
+import { normalizeAPIError } from '../../utils/normalizeAPIError';
 import SelectTree from '../SelectTree';
 
 export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
