@@ -3,13 +3,13 @@ import * as React from 'react';
 
 import { AnyAction } from '@reduxjs/toolkit';
 import { Layout as DSLayout } from '@strapi/design-system';
-import { useGuidedTour } from '@strapi/helper-plugin';
 import produce from 'immer';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from '../components/DragLayer';
+import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { Page } from '../components/PageHelpers';
 
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
@@ -38,7 +38,7 @@ const Layout = () => {
 
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
-  const { startSection } = useGuidedTour();
+  const startSection = useGuidedTour('Layout', (state) => state.startSection);
   const startSectionRef = React.useRef(startSection);
 
   // Check if we're on a history route to known if we should render the left menu

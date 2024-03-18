@@ -1,4 +1,4 @@
-import type { SanitizedAdminUser } from '../../../../shared/contracts/shared';
+import type { SanitizedAdminUser } from '../../../shared/contracts/shared';
 import type { IntlShape } from 'react-intl';
 
 /**
@@ -10,7 +10,7 @@ const getDisplayName = (
     lastname,
     username,
     email,
-  }: Pick<SanitizedAdminUser, 'firstname' | 'lastname' | 'username' | 'email'>,
+  }: Pick<SanitizedAdminUser, 'firstname' | 'lastname' | 'username' | 'email'> = {},
   formatMessage: IntlShape['formatMessage']
 ) => {
   if (username) {

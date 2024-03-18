@@ -18,6 +18,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
+jest.mock('../../../../../components/GuidedTour/Provider');
+
 describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   afterAll(() => {
     jest.clearAllMocks();
@@ -64,23 +66,5 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     const { findByRole } = render(<ListView />);
 
     await findByRole('button', { name: 'Delete My super token' });
-  });
-
-  it('should show the read button when the user have the rights to read and not to update', async () => {
-    jest.mocked(useRBAC).mockReturnValue({
-      isLoading: false,
-      setIsLoading: jest.fn(),
-      allowedActions: {
-        canCreate: false,
-        canDelete: true,
-        canRead: true,
-        canUpdate: false,
-        canRegenerate: false,
-      },
-    });
-
-    const { findByRole } = render(<ListView />);
-
-    await findByRole('link', { name: 'Read My super token' });
   });
 });

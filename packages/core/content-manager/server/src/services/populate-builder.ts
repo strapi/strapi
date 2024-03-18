@@ -31,19 +31,7 @@ const populateBuilder = (uid: Common.UID.Schema) => {
       getInitialPopulate = async () => getQueryPopulate(uid, query);
       return builder;
     },
-    /**
-     * Populate relations as count if condition is true.
-     * @param condition
-     * @param [options]
-     * @param [options.toMany] - Populate XtoMany relations as count if true.
-     * @param [options.toOne] - Populate XtoOne relations as count if true.
-     */
-    countRelationsIf(condition: boolean, { toMany, toOne } = { toMany: true, toOne: true }) {
-      if (condition) {
-        return this.countRelations({ toMany, toOne });
-      }
-      return builder;
-    },
+
     /**
      * Populate relations as count.
      * @param [options]
@@ -59,6 +47,7 @@ const populateBuilder = (uid: Common.UID.Schema) => {
       }
       return builder;
     },
+
     /**
      * Populate relations deeply, up to a certain level.
      * @param [level=Infinity] - Max level of nested populate.
@@ -67,6 +56,7 @@ const populateBuilder = (uid: Common.UID.Schema) => {
       deepPopulateOptions.maxLevel = level;
       return builder;
     },
+
     /**
      * Construct the populate object based on the builder options.
      * @returns Populate object

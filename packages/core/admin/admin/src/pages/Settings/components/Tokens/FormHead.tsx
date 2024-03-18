@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Refresh } from '@strapi/icons';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { Check, Refresh } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { BackButton } from '../../../../features/BackButton';
 import { useRegenerateTokenMutation } from '../../../../services/api';
 
 import type { Entity } from '@strapi/types';
@@ -77,28 +77,30 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
       </Button>
 
       <ConfirmDialog
-        bodyText={{
-          id: 'Settings.tokens.popUpWarning.message',
-          defaultMessage: 'Are you sure you want to regenerate this token?',
-        }}
-        iconRightButton={<Refresh />}
-        isConfirmButtonLoading={isLoadingConfirmation}
         isOpen={showConfirmDialog}
-        onToggleDialog={() => setShowConfirmDialog(false)}
-        onConfirm={handleConfirmRegeneration}
-        leftButtonText={{
-          id: 'Settings.tokens.Button.cancel',
-          defaultMessage: 'Cancel',
-        }}
-        rightButtonText={{
-          id: 'Settings.tokens.Button.regenerate',
-          defaultMessage: 'Regenerate',
-        }}
-        title={{
+        onClose={() => setShowConfirmDialog(false)}
+        title={formatMessage({
           id: 'Settings.tokens.RegenerateDialog.title',
           defaultMessage: 'Regenerate token',
-        }}
-      />
+        })}
+        endAction={
+          <Button
+            startIcon={<Refresh />}
+            loading={isLoadingConfirmation}
+            onClick={handleConfirmRegeneration}
+          >
+            {formatMessage({
+              id: 'Settings.tokens.Button.regenerate',
+              defaultMessage: 'Regenerate',
+            })}
+          </Button>
+        }
+      >
+        {formatMessage({
+          id: 'Settings.tokens.popUpWarning.message',
+          defaultMessage: 'Are you sure you want to regenerate this token?',
+        })}
+      </ConfirmDialog>
     </>
   );
 };
@@ -115,7 +117,6 @@ interface FormHeadProps<TToken extends Token | null> {
   canRegenerate: boolean;
   setToken: (token: TToken) => void;
   isSubmitting: boolean;
-  backUrl: string;
   regenerateUrl: string;
 }
 
@@ -126,7 +127,6 @@ export const FormHead = <TToken extends Token | null>({
   canEditInputs,
   canRegenerate,
   isSubmitting,
-  backUrl,
   regenerateUrl,
 }: FormHeadProps<TToken>) => {
   const { formatMessage } = useIntl();
@@ -172,17 +172,7 @@ export const FormHead = <TToken extends Token | null>({
           )
         )
       }
-      navigationAction={
-        <>
-          {/* @ts-expect-error polymorphic */}
-          <Link as={NavLink} startIcon={<ArrowLeft />} to={backUrl}>
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        </>
-      }
+      navigationAction={<BackButton />}
       ellipsis
     />
   );

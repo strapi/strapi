@@ -10,11 +10,9 @@ import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
   useRBAC: jest.fn(() => ({
     isLoading: false,
-    allowedActions: { canUpdate: true, canDelete: true },
+    allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
   })),
 }));
 
@@ -63,7 +61,7 @@ describe('Releases details page', () => {
     const moreButton = screen.getByRole('button', { name: 'Release edit and delete menu' });
     expect(moreButton).toBeInTheDocument();
 
-    const publishButton = screen.getByRole('button', { name: 'Publish' });
+    const publishButton = await screen.findByRole('button', { name: 'Publish' });
     expect(publishButton).toBeInTheDocument();
     expect(publishButton).toBeDisabled();
 

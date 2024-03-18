@@ -6,12 +6,6 @@ import { ReleasesPage } from '../ReleasesPage';
 
 import { mockReleasesPageData } from './mockReleasesPageData';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
-}));
-
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useLicenseLimits: jest.fn().mockReturnValue({

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   LinkButton,
   ContentLayout,
@@ -17,7 +18,7 @@ import {
   Typography,
   EmptyStateLayout,
 } from '@strapi/design-system';
-import { ConfirmDialog, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
 import { Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
@@ -33,7 +34,6 @@ const PluginPage = () => {
   const { formatMessage } = useIntl();
   const { data, isLoading, isError, remove, regenerate } = useDocumentation();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState();
   const { allowedActions } = useRBAC(PERMISSIONS);
 
@@ -49,10 +49,8 @@ const PluginPage = () => {
   };
 
   const handleConfirmDelete = async () => {
-    setIsConfirmButtonLoading(true);
     await remove.mutateAsync({ prefix: data?.prefix, version: versionToDelete });
     setShowConfirmDelete(!showConfirmDelete);
-    setIsConfirmButtonLoading(false);
   };
 
   const handleClickDelete = (version) => {
@@ -187,9 +185,8 @@ const PluginPage = () => {
           )}
         </ContentLayout>
         <ConfirmDialog
-          isConfirmButtonLoading={isConfirmButtonLoading}
           onConfirm={handleConfirmDelete}
-          onToggleDialog={handleShowConfirmDelete}
+          onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Main>

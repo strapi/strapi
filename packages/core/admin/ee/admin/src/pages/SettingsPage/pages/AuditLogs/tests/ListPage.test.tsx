@@ -85,7 +85,9 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     await user.click(
-      screen.getByRole('row', { name: 'Admin logout October 31, 2023, 15:56:54 test testing' })
+      screen.getByRole('row', {
+        name: 'Admin logout October 31, 2023, 15:56:54 test testing admin.logout action details',
+      })
     );
 
     const dialog = screen.getByRole('dialog', { name: 'October 31, 2023, 15:56:54' });

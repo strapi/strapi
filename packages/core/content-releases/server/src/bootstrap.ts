@@ -149,20 +149,18 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       },
     });
 
-    if (strapi.features.future.isEnabled('contentReleasesScheduling')) {
-      getService('scheduling', { strapi })
-        .syncFromDatabase()
-        .catch((err: Error) => {
-          strapi.log.error(
-            'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
-          );
+    getService('scheduling', { strapi })
+      .syncFromDatabase()
+      .catch((err: Error) => {
+        strapi.log.error(
+          'Error while syncing scheduled jobs from the database in the content-releases plugin. This could lead to errors in the releases scheduling.'
+        );
 
-          throw err;
-        });
-
-      Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-        strapi.webhookStore.addAllowedEvent(key, value);
+        throw err;
       });
-    }
+
+    Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+      strapi.webhookStore.addAllowedEvent(key, value);
+    });
   }
 };

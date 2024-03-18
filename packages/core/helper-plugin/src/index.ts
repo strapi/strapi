@@ -1,21 +1,10 @@
 /* -------------------------------------------------------------------------------------------------
- * Components
- * -----------------------------------------------------------------------------------------------*/
-
-export * from './components/CheckPermissions';
-export * from './components/ConfirmDialog';
-export * from './components/DynamicTable';
-export * from './components/Table';
-export * from './components/EmptyBodyTable';
-
-/* -------------------------------------------------------------------------------------------------
  * Features
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './features/AppInfo';
 export * from './features/AutoReloadOverlayBlocker';
 export * from './features/CustomFields';
-export * from './features/GuidedTour';
 export * from './features/Library';
 export * from './features/Notifications';
 export * from './features/OverlayBlocker';

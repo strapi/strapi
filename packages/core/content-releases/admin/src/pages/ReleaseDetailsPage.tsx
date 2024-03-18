@@ -1,13 +1,19 @@
 import * as React from 'react';
 
-import { Page, unstable_useDocument, Pagination } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  unstable_useDocument,
+  Pagination,
+  Table,
+  BackButton,
+  ConfirmDialog,
+} from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
   Flex,
   HeaderLayout,
   IconButton,
-  Link,
   Main,
   Tr,
   Td,
@@ -21,24 +27,13 @@ import {
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
-  Table,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
-  ConfirmDialog,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import {
-  ArrowLeft,
-  CheckCircle,
-  More,
-  Pencil,
-  Trash,
-  CrossCircle,
-  EmptyDocuments,
-} from '@strapi/icons';
+import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -76,7 +71,6 @@ import type { Schema } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -234,9 +228,8 @@ const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const {
-    allowedActions: { canUpdate, canDelete },
-  } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
 
@@ -322,7 +315,6 @@ const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
@@ -361,20 +353,12 @@ const ReleaseDetailsLayout = ({
         subtitle={
           <Flex gap={2} lineHeight={6}>
             <Typography textColor="neutral600" variant="epsilon">
-              {numberOfEntriesText +
-                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
             </Typography>
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
         }
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
@@ -468,7 +452,7 @@ const ReleaseDetailsLayout = ({
                   defaultMessage: 'Refresh',
                 })}
               </Button>
-              <CheckPermissions permissions={PERMISSIONS.publish}>
+              {canPublish ? (
                 <Button
                   size="S"
                   variant="default"
@@ -481,7 +465,7 @@ const ReleaseDetailsLayout = ({
                     defaultMessage: 'Publish',
                   })}
                 </Button>
-              </CheckPermissions>
+              ) : null}
             </Flex>
           )
         }
@@ -651,6 +635,48 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     );
   }
 
+  const headers = [
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+        defaultMessage: 'name',
+      }),
+      name: 'name',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+        defaultMessage: 'locale',
+      }),
+      name: 'locale',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
+        defaultMessage: 'content-type',
+      }),
+      name: 'content-type',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+        defaultMessage: 'action',
+      }),
+      name: 'action',
+    },
+    ...(!release.releasedAt
+      ? [
+          {
+            label: formatMessage({
+              id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+              defaultMessage: 'status',
+            }),
+            name: 'status',
+          },
+        ]
+      : []),
+  ];
+
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
@@ -691,56 +717,16 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 ...item,
                 id: Number(item.entry.id),
               }))}
-              colCount={releaseActions[key].length}
-              isLoading={isLoading}
-              isFetching={isFetching}
+              headers={headers}
+              isLoading={isLoading || isFetching}
             >
               <Table.Content>
                 <Table.Head>
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-                      defaultMessage: 'name',
-                    })}
-                    name="name"
-                  />
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
-                      defaultMessage: 'content-type',
-                    })}
-                    name="content-type"
-                  />
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-                      defaultMessage: 'action',
-                    })}
-                    name="action"
-                  />
-                  {!release.releasedAt && (
-                    <Table.HeaderCell
-                      attribute={{ type: 'string' }}
-                      label={formatMessage({
-                        id: 'content-releases.page.ReleaseDetails.table.header.label.status',
-                        defaultMessage: 'status',
-                      })}
-                      name="status"
-                    />
-                  )}
+                  {headers.map((header) => (
+                    <Table.HeaderCell key={header.name} {...header} />
+                  ))}
                 </Table.Head>
-                <Table.LoadingBody />
+                <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
                     ({ id, contentType, locale, type, entry }, actionIndex) => (
@@ -852,7 +838,7 @@ const ReleaseDetailsPage = () => {
     }
   );
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
-  const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
+  const [deleteRelease] = useDeleteReleaseMutation();
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
@@ -963,15 +949,15 @@ const ReleaseDetailsPage = () => {
         />
       )}
       <ConfirmDialog
-        bodyText={{
+        isOpen={showWarningSubmit}
+        onClose={toggleWarningSubmit}
+        onConfirm={handleDeleteRelease}
+      >
+        {formatMessage({
           id: 'content-releases.dialog.confirmation-message',
           defaultMessage: 'Are you sure you want to delete this release?',
-        }}
-        isOpen={showWarningSubmit}
-        isConfirmButtonLoading={isDeletingRelease}
-        onToggleDialog={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      />
+        })}
+      </ConfirmDialog>
     </ReleaseDetailsLayout>
   );
 };

@@ -6,7 +6,6 @@ import {
   auth,
   translatedErrors,
   useAPIErrorHandler,
-  useGuidedTour,
   useNotification,
   useQuery,
   useTracking,
@@ -24,6 +23,7 @@ import {
 } from '../../../../../shared/contracts/authentication';
 import { Form, FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
+import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
@@ -169,7 +169,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { setSkipped } = useGuidedTour();
+  const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
   const query = useQuery();
   const match = useMatch('/auth/:authType');
   const {

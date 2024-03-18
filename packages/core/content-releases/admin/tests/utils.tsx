@@ -16,9 +16,11 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
+import { PERMISSIONS } from '../src/constants';
 import { releaseApi } from '../src/services/release';
 
 import { server } from './server';
@@ -44,36 +46,47 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       }).concat(releaseApi.middleware),
   });
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   // en is the default locale of the admin app.
   return (
-    <Provider store={store}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <DesignSystemProvider locale="en">
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <NotificationsProvider>
-              <RBACContext.Provider
-                value={{
-                  refetchPermissions: jest.fn(),
-                  allPermissions: [
-                    ...fixtures.permissions.allPermissions,
-                    {
-                      id: 314,
-                      action: 'admin::users.read',
-                      subject: null,
-                      properties: {},
-                      conditions: [],
-                      actionParameters: {},
-                    },
-                  ] as Permission[],
-                }}
-              >
-                {children}
-              </RBACContext.Provider>
-            </NotificationsProvider>
-          </IntlProvider>
-        </DesignSystemProvider>
-      </MemoryRouter>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <DesignSystemProvider locale="en">
+            <IntlProvider locale="en" messages={{}} textComponent="span">
+              <NotificationsProvider>
+                <RBACContext.Provider
+                  value={{
+                    refetchPermissions: jest.fn(),
+                    allPermissions: [
+                      ...fixtures.permissions.allPermissions,
+                      {
+                        id: 314,
+                        action: 'admin::users.read',
+                        subject: null,
+                        properties: {},
+                        conditions: [],
+                        actionParameters: {},
+                      },
+                      ...Object.values(PERMISSIONS).flat(),
+                    ] as Permission[],
+                  }}
+                >
+                  {children}
+                </RBACContext.Provider>
+              </NotificationsProvider>
+            </IntlProvider>
+          </DesignSystemProvider>
+        </MemoryRouter>
+      </Provider>
+    </QueryClientProvider>
   );
 };
 

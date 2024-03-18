@@ -10,7 +10,6 @@ import {
 import {
   useAPIErrorHandler,
   useFocusWhenNavigate,
-  useGuidedTour,
   useNotification,
   useRBAC,
   useTracking,
@@ -22,6 +21,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useOnce } from '../../../../hooks/useOnce';
@@ -32,47 +32,35 @@ import { Table } from '../../components/Tokens/Table';
 const TABLE_HEADERS = [
   {
     name: 'name',
-    key: 'name',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.name',
-        defaultMessage: 'Name',
-      },
-      sortable: true,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.name',
+      defaultMessage: 'Name',
     },
+    sortable: true,
   },
   {
     name: 'description',
-    key: 'description',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.description',
-        defaultMessage: 'Description',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.description',
+      defaultMessage: 'Description',
     },
+    sortable: false,
   },
   {
     name: 'createdAt',
-    key: 'createdAt',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.createdAt',
-        defaultMessage: 'Created at',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.createdAt',
+      defaultMessage: 'Created at',
     },
+    sortable: false,
   },
   {
     name: 'lastUsedAt',
-    key: 'lastUsedAt',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.lastUsedAt',
-        defaultMessage: 'Last used',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.lastUsedAt',
+      defaultMessage: 'Last used',
     },
+    sortable: false,
   },
 ];
 
@@ -88,7 +76,7 @@ export const ListView = () => {
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
-  const { startSection } = useGuidedTour();
+  const startSection = useGuidedTour('ListView', (state) => state.startSection);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
@@ -101,10 +89,7 @@ export const ListView = () => {
 
   const headers = TABLE_HEADERS.map((header) => ({
     ...header,
-    metadatas: {
-      ...header.metadatas,
-      label: formatMessage(header.metadatas.label),
-    },
+    label: formatMessage(header.label),
   }));
 
   useOnce(() => {
@@ -199,7 +184,6 @@ export const ListView = () => {
               <Table
                 permissions={{ canRead, canDelete, canUpdate }}
                 headers={headers}
-                contentType="api-tokens"
                 isLoading={isLoading}
                 onConfirmDelete={handleDelete}
                 tokens={apiTokens}
