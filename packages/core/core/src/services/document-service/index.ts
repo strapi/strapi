@@ -1,8 +1,7 @@
 import { Strapi, Documents } from '@strapi/types';
 
-import { createMiddlewareManager } from './middlewares/middleware-manager';
+import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
-import { databaseErrorsMiddleware } from './middlewares/errors';
 
 /**
  * Repository to :
