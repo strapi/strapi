@@ -1,10 +1,10 @@
-type Middleware = (ctx: any, next: () => Promise<void>) => Promise<void>;
+export type Middleware = (ctx: any, next: () => Promise<void>) => Promise<void>;
 
 export const createMiddlewareManager = () => {
   const middlewares: Middleware[] = [];
 
   const manager = {
-    use(middleware: any) {
+    use(middleware: Middleware) {
       middlewares.push(middleware);
 
       return () => middlewares.splice(middlewares.indexOf(middleware), 1);
