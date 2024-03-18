@@ -6,7 +6,6 @@ import {
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
@@ -30,7 +29,6 @@ const EmailTemplatesPage = () => {
   const { trackUsage } = useTracking();
   const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
@@ -94,7 +92,6 @@ const EmailTemplatesPage = () => {
 
         trackUsage('didEditEmailTemplates');
 
-        unlockApp();
         handleToggle();
       },
       onError(error) {
@@ -102,16 +99,12 @@ const EmailTemplatesPage = () => {
           type: 'warning',
           message: formatAPIError(error),
         });
-
-        unlockApp();
       },
       refetchActive: true,
     }
   );
 
   const handleSubmit = (body) => {
-    lockApp();
-
     trackUsage('willEditEmailTemplates');
 
     const editedTemplates = { ...data, [templateToEdit]: body };

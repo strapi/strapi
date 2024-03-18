@@ -3,7 +3,6 @@ import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 import { Page, useGuidedTour, useTracking, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
   useAppInfo,
-  useAutoReloadOverlayBlocker,
   useFetchClient,
   useNotification,
   useRBACProvider,
@@ -21,6 +20,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import { makeUnique } from '../../utils/makeUnique';
+import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
 import { FormModal } from '../FormModal/FormModal';
 
 import {

@@ -14,12 +14,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -58,7 +53,6 @@ export const SingleSignOnPage = () => {
 
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -86,9 +80,6 @@ export const SingleSignOnPage = () => {
     body: ProvidersOptions.Request['body'],
     formik: FormikHelpers<ProvidersOptions.Request['body']>
   ) => {
-    // @ts-expect-error - context assertation
-    lockApp();
-
     try {
       const res = await updateProviderOptions(body);
 
@@ -117,9 +108,6 @@ export const SingleSignOnPage = () => {
           defaultMessage: 'An error occurred, please try again.',
         },
       });
-    } finally {
-      // @ts-expect-error - context assertation
-      unlockApp();
     }
   };
 

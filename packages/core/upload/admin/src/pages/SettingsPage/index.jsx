@@ -14,12 +14,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-} from '@strapi/helper-plugin';
+import { useFetchClient, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { Helmet } from 'react-helmet';
@@ -34,7 +29,6 @@ import reducer, { initialState } from './reducer';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const { get, put } = useFetchClient();
 
@@ -88,11 +82,7 @@ export const SettingsPage = () => {
       return;
     }
 
-    lockApp();
-
     await mutateAsync(modifiedData);
-
-    unlockApp();
   };
 
   const handleChange = ({ target: { name, value } }) => {

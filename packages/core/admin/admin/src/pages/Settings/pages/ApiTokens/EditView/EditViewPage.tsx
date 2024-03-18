@@ -1,12 +1,7 @@
 import * as React from 'react';
 
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
-import {
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -47,7 +42,6 @@ export const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { state: locationState } = useLocation();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [apiToken, setApiToken] = React.useState<ApiToken | null>(
@@ -192,9 +186,6 @@ export const EditView = () => {
       tokenType: API_TOKEN_TYPE,
     });
 
-    // @ts-expect-error context assertation
-    lockApp();
-
     try {
       if (isCreating) {
         const res = await createToken({
@@ -278,9 +269,6 @@ export const EditView = () => {
           defaultMessage: 'Something went wrong',
         },
       });
-    } finally {
-      // @ts-expect-error context assertation
-      unlockApp();
     }
   };
 

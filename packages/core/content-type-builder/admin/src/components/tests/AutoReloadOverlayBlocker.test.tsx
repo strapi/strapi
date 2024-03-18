@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { act, screen } from '@testing-library/react';
-import { renderHook } from '@tests/utils';
+import { DesignSystemProvider } from '@strapi/design-system';
+import { act, screen, renderHook } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 import {
   AutoReloadOverlayBlockerProvider,
@@ -11,7 +12,11 @@ import {
 const MAX_ELAPSED_TIME = 30 * 1000;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <AutoReloadOverlayBlockerProvider>{children}</AutoReloadOverlayBlockerProvider>
+  <DesignSystemProvider locale="en">
+    <IntlProvider locale="en" messages={{}}>
+      <AutoReloadOverlayBlockerProvider>{children}</AutoReloadOverlayBlockerProvider>
+    </IntlProvider>
+  </DesignSystemProvider>
 );
 
 describe('AutoReloadOverlayBlocker', () => {
