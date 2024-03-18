@@ -41,8 +41,3 @@ export type {
 } from './core/apis/content-manager';
 
 export * from './content-manager/exports';
-
-/**
- * Test Utils
- */
-export * from '../tests/utils';

@@ -6,7 +6,7 @@ import {
   defaultTestStoreConfig,
   render as renderAdmin,
   RenderOptions,
-} from '@strapi/admin/strapi-admin';
+} from '@strapi/admin/strapi-admin/tests';
 import { waitFor, RenderResult, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -28,8 +28,8 @@ const storeConfig: ConfigureStoreOptions = {
 
 const render = (
   ui: React.ReactElement,
-  options?: RenderOptions
+  options: RenderOptions = {}
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } =>
-  renderAdmin(ui, { providerOptions: { storeConfig }, ...options });
+  renderAdmin(ui, { ...options, providerOptions: { storeConfig } });
 
 export { render, waitFor, act, screen, server };
