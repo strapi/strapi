@@ -12,15 +12,13 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ArrowLeft } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
 import { Form, FormProps, useForm } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
+import { BackButton } from '../../../features/BackButton';
 import { capitalise } from '../../../utils/strings';
 import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
 import { getTranslation } from '../../utils/translations';
@@ -79,6 +77,7 @@ const ConfigurationForm = ({
   const initialValues: ConfigurationFormData = React.useMemo(() => {
     const transformations = pipe(
       flattenPanels,
+      replaceMainFieldWithNameOnly,
       extractMetadata,
       addTmpSpaceToLayout,
       addTmpKeysToLayout
@@ -189,6 +188,18 @@ const flattenPanels = (layout: EditLayout['layout']): EditLayout['layout'][numbe
 
 /**
  * @internal
+ * @description We don't need the mainField object in the layout, we only need the name.
+ */
+const replaceMainFieldWithNameOnly = (layout: EditLayout['layout'][number]) =>
+  layout.map((row) =>
+    row.map((field) => ({
+      ...field,
+      mainField: field.mainField?.name,
+    }))
+  );
+
+/**
+ * @internal
  * @description We extract the metadata values from the field layout, because these are editable by the user.
  */
 const extractMetadata = (
@@ -285,15 +296,7 @@ const Header = ({ name }: HeaderProps) => {
         id: getTranslation('components.SettingsViewWrapper.pluginHeader.description.edit-settings'),
         defaultMessage: 'Customize how the edit view will look like.',
       })}
-      navigationAction={
-        // @ts-expect-error – DS does not infer props from the `as` prop
-        <Link startIcon={<ArrowLeft />} as={NavLink} to="..">
-          {formatMessage({
-            id: 'global.back',
-            defaultMessage: 'Back',
-          })}
-        </Link>
-      }
+      navigationAction={<BackButton />}
       primaryAction={
         <Button disabled={!modified} loading={isSubmitting} type="submit">
           {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}

@@ -94,6 +94,7 @@ export interface SchemaOptions {
   populateCreatorFields?: boolean;
   comment?: string;
   version?: string;
+  draftAndPublish?: boolean;
 }
 
 /**

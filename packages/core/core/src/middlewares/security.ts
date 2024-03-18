@@ -71,12 +71,24 @@ export const security: Core.MiddlewareFactory<Config> =
       });
     }
 
-    if (ctx.method === 'GET' && ['/admin'].some((str) => ctx.path.startsWith(str))) {
+    /**
+     * These are for vite's watch mode so it can accurately
+     * connect to the HMR websocket & reconnect on failure
+     * or when the server restarts.
+     *
+     * It only applies in development, and only on GET requests
+     * that are part of the admin route.
+     */
+    if (
+      process.env.NODE_ENV === 'development' &&
+      ctx.method === 'GET' &&
+      ['/admin'].some((str) => ctx.path.startsWith(str))
+    ) {
       helmetConfig = merge(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
             'script-src': ["'self'", "'unsafe-inline'"],
-            'connect-src': ["'self'", 'https:', 'ws:'],
+            'connect-src': ["'self'", 'http:', 'https:', 'ws:'],
           },
         },
       });

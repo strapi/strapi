@@ -27,15 +27,15 @@ const relationsApi = contentManagerApi.injectEndpoints({
     getRelations: build.query<
       GetRelationsResponse,
       Contracts.Relations.FindExisting.Params & {
-        pagination?: Contracts.Relations.FindExisting.Request['query'];
+        params?: Contracts.Relations.FindExisting.Request['query'];
       }
     >({
-      query: ({ model, id, targetField, pagination }) => {
+      query: ({ model, id, targetField, params }) => {
         return {
           url: `/content-manager/relations/${model}/${id}/${targetField}`,
           method: 'GET',
           config: {
-            params: pagination,
+            params,
           },
         };
       },
@@ -49,34 +49,42 @@ const relationsApi = contentManagerApi.injectEndpoints({
         };
       },
       merge: (currentCache, newItems) => {
-        if (currentCache.results && newItems.results) {
-          /**
-           * Relations will always have unique IDs, so we can therefore assume
-           * that we only need to push the new items to the cache.
-           */
-          const existingIds = currentCache.results.map((item) => item.id);
-          const uniqueNewItems = newItems.results.filter((item) => !existingIds.includes(item.id));
-          currentCache.results.push(...uniqueNewItems);
-          currentCache.pagination = newItems.pagination;
+        if (currentCache.pagination && newItems.pagination) {
+          if (currentCache.pagination.page < newItems.pagination.page) {
+            /**
+             * Relations will always have unique IDs, so we can therefore assume
+             * that we only need to push the new items to the cache.
+             */
+            const existingIds = currentCache.results.map((item) => item.id);
+            const uniqueNewItems = newItems.results.filter(
+              (item) => !existingIds.includes(item.id)
+            );
+            currentCache.results.push(...uniqueNewItems);
+            currentCache.pagination = newItems.pagination;
+          } else if (newItems.pagination.page === 1) {
+            /**
+             * We're resetting the relations
+             */
+            currentCache.results = newItems.results;
+            currentCache.pagination = newItems.pagination;
+          }
         }
       },
       forceRefetch({ currentArg, previousArg }) {
-        if (!currentArg?.pagination && !previousArg?.pagination) {
+        if (!currentArg?.params && !previousArg?.params) {
           return false;
         }
 
         return (
-          currentArg?.pagination?.page !== previousArg?.pagination?.page ||
-          currentArg?.pagination?.pageSize !== previousArg?.pagination?.pageSize
+          currentArg?.params?.page !== previousArg?.params?.page ||
+          currentArg?.params?.pageSize !== previousArg?.params?.pageSize
         );
       },
       transformResponse: (response: Contracts.Relations.FindExisting.Response) => {
-        if ('data' in response) {
-          return { results: response.data ? [response.data] : [], pagination: null };
-        } else if ('results' in response) {
+        if ('results' in response && response.results) {
           return {
             ...response,
-            results: response.results.reverse(),
+            results: response.results,
           };
         } else {
           return response;
@@ -94,7 +102,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
           url: `/content-manager/relations/${model}/${targetField}`,
           method: 'GET',
           config: {
-            params: params,
+            params,
           },
         };
       },
@@ -105,18 +113,30 @@ const relationsApi = contentManagerApi.injectEndpoints({
           model: queryArgs.model,
           targetField: queryArgs.targetField,
           _q: queryArgs.params?._q,
+          idsToOmit: queryArgs.params?.idsToOmit,
+          idsToInclude: queryArgs.params?.idsToInclude,
         };
       },
       merge: (currentCache, newItems) => {
-        if (currentCache.results && newItems.results) {
-          /**
-           * Relations will always have unique IDs, so we can therefore assume
-           * that we only need to push the new items to the cache.
-           */
-          const existingIds = currentCache.results.map((item) => item.id);
-          const uniqueNewItems = newItems.results.filter((item) => !existingIds.includes(item.id));
-          currentCache.results.push(...uniqueNewItems);
-          currentCache.pagination = newItems.pagination;
+        if (currentCache.pagination && newItems.pagination) {
+          if (currentCache.pagination.page < newItems.pagination.page) {
+            /**
+             * Relations will always have unique IDs, so we can therefore assume
+             * that we only need to push the new items to the cache.
+             */
+            const existingIds = currentCache.results.map((item) => item.id);
+            const uniqueNewItems = newItems.results.filter(
+              (item) => !existingIds.includes(item.id)
+            );
+            currentCache.results.push(...uniqueNewItems);
+            currentCache.pagination = newItems.pagination;
+          } else if (newItems.pagination.page === 1) {
+            /**
+             * We're resetting the relations
+             */
+            currentCache.results = newItems.results;
+            currentCache.pagination = newItems.pagination;
+          }
         }
       },
       forceRefetch({ currentArg, previousArg }) {
@@ -133,7 +153,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
         if (response.results) {
           return {
             ...response,
-            results: response.results.reverse(),
+            results: response.results,
           };
         } else {
           return response;

@@ -89,7 +89,7 @@ describe('History version controller', () => {
       results: [{ id: 'history-version-id' }],
       pagination: {
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
         pageCount: 1,
         total: 0,
       },
@@ -122,7 +122,7 @@ describe('History version controller', () => {
       results: [{ id: 'history-version-id' }],
       pagination: {
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
         pageCount: 1,
         total: 0,
       },
@@ -163,7 +163,7 @@ describe('History version controller', () => {
       results: [],
       pagination: {
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
       },
     });
     // @ts-expect-error partial context
@@ -171,11 +171,11 @@ describe('History version controller', () => {
     expect(mockFindVersionsPage).toHaveBeenCalledWith(
       expect.objectContaining({
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
       })
     );
     expect(mockResponse.meta.pagination.page).toBe(1);
-    expect(mockResponse.meta.pagination.pageSize).toBe(10);
+    expect(mockResponse.meta.pagination.pageSize).toBe(20);
 
     /**
      * Prevents invalid pagination params
@@ -192,7 +192,7 @@ describe('History version controller', () => {
     expect(mockFindVersionsPage).toHaveBeenCalledWith(
       expect.objectContaining({
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
       })
     );
   });

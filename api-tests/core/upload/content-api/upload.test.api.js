@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const get = require('lodash/get');
 
 // Helpers.
 const { createTestBuilder } = require('api-tests/builder');
@@ -164,19 +163,25 @@ describe('Upload plugin', () => {
         ])
       );
     });
+
     test('Get one file', async () => {
-      const dogEntity = await strapi.entityService.create('api::dog.dog', {
-        data: {},
-        files: {
-          profilePicture: {
-            path: path.join(__dirname, '../utils/rec.jpg'),
-            name: 'rec',
-            type: 'jpg',
-            size: 0,
-          },
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
         },
-        populate: 'profilePicture',
       });
+
+      const dogEntity = await strapi.db.query('api::dog.dog').create({
+        data: {
+          profilePicture: res.body[0].id,
+        },
+        populate: {
+          profilePicture: true,
+        },
+      });
+
       const getRes = await rq({
         method: 'GET',
         url: `/upload/files/${dogEntity.profilePicture.id}`,
@@ -189,35 +194,11 @@ describe('Upload plugin', () => {
           url: expect.any(String),
         })
       );
-      await strapi.entityService.delete('api::dog.dog', dogEntity.id);
-      await strapi.entityService.delete('plugin::upload.file', dogEntity.profilePicture.id);
-    });
-  });
 
-  // see https://github.com/strapi/strapi/issues/14125
-  describe('File relations are correctly removed', () => {
-    // TODO V5: Remove when entity service is deprecated
-    test.skip('Update a file with an entity correctly removes the relation between the entity and its old file', async () => {
-      const fileId = data.dogs[1].data.attributes.profilePicture.data.id;
-      await strapi.entityService.update('plugin::upload.file', fileId, {
-        data: {
-          related: [
-            {
-              id: data.dogs[0].data.id,
-              __type: 'api::dog.dog',
-              __pivot: { field: 'profilePicture' },
-            },
-          ],
-        },
-      });
-
-      const res = await rq({
-        method: 'GET',
-        url: `/dogs/${data.dogs[0].data.id}?populate=*`,
-      });
-      expect(res.body.data.attributes.profilePicture.data.id).toBe(fileId);
-
-      data.dogs[0] = res.body;
+      await strapi.db.query('api::dog.dog').delete({ where: { id: dogEntity.id } });
+      await strapi.db
+        .query('plugin::upload.file')
+        .delete({ where: { id: dogEntity.profilePicture.id } });
     });
   });
 });

@@ -1,4 +1,4 @@
-import { omit, assoc, curry } from 'lodash/fp';
+import { omit, assoc, curry, merge } from 'lodash/fp';
 
 import { async, convertQueryParams, contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { UID } from '@strapi/types';
@@ -9,7 +9,6 @@ import * as i18n from './internationalization';
 import { transformParamsDocumentId } from './transform/id-transform';
 
 import {
-  cloneComponents,
   createComponents,
   deleteComponents,
   getComponents,
@@ -32,15 +31,15 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
+  const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
   async function findMany(params = {} as any) {
     const query = await async.pipe(
       DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
-      (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, { isDraft: queryParams.status === 'draft' }),
+      transformParamsDocumentId(uid),
       transformParamsToQuery(uid)
     )(params || {});
 
@@ -50,11 +49,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function findFirst(params = {} as any) {
     const query = await async.pipe(
       DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
-      (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, { isDraft: queryParams.status === 'draft' }),
+      transformParamsDocumentId(uid),
       transformParamsToQuery(uid)
     )(params);
 
@@ -65,11 +63,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function findOne(documentId: string, params = {} as any) {
     const query = await async.pipe(
       DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
-      (queryParams) =>
-        transformParamsDocumentId(uid, queryParams, { isDraft: queryParams.status === 'draft' }),
+      transformParamsDocumentId(uid),
       transformParamsToQuery(uid),
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
@@ -103,25 +100,23 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     // Delete all matched entries and its components
     await async.map(entriesToDelete, (entryToDelete: any) => deleteEntry(entryToDelete.id));
 
-    return { deletedEntries: entriesToDelete.length };
+    return { deletedEntries: entriesToDelete };
   }
 
   async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params, {
-      locale: params.locale,
-      // User can not set publishedAt on create, but other methods in the engine can (publish)
-      isDraft: !params.data?.publishedAt,
-    });
+    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
 
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation
-    if (!params.data) {
+    if (!data) {
       throw new Error('Create requires data attribute');
     }
 
+    // @ts-expect-error we need type guard to assert that data has the valid type
     const validData = await entityValidator.validateEntityCreation(contentType, data, {
-      isDraft: !data.publishedAt,
+      // Note: publishedAt value will always be set when DP is disabled
+      isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
     });
 
@@ -140,16 +135,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function create(params = {} as any) {
     const queryParams = await async.pipe(
-      DP.setStatusToDraft,
-      DP.statusToData,
       DP.filterDataPublishedAt,
+      DP.setStatusToDraft(contentType),
+      DP.statusToData(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToData(contentType)
     )(params);
 
     const doc = await createEntry(queryParams);
 
-    if (params.status === 'published') {
+    if (hasDraftAndPublish && params.status === 'published') {
       return publish(doc.documentId, params).then((doc) => doc.versions[0]);
     }
 
@@ -159,77 +154,50 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function clone(documentId: string, params = {} as any) {
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
-      i18n.localeToLookup(contentType)
+      i18n.defaultLocale(contentType),
+      i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {}, {
-      isDraft: true,
-      locale: queryParams?.locale,
-    });
-    const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any);
-    // Param parsing
-
-    // Validation
-    const model = strapi.contentType(uid);
-    // Find all locales of the document
-    const entries = await strapi.db.query(uid).findMany({
-      ...query,
-      where: { ...queryParams?.lookup, ...query.where, documentId },
+    // Get deep populate
+    const entriesToClone = await strapi.db?.query(uid).findMany({
+      where: {
+        ...queryParams?.lookup,
+        documentId,
+        // DP Enabled: Clone drafts
+        // DP Disabled: Clone only the existing version (published)
+        publishedAt: { $null: hasDraftAndPublish },
+      },
+      populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
-    // Document does not exist
-    if (!entries.length) {
-      return null;
-    }
+    const clonedEntries = await async.map(
+      entriesToClone,
+      async.pipe(
+        omit('id'),
+        // assign new documentId
+        assoc('documentId', createDocumentId()),
+        // Merge new data into it
+        (data) => merge(data, queryParams.data),
+        (data) => createEntry({ ...queryParams, data, status: 'draft' })
+      )
+    );
 
-    const newDocumentId = createDocumentId();
-
-    const versions = await async.map(entries, async (entryToClone: any) => {
-      const isDraft = contentTypesUtils.isDraft(data);
-      // Todo: Merge data with entry to clone
-      const validData = await entityValidator.validateEntityUpdate(
-        model,
-        // Omit id fields, the cloned entity id will be generated by the database
-        omit(['id'], data) as any,
-        { isDraft, ...queryParams?.lookup },
-        entryToClone
-      );
-
-      const componentData = await cloneComponents(uid, entryToClone, validData);
-      const entityData = applyTransforms(
-        Object.assign(omitComponentData(model, validData), componentData as any),
-        { contentType: model }
-      );
-
-      // TODO: Transform params to query
-      return strapi.db.query(uid).clone(entryToClone.id, {
-        ...query,
-        // Allows entityData to override the documentId (e.g. when publishing)
-        data: { documentId: newDocumentId, ...entityData, locale: entryToClone.locale },
-      });
-    });
-
-    return { documentId: newDocumentId, versions };
+    return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
   }
 
-  // NOTE: What happens if user doesn't provide specific publications state and locale to update?
   async function update(documentId: string, params = {} as any) {
     const queryParams = await async.pipe(
-      DP.setStatusToDraft,
-      DP.statusToLookup,
-      DP.statusToData,
       DP.filterDataPublishedAt,
+      DP.setStatusToDraft(contentType),
+      DP.statusToLookup(contentType),
+      DP.statusToData(contentType),
       // Default locale will be set if not provided
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       i18n.localeToData(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {}, {
-      isDraft: true,
-      locale: queryParams?.locale,
-    });
-
+    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
@@ -243,9 +211,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     if (entryToUpdate) {
       const validData = await entityValidator.validateEntityUpdate(
         model,
+        // @ts-expect-error we need type guard to assert that data has the valid type
         data,
         {
-          isDraft: true, // Always update the draft version
+          isDraft: !queryParams?.data?.publishedAt, // Always update the draft version
           locale: queryParams?.locale,
         },
         entryToUpdate
@@ -276,7 +245,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       }
     }
 
-    if (updatedDraft && params.status === 'published') {
+    if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
       return publish(documentId, params).then((doc) => doc.versions[0]);
     }
 
@@ -285,8 +254,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function count(params = {} as any) {
     const query = await async.pipe(
-      DP.defaultToDraft,
-      DP.statusToLookup,
+      DP.defaultStatus(contentType),
+      DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       transformParamsToQuery(uid)
@@ -313,23 +282,26 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         documentId,
         publishedAt: null,
       },
-      populate: getDeepPopulate(uid),
+      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
     });
 
     // Transform draft entry data and create published versions
     const publishedEntries = await async.map(
       entriesToPublish,
       async.pipe(
+        // Updated at value is used to know if draft has been modified
+        // If both versions share the same value, it means the draft has not been modified
+        (draft) => assoc('updatedAt', draft.updatedAt, draft),
         assoc('publishedAt', new Date()),
         assoc('documentId', documentId),
         omit('id'),
         // Transform relations to target published versions
         (entry) => {
-          const opts = { uid, locale: entry.locale, isDraft: false, allowMissingId: true };
+          const opts = { uid, locale: entry.locale, status: 'published', allowMissingId: true };
           return transformData(entry, opts);
         },
         // Create the published entry
-        (data) => createEntry({ ...queryParams, data, locale: data.locale })
+        (data) => createEntry({ ...queryParams, data, locale: data.locale, status: 'published' })
       )
     );
 
@@ -369,7 +341,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         documentId,
         publishedAt: { $ne: null },
       },
-      populate: getDeepPopulate(uid),
+      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
     });
 
     // Transform published entry data and create draft versions
@@ -381,11 +353,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         omit('id'),
         // Transform relations to target draft versions
         (entry) => {
-          const opts = { uid, locale: entry.locale, isDraft: true, allowMissingId: true };
+          const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
           return transformData(entry, opts);
         },
         // Create the draft entry
-        (data) => createEntry({ ...queryParams, locale: data.locale, data })
+        (data) => createEntry({ ...queryParams, locale: data.locale, data, status: 'draft' })
       )
     );
 
@@ -401,8 +373,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
     count: wrapInTransaction(count),
-    publish: wrapInTransaction(publish),
-    unpublish: wrapInTransaction(unpublish),
-    discardDraft: wrapInTransaction(discardDraft),
+    publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
+    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
+    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
   };
 };

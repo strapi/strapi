@@ -9,7 +9,7 @@ import { HistoryVersions } from '../../../../shared/contracts';
  */
 const getValidPagination = ({ page, pageSize }: { page: any; pageSize: any }) => {
   let pageNumber = 1;
-  let pageSizeNumber = 10;
+  let pageSizeNumber = 20;
 
   if (page) {
     const parsedPage = parseInt(page, 10);

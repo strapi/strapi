@@ -22,19 +22,22 @@ describe('Document Service relations', () => {
   });
 
   describe('Create', () => {
-    it('Can create a document with relations', async () => {
-      const article = await strapi.documents(ARTICLE_UID).create({
-        data: {
-          title: 'Article with author',
-          // Connect document id
-          categories: ['Cat1'],
-        },
-        populate: { categories: true },
-      });
+    it(
+      'Can create a document with relations',
+      testInTransaction(async () => {
+        const article = await strapi.documents(ARTICLE_UID).create({
+          data: {
+            title: 'Article with author',
+            // Connect document id
+            categories: ['Cat1'],
+          },
+          populate: { categories: true },
+        });
 
-      // TODO: Category id should be the document id
-      expect(article.categories[0].documentId).toBe('Cat1');
-    });
+        // TODO: Category id should be the document id
+        expect(article.categories[0].documentId).toBe('Cat1');
+      })
+    );
   });
 
   // TODO

@@ -7,34 +7,27 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
-  ({ disabled, label, hint, name, required, placeholder, type }, ref) => {
-    const field = useField<number>(name);
-    const fieldRef = useFocusInputField(name);
+const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(({ type, ...props }, ref) => {
+  const field = useField<number>(props.name);
+  const fieldRef = useFocusInputField(props.name);
 
-    const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
+  const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
 
-    return (
-      <NumberInput
-        ref={composedRefs}
-        defaultValue={field.initialValue}
-        disabled={disabled}
-        error={field.error}
-        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-        label={label}
-        id={name}
-        hint={hint}
-        name={name}
-        onValueChange={(value) => {
-          field.onChange(name, value);
-        }}
-        placeholder={placeholder}
-        required={required}
-        step={type === 'float' || type == 'decimal' ? 0.01 : 1}
-        value={field.value}
-      />
-    );
-  }
-);
+  return (
+    // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
+    <NumberInput
+      ref={composedRefs}
+      defaultValue={field.initialValue}
+      error={field.error}
+      id={props.name}
+      onValueChange={(value) => {
+        field.onChange(props.name, value);
+      }}
+      step={type === 'float' || type == 'decimal' ? 0.01 : 1}
+      value={field.value}
+      {...props}
+    />
+  );
+});
 
 export { NumberInputImpl as NumberInput };

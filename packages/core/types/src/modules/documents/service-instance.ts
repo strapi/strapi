@@ -1,5 +1,6 @@
-import type { UID } from '../..';
+import type { UID, Utils } from '../..';
 import type { ID } from '.';
+import type { IsDraftAndPublishEnabled } from './draft-and-publish';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-engine';
 
@@ -26,6 +27,10 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
     params: TParams
   ) => Result.Create<TContentTypeUID, TParams>;
 
+  /**
+   * @internal
+   * Exposed for use within the Strapi Admin Panel
+   */
   clone: <TParams extends Params.Clone<TContentTypeUID>>(
     documentId: ID,
     params: TParams
@@ -38,18 +43,34 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
 
   count: <TParams extends Params.Count<TContentTypeUID>>(params?: TParams) => Result.Count;
 
-  publish: <TParams extends Params.Publish<TContentTypeUID>>(
-    documentId: ID,
-    params?: TParams
-  ) => Result.Publish<TContentTypeUID, TParams>;
+  // Publication methods are only enabled if D&P is enabled for the content type
+  publish: Utils.If<
+    // If draft and publish is enabled for the content type
+    IsDraftAndPublishEnabled<TContentTypeUID>,
+    // Then, publish method is enabled
+    <TParams extends Params.Publish<TContentTypeUID>>(
+      documentId: ID,
+      params?: TParams
+    ) => Result.Publish<TContentTypeUID, TParams>,
+    // Otherwise, disable it
+    undefined
+  >;
 
-  unpublish: <TParams extends Params.Unpublish<TContentTypeUID>>(
-    documentId: ID,
-    params?: TParams
-  ) => Result.Unpublish<TContentTypeUID, TParams>;
+  unpublish: Utils.If<
+    IsDraftAndPublishEnabled<TContentTypeUID>,
+    <TParams extends Params.Unpublish<TContentTypeUID>>(
+      documentId: ID,
+      params?: TParams
+    ) => Result.Unpublish<TContentTypeUID, TParams>,
+    undefined
+  >;
 
-  discardDraft: <TParams extends Params.DiscardDraft<TContentTypeUID>>(
-    documentId: ID,
-    params?: TParams
-  ) => Result.DiscardDraft<TContentTypeUID, TParams>;
+  discardDraft: Utils.If<
+    IsDraftAndPublishEnabled<TContentTypeUID>,
+    <TParams extends Params.DiscardDraft<TContentTypeUID>>(
+      documentId: ID,
+      params?: TParams
+    ) => Result.DiscardDraft<TContentTypeUID, TParams>,
+    undefined
+  >;
 };

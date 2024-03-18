@@ -107,7 +107,10 @@ export default function createComponentBuilder() {
           displayName: infos.displayName,
           description: infos.description,
         })
-        .set('options', infos.options ?? {})
+        .set('options', {
+          ...(infos.options ?? {}),
+          draftAndPublish: infos.draftAndPublish,
+        })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
         .setAttributes(this.convertAttributes(infos.attributes));
@@ -226,7 +229,10 @@ export default function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
-        .set('options', infos.options ?? {})
+        .set('options', {
+          ...(infos.options ?? {}),
+          draftAndPublish: infos.draftAndPublish,
+        })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 

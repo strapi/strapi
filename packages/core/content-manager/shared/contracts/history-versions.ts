@@ -56,11 +56,17 @@ export declare namespace GetHistoryVersions {
     } & Partial<Pick<Pagination, 'page' | 'pageSize'>>;
   }
 
-  export interface Response {
-    data: HistoryVersionDataResponse[];
-    meta: {
-      pagination?: Pagination;
-    };
-    error?: errors.ApplicationError;
-  }
+  export type Response =
+    | {
+        data: HistoryVersionDataResponse[];
+        meta: {
+          pagination: Pagination;
+        };
+        error?: never;
+      }
+    | {
+        data?: never;
+        meta?: never;
+        error: errors.ApplicationError;
+      };
 }

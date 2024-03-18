@@ -11,10 +11,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async findEntityAssigneeId(id: any, model: any) {
-      const entity = (await strapi.entityService.findOne(model, id, {
+      const entity = await strapi.db.query(model).findOne({
+        where: { id },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
-      })) as any;
+        select: [],
+      });
 
       return entity?.[ENTITY_ASSIGNEE_ATTRIBUTE]?.id ?? null;
     },
@@ -35,22 +36,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), assigneeId);
 
-      return strapi.entityService.update(model, id, {
-        // @ts-expect-error check entity service types
+      return strapi.db.query(model).update({
+        where: { id },
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
+        select: [],
       });
     },
 
     async deleteEntityAssignee(id: any, model: any) {
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), null);
 
-      return strapi.entityService.update(model, id, {
-        // @ts-expect-error check entity service types
+      return strapi.db.query(model).update({
+        where: { id },
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
+        select: [],
       });
     },
   };

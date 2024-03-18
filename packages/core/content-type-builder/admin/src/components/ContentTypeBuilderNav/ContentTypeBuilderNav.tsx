@@ -9,7 +9,6 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system/v2';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -89,7 +88,7 @@ export const ContentTypeBuilderNav = () => {
               <Box paddingLeft={7}>
                 <TextButton
                   onClick={section.customLink.onClick}
-                  startIcon={<Icon as={Plus} width={pxToRem(8)} height={pxToRem(8)} />}
+                  startIcon={<Icon as={Plus} width={`${8 / 16}rem`} height={`${8 / 16}rem`} />}
                   marginTop={2}
                 >
                   {formatMessage({

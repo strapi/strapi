@@ -4,8 +4,8 @@ import { ASSIGNEE_ATTRIBUTE_NAME, STAGE_ATTRIBUTE_NAME } from '../EditView/compo
 import { AssigneeFilter } from './components/AssigneeFilter';
 import { StageFilter } from './components/StageFilter';
 
+import type { Filters } from '../../../../../../admin/src/components/Filters';
 import type { ListFieldLayout } from '../../../../../../admin/src/content-manager/hooks/useDocumentLayout';
-import type { FilterData } from '@strapi/helper-plugin';
 import type { MessageDescriptor } from 'react-intl';
 
 export const REVIEW_WORKFLOW_COLUMNS_EE = [
@@ -22,7 +22,10 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
     },
     searchable: false,
     sortable: true,
-    mainField: 'name',
+    mainField: {
+      name: 'name',
+      type: 'string',
+    },
   },
   {
     name: ASSIGNEE_ATTRIBUTE_NAME,
@@ -37,79 +40,60 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
     },
     searchable: false,
     sortable: true,
-    mainField: 'firstname',
+    mainField: {
+      name: 'firstname',
+      type: 'string',
+    },
   },
-] satisfies ListFieldLayout[];
+] satisfies Array<Omit<ListFieldLayout, 'label'> & { label: MessageDescriptor }>;
 
 export const REVIEW_WORKFLOW_FILTERS = [
   {
-    fieldSchema: {
-      type: 'relation',
-      mainField: {
-        name: 'name',
-
-        schema: {
-          type: 'string',
-        },
-      },
+    mainField: {
+      name: 'name',
+      type: 'string',
     },
-
-    metadatas: {
-      customInput: StageFilter,
-
-      label: {
-        id: getTranslation(`containers.list.table-headers.reviewWorkflows.stage`),
-        defaultMessage: 'Review stage',
-      },
+    input: StageFilter,
+    label: {
+      id: getTranslation(`containers.list.table-headers.reviewWorkflows.stage`),
+      defaultMessage: 'Review stage',
     },
-
     name: 'strapi_stage',
+    type: 'relation',
   },
 
   {
-    fieldSchema: {
-      type: 'relation',
-      mainField: {
-        name: 'id',
-
-        schema: {
-          type: 'integer',
-        },
-      },
+    type: 'relation',
+    mainField: {
+      name: 'id',
+      type: 'integer',
     },
-
-    metadatas: {
-      customInput: AssigneeFilter,
-
-      customOperators: [
-        {
-          intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$eq',
-            defaultMessage: 'is',
-          },
-          value: '$eq',
+    input: AssigneeFilter,
+    operators: [
+      {
+        label: {
+          id: 'components.FilterOptions.FILTER_TYPES.$eq',
+          defaultMessage: 'is',
         },
-        {
-          intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$ne',
-            defaultMessage: 'is not',
-          },
-          value: '$ne',
-        },
-      ],
-
-      label: {
-        id: getTranslation(`containers.list.table-headers.reviewWorkflows.assignee.label`),
-        defaultMessage: 'Assignee',
+        value: '$eq',
       },
+      {
+        label: {
+          id: 'components.FilterOptions.FILTER_TYPES.$ne',
+          defaultMessage: 'is not',
+        },
+        value: '$ne',
+      },
+    ],
+    label: {
+      id: getTranslation(`containers.list.table-headers.reviewWorkflows.assignee.label`),
+      defaultMessage: 'Assignee',
     },
-
     name: 'strapi_assignee',
   },
 ] satisfies Array<
-  Omit<FilterData, 'metadatas'> & {
-    metadatas: Omit<FilterData['metadatas'], 'label'> & {
-      label: MessageDescriptor;
-    };
+  Omit<Filters.Filter, 'label' | 'operators'> & {
+    label: MessageDescriptor;
+    operators?: Array<{ value: string; label: MessageDescriptor }>;
   }
 >;

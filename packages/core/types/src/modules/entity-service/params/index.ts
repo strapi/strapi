@@ -41,8 +41,6 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     // Data
     [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
     [HasMember<TKind, 'data:partial'>, { data?: Partial<Data.Input<TSchemaUID>> }],
-    // Files
-    [HasMember<TKind, 'files'>, { files?: Record<string, unknown> }], // TODO
     // Search
     [HasMember<TKind, '_q'>, { _q?: Search.Q }]
   ]

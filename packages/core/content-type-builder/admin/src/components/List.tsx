@@ -1,8 +1,20 @@
 import { ComponentType, Fragment } from 'react';
 
-import { Box, Button, Table, TFooter, Th, Thead, Tr, Typography } from '@strapi/design-system';
-import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+import {
+  Box,
+  Button,
+  EmptyStateLayout,
+  Table,
+  Tbody,
+  Td,
+  TFooter,
+  Th,
+  Thead,
+  Tr,
+  Typography,
+} from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -72,13 +84,20 @@ export const List = ({
             </Th>
           </Tr>
         </Thead>
-        <EmptyBodyTable
-          colSpan={2}
-          content={formatMessage({
-            id: getTrad('table.content.create-first-content-type'),
-            defaultMessage: 'Create your first Collection-Type',
-          })}
-        />
+        <Tbody>
+          <Tr>
+            <Td colSpan={2}>
+              <EmptyStateLayout
+                content={formatMessage({
+                  id: getTrad('table.content.create-first-content-type'),
+                  defaultMessage: 'Create your first Collection-Type',
+                })}
+                hasRadius
+                icon={<EmptyDocuments width="10rem" />}
+              />
+            </Td>
+          </Tr>
+        </Tbody>
       </Table>
     );
   }
@@ -100,28 +119,40 @@ export const List = ({
             </Th>
           </Tr>
         </Thead>
-        <EmptyBodyTable
-          action={
-            <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
-              {formatMessage({
-                id: getTrad('table.button.no-fields'),
-                defaultMessage: 'Add new field',
-              })}
-            </Button>
-          }
-          colSpan={2}
-          content={formatMessage(
-            isInContentTypeView
-              ? {
-                  id: getTrad('table.content.no-fields.collection-type'),
-                  defaultMessage: 'Add your first field to this Collection-Type',
+        <Tbody>
+          <Tr>
+            <Td colSpan={2}>
+              <EmptyStateLayout
+                action={
+                  <Button
+                    onClick={onClickAddField}
+                    size="L"
+                    startIcon={<Plus />}
+                    variant="secondary"
+                  >
+                    {formatMessage({
+                      id: getTrad('table.button.no-fields'),
+                      defaultMessage: 'Add new field',
+                    })}
+                  </Button>
                 }
-              : {
-                  id: getTrad('table.content.no-fields.component'),
-                  defaultMessage: 'Add your first field to this component',
-                }
-          )}
-        />
+                content={formatMessage(
+                  isInContentTypeView
+                    ? {
+                        id: getTrad('table.content.no-fields.collection-type'),
+                        defaultMessage: 'Add your first field to this Collection-Type',
+                      }
+                    : {
+                        id: getTrad('table.content.no-fields.component'),
+                        defaultMessage: 'Add your first field to this component',
+                      }
+                )}
+                hasRadius
+                icon={<EmptyDocuments width="10rem" />}
+              />
+            </Td>
+          </Tr>
+        </Tbody>
       </Table>
     );
   }

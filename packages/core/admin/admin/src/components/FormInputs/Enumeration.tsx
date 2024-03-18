@@ -8,27 +8,22 @@ import { useField } from '../Form';
 import { EnumerationProps } from './types';
 
 export const EnumerationInput = forwardRef<any, EnumerationProps>(
-  ({ disabled, label, hint, name, options = [], placeholder, required }, ref) => {
-    const field = useField(name);
-    const fieldRef = useFocusInputField(name);
+  ({ options = [], ...props }, ref) => {
+    const field = useField(props.name);
+    const fieldRef = useFocusInputField(props.name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
+      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
       <SingleSelect
         ref={composedRefs}
-        disabled={disabled}
         error={field.error}
-        // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-        label={label}
-        hint={hint}
-        name={name}
         onChange={(value) => {
-          field.onChange(name, value);
+          field.onChange(props.name, value);
         }}
-        placeholder={placeholder}
-        required={required}
         value={field.value}
+        {...props}
       >
         {options.map(({ value, label, disabled, hidden }) => {
           return (

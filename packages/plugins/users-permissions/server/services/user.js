@@ -10,8 +10,10 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
-const { sanitize } = require('@strapi/utils');
+const { sanitize, convertQueryParams } = require('@strapi/utils');
 const { getService } = require('../utils');
+
+const USER_MODEL_UID = 'plugin::users-permissions.user';
 
 module.exports = ({ strapi }) => ({
   /**
@@ -21,7 +23,7 @@ module.exports = ({ strapi }) => ({
    */
 
   count(params) {
-    return strapi.query('plugin::users-permissions.user').count({ where: params });
+    return strapi.db.query(USER_MODEL_UID).count({ where: params });
   },
 
   /**
@@ -35,7 +37,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async add(values) {
-    return strapi.entityService.create('plugin::users-permissions.user', {
+    return strapi.db.query(USER_MODEL_UID).create({
       data: values,
       populate: ['role'],
     });
@@ -48,7 +50,8 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async edit(userId, params = {}) {
-    return strapi.entityService.update('plugin::users-permissions.user', userId, {
+    return strapi.db.query(USER_MODEL_UID).update({
+      where: { id: userId },
       data: params,
       populate: ['role'],
     });
@@ -59,7 +62,14 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetch(id, params) {
-    return strapi.entityService.findOne('plugin::users-permissions.user', id, params);
+    const query = convertQueryParams.transformParamsToQuery(USER_MODEL_UID, params ?? {});
+
+    return strapi.db.query(USER_MODEL_UID).findOne({
+      ...query,
+      where: {
+        $and: [{ id }, query.where || {}],
+      },
+    });
   },
 
   /**
@@ -67,9 +77,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAuthenticatedUser(id) {
-    return strapi
-      .query('plugin::users-permissions.user')
-      .findOne({ where: { id }, populate: ['role'] });
+    return strapi.db.query(USER_MODEL_UID).findOne({ where: { id }, populate: ['role'] });
   },
 
   /**
@@ -77,7 +85,9 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAll(params) {
-    return strapi.entityService.findMany('plugin::users-permissions.user', params);
+    const query = convertQueryParams.transformParamsToQuery(USER_MODEL_UID, params ?? {});
+
+    return strapi.db.query(USER_MODEL_UID).findMany(query);
   },
 
   /**
@@ -85,7 +95,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async remove(params) {
-    return strapi.query('plugin::users-permissions.user').delete({ where: params });
+    return strapi.db.query(USER_MODEL_UID).delete({ where: params });
   },
 
   validatePassword(password, hash) {
@@ -95,7 +105,7 @@ module.exports = ({ strapi }) => ({
   async sendConfirmationEmail(user) {
     const userPermissionService = getService('users-permissions');
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
-    const userSchema = strapi.getModel('plugin::users-permissions.user');
+    const userSchema = strapi.getModel(USER_MODEL_UID);
 
     const settings = await pluginStore
       .get({ key: 'email' })

@@ -1,5 +1,8 @@
-import type { Core, UID } from '@strapi/types';
 import { groupBy, pick } from 'lodash/fp';
+
+import { contentTypes } from '@strapi/utils';
+import type { Core, UID } from '@strapi/types';
+
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 export interface DocumentVersion {
@@ -36,11 +39,11 @@ const CONTENT_MANAGER_STATUS = {
  * @param threshold The threshold in milliseconds.
  * @returns True if the absolute difference between the dates is less than or equal to the threshold, false otherwise.
  */
-function areDatesEqual(
+const areDatesEqual = (
   date1: Date | string | null,
   date2: Date | string | null,
   threshold: number
-): boolean {
+): boolean => {
   if (!date1 || !date2) {
     return false;
   }
@@ -50,7 +53,7 @@ function areDatesEqual(
   const difference = Math.abs(time1 - time2);
 
   return difference <= threshold;
-}
+};
 
 /**
  * Controls the metadata properties to be returned
@@ -119,7 +122,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
    * @param documents
    * @returns
    */
-  async getManyAvailableStatus(uid: UID.SingleType, documents: DocumentVersion[]) {
+  async getManyAvailableStatus(uid: UID.ContentType, documents: DocumentVersion[]) {
     if (!documents.length) return [];
 
     // The status and locale of all documents should be the same
@@ -208,14 +211,23 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   ) {
     if (!document) return document;
 
+    const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(uid));
+
+    // Ignore available status if the content type does not have draft and publish
+    if (!hasDraftAndPublish) {
+      opts.availableStatus = false;
+    }
+
     const meta = await this.getMetadata(uid, document, opts);
 
     // TODO: Sanitize output of metadata
     return {
       data: {
         ...document,
-        // Add status to the document
-        status: this.getStatus(document, meta.availableStatus as any),
+        // Add status to the document only if draft and publish is enabled
+        status: hasDraftAndPublish
+          ? this.getStatus(document, meta.availableStatus as any)
+          : undefined,
       },
       meta,
     };

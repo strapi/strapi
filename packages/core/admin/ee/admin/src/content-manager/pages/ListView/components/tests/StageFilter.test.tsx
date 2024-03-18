@@ -1,27 +1,47 @@
-import { render, waitFor } from '@tests/utils';
+import { render as renderRTL, screen } from '@tests/utils';
+import { Route, Routes } from 'react-router-dom';
 
-import { StageFilter } from '../StageFilter';
+import { Form } from '../../../../../../../../admin/src/components/Form';
+import { StageFilter, StageFilterProps } from '../StageFilter';
 
-describe('Content-Manger | List View | Filter | StageFilter', () => {
-  it('should display stages', async () => {
-    const { user, getByRole, findByText } = render(
-      <StageFilter uid="api::address.address" onChange={jest.fn()} />
+describe('StageFilter', () => {
+  const render = (props?: Partial<StageFilterProps>) =>
+    renderRTL(
+      <StageFilter aria-label="Pick a stage" type="enumeration" name="stage" {...props} />,
+      {
+        initialEntries: ['/content-manager/collection-types/api::address.address'],
+        renderOptions: {
+          wrapper({ children }) {
+            return (
+              <Routes>
+                <Route
+                  path="/content-manager/:collectionType/:slug"
+                  element={
+                    <Form method="PUT" initialValues={{ stage: '' }}>
+                      {children}
+                    </Form>
+                  }
+                />
+              </Routes>
+            );
+          },
+        },
+      }
     );
+  it('should display stages', async () => {
+    const { user } = render();
 
-    await user.click(getByRole('combobox'));
+    await user.click(screen.getByRole('combobox'));
 
-    await findByText('To Review');
+    await screen.findByText('To Review');
   });
 
   it('should use the stage name as filter value', async () => {
-    const spy = jest.fn();
-    const { getByText, user, getByRole } = render(
-      <StageFilter uid="api::address.address" onChange={spy} />
-    );
+    const { user } = render();
 
-    await user.click(getByRole('combobox'));
-    await user.click(getByText('To Review'));
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByRole('option', { name: 'To Review' }));
 
-    await waitFor(() => expect(spy).toHaveBeenCalledWith('To Review'));
+    expect(screen.getByRole('combobox')).toHaveTextContent('To Review');
   });
 });

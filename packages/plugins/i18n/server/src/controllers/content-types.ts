@@ -40,7 +40,7 @@ const controller = {
 
     const params = modelDef.kind === 'singleType' ? {} : { id };
 
-    const entity = await strapi
+    const entity = await strapi.db
       .query(model)
       .findOne({ where: params, populate: [...attributesToPopulate, 'localizations'] });
 

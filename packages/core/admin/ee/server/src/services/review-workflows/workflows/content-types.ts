@@ -72,7 +72,10 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
      */
     async transferContentTypes(srcWorkflow: any, uid: any) {
       // Update assignedContentTypes of the previous workflow
-      await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
+      await strapi.db.query(WORKFLOW_MODEL_UID).update({
+        where: {
+          id: srcWorkflow.id,
+        },
         data: {
           contentTypes: srcWorkflow.contentTypes.filter((contentType: any) => contentType !== uid),
         },

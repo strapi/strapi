@@ -19,16 +19,19 @@ export default ({ strapi }: Context) => ({
       const { component: componentName } = contentType.attributes[
         attributeName
       ] as Schema.Attribute.Component;
+
       const component = strapi.getModel(componentName);
 
       const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });
       await validate.contentAPI.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });
+
       const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });
-      return strapi.entityService!.load(contentTypeUID, parent, attributeName, sanitizedQuery);
+
+      return strapi.db?.query(contentTypeUID).load(parent, attributeName, sanitizedQuery);
     };
   },
 });

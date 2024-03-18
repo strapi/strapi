@@ -87,15 +87,12 @@ test.describe('Edit View', () => {
         .nth(1)
         .fill('I miss the denver broncos, now I can only watch it on the evening.');
 
-      /**
-       * TODO: relations are not supported atm.
-       */
-      // await page.getByRole('combobox', { name: 'authors' }).click();
+      await page.getByRole('combobox', { name: 'authors' }).click();
 
-      // expect(page.getByRole('option', { name: 'State: Draft Ted Lasso' })).toBeEnabled();
-      // await page.getByRole('option', { name: 'State: Published Ted Lasso' }).click();
+      expect(page.getByRole('option', { name: 'Ted Lasso Draft' })).toBeEnabled();
+      await page.getByRole('option', { name: 'Ted Lasso Draft' }).click();
 
-      // await expect(page.getByRole('link', { name: 'Ted Lasso' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Ted Lasso' })).toBeVisible();
 
       /**
        * When we click publish, we should stay on the draft tab but check the published tab to ensure

@@ -46,7 +46,6 @@ interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
   ref?: React.Ref<HTMLElement>;
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
-const pxToRem = (px: number) => `${px / 16}rem`;
 
 interface GenericInputProps<
   TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute
@@ -233,8 +232,8 @@ const GenericInput = ({
                 : json;
             onChange({ target: { name, value } }, false);
           }}
-          minHeight={pxToRem(252)}
-          maxHeight={pxToRem(504)}
+          minHeight={`${252 / 16}rem`}
+          maxHeight={`${504 / 16}rem`}
         />
       );
     }

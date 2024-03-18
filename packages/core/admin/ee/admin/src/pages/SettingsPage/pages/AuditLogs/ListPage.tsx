@@ -1,17 +1,28 @@
-import { ActionLayout, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { DynamicTable, useFocusWhenNavigate, useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import {
+  ActionLayout,
+  ContentLayout,
+  Flex,
+  HeaderLayout,
+  IconButton,
+  Main,
+  Typography,
+} from '@strapi/design-system';
+import { useFocusWhenNavigate, useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { Eye } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
+import { Filters } from '../../../../../../../admin/src/components/Filters';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
+import { Table } from '../../../../../../../admin/src/components/Table';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
-import { Filters } from '../../../../../../../admin/src/pages/Settings/components/Filters';
-import { SanitizedAdminUserForAuditLogs } from '../../../../../../../shared/contracts/audit-logs';
+import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
 import { Modal } from './components/Modal';
-import { TableHeader, TableRows } from './components/TableRows';
 import { useAuditLogsData } from './hooks/useAuditLogsData';
+import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
+import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
 
 const ListPage = () => {
@@ -26,7 +37,7 @@ const ListPage = () => {
     readUsers: permissions?.users.read || [],
   });
 
-  const [{ query }, setQuery] = useQueryParams<{ id?: string | null }>();
+  const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
   const {
     auditLogs,
     users,
@@ -39,51 +50,54 @@ const ListPage = () => {
 
   useFocusWhenNavigate();
 
+  const formatTimeStamp = useFormatTimeStamp();
+
   const displayedFilters = getDisplayedFilters({ formatMessage, users, canReadUsers });
 
-  const headers = [
+  const headers: Table.Header<AuditLog, object>[] = [
     {
       name: 'action',
-      key: 'action',
-      metadatas: {
-        label: formatMessage({
-          id: 'Settings.permissions.auditLogs.action',
-          defaultMessage: 'Action',
-        }),
-        sortable: true,
-      },
+      label: formatMessage({
+        id: 'Settings.permissions.auditLogs.action',
+        defaultMessage: 'Action',
+      }),
+      sortable: true,
     },
     {
       name: 'date',
-      key: 'date',
-      metadatas: {
-        label: formatMessage({
-          id: 'Settings.permissions.auditLogs.date',
-          defaultMessage: 'Date',
-        }),
-        sortable: true,
-      },
+      label: formatMessage({
+        id: 'Settings.permissions.auditLogs.date',
+        defaultMessage: 'Date',
+      }),
+      sortable: true,
     },
     {
-      key: 'user',
       name: 'user',
-      metadatas: {
-        label: formatMessage({
-          id: 'Settings.permissions.auditLogs.user',
-          defaultMessage: 'User',
-        }),
-        sortable: false,
-      },
+      label: formatMessage({
+        id: 'Settings.permissions.auditLogs.user',
+        defaultMessage: 'User',
+      }),
+      sortable: false,
       // In this case, the passed parameter cannot and shouldn't be something else than User
-      cellFormatter: (user) => (user ? (user as SanitizedAdminUserForAuditLogs).displayName : ''),
+      cellFormatter: ({ user }) => (user ? user.displayName : ''),
     },
-  ] satisfies TableHeader[];
+    {
+      name: 'actions',
+      label: formatMessage({
+        id: 'Settings.permissions.auditLogs.actions',
+        defaultMessage: 'Actions',
+      }),
+      sortable: false,
+    },
+  ];
 
   if (hasError) {
     return <Page.Error />;
   }
 
   const isLoading = isLoadingData || isLoadingRBAC;
+
+  const { results = [] } = auditLogs ?? {};
 
   return (
     <Main aria-busy={isLoading}>
@@ -108,27 +122,101 @@ const ListPage = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
-      <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
+      <ActionLayout
+        startActions={
+          <Filters.Root options={displayedFilters}>
+            <Filters.Trigger />
+            <Filters.Popover />
+            <Filters.List />
+          </Filters.Root>
+        }
+      />
       <ContentLayout>
-        <DynamicTable
-          contentType="Audit logs"
-          headers={headers}
-          rows={auditLogs?.results || []}
-          withBulkActions
-          isLoading={isLoading}
-        >
-          <TableRows
-            headers={headers}
-            rows={auditLogs?.results || []}
-            onOpenModal={(id) => setQuery({ id: `${id}` })}
-          />
-        </DynamicTable>
+        <Table.Root rows={results} headers={headers} isLoading={isLoading}>
+          <Table.Content>
+            <Table.Head>
+              {headers.map((header) => (
+                <Table.HeaderCell key={header.name} {...header} />
+              ))}
+            </Table.Head>
+            <Table.Empty />
+            <Table.Loading />
+            <Table.Body>
+              {results.map((log) => (
+                <Table.Row key={log.id} onClick={() => setQuery({ id: log.id })}>
+                  {headers.map((header) => {
+                    const { name, cellFormatter } = header;
+
+                    switch (name) {
+                      case 'action':
+                        return (
+                          <Table.Cell key={name}>
+                            <Typography textColor="neutral800">
+                              {formatMessage(
+                                {
+                                  id: `Settings.permissions.auditLogs.${log.action}`,
+                                  // @ts-expect-error – getDefaultMessage probably doesn't benefit from being so strongly typed unless we just add string at the end.
+                                  defaultMessage: getDefaultMessage(log.action),
+                                },
+                                { model: (log.payload?.model as string) ?? '' }
+                              )}
+                            </Typography>
+                          </Table.Cell>
+                        );
+                      case 'date':
+                        return (
+                          <Table.Cell key={name}>
+                            <Typography textColor="neutral800">
+                              {formatTimeStamp(log.date)}
+                            </Typography>
+                          </Table.Cell>
+                        );
+                      case 'user':
+                        return (
+                          <Table.Cell key={name}>
+                            <Typography textColor="neutral800">
+                              {cellFormatter ? cellFormatter(log, header) : '-'}
+                            </Typography>
+                          </Table.Cell>
+                        );
+                      case 'actions':
+                        return null;
+                      default:
+                        return (
+                          <Table.Cell key={name}>
+                            <Typography textColor="neutral800">
+                              {(log[name as keyof AuditLog] as string) || '-'}
+                            </Typography>
+                          </Table.Cell>
+                        );
+                    }
+                  })}
+                  <Table.Cell onClick={(e) => e.stopPropagation()}>
+                    <Flex justifyContent="end">
+                      <IconButton
+                        onClick={() => setQuery({ id: log.id })}
+                        aria-label={formatMessage(
+                          { id: 'app.component.table.view', defaultMessage: '{target} details' },
+                          { target: `${log.action} action` }
+                        )}
+                        noBorder
+                        icon={<Eye />}
+                      />
+                    </Flex>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Content>
+        </Table.Root>
         <Pagination.Root {...auditLogs?.pagination} defaultPageSize={24}>
           <Pagination.PageSize options={['12', '24', '50', '100']} />
           <Pagination.Links />
         </Pagination.Root>
       </ContentLayout>
-      {query?.id && <Modal handleClose={() => setQuery({ id: null }, 'remove')} logId={query.id} />}
+      {query?.id && (
+        <Modal handleClose={() => setQuery({ id: '' }, 'remove')} logId={query.id.toString()} />
+      )}
     </Main>
   );
 };

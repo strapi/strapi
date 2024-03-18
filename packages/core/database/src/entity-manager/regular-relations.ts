@@ -13,7 +13,7 @@ import {
 import { createQueryBuilder } from '../query';
 import { addSchema } from '../utils/knex';
 import type { Database } from '..';
-import type { ID, Relation } from '../types';
+import type { ID, Relation, Model } from '../types';
 
 declare module 'knex' {
   namespace Knex {
@@ -22,6 +22,36 @@ declare module 'knex' {
     }
   }
 }
+
+//  TODO: This is a short term solution, to not steal relations from the same document.
+const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID) => {
+  // Find if the model is a content type or something else (e.g component)
+  // to only get the documentId if it's a content type
+  const models: Model[] = Array.from(strapi.db.metadata.values());
+
+  const isContentType = models.find((model) => {
+    return model.tableName === tableName && model.attributes.documentId;
+  });
+
+  if (!isContentType) {
+    return [id];
+  }
+
+  return (
+    con
+      .from(tableName)
+      // Get all child ids of the document id
+      .select('id')
+      .where(
+        'document_id',
+        con
+          .from(tableName)
+          // get document id related to the current id
+          .select('document_id')
+          .where('id', id)
+      )
+  );
+};
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -47,15 +77,17 @@ const deletePreviousOneToAnyRelations = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  await createQueryBuilder(joinTable.name, db)
+  const con = db.getConnection();
+
+  await con
     .delete()
-    .where({
-      [inverseJoinColumn.name]: relIdsToadd,
-      [joinColumn.name]: { $ne: id },
-    })
+    .from(joinTable.name)
+    // Exclude the ids of the current document
+    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(con, joinColumn.referencedTable!, id))
+    // Include all of the ids that are being connected
+    .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
-    .transacting(trx)
-    .execute();
+    .transacting(trx);
 
   await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd, transaction: trx });
 };
@@ -78,6 +110,7 @@ const deletePreviousAnyToOneRelations = async ({
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
+  const con = db.getConnection();
 
   if (!isAnyToOne(attribute)) {
     throw new Error('deletePreviousAnyToOneRelations can only be called for anyToOne relations');
@@ -85,15 +118,16 @@ const deletePreviousAnyToOneRelations = async ({
   // handling manyToOne
   if (isManyToAny(attribute)) {
     // if the database integrity was not broken relsToDelete is supposed to be of length 1
-    const relsToDelete = await createQueryBuilder(joinTable.name, db)
+    const relsToDelete = await con
       .select(inverseJoinColumn.name)
-      .where({
-        [joinColumn.name]: id,
-        [inverseJoinColumn.name]: { $ne: relIdToadd },
-      })
+      .from(joinTable.name)
+      .where(joinColumn.name, id)
+      .whereNotIn(
+        inverseJoinColumn.name,
+        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+      )
       .where(joinTable.on || {})
-      .transacting(trx)
-      .execute<{ [key: string]: ID }[]>();
+      .transacting(trx);
 
     const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
 
@@ -111,15 +145,17 @@ const deletePreviousAnyToOneRelations = async ({
 
     // handling oneToOne
   } else {
-    await createQueryBuilder(joinTable.name, db)
+    await con
       .delete()
-      .where({
-        [joinColumn.name]: id,
-        [inverseJoinColumn.name]: { $ne: relIdToadd },
-      })
+      .from(joinTable.name)
+      .where(joinColumn.name, id)
+      // Exclude the ids of the current document
+      .whereNotIn(
+        inverseJoinColumn.name,
+        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+      )
       .where(joinTable.on || {})
-      .transacting(trx)
-      .execute();
+      .transacting(trx);
   }
 };
 
@@ -342,105 +378,9 @@ const cleanOrderColumns = async ({
   return Promise.all([updateOrderColumn(), updateInverseOrderColumn()]);
 };
 
-/**
- * Use this when a relation is added or removed and its inverse order column
- * needs to be re-calculated
- *
- * Example: In this following table
- *
- *   | joinColumn      | inverseJoinColumn | order       | inverseOrder       |
- *   | --------------- | --------          | ----------- | ------------------ |
- *   | 1               | 1                 | 1           | 1                  |
- *   | 2               | 1                 | 3           | 2                  |
- *   | 2               | 2                 | 3           | 1                  |
- *
- * You add a new relation { joinColumn: 1, inverseJoinColumn: 2 }
- *
- *   | joinColumn      | inverseJoinColumn | order       | inverseOrder       |
- *   | --------------- | --------          | ----------- | ------------------ |
- *   | 1               | 1                 | 1           | 1                  |
- *   | 1               | 2                 | 2           | 1                  | <- inverseOrder should be 2
- *   | 2               | 1                 | 3           | 2                  |
- *   | 2               | 2                 | 3           | 1                  |
- *
- * This function would make such update, so all inverse order columns related
- * to the given id (1 in this example) are following a 1, 2, 3 sequence, without gap.
- *
- */
-const cleanInverseOrderColumn = async ({
-  id,
-  attribute,
-  trx,
-}: {
-  id: ID;
-  attribute: Relation.Bidirectional;
-  trx: Knex.Transaction;
-}) => {
-  const con = strapi.db.connection;
-  const { joinTable } = attribute;
-  const { joinColumn, inverseJoinColumn, inverseOrderColumnName } = joinTable;
-
-  switch (strapi.db.dialect.client) {
-    /*
-      UPDATE `:joinTableName` AS `t1`
-      JOIN (
-          SELECT
-            `inverseJoinColumn`,
-            MAX(`:inverseOrderColumnName`) AS `max_inv_order`
-          FROM `:joinTableName`
-          GROUP BY `:inverseJoinColumn`
-      ) AS `t2`
-      ON `t1`.`:inverseJoinColumn` = `t2`.`:inverseJoinColumn`
-      SET `t1`.`:inverseOrderColumnNAme` = `t2`.`max_inv_order` + 1
-      WHERE `t1`.`:joinColumnName` = :id;
-    */
-    case 'mysql': {
-      // Group by the inverse join column and get the max value of the inverse order column
-      const subQuery = con(joinTable.name)
-        .select(inverseJoinColumn.name)
-        .max(inverseOrderColumnName, { as: 'max_inv_order' })
-        .groupBy(inverseJoinColumn.name)
-        .as('t2');
-
-      //  Update ids with the new inverse order
-      await con(`${joinTable.name} as t1`)
-        .join(subQuery, `t1.${inverseJoinColumn.name}`, '=', `t2.${inverseJoinColumn.name}`)
-        .where(joinColumn.name, id)
-        .update({
-          [inverseOrderColumnName]: con.raw('t2.max_inv_order + 1'),
-        })
-        .transacting(trx);
-      break;
-    }
-    default: {
-      /*
-        UPDATE `:joinTableName` as `t1`
-        SET `:inverseOrderColumnName` = (
-          SELECT max(`:inverseOrderColumnName`) + 1
-          FROM `:joinTableName` as `t2`
-          WHERE t2.:inverseJoinColumn = t1.:inverseJoinColumn
-        )
-        WHERE `t1`.`:joinColumnName` = :id
-      */
-      // New inverse order will be the max value + 1
-      const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
-
-      const subQuery = con(`${joinTable.name} as t2`)
-        .select(selectMaxInverseOrder)
-        .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
-
-      await con(`${joinTable.name} as t1`)
-        .where(`t1.${joinColumn.name}`, id)
-        .update({ [inverseOrderColumnName]: subQuery })
-        .transacting(trx);
-    }
-  }
-};
-
 export {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
-  cleanInverseOrderColumn,
 };

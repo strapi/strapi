@@ -477,7 +477,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
-      const count = await strapi.query(key as UID.Schema).count({
+      const count = await strapi.db.query(key as UID.Schema).count({
         where: {
           id: {
             $in: uniqueValues.map((v) => v.id),

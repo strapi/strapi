@@ -1,32 +1,26 @@
 import * as React from 'react';
 
+import { Combobox, ComboboxOption, useCollator } from '@strapi/design-system';
 import {
-  Button,
-  Combobox,
-  ComboboxOption,
-  ComboboxProps,
-  useCollator,
-} from '@strapi/design-system';
-import {
-  FilterData,
-  FilterListURLQuery,
-  FilterPopoverURLQuery,
   findMatchingPermissions,
   useQueryParams,
   useRBACProvider,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Filter as FilterIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { Filters } from '../../../../components/Filters';
+import { useField } from '../../../../components/Form';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers } from '../../../../services/users';
+import { getDisplayName } from '../../../../utils/users';
 import { CREATOR_FIELDS } from '../../../constants/attributes';
+import { useContentTypeSchema } from '../../../hooks/useContentTypeSchema';
 import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
-import { getDisplayName } from '../../../utils/users';
+import { getMainField } from '../../../utils/attributes';
 
-const REVIEW_WORKFLOW_FILTER_CE: FilterData[] = [];
+const REVIEW_WORKFLOW_FILTER_CE: Filters.Filter[] = [];
 
 /**
  * If new attributes are added, this list needs to be updated.
@@ -51,25 +45,13 @@ interface FiltersProps {
   schema: Schema;
 }
 
-const Filters = ({ disabled, schema }: FiltersProps) => {
+const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
   const { attributes, uid: model, options } = schema;
-  const [isVisible, setIsVisible] = React.useState(false);
   const { formatMessage, locale } = useIntl();
-  const buttonRef = React.useRef<HTMLButtonElement>(null!);
   const { trackUsage } = useTracking();
   const { allPermissions } = useRBACProvider();
-  const [{ query }] = useQueryParams<{
-    filters?: {
-      $and: Array<{
-        [key: string]: {
-          id?: {
-            $eq?: string;
-            $ne?: string;
-          };
-        };
-      }>;
-    };
-  }>();
+  const [{ query }] = useQueryParams<Filters.Query>();
+  const { schemas } = useContentTypeSchema();
 
   const canReadAdminUsers = React.useMemo(
     () =>
@@ -82,15 +64,20 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
     [allPermissions]
   );
 
-  const selectedUserIds =
-    query?.filters?.$and?.reduce<string[]>((acc, filter) => {
-      const [key, value] = Object.entries(filter)[0];
-      const id = value.id?.$eq || value.id?.$ne;
-      if (id && USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
-        acc.push(id);
-      }
+  const selectedUserIds = (query?.filters?.$and ?? []).reduce<string[]>((acc, filter) => {
+    const [key, value] = Object.entries(filter)[0];
+    if (typeof value.id !== 'object') {
       return acc;
-    }, []) ?? [];
+    }
+
+    const id = value.id.$eq || value.id.$ne;
+
+    if (id && USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+      acc.push(id);
+    }
+
+    return acc;
+  }, []);
 
   const { data: userData, isLoading: isLoadingAdminUsers } = useAdminUsers(
     { filters: { id: { $in: selectedUserIds } } },
@@ -122,8 +109,8 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
       ]
     );
 
-    const allowedFields = fields.filter((attr) => {
-      const attribute = attributes[attr] ?? {};
+    const allowedFields = fields.filter((field) => {
+      const attribute = attributes[field] ?? {};
 
       return attribute.type && !NOT_ALLOWED_FILTERS.includes(attribute.type);
     });
@@ -133,68 +120,72 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
       ...allowedFields,
       ...DEFAULT_ALLOWED_FILTERS,
       ...(canReadAdminUsers ? CREATOR_FIELDS : []),
-    ].map((name) => {
-      const attribute = attributes[name];
-      const trackedEvent = {
-        name: 'didFilterEntries',
-        properties: { useRelation: attribute.type === 'relation' },
-      } as const;
-      const { mainField = '', label } = metadata[name].list;
+    ]
+      .map((name) => {
+        const attribute = attributes[name];
 
-      const actualMainField = {
-        name: mainField,
-        schema: attributes[mainField],
-      };
+        if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
+          return null;
+        }
 
-      const filter: FilterData = {
-        name,
-        metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
-        fieldSchema: {
+        const { mainField: mainFieldName = '', label } = metadata[name].list;
+
+        let filter: Filters.Filter = {
+          name,
+          label: label ?? '',
+          mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
+          // @ts-expect-error – TODO: this is filtered out above in the `allowedFields` call but TS complains, is there a better way to solve this?
           type: attribute.type,
-          options: 'enum' in attribute ? attribute.enum : [],
-          mainField: actualMainField,
-        },
-        trackedEvent,
-      };
-
-      if (
-        attribute.type === 'relation' &&
-        'target' in attribute &&
-        attribute.target === 'admin::user'
-      ) {
-        filter.metadatas = {
-          ...filter.metadatas,
-          customOperators: [
-            {
-              intlLabel: {
-                id: 'components.FilterOptions.FILTER_TYPES.$eq',
-                defaultMessage: 'is',
-              },
-              value: '$eq',
-            },
-            {
-              intlLabel: {
-                id: 'components.FilterOptions.FILTER_TYPES.$ne',
-                defaultMessage: 'is not',
-              },
-              value: '$ne',
-            },
-          ],
-          customInput: AdminUsersFilter,
-          options: users.map((user) => ({
-            label: getDisplayName(user, formatMessage),
-            customValue: user.id.toString(),
-          })),
         };
-        filter.fieldSchema.mainField = {
-          ...actualMainField,
-          name: 'id',
-        };
-      }
 
-      return filter;
-    });
-  }, [allPermissions, model, canReadAdminUsers, attributes, metadata, formatMessage, users]);
+        if (
+          attribute.type === 'relation' &&
+          'target' in attribute &&
+          attribute.target === 'admin::user'
+        ) {
+          filter = {
+            ...filter,
+            input: AdminUsersFilter,
+            options: users.map((user) => ({
+              label: getDisplayName(user, formatMessage),
+              value: user.id.toString(),
+            })),
+            operators: [
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                  defaultMessage: 'is',
+                }),
+                value: '$eq',
+              },
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$ne',
+                  defaultMessage: 'is not',
+                }),
+                value: '$ne',
+              },
+            ],
+            mainField: {
+              name: 'id',
+              type: 'integer',
+            },
+          };
+        }
+
+        return filter;
+      })
+      .filter(Boolean) as Filters.Filter[];
+  }, [
+    allPermissions,
+    model,
+    canReadAdminUsers,
+    attributes,
+    metadata,
+    schemas,
+    users,
+    formatMessage,
+  ]);
 
   const reviewWorkflowFilter = useEnterprise(
     REVIEW_WORKFLOW_FILTER_CE,
@@ -223,25 +214,16 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
             })
             .map((eeFilter) => ({
               ...eeFilter,
-              metadatas: {
-                ...eeFilter.metadatas,
-                // the stage filter needs the current content-type uid to fetch
-                // the list of stages that can be assigned to this content-type
-                ...(eeFilter.name === 'strapi_stage' ? { uid: model } : {}),
-                // translate the filter label
-                label: formatMessage(eeFilter.metadatas.label),
-                // `options` allows the filter-tag to render the displayname
-                // of a user over a plain id
-                options:
-                  // TODO: strapi_assignee should not be in here and rather defined
-                  // in the ee directory.
-                  eeFilter.name === 'strapi_assignee'
-                    ? users.map((user) => ({
-                        label: getDisplayName(user, formatMessage),
-                        customValue: user.id.toString(),
-                      }))
-                    : undefined,
-              },
+              'aria-label': formatMessage(eeFilter.label),
+              options:
+                // TODO: strapi_assignee should not be in here and rather defined
+                // in the ee directory.
+                eeFilter.name === 'strapi_assignee'
+                  ? users.map((user) => ({
+                      label: getDisplayName(user, formatMessage),
+                      value: user.id.toString(),
+                    }))
+                  : undefined,
             })),
         ];
       },
@@ -255,41 +237,39 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
      * this is cast because the data returns MessageDescriptor
      * as `metadatas.label` _then_ we turn it to a string.
      */
-  ) as FilterData[];
+  ) as Filters.Filter[];
 
-  const handleToggle = () => {
-    if (!isVisible) {
+  const onOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
       trackUsage('willFilterEntries');
     }
-    setIsVisible((prev) => !prev);
   };
 
   const displayedFilters = [...displayedAttributeFilters, ...reviewWorkflowFilter].sort((a, b) =>
-    formatter.compare(a.metadatas.label, b.metadatas.label)
+    formatter.compare(a.label, b.label)
   );
 
+  const handleFilterChange: Filters.Props['onChange'] = (data) => {
+    const attribute = attributes[data.name];
+
+    if (attribute) {
+      trackUsage('didFilterEntries', {
+        useRelation: attribute.type === 'relation',
+      });
+    }
+  };
+
   return (
-    <>
-      <Button
-        variant="tertiary"
-        ref={buttonRef}
-        startIcon={<FilterIcon />}
-        onClick={handleToggle}
-        size="S"
-        disabled={disabled}
-      >
-        {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-      </Button>
-      {isVisible && (
-        <FilterPopoverURLQuery
-          displayedFilters={displayedFilters}
-          isVisible={isVisible}
-          onToggle={handleToggle}
-          source={buttonRef}
-        />
-      )}
-      <FilterListURLQuery filtersSchema={displayedFilters} />
-    </>
+    <Filters.Root
+      disabled={disabled}
+      options={displayedFilters}
+      onOpenChange={onOpenChange}
+      onChange={handleFilterChange}
+    >
+      <Filters.Trigger />
+      <Filters.Popover />
+      <Filters.List />
+    </Filters.Root>
   );
 };
 
@@ -297,23 +277,33 @@ const Filters = ({ disabled, schema }: FiltersProps) => {
  * AdminUsersFilter
  * -----------------------------------------------------------------------------------------------*/
 
-interface AdminUsersFilterProps extends Pick<ComboboxProps, 'value' | 'onChange'> {}
-
-const AdminUsersFilter = ({ value, onChange }: AdminUsersFilterProps) => {
+const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
+  const [page, setPage] = React.useState(1);
   const { formatMessage } = useIntl();
-  const { data, isLoading } = useAdminUsers();
+  const { data, isLoading } = useAdminUsers({
+    page,
+  });
+  const field = useField(name);
+
+  const handleOpenChange = (isOpen?: boolean) => {
+    if (!isOpen) {
+      setPage(1);
+    }
+  };
 
   const users = data?.users || [];
 
   return (
     <Combobox
-      value={value}
+      value={field.value}
       aria-label={formatMessage({
         id: 'content-manager.components.Filters.usersSelect.label',
         defaultMessage: 'Search and select a user to filter',
       })}
-      onChange={onChange}
+      onOpenChange={handleOpenChange}
+      onChange={(value) => field.onChange(name, value)}
       loading={isLoading}
+      onLoadMore={() => setPage((prev) => prev + 1)}
     >
       {users.map((user) => {
         return (
@@ -326,5 +316,5 @@ const AdminUsersFilter = ({ value, onChange }: AdminUsersFilterProps) => {
   );
 };
 
-export { Filters };
+export { FiltersImpl as Filters };
 export type { FiltersProps };

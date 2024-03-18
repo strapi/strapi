@@ -21,13 +21,13 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST: Array<Field> = [
+  const FIELDS_TO_TEST = [
     { name: 'uniqueString', value: 'unique' },
     { name: 'uniqueNumber', value: '10' },
     { name: 'uniqueEmail', value: 'test@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique' },
-  ] as const;
+  ] as const satisfies Array<Field>;
 
   const clickSave = async (page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
@@ -74,6 +74,7 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
+      const successLocator = page.getByText('Saved document');
       await expect(page.getByText('Saved document')).toBeVisible();
 
       await page.getByRole('link', { name: 'Unique' }).click();
@@ -90,7 +91,8 @@ test.describe('Uniqueness', () => {
 
       await clickSave(page);
       await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
-
+      // Wait for previous success notifications to be removed
+      await expect(successLocator).toHaveCount(0);
       /**
        * Modify the value and try again, this should save successfully
        * Either take the new value provided in the field object or generate a random new one

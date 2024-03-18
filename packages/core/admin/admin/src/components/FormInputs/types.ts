@@ -19,10 +19,11 @@ interface StringProps
  * between the numerous forms across Strapi.
  */
 interface InputProps {
+  'aria-label'?: string;
   autoComplete?: never;
   disabled?: boolean;
   hint?: ReactNode;
-  label: ReactNode;
+  label?: ReactNode;
   name: string;
   placeholder?: string;
   required?: boolean;

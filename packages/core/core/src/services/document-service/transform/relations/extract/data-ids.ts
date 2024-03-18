@@ -5,7 +5,7 @@ import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
-
+import { getRelationTargetStatus } from '../utils/dp';
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
@@ -23,7 +23,9 @@ const handlePrimitive = (
   if (isLongHand(relation)) {
     // { documentId, locale? }
     if ('documentId' in relation) {
-      return [{ documentId: relation.documentId, locale: relation.locale }];
+      return [
+        { documentId: relation.documentId, locale: relation.locale, status: relation.status },
+      ];
     }
     // { id }
     return [];
@@ -61,12 +63,12 @@ const extractRelationIds = <T extends Schema.Attribute.RelationKind.Any>(
 
       // { connect: { id: id, position: { before: id } } }
       if (position?.before) {
-        ids.push(...handlePrimitive({ ...position, id: position.before }));
+        ids.push(...handlePrimitive({ ...position, documentId: position.before }));
       }
 
       // { connect: { id: id, position: { after: id } } }
       if (position?.after) {
-        ids.push(...handlePrimitive({ ...position, id: position.after }));
+        ids.push(...handlePrimitive({ ...position, documentId: position.after }));
       }
     });
   }
@@ -81,7 +83,7 @@ const extractRelationIds = <T extends Schema.Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: UID.Schema; locale?: string | null; isDraft?: boolean }
+  opts: { uid: UID.Schema; locale?: string | null; status?: 'draft' | 'published' }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
@@ -93,16 +95,27 @@ const extractDataIds = (
         const target = attribute.target;
         if (!target) return;
 
+        // If not connecting to any version on disabled d&p, we should connect to both draft and published relations at the same time
         extractedIds.forEach((relation) => {
-          idMap.add({
-            uid: target,
-            documentId: relation.documentId,
-            locale: getRelationTargetLocale(relation, {
-              targetUid: target as UID.Schema,
-              sourceUid: opts.uid,
-              sourceLocale: opts.locale,
-            }),
-            isDraft: opts.isDraft,
+          const targetLocale = getRelationTargetLocale(relation, {
+            targetUid: target as UID.Schema,
+            sourceUid: opts.uid,
+            sourceLocale: opts.locale,
+          });
+
+          const targetStatus = getRelationTargetStatus(relation, {
+            targetUid: target as UID.Schema,
+            sourceUid: opts.uid,
+            sourceStatus: opts.status,
+          });
+
+          targetStatus.forEach((status) => {
+            idMap.add({
+              uid: target,
+              documentId: relation.documentId,
+              locale: targetLocale,
+              status,
+            });
           });
         });
       }

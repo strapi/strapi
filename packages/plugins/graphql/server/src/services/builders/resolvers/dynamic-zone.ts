@@ -11,7 +11,7 @@ export default ({ strapi }: Context) => ({
     attributeName: string;
   }) {
     return async (parent: any) => {
-      return strapi.entityService!.load(contentTypeUID, parent, attributeName);
+      return strapi.db?.query(contentTypeUID).load(parent, attributeName);
     };
   },
 });

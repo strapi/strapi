@@ -11,7 +11,9 @@ import {
 import { HOOKS } from '../../constants';
 import { BaseQueryError } from '../../utils/baseQuery';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
+import { getMainField } from '../utils/attributes';
 
+import { useContentTypeSchema } from './useContentTypeSchema';
 import {
   type ComponentsDictionary,
   type Document,
@@ -20,10 +22,11 @@ import {
   useDocument,
 } from './useDocument';
 
+import type { Filters } from '../../components/Filters';
 import type { InputProps } from '../../components/FormInputs/types';
+import type { Table } from '../../components/Table';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { Schema as SchemaUtils } from '@strapi/types';
-import type { MessageDescriptor } from 'react-intl';
 
 type LayoutOptions = Schema['options'] & Schema['pluginOptions'] & object;
 
@@ -32,29 +35,10 @@ interface LayoutSettings extends Contracts.ContentTypes.Settings {
   icon?: never;
 }
 
-interface ListFieldLayout {
-  /**
-   * The attribute data from the content-type's schema for the field
-   */
+interface ListFieldLayout
+  extends Table.Header<Document, ListFieldLayout>,
+    Pick<Filters.Filter, 'mainField'> {
   attribute: SchemaUtils.Attribute.AnyAttribute | { type: 'custom' };
-  /**
-   * Typically used by plugins to render a custom cell
-   */
-  cellFormatter?: (
-    data: Document,
-    header: Omit<ListFieldLayout, 'cellFormatter'>,
-    { collectionType, model }: { collectionType: string; model: string }
-  ) => React.ReactNode;
-  label: string | MessageDescriptor;
-  /**
-   * the name of the attribute we use to display the actual name e.g. relations
-   * are just ids, so we use the mainField to display something meaninginful by
-   * looking at the target's schema
-   */
-  mainField?: string;
-  name: string;
-  searchable?: boolean;
-  sortable?: boolean;
 }
 
 interface ListLayout {
@@ -66,10 +50,11 @@ interface ListLayout {
   options: LayoutOptions;
   settings: LayoutSettings;
 }
-interface EditFieldSharedProps extends Omit<InputProps, 'hint' | 'label' | 'type'> {
+interface EditFieldSharedProps
+  extends Omit<InputProps, 'hint' | 'label' | 'type'>,
+    Pick<Filters.Filter, 'mainField'> {
   hint?: string;
   label: string;
-  mainField?: string;
   size: number;
   unique?: boolean;
   visible?: boolean;
@@ -153,8 +138,11 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { runHookWaterfall } = useStrapiApp();
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
-  const { data, isLoading, error } = useGetContentTypeConfigurationQuery(model);
+  const { data, isLoading: isLoadingConfigs, error } = useGetContentTypeConfigurationQuery(model);
+
+  const isLoading = isLoadingSchemas || isLoadingConfigs;
 
   React.useEffect(() => {
     if (error) {
@@ -168,7 +156,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const editLayout = React.useMemo(
     () =>
       data
-        ? formatEditLayout(data, { schema, components })
+        ? formatEditLayout(data, { schemas, schema, components })
         : ({
             layout: [],
             components: {},
@@ -176,21 +164,19 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
             options: {},
             settings: DEFAULT_SETTINGS,
           } as EditLayout),
-    [data, schema, components]
+    [data, schema, components, schemas]
   );
 
-  const listLayout = React.useMemo(
-    () =>
-      data
-        ? formatListLayout(data, { schema })
-        : ({
-            layout: [],
-            metadatas: {},
-            options: {},
-            settings: DEFAULT_SETTINGS,
-          } as ListLayout),
-    [data, schema]
-  );
+  const listLayout = React.useMemo(() => {
+    return data
+      ? formatListLayout(data, { schemas, schema, components })
+      : ({
+          layout: [],
+          metadatas: {},
+          options: {},
+          settings: DEFAULT_SETTINGS,
+        } as ListLayout);
+  }, [data, schema, schemas, components]);
 
   const { layout: edit } = React.useMemo(
     () =>
@@ -234,7 +220,11 @@ type LayoutData = Contracts.ContentTypes.FindContentTypeConfiguration.Response['
  */
 const formatEditLayout = (
   data: LayoutData,
-  { schema, components }: { schema?: Schema; components: ComponentsDictionary }
+  {
+    schemas,
+    schema,
+    components,
+  }: { schemas: Schema[]; schema?: Schema; components: ComponentsDictionary }
 ): EditLayout => {
   let currentPanelIndex = 0;
   /**
@@ -244,7 +234,8 @@ const formatEditLayout = (
     data.contentType.layouts.edit,
     schema?.attributes,
     data.contentType.metadatas,
-    data.components
+    { configurations: data.components, schemas: components },
+    schemas
   ).reduce<Array<EditFieldLayout[][]>>((panels, row) => {
     if (row.some((field) => field.type === 'dynamiczone')) {
       panels.push([row]);
@@ -317,7 +308,11 @@ const convertEditLayoutToFieldLayouts = (
   rows: LayoutData['contentType']['layouts']['edit'],
   attributes: Schema['attributes'] = {},
   metadatas: Contracts.ContentTypes.Metadatas,
-  components?: Record<string, Contracts.Components.ComponentConfiguration>
+  components?: {
+    configurations: Record<string, Contracts.Components.ComponentConfiguration>;
+    schemas: ComponentsDictionary;
+  },
+  schemas: Schema[] = []
 ) => {
   return rows.map((row) =>
     row
@@ -330,9 +325,9 @@ const convertEditLayoutToFieldLayouts = (
 
         const { edit: metadata } = metadatas[field.name];
 
-        const settings =
+        const settings: Partial<Contracts.ContentTypes.Settings> =
           attribute.type === 'component' && components
-            ? components[attribute.component].settings
+            ? components.configurations[attribute.component].settings
             : {};
 
         return {
@@ -342,7 +337,10 @@ const convertEditLayoutToFieldLayouts = (
           label: metadata.label ?? '',
           name: field.name,
           // @ts-expect-error – mainField does exist on the metadata for a relation.
-          mainField: metadata.mainField || settings?.mainField,
+          mainField: getMainField(attribute, metadata.mainField || settings.mainField, {
+            schemas,
+            components: components?.schemas ?? {},
+          }),
           placeholder: metadata.placeholder ?? '',
           required: attribute.required ?? false,
           size: field.size,
@@ -365,7 +363,14 @@ const convertEditLayoutToFieldLayouts = (
  * formats a list view layout for the content-type. This is much simpler than the edit view layout as there
  * are less options to consider.
  */
-const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): ListLayout => {
+const formatListLayout = (
+  data: LayoutData,
+  {
+    schemas,
+    schema,
+    components,
+  }: { schemas: Schema[]; schema?: Schema; components: ComponentsDictionary }
+): ListLayout => {
   const listMetadatas = Object.entries(data.contentType.metadatas).reduce<ListLayout['metadatas']>(
     (acc, [attribute, metadata]) => {
       return {
@@ -382,7 +387,8 @@ const formatListLayout = (data: LayoutData, { schema }: { schema?: Schema }): Li
     data.contentType.layouts.list,
     schema?.attributes,
     listMetadatas,
-    data.components
+    { configurations: data.components, schemas: components },
+    schemas
   );
 
   return {
@@ -411,7 +417,11 @@ const convertListLayoutToFieldLayouts = (
   columns: LayoutData['contentType']['layouts']['list'],
   attributes: Schema['attributes'] = {},
   metadatas: ListLayout['metadatas'],
-  components: Record<string, Contracts.Components.ComponentConfiguration> = {}
+  components?: {
+    configurations: Record<string, Contracts.Components.ComponentConfiguration>;
+    schemas: ComponentsDictionary;
+  },
+  schemas: Schema[] = []
 ) => {
   return columns
     .map((name) => {
@@ -423,13 +433,18 @@ const convertListLayoutToFieldLayouts = (
 
       const metadata = metadatas[name];
 
+      const settings: Partial<Contracts.ContentTypes.Settings> =
+        attribute.type === 'component' && components
+          ? components.configurations[attribute.component].settings
+          : {};
+
       return {
         attribute,
         label: metadata.label ?? '',
-        mainField:
-          'component' in attribute
-            ? components[attribute.component].settings.mainField
-            : metadata.mainField,
+        mainField: getMainField(attribute, metadata.mainField || settings.mainField, {
+          schemas,
+          components: components?.schemas ?? {},
+        }),
         name: name,
         searchable: metadata.searchable ?? true,
         sortable: metadata.sortable ?? true,

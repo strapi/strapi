@@ -115,7 +115,11 @@ function getPopulateFor(
       };
     case 'media':
       return {
-        [attributeName]: { populate: 'folder' },
+        [attributeName]: {
+          populate: {
+            folder: true,
+          },
+        },
       };
     case 'dynamiczone':
       return {

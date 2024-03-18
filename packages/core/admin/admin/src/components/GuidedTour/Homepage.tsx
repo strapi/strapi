@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import { GuidedTourContextValue, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -62,7 +62,7 @@ const GuidedTourHomepage = () => {
             return (
               <Box key={section.key}>
                 <Flex>
-                  <Box minWidth={pxToRem(30)} marginRight={5}>
+                  <Box minWidth={`${30 / 16}rem`} marginRight={5}>
                     <Number state={state}>{index + 1}</Number>
                   </Box>
                   <Typography variant="delta" as="h3">
@@ -72,7 +72,7 @@ const GuidedTourHomepage = () => {
                 <Flex alignItems="flex-start">
                   <Flex
                     justifyContent="center"
-                    minWidth={pxToRem(30)}
+                    minWidth={`${30 / 16}rem`}
                     marginBottom={3}
                     marginTop={3}
                     marginRight={5}

@@ -1,5 +1,4 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import styled from 'styled-components';
@@ -21,11 +20,11 @@ const CloseButton = styled(Box)`
   position: absolute;
   display: none;
   top: 5px;
-  right: ${pxToRem(8)};
+  right: ${8 / 16}rem;
 
   svg {
-    width: ${pxToRem(10)};
-    height: ${pxToRem(10)};
+    width: ${10 / 16}rem;
+    height: ${10 / 16}rem;
 
     path {
       fill: ${({ theme }) => theme.colors.primary600};
@@ -34,8 +33,8 @@ const CloseButton = styled(Box)`
 `;
 
 const ComponentBox = styled(Flex)`
-  width: ${pxToRem(140)};
-  height: ${pxToRem(80)};
+  width: ${140 / 16}rem;
+  height: ${80 / 16}rem;
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral100};

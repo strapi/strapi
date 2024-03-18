@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { Button, Typography } from '@strapi/design-system';
-import { useTracking, useTableContext } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import { Check, Trash } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
+import { useTable } from '../../../../../components/Table';
 import { getTranslation } from '../../../../utils/translations';
 import { InjectionZoneList } from '../InjectionZoneList';
 
@@ -126,7 +127,8 @@ const BulkActionButtons = ({
 }: BulkActionButtonsProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { selectedEntries, setSelectedEntries } = useTableContext();
+  const selectedEntries = useTable('BulkActionButtons', (state) => state.selectedRows);
+  const setSelectedEntries = useTable('BulkActionButtons', (state) => state.selectRow);
 
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
   const [isSelectedEntriesModalOpen, setIsSelectedEntriesModalOpen] = React.useState(false);

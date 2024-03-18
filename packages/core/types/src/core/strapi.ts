@@ -19,8 +19,15 @@ export interface Strapi extends Container {
   webhookRunner?: Modules.WebhookRunner.WebhookRunner;
   webhookStore?: Modules.WebhookStore.WebhookStore;
   store?: Modules.CoreStore.CoreStore;
+  /**
+   * @deprecated will be removed in the next major
+   */
   entityValidator?: Modules.EntityValidator.EntityValidator;
   entityService?: Modules.EntityService.EntityService;
+  /**
+   * @description interact with documents within Strapi, this API is currently in beta and is subject to change in the future
+   * @beta
+   */
   documents?: Modules.Documents.Service;
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
@@ -29,7 +36,7 @@ export interface Strapi extends Container {
   dirs: StrapiDirectories;
   admin?: Core.Module;
   isLoaded: boolean;
-  db?: Database;
+  db: Database;
   app: any;
   EE?: boolean;
   ee: {

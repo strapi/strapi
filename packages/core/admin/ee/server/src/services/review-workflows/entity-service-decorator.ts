@@ -23,7 +23,8 @@ const getDataWithStage = async (workflow: any, data: any) => {
  * @returns {Object}
  */
 const getEntityStage = async (uid: any, id: any) => {
-  const entity = await strapi.entityService.findOne(uid, id, {
+  const entity = await strapi.db.query(uid).findOne({
+    where: { id },
     populate: {
       [ENTITY_STAGE_ATTRIBUTE]: {
         populate: {
@@ -32,6 +33,7 @@ const getEntityStage = async (uid: any, id: any) => {
       },
     },
   });
+
   return entity?.[ENTITY_STAGE_ATTRIBUTE] ?? {};
 };
 

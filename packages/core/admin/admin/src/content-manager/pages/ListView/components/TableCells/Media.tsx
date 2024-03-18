@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-system';
-import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import styled from 'styled-components';
+
+import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import type { Data } from '@strapi/types';
 
@@ -25,6 +26,8 @@ interface MediaFile {
  * -----------------------------------------------------------------------------------------------*/
 
 interface MediaSingleProps extends MediaFile {}
+
+const getFileExtension = (ext: string) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSingleProps) => {
   const fileURL = prefixFileUrlWithBackendUrl(url)!;

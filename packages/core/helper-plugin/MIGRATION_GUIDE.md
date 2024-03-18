@@ -65,6 +65,14 @@ import { DateTimePicker } from '@strapi/helper-plugin';
 import { DateTimePicker } from '@strapi/design-system';
 ```
 
+### DynamicTable
+
+This component was previously deprecated and has now been removed. Similar to the deprecation notice, we recommend using the `Table` component from `@strapi/strapi/admin`.
+
+### EmptyBodyTable
+
+This component has been removed and is part of the `Table` component.
+
 ### EmptyStateLayout
 
 This component has been removed and not replaced. You should use `EmptyStateLayout` from `@strapi/design-system`:
@@ -78,6 +86,47 @@ import { EmptyStateLayout } from '@strapi/design-system';
 ```
 
 NOTE! the props will be different. Please refer to the documentation for the `EmptyStateLayout` component.
+
+### FilterListURLQuery
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Filters`:
+
+```tsx
+// Before
+import { FilterListURLQuery } from '@strapi/helper-plugin';
+
+// After
+import { Filters } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Filters.Root>
+      <Filters.List />
+    </Filters.Root>
+  );
+};
+```
+
+### FilterPopoverURLQueryProps
+
+This component was moved to the `admin` package and can now be imported via the `@strapi/strapi` package as part of the composite component `Filters`:
+
+```tsx
+// Before
+import { FilterPopoverURLQueryProps } from '@strapi/helper-plugin';
+
+// After
+import { Filters } from '@strapi/strapi/admin';
+
+const MyComponent = () => {
+  return (
+    <Filters.Root>
+      <Filters.Trigger />
+      <Filters.Popover />
+    </Filters.Root>
+  );
+};
+```
 
 ### Form
 
@@ -316,6 +365,20 @@ import { Status } from '@strapi/helper-plugin';
 import { Status } from '@strapi/design-system';
 ```
 
+### Table
+
+This component should be imported from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { Table } from '@strapi/helper-plugin';
+
+// After
+import { Table } from '@strapi/strapi/admin';
+```
+
+Note! some of the props have changed, please refer to the documentation for the `Table` component.
+
 ## Content Manager
 
 ### contentManagementUtilRemoveFieldsFromData
@@ -426,3 +489,64 @@ This component has been removed and not replaced. If you feel like you need this
 ### RemoveRoundedButton
 
 This component has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.
+
+## Utils
+
+### awaitToJs
+
+This util has been removed and not replaced, use async / await with try / catch instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### difference
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### getFileExtension
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### prefixFileUrlWithBackendUrl
+
+This util has been removed and not replaced. Use the strapi backendUrl to prefix the relative url if you need. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### pxToRem
+
+This util has been removed and not replaced. You should use directly this code in place of the pxToRem:
+
+```tsx
+// Before
+pxToRem(
+  32
+) // After
+`${32 / 16}rem`;
+// or
+('2rem');
+```
+
+If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### request
+
+This util has been removed and not replaced.
+You can use `useFetchClient` from `@strapi/admin/strapi-admin`.
+
+```tsx
+import { useFetchClient } from '@strapi/admin/strapi-admin';
+```
+
+And you can use it like this
+
+```tsx
+const { get } = useFetchClient();
+
+const { data } = await get(requestURL);
+```
+
+If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### setHexOpacity
+
+This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### wrapAxiosInstance
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.

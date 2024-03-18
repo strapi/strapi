@@ -42,11 +42,41 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   };
 
   return {
-    async findOne(id: string, uid: UID.CollectionType, opts = {}) {
+    async findOne(id: string, uid: UID.CollectionType, opts: DocServiceParams<'findOne'>[1] = {}) {
       return strapi
         .documents(uid)
         .findOne(id, opts)
         .then((doc) => mapDocument(uid, doc));
+    },
+
+    /**
+     * Find multiple (or all) locales for a document
+     */
+    async findLocales(
+      id: string | undefined,
+      uid: UID.CollectionType,
+      opts: {
+        populate?: Modules.Documents.Params.Pick<any, 'populate'>;
+        locale?: string | string[] | '*';
+      }
+    ) {
+      // Will look for a specific locale by default
+      const where: any = {};
+
+      // Might not have an id if querying a single type
+      if (id) {
+        where.documentId = id;
+      }
+
+      // Search in array of locales
+      if (Array.isArray(opts.locale)) {
+        where.locale = { $in: opts.locale };
+      } else if (opts.locale && opts.locale !== '*') {
+        // Look for a specific locale, ignore if looking for all locales
+        where.locale = opts.locale;
+      }
+
+      return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
     async findMany(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
@@ -140,12 +170,12 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async exists(uid: UID.CollectionType, id?: string) {
       // Collection type
       if (id) {
-        const count = await strapi.query(uid).count({ where: { documentId: id } });
+        const count = await strapi.db.query(uid).count({ where: { documentId: id } });
         return count > 0;
       }
 
       // Single type
-      const count = await strapi.query(uid).count();
+      const count = await strapi.db.query(uid).count();
       return count > 0;
     },
 
@@ -155,11 +185,6 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       opts: DocServiceParams<'delete'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
-
-      // Delete all locales if no locale is specified
-      if (opts.locale === undefined) {
-        opts.locale = '*';
-      }
 
       await strapi.documents(uid).delete(id, { ...opts, populate });
 
@@ -172,11 +197,14 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     },
 
     // FIXME: handle relations
-    deleteMany(
-      opts: Parameters<typeof strapi.entityService.deleteMany>[1],
-      uid: UID.CollectionType
-    ) {
-      return strapi.entityService.deleteMany(uid, opts);
+    async deleteMany(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
+      const docs = await strapi.documents(uid).findMany(opts);
+
+      for (const doc of docs) {
+        await strapi.documents!(uid).delete(doc.documentId);
+      }
+
+      return { count: docs.length };
     },
 
     async publish(
@@ -233,7 +261,10 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         data,
       });
       // Get the updated entities since updateMany only returns the count
-      const publishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
+      const publishedEntities = await strapi.db.query(uid).findMany({
+        where: filters,
+        populate,
+      });
       // Emit the publish event for all updated entities
       await Promise.all(
         publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
@@ -258,12 +289,17 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       const populate = await buildDeepPopulate(uid);
 
       // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.query(uid).updateMany({
+      const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
         where: filters,
         data,
       });
+
       // Get the updated entities since updateMany only returns the count
-      const unpublishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
+      const unpublishedEntities = await strapi.db.query(uid).findMany({
+        where: filters,
+        populate,
+      });
+
       // Emit the unpublish event for all updated entities
       await Promise.all(
         unpublishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_UNPUBLISH, doc))
@@ -334,10 +370,12 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         return 0;
       }
 
-      const entities = await strapi.entityService.findMany(uid, {
+      const entities = await strapi.db.query(uid).findMany({
         populate,
-        filters: { id: { $in: ids } },
-        locale,
+        where: {
+          id: { $in: ids },
+          ...(locale ? { locale } : {}),
+        },
       });
 
       const totalNumberDraftRelations: number = entities!.reduce(

@@ -227,7 +227,7 @@ export default {
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const [totalEntries, document] = await Promise.all([
-      strapi.query(model).count(),
+      strapi.db.query(model).count(),
       createDocument(ctx),
     ]);
 
@@ -339,17 +339,21 @@ export default {
       .build();
 
     const { locale } = getDocumentLocaleAndStatus(ctx.query);
-    const document = await documentManager.findOne(id, model, { populate, locale });
 
-    if (!document) {
+    // Find locales to delete
+    const documentLocales = await documentManager.findLocales(id, model, { populate, locale });
+
+    if (documentLocales.length === 0) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.delete(document)) {
-      return ctx.forbidden();
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.delete(document)) {
+        return ctx.forbidden();
+      }
     }
 
-    const result = await documentManager.delete(document.documentId, model, { locale });
+    const result = await documentManager.delete(id, model, { locale });
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },

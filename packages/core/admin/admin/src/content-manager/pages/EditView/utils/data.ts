@@ -109,7 +109,10 @@ const removeProhibitedFields = (prohibitedFields: Schema.Attribute.Kind[]) =>
  */
 const prepareRelations = traverseData(
   (attribute) => attribute.type === 'relation',
-  () => []
+  () => ({
+    connect: [],
+    disconnect: [],
+  })
 );
 
 /* -------------------------------------------------------------------------------------------------
@@ -118,7 +121,8 @@ const prepareRelations = traverseData(
 
 /**
  * @internal
- * @description TODO
+ * @description Adds a `__temp_key__` to each component and dynamiczone item. This gives us
+ * a stable identifier regardless of it's ids etc. that we can then use for drag and drop.
  */
 const prepareTempKeys = traverseData(
   (attribute) =>

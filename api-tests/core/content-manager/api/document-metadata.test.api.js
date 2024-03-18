@@ -24,6 +24,7 @@ const product = {
       localized: true,
     },
   },
+  draftAndPublish: true,
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',

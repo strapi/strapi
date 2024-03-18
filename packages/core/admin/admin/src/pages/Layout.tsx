@@ -25,8 +25,8 @@ import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { useGetMyPermissionsQuery } from '../services/auth';
-import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
+import { getDisplayName } from '../utils/users';
 
 const strapiVersion = packageJSON.version;
 
@@ -34,21 +34,6 @@ const AdminLayout = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
-  const [userDisplayName, setUserDisplayName] = React.useState<string>(() =>
-    userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
-  );
-  /**
-   * Keep this in sync with the user info we return from the useAuth hook.
-   * We can't remove the above state because it's used in `useAppInfo` which
-   * is a public API.
-   *
-   * TODO: remove this workaround in V5.
-   */
-  React.useEffect(() => {
-    setUserDisplayName(
-      userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
-    );
-  }, [userInfo]);
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
@@ -144,9 +129,9 @@ const AdminLayout = () => {
       {...appInfo}
       userId={userId}
       latestStrapiReleaseTag={tagName}
-      setUserDisplayName={setUserDisplayName}
+      setUserDisplayName={() => {}}
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
-      userDisplayName={userDisplayName}
+      userDisplayName={getDisplayName(userInfo, formatMessage) ?? ''}
     >
       <RBACProvider permissions={permissions ?? []} refetchPermissions={refetchPermissions}>
         <NpsSurvey />

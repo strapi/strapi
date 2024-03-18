@@ -1,13 +1,18 @@
 import * as React from 'react';
 
-import { Page, unstable_useDocument, Pagination } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  unstable_useDocument,
+  Pagination,
+  Table,
+  BackButton,
+} from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
   Flex,
   HeaderLayout,
   IconButton,
-  Link,
   Main,
   Tr,
   Td,
@@ -22,7 +27,6 @@ import {
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
-  Table,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
@@ -30,15 +34,7 @@ import {
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import {
-  ArrowLeft,
-  CheckCircle,
-  More,
-  Pencil,
-  Trash,
-  CrossCircle,
-  EmptyDocuments,
-} from '@strapi/icons';
+import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -70,6 +66,7 @@ import type {
   ReleaseAction,
   ReleaseActionGroupBy,
   ReleaseActionEntry,
+  FormattedReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { Schema } from '@strapi/types';
 
@@ -367,14 +364,7 @@ const ReleaseDetailsLayout = ({
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
         }
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
@@ -655,6 +645,47 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
     defaultMessage: 'Group by',
   });
+  const headers = [
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+        defaultMessage: 'name',
+      }),
+      name: 'name',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+        defaultMessage: 'locale',
+      }),
+      name: 'locale',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
+        defaultMessage: 'content-type',
+      }),
+      name: 'content-type',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+        defaultMessage: 'action',
+      }),
+      name: 'action',
+    },
+    ...(!release.releasedAt
+      ? [
+          {
+            label: formatMessage({
+              id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+              defaultMessage: 'status',
+            }),
+            name: 'status',
+          },
+        ]
+      : []),
+  ];
 
   return (
     <ContentLayout>
@@ -694,56 +725,16 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 ...item,
                 id: Number(item.entry.id),
               }))}
-              colCount={releaseActions[key].length}
-              isLoading={isLoading}
-              isFetching={isFetching}
+              headers={headers}
+              isLoading={isLoading || isFetching}
             >
               <Table.Content>
                 <Table.Head>
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-                      defaultMessage: 'name',
-                    })}
-                    name="name"
-                  />
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
-                      defaultMessage: 'content-type',
-                    })}
-                    name="content-type"
-                  />
-                  <Table.HeaderCell
-                    attribute={{ type: 'string' }}
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-                      defaultMessage: 'action',
-                    })}
-                    name="action"
-                  />
-                  {!release.releasedAt && (
-                    <Table.HeaderCell
-                      attribute={{ type: 'string' }}
-                      label={formatMessage({
-                        id: 'content-releases.page.ReleaseDetails.table.header.label.status',
-                        defaultMessage: 'status',
-                      })}
-                      name="status"
-                    />
-                  )}
+                  {headers.map((header) => (
+                    <Table.HeaderCell key={header.name} {...header} />
+                  ))}
                 </Table.Head>
-                <Table.LoadingBody />
+                <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
                     ({ id, contentType, locale, type, entry }, actionIndex) => (

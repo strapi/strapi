@@ -2,11 +2,10 @@ import { Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
 
-import { useDoc } from '../../../../hooks/useDocument';
-
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';
 import { MediaSingle, MediaMultiple } from './Media';
+import { RelationMultiple, RelationSingle } from './Relations';
 
 import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Schema, Data } from '@strapi/types';
@@ -16,9 +15,7 @@ interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
   rowId: Data.ID;
 }
 
-const CellContent = ({ content, mainField, attribute }: CellContentProps) => {
-  const { components } = useDoc();
-
+const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
   if (!hasContent(content, mainField, attribute)) {
     return <Typography textColor="neutral800">-</Typography>;
   }
@@ -31,37 +28,20 @@ const CellContent = ({ content, mainField, attribute }: CellContentProps) => {
 
       return <MediaMultiple content={content} />;
 
-    /**
-     * TODO: re-add relations to the ListView – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
-     */
-    // case 'relation': {
-    //   if (isSingleRelation(attribute.relation)) {
-    //     return <RelationSingle mainField={mainField} content={content} />;
-    //   }
+    case 'relation': {
+      if (isSingleRelation(attribute.relation)) {
+        return <RelationSingle mainField={mainField} content={content} />;
+      }
 
-    //   return (
-    //     <RelationMultiple mainField={mainField} content={content} name={name} entityId={rowId} />
-    //   );
-    // }
+      return <RelationMultiple rowId={rowId} mainField={mainField} content={content} name={name} />;
+    }
 
     case 'component':
       if (attribute.repeatable) {
-        return (
-          <RepeatableComponent
-            schema={components[attribute.component]}
-            mainField={mainField}
-            content={content}
-          />
-        );
+        return <RepeatableComponent mainField={mainField} content={content} />;
       }
 
-      return (
-        <SingleComponent
-          schema={components[attribute.component]}
-          mainField={mainField}
-          content={content}
-        />
-      );
+      return <SingleComponent mainField={mainField} content={content} />;
 
     case 'string':
       return (
@@ -97,26 +77,12 @@ const hasContent = (
       return content?.length > 0;
     }
 
-    const value = content?.[mainField];
+    const value = content?.[mainField.name];
 
     // relations, media ... show the id as fallback
-    if (mainField === 'id' && ![undefined, null].includes(value)) {
+    if (mainField.name === 'id' && ![undefined, null].includes(value)) {
       return true;
     }
-
-    /* The ID field reports itself as type `integer`, which makes it
-       impossible to distinguish it from other number fields.
-
-       Biginteger fields need to be treated as strings, as `isNumber`
-       doesn't deal with them.
-    */
-    // if (
-    //   isFieldTypeNumber(mainField.type) &&
-    //   mainField.type !== 'biginteger' &&
-    //   mainField.name !== 'id'
-    // ) {
-    //   return typeof value === 'number';
-    // }
 
     return !isEmpty(value);
   }

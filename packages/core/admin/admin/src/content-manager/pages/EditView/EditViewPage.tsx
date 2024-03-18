@@ -12,11 +12,12 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Blocker, Form } from '../../../components/Form';
+import { Blocker, Form, FormHelpers } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useOnce } from '../../../hooks/useOnce';
 import { SINGLE_TYPES } from '../../constants/collections';
@@ -54,11 +55,24 @@ const EditViewPage = () => {
     };
   }>(null);
 
+  const {
+    document,
+    meta,
+    isLoading: isLoadingDocument,
+    schema,
+    components,
+    collectionType,
+    id,
+    model,
+  } = useDoc();
+
+  const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
+
   React.useEffect(() => {
-    if (tabApi.current) {
+    if (tabApi.current && hasDraftAndPublished) {
       tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
     }
-  }, [status]);
+  }, [hasDraftAndPublished, status]);
 
   useOnce(() => {
     /**
@@ -76,16 +90,6 @@ const EditViewPage = () => {
   });
 
   const isLoadingActionsRBAC = useDocumentRBAC('EditViewPage', (state) => state.isLoading);
-  const {
-    document,
-    meta,
-    isLoading: isLoadingDocument,
-    schema,
-    components,
-    collectionType,
-    id,
-    model,
-  } = useDoc();
 
   const isSingleType = collectionType === SINGLE_TYPES;
 
@@ -131,7 +135,7 @@ const EditViewPage = () => {
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, isSingleType, schema, components]);
 
-  if (isLoading) {
+  if (isLoading && !document?.documentId) {
     return <Page.Loading />;
   }
 
@@ -139,11 +143,13 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const handleTabChange = (index: number) => {
+  const handleTabChange = (index: number, { resetForm }: Pick<FormHelpers, 'resetForm'>) => {
     if (index === 0) {
-      setQuery({ status: 'draft' });
+      setQuery({ status: 'draft' }, 'push', true);
     } else {
-      setQuery({ status: 'published' });
+      setQuery({ status: 'published' }, 'push', true);
+      // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+      resetForm();
     }
   };
 
@@ -157,58 +163,68 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
+      <Helmet title={`${documentTitle} | Strapi`} />
       <Form
-        disabled={status === 'published'}
+        disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validationSchema={createYupSchema(schema?.attributes, components)}
       >
-        <Header
-          isCreating={isCreatingDocument}
-          status={getDocumentStatus(document, meta)}
-          title={documentTitle}
-        />
-        <TabGroup
-          ref={tabApi}
-          variant="simple"
-          label={formatMessage({
-            id: getTranslation('containers.edit.tabs.label'),
-            defaultMessage: 'Document status',
-          })}
-          initialSelectedTabIndex={status === 'published' ? 1 : 0}
-          onTabChange={handleTabChange}
-        >
-          <Tabs>
-            <StatusTab>
-              {formatMessage({
-                id: getTranslation('containers.edit.tabs.draft'),
-                defaultMessage: 'draft',
+        {({ resetForm }) => (
+          <>
+            <Header
+              isCreating={isCreatingDocument}
+              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+              title={documentTitle}
+            />
+            <TabGroup
+              ref={tabApi}
+              variant="simple"
+              label={formatMessage({
+                id: getTranslation('containers.edit.tabs.label'),
+                defaultMessage: 'Document status',
               })}
-            </StatusTab>
-            <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
-              {formatMessage({
-                id: getTranslation('containers.edit.tabs.published'),
-                defaultMessage: 'published',
-              })}
-            </StatusTab>
-          </Tabs>
-          <Grid paddingTop={8} gap={4}>
-            <GridItem col={9} s={12}>
-              <TabPanels>
-                <TabPanel>
-                  <FormLayout layout={layout} />
-                </TabPanel>
-                <TabPanel>
-                  <FormLayout layout={layout} />
-                </TabPanel>
-              </TabPanels>
-            </GridItem>
-            <GridItem col={3} s={12}>
-              <Panels />
-            </GridItem>
-          </Grid>
-        </TabGroup>
-        <Blocker />
+              initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
+              onTabChange={(index) => {
+                // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
+                handleTabChange(index, { resetForm });
+              }}
+            >
+              {hasDraftAndPublished ? (
+                <Tabs>
+                  <StatusTab>
+                    {formatMessage({
+                      id: getTranslation('containers.edit.tabs.draft'),
+                      defaultMessage: 'draft',
+                    })}
+                  </StatusTab>
+                  <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
+                    {formatMessage({
+                      id: getTranslation('containers.edit.tabs.published'),
+                      defaultMessage: 'published',
+                    })}
+                  </StatusTab>
+                </Tabs>
+              ) : null}
+              <Grid paddingTop={8} gap={4}>
+                <GridItem col={9} s={12}>
+                  <TabPanels>
+                    <TabPanel>
+                      <FormLayout layout={layout} />
+                    </TabPanel>
+                    <TabPanel>
+                      <FormLayout layout={layout} />
+                    </TabPanel>
+                  </TabPanels>
+                </GridItem>
+                <GridItem col={3} s={12}>
+                  <Panels />
+                </GridItem>
+              </Grid>
+            </TabGroup>
+            <Blocker />
+          </>
+        )}
       </Form>
     </Main>
   );

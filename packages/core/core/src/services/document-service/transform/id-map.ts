@@ -21,7 +21,7 @@ interface KeyFields {
   uid: string;
   documentId: Data.ID;
   locale?: string | null;
-  isDraft?: boolean;
+  status?: 'draft' | 'published';
 }
 
 export interface IdMap {
@@ -48,7 +48,7 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
      * Register a new document id and its corresponding entity id.
      */
     add(keyFields: KeyFields) {
-      const key = encodeKey({ isDraft: false, locale: null, ...keyFields });
+      const key = encodeKey({ status: 'published', locale: null, ...keyFields });
 
       // If the id is already loaded, do nothing
       if (loadedIds.has(key)) return;
@@ -78,19 +78,26 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
       // 2. Query ids
       await async.map(
         Object.values(idsByUidAndLocale),
-        async ({ uid, locale, documentIds, isDraft }: any) => {
-          const result = await strapi?.db?.query(uid).findMany({
+        async ({ uid, locale, documentIds, status }: any) => {
+          const findParams = {
             select: ['id', 'documentId', 'locale', 'publishedAt'],
             where: {
               documentId: { $in: documentIds },
-              locale,
-              publishedAt: isDraft ? null : { $ne: null },
+              locale: locale || null,
+              publishedAt: status === 'draft' ? null : { $ne: null },
             },
-          });
+          } as any;
+
+          const result = await strapi?.db?.query(uid).findMany(findParams);
 
           // 3. Store result in loadedIds
           result?.forEach(({ documentId, id, locale, publishedAt }: any) => {
-            const key = encodeKey({ documentId, uid, locale, isDraft: !publishedAt });
+            const key = encodeKey({
+              documentId,
+              uid,
+              locale,
+              status: publishedAt ? 'published' : 'draft',
+            });
             loadedIds.set(key, id);
           });
         }
@@ -104,7 +111,7 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
      * Get the entity id for a given document id.
      */
     get(keys: KeyFields) {
-      const key = encodeKey({ isDraft: false, locale: null, ...keys });
+      const key = encodeKey({ status: 'published', locale: null, ...keys });
       return loadedIds.get(key);
     },
 

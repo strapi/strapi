@@ -8,7 +8,7 @@ import { Navigate } from 'react-router-dom';
 import { Form, FormProps } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useTypedSelector } from '../../../core/store/hooks';
-import { setIn } from '../../../utils/object';
+import { setIn } from '../../../utils/objects';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { useDoc } from '../../hooks/useDocument';
 import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
@@ -35,10 +35,10 @@ const ListConfiguration = () => {
   const { isLoading: isLoadingLayout, list, edit } = useDocLayout();
 
   const [updateContentTypeConfiguration] = useUpdateContentTypeConfigurationMutation();
-  const handleSubmit: FormProps<FormData>['onSubmit'] = async (data, event) => {
+  const handleSubmit: FormProps<FormData>['onSubmit'] = async (data) => {
     try {
       trackUsage('willSaveContentTypeLayout');
-
+      const layoutData = data.layout ?? [];
       /**
        * We reconstruct the metadatas object by taking the existing edit metadatas
        * and re-merging that by attribute name with the current list metadatas, whilst overwriting
@@ -48,7 +48,7 @@ const ListConfiguration = () => {
         (acc, [name, editMeta]) => {
           const { mainField: _mainField, ...listMeta } = list.metadatas[name];
 
-          const { label, sortable } = data.layout.find((field) => field.name === name) ?? {};
+          const { label, sortable } = layoutData.find((field) => field.name === name) ?? {};
 
           acc[name] = {
             edit: editMeta,
@@ -69,7 +69,7 @@ const ListConfiguration = () => {
           edit: edit.layout.flatMap((panel) =>
             panel.map((row) => row.map(({ name, size }) => ({ name, size })))
           ),
-          list: data.layout.map((field) => field.name),
+          list: layoutData.map((field) => field.name),
         },
         settings: setIn(data.settings, 'displayName', undefined),
         metadatas: meta,
@@ -88,7 +88,8 @@ const ListConfiguration = () => {
           message: formatAPIError(res.error),
         });
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occurred' },

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Flex, Icon, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -10,8 +9,8 @@ import styled from 'styled-components';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;
-  height: ${pxToRem(22)};
-  width: ${pxToRem(28)};
+  height: ${22 / 16}rem;
+  width: ${28 / 16}rem;
 
   &:hover,
   &:focus {
@@ -52,7 +51,11 @@ const Option = ({ children, data, selectProps, ...props }) => {
               onOptionToggle(value);
             }}
           >
-            <Icon width={pxToRem(14)} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
+            <Icon
+              width={`${14 / 16}rem`}
+              color="neutral500"
+              as={isOpen ? ChevronUp : ChevronDown}
+            />
           </ToggleButton>
         )}
       </Flex>

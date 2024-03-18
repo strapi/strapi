@@ -3,7 +3,10 @@ import { get, set, has, isString, type PropertyName } from 'lodash';
 
 type Config = Record<string, unknown>;
 
-export default (initialConfig = {}, strapi?: Core.Strapi | Core.LoadedStrapi): Core.ConfigProvider => {
+export default (
+  initialConfig = {},
+  strapi?: Core.Strapi | Core.LoadedStrapi
+): Core.ConfigProvider => {
   const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change

@@ -161,7 +161,7 @@ const getComponents = async <TUID extends UID.Schema>(
     return {} as LoadedComponents<TUID>;
   }
 
-  return strapi.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
+  return strapi.db.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
 };
 
 /*
@@ -281,7 +281,7 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   attributeName: string,
   componentValue: ComponentValue
 ) => {
-  const previousValue = (await strapi
+  const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
 
@@ -311,7 +311,7 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
   attributeName: string,
   dynamiczoneValues: DynamicZoneValue
 ) => {
-  const previousValue = (await strapi
+  const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as DynamicZoneValue;
 
@@ -373,7 +373,7 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
     if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
       let value;
       if (loadComponents) {
-        value = await strapi.query(uid).load(entityToDelete, attributeName);
+        value = await strapi.db.query(uid).load(entityToDelete, attributeName);
       } else {
         value = entityToDelete[attributeName as keyof TEntity];
       }
@@ -407,101 +407,6 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
   }
 };
 
-const cloneComponents = async <TUID extends UID.Schema>(
-  uid: TUID,
-  entityToClone: { id: Modules.EntityService.Params.Attribute.ID },
-  data: Modules.EntityService.Params.Data.Input<TUID>
-) => {
-  const { attributes = {} } = strapi.getModel(uid);
-
-  const componentBody: ComponentBody = {};
-  const componentData = await getComponents(uid, entityToClone);
-
-  for (const attributeName of Object.keys(attributes)) {
-    const attribute = attributes[attributeName];
-
-    // If the attribute is not set or on the component to clone, skip it
-    if (!has(attributeName, data) && !has(attributeName, componentData)) {
-      continue;
-    }
-
-    if (attribute.type === 'component') {
-      const { component: componentUID, repeatable = false } = attribute;
-
-      const componentValue = (
-        attributeName in data
-          ? data[attributeName as keyof typeof data]
-          : componentData[attributeName as keyof typeof componentData]
-      ) as ComponentValue;
-
-      if (componentValue === null) {
-        continue;
-      }
-
-      if (repeatable === true) {
-        if (!Array.isArray(componentValue)) {
-          throw new Error('Expected an array to create repeatable component');
-        }
-
-        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = (await async.map(
-          componentValue,
-          (value: any) => cloneComponent(componentUID, value),
-          { concurrency: isDialectMySQL() ? 1 : Infinity }
-        )) as RepeatableComponentValue;
-
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
-          return {
-            id,
-            __pivot: {
-              field: attributeName,
-              component_type: componentUID,
-            },
-          };
-        });
-      } else {
-        const component = await cloneComponent(componentUID, componentValue);
-        componentBody[attributeName] = component && {
-          id: component.id,
-          __pivot: {
-            field: attributeName,
-            component_type: componentUID,
-          },
-        };
-      }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = has(attributeName, data)
-        ? data[attributeName as keyof typeof data]
-        : componentData[attributeName as keyof typeof componentData];
-
-      if (!Array.isArray(dynamiczoneValues)) {
-        throw new Error('Expected an array to create repeatable component');
-      }
-      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await async.map(
-        dynamiczoneValues,
-        async (value: any) => {
-          const { id } = await cloneComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        },
-        { concurrency: isDialectMySQL() ? 1 : Infinity }
-      );
-      continue;
-    }
-  }
-
-  return componentBody;
-};
 /** *************************
     Component queries
 ************************** */
@@ -523,7 +428,7 @@ const createComponent = async <TUID extends UID.Component>(
     assign(componentData)
   );
 
-  return strapi.query(uid).create({ data: transform(data) });
+  return strapi.db.query(uid).create({ data: transform(data) });
 };
 
 // components can have nested compos so this must be recursive
@@ -536,7 +441,7 @@ const updateComponent = async <TUID extends UID.Component>(
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  return strapi.query(uid).update({
+  return strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
@@ -567,30 +472,7 @@ const deleteComponent = async <TUID extends UID.Component>(
   componentToDelete: Data.Component<TUID>
 ) => {
   await deleteComponents(uid, componentToDelete);
-  await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
-};
-
-const cloneComponent = async <TUID extends UID.Component>(
-  uid: TUID,
-  data: Modules.EntityService.Params.Data.Input<TUID>
-) => {
-  const model = strapi.getModel(uid);
-
-  if (!('id' in data) || typeof data.id === 'undefined') {
-    return createComponent(uid, data);
-  }
-
-  const componentData = await cloneComponents(uid, { id: data.id }, data);
-  const transform = pipe(
-    // Make sure we don't save the component with a pre-defined ID
-    omit('id'),
-    // Remove the component data from the original data object ...
-    (payload) => omitComponentData(model, payload),
-    // ... and assign the newly created component instead
-    assign(componentData)
-  );
-
-  return strapi.query(uid).clone(data.id, { data: transform(data) });
+  await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
 export {
@@ -600,5 +482,4 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
-  cloneComponents,
 };

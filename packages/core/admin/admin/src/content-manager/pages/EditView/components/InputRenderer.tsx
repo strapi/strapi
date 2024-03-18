@@ -13,6 +13,7 @@ import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
+import { RelationsInput } from './FormInputs/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
@@ -113,6 +114,8 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
       return <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+    case 'relation':
+      return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':
       return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'uid':
@@ -132,9 +135,11 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
         />
       );
     default:
+      // These props are not needed for the generic form input renderer.
+      const { unique: _unique, mainField: _mainField, ...restProps } = props;
       return (
         <FormInputRenderer
-          {...props}
+          {...restProps}
           hint={hint}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}

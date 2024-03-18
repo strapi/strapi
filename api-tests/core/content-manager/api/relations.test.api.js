@@ -670,9 +670,9 @@ describe.skip('Relations', () => {
 
       const expectedRelations = [{ id: id2 }, { id: id1 }, { id: id3 }];
 
-      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-        populate: populateShop,
-      });
+      const updatedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id }, populate: populateShop });
 
       expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
       expect(updatedShop.products_mm).toMatchObject(expectedRelations);
@@ -711,9 +711,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-        populate: populateShop,
-      });
+      const updatedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id }, populate: populateShop });
 
       const expectedRelations = [{ id: id3 }, { id: id1 }, { id: id2 }];
 
@@ -753,9 +753,9 @@ describe.skip('Relations', () => {
       });
 
       const expectedRelations = [{ id: id2 }, { id: id1 }];
-      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-        populate: populateShop,
-      });
+      const updatedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id }, populate: populateShop });
 
       expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
       expect(updatedShop.products_mm).toMatchObject(expectedRelations);
@@ -812,9 +812,9 @@ describe.skip('Relations', () => {
           populateShop
         );
 
-        const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-          populate: populateShop,
-        });
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id }, populate: populateShop });
 
         expect(updatedShop.myCompo.compo_products_mw).toMatchObject([]);
         expect(updatedShop.myCompo.compo_products_ow).toBe(null);
@@ -868,9 +868,9 @@ describe.skip('Relations', () => {
           populateShop
         );
 
-        const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-          populate: populateShop,
-        });
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id }, populate: populateShop });
 
         expect(updatedShop.myCompo.compo_products_mw).toMatchObject([{ id: id1 }]);
         expect(updatedShop.myCompo.compo_products_ow).toMatchObject({ id: id1 });
@@ -950,9 +950,9 @@ describe.skip('Relations', () => {
 
       expect(name).toBe('Cazotte Shop 2');
 
-      const clonedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-        populate: populateShop,
-      });
+      const clonedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id }, populate: populateShop });
 
       expect(clonedShop.myCompo.compo_products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
       expect(clonedShop.myCompo.compo_products_ow).toMatchObject({ id: id2 });
@@ -1000,9 +1000,9 @@ describe.skip('Relations', () => {
 
       expect(name).toBe('Cazotte Shop 2');
 
-      const clonedShop = await strapi.entityService.findOne('api::shop.shop', id, {
-        populate: populateShop,
-      });
+      const clonedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id }, populate: populateShop });
 
       expect(clonedShop.myCompo.compo_products_mw).toMatchObject([{ id: id2 }]);
       expect(clonedShop.myCompo.compo_products_ow).toBe(null);
@@ -1039,11 +1039,9 @@ describe.skip('Relations', () => {
         products_om: { disconnect: [id1] },
       });
 
-      const populatedCreatedShop = await strapi.entityService.findOne(
-        'api::shop.shop',
-        createdShop.id,
-        { populate: populateShop }
-      );
+      const populatedCreatedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id: createdShop.id }, populate: populateShop });
 
       expect(populatedCreatedShop.products_om).toMatchObject([{ id: id1 }]);
       expect(populatedCreatedShop.products_oo).toMatchObject({ id: id1 });
@@ -1074,11 +1072,9 @@ describe.skip('Relations', () => {
         products_om: { set: [id2] }, // id 1 should not be stolen from createdShop products_om
       });
 
-      const populatedCreatedShop = await strapi.entityService.findOne(
-        'api::shop.shop',
-        createdShop.id,
-        { populate: populateShop }
-      );
+      const populatedCreatedShop = await strapi.db
+        .query('api::shop.shop')
+        .findOne({ where: { id: createdShop.id }, populate: populateShop });
 
       expect(populatedCreatedShop.products_om).toMatchObject([{ id: id1 }]);
       expect(populatedCreatedShop.products_oo).toMatchObject({ id: id1 });

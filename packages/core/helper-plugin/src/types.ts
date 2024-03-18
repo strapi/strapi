@@ -31,11 +31,6 @@ export type RelationFilter = Record<string, AttributeFilter>;
 
 export type Filter = AttributeFilter | RelationFilter;
 
-export interface Operator {
-  value: Modules.EntityService.Params.Filters.Operator.Where;
-  intlLabel: MessageDescriptor;
-}
-
 export interface DefaultFilterInputsProps {
   label?: string;
   onChange: (value: string | null) => void;

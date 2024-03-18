@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Flex } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { File, FilePdf } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -24,7 +23,7 @@ export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
     <AssetCardBase name={name} extension={extension} {...restProps} variant="Doc">
       <CardAsset
         width="100%"
-        height={size === 'S' ? pxToRem(88) : pxToRem(164)}
+        height={size === 'S' ? `${88 / 16}rem` : `${164 / 16}rem`}
         justifyContent="center"
       >
         <IconWrapper>

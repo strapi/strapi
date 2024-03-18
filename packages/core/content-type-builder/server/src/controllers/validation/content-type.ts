@@ -3,7 +3,7 @@
 import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Struct, Internal, Utils } from '@strapi/types';
+import type { Struct, Internal } from '@strapi/types';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -14,13 +14,8 @@ import { nestedComponentSchema } from './component';
 export type CreateContentTypeInput = {
   contentType?: Partial<Struct.ContentTypeSchema> & Partial<Struct.ContentTypeSchemaInfo>;
   components?: Array<
-    Utils.Intersect<
-      [
-        Partial<Struct.ComponentSchema>,
-        Partial<Struct.SchemaInfo>,
-        { tmpUID?: Internal.UID.Component }
-      ]
-    >
+    Partial<Struct.ComponentSchema> &
+      Partial<Struct.SchemaInfo> & { tmpUID?: Internal.UID.Component }
   >;
   singularName: Struct.ContentTypeSchemaInfo['singularName'];
   attributes: Struct.SchemaAttributes & Record<string, any>;
@@ -30,6 +25,7 @@ export type CreateContentTypeInput = {
   displayName: Struct.ContentTypeSchemaInfo['displayName'];
   description: Struct.ContentTypeSchemaInfo['description'];
   options?: Struct.SchemaOptions;
+  draftAndPublish?: Struct.SchemaOptions['draftAndPublish'];
   pluginOptions?: Struct.ContentTypeSchema['pluginOptions'];
   config?: object;
 };

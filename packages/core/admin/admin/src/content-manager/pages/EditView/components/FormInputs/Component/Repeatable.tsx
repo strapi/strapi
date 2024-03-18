@@ -22,7 +22,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
-import { getIn } from '../../../../../../utils/object';
+import { getIn } from '../../../../../../utils/objects';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
@@ -31,6 +31,7 @@ import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { InputRenderer } from '../../InputRenderer';
+import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
 
@@ -189,6 +190,8 @@ const RepeatableComponent = ({
 
   const ariaDescriptionId = React.useId();
 
+  const level = useComponent('RepeatableComponent', (state) => state.level);
+
   if (value.length === 0) {
     return <Initializer disabled={disabled} name={name} onClick={handleClick} />;
   }
@@ -204,27 +207,37 @@ const RepeatableComponent = ({
       <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
       <AccordionGroup error={error}>
         <AccordionContent aria-describedby={ariaDescriptionId}>
-          {value.map(({ __temp_key__: key }, index) => (
-            <Component
-              key={key}
-              disabled={disabled}
-              name={`${name}.${index}`}
-              attribute={attribute}
-              index={index}
-              isOpen={collapseToOpen === key}
-              mainField={mainField}
-              onMoveItem={handleMoveComponentField}
-              onClickToggle={handleToggle(key)}
-              onDeleteComponent={() => {
-                removeFieldRow(name, index);
-                toggleCollapses();
-              }}
-              toggleCollapses={toggleCollapses}
-              onCancel={handleCancel}
-              onDropItem={handleDropItem}
-              onGrabItem={handleGrabItem}
-            />
-          ))}
+          {value.map(({ __temp_key__: key, id }, index) => {
+            return (
+              <ComponentProvider
+                key={key}
+                // id is always a number in a component
+                id={id as number}
+                uid={attribute.component}
+                level={level + 1}
+                type="repeatable"
+              >
+                <Component
+                  disabled={disabled}
+                  name={`${name}.${index}`}
+                  attribute={attribute}
+                  index={index}
+                  isOpen={collapseToOpen === key}
+                  mainField={mainField}
+                  onMoveItem={handleMoveComponentField}
+                  onClickToggle={handleToggle(key)}
+                  onDeleteComponent={() => {
+                    removeFieldRow(name, index);
+                    toggleCollapses();
+                  }}
+                  toggleCollapses={toggleCollapses}
+                  onCancel={handleCancel}
+                  onDropItem={handleDropItem}
+                  onGrabItem={handleGrabItem}
+                />
+              </ComponentProvider>
+            );
+          })}
         </AccordionContent>
         <AccordionFooter>
           <Flex justifyContent="center" height="48px" background="neutral0">
@@ -361,13 +374,13 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 `;
 
 interface ComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'> {
+  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
+    Pick<RepeatableComponentProps, 'mainField'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
   isOpen?: boolean;
   name: string;
-  mainField?: string;
   onClickToggle: () => void;
   onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
   toggleCollapses: () => void;
@@ -379,7 +392,10 @@ const Component = ({
   index,
   isOpen,
   name,
-  mainField = 'id',
+  mainField = {
+    name: 'id',
+    type: 'integer',
+  },
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
@@ -393,7 +409,7 @@ const Component = ({
   const { layout } = components[attribute.component];
 
   const displayValue = useForm('RepeatableComponent', (state) => {
-    return getIn(state.values, [...name.split('.'), mainField]);
+    return getIn(state.values, [...name.split('.'), mainField.name]);
   });
 
   const accordionRef = React.useRef<HTMLButtonElement>(null!);

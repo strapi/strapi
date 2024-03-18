@@ -1,8 +1,10 @@
 import { traverse } from '@strapi/utils';
-import { type Data, type Options } from './types';
+import type { UID } from '@strapi/types';
+
+import { type Data } from './types';
 import { transformFields } from './fields';
 
-export const transformPopulate = async (data: Data, opts: Options) => {
+export const transformPopulate = async (data: Data, opts: { uid: UID.Schema }) => {
   return traverse.traverseQueryPopulate(
     async ({ attribute, key, value }, { set }) => {
       if (!value || typeof value !== 'object' || attribute?.type !== 'relation') {

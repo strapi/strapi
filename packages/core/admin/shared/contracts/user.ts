@@ -46,7 +46,9 @@ export declare namespace FindAll {
   // TODO make the types for this
   export interface Request {
     body: {};
-    query: Modules.EntityService.Params.Pick<'admin::user', 'filters'>;
+    query: Modules.EntityService.Params.Pick<'admin::user', 'filters'> & {
+      [key: string]: any;
+    };
   }
 
   export interface Response {

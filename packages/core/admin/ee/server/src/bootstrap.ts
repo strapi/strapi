@@ -21,8 +21,10 @@ export default async (args: any) => {
     await actionProvider.registerMany(actions.reviewWorkflows);
     // Decorate the entity service with review workflow logic
     const { decorator } = getService('review-workflows-decorator');
-    // @ts-expect-error - add decorator to entity service
-    strapi.entityService.decorate(decorator);
+
+    // TODO: use document service middleware
+    // strapi.entityService.decorate(decorator);
+
     await getService('review-workflows-weekly-metrics').registerCron();
   }
   await getService('seat-enforcement').seatEnforcementWorkflow();

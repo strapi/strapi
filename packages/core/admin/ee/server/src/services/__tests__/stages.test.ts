@@ -33,16 +33,17 @@ const workflowMock = {
   ],
 };
 
-const entityServiceMock = {
-  findOne: jest.fn((uid, id) => workflowMock.stages.find((stage) => stage.id === id) || { id }),
+const dbMock = {
+  findOne: jest.fn((id) => workflowMock.stages.find((stage) => stage.id === id) || { id }),
   findMany: jest.fn(() => [stageMock]),
-  create: jest.fn((uid, { data }) => ({
+  create: jest.fn(({ data }) => ({
     ...data,
     id: data?.id || Math.floor(Math.random() * 1000),
   })),
-  update: jest.fn((uid, id, { data }) => data),
+  update: jest.fn(({ data }) => data),
   delete: jest.fn(() => true),
 };
+
 const servicesMock: Record<string, any> = {
   'admin::workflows': {
     findById: jest.fn(() => workflowMock),
@@ -84,13 +85,13 @@ const strapiMock = {
   query: jest.fn(() => ({
     findOne: jest.fn(() => workflowMock),
   })),
-  entityService: entityServiceMock,
   service: jest.fn((serviceName) => {
     return servicesMock[serviceName];
   }),
   db: {
     transaction: jest.fn((func) => func({})),
     query: jest.fn(() => ({
+      ...dbMock,
       updateMany: queryUpdateMock,
     })),
     metadata: {
@@ -136,23 +137,23 @@ describe('Review workflows - Stages service', () => {
   });
 
   describe('find', () => {
-    test('Should call entityService with the right model UID and ID', async () => {
+    test('Should call db with the right ID', async () => {
       stagesService.find({ workflowId: 1 });
 
-      expect(entityServiceMock.findOne).not.toBeCalled();
-      expect(entityServiceMock.findMany).toBeCalled();
-      expect(entityServiceMock.findMany).toBeCalledWith(STAGE_MODEL_UID, {
-        filters: { workflow: 1 },
+      expect(dbMock.findOne).not.toBeCalled();
+      expect(dbMock.findMany).toBeCalled();
+      expect(dbMock.findMany).toBeCalledWith({
+        where: { workflow: 1 },
       });
     });
   });
   describe('findById', () => {
-    test('Should call entityService with the right model UID', async () => {
+    test('Should call db with the right ID', async () => {
       stagesService.findById(1, { workflowId: 1 });
 
-      expect(entityServiceMock.findMany).not.toBeCalled();
-      expect(entityServiceMock.findOne).toBeCalled();
-      expect(entityServiceMock.findOne).toBeCalledWith(STAGE_MODEL_UID, 1, {});
+      expect(dbMock.findMany).not.toBeCalled();
+      expect(dbMock.findOne).toBeCalled();
+      expect(dbMock.findOne).toBeCalledWith({ where: { id: 1 } });
     });
   });
   describe('replaceStages', () => {
@@ -162,9 +163,9 @@ describe('Review workflows - Stages service', () => {
         [...workflowMock.stages, { name: 'to publish' }]
       );
 
-      expect(entityServiceMock.create).toBeCalled();
-      expect(entityServiceMock.update).not.toBeCalled();
-      expect(entityServiceMock.delete).not.toBeCalled();
+      expect(dbMock.create).toBeCalled();
+      expect(dbMock.update).not.toBeCalled();
+      expect(dbMock.delete).not.toBeCalled();
     });
     test('Should update a stage contained in the workflow', async () => {
       const updateStages = cloneDeep(workflowMock.stages);
@@ -172,9 +173,9 @@ describe('Review workflows - Stages service', () => {
 
       await stagesService.replaceStages(workflowMock.stages, updateStages);
 
-      expect(entityServiceMock.create).not.toBeCalled();
-      expect(entityServiceMock.update).toBeCalled();
-      expect(entityServiceMock.delete).not.toBeCalled();
+      expect(dbMock.create).not.toBeCalled();
+      expect(dbMock.update).toBeCalled();
+      expect(dbMock.delete).not.toBeCalled();
     });
     test('Should delete a stage contained in the workflow', async () => {
       const selectedIndexes = [0, 2, 3];
@@ -183,17 +184,17 @@ describe('Review workflows - Stages service', () => {
         selectedIndexes.map((index) => workflowMock.stages[index])
       );
 
-      expect(entityServiceMock.create).not.toBeCalled();
-      expect(entityServiceMock.update).not.toBeCalled();
-      expect(entityServiceMock.delete).toBeCalled();
+      expect(dbMock.create).not.toBeCalled();
+      expect(dbMock.update).not.toBeCalled();
+      expect(dbMock.delete).toBeCalled();
     });
 
     // TODO: Fix when the updateEntitiesStage method is implemented
     test.skip('Should move entities in a deleted stage to the previous stage', async () => {
       await stagesService.replaceStages(workflowMock.stages, workflowMock.stages.slice(0, 3));
 
-      expect(entityServiceMock.create).not.toBeCalled();
-      expect(entityServiceMock.delete).toBeCalled();
+      expect(dbMock.create).not.toBeCalled();
+      expect(dbMock.delete).toBeCalled();
 
       // Here we are only deleting the stage containing related IDs 1 & 2
       expect(stagesService.updateEntitiesStage).toHaveBeenCalledWith('api::shop.shop', {
@@ -209,8 +210,8 @@ describe('Review workflows - Stages service', () => {
       ]);
 
       expect(servicesMock['admin::workflows'].findById).toBeCalled();
-      expect(entityServiceMock.create).toBeCalled();
-      expect(entityServiceMock.delete).toBeCalled();
+      expect(dbMock.create).toBeCalled();
+      expect(dbMock.delete).toBeCalled();
 
       // Here we are deleting all stages and expecting all entities to be moved to the new stage
       for (const stage of workflowMock.stages) {
@@ -236,9 +237,9 @@ describe('Review workflows - Stages service', () => {
         { name: 'new stage2' },
       ]);
 
-      expect(entityServiceMock.create).toBeCalled();
-      expect(entityServiceMock.update).toBeCalled();
-      expect(entityServiceMock.delete).toBeCalled();
+      expect(dbMock.create).toBeCalled();
+      expect(dbMock.update).toBeCalled();
+      expect(dbMock.delete).toBeCalled();
     });
 
     test('Undefined destination stage permissions should apply a partial permission update', async () => {
@@ -254,12 +255,13 @@ describe('Review workflows - Stages service', () => {
 
       await stagesService.replaceStages(srcStages, destStages);
 
-      expect(entityServiceMock.create).not.toBeCalled();
-      expect(entityServiceMock.delete).not.toBeCalled();
-      expect(entityServiceMock.update).toBeCalledTimes(4);
+      expect(dbMock.create).not.toBeCalled();
+      expect(dbMock.delete).not.toBeCalled();
+      expect(dbMock.update).toBeCalledTimes(4);
 
       destStages.forEach((stage, index) => {
-        expect(entityServiceMock.update).toBeCalledWith('admin::workflow-stage', stage.id, {
+        expect(dbMock.update).toBeCalledWith({
+          where: { id: stage.id },
           data: { ...stage, permissions: srcStages[index].permissions },
         });
       });

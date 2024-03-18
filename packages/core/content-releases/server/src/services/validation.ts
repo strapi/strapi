@@ -13,8 +13,11 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.LoadedStrapi 
      * Asserting the type, otherwise TS complains: 'release.actions' is of type 'unknown', even though the types come through for non-populated fields...
      * Possibly related to the comment on GetValues: https://github.com/strapi/strapi/blob/main/packages/core/types/src/modules/entity-service/result.ts
      */
-    const release = (await strapi.entityService.findOne(RELEASE_MODEL_UID, releaseId, {
-      populate: { actions: { populate: { entry: { fields: ['id'] } } } },
+    const release = (await strapi.db.query(RELEASE_MODEL_UID).findOne({
+      where: {
+        id: releaseId,
+      },
+      populate: { actions: { populate: { entry: { select: ['id'] } } } },
     })) as Release | null;
 
     if (!release) {
@@ -64,8 +67,8 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.LoadedStrapi 
     name: CreateRelease.Request['body']['name'],
     id?: UpdateRelease.Request['params']['id']
   ) {
-    const pendingReleases = (await strapi.entityService.findMany(RELEASE_MODEL_UID, {
-      filters: {
+    const pendingReleases = (await strapi.db.query(RELEASE_MODEL_UID).findMany({
+      where: {
         releasedAt: {
           $null: true,
         },

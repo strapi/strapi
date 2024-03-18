@@ -56,14 +56,14 @@ const syncAuthSettings = async () => {
 const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await async.pipe(
-    strapi.query('admin::api-token-permission').findMany,
+    strapi.db.query('admin::api-token-permission').findMany,
     map('action')
   )();
 
   const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));
 
   if (unknownPermissions.length > 0) {
-    await strapi
+    await strapi.db
       .query('admin::api-token-permission')
       .deleteMany({ where: { action: { $in: unknownPermissions } } });
   }

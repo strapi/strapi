@@ -41,6 +41,7 @@ const productWithCompoAndDP = {
       repeatable: true,
     },
   },
+  draftAndPublish: true,
   displayName: 'product-with-compo-and-dp',
   singularName: 'product-with-compo-and-dp',
   pluralName: 'product-with-compo-and-dps',
