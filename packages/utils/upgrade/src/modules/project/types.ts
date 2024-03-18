@@ -22,7 +22,7 @@ export type MinimalPackageJSON = {
   dependencies?: Record<string, string>;
 } & Utils.JSONObject;
 
-export interface Project {
+export interface IProjectBase {
   cwd: string;
   files: string[];
   packageJSONPath: string;
@@ -34,11 +34,14 @@ export interface Project {
   refresh(): this;
 }
 
-export interface AppProject extends Project {
+export interface IAppProject extends IProjectBase {
+  type: 'app';
   strapiVersion: Version.SemVer;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginProject extends Project {
-  // It is expected to add things here later, so we'll keep this an interface
+export interface IPluginProject extends IProjectBase {
+  type: 'plugin';
 }
+
+export type Project = IAppProject | IPluginProject;

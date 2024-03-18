@@ -13,15 +13,15 @@ import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
 import type {
-  Project as ProjectInterface,
-  AppProject as AppProjectInterface,
-  PluginProject as PluginProjectInterface,
+  IAppProject,
+  IPluginProject,
   FileExtension,
   MinimalPackageJSON,
   RunCodemodsOptions,
+  IProjectBase,
 } from './types';
 
-export class Project implements ProjectInterface {
+export class Project implements IProjectBase {
   public cwd: string;
 
   // The following properties are assigned during the .refresh() call in the constructor.
@@ -31,8 +31,6 @@ export class Project implements ProjectInterface {
   public packageJSONPath!: string;
 
   public packageJSON!: MinimalPackageJSON;
-
-  public readonly type: 'plugin' | 'app';
 
   constructor(cwd: string) {
     if (!fse.pathExistsSync(cwd)) {
@@ -135,21 +133,14 @@ export class Project implements ProjectInterface {
   }
 }
 
-export class AppProject extends Project implements AppProjectInterface {
+export class AppProject extends Project implements IAppProject {
   public strapiVersion!: Version.SemVer;
+
+  type = 'app' as const;
 
   constructor(cwd: string) {
     super(cwd);
-    this.type = 'app';
     this.refreshStrapiVersion();
-  }
-
-  getFilesByExtensions(extensions: FileExtension[]) {
-    return this.files.filter((filePath) => {
-      const fileExtension = path.extname(filePath) as FileExtension;
-
-      return extensions.includes(fileExtension);
-    });
   }
 
   refresh() {
@@ -220,11 +211,8 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
   return collection.length === 1 ? collection[0] : `{${collection}}`;
 };
 
-export class PluginProject extends Project implements PluginProjectInterface {
-  constructor(cwd: string) {
-    super(cwd);
-    this.type = 'plugin';
-  }
+export class PluginProject extends Project implements IPluginProject {
+  type = 'plugin' as const;
 }
 
 const isPlugin = (cwd: string) => {
