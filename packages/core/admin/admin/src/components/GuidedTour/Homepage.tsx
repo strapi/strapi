@@ -1,9 +1,10 @@
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useTracking } from '@strapi/helper-plugin';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
+
+import { useTracking } from '../../features/Tracking';
 
 import { LAYOUT_DATA, States, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';

@@ -17,6 +17,11 @@ export * from './components/SearchInput';
 export * from './components/Table';
 
 /**
+ * Features
+ */
+export { useTracking, type TrackingEvent } from './features/Tracking';
+
+/**
  * Hooks
  */
 export { useInjectReducer } from './hooks/useInjectReducer';

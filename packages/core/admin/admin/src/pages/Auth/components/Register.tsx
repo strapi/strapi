@@ -7,7 +7,6 @@ import {
   translatedErrors,
   useNotification,
   useQuery,
-  useTracking,
 } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
@@ -26,6 +25,7 @@ import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
 import {

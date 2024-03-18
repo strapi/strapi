@@ -10,12 +10,13 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useTracking } from '@strapi/helper-plugin';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { useTracking } from '../../features/Tracking';
 
 import { LAYOUT_DATA, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';

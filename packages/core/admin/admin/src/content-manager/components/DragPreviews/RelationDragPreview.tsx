@@ -1,5 +1,6 @@
 import { Box, Flex, Icon, IconButton, Typography } from '@strapi/design-system';
 import { Cross, Drag } from '@strapi/icons';
+import { Entity } from '@strapi/types';
 
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import {
@@ -9,8 +10,10 @@ import {
 } from '../../pages/EditView/components/FormInputs/Relations';
 
 interface RelationDragPreviewProps {
-  status: string;
+  status?: string;
   displayedValue: string;
+  id: Entity.ID;
+  index: number;
   width: number;
 }
 
@@ -40,7 +43,7 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
                 </Typography>
               </LinkEllipsis>
             </Box>
-            {status && <DocumentStatus status={status} />}
+            {status ? <DocumentStatus status={status} /> : null}
           </Flex>
         </FlexWrapper>
         <Box paddingLeft={4}>

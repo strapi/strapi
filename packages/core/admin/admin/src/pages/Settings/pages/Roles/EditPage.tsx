@@ -4,7 +4,6 @@ import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/de
 import {
   useNotification,
   useOverlayBlocker,
-  useTracking,
   translatedErrors,
 } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
@@ -16,6 +15,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useTracking } from '../../../../features/Tracking';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {

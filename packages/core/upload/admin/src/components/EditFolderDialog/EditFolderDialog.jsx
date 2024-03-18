@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
   FieldLabel,
@@ -13,7 +14,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';

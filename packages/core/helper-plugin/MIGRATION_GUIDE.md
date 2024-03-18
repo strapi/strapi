@@ -405,6 +405,10 @@ Note! some of the props have changed, please refer to the documentation for the 
 
 This component has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
 
+### Tracking
+
+This feature has been moved to the `@strapi/admin` package and only the `useTracking` hook is exported.
+
 ### contentManagementUtilRemoveFieldsFromData
 
 This function has been removed and not replaced. If you feel like you need this function, please open an issue on the Strapi repository to discuss your usecase.

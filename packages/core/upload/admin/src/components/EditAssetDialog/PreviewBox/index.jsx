@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

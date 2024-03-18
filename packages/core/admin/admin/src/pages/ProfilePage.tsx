@@ -17,7 +17,6 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
@@ -30,6 +29,7 @@ import { InputRenderer } from '../components/FormInputs/Renderer';
 import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
+import { useTracking } from '../features/Tracking';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';

@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { SerializedError } from '@reduxjs/toolkit';
-import { type TrackingEvent, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 
+import { TrackingEvent, useTracking } from '../../features/Tracking';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { BaseQueryError } from '../../utils/baseQuery';
 import {

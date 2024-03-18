@@ -1,6 +1,6 @@
 import { Strapi, Documents } from '@strapi/types';
 
-import { createMiddlewareManager } from './middlewares';
+import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 
 /**
@@ -23,6 +23,8 @@ import { createContentTypeRepository } from './repository';
 export const createDocumentService = (strapi: Strapi): Documents.Service => {
   const repositories = new Map<string, Documents.ServiceInstance>();
   const middlewares = createMiddlewareManager();
+
+  middlewares.use(databaseErrorsMiddleware);
 
   const factory = function factory(uid) {
     if (repositories.has(uid)) {
