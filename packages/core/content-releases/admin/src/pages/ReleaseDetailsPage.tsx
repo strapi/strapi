@@ -265,7 +265,12 @@ export const ReleaseDetailsLayout = ({
   };
 
   const handleRefresh = () => {
-    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+    dispatch(
+      releaseApi.util.invalidateTags([
+        { type: 'ReleaseAction', id: 'LIST' },
+        { type: 'Release', id: releaseId },
+      ])
+    );
   };
 
   const getCreatedByUser = () => {
