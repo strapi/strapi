@@ -586,6 +586,10 @@ import { useFilter } from '@strapi/design-system';
 
 This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
 
+### useLockScroll
+
+This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
+
 ## Icons
 
 ### SortIcon

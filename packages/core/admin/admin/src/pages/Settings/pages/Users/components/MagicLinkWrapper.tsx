@@ -1,10 +1,10 @@
 import { IconButton } from '@strapi/design-system';
-import { useClipboard } from '@strapi/helper-plugin';
 import { Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../../../../components/ContentBox';
 import { useNotification } from '../../../../../features/Notifications';
+import { useClipboard } from '../../../../../hooks/useClipboard';
 
 interface MagicLinkWrapperProps {
   children: string;

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-export const useClipboard = () => {
+const useClipboard = () => {
   const copy = useCallback(async (value: string | number) => {
     try {
       // only strings and numbers casted to strings can be copied to clipboard
@@ -31,3 +31,5 @@ export const useClipboard = () => {
 
   return { copy };
 };
+
+export { useClipboard };
