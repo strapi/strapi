@@ -6,7 +6,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useRouteMatch } from 'react-router-dom';
+import { Prompt, useRouteMatch, useHistory } from 'react-router-dom';
 
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
@@ -20,6 +20,7 @@ import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 /* eslint-disable indent */
 
 const ListView = () => {
+  const history = useHistory();
   const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
     useDataManager();
   const { formatMessage } = useIntl();
@@ -48,6 +49,10 @@ const ListView = () => {
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
 
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
+
+  const handleReload = () => {
+    history.go(0); // Reloads the current page
+  };
 
   const handleClickAddComponentToDZ = (dynamicZoneTarget?: string) => {
     onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
@@ -142,7 +147,10 @@ const ListView = () => {
               )}
               <Button
                 startIcon={<Check />}
-                onClick={() => submitData()}
+                onClick={async () => {
+                  await submitData();
+                  handleReload();
+                }}
                 type="submit"
                 disabled={isEqual(modifiedData, initialData)}
               >
