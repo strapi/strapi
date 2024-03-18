@@ -24,17 +24,14 @@ export default async ({ oldContentTypes, contentTypes }: any) => {
 
       await Promise.all([
         // Delete all entities that are not in the default locale
-        strapi.db
-          .queryBuilder(uid)
-          .delete()
-          .where({ locale: { $ne: defaultLocale } })
-          .execute(),
+        strapi.db.query(uid).deleteMany({
+          where: { locale: { $ne: defaultLocale } },
+        }),
         // Set locale to null for the rest
-        strapi.db
-          .queryBuilder(uid)
-          .update({ locale: null })
-          .where({ locale: { $eq: defaultLocale } })
-          .execute(),
+        strapi.db.query(uid).updateMany({
+          where: { locale: { $eq: defaultLocale } },
+          data: { locale: null },
+        }),
       ]);
     }
   }
