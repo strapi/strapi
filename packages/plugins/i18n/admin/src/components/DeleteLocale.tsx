@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { IconButton } from '@strapi/design-system';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
+import { ConfirmDialog } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { useDeleteLocaleMutation } from '../services/locales';
@@ -23,7 +24,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
 
   const [visible, setVisible] = React.useState(false);
 
-  const [deleteLocale, { isLoading }] = useDeleteLocaleMutation();
+  const [deleteLocale] = useDeleteLocaleMutation();
   const handleConfirm = async () => {
     try {
       const res = await deleteLocale(id);
@@ -68,12 +69,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
         icon={<Trash />}
         borderWidth={0}
       />
-      <ConfirmDialog
-        isConfirmButtonLoading={isLoading}
-        onConfirm={handleConfirm}
-        onToggleDialog={() => setVisible(false)}
-        isOpen={visible}
-      />
+      <ConfirmDialog onConfirm={handleConfirm} onClose={() => setVisible(false)} isOpen={visible} />
     </>
   );
 };

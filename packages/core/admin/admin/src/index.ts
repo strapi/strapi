@@ -8,6 +8,7 @@ export * from './render';
  * components
  */
 export { BackButton, type BackButtonProps } from './features/BackButton';
+export * from './components/ConfirmDialog';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';

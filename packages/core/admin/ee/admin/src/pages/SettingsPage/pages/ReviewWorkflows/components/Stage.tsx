@@ -15,12 +15,11 @@ import {
   SingleSelect,
   SingleSelectOption,
   TextInput,
-  Typography,
   VisuallyHidden,
   useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
-import { ConfirmDialog, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -28,6 +27,7 @@ import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { ConfirmDialog } from '../../../../../../../../admin/src/components/ConfirmDialog';
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
 import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
@@ -497,10 +497,9 @@ export const Stage = ({
         </Accordion>
       )}
 
-      <ConfirmDialog.Root
-        iconRightButton={null}
+      <ConfirmDialog
         isOpen={isApplyAllConfirmationOpen}
-        onToggleDialog={() => setIsApplyAllConfirmationOpen(false)}
+        onClose={() => setIsApplyAllConfirmationOpen(false)}
         onConfirm={() => {
           dispatch(updateStages({ permissions: permissionsField.value }));
           setIsApplyAllConfirmationOpen(false);
@@ -512,18 +511,14 @@ export const Stage = ({
             }),
           });
         }}
-        variantRightButton="default"
+        variant="default"
       >
-        <ConfirmDialog.Body>
-          <Typography textAlign="center" variant="omega">
-            {formatMessage({
-              id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
-              defaultMessage:
-                'Roles that can change that stage will be applied to all the other stages.',
-            })}
-          </Typography>
-        </ConfirmDialog.Body>
-      </ConfirmDialog.Root>
+        {formatMessage({
+          id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
+          defaultMessage:
+            'Roles that can change that stage will be applied to all the other stages.',
+        })}
+      </ConfirmDialog>
     </Box>
   );
 };

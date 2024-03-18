@@ -138,6 +138,7 @@ describe('Upload plugin', () => {
               ext: '.png',
               mime: 'image/png',
               size: expect.any(Number),
+              sizeInBytes: expect.any(Number),
               width: expect.any(Number),
               height: expect.any(Number),
               url: expect.any(String),

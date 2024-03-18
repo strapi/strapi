@@ -156,7 +156,7 @@ describe('EditFolderDialog', () => {
       fireEvent.click(getButton(baseElement, 'delete'));
     });
 
-    expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    expect(queryByText('Are you sure?')).toBeInTheDocument();
   });
 
   test('keeps edit folder dialog open and show error message on API error', async () => {

@@ -238,7 +238,7 @@ export const List = ({
           })}
         </TFooter>
       )}
-      {isSub && isInDevelopmentMode && (
+      {isSub && isInDevelopmentMode && !isFromDynamicZone && (
         <NestedTFooter
           icon={<Plus />}
           onClick={onClickAddField}

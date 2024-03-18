@@ -16,7 +16,7 @@ import {
 import { Link } from '@strapi/design-system/v2';
 import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Cross, Drag, Refresh } from '@strapi/icons';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -24,17 +24,21 @@ import { NavLink } from 'react-router-dom';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
-import { RelationResult } from '../../../../../../../../content-manager/dist/shared/contracts/relations';
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../hooks/useDocument';
+import { type EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../hooks/useDragAndDrop';
-import { useGetRelationsQuery, useLazySearchRelationsQuery } from '../../../../services/relations';
+import {
+  useGetRelationsQuery,
+  useLazySearchRelationsQuery,
+  RelationResult,
+} from '../../../../services/relations';
 import { buildValidParams } from '../../../../utils/api';
 import { getRelationLabel } from '../../../../utils/relations';
 import { getTranslation } from '../../../../utils/translations';
@@ -42,7 +46,6 @@ import { DocumentStatus } from '../DocumentStatus';
 
 import { useComponent } from './ComponentContext';
 
-import type { EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Attribute } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -51,10 +54,18 @@ import type { Attribute } from '@strapi/types';
 const RELATIONS_TO_DISPLAY = 5;
 const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
 
-interface Relation extends Contracts.Relations.RelationResult {
+type RelationPosition =
+  | (Pick<RelationResult, 'status' | 'locale'> & {
+      before: string;
+      end?: never;
+    })
+  | { end: boolean; before?: never; status?: never; locale?: never };
+
+interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
   href: string;
   label: string;
-  [key: string]: any;
+  position?: RelationPosition;
+  __temp_key__: string;
 }
 
 interface RelationsFieldProps
@@ -62,8 +73,8 @@ interface RelationsFieldProps
     Pick<InputProps, 'hint'> {}
 
 interface RelationsFormValue {
-  connect?: Contracts.Relations.RelationResult[];
-  disconnect?: Contracts.Relations.RelationResult[];
+  connect?: Relation[];
+  disconnect?: Pick<RelationResult, 'documentId'>[];
 }
 
 /**
@@ -140,17 +151,29 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       setCurrentPage((prev) => prev + 1);
     };
 
-    const field = useField<RelationsFormValue>(props.name);
+    const field = useField(props.name);
 
     const isFetchingMoreRelations = isLoading || isFetching;
 
     const realServerRelationsCount =
       'pagination' in data && data.pagination ? data.pagination.total : 0;
-    const relationsConnected = field.value?.connect?.length ?? 0;
+    /**
+     * Items that are already connected, but reordered would be in
+     * this list, so to get an accurate figure, we remove them.
+     */
+    const relationsConnected =
+      (field.value?.connect ?? []).filter(
+        (rel: Relation) => data.results.findIndex((relation) => relation.id === rel.id) === -1
+      ).length ?? 0;
     const relationsDisconnected = field.value?.disconnect?.length ?? 0;
 
     const relationsCount = realServerRelationsCount + relationsConnected - relationsDisconnected;
 
+    /**
+     * This is it, the source of truth for reordering in conjunction with partial loading & updating
+     * of relations. Relations on load are given __temp_key__ when fetched, because we don't want to
+     * create brand new keys everytime the data updates, just keep adding them onto the newly loaded ones.
+     */
     const relations = React.useMemo(() => {
       const ctx = {
         field: field.value,
@@ -159,9 +182,26 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         mainField: props.mainField,
       };
 
-      const transformations = pipe(removeDisconnected(ctx), addLabelAndHref(ctx));
+      /**
+       * Tidy up our data.
+       */
+      const transformations = pipe(
+        removeConnected(ctx),
+        removeDisconnected(ctx),
+        addLabelAndHref(ctx)
+      );
 
-      return transformations([...data.results, ...(field.value?.connect ?? [])]);
+      const transformedRels = transformations([...data.results]);
+
+      /**
+       * THIS IS CRUCIAL. If you don't sort by the __temp_key__ which comes from fractional indexing
+       * then the list will be in the wrong order.
+       */
+      return [...transformedRels, ...(field.value?.connect ?? [])].sort((a, b) => {
+        if (a.__temp_key__ < b.__temp_key__) return -1;
+        if (a.__temp_key__ > b.__temp_key__) return 1;
+        return 0;
+      });
     }, [
       data.results,
       field.value,
@@ -169,6 +209,29 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       props.attribute.targetModel,
       props.mainField,
     ]);
+
+    const handleConnect: RelationsInputProps['onChange'] = (relation) => {
+      const [lastItemInList] = relations.slice(-1);
+
+      const item = {
+        ...relation,
+        /**
+         * If there's a last item, that's the first key we use to generate out next one.
+         */
+        __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
+        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
+        [props.mainField?.name ?? 'id']: relation[props.mainField?.name ?? 'id'],
+        label: getRelationLabel(relation, props.mainField),
+        // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
+        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
+      };
+
+      if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+        field.onChange(props.name, { connect: [item] });
+      } else {
+        field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
+      }
+    };
 
     return (
       <Flex
@@ -185,6 +248,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
             id={id}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
+            onChange={handleConnect}
             {...props}
           />
           {'pagination' in data &&
@@ -207,6 +271,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         </StyledFlex>
         <RelationsList
           data={relations}
+          serverData={data.results}
           disabled={isDisabled}
           name={props.name}
           isLoading={isFetchingMoreRelations}
@@ -237,6 +302,20 @@ interface TransformationContext extends Pick<RelationsFieldProps, 'mainField'> {
 }
 
 /**
+ * If it's in the connected array, it can get out of our data array,
+ * we'll be putting it back in later and sorting it anyway.
+ */
+const removeConnected =
+  ({ field }: TransformationContext) =>
+  (relations: RelationResult[]) => {
+    return relations.filter((relation) => {
+      const connectedRelations = field?.connect ?? [];
+
+      return connectedRelations.findIndex((rel) => rel.documentId === relation.documentId) === -1;
+    });
+  };
+
+/**
  * @description Removes relations that are in the `disconnect` array of the field
  */
 const removeDisconnected =
@@ -260,6 +339,8 @@ const addLabelAndHref =
     relations.map((relation) => {
       return {
         ...relation,
+        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
+        [mainField?.name ?? 'id']: relation[mainField?.name ?? 'id'],
         label: getRelationLabel(relation, mainField),
         href: `${href}/${relation.documentId}`,
       };
@@ -272,6 +353,11 @@ const addLabelAndHref =
 interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   id?: string;
   model: string;
+  onChange: (
+    relation: Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> & {
+      [key: string]: any;
+    }
+  ) => void;
 }
 
 /**
@@ -288,7 +374,7 @@ const RelationsInput = ({
   mainField,
   placeholder,
   required,
-  attribute,
+  onChange,
 }: RelationsInputProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
   const [searchParams, setSearchParams] = React.useState({
@@ -301,7 +387,6 @@ const RelationsInput = ({
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField(name);
   const field = useField<RelationsFormValue>(name);
-  const addFieldRow = useForm('RelationInput', (state) => state.addFieldRow);
 
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
 
@@ -350,8 +435,6 @@ const RelationsInput = ({
 
   const options = data?.results ?? [];
 
-  const isSingleRelation = ONE_WAY_RELATIONS.includes(attribute.relation);
-
   const handleChange = (relationId?: string) => {
     if (!relationId) {
       return;
@@ -376,11 +459,14 @@ const RelationsInput = ({
       return;
     }
 
-    if (isSingleRelation) {
-      field.onChange(name, { connect: [relation] });
-    } else {
-      addFieldRow(`${name}.connect`, relation);
-    }
+    /**
+     * You need to give this relation a correct _temp_key_ but
+     * this component doesn't know about those ones, you can't rely
+     * on the connect array because that doesn't hold items that haven't
+     * moved. So use a callback to fill in the gaps when connecting.
+     *
+     */
+    onChange(relation);
   };
 
   const handleLoadMore = () => {
@@ -463,16 +549,27 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
   data: Relation[];
   isLoading?: boolean;
   relationType: Attribute.Relation['relation'];
+  /**
+   * The existing relations connected on the server. We need these to diff against.
+   */
+  serverData: RelationResult[];
 }
 
-const RelationsList = ({ data, disabled, name, isLoading, relationType }: RelationsListProps) => {
+const RelationsList = ({
+  data,
+  serverData,
+  disabled,
+  name,
+  isLoading,
+  relationType,
+}: RelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
   const listRef = React.useRef<FixedSizeList>(null);
   const outerListRef = React.useRef<HTMLUListElement>(null);
   const [overflow, setOverflow] = React.useState<'top' | 'bottom' | 'top-bottom'>();
   const [liveText, setLiveText] = React.useState('');
-  const field = useField<RelationsFormValue>(name);
+  const field = useField(name);
   const removeFieldRow = useForm('RelationsList', (state) => state.removeFieldRow);
   const addFieldRow = useForm('RelationsList', (state) => state.addFieldRow);
 
@@ -512,7 +609,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
 
   const getItemPos = (index: number) => `${index + 1} of ${data.length}`;
 
-  const handleMoveItem: UseDragAndDropOptions['onMoveItem'] = (oldIndex, newIndex) => {
+  const handleMoveItem: UseDragAndDropOptions['onMoveItem'] = (newIndex, oldIndex) => {
     const item = data[oldIndex];
 
     setLiveText(
@@ -527,6 +624,59 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
         }
       )
     );
+
+    /**
+     * Splicing mutates the array, so we need to create a new array
+     */
+    const newData = [...data];
+    const currentRow = data[oldIndex];
+
+    const startKey =
+      oldIndex > newIndex ? newData[newIndex - 1]?.__temp_key__ : newData[newIndex]?.__temp_key__;
+    const endKey =
+      oldIndex > newIndex ? newData[newIndex]?.__temp_key__ : newData[newIndex + 1]?.__temp_key__;
+
+    /**
+     * We're moving the relation between two other relations, so
+     * we need to generate a new key that keeps the order
+     */
+    const [newKey] = generateNKeysBetween(startKey, endKey, 1);
+
+    newData.splice(oldIndex, 1);
+    newData.splice(newIndex, 0, { ...currentRow, __temp_key__: newKey });
+
+    /**
+     * Now we diff against the server to understand what's different so we
+     * can keep the connect array nice and tidy. It also needs reversing because
+     * we reverse the relations from the server in the first place.
+     */
+    const connectedRelations = newData
+      .reduce<Relation[]>((acc, relation, currentIndex, array) => {
+        const relationOnServer = serverData.find(
+          (oldRelation) => oldRelation.documentId === relation.documentId
+        );
+
+        const relationInFront = array[currentIndex + 1];
+
+        if (!relationOnServer || relationOnServer.__temp_key__ !== relation.__temp_key__) {
+          const position = relationInFront
+            ? {
+                before: relationInFront.documentId,
+                locale: relationInFront.locale,
+                status: relationInFront.status,
+              }
+            : { end: true };
+
+          const relationWithPosition: Relation = { ...relation, position };
+
+          return [...acc, relationWithPosition];
+        }
+
+        return acc;
+      }, [])
+      .toReversed();
+
+    field.onChange(`${name}.connect`, connectedRelations);
   };
 
   const handleGrabItem: UseDragAndDropOptions['onGrabItem'] = (index) => {
@@ -547,7 +697,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
   };
 
   const handleDropItem: UseDragAndDropOptions['onDropItem'] = (index) => {
-    const item = data[index];
+    const { href: _href, label, ...item } = data[index];
 
     setLiveText(
       formatMessage(
@@ -556,7 +706,7 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
           defaultMessage: `{item}, dropped. Final position in list: {position}.`,
         },
         {
-          item: item.label ?? item.documentId,
+          item: label ?? item.documentId,
           position: getItemPos(index),
         }
       )
@@ -587,7 +737,8 @@ const RelationsList = ({ data, disabled, name, isLoading, relationType }: Relati
        * from the connect array
        */
       const indexOfRelationInConnectArray = field.value.connect.findIndex(
-        (rel) => rel.documentId === relation.documentId
+        (rel: NonNullable<RelationsFormValue['connect']>[number]) =>
+          rel.documentId === relation.documentId
       );
 
       if (indexOfRelationInConnectArray >= 0) {
@@ -736,7 +887,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       onDropItem: handleDropItem,
       onGrabItem: handleGrabItem,
       onCancel: handleCancel,
-      dropSensitivity: DROP_SENSITIVITY.IMMEDIATE,
+      dropSensitivity: DROP_SENSITIVITY.REGULAR,
     });
 
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
