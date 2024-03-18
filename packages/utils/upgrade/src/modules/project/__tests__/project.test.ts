@@ -46,7 +46,7 @@ const pluginVolume = {
 };
 
 // eslint-disable-next-line import/first
-import { PluginProject, projectFactory } from '../project';
+import { AppProject, PluginProject, projectFactory } from '../project';
 
 describe('Project', () => {
   beforeEach(() => {
@@ -108,7 +108,7 @@ describe('Project', () => {
     test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(appVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD);
+      const project = projectFactory(defaultCWD) as AppProject;
 
       expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
@@ -116,13 +116,13 @@ describe('Project', () => {
       );
 
       expect(project.cwd).toBe(defaultCWD);
-      expect((project as any).strapiVersion.raw).toBe(currentStrapiVersion);
+      expect(project.strapiVersion.raw).toBe(currentStrapiVersion);
     });
 
     test('Succeed for valid PluginProject', () => {
       vol.fromNestedJSON(pluginVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD);
+      const project = projectFactory(defaultCWD) as AppProject;
       expect(project.type).toBe('plugin');
       expect(project instanceof PluginProject).toBe(true);
 
@@ -132,7 +132,7 @@ describe('Project', () => {
       );
 
       expect(project.cwd).toBe(defaultCWD);
-      expect((project as any).strapiVersion).toBe(undefined);
+      expect(project.strapiVersion).toBe(undefined);
     });
   });
 
@@ -140,7 +140,7 @@ describe('Project', () => {
     test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(appVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD);
+      const project = projectFactory(defaultCWD) as AppProject;
 
       project.refresh();
 
@@ -151,7 +151,7 @@ describe('Project', () => {
 
       expect(project.cwd).toBe(defaultCWD);
 
-      expect((project as any).strapiVersion.raw).toBe(currentStrapiVersion);
+      expect(project.strapiVersion.raw).toBe(currentStrapiVersion);
 
       project.packageJSON.name = 'test';
     });
@@ -159,7 +159,8 @@ describe('Project', () => {
     test('Succeed for valid PluginProject', () => {
       vol.fromNestedJSON(pluginVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD);
+      const project = projectFactory(defaultCWD) as PluginProject;
+      expect((project as AppProject).strapiVersion).toBe(undefined);
       expect(project.type).toBe('plugin');
       expect(project instanceof PluginProject).toBe(true);
 
@@ -171,8 +172,6 @@ describe('Project', () => {
       );
 
       expect(project.cwd).toBe(defaultCWD);
-
-      expect((project as any).strapiVersion).toBe(undefined);
 
       project.packageJSON.name = 'test';
     });
