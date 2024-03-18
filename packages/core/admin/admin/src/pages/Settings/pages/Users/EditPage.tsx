@@ -11,12 +11,7 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import {
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
@@ -69,7 +64,6 @@ const EditPage = () => {
   const id = match?.params?.id ?? '';
   const navigate = useNavigate();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const MagicLink = useEnterprise(
     MagicLinkCE,
     async () =>
@@ -152,8 +146,6 @@ const EditPage = () => {
   } satisfies InitialData;
 
   const handleSubmit = async (body: InitialData, actions: FormHelpers<InitialData>) => {
-    lockApp?.();
-
     const { confirmPassword: _confirmPassword, ...bodyRest } = body;
 
     const res = await updateUser({
@@ -182,8 +174,6 @@ const EditPage = () => {
         confirmPassword: '',
       });
     }
-
-    unlockApp?.();
   };
 
   return (

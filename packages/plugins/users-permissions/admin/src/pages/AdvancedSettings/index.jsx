@@ -16,7 +16,6 @@ import {
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
@@ -40,7 +39,6 @@ const ProtectedAdvancedSettingsPage = () => (
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
@@ -88,16 +86,12 @@ const AdvancedSettingsPage = () => {
         type: 'success',
         message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
       });
-
-      unlockApp();
     },
     onError(error) {
       toggleNotification({
         type: 'warning',
         message: formatAPIError(error),
       });
-
-      unlockApp();
     },
     refetchActive: true,
   });
@@ -105,8 +99,6 @@ const AdvancedSettingsPage = () => {
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleSubmit = async (body) => {
-    lockApp();
-
     submitMutation.mutate({
       ...body,
       email_confirmation_redirection: body.email_confirmation

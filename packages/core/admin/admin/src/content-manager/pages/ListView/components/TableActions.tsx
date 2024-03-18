@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Button, Flex } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useNotification, useStrapiApp, useQueryParams } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Duplicate, Pencil } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
@@ -11,6 +11,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
+import { useStrapiApp } from '../../../../features/StrapiApp';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { Document, useDoc } from '../../../hooks/useDocument';
@@ -36,7 +37,7 @@ interface TableActionsProps {
 const TableActions = ({ document }: TableActionsProps) => {
   const { formatMessage } = useIntl();
   const { model, collectionType } = useDoc();
-  const { plugins } = useStrapiApp();
+  const plugins = useStrapiApp('TableActions', (state) => state.plugins);
 
   const props: DocumentActionProps = {
     activeTab: null,

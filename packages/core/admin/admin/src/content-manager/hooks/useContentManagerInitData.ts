@@ -6,7 +6,6 @@ import {
   hasPermissions,
   useNotification,
   useRBACProvider,
-  useStrapiApp,
 } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
@@ -14,6 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useStrapiApp } from '../../features/StrapiApp';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { ContentManagerAppState, SET_INIT_DATA } from '../layout';
@@ -38,7 +38,10 @@ const useContentManagerInitData = (): ContentManagerAppState => {
   const dispatch = useTypedDispatch();
   const toggleNotification = useNotification();
   const { allPermissions } = useRBACProvider();
-  const { runHookWaterfall } = useStrapiApp();
+  const runHookWaterfall = useStrapiApp(
+    'useContentManagerInitData',
+    (state) => state.runHookWaterfall
+  );
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);

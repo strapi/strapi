@@ -23,7 +23,6 @@ import {
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
@@ -46,7 +45,6 @@ export const ProvidersPage = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [providerToEditName, setProviderToEditName] = React.useState(null);
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const formatter = useCollator(locale, {
@@ -84,15 +82,12 @@ export const ProvidersPage = () => {
       trackUsage('didEditAuthenticationProvider');
 
       handleToggleModal();
-      unlockApp();
     },
     onError(error) {
       toggleNotification({
         type: 'warning',
         message: formatAPIError(error),
       });
-
-      unlockApp();
     },
     refetchActive: false,
   });
@@ -148,8 +143,6 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async (values) => {
-    lockApp();
-
     trackUsage('willEditAuthenticationProvider');
 
     submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });

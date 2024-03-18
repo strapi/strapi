@@ -3,13 +3,8 @@
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './features/AppInfo';
-export * from './features/AutoReloadOverlayBlocker';
-export * from './features/CustomFields';
-export * from './features/Library';
 export * from './features/Notifications';
-export * from './features/OverlayBlocker';
 export * from './features/RBAC';
-export * from './features/StrapiApp';
 
 /* -------------------------------------------------------------------------------------------------
  * Hooks

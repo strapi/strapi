@@ -37,9 +37,6 @@ const adminSlice = createSlice({
     } as AppState;
   },
   reducers: {
-    setAdminPermissions(state, action: PayloadAction<Partial<PermissionMap>>) {
-      state.permissions = action.payload;
-    },
     setAppTheme(state, action: PayloadAction<ThemeName>) {
       state.theme.currentTheme = action.payload;
       window.localStorage.setItem(THEME_LOCAL_STORAGE_KEY, action.payload);
@@ -58,11 +55,10 @@ const adminSlice = createSlice({
 
 const reducer = adminSlice.reducer;
 
-const { setAdminPermissions, setAppTheme, setAvailableThemes, setLocale } = adminSlice.actions;
+const { setAppTheme, setAvailableThemes, setLocale } = adminSlice.actions;
 
 export {
   reducer,
-  setAdminPermissions,
   setAppTheme,
   setAvailableThemes,
   setLocale,

@@ -57,7 +57,7 @@
   "devDependencies": {
     "@strapi/pack-up": "4.20.5",
     "@types/koa": "2.13.4",
-    "@types/node": "18.18.4",
+    "@types/node": "18.19.24",
     "eslint-config-custom": "4.20.5",
     "koa": "2.13.4",
     "koa-body": "4.2.0",

@@ -49,23 +49,24 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   React.useEffect(() => {
     if (uuid && data) {
       const event = 'didInitializeAdministration';
-      /**
-       * fetch doesn't throw so it doesn't need to be in a try/catch.
-       */
-      fetch('https://analytics.strapi.io/api/v2/track', {
-        method: 'POST',
-        body: JSON.stringify({
-          // This event is anonymous
-          event,
-          userId: '',
-          eventPropeties: {},
-          groupProperties: { ...data, projectId: uuid },
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Strapi-Event': event,
-        },
-      });
+      try {
+        fetch('https://analytics.strapi.io/api/v2/track', {
+          method: 'POST',
+          body: JSON.stringify({
+            // This event is anonymous
+            event,
+            userId: '',
+            eventPropeties: {},
+            groupProperties: { ...data, projectId: uuid },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Strapi-Event': event,
+          },
+        });
+      } catch {
+        // silence is golden
+      }
     }
   }, [data, uuid]);
 

@@ -5,16 +5,20 @@ import { useNotification, useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { Page } from '../components/PageHelpers';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import {
   ConfigurationLogo,
+  useInitQuery,
   useProjectSettingsQuery,
   useUpdateProjectSettingsMutation,
 } from '../services/admin';
 
 import { useAuth } from './Auth';
 import { useTracking } from './Tracking';
+
+import type { StrapiApp } from '../StrapiApp';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Context
@@ -50,21 +54,18 @@ const [ConfigurationContextProvider, useConfiguration] =
  * ConfigurationProvider
  * -----------------------------------------------------------------------------------------------*/
 
-interface ConfigurationProviderProps extends Required<Logos> {
+interface ConfigurationProviderProps {
   children: React.ReactNode;
+  defaultAuthLogo: StrapiApp['configurations']['authLogo'];
+  defaultMenuLogo: StrapiApp['configurations']['menuLogo'];
   showReleaseNotification?: boolean;
   showTutorials?: boolean;
 }
 
-interface Logos {
-  menuLogo: ConfigurationContextValue['logos']['menu'];
-  authLogo: ConfigurationContextValue['logos']['auth'];
-}
-
 const ConfigurationProvider = ({
   children,
-  authLogo: defaultAuthLogo,
-  menuLogo: defaultMenuLogo,
+  defaultAuthLogo,
+  defaultMenuLogo,
   showReleaseNotification = false,
   showTutorials = false,
 }: ConfigurationProviderProps) => {
@@ -79,6 +80,21 @@ const ConfigurationProvider = ({
   const {
     allowedActions: { canRead },
   } = useRBAC(permissions);
+
+  const {
+    data: { authLogo: customAuthLogo, menuLogo: customMenuLogo } = {},
+    error,
+    isLoading,
+  } = useInitQuery();
+
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'app.containers.App.notification.error.init' },
+      });
+    }
+  }, [error, toggleNotification]);
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
     skip: !token || !canRead,
@@ -135,18 +151,30 @@ const ConfigurationProvider = ({
     [formatAPIError, formatMessage, toggleNotification, trackUsage, updateProjectSettingsMutation]
   );
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <ConfigurationContextProvider
       showReleaseNotification={showReleaseNotification}
       showTutorials={showTutorials}
       logos={{
         menu: {
-          custom: isSuccess ? data?.menuLogo : defaultMenuLogo.custom,
-          default: defaultMenuLogo.default,
+          custom: isSuccess
+            ? data?.menuLogo
+            : {
+                url: customMenuLogo ?? '',
+              },
+          default: defaultMenuLogo,
         },
         auth: {
-          custom: isSuccess ? data?.authLogo : defaultAuthLogo.custom,
-          default: defaultAuthLogo.default,
+          custom: isSuccess
+            ? data?.authLogo
+            : {
+                url: customAuthLogo ?? '',
+              },
+          default: defaultAuthLogo,
         },
       }}
       updateProjectSettings={updateProjectSettings}

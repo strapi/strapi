@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { useNotification, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { DescriptionComponentRenderer } from '../../../../components/Description
 import { useForm } from '../../../../components/Form';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { BackButton } from '../../../../features/BackButton';
+import { useStrapiApp } from '../../../../features/StrapiApp';
 import { getDisplayName } from '../../../../utils/users';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
@@ -119,7 +120,7 @@ const HeaderToolbar = () => {
     },
   ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { model, id, document, meta, collectionType } = useDoc();
-  const { plugins } = useStrapiApp();
+  const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
 
   return (
     <Flex gap={2}>
