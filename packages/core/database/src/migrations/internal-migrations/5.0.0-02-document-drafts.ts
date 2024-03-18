@@ -11,11 +11,11 @@ import type { Migration } from '../common';
  *
  */
 export const createDocumentDrafts: Migration = {
-  name: 'created-document-id',
+  name: 'created-document-drafts',
   async up(knex, db) {
     //
   },
   async down() {
-    throw new Error('not implemented');
+    // no-op
   },
 };
