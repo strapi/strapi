@@ -14,6 +14,8 @@ import type { Codemod } from '../codemod';
 import type { Report } from '../report';
 import type {
   Project as ProjectInterface,
+  AppProject as AppProjectInterface,
+  PluginProject as PluginProjectInterface,
   FileExtension,
   MinimalPackageJSON,
   RunCodemodsOptions,
@@ -30,7 +32,7 @@ export class Project implements ProjectInterface {
 
   public packageJSON!: MinimalPackageJSON;
 
-  public strapiVersion!: Version.SemVer;
+  public type?: 'plugin' | 'app';
 
   constructor(cwd: string) {
     if (!fse.pathExistsSync(cwd)) {
@@ -52,7 +54,6 @@ export class Project implements ProjectInterface {
 
   refresh() {
     this.refreshPackageJSON();
-    this.refreshStrapiVersion();
     this.refreshProjectFiles();
 
     return this;
@@ -132,6 +133,29 @@ export class Project implements ProjectInterface {
 
     this.files = scanner.scan(patterns);
   }
+}
+
+export class AppProject extends Project implements AppProjectInterface {
+  public strapiVersion!: Version.SemVer;
+
+  constructor(cwd: string) {
+    super(cwd);
+    this.type = 'app';
+  }
+
+  getFilesByExtensions(extensions: FileExtension[]) {
+    return this.files.filter((filePath) => {
+      const fileExtension = path.extname(filePath) as FileExtension;
+
+      return extensions.includes(fileExtension);
+    });
+  }
+
+  refresh() {
+    super.refresh();
+    this.refreshStrapiVersion();
+    return this;
+  }
 
   private refreshStrapiVersion(): void {
     this.strapiVersion =
@@ -194,5 +218,34 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
 
   return collection.length === 1 ? collection[0] : `{${collection}}`;
 };
+export class PluginProject extends Project implements PluginProjectInterface {
+  constructor(cwd: string) {
+    super(cwd);
+    this.type = 'plugin';
+  }
+}
 
-export const projectFactory = (cwd: string) => new Project(cwd);
+const isPlugin = (cwd: string) => {
+  const packageJSONPath = path.join(cwd, constants.PROJECT_PACKAGE_JSON);
+
+  try {
+    fse.accessSync(packageJSONPath);
+  } catch {
+    throw new Error(`Could not find a ${constants.PROJECT_PACKAGE_JSON} file in ${cwd}`);
+  }
+
+  const packageJSONBuffer = fse.readFileSync(packageJSONPath);
+
+  const packageJSON = JSON.parse(packageJSONBuffer.toString());
+
+  return packageJSON.strapi.kind === 'plugin';
+};
+
+// TODO: make this async so we can use async file methods
+export const projectFactory = (cwd: string) => {
+  if (isPlugin(cwd)) {
+    return new PluginProject(cwd);
+  }
+
+  return new AppProject(cwd);
+};

@@ -14,7 +14,11 @@ export const codemods = async (options: RunCodemodsOptions) => {
   const cwd = path.resolve(options.cwd ?? process.cwd());
 
   const project = projectFactory(cwd);
-  const range = getRangeFromTarget(project.strapiVersion, options.target);
+  const range =
+    'strapiVersion' in project
+      ? getRangeFromTarget(project.strapiVersion, options.target)
+      : undefined;
+
   const codemodRunner = codemodRunnerFactory(project, range)
     .dry(options.dry ?? false)
     .onSelectCodemods(options.selectCodemods ?? null)

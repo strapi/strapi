@@ -27,10 +27,18 @@ export interface Project {
   files: string[];
   packageJSONPath: string;
   packageJSON: MinimalPackageJSON;
-  strapiVersion: Version.SemVer;
 
   getFilesByExtensions(extensions: FileExtension[]): string[];
   runCodemods(codemods: Codemod.List, options: RunCodemodsOptions): Promise<Report.CodemodReport[]>;
 
   refresh(): this;
+}
+
+export interface AppProject extends Project {
+  strapiVersion: Version.SemVer;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginProject extends Project {
+  // It is expected to add things here later, so we'll keep this an interface
 }

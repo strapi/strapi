@@ -64,6 +64,15 @@ export class CodemodRepository implements CodemodRepositoryInterface {
     return codemods ?? [];
   }
 
+  findAll() {
+    const entries = Object.entries(this.groups) as Array<[Version.LiteralSemVer, Codemod.List]>;
+
+    return entries.map<Codemod.VersionedCollection>(([version, codemods]) => ({
+      version: semVerFactory(version),
+      codemods,
+    }));
+  }
+
   private refreshAvailableVersions() {
     this.versions = fse
       .readdirSync(this.cwd) // Only keep root directories
