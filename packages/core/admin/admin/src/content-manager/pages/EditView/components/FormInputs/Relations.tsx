@@ -77,7 +77,7 @@ interface RelationsFieldProps
 
 interface RelationsFormValue {
   connect?: Relation[];
-  disconnect?: Pick<RelationResult, 'documentId'>[];
+  disconnect?: Pick<Relation, 'id'>[];
 }
 
 /**
@@ -223,7 +223,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
          */
         __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [props.mainField?.name ?? 'id']: relation[props.mainField?.name ?? 'id'],
+        [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, props.mainField),
         // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
         href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
@@ -314,7 +314,7 @@ const removeConnected =
     return relations.filter((relation) => {
       const connectedRelations = field?.connect ?? [];
 
-      return connectedRelations.findIndex((rel) => rel.documentId === relation.documentId) === -1;
+      return connectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
     });
   };
 
@@ -327,9 +327,7 @@ const removeDisconnected =
     relations.filter((relation) => {
       const disconnectedRelations = field?.disconnect ?? [];
 
-      return (
-        disconnectedRelations.findIndex((rel) => rel.documentId === relation.documentId) === -1
-      );
+      return disconnectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
     });
 
 /**
@@ -342,8 +340,8 @@ const addLabelAndHref =
     relations.map((relation) => {
       return {
         ...relation,
-        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [mainField?.name ?? 'id']: relation[mainField?.name ?? 'id'],
+        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
+        [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, mainField),
         href: `${href}/${relation.documentId}`,
       };
@@ -414,8 +412,8 @@ const RelationsInput = ({
         ...buildValidParams(query),
         id: id ?? '',
         pageSize: 10,
-        idsToInclude: field.value?.disconnect?.map((rel) => rel.documentId) ?? [],
-        idsToOmit: field.value?.connect?.map((rel) => rel.documentId) ?? [],
+        idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
+        idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
         ...searchParams,
       },
     });
@@ -740,8 +738,7 @@ const RelationsList = ({
        * from the connect array
        */
       const indexOfRelationInConnectArray = field.value.connect.findIndex(
-        (rel: NonNullable<RelationsFormValue['connect']>[number]) =>
-          rel.documentId === relation.documentId
+        (rel: NonNullable<RelationsFormValue['connect']>[number]) => rel.id === relation.id
       );
 
       if (indexOfRelationInConnectArray >= 0) {
@@ -750,7 +747,7 @@ const RelationsList = ({
       }
     }
 
-    addFieldRow(`${name}.disconnect`, { documentId: relation.documentId });
+    addFieldRow(`${name}.disconnect`, { id: relation.id });
   };
 
   /**
