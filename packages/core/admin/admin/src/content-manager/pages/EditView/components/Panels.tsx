@@ -1,12 +1,13 @@
 import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
-import { useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useMatch } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { InjectionZone } from '../../../../components/InjectionZone';
+import { useStrapiApp } from '../../../../features/StrapiApp';
 import { useDoc } from '../../../hooks/useDocument';
 import { CLONE_PATH } from '../../../router';
 
@@ -38,7 +39,7 @@ const Panels = () => {
     status: 'draft',
   });
   const { model, id, document, meta, collectionType } = useDoc();
-  const { plugins } = useStrapiApp();
+  const plugins = useStrapiApp('Panels', (state) => state.plugins);
 
   const props = {
     activeTab: status,
@@ -95,7 +96,7 @@ const ActionsPanelContent = () => {
     },
   ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { model, id, document, meta, collectionType } = useDoc();
-  const { plugins } = useStrapiApp();
+  const plugins = useStrapiApp('ActionsPanel', (state) => state.plugins);
 
   const props = {
     activeTab: status,

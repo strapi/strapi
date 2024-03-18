@@ -2,26 +2,24 @@ import * as React from 'react';
 
 import {
   AutoReloadOverlayBlockerProvider,
-  CustomFieldsProvider,
-  CustomFieldsProviderProps,
-  LibraryProvider,
-  LibraryProviderProps,
   NotificationsProvider,
   OverlayBlockerProvider,
-  StrapiAppProvider,
-  StrapiAppProviderProps,
 } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
 import { AuthProvider } from '../features/Auth';
 import { HistoryProvider } from '../features/BackButton';
+import { ConfigurationProvider } from '../features/Configuration';
+import { StrapiAppProvider } from '../features/StrapiApp';
+import { TrackingProvider } from '../features/Tracking';
 
 import { GuidedTourProvider } from './GuidedTour/Provider';
-import { LanguageProvider, LanguageProviderProps } from './LanguageProvider';
-import { Theme, ThemeProps } from './Theme';
+import { LanguageProvider } from './LanguageProvider';
+import { Theme } from './Theme';
 
 import type { Store } from '../core/store/configure';
+import type { StrapiApp } from '../StrapiApp';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,71 +29,53 @@ const queryClient = new QueryClient({
   },
 });
 
-interface ProvidersProps
-  extends Pick<LanguageProviderProps, 'messages'>,
-    Pick<CustomFieldsProviderProps, 'customFields'>,
-    Pick<LibraryProviderProps, 'components' | 'fields'>,
-    Pick<
-      StrapiAppProviderProps,
-      | 'getPlugin'
-      | 'getAdminInjectedComponents'
-      | 'menu'
-      | 'plugins'
-      | 'runHookParallel'
-      | 'runHookSeries'
-      | 'runHookWaterfall'
-      | 'settings'
-    >,
-    Pick<ThemeProps, 'themes'> {
+interface ProvidersProps {
   children: React.ReactNode;
+  strapi: StrapiApp;
   store: Store;
 }
 
-const Providers = ({
-  children,
-  components,
-  customFields,
-  fields,
-  getAdminInjectedComponents,
-  getPlugin,
-  menu,
-  messages,
-  plugins,
-  runHookParallel,
-  runHookSeries,
-  runHookWaterfall,
-  settings,
-  store,
-  themes,
-}: ProvidersProps) => {
+const Providers = ({ children, strapi, store }: ProvidersProps) => {
   return (
     <Provider store={store}>
       <HistoryProvider>
         <AuthProvider>
-          <LanguageProvider messages={messages}>
-            <Theme themes={themes}>
+          <LanguageProvider messages={strapi.configurations.translations}>
+            <Theme themes={strapi.configurations.themes}>
               <QueryClientProvider client={queryClient}>
                 <StrapiAppProvider
-                  getPlugin={getPlugin}
-                  getAdminInjectedComponents={getAdminInjectedComponents}
-                  menu={menu}
-                  plugins={plugins}
-                  runHookParallel={runHookParallel}
-                  runHookWaterfall={runHookWaterfall}
-                  runHookSeries={runHookSeries}
-                  settings={settings}
+                  components={strapi.library.components}
+                  customFields={strapi.customFields}
+                  fields={strapi.library.fields}
+                  menu={strapi.menu}
+                  getAdminInjectedComponents={strapi.getAdminInjectedComponents}
+                  getPlugin={strapi.getPlugin}
+                  plugins={strapi.plugins}
+                  runHookParallel={strapi.runHookParallel}
+                  runHookWaterfall={(name, initialValue) => {
+                    return strapi.runHookWaterfall(name, initialValue, store);
+                  }}
+                  runHookSeries={strapi.runHookSeries}
+                  settings={strapi.settings}
                 >
-                  <LibraryProvider components={components} fields={fields}>
-                    <CustomFieldsProvider customFields={customFields}>
-                      <AutoReloadOverlayBlockerProvider>
-                        <OverlayBlockerProvider>
+                  <NotificationsProvider>
+                    <AutoReloadOverlayBlockerProvider>
+                      <OverlayBlockerProvider>
+                        <TrackingProvider>
                           <GuidedTourProvider>
-                            <NotificationsProvider>{children}</NotificationsProvider>
+                            <ConfigurationProvider
+                              defaultAuthLogo={strapi.configurations.authLogo}
+                              defaultMenuLogo={strapi.configurations.menuLogo}
+                              showTutorials={strapi.configurations.tutorials}
+                              showReleaseNotification={strapi.configurations.notifications.releases}
+                            >
+                              {children}
+                            </ConfigurationProvider>
                           </GuidedTourProvider>
-                        </OverlayBlockerProvider>
-                      </AutoReloadOverlayBlockerProvider>
-                    </CustomFieldsProvider>
-                  </LibraryProvider>
+                        </TrackingProvider>
+                      </OverlayBlockerProvider>
+                    </AutoReloadOverlayBlockerProvider>
+                  </NotificationsProvider>
                 </StrapiAppProvider>
               </QueryClientProvider>
             </Theme>

@@ -1,21 +1,17 @@
 import * as React from 'react';
 
-import {
-  hasPermissions,
-  StrapiAppSetting,
-  StrapiAppSettingLink as IStrapiAppSettingLink,
-  useRBACProvider,
-  useStrapiApp,
-  useAppInfo,
-} from '@strapi/helper-plugin';
+import { hasPermissions, useRBACProvider, useAppInfo } from '@strapi/helper-plugin';
 import sortBy from 'lodash/sortBy';
 import { useSelector } from 'react-redux';
 
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
+import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
 
 import { useEnterprise } from './useEnterprise';
+
+import type { StrapiAppSetting, StrapiAppSettingLink as IStrapiAppSettingLink } from '../StrapiApp';
 
 const formatLinks = (menu: SettingsMenuSection[]): SettingsMenuSectionWithDisplayedLinks[] =>
   menu.map((menuSection) => {
@@ -68,7 +64,7 @@ const useSettingsMenu = (): {
   });
   const { allPermissions: userPermissions } = useRBACProvider();
   const { shouldUpdateStrapi } = useAppInfo();
-  const { settings } = useStrapiApp();
+  const settings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const permissions = useSelector(selectAdminPermissions);
 
   /**

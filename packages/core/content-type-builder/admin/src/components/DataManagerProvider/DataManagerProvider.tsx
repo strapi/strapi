@@ -1,13 +1,12 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page, useGuidedTour, useTracking } from '@strapi/admin/strapi-admin';
+import { Page, useGuidedTour, useTracking, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
   useAppInfo,
   useAutoReloadOverlayBlocker,
   useFetchClient,
   useNotification,
   useRBACProvider,
-  useStrapiApp,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
@@ -83,7 +82,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
 
-  const { getPlugin } = useStrapiApp();
+  const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
 
   const plugin = getPlugin(pluginId);
   const { autoReload } = useAppInfo();

@@ -1,5 +1,5 @@
+import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Box } from '@strapi/design-system';
-import { useCustomFields, CustomFieldUID } from '@strapi/helper-plugin';
 import {
   Boolean,
   CollectionType,
@@ -65,16 +65,16 @@ export type IconByType = keyof typeof iconByTypes;
 
 type AttributeIconProps = {
   type: IconByType;
-  customField?: CustomFieldUID | null;
+  customField?: string | null;
 };
 
 export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIconProps) => {
-  const customFieldsRegistry = useCustomFields();
+  const getCustomField = useStrapiApp('AttributeIcon', (state) => state.customFields.get);
 
   let Compo: any = iconByTypes[type];
 
   if (customField) {
-    const customFieldObject = customFieldsRegistry.get(customField);
+    const customFieldObject = getCustomField(customField);
     const icon = customFieldObject?.icon;
     if (icon) {
       Compo = icon;
