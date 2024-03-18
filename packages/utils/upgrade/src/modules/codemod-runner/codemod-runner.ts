@@ -80,11 +80,14 @@ export class CodemodRunner implements CodemodRunnerInterface {
       return successReport();
     }
 
-    this.logger?.debug(
-      `Found codemods for ${f.highlight(versionedCodemods.length)} version(s)${
-        this.range ? ` using ${this.range}` : ''
-      }`
-    );
+    if (this.range) {
+      this.logger?.debug(
+        `Found codemods for ${f.highlight(versionedCodemods.length)} version(s) using ${this.range}`
+      );
+    } else {
+      this.logger?.debug(`Found codemods for ${f.highlight(versionedCodemods.length)} version(s)`);
+    }
+
     versionedCodemods.forEach(({ version, codemods }) =>
       this.logger?.debug(`- ${f.version(version)} (${codemods.length})`)
     );

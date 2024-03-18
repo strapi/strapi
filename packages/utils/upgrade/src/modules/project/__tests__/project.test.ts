@@ -12,10 +12,18 @@ const currentStrapiVersion = '1.2.3';
 
 const defaultCWD = '/__unit_tests__';
 
-const packageJSONFile = `{
+const appPackageJSONFile = `{
   "name": "test",
   "version": "1.0.0",
   "dependencies": { "@strapi/strapi": "${currentStrapiVersion}" }
+}`;
+
+const pluginPackageJSONFile = `{
+  "name": "test",
+  "version": "1.0.0",
+  "strapi": {
+    "kind": "plugin"
+  }
 }`;
 
 const srcFiles = {
@@ -27,10 +35,18 @@ const srcFiles = {
   'f.tsx': `console.log('f.tsx')`,
 };
 
-const defaultVolume = { 'package.json': packageJSONFile, src: srcFiles };
+const appVolume = {
+  'package.json': appPackageJSONFile,
+  src: srcFiles,
+};
+
+const pluginVolume = {
+  'package.json': pluginPackageJSONFile,
+  src: srcFiles,
+};
 
 // eslint-disable-next-line import/first
-import { projectFactory } from '../project';
+import { PluginProject, projectFactory } from '../project';
 
 describe('Project', () => {
   beforeEach(() => {
@@ -44,7 +60,7 @@ describe('Project', () => {
 
   describe('Factory', () => {
     test('Fails on invalid project path', async () => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+      vol.fromNestedJSON(appVolume, defaultCWD);
 
       const cwd = 'unknown-path';
 
@@ -61,7 +77,7 @@ describe('Project', () => {
       );
     });
 
-    test('Fails on project without a @strapi/strapi dependency', async () => {
+    test('Fails when not a plugin and no @strapi/strapi dependency found', async () => {
       vol.fromNestedJSON(
         { 'package.json': `{ "name": "test", "version": "1.2.3" }`, src: srcFiles },
         defaultCWD
@@ -90,7 +106,7 @@ describe('Project', () => {
     test.todo(`Use the @strapi/strapi's package.json version as a fallback succeed`);
 
     test('Succeed for valid AppProject', () => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+      vol.fromNestedJSON(appVolume, defaultCWD);
 
       const project = projectFactory(defaultCWD);
 
@@ -102,11 +118,27 @@ describe('Project', () => {
       expect(project.cwd).toBe(defaultCWD);
       expect((project as any).strapiVersion.raw).toBe(currentStrapiVersion);
     });
+
+    test('Succeed for valid PluginProject', () => {
+      vol.fromNestedJSON(pluginVolume, defaultCWD);
+
+      const project = projectFactory(defaultCWD);
+      expect(project.type).toBe('plugin');
+      expect(project instanceof PluginProject).toBe(true);
+
+      expect(project.files.length).toBe(7);
+      expect(project.files).toStrictEqual(
+        expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
+      );
+
+      expect(project.cwd).toBe(defaultCWD);
+      expect((project as any).strapiVersion).toBe(undefined);
+    });
   });
 
   describe('refresh', () => {
     test('Succeed for valid AppProject', () => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+      vol.fromNestedJSON(appVolume, defaultCWD);
 
       const project = projectFactory(defaultCWD);
 
@@ -123,13 +155,34 @@ describe('Project', () => {
 
       project.packageJSON.name = 'test';
     });
+
+    test('Succeed for valid PluginProject', () => {
+      vol.fromNestedJSON(pluginVolume, defaultCWD);
+
+      const project = projectFactory(defaultCWD);
+      expect(project.type).toBe('plugin');
+      expect(project instanceof PluginProject).toBe(true);
+
+      project.refresh();
+
+      expect(project.files.length).toBe(7);
+      expect(project.files).toStrictEqual(
+        expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
+      );
+
+      expect(project.cwd).toBe(defaultCWD);
+
+      expect((project as any).strapiVersion).toBe(undefined);
+
+      project.packageJSON.name = 'test';
+    });
   });
 
   describe('runCodemods', () => {});
 
   describe('getFilesByExtensions', () => {
     beforeEach(() => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+      vol.fromNestedJSON(appVolume, defaultCWD);
     });
 
     test('Get .js files only', () => {
