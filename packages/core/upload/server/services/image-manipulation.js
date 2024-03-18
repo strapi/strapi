@@ -59,7 +59,7 @@ const resizeFileTo = async (file, options, { name, hash }) => {
 
   const { width, height, size } = await getMetadata(newFile);
 
-  Object.assign(newFile, { width, height, size: bytesToKbytes(size) });
+  Object.assign(newFile, { width, height, size: bytesToKbytes(size), sizeInBytes: size });
   return newFile;
 };
 
@@ -112,13 +112,14 @@ const optimize = async (file) => {
 
   if (newSize > size) {
     // Ignore optimization if output is bigger than original
-    return { ...file, width, height, size: bytesToKbytes(size) };
+    return { ...file, width, height, size: bytesToKbytes(size), sizeInBytes: size };
   }
 
   return Object.assign(newFile, {
     width: newWidth,
     height: newHeight,
     size: bytesToKbytes(newSize),
+    sizeInBytes: newSize,
   });
 };
 
@@ -128,7 +129,7 @@ const DEFAULT_BREAKPOINTS = {
   small: 500,
 };
 
-const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
+const getBreakpoints = () => strapi.config.get('plugin::upload.breakpoints', DEFAULT_BREAKPOINTS);
 
 const generateResponsiveFormats = async (file) => {
   const { responsiveDimensions = false } = await getService('upload').getSettings();

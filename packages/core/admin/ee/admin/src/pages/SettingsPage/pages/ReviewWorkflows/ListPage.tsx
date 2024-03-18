@@ -14,23 +14,21 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
-  ConfirmDialog,
-  Link,
-  LinkButton,
   onRowClick,
-  pxToRem,
   useAPIErrorHandler,
   useNotification,
   useRBAC,
   useTracking,
-  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
+import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
@@ -42,15 +40,15 @@ import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
   align-items: center;
-  height: ${pxToRem(32)};
+  height: ${32 / 16}rem;
   display: flex;
   justify-content: center;
   padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: ${pxToRem(32)};
+  width: ${32 / 16}rem;
 
   svg {
-    height: ${pxToRem(12)};
-    width: ${pxToRem(12)};
+    height: ${12 / 16}rem;
+    width: ${12 / 16}rem;
 
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
@@ -75,7 +73,6 @@ export const ReviewWorkflowsListView = () => {
   const [showLimitModal, setShowLimitModal] = React.useState<boolean>(false);
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { meta, workflows, isLoading, deleteWorkflow } = useReviewWorkflows();
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
@@ -109,8 +106,6 @@ export const ReviewWorkflowsListView = () => {
     if (!workflowToDelete) return;
 
     try {
-      setIsDeleting(true);
-
       const res = await deleteWorkflow({ id: workflowToDelete });
 
       if ('error' in res) {
@@ -136,8 +131,6 @@ export const ReviewWorkflowsListView = () => {
           defaultMessage: 'An error occurred',
         },
       });
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -313,7 +306,7 @@ export const ReviewWorkflowsListView = () => {
                   })}
                   key={`workflow-${workflow.id}`}
                 >
-                  <Td width={pxToRem(250)}>
+                  <Td width={`${250 / 16}rem`}>
                     <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                       {workflow.name}
                     </Typography>
@@ -329,6 +322,7 @@ export const ReviewWorkflowsListView = () => {
                   <Td>
                     <Flex alignItems="center" justifyContent="end">
                       <ActionLink
+                        // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
                         to={`/settings/review-workflows/${workflow.id}`}
                         aria-label={formatMessage(
                           {
@@ -366,16 +360,16 @@ export const ReviewWorkflowsListView = () => {
         )}
 
         <ConfirmDialog
-          bodyText={{
+          isOpen={!!workflowToDelete}
+          onClose={toggleConfirmDeleteDialog}
+          onConfirm={handleConfirmDeleteDialog}
+        >
+          {formatMessage({
             id: 'Settings.review-workflows.list.page.delete.confirm.body',
             defaultMessage:
               'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
-          }}
-          isConfirmButtonLoading={isDeleting}
-          isOpen={!!workflowToDelete}
-          onToggleDialog={toggleConfirmDeleteDialog}
-          onConfirm={handleConfirmDeleteDialog}
-        />
+          })}
+        </ConfirmDialog>
 
         <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
           <LimitsModal.Title>
@@ -403,8 +397,8 @@ export const ProtectedReviewWorkflowsPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ReviewWorkflowsListView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

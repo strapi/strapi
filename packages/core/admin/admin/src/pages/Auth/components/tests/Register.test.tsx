@@ -4,6 +4,8 @@ import { Register } from '../Register';
 
 const FIELD_LABELS = ['Firstname', 'Lastname', 'Email', 'Password', 'Confirm Password'];
 
+jest.mock('../../../../components/GuidedTour/Provider');
+
 describe('Register', () => {
   it('renders correctly', () => {
     const { getByText, getByRole, getByLabelText } = render(<Register />, {
@@ -26,7 +28,7 @@ describe('Register', () => {
         /keep me updated about new features & upcoming improvements \(by doing this you accept the and the \)\./i
       )
     ).toBeInTheDocument();
-    expect(getByRole('checkbox', { name: /news/i })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: /Keep me updated/i })).toBeInTheDocument();
     expect(getByRole('button', { name: /let's start/i })).toBeInTheDocument();
   });
 

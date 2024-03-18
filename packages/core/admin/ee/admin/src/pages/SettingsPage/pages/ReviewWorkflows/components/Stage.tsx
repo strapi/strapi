@@ -15,16 +15,11 @@ import {
   SingleSelect,
   SingleSelectOption,
   TextInput,
-  Typography,
   VisuallyHidden,
+  useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
-import {
-  ConfirmDialog,
-  useNotification,
-  NotAllowedInput,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -32,8 +27,9 @@ import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { ConfirmDialog } from '../../../../../../../../admin/src/components/ConfirmDialog';
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
-import { composeRefs } from '../../../../../../../../admin/src/content-manager/utils/refs';
+import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,
@@ -224,7 +220,7 @@ export const Stage = ({
       type: DRAG_DROP_TYPES.STAGE,
     });
 
-  const composedRef = composeRefs(stageRef, dropRef);
+  const composedRef = useComposedRefs(stageRef, dropRef);
 
   const colorOptions = AVAILABLE_COLORS.map(({ hex, name }) => ({
     value: hex,
@@ -418,15 +414,16 @@ export const Stage = ({
               <GridItem col={6}>
                 {filteredRoles?.length === 0 ? (
                   <NotAllowedInput
-                    description={{
+                    hint={formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
                       defaultMessage: 'You don’t have the permission to see roles',
-                    }}
-                    intlLabel={{
+                    })}
+                    label={formatMessage({
                       id: 'Settings.review-workflows.stage.permissions.label',
                       defaultMessage: 'Roles that can change this stage',
-                    }}
+                    })}
                     name={permissionsField.name}
+                    type="enumeration"
                   />
                 ) : (
                   <Flex alignItems="flex-end" gap={3}>
@@ -500,10 +497,9 @@ export const Stage = ({
         </Accordion>
       )}
 
-      <ConfirmDialog.Root
-        iconRightButton={null}
+      <ConfirmDialog
         isOpen={isApplyAllConfirmationOpen}
-        onToggleDialog={() => setIsApplyAllConfirmationOpen(false)}
+        onClose={() => setIsApplyAllConfirmationOpen(false)}
         onConfirm={() => {
           dispatch(updateStages({ permissions: permissionsField.value }));
           setIsApplyAllConfirmationOpen(false);
@@ -515,18 +511,14 @@ export const Stage = ({
             }),
           });
         }}
-        variantRightButton="default"
+        variant="default"
       >
-        <ConfirmDialog.Body>
-          <Typography textAlign="center" variant="omega">
-            {formatMessage({
-              id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
-              defaultMessage:
-                'Roles that can change that stage will be applied to all the other stages.',
-            })}
-          </Typography>
-        </ConfirmDialog.Body>
-      </ConfirmDialog.Root>
+        {formatMessage({
+          id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
+          defaultMessage:
+            'Roles that can change that stage will be applied to all the other stages.',
+        })}
+      </ConfirmDialog>
     </Box>
   );
 };

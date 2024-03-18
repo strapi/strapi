@@ -40,7 +40,7 @@ describe('Test type email', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 'validemail@test.fr',
     });
   });
@@ -63,7 +63,7 @@ describe('Test type email', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 'test@email.fr',
     });
   });
@@ -90,7 +90,7 @@ describe('Test type email', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withemail.withemail/${res.body.id}`,
+      `/content-manager/collection-types/api::withemail.withemail/${res.body.data.documentId}`,
       {
         body: {
           field: 'new-email@email.fr',
@@ -99,8 +99,8 @@ describe('Test type email', () => {
     );
 
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      documentId: res.body.data.documentId,
       field: 'new-email@email.fr',
     });
   });

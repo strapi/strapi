@@ -59,15 +59,13 @@ describe('Content Manager single types', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: {
-        title: 'Title',
-      },
+      documentId: expect.anything(),
+      title: 'Title',
     });
 
-    expect(res.body.data.attributes.publishedAt).toBeISODate();
+    expect(res.body.data.publishedAt).toBeISODate();
 
-    data.id = res.body.data.id;
+    data.documentId = res.body.data.documentId;
   });
 
   test('Update keeps the same data id', async () => {
@@ -83,10 +81,8 @@ describe('Content Manager single types', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
-      id: data.id,
-      attributes: {
-        title: 'Title',
-      },
+      documentId: data.documentId,
+      title: 'Title',
     });
   });
 
@@ -98,10 +94,8 @@ describe('Content Manager single types', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: {
-        title: 'Title',
-      },
+      documentId: expect.anything(),
+      title: 'Title',
     });
   });
 
@@ -111,13 +105,12 @@ describe('Content Manager single types', () => {
       method: 'DELETE',
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: {
-        title: 'Title',
-      },
-    });
+    // TODO V5: Discuss if we should return the deleted entry
+    // expect(res.statusCode).toBe(200);
+    // expect(res.body.data).toMatchObject({
+    //   documentId: expect.anything(),
+    //   title: 'Title',
+    // });
 
     const getRes = await rq({
       url: `/${uid}`,

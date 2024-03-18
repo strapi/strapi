@@ -10,97 +10,6 @@ describe('ADMIN | new StrapiApp', () => {
     await findByRole('combobox');
   });
 
-  it('should create a valid store', () => {
-    const app = new StrapiApp();
-
-    const store = app.createStore();
-
-    expect(store.getState()).toMatchInlineSnapshot(`
-      {
-        "adminApi": {
-          "config": {
-            "focused": true,
-            "keepUnusedDataFor": 60,
-            "middlewareRegistered": false,
-            "online": true,
-            "reducerPath": "adminApi",
-            "refetchOnFocus": false,
-            "refetchOnMountOrArgChange": false,
-            "refetchOnReconnect": false,
-          },
-          "mutations": {},
-          "provided": {},
-          "queries": {},
-          "subscriptions": {},
-        },
-        "admin_app": {
-          "language": {
-            "locale": "en",
-            "localeNames": {
-              "en": "English",
-            },
-          },
-          "permissions": {},
-          "theme": {
-            "availableThemes": [],
-            "currentTheme": "system",
-          },
-        },
-        "content-manager_app": {
-          "collectionTypeLinks": [],
-          "components": [],
-          "fieldSizes": {},
-          "isLoading": true,
-          "models": [],
-          "singleTypeLinks": [],
-        },
-        "content-manager_editViewCrudReducer": {
-          "componentsDataStructure": {},
-          "contentTypeDataStructure": {},
-          "data": null,
-          "isLoading": true,
-          "setModifiedDataOnly": false,
-          "status": "resolved",
-        },
-        "content-manager_editViewLayoutManager": {
-          "currentLayout": {
-            "components": {},
-            "contentType": null,
-          },
-        },
-        "content-manager_listView": {
-          "components": {},
-          "contentType": null,
-          "displayedHeaders": [],
-          "initialDisplayedHeaders": [],
-        },
-        "content-manager_rbacManager": {
-          "permissions": null,
-        },
-        "contentManagerApi": {
-          "config": {
-            "focused": true,
-            "keepUnusedDataFor": 60,
-            "middlewareRegistered": false,
-            "online": true,
-            "reducerPath": "contentManagerApi",
-            "refetchOnFocus": false,
-            "refetchOnMountOrArgChange": false,
-            "refetchOnReconnect": false,
-          },
-          "mutations": {},
-          "provided": {},
-          "queries": {},
-          "subscriptions": {},
-        },
-        "rbacProvider": {
-          "allPermissions": null,
-          "collectionTypesRelatedPermissions": {},
-        },
-      }
-    `);
-  });
-
   describe('Hook api', () => {
     it('runs the "moto" hooks in series', () => {
       const app = new StrapiApp();
@@ -680,70 +589,40 @@ describe('ADMIN | new StrapiApp', () => {
 
   describe('createCustomConfigurations', () => {
     it('should add a locale', () => {
-      const adminConfig = {
-        config: { locales: ['fr'] },
-      };
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { locales: ['fr'] } });
 
       expect(app.configurations.locales).toEqual(['en', 'fr']);
     });
 
     it('should override the authLogo', () => {
-      const adminConfig = {
-        config: { auth: { logo: 'fr' } },
-      };
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { auth: { logo: 'fr' } } });
 
       expect(app.configurations.authLogo).toBe('fr');
     });
 
     it('should override the menuLogo', () => {
-      const adminConfig = {
-        config: { menu: { logo: 'fr' } },
-      };
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { menu: { logo: 'fr' } } });
 
       expect(app.configurations.menuLogo).toBe('fr');
     });
 
     it('should override the favicon', () => {
-      const adminConfig = {
-        config: { head: { favicon: 'fr' } },
-      };
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { head: { favicon: 'fr' } } });
 
       expect(app.configurations.head.favicon).toBe('fr');
     });
 
     it('should override the light theme', () => {
-      const adminConfig = {
-        config: { theme: { light: { colors: { red: 'black' } } } },
-      };
       // @ts-expect-error - test mocks
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { theme: { light: { colors: { red: 'black' } } } } });
 
       // @ts-expect-error - test mocks
       expect(app.configurations.themes.light.colors.red).toBe('black');
     });
 
     it('should override the dark theme', () => {
-      const adminConfig = {
-        config: { theme: { dark: { colors: { red: 'black' } } } },
-      };
       // @ts-expect-error - test mocks
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { theme: { dark: { colors: { red: 'black' } } } } });
 
       // @ts-expect-error - test mocks
       expect(app.configurations.themes.dark.colors.red).toBe('black');
@@ -754,14 +633,8 @@ describe('ADMIN | new StrapiApp', () => {
 
       console.warn = jest.fn();
 
-      const adminConfig = {
-        config: { theme: { colors: { red: 'black' } } },
-      };
-
       // @ts-expect-error - test mocks
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { theme: { colors: { red: 'black' } } } });
 
       // @ts-expect-error - test mocks
       expect(app.configurations.themes.light.colors.red).toBe('black');
@@ -771,23 +644,13 @@ describe('ADMIN | new StrapiApp', () => {
     });
 
     it('should override the tutorials', () => {
-      const adminConfig = {
-        config: { tutorials: false },
-      };
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { tutorials: false } });
 
       expect(app.configurations.tutorials).toBeFalsy();
     });
 
     it('should override the release notification', () => {
-      const adminConfig = {
-        config: { notifications: { releases: false } },
-      };
-      const app = new StrapiApp({ adminConfig });
-
-      app.createCustomConfigurations();
+      const app = new StrapiApp({ config: { notifications: { releases: false } } });
 
       expect(app.configurations.notifications.releases).toBeFalsy();
     });

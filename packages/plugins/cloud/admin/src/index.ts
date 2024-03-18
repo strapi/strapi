@@ -5,7 +5,7 @@ import { Initializer } from './components/Initializer';
 import { PluginIcon } from './components/PluginIcon';
 import { pluginId } from './pluginId';
 
-const name = 'Strapi Cloud';
+const name = 'Deploy';
 
 // eslint-disable-next-line import/no-default-export
 export default {

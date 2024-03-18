@@ -5,30 +5,37 @@ interface Query {
 }
 
 /**
+ * This type extracts the plugin options from the query
+ * and appends them to the root of the query
+ */
+type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
+  [key: string]: string;
+};
+
+/**
  * @description
  * Creates a valid query params object for get requests
  * ie. plugins[18n][locale]=en becomes locale=en
  */
-const buildValidGetParams = (query: Query = {}) => {
+const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery<TQuery> => {
+  if (!query) return query;
+
   // Extract pluginOptions from the query, they shouldn't be part of the URL
-  const {
-    plugins: _,
-    _q: searchQuery,
-    ...validQueryParams
-  } = {
+  const { plugins: _, ...validQueryParams } = {
     ...query,
-    ...Object.values(query?.plugins ?? {}).reduce<Record<string, unknown>>(
+    ...Object.values(query?.plugins ?? {}).reduce<Record<string, string>>(
       (acc, current) => Object.assign(acc, current),
       {}
     ),
   };
 
-  if (searchQuery) {
+  if ('_q' in validQueryParams) {
     // Encode the search query here since the paramsSerializer will not
-    validQueryParams._q = encodeURIComponent(searchQuery);
+    // @ts-expect-error – TODO: fix this type error
+    validQueryParams._q = encodeURIComponent(validQueryParams._q);
   }
 
   return validQueryParams;
 };
 
-export { buildValidGetParams };
+export { buildValidParams };

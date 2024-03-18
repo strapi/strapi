@@ -52,17 +52,7 @@ const collector = {
 };
 
 const fixtures = {
-  card: [
-    {
-      name: 'Hugo LLORIS',
-    },
-    {
-      name: 'Samuel UMTITI',
-    },
-    {
-      name: 'Lucas HERNANDEZ',
-    },
-  ],
+  card: [{ name: 'Hugo LLORIS' }, { name: 'Samuel UMTITI' }, { name: 'Lucas HERNANDEZ' }],
   collector: ({ card }) => [
     {
       name: 'Bernard',
@@ -121,7 +111,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            filters: { cards: { name: data.card[0].attributes.name } },
+            filters: { cards: { name: data.card[0].name } },
           },
         });
         expect(Array.isArray(res.body.data)).toBe(true);
@@ -139,7 +129,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            filters: { cards: { name: data.card[1].attributes.name } },
+            filters: { cards: { name: data.card[1].name } },
           },
         });
 
@@ -161,12 +151,12 @@ describe('Deep Filtering API', () => {
               $or: [
                 {
                   cards: {
-                    name: data.card[0].attributes.name,
+                    name: data.card[0].name,
                   },
                 },
                 {
                   cards: {
-                    name: data.card[1].attributes.name,
+                    name: data.card[1].name,
                   },
                 },
               ],
@@ -195,7 +185,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            filters: { collector_friends: { name: data.collector[0].attributes.name } },
+            filters: { collector_friends: { name: data.collector[0].name } },
           },
         });
         expect(res.body.meta.pagination).toMatchObject({
@@ -218,7 +208,7 @@ describe('Deep Filtering API', () => {
           qs: {
             filters: {
               cards: {
-                name: data.card[0].attributes.name,
+                name: data.card[0].name,
               },
             },
             _q: '',
@@ -241,7 +231,7 @@ describe('Deep Filtering API', () => {
           qs: {
             filters: {
               cards: {
-                name: data.card[0].attributes.name,
+                name: data.card[0].name,
               },
             },
             _q: 'Bernard',
@@ -266,7 +256,7 @@ describe('Deep Filtering API', () => {
           qs: {
             filters: {
               collector_friends: {
-                name: data.collector[0].attributes.name,
+                name: data.collector[0].name,
               },
             },
             _q: '',
@@ -289,7 +279,7 @@ describe('Deep Filtering API', () => {
           qs: {
             filters: {
               collector_friends: {
-                name: data.collector[0].attributes.name,
+                name: data.collector[0].name,
               },
             },
             _q: 'isa',

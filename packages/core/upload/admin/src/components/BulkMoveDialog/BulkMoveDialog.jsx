@@ -13,8 +13,8 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { Form, normalizeAPIError } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { normalizeAPIError } from '@strapi/helper-plugin';
+import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

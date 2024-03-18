@@ -4,10 +4,13 @@ import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 
-import type { FeaturesService } from '@strapi/types';
+import type { FeaturesConfig, FeaturesService } from '@strapi/types';
 
 interface RenderAdminArgs {
-  customisations: StrapiAppConstructorArgs['adminConfig'];
+  customisations: {
+    bootstrap?: (app: StrapiApp) => Promise<void> | void;
+    config?: StrapiAppConstructorArgs['config'];
+  };
   plugins: StrapiAppConstructorArgs['appPlugins'];
   features?: FeaturesService['config'];
 }
@@ -31,7 +34,7 @@ const renderAdmin = async (
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
     future: {
-      isEnabled: (name: keyof FeaturesService['config']) => {
+      isEnabled: (name: keyof NonNullable<FeaturesConfig['future']>) => {
         return features?.future?.[name] === true;
       },
     },
@@ -85,14 +88,13 @@ const renderAdmin = async (
   }
 
   const app = new StrapiApp({
-    adminConfig: customisations,
+    config: customisations?.config,
     appPlugins: plugins,
   });
 
-  await app.bootstrapAdmin();
-  await app.initialize();
-  await app.bootstrap();
-  await app.loadTrads();
+  await app.register();
+  await app.bootstrap(customisations?.bootstrap);
+  await app.loadTrads(customisations?.config?.translations);
 
   createRoot(mountNode).render(app.render());
 

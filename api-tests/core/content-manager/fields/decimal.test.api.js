@@ -41,7 +41,7 @@ describe('Test type decimal', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: inputValue,
     });
   });
@@ -55,7 +55,7 @@ describe('Test type decimal', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       field: 1821.0,
     });
   });
@@ -79,7 +79,7 @@ describe('Test type decimal', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/api::withdecimal.withdecimal/${res.body.id}`,
+      `/content-manager/collection-types/api::withdecimal.withdecimal/${res.body.data.documentId}`,
       {
         body: {
           field: 14,
@@ -88,8 +88,8 @@ describe('Test type decimal', () => {
     );
 
     expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
-      id: res.body.id,
+    expect(updateRes.body.data).toMatchObject({
+      documentId: res.body.data.documentId,
       field: 14.0,
     });
   });

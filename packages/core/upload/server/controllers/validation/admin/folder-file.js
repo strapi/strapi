@@ -35,15 +35,16 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
     const { folderIds, destinationFolderId } = value;
     if (isEmpty(folderIds)) return true;
 
-    const folders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
-      fields: ['name'],
-      filters: { id: { $in: folderIds } },
+    const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
+      select: ['name'],
+      where: { id: { $in: folderIds } },
     });
 
-    const existingFolders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
-      fields: ['name'],
-      filters: { parent: { id: destinationFolderId } },
+    const existingFolders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
+      select: ['name'],
+      where: { parent: { id: destinationFolderId } },
     });
+
     const duplicatedNames = intersection(map('name', folders), map('name', existingFolders));
     if (duplicatedNames.length > 0) {
       return this.createError({
@@ -63,21 +64,20 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
       const { folderIds, destinationFolderId } = value;
       if (destinationFolderId === null || isEmpty(folderIds)) return true;
 
-      const destinationFolder = await strapi.entityService.findOne(
-        FOLDER_MODEL_UID,
-        destinationFolderId,
-        {
-          fields: ['path'],
-        }
-      );
-      const folders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
-        fields: ['name', 'path'],
-        filters: { id: { $in: folderIds } },
+      const destinationFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({
+        select: ['path'],
+        where: { id: destinationFolderId },
+      });
+
+      const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
+        select: ['name', 'path'],
+        where: { id: { $in: folderIds } },
       });
 
       const unmovableFoldersNames = folders
         .filter((folder) => isFolderOrChild(destinationFolder, folder))
         .map((f) => f.name);
+
       if (unmovableFoldersNames.length > 0) {
         return this.createError({
           message: `folders cannot be moved inside themselves or one of its children: ${unmovableFoldersNames.join(

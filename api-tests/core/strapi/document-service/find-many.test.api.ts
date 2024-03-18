@@ -51,15 +51,15 @@ describe('Document Service', () => {
 
     it('find documents by name and locale', async () => {
       const params = {
-        locale: 'fr',
-        filters: { title: 'Article1-Draft-FR' },
+        locale: 'nl',
+        filters: { title: 'Article1-Draft-NL' },
         populate: '*',
       } as const;
 
-      // There should not be a fr article called Article1-Draft-EN
+      // There should not be a nl article called Article1-Draft-EN
       const articles = await strapi.documents('api::article.article').findMany(params);
 
-      // Should return french locale and draft version
+      // Should return dutch locale and draft version
       expect(articles.length).toBe(1);
 
       // expect count to be the same as findMany
@@ -67,9 +67,9 @@ describe('Document Service', () => {
       expect(count).toBe(articles.length);
     });
 
-    it('find french documents', async () => {
+    it('find dutch documents', async () => {
       const params = {
-        locale: 'fr',
+        locale: 'nl',
         status: 'draft', // 'published' | 'draft'
       } as const;
 
@@ -80,9 +80,9 @@ describe('Document Service', () => {
 
       // Should return default language (en) and draft version
       expect(articles.length).toBeGreaterThan(0);
-      // All articles should be in french
+      // All articles should be in dutch
       articles.forEach((article) => {
-        expect(article.locale).toBe('fr');
+        expect(article.locale).toBe('nl');
         expect(article.publishedAt).toBe(null);
       });
 

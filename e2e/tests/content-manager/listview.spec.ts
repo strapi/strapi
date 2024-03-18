@@ -1,6 +1,3 @@
-/**
- * THIS IS A DUMMY TEST.
- */
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';

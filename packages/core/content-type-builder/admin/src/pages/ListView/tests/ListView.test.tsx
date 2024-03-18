@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import { FormModalNavigationProvider } from '../../../components/FormModalNavigationProvider/FormModalNavigationProvider';
@@ -51,12 +52,23 @@ const makeApp = () => {
     },
   ]);
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        enabled: false,
+        retry: false,
+      },
+    },
+  });
+
   return (
-    <IntlProvider messages={messages} defaultLocale="en" textComponent="span" locale="en">
-      <ThemeProvider theme={lightTheme}>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </IntlProvider>
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider messages={messages} defaultLocale="en" textComponent="span" locale="en">
+        <ThemeProvider theme={lightTheme}>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </IntlProvider>
+    </QueryClientProvider>
   );
 };
 

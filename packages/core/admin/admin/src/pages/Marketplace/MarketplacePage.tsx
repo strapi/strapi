@@ -15,10 +15,6 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  ContentBox,
-  PageSizeURLQuery,
-  PaginationURLQuery,
   useAppInfo,
   useFocusWhenNavigate,
   useNotification,
@@ -28,10 +24,12 @@ import {
 import { ExternalLink, GlassesSquare } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
 
+import { ContentBox } from '../../components/ContentBox';
+import { Page } from '../../components/PageHelpers';
+import { Pagination } from '../../components/Pagination';
+import { useTypedSelector } from '../../core/store/hooks';
 import { useDebounce } from '../../hooks/useDebounce';
-import { selectAdminPermissions } from '../../selectors';
 
 import { NpmPackagesFilters } from './components/NpmPackagesFilters';
 import { NpmPackagesGrid } from './components/NpmPackagesGrid';
@@ -270,14 +268,10 @@ const MarketplacePage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {pagination ? (
-            <Box paddingTop={4}>
-              <Flex alignItems="flex-end" justifyContent="space-between">
-                <PageSizeURLQuery options={['12', '24', '50', '100']} defaultValue="24" />
-                <PaginationURLQuery pagination={pagination} />
-              </Flex>
-            </Box>
-          ) : null}
+          <Pagination.Root {...pagination} defaultPageSize={24}>
+            <Pagination.PageSize options={['12', '24', '50', '100']} />
+            <Pagination.Links />
+          </Pagination.Root>
           <Box paddingTop={8}>
             <a
               href="https://strapi.canny.io/plugin-requests"
@@ -311,13 +305,12 @@ const MarketplacePage = () => {
 };
 
 const ProtectedMarketplacePage = () => {
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.marketplace?.main);
 
   return (
-    // @ts-expect-error – the selector is not typed.
-    <CheckPagePermissions permissions={permissions.marketplace.main}>
+    <Page.Protect permissions={permissions}>
       <MarketplacePage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

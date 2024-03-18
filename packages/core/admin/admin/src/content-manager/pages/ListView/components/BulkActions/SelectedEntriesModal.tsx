@@ -8,8 +8,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Tr,
-  Td,
   IconButton,
   Flex,
   Icon,
@@ -17,8 +15,6 @@ import {
   Loader,
 } from '@strapi/design-system';
 import {
-  useTableContext,
-  Table as HelperPluginTable,
   getYupInnerErrors,
   useQueryParams,
   useNotification,
@@ -32,14 +28,15 @@ import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
-import { useTypedSelector } from '../../../../../core/store/hooks';
+import { Table, useTable } from '../../../../../components/Table';
+import { useDoc } from '../../../../hooks/useDocument';
+import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {
   useGetAllDocumentsQuery,
   usePublishManyDocumentsMutation,
 } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
-import { Table } from '../Table';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
@@ -122,6 +119,12 @@ interface SelectedEntriesTableContentProps {
   validationErrors: Record<string, EntryValidationTextProps['validationErrors']>;
 }
 
+const TABLE_HEADERS: Table.Header<any, any>[] = [
+  { name: 'id', label: 'id' },
+  { name: 'name', label: 'name' },
+  { name: 'status', label: 'status' },
+];
+
 const SelectedEntriesTableContent = ({
   isPublishing,
   rowsToDisplay = [],
@@ -131,38 +134,38 @@ const SelectedEntriesTableContent = ({
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
 
-  const contentTypeSettings = useTypedSelector(
-    (state) => state['content-manager_listView'].contentType?.settings
-  );
-  const mainField = contentTypeSettings?.mainField;
+  const {
+    list: {
+      settings: { mainField },
+    },
+  } = useDocLayout();
+
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
 
   return (
-    <HelperPluginTable.Content>
-      <HelperPluginTable.Head>
-        <HelperPluginTable.HeaderCheckboxCell />
-        <HelperPluginTable.HeaderCell fieldSchemaType="integer" label="id" name="id" />
-        {shouldDisplayMainField && (
-          <HelperPluginTable.HeaderCell fieldSchemaType="string" label="name" name="name" />
+    <Table.Content>
+      <Table.Head>
+        <Table.HeaderCheckboxCell />
+        {TABLE_HEADERS.filter((head) => head.name !== 'name' || shouldDisplayMainField).map(
+          (head) => (
+            <Table.HeaderCell key={head.name} {...head} />
+          )
         )}
-        <HelperPluginTable.HeaderCell fieldSchemaType="string" label="status" name="status" />
-      </HelperPluginTable.Head>
-      <HelperPluginTable.LoadingBody />
-      <HelperPluginTable.Body>
+      </Table.Head>
+      <Table.Loading />
+      <Table.Body>
         {rowsToDisplay.map((row, index) => (
-          <Tr key={row.id}>
-            <Td>
-              <Table.CheckboxDataCell rowId={row.id} index={index} />
-            </Td>
-            <Td>
+          <Table.Row key={row.id}>
+            <Table.CheckboxCell id={row.id} />
+            <Table.Cell>
               <Typography>{row.id}</Typography>
-            </Td>
+            </Table.Cell>
             {shouldDisplayMainField && (
-              <Td>
+              <Table.Cell>
                 <Typography>{row[mainField as keyof TableRow]}</Typography>
-              </Td>
+              </Table.Cell>
             )}
-            <Td>
+            <Table.Cell>
               {isPublishing && entriesToPublish.includes(row.id) ? (
                 <Flex gap={2}>
                   <Typography>
@@ -179,8 +182,8 @@ const SelectedEntriesTableContent = ({
                   isPublished={row.publishedAt !== null}
                 />
               )}
-            </Td>
-            <Td>
+            </Table.Cell>
+            <Table.Cell>
               <IconButton
                 forwardedAs={Link}
                 // @ts-expect-error – DS does not correctly infer props from the as prop.
@@ -206,11 +209,11 @@ const SelectedEntriesTableContent = ({
               >
                 <Pencil />
               </IconButton>
-            </Td>
-          </Tr>
+            </Table.Cell>
+          </Table.Row>
         ))}
-      </HelperPluginTable.Body>
-    </HelperPluginTable.Content>
+      </Table.Body>
+    </Table.Content>
   );
 };
 
@@ -245,7 +248,12 @@ const SelectedEntriesModalContent = ({
   validationErrors = {},
 }: SelectedEntriesModalContentProps) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext<TableRow>();
+  const {
+    selectedRows: selectedEntries,
+    rows,
+    selectRow,
+    isLoading,
+  } = useTable('SelectedEntriesModal', (state) => state);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [rowsToDisplay, setRowsToDisplay] = React.useState<Array<TableRow>>([]);
   const [publishedCount, setPublishedCount] = React.useState(0);
@@ -256,7 +264,7 @@ const SelectedEntriesModalContent = ({
     .map(({ id }) => id);
 
   const toggleNotification = useNotification();
-  const { contentType } = useTypedSelector((state) => state['content-manager_listView']);
+  const { model } = useDoc();
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
     ({ id }) => selectedEntries.includes(id) && validationErrors[id]
@@ -274,7 +282,8 @@ const SelectedEntriesModalContent = ({
     toggleDialog();
 
     try {
-      const res = await publishManyDocuments({ model: contentType!.uid, ids: entriesToPublish });
+      // @ts-expect-error – TODO: this still expects Entity.ID instead of Document.ID
+      const res = await publishManyDocuments({ model: model, ids: entriesToPublish });
 
       if ('error' in res) {
         toggleNotification({
@@ -288,7 +297,7 @@ const SelectedEntriesModalContent = ({
       const update = rowsToDisplay.filter((row) => {
         if (entriesToPublish.includes(row.id)) {
           // Deselect the entries that have been published from the modal table
-          onSelectRow({ name: row.id, value: false });
+          selectRow({ name: row.id, value: false });
         }
 
         // Remove the entries that have been published from the table
@@ -327,7 +336,7 @@ const SelectedEntriesModalContent = ({
     if (publishedCount) {
       return formatMessage(
         {
-          id: getTranslation('containers.ListPage.selectedEntriesModal.publishedCount'),
+          id: getTranslation('containers.list.selectedEntriesModal.publishedCount'),
           defaultMessage:
             '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
         },
@@ -341,7 +350,7 @@ const SelectedEntriesModalContent = ({
 
     return formatMessage(
       {
-        id: getTranslation('containers.ListPage.selectedEntriesModal.selectedCount'),
+        id: getTranslation('containers.list.selectedEntriesModal.selectedCount'),
         defaultMessage:
           '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
       },
@@ -367,7 +376,7 @@ const SelectedEntriesModalContent = ({
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
+            id: getTranslation('containers.list.selectedEntriesModal.title'),
             defaultMessage: 'Publish entries',
           })}
         </Typography>
@@ -394,7 +403,7 @@ const SelectedEntriesModalContent = ({
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={refetchModalData} variant="tertiary" loading={isFetching}>
+            <Button onClick={refetchModalData} variant="tertiary" loading={isLoading}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -430,13 +439,12 @@ interface SelectedEntriesModalProps {
 }
 
 const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
-  const {
-    selectedEntries: selectedListViewEntries,
-    setSelectedEntries: setSelectedListViewEntries,
-  } = useTableContext();
-  const { contentType, components } = useTypedSelector(
-    (state) => state['content-manager_listView']
+  const { selectedRows: selectedListViewEntries, selectRow: setSelectedListViewEntries } = useTable(
+    'SelectedEntriesModal',
+    (state) => state
   );
+
+  const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
   // We want to keep the selected entries order same as the list view
@@ -446,17 +454,12 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     },
   ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
 
-  const {
-    data = [],
-    refetch,
-    isLoading,
-    isFetching,
-  } = useGetAllDocumentsQuery(
+  const { data, refetch, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
-      model: contentType!.uid,
-      query: {
-        page: 1,
-        pageSize: entriesToFetch.length,
+      model,
+      params: {
+        page: '1',
+        pageSize: entriesToFetch.length.toString(),
         sort,
         filters: {
           id: {
@@ -467,22 +470,17 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
       },
     },
     {
-      skip: !contentType,
       selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
     }
   );
 
   const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && contentType) {
-      const schema = createYupSchema(
-        contentType,
-        { components },
-        { isDraft: false, isJSONTestDisabled: true }
-      );
+    if (data.length > 0 && schema) {
+      const validate = createYupSchema(schema.attributes, components);
       const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
       const rows = data.map((entry) => {
         try {
-          schema.validateSync(entry, { abortEarly: false });
+          validate.validateSync(entry, { abortEarly: false });
 
           return entry;
         } catch (e) {
@@ -501,15 +499,14 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
       rows: [],
       validationErrors: {},
     };
-  }, [components, contentType, data]);
+  }, [components, data, schema]);
 
   return (
-    <HelperPluginTable.Root
+    <Table.Root
       rows={rows}
-      defaultSelectedEntries={selectedListViewEntries}
-      colCount={4}
-      isLoading={isLoading}
-      isFetching={isFetching}
+      defaultSelectedRows={selectedListViewEntries}
+      headers={TABLE_HEADERS}
+      isLoading={isLoading || isLoadingDoc || isFetching}
     >
       <SelectedEntriesModalContent
         setSelectedListViewEntries={setSelectedListViewEntries}
@@ -518,7 +515,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
         refetchModalData={refetch}
         validationErrors={validationErrors}
       />
-    </HelperPluginTable.Root>
+    </Table.Root>
   );
 };
 

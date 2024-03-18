@@ -8,6 +8,9 @@ export interface Release extends Entity {
   name: string;
   releasedAt: string | null;
   scheduledAt: string | null;
+  status: 'ready' | 'blocked' | 'failed' | 'done' | 'empty';
+  // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
+  timezone: string | null;
   actions: ReleaseAction[];
 }
 
@@ -42,6 +45,7 @@ export declare namespace GetReleases {
     data: ReleaseDataResponse[];
     meta: {
       pagination?: Pagination;
+      pendingReleasesCount?: number;
     };
     error?: errors.ApplicationError;
   }
@@ -97,7 +101,8 @@ export declare namespace CreateRelease {
     };
     body: {
       name: string;
-      scheduledAt?: Date;
+      scheduledAt: Date | null;
+      timezone: string | null;
     };
   }
 
@@ -120,6 +125,9 @@ export declare namespace UpdateRelease {
     };
     body: {
       name: string;
+      // When editing a release, scheduledAt always need to be explicitly sended, so it can be null to unschedule it
+      scheduledAt?: Date | null;
+      timezone?: string | null;
     };
   }
 

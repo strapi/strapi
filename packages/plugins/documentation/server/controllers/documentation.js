@@ -108,7 +108,7 @@ module.exports = {
       const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
       const filledLayout = _.template(layout)({
         actionUrl: `${strapi.config.server.url}${
-          strapi.config.get('plugin.documentation.x-strapi-config').path
+          strapi.config.get('plugin::documentation.x-strapi-config').path
         }/login`,
       });
       const $ = cheerio.load(filledLayout);
@@ -164,7 +164,7 @@ module.exports = {
 
     ctx.redirect(
       `${strapi.config.server.url}${
-        strapi.config.get('plugin.documentation.x-strapi-config').path
+        strapi.config.get('plugin::documentation.x-strapi-config').path
       }${querystring}`
     );
   },

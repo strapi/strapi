@@ -6,6 +6,7 @@ import type * as Literals from './literals';
 export * from './id';
 export * from './utils';
 export * from './literals';
+export * from './relation';
 
 /**
  * List of possible values for the scalar attributes

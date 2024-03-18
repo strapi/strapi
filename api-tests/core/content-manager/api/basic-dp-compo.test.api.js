@@ -42,6 +42,7 @@ const productWithCompoAndDP = {
       required: true,
     },
   },
+  draftAndPublish: true,
   displayName: 'product with compo and DP',
   singularName: 'product-with-compo-and-dp',
   pluralName: 'product-with-compo-and-dps',
@@ -78,20 +79,20 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithCompoAndDP.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithCompoAndDP.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
-    expect(res.body.publishedAt).toBeNull();
+    expect(res.body.data).toMatchObject(data.productsWithCompoAndDP[0]);
+    expect(res.body.data.publishedAt).toBeNull();
   });
 
   test('Update product with compo', async () => {
@@ -105,21 +106,21 @@ describe('CM API - Basic + compo', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-    expect(res.body.publishedAt).toBeNull();
-    data.productsWithCompoAndDP[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.documentId).toEqual(data.productsWithCompoAndDP[0].documentId);
+    expect(res.body.data.publishedAt).toBeNull();
+    data.productsWithCompoAndDP[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -140,8 +141,8 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body.data);
     });
 
     test('Can create product with compo - minLength', async () => {
@@ -160,8 +161,8 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body.data);
     });
 
     test('Cannot create product with compo - maxLength', async () => {
@@ -214,8 +215,8 @@ describe('CM API - Basic + compo', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject(product);
-      data.productsWithCompoAndDP.push(res.body);
+      expect(res.body.data).toMatchObject(product);
+      data.productsWithCompoAndDP.push(res.body.data);
     });
   });
 
@@ -237,7 +238,7 @@ describe('CM API - Basic + compo', () => {
 
       const publishRes = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${res.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${res.body.data.documentId}/actions/publish`,
         body: product,
       });
 
@@ -265,7 +266,7 @@ describe('CM API - Basic + compo', () => {
         method: 'POST',
         url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
         body: {
-          ids: [res.body.id],
+          ids: [res.body.documentId],
         },
       });
 

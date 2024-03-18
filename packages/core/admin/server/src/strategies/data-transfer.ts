@@ -34,7 +34,6 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  // @ts-ignore
   const transferToken = await tokenService.getBy({ accessKey: tokenService.hash(token) });
 
   // Check if the token exists
@@ -54,10 +53,10 @@ export const authenticate = async (ctx: Context) => {
   }
 
   // Update token metadata if the token has not been used in the last hour
-  // @ts-ignore
+  // @ts-expect-error - FIXME: verify lastUsedAt is defined
   const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(transferToken.lastUsedAt));
   if (hoursSinceLastUsed >= 1) {
-    await strapi.query('admin::api-token').update({
+    await strapi.db.query('admin::api-token').update({
       where: { id: transferToken.id },
       data: { lastUsedAt: currentDate },
     });

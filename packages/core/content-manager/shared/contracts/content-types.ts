@@ -23,6 +23,7 @@ export type Metadatas = {
     };
     list: {
       label?: string;
+      mainField?: string;
       searchable?: boolean;
       sortable?: boolean;
     };

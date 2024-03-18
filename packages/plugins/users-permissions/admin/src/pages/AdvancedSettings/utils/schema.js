@@ -11,8 +11,14 @@ const schema = yup.object().shape({
     otherwise: yup.string().nullable(),
   }),
   email_reset_password: yup
-    .string(translatedErrors.string)
-    .matches(URL_REGEX, translatedErrors.regex)
+    .string({
+      id: translatedErrors.string,
+      defaultMessage: 'This is not a valid string',
+    })
+    .matches(URL_REGEX, {
+      id: translatedErrors.regex,
+      defaultMessage: 'This is not a valid URL',
+    })
     .nullable(),
 });
 

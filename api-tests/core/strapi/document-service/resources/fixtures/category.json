@@ -9,9 +9,9 @@
   {
     "id": 2,
     "documentId": "Cat1",
-    "name": "Cat1-FR",
+    "name": "Cat1-NL",
     "publishedAt": null,
-    "locale": "fr"
+    "locale": "nl"
   },
   {
     "id": 3,

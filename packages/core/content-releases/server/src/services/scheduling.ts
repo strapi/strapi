@@ -47,6 +47,32 @@ const createSchedulingService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
       return scheduledJobs;
     },
+
+    getAll() {
+      return scheduledJobs;
+    },
+
+    /**
+     * On bootstrap, we can use this function to make sure to sync the scheduled jobs from the database that are not yet released
+     * This is useful in case the server was restarted and the scheduled jobs were lost
+     * This also could be used to sync different Strapi instances in case of a cluster
+     */
+    async syncFromDatabase() {
+      const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+        where: {
+          scheduledAt: {
+            $gte: new Date(),
+          },
+          releasedAt: null,
+        },
+      });
+
+      for (const release of releases) {
+        this.set(release.id, release.scheduledAt);
+      }
+
+      return scheduledJobs;
+    },
   };
 };
 

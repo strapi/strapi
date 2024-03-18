@@ -15,10 +15,11 @@ const _ = require('lodash');
 const { extension } = require('mime-types');
 const {
   sanitize,
-  nameToSlug,
+  strings,
   contentTypes: contentTypesUtils,
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
+  convertQueryParams,
 } = require('@strapi/utils');
 
 const {
@@ -32,7 +33,7 @@ const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constan
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
 const generateFileName = (name) => {
-  const baseName = nameToSlug(name, { separator: '_', lowercase: false });
+  const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
 };
@@ -89,6 +90,7 @@ module.exports = ({ strapi }) => ({
       ext,
       mime: type,
       size: bytesToKbytes(size),
+      sizeInBytes: size,
     };
 
     const { refId, ref, field } = metas;
@@ -243,7 +245,7 @@ module.exports = ({ strapi }) => ({
    * and responsive formats (if enabled).
    */
   async uploadFileAndPersist(fileData, { user } = {}) {
-    const config = strapi.config.get('plugin.upload');
+    const config = strapi.config.get('plugin::upload');
     const { isImage } = getService('image-manipulation');
 
     await getService('provider').checkFileSize(fileData);
@@ -282,7 +284,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async replace(id, { data, file }, { user } = {}) {
-    const config = strapi.config.get('plugin.upload');
+    const config = strapi.config.get('plugin::upload');
 
     const { isImage } = getService('image-manipulation');
 
@@ -345,7 +347,7 @@ module.exports = ({ strapi }) => ({
 
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
+    const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
     await this.emitEvent(MEDIA_UPDATE, res);
 
@@ -361,27 +363,38 @@ module.exports = ({ strapi }) => ({
 
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
+    const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
     await this.emitEvent(MEDIA_CREATE, res);
 
     return res;
   },
 
-  findOne(id, populate) {
-    return strapi.entityService.findOne(FILE_MODEL_UID, id, { populate });
+  findOne(id, populate = {}) {
+    const query = convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, {
+      populate,
+    });
+
+    return strapi.db.query(FILE_MODEL_UID).findOne({
+      where: { id },
+      ...query,
+    });
   },
 
-  findMany(query) {
-    return strapi.entityService.findMany(FILE_MODEL_UID, query);
+  findMany(query = {}) {
+    return strapi.db
+      .query(FILE_MODEL_UID)
+      .findMany(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
   },
 
-  findPage(query) {
-    return strapi.entityService.findPage(FILE_MODEL_UID, query);
+  findPage(query = {}) {
+    return strapi.db
+      .query(FILE_MODEL_UID)
+      .findPage(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
   },
 
   async remove(file) {
-    const config = strapi.config.get('plugin.upload');
+    const config = strapi.config.get('plugin::upload');
 
     // execute delete function of the provider
     if (file.provider === config.provider) {
@@ -396,13 +409,13 @@ module.exports = ({ strapi }) => ({
       }
     }
 
-    const media = await strapi.query(FILE_MODEL_UID).findOne({
+    const media = await strapi.db.query(FILE_MODEL_UID).findOne({
       where: { id: file.id },
     });
 
     await this.emitEvent(MEDIA_DELETE, media);
 
-    return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
+    return strapi.db.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
   },
 
   async uploadToEntity(params, files) {

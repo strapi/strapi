@@ -1,11 +1,9 @@
-import * as React from 'react';
-
 import { Layout as DSLayout } from '@strapi/design-system';
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useMatch } from 'react-router-dom';
 
+import { Page } from '../../components/PageHelpers';
 import { useSettingsMenu } from '../../hooks/useSettingsMenu';
 
 import { SettingsNav } from './components/SettingsNav';
@@ -22,7 +20,7 @@ const Layout = () => {
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
   // We need to add a loading state to prevent redirecting the user while permissions are being checked
   if (isLoading) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   if (!match?.params.settingId) {

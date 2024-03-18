@@ -13,14 +13,9 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import {
-  SettingsPageTitle,
-  useAppInfo,
-  useFocusWhenNavigate,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useAppInfo, useFocusWhenNavigate, useRBAC, useTracking } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -115,11 +110,16 @@ const ApplicationInfoPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: 'Settings.application.header',
-          defaultMessage: 'Application',
-        })}
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: 'Settings.application.header',
+              defaultMessage: 'Application',
+            }),
+          }
+        )}
       />
       <Main>
         <form onSubmit={handleSubmit}>

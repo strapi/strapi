@@ -11,6 +11,7 @@ module.exports = (fixtures) => {
       password: 'Password1234',
       misc: 2,
       relations: [relation[0].id, relation[1].id],
+      private_relations: [relation[0].id, relation[1].id],
       componentA: {
         name: 'Component A Name A',
         name_private: 'Private Component A Name A',
@@ -44,6 +45,7 @@ module.exports = (fixtures) => {
       password: 'Password5678',
       misc: 3,
       relations: [relation[1].id],
+      private_relations: [relation[1].id],
       componentA: {
         name: 'Component A Name B',
         name_private: 'Private Component A Name B',

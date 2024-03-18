@@ -15,7 +15,8 @@ import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
-import { ContentManagerAppState, SET_INIT_DATA } from '../pages/App';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
+import { ContentManagerAppState, SET_INIT_DATA } from '../layout';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
 import { getTranslation } from '../utils/translations';
@@ -44,7 +45,13 @@ const useContentManagerInitData = (): ContentManagerAppState => {
 
   const state = useTypedSelector((state) => state['content-manager_app']);
 
-  const initialDataQuery = useGetInitialDataQuery();
+  const initialDataQuery = useGetInitialDataQuery(undefined, {
+    /**
+     * TODO: remove this when the CTB has been refactored to use redux-toolkit-query
+     * and it can invalidate the cache on mutation
+     */
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
     if (initialDataQuery.data) {
@@ -196,9 +203,9 @@ const generateLinks = (
         search,
         kind: link.kind,
         title: link.info.displayName,
-        to: `/content-manager/${
-          link.kind === 'collectionType' ? 'collection-types' : 'single-types'
-        }/${link.uid}`,
+        to: `/content-manager/${link.kind === 'collectionType' ? COLLECTION_TYPES : SINGLE_TYPES}/${
+          link.uid
+        }`,
         uid: link.uid,
         // Used for the list item key in the helper plugin
         name: link.uid,

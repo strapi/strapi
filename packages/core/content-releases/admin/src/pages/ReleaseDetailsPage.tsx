@@ -1,15 +1,20 @@
 import * as React from 'react';
 
-import { unstable_useDocument } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  unstable_useDocument,
+  Pagination,
+  Table,
+  BackButton,
+  ConfirmDialog,
+} from '@strapi/admin/strapi-admin';
 import {
   Button,
   ContentLayout,
   Flex,
   HeaderLayout,
   IconButton,
-  Link,
   Main,
-  Popover,
   Tr,
   Td,
   Typography,
@@ -18,29 +23,24 @@ import {
   SingleSelectOption,
   Icon,
   Tooltip,
+  EmptyStateLayout,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
-  LoadingIndicatorPage,
-  NoContent,
-  PageSizeURLQuery,
-  PaginationURLQuery,
-  RelativeTime,
-  Table,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
-  ConfirmDialog,
   useRBAC,
-  AnErrorOccurred,
   useTracking,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
+import format from 'date-fns/format';
+import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
@@ -57,6 +57,9 @@ import {
   releaseApi,
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
+import { getTimezoneOffset } from '../utils/time';
+
+import { getBadgeProps } from './ReleasesPage';
 
 import type {
   ReleaseAction,
@@ -68,7 +71,6 @@ import type { Schema } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -76,15 +78,19 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
-  align-self: stretch;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-
+const StyledMenuItem = styled(Menu.Item)<{
+  disabled?: boolean;
+  variant?: 'neutral' | 'danger';
+}>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
   span {
     color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
+  }
+
+  &:hover {
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
   }
 `;
 
@@ -108,47 +114,26 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-interface PopoverButtonProps {
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}
-
-const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
-  return (
-    <StyledFlex
-      paddingTop={2}
-      paddingBottom={2}
-      paddingLeft={4}
-      paddingRight={4}
-      alignItems="center"
-      gap={2}
-      as="button"
-      hasRadius
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </StyledFlex>
-  );
-};
-
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema: Schema.ContentType;
+  schema?: Schema.ContentType;
   components: { [key: Schema.Component['uid']]: Schema.Component };
   entry: ReleaseActionEntry;
 }
 
-const EntryValidationText = ({ action, schema, components, entry }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument();
+  const { validate } = unstable_useDocument(
+    {
+      collectionType: schema?.kind ?? '',
+      model: schema?.uid ?? '',
+    },
+    {
+      skip: !schema,
+    }
+  );
 
-  const { errors } = validate(entry, {
-    contentType: schema,
-    components,
-    isCreatingEntry: false,
-  });
+  const errors = validate(entry) ?? {};
 
   if (Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)
@@ -227,10 +212,8 @@ const ReleaseDetailsLayout = ({
   toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
-  const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
-  const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const {
     data,
     isLoading: isLoadingDetails,
@@ -245,22 +228,12 @@ const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const {
-    allowedActions: { canUpdate, canDelete },
-  } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
 
   const release = data?.data;
-
-  const handleTogglePopover = () => {
-    setIsPopoverVisible((prev) => !prev);
-  };
-
-  const openReleaseModal = () => {
-    toggleEditReleaseModal();
-    handleTogglePopover();
-  };
 
   const handlePublishRelease = (id: string) => async () => {
     const response = await publishRelease({ id });
@@ -297,11 +270,6 @@ const ReleaseDetailsLayout = ({
     }
   };
 
-  const openWarningConfirmDialog = () => {
-    toggleWarningSubmit();
-    handleTogglePopover();
-  };
-
   const handleRefresh = () => {
     dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
   };
@@ -326,11 +294,7 @@ const ReleaseDetailsLayout = ({
   };
 
   if (isLoadingDetails) {
-    return (
-      <Main aria-busy={isLoadingDetails}>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   if (isError || !release) {
@@ -351,65 +315,109 @@ const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
+  const isScheduled = release.scheduledAt && release.timezone;
+  const numberOfEntriesText = formatMessage(
+    {
+      id: 'content-releases.pages.Details.header-subtitle',
+      defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+    },
+    { number: totalEntries }
+  );
+  const scheduledText = isScheduled
+    ? formatMessage(
+        {
+          id: 'content-releases.pages.ReleaseDetails.header-subtitle.scheduled',
+          defaultMessage: 'Scheduled for {date} at {time} ({offset})',
+        },
+        {
+          date: formatDate(new Date(release.scheduledAt!), {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: release.timezone!,
+          }),
+          time: formatTime(new Date(release.scheduledAt!), {
+            timeZone: release.timezone!,
+            hourCycle: 'h23',
+          }),
+          offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
+        }
+      )
+    : '';
+
   return (
     <Main aria-busy={isLoadingDetails}>
       <HeaderLayout
         title={release.name}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Details.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-          },
-          { number: totalEntries }
-        )}
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
+        subtitle={
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
+            </Typography>
+            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+          </Flex>
         }
+        navigationAction={<BackButton />}
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <IconButton
-                label={formatMessage({
-                  id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release edit and delete menu',
-                })}
-                ref={moreButtonRef}
-                onClick={handleTogglePopover}
-              >
-                <More />
-              </IconButton>
-              {isPopoverVisible && (
-                <Popover
-                  source={moreButtonRef}
-                  placement="bottom-end"
-                  onDismiss={handleTogglePopover}
-                  spacing={4}
-                  minWidth="242px"
-                >
-                  <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                    <PopoverButton disabled={!canUpdate} onClick={openReleaseModal}>
-                      <PencilIcon />
-                      <Typography ellipsis>
-                        {formatMessage({
-                          id: 'content-releases.header.actions.edit',
-                          defaultMessage: 'Edit',
-                        })}
-                      </Typography>
-                    </PopoverButton>
-                    <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
-                      <TrashIcon />
-                      <Typography ellipsis textColor="danger600">
-                        {formatMessage({
-                          id: 'content-releases.header.actions.delete',
-                          defaultMessage: 'Delete',
-                        })}
-                      </Typography>
-                    </PopoverButton>
+              <Menu.Root>
+                {/* 
+                  TODO Fix in the DS
+                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
+                */}
+                <Menu.Trigger
+                  as={IconButton}
+                  paddingLeft={2}
+                  paddingRight={2}
+                  aria-label={formatMessage({
+                    id: 'content-releases.header.actions.open-release-actions',
+                    defaultMessage: 'Release edit and delete menu',
+                  })}
+                  // @ts-expect-error See above
+                  icon={<More />}
+                  variant="tertiary"
+                />
+                {/*
+                  TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
+                  Refactor this once fixed in the DS
+                */}
+                <Menu.Content top={1} popoverPlacement="bottom-end">
+                  <Flex
+                    alignItems="center"
+                    justifyContent="center"
+                    direction="column"
+                    padding={1}
+                    width="100%"
+                  >
+                    <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
+                        <PencilIcon />
+                        <Typography ellipsis>
+                          {formatMessage({
+                            id: 'content-releases.header.actions.edit',
+                            defaultMessage: 'Edit',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
+                    <StyledMenuItem
+                      disabled={!canDelete}
+                      onSelect={toggleWarningSubmit}
+                      variant="danger"
+                    >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
+                        <TrashIcon />
+                        <Typography ellipsis textColor="danger600">
+                          {formatMessage({
+                            id: 'content-releases.header.actions.delete',
+                            defaultMessage: 'Delete',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
@@ -436,15 +444,15 @@ const ReleaseDetailsLayout = ({
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
-                </Popover>
-              )}
+                </Menu.Content>
+              </Menu.Root>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',
                   defaultMessage: 'Refresh',
                 })}
               </Button>
-              <CheckPermissions permissions={PERMISSIONS.publish}>
+              {canPublish ? (
                 <Button
                   size="S"
                   variant="default"
@@ -457,7 +465,7 @@ const ReleaseDetailsLayout = ({
                     defaultMessage: 'Publish',
                   })}
                 </Button>
-              </CheckPermissions>
+              ) : null}
             </Flex>
           )
         }
@@ -562,11 +570,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   };
 
   if (isLoading || isReleaseLoading) {
-    return (
-      <ContentLayout>
-        <LoadingIndicatorPage />
-      </ContentLayout>
-    );
+    return <Page.Loading />;
   }
 
   const releaseActions = data?.data;
@@ -597,22 +601,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   }
 
   if (isError || !releaseActions) {
-    return (
-      <ContentLayout>
-        <AnErrorOccurred />
-      </ContentLayout>
-    );
+    return <Page.Error />;
   }
 
   if (Object.keys(releaseActions).length === 0) {
     return (
       <ContentLayout>
-        <NoContent
-          content={{
-            id: 'content-releases.pages.Details.tab.emptyEntries',
-            defaultMessage:
-              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
-          }}
+        <EmptyStateLayout
           action={
             <LinkButton
               as={ReactRouterLink}
@@ -629,10 +624,58 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
+          icon={<EmptyDocuments width="10rem" />}
+          content={formatMessage({
+            id: 'content-releases.pages.Details.tab.emptyEntries',
+            defaultMessage:
+              'This release is empty. Open the Content Manager, select an entry and add it to the release.',
+          })}
         />
       </ContentLayout>
     );
   }
+
+  const headers = [
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+        defaultMessage: 'name',
+      }),
+      name: 'name',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+        defaultMessage: 'locale',
+      }),
+      name: 'locale',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
+        defaultMessage: 'content-type',
+      }),
+      name: 'content-type',
+    },
+    {
+      label: formatMessage({
+        id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+        defaultMessage: 'action',
+      }),
+      name: 'action',
+    },
+    ...(!release.releasedAt
+      ? [
+          {
+            label: formatMessage({
+              id: 'content-releases.page.ReleaseDetails.table.header.label.status',
+              defaultMessage: 'status',
+            }),
+            name: 'status',
+          },
+        ]
+      : []),
+  ];
 
   return (
     <ContentLayout>
@@ -674,56 +717,16 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 ...item,
                 id: Number(item.entry.id),
               }))}
-              colCount={releaseActions[key].length}
-              isLoading={isLoading}
-              isFetching={isFetching}
+              headers={headers}
+              isLoading={isLoading || isFetching}
             >
               <Table.Content>
                 <Table.Head>
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-                      defaultMessage: 'name',
-                    })}
-                    name="name"
-                  />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
-                      defaultMessage: 'content-type',
-                    })}
-                    name="content-type"
-                  />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-                      defaultMessage: 'action',
-                    })}
-                    name="action"
-                  />
-                  {!release.releasedAt && (
-                    <Table.HeaderCell
-                      fieldSchemaType="string"
-                      label={formatMessage({
-                        id: 'content-releases.page.ReleaseDetails.table.header.label.status',
-                        defaultMessage: 'status',
-                      })}
-                      name="status"
-                    />
-                  )}
+                  {headers.map((header) => (
+                    <Table.HeaderCell key={header.name} {...header} />
+                  ))}
                 </Table.Head>
-                <Table.LoadingBody />
+                <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
                     ({ id, contentType, locale, type, entry }, actionIndex) => (
@@ -800,14 +803,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             </Table.Root>
           </Flex>
         ))}
-        <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
-          <PageSizeURLQuery defaultValue={releaseMeta?.pagination?.pageSize.toString()} />
-          <PaginationURLQuery
-            pagination={{
-              pageCount: releaseMeta?.pagination?.pageCount || 0,
-            }}
-          />
-        </Flex>
+        <Pagination.Root
+          {...releaseMeta?.pagination}
+          defaultPageSize={releaseMeta?.pagination?.pageSize}
+        >
+          <Pagination.PageSize />
+          <Pagination.Links />
+        </Pagination.Root>
       </Flex>
     </ContentLayout>
   );
@@ -836,7 +838,7 @@ const ReleaseDetailsPage = () => {
     }
   );
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
-  const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
+  const [deleteRelease] = useDeleteReleaseMutation();
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
@@ -850,9 +852,7 @@ const ReleaseDetailsPage = () => {
         toggleEditReleaseModal={toggleEditReleaseModal}
         toggleWarningSubmit={toggleWarningSubmit}
       >
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
+        <Page.Loading />
       </ReleaseDetailsLayout>
     );
   }
@@ -861,12 +861,22 @@ const ReleaseDetailsPage = () => {
     return <Navigate to=".." />;
   }
 
-  const title = (isSuccessDetails && data?.data?.name) || '';
+  const releaseData = (isSuccessDetails && data?.data) || null;
+
+  const title = releaseData?.name || '';
+  const timezone = releaseData?.timezone ?? null;
+  const scheduledAt =
+    releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
+  // Just get the date and time to display without considering updated timezone time
+  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
+  const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
     const response = await updateRelease({
       id: releaseId,
       name: values.name,
+      scheduledAt: values.scheduledAt,
+      timezone: values.timezone,
     });
 
     if ('data' in response) {
@@ -928,19 +938,26 @@ const ReleaseDetailsPage = () => {
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
           isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{ name: title || '' }}
+          initialValues={{
+            name: title || '',
+            scheduledAt,
+            date,
+            time,
+            isScheduled: Boolean(scheduledAt),
+            timezone,
+          }}
         />
       )}
       <ConfirmDialog
-        bodyText={{
+        isOpen={showWarningSubmit}
+        onClose={toggleWarningSubmit}
+        onConfirm={handleDeleteRelease}
+      >
+        {formatMessage({
           id: 'content-releases.dialog.confirmation-message',
           defaultMessage: 'Are you sure you want to delete this release?',
-        }}
-        isOpen={showWarningSubmit}
-        isConfirmButtonLoading={isDeletingRelease}
-        onToggleDialog={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      />
+        })}
+      </ConfirmDialog>
     </ReleaseDetailsLayout>
   );
 };

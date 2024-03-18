@@ -1,6 +1,5 @@
 import { Context } from 'koa';
 
-// @ts-ignore - TS Build sometimes fails on this import, probably because of the circular dependency with DT
 import { strapi as dataTransferStrapi } from '@strapi/data-transfer';
 import { errors } from '@strapi/utils';
 import dataTransferAuthStrategy from '../../strategies/data-transfer';

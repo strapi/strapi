@@ -1,5 +1,5 @@
 import { get } from 'lodash/fp';
-import { sanitize, validate, pipeAsync, errors } from '@strapi/utils';
+import { sanitize, validate, async, errors } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -49,16 +49,14 @@ export default ({ strapi }: Context) => {
         await validate.contentAPI.query(transformedArgs, targetContentType, {
           auth,
         });
+
         const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
           auth,
         });
 
-        const data = await strapi.entityService!.load(
-          contentTypeUID,
-          parent,
-          attributeName,
-          sanitizedQuery
-        );
+        const data = await strapi.db
+          ?.query(contentTypeUID)
+          .load(parent, attributeName, sanitizedQuery);
 
         const info = {
           args: sanitizedQuery,
@@ -77,7 +75,7 @@ export default ({ strapi }: Context) => {
           const unwrapData = get(attributeName);
 
           // Sanitizer definition
-          const sanitizeMorphAttribute = pipeAsync(wrapData, sanitizeData, unwrapData);
+          const sanitizeMorphAttribute = async.pipe(wrapData, sanitizeData, unwrapData);
 
           return sanitizeMorphAttribute(data);
         }

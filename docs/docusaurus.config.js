@@ -37,6 +37,17 @@ const config = {
         };
       },
     }),
+    [
+      'docusaurus-plugin-typedoc',
+      // Plugin / TypeDoc options
+      {
+        entryPoints: ['../packages/core/strapi/src/admin.ts'],
+        tsconfig: '../packages/core/strapi/tsconfig.build.json',
+        entryDocument: null,
+        out: 'exports',
+        watch: process.env.TYPEDOC_WATCH,
+      },
+    ],
   ],
   presets: [
     [
@@ -83,6 +94,12 @@ const config = {
             position: 'left',
             sidebarId: 'api',
             label: 'API Reference',
+          },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'exports',
+            label: 'Exports',
           },
           {
             type: 'docSidebar',

@@ -6,19 +6,18 @@ import styled from 'styled-components';
 import { CellContentProps } from './CellContent';
 import { CellValue } from './CellValue';
 
-import type { Attribute, Common } from '@strapi/types';
+import type { ComponentsDictionary } from '../../../../hooks/useDocument';
+import type { Attribute } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * SingleComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface SingleComponentProps extends Pick<CellContentProps, 'metadatas'> {
-  content: Attribute.GetValue<Attribute.Component<Common.UID.Component, false>>;
+interface SingleComponentProps extends Pick<CellContentProps, 'mainField'> {
+  content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, false>>;
 }
 
-const SingleComponent = ({ content, metadatas }: SingleComponentProps) => {
-  const { mainField } = metadatas;
-
+const SingleComponent = ({ content, mainField }: SingleComponentProps) => {
   if (!mainField) {
     return null;
   }
@@ -26,7 +25,7 @@ const SingleComponent = ({ content, metadatas }: SingleComponentProps) => {
   return (
     <Tooltip label={content[mainField.name]}>
       <SingleComponentTypography textColor="neutral800" ellipsis>
-        <CellValue type={mainField?.type} value={content[mainField.name]} />
+        <CellValue type={mainField.type} value={content[mainField.name]} />
       </SingleComponentTypography>
     </Tooltip>
   );
@@ -40,13 +39,12 @@ const SingleComponentTypography = styled(Typography)`
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface RepeatableComponentProps extends Pick<CellContentProps, 'metadatas'> {
-  content: Attribute.GetValue<Attribute.Component<Common.UID.Component, true>>;
+interface RepeatableComponentProps extends Pick<CellContentProps, 'mainField'> {
+  content: Attribute.GetValue<Attribute.Component<`${string}.${string}`, true>>;
 }
 
-const RepeatableComponent = ({ content, metadatas }: RepeatableComponentProps) => {
+const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) => {
   const { formatMessage } = useIntl();
-  const { mainField } = metadatas;
 
   if (!mainField) {
     return null;
@@ -58,7 +56,7 @@ const RepeatableComponent = ({ content, metadatas }: RepeatableComponentProps) =
         <Badge>{content.length}</Badge>{' '}
         {formatMessage(
           {
-            id: 'content-manager.containers.ListPage.items',
+            id: 'content-manager.containers.list.items',
             defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
           },
           { number: content.length }

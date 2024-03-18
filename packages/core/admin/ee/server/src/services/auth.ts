@@ -12,7 +12,7 @@ const { ApplicationError } = errors;
  * @param {string} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email }: any = {}) => {
-  const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
+  const user = await strapi.db.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user || (await isSsoLocked(user))) {
     return;
@@ -53,7 +53,7 @@ const forgotPassword = async ({ email }: any = {}) => {
  * @param {string} param.password new user password
  */
 const resetPassword = async ({ resetPasswordToken, password }: any = {}) => {
-  const matchingUser = await strapi
+  const matchingUser = await strapi.db
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
 

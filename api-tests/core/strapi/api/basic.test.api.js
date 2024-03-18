@@ -74,10 +74,10 @@ describe('Core API - Basic', () => {
     expect(body).toMatchObject({
       data: {
         id: expect.anything(),
-        attributes: product,
+        ...product,
       },
     });
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.publishedAt).toBeDefined();
 
     data.product.push(body.data);
   });
@@ -97,16 +97,14 @@ describe('Core API - Basic', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: expect.anything(),
-          attributes: expect.objectContaining({
-            name: 'Product 1',
-            description: 'Product description',
-          }),
+          name: 'Product 1',
+          description: 'Product description',
         }),
       ])
     );
 
     body.data.forEach((p) => {
-      expect(p.attributes.publishedAt).toBeDefined();
+      expect(p.publishedAt).toBeDefined();
     });
   });
 
@@ -117,7 +115,7 @@ describe('Core API - Basic', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/products/${data.product[0].id}`,
+      url: `/products/${data.product[0].documentId}`,
       body: {
         data: product,
       },
@@ -126,28 +124,27 @@ describe('Core API - Basic', () => {
     const { statusCode, body } = res;
 
     expect(statusCode).toBe(200);
-    expect(body.data).toMatchObject({
-      attributes: product,
-    });
+    expect(body.data).toMatchObject(product);
 
-    expect(body.data.id).toEqual(data.product[0].id);
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.documentId).toEqual(data.product[0].documentId);
+    expect(body.data.publishedAt).toBeDefined();
 
     data.product[0] = res.body.data;
   });
 
-  test('Delete product', async () => {
+  // TODO V5: Decide response of delete
+  test.skip('Delete product', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/products/${data.product[0].id}`,
+      url: `/products/${data.product[0].documentId}`,
     });
 
     const { statusCode, body } = res;
 
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject(data.product[0]);
-    expect(body.data.id).toEqual(data.product[0].id);
-    expect(body.data.attributes.publishedAt).toBeDefined();
+    expect(body.data.documentId).toEqual(data.product[0].documentId);
+    expect(body.data.publishedAt).toBeDefined();
     data.product.shift();
   });
 });

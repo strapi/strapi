@@ -1,5 +1,5 @@
 import { getService } from '../utils';
-import { getDocumentDimensions } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './utils/dimensions';
 
 import {
   validateGenerateUIDInput,
@@ -12,7 +12,7 @@ export default {
     const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
 
     const { query = {} } = ctx.request;
-    const { locale } = getDocumentDimensions(query);
+    const { locale } = getDocumentLocaleAndStatus(query);
 
     await validateUIDField(contentTypeUID, field);
 
@@ -29,7 +29,7 @@ export default {
     );
 
     const { query = {} } = ctx.request;
-    const { locale } = getDocumentDimensions(query);
+    const { locale } = getDocumentLocaleAndStatus(query);
 
     await validateUIDField(contentTypeUID, field);
 

@@ -6,6 +6,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import readPkgUp from 'read-pkg-up';
 import {
   Configuration,
   DefinePlugin,
@@ -16,12 +17,10 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { loadStrapiMonorepo } from '../core/monorepo';
 import type { BuildContext } from '../create-build-context';
-import { getAliases } from './aliases';
 import { getUserConfig } from '../core/config';
+import { getMonorepoAliases } from '../core/aliases';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
-  const monorepo = await loadStrapiMonorepo(ctx.cwd);
-
   const target = browserslistToEsbuild(ctx.target);
 
   return {
@@ -32,7 +31,12 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
       main: [`./${ctx.entry}`],
     },
     resolve: {
-      alias: getAliases(ctx.cwd, monorepo),
+      alias: {
+        react: getModulePath('react'),
+        'react-dom': getModulePath('react-dom'),
+        'styled-components': getModulePath('styled-components'),
+        'react-router-dom': getModulePath('react-router-dom'),
+      },
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
     },
     module: {
@@ -119,6 +123,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
 
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuration> => {
   const baseConfig = await resolveBaseConfig(ctx);
+  const monorepo = await loadStrapiMonorepo(ctx.cwd);
 
   return {
     ...baseConfig,
@@ -130,8 +135,15 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
       },
       version: crypto
         .createHash('md5')
-        .update(Object.entries(baseConfig.resolve.alias).join())
+        .update(Object.entries(baseConfig.resolve.alias ?? {}).join())
         .digest('hex'),
+    },
+    resolve: {
+      ...baseConfig.resolve,
+      alias: {
+        ...baseConfig.resolve.alias,
+        ...getMonorepoAliases({ monorepo }),
+      },
     },
     entry: {
       ...baseConfig.entry,
@@ -225,6 +237,16 @@ const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContex
   }
 
   return config;
+};
+
+/**
+ * @internal This function is used to resolve the path of a module.
+ * It mimics what vite does internally already.
+ */
+const getModulePath = (mod: string) => {
+  const modulePath = require.resolve(mod);
+  const pkg = readPkgUp.sync({ cwd: path.dirname(modulePath) });
+  return pkg ? path.dirname(pkg.path) : modulePath;
 };
 
 export { mergeConfigWithUserConfig, resolveDevelopmentConfig, resolveProductionConfig };

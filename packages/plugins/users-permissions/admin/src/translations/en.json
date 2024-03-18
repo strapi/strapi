@@ -60,7 +60,7 @@
   "Settings.roles.deleted": "Role deleted",
   "Settings.roles.edited": "Role edited",
   "Settings.section-label": "Users & Permissions plugin",
-  "components.Input.error.validation.email": "This is an invalid email",
+  "components.Input.error.validation.email": "This is not a valid email",
   "components.Input.error.validation.json": "This doesn't match the JSON format",
   "components.Input.error.validation.max": "The value is too high.",
   "components.Input.error.validation.maxLength": "The value is too long.",

@@ -9,16 +9,12 @@ import {
   Typography,
   DialogFooterProps,
 } from '@strapi/design-system';
-import {
-  useTableContext,
-  useNotification,
-  useAPIErrorHandler,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { useNotification, useAPIErrorHandler, useQueryParams } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useTable } from '../../../../../components/Table';
+import { useDoc } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { InjectionZoneList } from '../InjectionZoneList';
@@ -89,10 +85,10 @@ const ConfirmDialogPublishAll = ({
   onConfirm,
 }: ConfirmDialogPublishAllProps) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries } = useTableContext();
+  const selectedEntries = useTable('ConfirmDialogPublishAll', (state) => state.selectedRows);
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
-  const contentType = useTypedSelector((state) => state['content-manager_listView'].contentType);
+  const { model } = useDoc();
   const [{ query }] = useQueryParams<{
     plugins?: {
       i18n?: {
@@ -101,16 +97,14 @@ const ConfirmDialogPublishAll = ({
     };
   }>();
 
-  const slug = contentType?.uid ?? '';
-
   const {
     data: countDraftRelations = 0,
     isLoading,
     error,
   } = useGetManyDraftRelationCountQuery(
     {
-      model: slug,
-      ids: selectedEntries,
+      model,
+      documentIds: selectedEntries.map((id) => id.toString()),
       locale: query?.plugins?.i18n?.locale,
     },
     {

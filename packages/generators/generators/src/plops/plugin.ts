@@ -1,7 +1,7 @@
 import { NodePlopAPI } from 'plop';
 import chalk from 'chalk';
 import tsUtils from '@strapi/typescript-utils';
-import * as utils from '@strapi/utils';
+import { strings } from '@strapi/utils';
 
 import validateInput from './utils/validate-input';
 
@@ -61,8 +61,8 @@ export default (plop: NodePlopAPI) => {
       const language = isTypescript ? 'ts' : 'js';
       const projectLanguage = tsUtils.isUsingTypeScriptSync(process.cwd()) ? 'ts' : 'js';
 
-      if (!utils.isKebabCase(answers.pluginName)) {
-        answers.pluginName = utils.toKebabCase(answers.pluginName);
+      if (!strings.isKebabCase(answers.pluginName)) {
+        answers.pluginName = strings.toKebabCase(answers.pluginName);
         console.log(
           chalk.yellow(
             `Strapi only supports kebab-cased names for plugins.\nYour plugin has been automatically renamed to "${answers.pluginName}".`

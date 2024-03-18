@@ -19,5 +19,5 @@
   "Settings.email.plugin.title.test": "Test email delivery",
   "SettingsNav.link.settings": "Settings",
   "SettingsNav.section-label": "Email plugin",
-  "components.Input.error.validation.email": "This is an invalid email"
+  "components.Input.error.validation.email": "This is not a valid email"
 }

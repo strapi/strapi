@@ -18,6 +18,7 @@ const productModel = {
   pluralName: 'products',
   description: '',
   collectionName: '',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -168,7 +169,7 @@ describe.skip('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -201,7 +202,7 @@ describe.skip('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -234,7 +235,7 @@ describe.skip('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
@@ -277,7 +278,7 @@ describe.skip('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
@@ -321,7 +322,7 @@ describe.skip('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(12);
@@ -388,7 +389,7 @@ describe.skip('CM API - Basic', () => {
     // Ensure we can count the number of draft relations when the entry is in a non default locale
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${localisedProduct.id}/actions/countDraftRelations?locale=${locale}`,
+      url: `/content-manager/collection-types/api::product.product/${localisedProduct.documentId}/actions/countDraftRelations?locale=${locale}`,
     });
 
     expect(body.data).toBe(8);

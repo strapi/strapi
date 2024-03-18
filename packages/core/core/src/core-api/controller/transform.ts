@@ -1,12 +1,10 @@
 import { isNil, isPlainObject } from 'lodash/fp';
-import { parseMultipartData } from '@strapi/utils';
-import type Koa from 'koa';
 import type { Common, Schema, UID } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
+  documentId?: string | null;
   attributes: Record<string, unknown>;
-  meta?: Record<string, unknown>;
 };
 
 type TransformedComponent = {
@@ -16,6 +14,7 @@ type TransformedComponent = {
 
 type Entry = {
   id: string;
+  documentId: string | null;
   [key: string]: Entry | Entry[] | string | number | null | boolean | Date;
 };
 
@@ -27,27 +26,31 @@ function isDZEntries(property: unknown): property is (Entry & { __component: UID
   return Array.isArray(property);
 }
 
-const parseBody = (ctx: Koa.Context) => {
-  if (ctx.is('multipart')) {
-    return parseMultipartData(ctx);
-  }
-
-  const { data } = ctx.request.body || {};
-
-  return { data };
-};
+interface TransformOptions {
+  contentType?: Schema.ContentType | Schema.Component;
+  /**
+   * @deprecated this option is deprecated and will be removed in the next major version
+   */
+  useJsonAPIFormat?: boolean;
+}
 
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Schema.ContentType | Schema.Component } = {}
+  opts: TransformOptions = {
+    useJsonAPIFormat: false,
+  }
 ) => {
   if (isNil(resource)) {
     return resource;
   }
 
+  if (!isPlainObject(resource) && !Array.isArray(resource)) {
+    throw new Error('Entry must be an object or an arrayy of objects');
+  }
+
   return {
-    data: transformEntry(resource, opts?.contentType),
+    data: opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource,
     meta,
   };
 };
@@ -94,7 +97,7 @@ function transformEntry(
     throw new Error('Entry must be an object');
   }
 
-  const { id, ...properties } = entry;
+  const { id, documentId, ...properties } = entry;
 
   const attributeValues: Record<string, unknown> = {};
 
@@ -130,10 +133,9 @@ function transformEntry(
 
   return {
     id,
+    documentId,
     attributes: attributeValues,
-    // NOTE: not necessary for now
-    // meta: {},
   };
 }
 
-export { parseBody, transformResponse };
+export { transformResponse };

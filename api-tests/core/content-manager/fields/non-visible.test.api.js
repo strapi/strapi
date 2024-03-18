@@ -35,7 +35,7 @@ let strapi;
 let utils;
 
 const createEntry = async (data) => {
-  return strapi.entityService.create('api::nonvisible.nonvisible', {
+  return strapi.db.query('api::nonvisible.nonvisible').create({
     data,
   });
 };

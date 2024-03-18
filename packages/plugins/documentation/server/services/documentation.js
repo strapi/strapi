@@ -9,7 +9,7 @@ const defaultOpenApiComponents = require('./utils/default-openapi-components');
 const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
 module.exports = ({ strapi }) => {
-  const config = strapi.config.get('plugin.documentation');
+  const config = strapi.config.get('plugin::documentation');
   const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
   const overrideService = strapi.plugin('documentation').service('override');
 

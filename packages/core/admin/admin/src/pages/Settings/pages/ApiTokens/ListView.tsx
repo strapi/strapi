@@ -1,24 +1,28 @@
 import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, LinkButton, Main } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  NoContent,
-  NoPermissions,
-  SettingsPageTitle,
+  ContentLayout,
+  EmptyStateLayout,
+  HeaderLayout,
+  LinkButton,
+  Main,
+} from '@strapi/design-system';
+import {
   useAPIErrorHandler,
   useFocusWhenNavigate,
-  useGuidedTour,
   useNotification,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useOnce } from '../../../../hooks/useOnce';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
@@ -28,47 +32,35 @@ import { Table } from '../../components/Tokens/Table';
 const TABLE_HEADERS = [
   {
     name: 'name',
-    key: 'name',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.name',
-        defaultMessage: 'Name',
-      },
-      sortable: true,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.name',
+      defaultMessage: 'Name',
     },
+    sortable: true,
   },
   {
     name: 'description',
-    key: 'description',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.description',
-        defaultMessage: 'Description',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.description',
+      defaultMessage: 'Description',
     },
+    sortable: false,
   },
   {
     name: 'createdAt',
-    key: 'createdAt',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.createdAt',
-        defaultMessage: 'Created at',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.createdAt',
+      defaultMessage: 'Created at',
     },
+    sortable: false,
   },
   {
     name: 'lastUsedAt',
-    key: 'lastUsedAt',
-    metadatas: {
-      label: {
-        id: 'Settings.apiTokens.ListView.headers.lastUsedAt',
-        defaultMessage: 'Last used',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.apiTokens.ListView.headers.lastUsedAt',
+      defaultMessage: 'Last used',
     },
+    sortable: false,
   },
 ];
 
@@ -80,11 +72,11 @@ export const ListView = () => {
     (state) => state.admin_app.permissions.settings?.['api-tokens']
   );
   const {
-    allowedActions: { canCreate, canDelete, canUpdate, canRead },
+    allowedActions: { canRead, canCreate, canDelete, canUpdate },
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
-  const { startSection } = useGuidedTour();
+  const startSection = useGuidedTour('ListView', (state) => state.startSection);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
@@ -97,10 +89,7 @@ export const ListView = () => {
 
   const headers = TABLE_HEADERS.map((header) => ({
     ...header,
-    metadatas: {
-      ...header.metadatas,
-      label: formatMessage(header.metadatas.label),
-    },
+    label: formatMessage(header.label),
   }));
 
   useOnce(() => {
@@ -109,13 +98,7 @@ export const ListView = () => {
     });
   });
 
-  const {
-    data: apiTokens = [],
-    isLoading,
-    error,
-  } = useGetAPITokensQuery(undefined, {
-    skip: !canRead,
-  });
+  const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery();
 
   React.useEffect(() => {
     if (error) {
@@ -158,9 +141,13 @@ export const ListView = () => {
   };
 
   return (
-    <Main aria-busy={isLoading}>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="API Tokens" />
+    <>
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'API Tokens' }
+        )}
+      />
       <HeaderLayout
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
         subtitle={formatMessage({
@@ -188,45 +175,55 @@ export const ListView = () => {
           )
         }
       />
-      <ContentLayout>
-        {!canRead && <NoPermissions />}
-        {canRead && apiTokens.length > 0 && (
-          <Table
-            permissions={{ canRead, canDelete, canUpdate }}
-            headers={headers}
-            contentType="api-tokens"
-            isLoading={isLoading}
-            onConfirmDelete={handleDelete}
-            tokens={apiTokens}
-            tokenType={API_TOKEN_TYPE}
-          />
-        )}
-        {canRead && canCreate && apiTokens.length === 0 && (
-          <NoContent
-            content={{
-              id: 'Settings.apiTokens.addFirstToken',
-              defaultMessage: 'Add your first API Token',
-            }}
-            action={
-              <LinkButton variant="secondary" startIcon={<Plus />} to="/settings/api-tokens/create">
-                {formatMessage({
-                  id: 'Settings.apiTokens.addNewToken',
-                  defaultMessage: 'Add new API Token',
+      {!canRead ? (
+        <Page.NoPermissions />
+      ) : (
+        <Main aria-busy={isLoading}>
+          <ContentLayout>
+            {apiTokens.length > 0 && (
+              <Table
+                permissions={{ canRead, canDelete, canUpdate }}
+                headers={headers}
+                isLoading={isLoading}
+                onConfirmDelete={handleDelete}
+                tokens={apiTokens}
+                tokenType={API_TOKEN_TYPE}
+              />
+            )}
+            {canCreate && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="10rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.addFirstToken',
+                  defaultMessage: 'Add your first API Token',
                 })}
-              </LinkButton>
-            }
-          />
-        )}
-        {canRead && !canCreate && apiTokens.length === 0 && (
-          <NoContent
-            content={{
-              id: 'Settings.apiTokens.emptyStateLayout',
-              defaultMessage: 'You don’t have any content yet...',
-            }}
-          />
-        )}
-      </ContentLayout>
-    </Main>
+                action={
+                  <LinkButton
+                    variant="secondary"
+                    startIcon={<Plus />}
+                    to="/settings/api-tokens/create"
+                  >
+                    {formatMessage({
+                      id: 'Settings.apiTokens.addNewToken',
+                      defaultMessage: 'Add new API Token',
+                    })}
+                  </LinkButton>
+                }
+              />
+            ) : null}
+            {!canCreate && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="10rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.emptyStateLayout',
+                  defaultMessage: 'You don’t have any content yet...',
+                })}
+              />
+            ) : null}
+          </ContentLayout>
+        </Main>
+      )}
+    </>
   );
 };
 
@@ -236,8 +233,8 @@ export const ProtectedListView = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

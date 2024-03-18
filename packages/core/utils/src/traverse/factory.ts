@@ -51,7 +51,7 @@ interface Interceptor<T = unknown> {
 interface ParseUtils<T> {
   transform(data: T): unknown;
   remove(key: string, data: T): unknown;
-  set(key: string, valeu: unknown, data: T): unknown;
+  set(key: string, value: unknown, data: T): unknown;
   keys(data: T): string[];
   get(key: string, data: T): unknown;
 }

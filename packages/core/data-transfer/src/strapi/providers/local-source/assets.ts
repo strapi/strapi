@@ -12,6 +12,7 @@ function getFileStream(
   isLocal = false
 ): PassThrough | ReadStream {
   if (isLocal) {
+    // Todo: handle errors
     return createReadStream(filepath);
   }
 
@@ -102,10 +103,9 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
           const fileFormatFilepath = isLocalProvider
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
-
           const fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
           const fileFormatStream = getFileStream(fileFormatFilepath, strapi, isLocalProvider);
-          const metadata = { ...fileFormat, type: format, mainHash: file.hash };
+          const metadata = { ...fileFormat, type: format, id: file.id, mainHash: file.hash };
           yield {
             metadata,
             filepath: fileFormatFilepath,

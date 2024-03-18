@@ -2,71 +2,52 @@ import { Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
 
-import { isFieldTypeNumber } from '../../../../utils/fields';
-
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';
 import { MediaSingle, MediaMultiple } from './Media';
-import { RelationSingle, RelationMultiple } from './Relations';
+import { RelationMultiple, RelationSingle } from './Relations';
 
-import type { FormattedContentTypeLayout } from '../../../../utils/layouts';
-import type { TableHeader } from '../../ListViewPage';
+import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Attribute, Entity } from '@strapi/types';
 
-interface CellContentProps extends Omit<TableHeader, 'key'> {
+interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
   content: Attribute.GetValue<Attribute.Any>;
   rowId: Entity.ID;
-  contentType: FormattedContentTypeLayout;
 }
 
-const CellContent = ({
-  content,
-  fieldSchema,
-  metadatas,
-  name,
-  rowId,
-  contentType,
-}: CellContentProps) => {
-  if (!hasContent(content, metadatas, fieldSchema)) {
+const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
+  if (!hasContent(content, mainField, attribute)) {
     return <Typography textColor="neutral800">-</Typography>;
   }
 
-  switch (fieldSchema.type) {
+  switch (attribute.type) {
     case 'media':
-      if (!fieldSchema.multiple) {
+      if (!attribute.multiple) {
         return <MediaSingle {...content} />;
       }
 
       return <MediaMultiple content={content} />;
 
     case 'relation': {
-      if (isSingleRelation(fieldSchema.relation)) {
-        return <RelationSingle metadatas={metadatas} content={content} />;
+      if (isSingleRelation(attribute.relation)) {
+        return <RelationSingle mainField={mainField} content={content} />;
       }
 
-      return (
-        <RelationMultiple
-          metadatas={metadatas}
-          content={content}
-          name={name}
-          entityId={rowId}
-          uid={contentType.uid}
-        />
-      );
+      return <RelationMultiple rowId={rowId} mainField={mainField} content={content} name={name} />;
     }
 
     case 'component':
-      if (fieldSchema.repeatable === true) {
-        return <RepeatableComponent content={content} metadatas={metadatas} />;
+      if (attribute.repeatable) {
+        return <RepeatableComponent mainField={mainField} content={content} />;
       }
 
-      return <SingleComponent content={content} metadatas={metadatas} />;
+      return <SingleComponent mainField={mainField} content={content} />;
 
     case 'string':
       return (
         <Tooltip description={content}>
           <TypographyMaxWidth ellipsis textColor="neutral800">
-            <CellValue type={fieldSchema.type} value={content} />
+            <CellValue type={attribute.type} value={content} />
           </TypographyMaxWidth>
         </Tooltip>
       );
@@ -74,7 +55,7 @@ const CellContent = ({
     default:
       return (
         <TypographyMaxWidth ellipsis textColor="neutral800">
-          <CellValue type={fieldSchema.type} value={content} />
+          <CellValue type={attribute.type} value={content} />
         </TypographyMaxWidth>
       );
   }
@@ -86,16 +67,14 @@ const TypographyMaxWidth = styled(Typography)`
 
 const hasContent = (
   content: CellContentProps['content'],
-  metadatas: CellContentProps['metadatas'],
-  fieldSchema: CellContentProps['fieldSchema']
+  mainField: CellContentProps['mainField'],
+  attribute: CellContentProps['attribute']
 ) => {
-  if (fieldSchema.type === 'component') {
-    const { mainField } = metadatas;
-
+  if (attribute.type === 'component') {
     // Repeatable fields show the ID as fallback, in case the mainField
     // doesn't have any content
-    if (fieldSchema?.repeatable || !mainField) {
-      return content.length > 0;
+    if (attribute.repeatable || !mainField) {
+      return content?.length > 0;
     }
 
     const value = content?.[mainField.name];
@@ -105,25 +84,11 @@ const hasContent = (
       return true;
     }
 
-    /* The ID field reports itself as type `integer`, which makes it
-       impossible to distinguish it from other number fields.
-
-       Biginteger fields need to be treated as strings, as `isNumber`
-       doesn't deal with them.
-    */
-    if (
-      isFieldTypeNumber(mainField.type) &&
-      mainField.type !== 'biginteger' &&
-      mainField.name !== 'id'
-    ) {
-      return typeof value === 'number';
-    }
-
     return !isEmpty(value);
   }
 
-  if (fieldSchema.type === 'relation') {
-    if (isSingleRelation(fieldSchema.relation)) {
+  if (attribute.type === 'relation') {
+    if (isSingleRelation(attribute.relation)) {
       return !isEmpty(content);
     }
 
@@ -134,11 +99,11 @@ const hasContent = (
       Biginteger fields need to be treated as strings, as `isNumber`
       doesn't deal with them.
   */
-  if (isFieldTypeNumber(fieldSchema.type) && fieldSchema.type !== 'biginteger') {
+  if (['integer', 'decimal', 'float', 'number'].includes(attribute.type)) {
     return typeof content === 'number';
   }
 
-  if (fieldSchema.type === 'boolean') {
+  if (attribute.type === 'boolean') {
     return content !== null;
   }
 
@@ -146,7 +111,7 @@ const hasContent = (
 };
 
 const isSingleRelation = (
-  type: Extract<CellContentProps['fieldSchema'], { type: 'relation' }>['relation']
+  type: Extract<CellContentProps['attribute'], { type: 'relation' }>['relation']
 ) => ['oneToOne', 'manyToOne', 'oneToOneMorph'].includes(type);
 
 export { CellContent };

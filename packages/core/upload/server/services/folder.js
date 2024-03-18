@@ -1,7 +1,7 @@
 'use strict';
 
 const { keys, sortBy, omit, map, isUndefined } = require('lodash/fp');
-const { joinBy, setCreatorFields } = require('@strapi/utils');
+const { strings, setCreatorFields } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 
@@ -11,13 +11,16 @@ const setPathIdAndPath = async (folder) => {
   const pathId = max + 1;
   let parentPath = '/';
   if (folder.parent) {
-    const parentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, folder.parent);
+    const parentFolder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .findOne({ where: { id: folder.parent } });
+
     parentPath = parentFolder.path;
   }
 
   return Object.assign(folder, {
     pathId,
-    path: joinBy('/', parentPath, pathId),
+    path: strings.joinBy('/', parentPath, pathId),
   });
 };
 
@@ -29,7 +32,7 @@ const create = async (folderData, { user } = {}) => {
     enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
   }
 
-  const folder = await strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
+  const folder = await strapi.db.query(FOLDER_MODEL_UID).create({ data: enrichedFolder });
 
   strapi.eventHub.emit('media-folder.create', { folder });
 
@@ -92,7 +95,7 @@ const deleteByIds = async (ids = []) => {
 const update = async (id, { name, parent }, { user }) => {
   // only name is updated
   if (isUndefined(parent)) {
-    const existingFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id);
+    const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
 
     if (!existingFolder) {
       return undefined;
@@ -101,7 +104,10 @@ const update = async (id, { name, parent }, { user }) => {
     const newFolder = setCreatorFields({ user, isEdition: true })({ name, parent });
 
     if (isUndefined(parent)) {
-      const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+      const folder = await strapi.db
+        .query(FOLDER_MODEL_UID)
+        .update({ where: { id }, data: newFolder });
+
       return folder;
     }
     // location is updated => using transaction
@@ -166,7 +172,7 @@ const update = async (id, { name, parent }, { user }) => {
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
             pathColumnName,
             existingFolder.path,
-            joinBy('/', destinationFolderPath, existingFolder.pathId),
+            strings.joinBy('/', destinationFolderPath, existingFolder.pathId),
           ])
         );
 
@@ -181,7 +187,7 @@ const update = async (id, { name, parent }, { user }) => {
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
             folderPathColumnName,
             existingFolder.path,
-            joinBy('/', destinationFolderPath, existingFolder.pathId),
+            strings.joinBy('/', destinationFolderPath, existingFolder.pathId),
           ])
         );
 
@@ -193,7 +199,10 @@ const update = async (id, { name, parent }, { user }) => {
 
     // update less critical information (name + updatedBy)
     const newFolder = setCreatorFields({ user, isEdition: true })({ name });
-    const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+
+    const folder = await strapi.db
+      .query(FOLDER_MODEL_UID)
+      .update({ where: { id }, data: newFolder });
 
     strapi.eventHub.emit('media-folder.update', { folder });
     return folder;
@@ -206,7 +215,7 @@ const update = async (id, { name, parent }, { user }) => {
  * @returns {Promise<boolean>}
  */
 const exists = async (params = {}) => {
-  const count = await strapi.query(FOLDER_MODEL_UID).count({ where: params });
+  const count = await strapi.db.query(FOLDER_MODEL_UID).count({ where: params });
   return count > 0;
 };
 

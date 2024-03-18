@@ -14,15 +14,16 @@ let graphqlQuery;
 // Utils
 const selectFields = pick(['name']);
 
-const documentModel = {
+const articleModel = {
   attributes: {
     name: {
       type: 'richtext',
     },
   },
-  singularName: 'document',
-  pluralName: 'documents',
-  displayName: 'Document',
+  draftAndPublish: true,
+  singularName: 'article',
+  pluralName: 'articles',
+  displayName: 'Article',
   description: '',
   collectionName: '',
 };
@@ -32,13 +33,14 @@ const labelModel = {
     name: {
       type: 'richtext',
     },
-    documents: {
+    articles: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'api::document.document',
+      target: 'api::article.article',
       targetAttribute: 'labels',
     },
   },
+  draftAndPublish: true,
   singularName: 'label',
   pluralName: 'labels',
   displayName: 'Label',
@@ -47,25 +49,28 @@ const labelModel = {
 };
 
 const labels = [{ name: 'label 1' }, { name: 'label 2' }];
-const documents = ({ label: labels }) => {
+
+const articles = ({ label: labels }) => {
   const labelIds = labels.map((label) => label.id);
   return [
-    { name: 'document 1', labels: labelIds },
-    { name: 'document 2', labels: labelIds },
+    { name: 'article 1', documentId: 'article-1', publishedAt: new Date(), labels: labelIds },
+    { name: 'article 1', documentId: 'article-1', publishedAt: null, labels: labelIds },
+    { name: 'article 2', documentId: 'article-2', publishedAt: new Date(), labels: labelIds },
+    { name: 'article 2', documentId: 'article-2', publishedAt: null, labels: labelIds },
   ];
 };
 
 describe('Test Graphql Relations with Draft and Publish enabled', () => {
   const data = {
     labels: [],
-    documents: [],
+    articles: [],
   };
 
   beforeAll(async () => {
     await builder
-      .addContentTypes([documentModel, labelModel])
+      .addContentTypes([articleModel, labelModel])
       .addFixtures(labelModel.singularName, labels)
-      .addFixtures(documentModel.singularName, documents)
+      .addFixtures(articleModel.singularName, articles)
       .build();
 
     strapi = await createStrapiInstance();
@@ -90,9 +95,9 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            labels {
+            labels_connection {
               data {
-                id
+                documentId
                 attributes {
                   name
                 }
@@ -107,28 +112,31 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          labels: {
-            data: labels.map((label) => ({ id: expect.any(String), attributes: label })),
+          labels_connection: {
+            data: labels.map((label) => ({
+              documentId: expect.any(String),
+              attributes: pick('name', label),
+            })),
           },
         },
       });
 
       // assign for later use
-      data.labels = data.labels.concat(res.body.data.labels.data);
+      data.labels = data.labels.concat(res.body.data.labels_connection.data);
     });
 
-    test('List preview documents with labels', async () => {
+    test('List preview articles with labels', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            documents(publicationState: PREVIEW) {
+            articles_connection(status: DRAFT) {
               data {
-                id
+                documentId
                 attributes {
                   name
                   labels {
                     data {
-                      id
+                      documentId
                       attributes {
                         name
                       }
@@ -146,23 +154,23 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          documents: {
-            data: expect.arrayContaining(data.documents),
+          articles_connection: {
+            data: expect.arrayContaining(data.articles),
           },
         },
       });
 
       // assign for later use
-      data.documents = res.body.data.documents.data;
+      data.articles = res.body.data.articles_connection.data;
     });
 
-    test('Publish document', async () => {
+    test('Publish article', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation publishDocument($id: ID!, $data: DocumentInput!) {
-            updateDocument(id: $id, data: $data) {
+          mutation publishArticle($documentId: ID!, $data: ArticleInput!) {
+            updateArticle(documentId: $documentId, data: $data, status: PUBLISHED) {
               data {
-                id
+                documentId
                 attributes {
                   name
                   publishedAt
@@ -172,10 +180,8 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
           }
         `,
         variables: {
-          id: data.documents[0].id,
-          data: {
-            publishedAt: new Date().toISOString(),
-          },
+          documentId: data.articles[0].documentId,
+          data: {},
         },
       });
 
@@ -184,11 +190,11 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          updateDocument: {
+          updateArticle: {
             data: {
-              id: data.documents[0].id,
+              documentId: data.articles[0].documentId,
               attributes: {
-                name: data.documents[0].attributes.name,
+                name: data.articles[0].attributes.name,
                 publishedAt: expect.any(String),
               },
             },
@@ -197,18 +203,18 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       });
     });
 
-    test('List labels with live documents', async () => {
+    test('List labels with live articles', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            labels {
+            labels_connection {
               data {
-                id
+                documentId
                 attributes {
                   name
-                  documents {
+                  articles_connection {
                     data {
-                      id
+                      documentId
                       attributes {
                         name
                         publishedAt
@@ -227,19 +233,19 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          labels: {
+          labels_connection: {
             data: expect.arrayContaining(
               data.labels.map((label) => ({
-                id: label.id,
+                documentId: label.documentId,
                 attributes: {
                   ...label.attributes,
-                  documents: {
+                  articles_connection: {
                     data: expect.arrayContaining(
-                      // Only the first document is published
-                      data.documents.slice(0, 1).map((document) => ({
-                        id: document.id,
+                      // Only the first article is published
+                      data.articles.slice(0, 1).map((article) => ({
+                        documentId: article.documentId,
                         attributes: {
-                          ...selectFields(document.attributes),
+                          ...selectFields(article.attributes),
                           publishedAt: expect.any(String),
                         },
                       }))
@@ -253,18 +259,18 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       });
     });
 
-    test('List labels with preview documents', async () => {
+    test('List labels with preview articles', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            labels {
+            labels_connection {
               data {
-                id
+                documentId
                 attributes {
                   name
-                  documents(publicationState: PREVIEW) {
+                  articles_connection {
                     data {
-                      id
+                      documentId
                       attributes {
                         name
                       }
@@ -282,18 +288,18 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          labels: {
+          labels_connection: {
             data: expect.arrayContaining(
               data.labels.map((label) => ({
-                id: label.id,
+                documentId: label.documentId,
                 attributes: {
                   ...label.attributes,
-                  documents: {
+                  articles_connection: {
                     data: expect.arrayContaining(
-                      // All documents should be returned, even if they are not published
-                      data.documents.map((document) => ({
-                        id: document.id,
-                        attributes: selectFields(document.attributes),
+                      // All articles should be returned, even if they are not published
+                      data.articles.map((article) => ({
+                        documentId: article.documentId,
+                        attributes: selectFields(article.attributes),
                       }))
                     ),
                   },

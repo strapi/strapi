@@ -1,8 +1,7 @@
-import React, { PropsWithChildren } from 'react';
+import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import { Link, SettingsPageTitle } from '@strapi/helper-plugin';
-import { ArrowLeft } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
@@ -22,29 +21,13 @@ const DragLayerRendered = () => {
   );
 };
 
-const Root: React.FC<PropsWithChildren> = ({ children }) => {
+const Root: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <Layout>
       <Main tabIndex={-1}>
         <ContentLayout>{children}</ContentLayout>
       </Main>
     </Layout>
-  );
-};
-
-type BackProps = {
-  href: string;
-};
-const Back: React.FC<BackProps> = ({ href }) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    <Link startIcon={<ArrowLeft />} to={href}>
-      {formatMessage({
-        id: 'global.back',
-        defaultMessage: 'Back',
-      })}
-    </Link>
   );
 };
 
@@ -56,9 +39,17 @@ type HeaderProps = {
   subtitle?: React.ReactNode;
 };
 const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, primaryAction }) => {
+  const { formatMessage } = useIntl();
   return (
     <>
-      <SettingsPageTitle name={title} />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: title,
+          }
+        )}
+      />
       <HeaderLayout
         navigationAction={navigationAction}
         primaryAction={primaryAction}
@@ -69,4 +60,4 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, prim
   );
 };
 
-export { Back, DragLayerRendered, Header, Root };
+export { DragLayerRendered, Header, Root };

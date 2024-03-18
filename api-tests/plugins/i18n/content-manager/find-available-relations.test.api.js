@@ -24,6 +24,7 @@ const productModel = {
       type: 'string',
     },
   },
+  draftAndPublish: false,
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',
@@ -48,6 +49,7 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
+  draftAndPublish: false,
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
@@ -57,6 +59,10 @@ const shops = [
   {
     name: 'market',
     locale: 'en',
+  },
+  {
+    name: 'mercato',
+    locale: 'it',
   },
 ];
 
@@ -103,6 +109,9 @@ describe('i18n - Find available relations', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -111,24 +120,27 @@ describe('i18n - Find available relations', () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/relations/api::shop.shop/products',
+      qs: { locale: 'en', status: 'published' },
     });
 
+    const expectedObj = {
+      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[1]),
+    };
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[1])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 
   test('Can filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
       url: '/content-manager/relations/api::shop.shop/products',
-      qs: { locale: 'it' },
+      qs: { locale: 'it', status: 'published' },
     });
 
+    const expectedObj = {
+      ...pick(['id', 'name', 'publishedAt', 'documentId', 'locale', 'updatedAt'], data.products[0]),
+    };
     expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(
-      pick(['id', 'name', 'publishedAt'], data.products[0])
-    );
+    expect(res.body.results[0]).toStrictEqual(expectedObj);
   });
 });

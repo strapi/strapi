@@ -8,7 +8,7 @@
     "deploy": "docusaurus deploy",
     "docusaurus": "docusaurus",
     "serve": "docusaurus serve",
-    "start": "docusaurus start",
+    "start": "TYPEDOC_WATCH=true docusaurus start",
     "swizzle": "docusaurus swizzle",
     "write-heading-ids": "docusaurus write-heading-ids",
     "write-translations": "docusaurus write-translations"
@@ -35,6 +35,10 @@
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.2.0"
+    "@docusaurus/module-type-aliases": "2.2.0",
+    "docusaurus-plugin-typedoc": "0.22.0",
+    "typedoc": "0.25.9",
+    "typedoc-plugin-markdown": "3.17.1",
+    "typescript": "5.3.3"
   }
 }

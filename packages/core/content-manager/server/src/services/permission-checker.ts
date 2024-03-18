@@ -1,4 +1,4 @@
-import { pipeAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { LoadedStrapi as Strapi, EntityService, Common } from '@strapi/types';
 
 const ACTIONS = {
@@ -8,6 +8,7 @@ const ACTIONS = {
   delete: 'plugin::content-manager.explorer.delete',
   publish: 'plugin::content-manager.explorer.publish',
   unpublish: 'plugin::content-manager.explorer.publish',
+  discard: 'plugin::content-manager.explorer.update',
 } as const;
 
 type Entity = EntityService.Result<Common.UID.ContentType>;
@@ -75,7 +76,7 @@ const createPermissionChecker =
     };
 
     const sanitizedQuery = (query: Query, action: { action?: string } = {}) => {
-      return pipeAsync(
+      return async.pipe(
         (q: Query) => sanitizeQuery(q, action),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);

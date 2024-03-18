@@ -2,16 +2,17 @@
 import { Plugin as IPlugin } from '@strapi/helper-plugin';
 
 export interface PluginConfig
-  extends Pick<IPlugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady' | 'name'> {
+  extends Partial<Pick<IPlugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>> {
+  name: string;
   id: string;
 }
 
 export class Plugin implements IPlugin {
-  apis: PluginConfig['apis'];
-  initializer: PluginConfig['initializer'];
-  injectionZones: PluginConfig['injectionZones'];
-  isReady: PluginConfig['isReady'];
-  name: PluginConfig['name'];
+  apis: IPlugin['apis'];
+  initializer: IPlugin['initializer'] | null;
+  injectionZones: IPlugin['injectionZones'];
+  isReady: IPlugin['isReady'];
+  name: IPlugin['name'];
   pluginId: PluginConfig['id'];
 
   constructor(pluginConf: PluginConfig) {

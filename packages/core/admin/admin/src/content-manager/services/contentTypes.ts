@@ -14,7 +14,10 @@ const contentTypesApi = contentManagerApi.injectEndpoints({
       }),
       transformResponse: (response: Contracts.ContentTypes.FindContentTypeConfiguration.Response) =>
         response.data,
-      providesTags: (_result, _error, uid) => [{ type: 'ContentTypesConfiguration', id: uid }],
+      providesTags: (_result, _error, uid) => [
+        { type: 'ContentTypesConfiguration', id: uid },
+        { type: 'ContentTypeSettings', id: 'LIST' },
+      ],
     }),
     getAllContentTypeSettings: builder.query<
       Contracts.ContentTypes.FindContentTypesSettings.Response['data'],

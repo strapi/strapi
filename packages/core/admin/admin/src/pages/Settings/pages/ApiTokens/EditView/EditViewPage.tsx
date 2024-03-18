@@ -2,21 +2,20 @@ import * as React from 'react';
 
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  Form,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFocusWhenNavigate,
-  useGuidedTour,
   useNotification,
   useOverlayBlocker,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
+import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
+import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import {
   useCreateAPITokenMutation,
@@ -34,7 +33,6 @@ import {
   ApiTokenPermissionsProvider,
 } from './apiTokenPermissions';
 import { FormApiTokenContainer } from './components/FormApiTokenContainer';
-import { LoadingView } from './components/LoadingView';
 import { Permissions } from './components/Permissions';
 import { schema } from './constants';
 import { initialState, reducer } from './reducer';
@@ -60,7 +58,7 @@ export const EditView = () => {
       : null
   );
   const { trackUsage } = useTracking();
-  const { setCurrentStep } = useGuidedTour();
+  const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions.settings?.['api-tokens']);
@@ -201,8 +199,8 @@ export const EditView = () => {
       if (isCreating) {
         const res = await createToken({
           ...body,
-          // in case a token has a lifespan of "unlimited" the API only accepts zero as a number
-          lifespan: body.lifespan === '0' ? parseInt(body.lifespan) : null,
+          // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
+          lifespan: body?.lifespan || null,
           permissions: body.type === 'custom' ? state.selectedActions : null,
         });
 
@@ -327,13 +325,18 @@ export const EditView = () => {
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
 
   if (isLoading) {
-    return <LoadingView apiTokenName={apiToken?.name} />;
+    return <Page.Loading />;
   }
 
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
       <Main>
-        <SettingsPageTitle name="API Tokens" />
+        <Helmet
+          title={formatMessage(
+            { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+            { name: 'API Tokens' }
+          )}
+        />
         <Formik
           validationSchema={schema}
           validateOnChange={false}
@@ -341,7 +344,7 @@ export const EditView = () => {
             name: apiToken?.name || '',
             description: apiToken?.description || '',
             type: apiToken?.type,
-            lifespan: apiToken?.lifespan ? apiToken.lifespan.toString() : apiToken?.lifespan,
+            lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions)}
@@ -354,7 +357,6 @@ export const EditView = () => {
             return (
               <Form>
                 <FormHead
-                  backUrl="/settings/api-tokens"
                   title={{
                     id: 'Settings.apiTokens.createPage.title',
                     defaultMessage: 'Create API Token',
@@ -406,8 +408,8 @@ export const ProtectedEditView = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <EditView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

@@ -1,8 +1,8 @@
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { CoreApi, Schema } from '@strapi/types';
 
-import createSingleTypeService from './single-type';
-import createCollectionTypeService from './collection-type';
+import { createSingleTypeService } from './single-type';
+import { createCollectionTypeService } from './collection-type';
 
 const isSingleType = (contentType: Schema.ContentType): contentType is Schema.SingleType =>
   contentTypeUtils.isSingleType(contentType);
@@ -19,10 +19,10 @@ function createService({
   contentType: Schema.CollectionType | Schema.SingleType;
 }): CoreApi.Service.SingleType | CoreApi.Service.CollectionType {
   if (isSingleType(contentType)) {
-    return createSingleTypeService({ contentType });
+    return createSingleTypeService(contentType);
   }
 
-  return createCollectionTypeService({ contentType });
+  return createCollectionTypeService(contentType);
 }
 
 export { createService };

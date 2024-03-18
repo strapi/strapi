@@ -1,8 +1,8 @@
 import { curry, isEmpty, isNil, isArray, isObject } from 'lodash/fp';
 
-import { pipeAsync } from '../async';
+import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
-import { isScalarAttribute } from '../content-types';
+import { isScalarAttribute, constants } from '../content-types';
 
 import {
   traverseQueryFilters,
@@ -16,10 +16,13 @@ import {
   removePrivate,
   removeDynamicZones,
   removeMorphToRelations,
+  expandWildcardPopulate,
 } from './visitors';
 import { isOperator } from '../operators';
 
 import type { Model, Data } from '../types';
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
@@ -54,7 +57,7 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
 
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not checking it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -94,7 +97,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
       ({ key, attribute }, { remove }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not checking it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -117,7 +120,7 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
       ({ key, attribute, value }, { remove }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -140,7 +143,7 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
       ({ key, attribute }, { remove }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not checking it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
@@ -164,6 +167,7 @@ const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
     throw new Error('Missing schema in defaultSanitizePopulate');
   }
   return pipeAsync(
+    traverseQueryPopulate(expandWildcardPopulate, { schema }),
     traverseQueryPopulate(
       async ({ key, value, schema, attribute }, { set }) => {
         if (attribute) {
@@ -180,6 +184,10 @@ const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
 
         if (key === 'fields') {
           set(key, await defaultSanitizeFields(schema, value));
+        }
+
+        if (key === 'populate') {
+          set(key, await defaultSanitizePopulate(schema, value));
         }
       },
       { schema }

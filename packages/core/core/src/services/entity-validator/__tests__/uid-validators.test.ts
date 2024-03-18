@@ -8,9 +8,11 @@ describe('UID validator', () => {
   const fakeFindFirst = jest.fn();
 
   global.strapi = {
-    documents: () => ({
-      findFirst: fakeFindFirst,
-    }),
+    db: {
+      query: () => ({
+        findOne: fakeFindFirst,
+      }),
+    },
   } as any;
 
   afterEach(() => {
@@ -95,9 +97,11 @@ describe('UID validator', () => {
 
       expect(await validator(valueToCheck)).toBe(valueToCheck);
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrUidUnique: valueToCheck },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrUidUnique: valueToCheck,
+        },
       });
     });
 
@@ -161,9 +165,11 @@ describe('UID validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrUidUnique: valueToCheck },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrUidUnique: valueToCheck,
+        },
       });
     });
 
@@ -185,9 +191,11 @@ describe('UID validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrUidUnique: valueToCheck },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          publishedAt: null,
+          attrUidUnique: valueToCheck,
+        },
       });
     });
   });

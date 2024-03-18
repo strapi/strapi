@@ -1,12 +1,10 @@
 import * as React from 'react';
 
-import {
-  LoadingIndicatorPage,
-  useStrapiApp,
-  type StrapiAppContextValue,
-} from '@strapi/helper-plugin';
+import { useStrapiApp, type StrapiAppContextValue } from '@strapi/helper-plugin';
 import produce from 'immer';
 import set from 'lodash/set';
+
+import { Page } from '../components/PageHelpers';
 
 /**
  * TODO: this isn't great, and we really should focus on fixing this.
@@ -65,7 +63,7 @@ const PluginsInitializer = ({ children }: { children: React.ReactNode }) => {
     return (
       <>
         {initializers}
-        <LoadingIndicatorPage />
+        <Page.Loading />
       </>
     );
   }

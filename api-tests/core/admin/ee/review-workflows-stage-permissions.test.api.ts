@@ -12,6 +12,7 @@ const model = {
   pluralName: 'products',
   displayName: 'Product',
   kind: 'collectionType',
+  draftAndPublish: true,
   attributes: {
     name: {
       type: 'string',
@@ -140,7 +141,7 @@ describe.skip('Review workflows', () => {
       });
 
       // Validate that permissions have been removed from database
-      const deletedPermission = await strapi.query('admin::permission').findOne({
+      const deletedPermission = await strapi.db.query('admin::permission').findOne({
         where: {
           id: workflow.stages[0].permissions[1].id,
         },
@@ -168,7 +169,7 @@ describe.skip('Review workflows', () => {
       });
 
       // Deleted stage permissions should be removed from database
-      const permissions = await strapi.query('admin::permission').findMany({
+      const permissions = await strapi.db.query('admin::permission').findMany({
         where: {
           id: { $in: workflow.stages[0].permissions.map((p) => p.id) },
         },
@@ -191,7 +192,7 @@ describe.skip('Review workflows', () => {
       await deleteWorkflow(workflow.id);
 
       // Deleted workflow permissions should be removed from database
-      const permissions = await strapi.query('admin::permission').findMany({
+      const permissions = await strapi.db.query('admin::permission').findMany({
         where: {
           id: { $in: workflow.stages[0].permissions.map((p) => p.id) },
         },

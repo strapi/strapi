@@ -1,12 +1,12 @@
 import { memo } from 'react';
 
 import { Button } from '@strapi/design-system';
-import { CheckPermissions } from '@strapi/helper-plugin';
+import { type Permission, useRBAC } from '@strapi/helper-plugin';
 import { Layer } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
-const cmPermissions = {
+const cmPermissions: Record<string, Permission[]> = {
   collectionTypesConfigurations: [
     {
       action: 'plugin::content-manager.collection-types.configure-view',
@@ -74,18 +74,25 @@ export const LinkToCMSettingsView = memo(
     if (!isInContentTypeView) {
       permissionsToApply = componentsConfigurations;
     }
+    const {
+      allowedActions: { canViewConfig },
+    } = useRBAC({
+      viewConfig: permissionsToApply,
+    });
+
+    if (!canViewConfig) {
+      return null;
+    }
 
     return (
-      <CheckPermissions permissions={permissionsToApply}>
-        <Button
-          startIcon={<Layer />}
-          variant="tertiary"
-          onClick={handleClick}
-          disabled={isTemporary || disabled}
-        >
-          {label}
-        </Button>
-      </CheckPermissions>
+      <Button
+        startIcon={<Layer />}
+        variant="tertiary"
+        onClick={handleClick}
+        disabled={isTemporary || disabled}
+      >
+        {label}
+      </Button>
     );
   }
 );

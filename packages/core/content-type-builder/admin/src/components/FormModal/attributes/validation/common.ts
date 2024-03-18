@@ -1,4 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { snakeCase } from 'lodash/fp';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
@@ -16,7 +17,12 @@ const alreadyUsedAttributeNames = (
       if (!value) {
         return false;
       }
-      return !usedNames.includes(value);
+      const snakeCaseKey = snakeCase(value);
+
+      return !usedNames.some((existingKey) => {
+        if (existingKey === value) return false; // don't compare against itself
+        return snakeCase(existingKey) === snakeCaseKey;
+      });
     },
   };
 };
@@ -47,8 +53,11 @@ const isNameAllowed = (
       if (!value) {
         return false;
       }
+      const snakeCaseKey = snakeCase(value);
 
-      return !reservedNames.includes(value);
+      return !reservedNames.some((existingKey) => {
+        return snakeCase(existingKey) === snakeCaseKey;
+      });
     },
   };
 };

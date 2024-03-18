@@ -1,7 +1,7 @@
 'use strict';
 
 import { omit } from 'lodash/fp';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest, createRequest } from 'api-tests/request';
@@ -20,6 +20,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const productUID = 'api::product.product';
 const model = {
   pluginOptions: {},
+  draftAndPublish: false,
   singularName: 'product',
   pluralName: 'products',
   displayName: 'Product',
@@ -55,11 +56,6 @@ describe.skip('Review workflows', () => {
       method: 'POST',
       url: `/content-manager/collection-types/${uid}`,
       body: data,
-    });
-
-    await requests.admin({
-      method: 'POST',
-      url: `/content-manager/collection-types/${uid}/${body.id}/actions/publish`,
     });
 
     return body;
@@ -111,13 +107,13 @@ describe.skip('Review workflows', () => {
     // @ts-expect-error - We don't have the type for this
     requests.public = createRequest({ strapi }).setToken(await getFullAccessToken());
 
-    defaultStage = await strapi.query(STAGE_MODEL_UID).create({
+    defaultStage = await strapi.db.query(STAGE_MODEL_UID).create({
       data: { name: 'Stage' },
     });
-    secondStage = await strapi.query(STAGE_MODEL_UID).create({
+    secondStage = await strapi.db.query(STAGE_MODEL_UID).create({
       data: { name: 'Stage 2' },
     });
-    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
+    testWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).create({
       data: {
         contentTypes: [],
         name: 'workflow',
@@ -132,18 +128,18 @@ describe.skip('Review workflows', () => {
   });
 
   beforeEach(async () => {
-    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).update({
+    testWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).update({
       where: { id: testWorkflow.id },
       data: {
         uid: 'workflow',
         stages: { set: [defaultStage.id, secondStage.id] },
       },
     });
-    defaultStage = await strapi.query(STAGE_MODEL_UID).update({
+    defaultStage = await strapi.db.query(STAGE_MODEL_UID).update({
       where: { id: defaultStage.id },
       data: { name: 'Stage' },
     });
-    secondStage = await strapi.query(STAGE_MODEL_UID).update({
+    secondStage = await strapi.db.query(STAGE_MODEL_UID).update({
       where: { id: secondStage.id },
       data: { name: 'Stage 2' },
     });
@@ -812,7 +808,7 @@ describe.skip('Review workflows', () => {
 
       // Move half of the entries to the last stage,
       // and the other half to the first stage
-      await mapAsync(products.results, async (entity) =>
+      await async.map(products.results, async (entity) =>
         updateEntry(productUID, entity.id, {
           [ENTITY_STAGE_ATTRIBUTE]: entity.id % 2 ? defaultStage.id : secondStage.id,
         })

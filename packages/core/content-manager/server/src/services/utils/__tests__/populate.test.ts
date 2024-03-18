@@ -150,7 +150,7 @@ describe('Populate', () => {
       const result = getDeepPopulate(uid as any);
 
       expect(result).toEqual({
-        mediaAttrName: { populate: 'folder' },
+        mediaAttrName: { populate: { folder: true } },
       });
     });
   });

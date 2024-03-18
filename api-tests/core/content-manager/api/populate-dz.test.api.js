@@ -137,11 +137,16 @@ describe.skip('CM API - Populate dz', () => {
         dz: [
           {
             __component: 'default.compo-a',
-            items: { id: 2, title: 'AAAA', category: data.categories[0].id },
+            items: { id: 2, title: 'AAAA', category: data.categories[0].documentId },
           },
           {
             __component: 'default.compo-b',
-            items: { id: 2, name: 'BBBB', category_diff: data.categories[0].id, category: 'smthg' },
+            items: {
+              id: 2,
+              name: 'BBBB',
+              category_diff: data.categories[0].documentId,
+              category: 'smthg',
+            },
           },
         ],
       },
@@ -149,9 +154,9 @@ describe.skip('CM API - Populate dz', () => {
 
     expect(productRes.status).toBe(200);
 
-    data.productsWithDz.push(productRes.body);
+    data.productsWithDz.push(productRes.body.data);
 
-    expect(productRes.body).toMatchObject({
+    expect(productRes.body.data).toMatchObject({
       name: 'name',
       dz: [
         {

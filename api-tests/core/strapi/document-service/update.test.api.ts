@@ -2,7 +2,7 @@ import { LoadedStrapi } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticleDb } from './utils';
+import { ARTICLE_UID, findArticleDb, switchIdForDocumentId } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
@@ -81,12 +81,12 @@ describe('Document Service', () => {
     it(
       'update a document locale',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-FR' });
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
         const newName = 'updated document';
 
         // Update an existing locale of a document
         const article = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
-          locale: 'fr',
+          locale: 'nl',
           data: { title: newName },
         });
 
@@ -100,8 +100,8 @@ describe('Document Service', () => {
         // verify it was updated in the database
         const updatedArticleDb = await findArticleDb({ title: newName });
         expect(updatedArticleDb).toMatchObject({
-          id: articleDb.id,
-          locale: 'fr',
+          documentId: articleDb.documentId,
+          locale: 'nl',
           title: newName,
           updatedAt: article.updatedAt,
         });

@@ -1,13 +1,20 @@
 import { curry, isEmpty, isNil } from 'lodash/fp';
 
-import { pipeAsync } from '../async';
+import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
-import { isScalarAttribute } from '../content-types';
-import { traverseQueryFilters, traverseQuerySort, traverseQueryFields } from '../traverse';
+import { isScalarAttribute, constants } from '../content-types';
+import {
+  traverseQueryFilters,
+  traverseQuerySort,
+  traverseQueryFields,
+  traverseQueryPopulate,
+} from '../traverse';
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 import { throwInvalidParam } from './utils';
 import type { Model, Data } from '../types';
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 const throwPasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {
@@ -25,17 +32,17 @@ const defaultValidateFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
     // keys that are not attributes or valid operators
     traverseQueryFilters(
-      ({ key, attribute }) => {
+      ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
         const isAttribute = !!attribute;
 
         if (!isAttribute && !isOperator(key)) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -60,15 +67,15 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
   return pipeAsync(
     // non attribute keys
     traverseQuerySort(
-      ({ key, attribute }) => {
+      ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
         if (!attribute) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -83,15 +90,15 @@ const defaultValidateSort = curry((schema: Model, sort: unknown) => {
     traverseQuerySort(throwPassword, { schema }),
     // keys for empty non-scalar values
     traverseQuerySort(
-      ({ key, attribute, value }) => {
+      ({ key, attribute, value, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -106,15 +113,15 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
   return pipeAsync(
     // Only allow scalar attributes
     traverseQueryFields(
-      ({ key, attribute }) => {
+      ({ key, attribute, path }) => {
         // ID is not an attribute per se, so we need to make
         // an extra check to ensure we're not removing it
-        if (key === 'id') {
+        if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
           return;
         }
 
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
-          throwInvalidParam({ key });
+          throwInvalidParam({ key, path: path.attribute });
         }
       },
       { schema }
@@ -126,4 +133,44 @@ const defaultValidateFields = curry((schema: Model, fields: unknown) => {
   )(fields);
 });
 
-export { throwPasswords, defaultValidateFilters, defaultValidateSort, defaultValidateFields };
+const defaultValidatePopulate = curry((schema: Model, populate: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultValidatePopulate');
+  }
+
+  return pipeAsync(
+    traverseQueryPopulate(
+      async ({ key, value, schema, attribute }, { set }) => {
+        if (attribute) {
+          return;
+        }
+
+        if (key === 'sort') {
+          set(key, await defaultValidateSort(schema, value));
+        }
+
+        if (key === 'filters') {
+          set(key, await defaultValidateFilters(schema, value));
+        }
+
+        if (key === 'fields') {
+          set(key, await defaultValidateFields(schema, value));
+        }
+
+        if (key === 'populate') {
+          set(key, await defaultValidatePopulate(schema, value));
+        }
+      },
+      { schema }
+    ),
+    // Remove private fields
+    traverseQueryPopulate(throwPrivate, { schema })
+  )(populate);
+});
+export {
+  throwPasswords,
+  defaultValidateFilters,
+  defaultValidateSort,
+  defaultValidateFields,
+  defaultValidatePopulate,
+};

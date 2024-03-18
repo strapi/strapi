@@ -1,14 +1,13 @@
-import { Middleware } from '@reduxjs/toolkit';
-import { Permission } from '@strapi/helper-plugin';
-
-import { RootState } from '../store/reducers';
+import type { Middleware } from '@reduxjs/toolkit';
+import type { Permission } from '@strapi/helper-plugin';
+import type { Store } from '@strapi/strapi/admin';
 
 /**
  * TODO: is it possible to get the action types? How do we do it
  * when actions are spread across multiple packages e.g. content-manager
  * or content-type-builder?
  */
-const localePermissionMiddleware: () => Middleware<object, RootState> =
+const localePermissionMiddleware: () => Middleware<object, ReturnType<Store['getState']>> =
   () => () => (next) => (action) => {
     if (action.type !== 'ContentManager/RBACManager/SET_PERMISSIONS') {
       return next(action);

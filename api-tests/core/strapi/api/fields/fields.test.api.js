@@ -14,8 +14,9 @@ const data = { product: [] };
 const getProductDataFields = (fields) => {
   return data.product.map((product) => {
     return {
-      ...product,
-      attributes: fields.length > 0 ? _.pick(product.attributes, fields) : product.attributes,
+      id: product.id,
+      documentId: product.documentId,
+      ...(fields.length > 0 ? _.pick(product, fields) : product),
     };
   });
 };
@@ -105,10 +106,7 @@ describe('Field selection API', () => {
 
     const sanitizedFixtures = await builder.sanitizedFixtures(strapi);
 
-    Object.assign(
-      data,
-      _.mapValues(sanitizedFixtures, (value) => transformToRESTResource(value))
-    );
+    Object.assign(data, sanitizedFixtures);
   });
 
   afterAll(async () => {
@@ -141,8 +139,13 @@ describe('Field selection API', () => {
 
     describe('Select multiple', () => {
       test('Select all fields', async () => {
-        const { body } = await getProductAPI('*');
-        expect(body.data).toEqual(data.product);
+        // You can select all fields by passing * or an empty fields array
+        const waysToSelectAll = [[], '*'];
+
+        for (const way of waysToSelectAll) {
+          const { body } = await getProductAPI(way);
+          expect(body.data).toEqual(data.product);
+        }
       });
 
       test('Select multiple fields', async () => {

@@ -15,10 +15,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  Form,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
@@ -27,10 +23,12 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
 import {
@@ -129,7 +127,14 @@ export const SingleSignOnPage = () => {
 
   return (
     <Layout>
-      <SettingsPageTitle name="SSO" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'SSO',
+          }
+        )}
+      />
       <Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
         <Formik
           onSubmit={handleSubmit}
@@ -172,7 +177,7 @@ export const SingleSignOnPage = () => {
               />
               <ContentLayout>
                 {isSubmitting || isLoadingData ? (
-                  <LoadingIndicatorPage />
+                  <Page.Loading />
                 ) : (
                   <Flex
                     direction="column"
@@ -311,8 +316,8 @@ export const ProtectedSSO = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.sso?.main);
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <SingleSignOnPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

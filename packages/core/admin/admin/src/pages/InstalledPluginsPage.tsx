@@ -14,17 +14,12 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { Page } from '../components/PageHelpers';
 import { selectAdminPermissions } from '../selectors';
 import { useGetPluginsQuery } from '../services/admin';
 
@@ -64,13 +59,7 @@ const InstalledPluginsPage = () => {
   }, [data, error, formatAPIError, formatMessage, notifyStatus, toggleNotification]);
 
   if (isLoading) {
-    return (
-      <Layout>
-        <Main aria-busy>
-          <LoadingIndicatorPage />
-        </Main>
-      </Layout>
-    );
+    return <Page.Loading />;
   }
 
   return (
@@ -144,7 +133,7 @@ const ProtectedInstalledPluginsPage = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.marketplace?.main}>
+    <Page.Protect permissions={permissions.marketplace?.main}>
       <Helmet
         title={formatMessage({
           id: 'global.plugins',
@@ -152,7 +141,7 @@ const ProtectedInstalledPluginsPage = () => {
         })}
       />
       <InstalledPluginsPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

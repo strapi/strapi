@@ -35,7 +35,6 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  // @ts-ignore
   const apiToken = await apiTokenService.getBy({
     accessKey: apiTokenService.hash(token),
   });
@@ -56,10 +55,10 @@ export const authenticate = async (ctx: Context) => {
   }
 
   // update lastUsedAt if the token has not been used in the last hour
-  // @ts-ignore
+  // @ts-expect-error - FIXME: verify lastUsedAt is defined
   const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
   if (hoursSinceLastUsed >= 1) {
-    await strapi.query('admin::api-token').update({
+    await strapi.db.query('admin::api-token').update({
       where: { id: apiToken.id },
       data: { lastUsedAt: currentDate },
     });

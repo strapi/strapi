@@ -22,11 +22,11 @@
   {
     "id": 3,
     "documentId": "Article1",
-    "title": "Article1-Draft-FR",
+    "title": "Article1-Draft-NL",
     "publishedAt": null,
     "password": null,
     "private": "private",
-    "locale": "fr",
+    "locale": "nl",
     "categories": [2]
   },
   {

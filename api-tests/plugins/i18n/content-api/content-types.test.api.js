@@ -132,6 +132,9 @@ describe('i18n - Content API', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
+
     await strapi.destroy();
     await builder.cleanup();
   });

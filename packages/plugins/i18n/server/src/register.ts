@@ -1,8 +1,7 @@
 import _ from 'lodash';
-import type { Strapi } from '@strapi/types';
+import type { Strapi } from '@strapi/strapi';
 
 import validateLocaleCreation from './controllers/validate-locale-creation';
-import { getService } from './utils';
 import graphqlProvider from './graphql';
 
 import enableContentType from './migrations/content-type/enable';
@@ -14,13 +13,14 @@ export default ({ strapi }: { strapi: Strapi }) => {
   addContentTypeSyncHooks(strapi);
 };
 
+// TODO: v5 if implemented in the CM => delete this middleware
 /**
  * Adds middleware on CM creation routes to use i18n locale passed in a specific param
  * @param {Strapi} strapi
  */
 const addContentManagerLocaleMiddleware = (strapi: Strapi) => {
   strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
-    if (ctx.method === 'POST') {
+    if (ctx.method === 'POST' || ctx.method === 'PUT') {
       return validateLocaleCreation(ctx, next);
     }
 
@@ -28,7 +28,7 @@ const addContentManagerLocaleMiddleware = (strapi: Strapi) => {
   });
 
   strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
-    if (ctx.method === 'PUT') {
+    if (ctx.method === 'POST' || ctx.method === 'PUT') {
       return validateLocaleCreation(ctx, next);
     }
 
@@ -51,20 +51,8 @@ const addContentTypeSyncHooks = (strapi: Strapi) => {
  * @param {Strapi} strapi
  */
 const extendContentTypes = (strapi: Strapi) => {
-  const coreApiService = getService('core-api');
-
   Object.values(strapi.contentTypes).forEach((contentType) => {
     const { attributes } = contentType;
-
-    _.set(attributes, 'localizations', {
-      writable: true,
-      private: false,
-      configurable: false,
-      visible: false,
-      type: 'relation',
-      relation: 'oneToMany',
-      target: contentType.uid,
-    });
 
     _.set(attributes, 'locale', {
       writable: true,
@@ -73,8 +61,6 @@ const extendContentTypes = (strapi: Strapi) => {
       visible: false,
       type: 'string',
     });
-
-    coreApiService.addCreateLocalizationAction(contentType);
   });
 
   if (strapi.plugin('graphql')) {

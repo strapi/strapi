@@ -1,11 +1,20 @@
-import { Permission } from '@strapi/helper-plugin';
-
-import { FormattedComponentLayout, FormattedContentTypeLayout } from '../utils/layouts';
+import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
+import type { Permission } from '@strapi/helper-plugin';
 
 const testData = {
   contentType: {
     uid: 'api::test.test',
     apiID: 'test',
+    isDisplayed: true,
+    kind: 'collectionType',
+    modelName: 'test',
+    globalId: 'Test',
+    modelType: 'contentType',
+    info: {
+      displayName: 'Test',
+      singularName: 'test',
+      pluralName: 'tests',
+    },
     attributes: {
       createdAt: { type: 'timestamp' },
       dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
@@ -20,11 +29,19 @@ const testData = {
       repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
       updatedAt: { type: 'timestamp' },
     },
-  } as unknown as FormattedContentTypeLayout,
+  } satisfies Schema,
   components: {
     'compos.sub-compo': {
       uid: 'compos.sub-compo',
+      isDisplayed: true,
       category: 'compos',
+      modelType: 'component',
+      apiID: 'compos.sub-compo',
+      modelName: 'sub-compo',
+      globalId: 'SubCompo',
+      info: {
+        displayName: 'Sub compo',
+      },
       attributes: {
         id: { type: 'integer' },
         name: { type: 'string' },
@@ -34,6 +51,14 @@ const testData = {
     'compos.test-compo': {
       uid: 'compos.test-compo',
       category: 'compos',
+      isDisplayed: true,
+      modelType: 'component',
+      apiID: 'compos.test-compo',
+      modelName: 'test-compo',
+      globalId: 'TestCompo',
+      info: {
+        displayName: 'Test compo',
+      },
       attributes: {
         id: { type: 'integer' },
         name: { type: 'string' },
@@ -50,7 +75,7 @@ const testData = {
         },
       },
     },
-  } as unknown as Record<string, FormattedComponentLayout>,
+  } satisfies ComponentsDictionary,
   modifiedData: {
     createdAt: '2020-04-28T13:22:13.033Z',
     dz: [
@@ -111,112 +136,6 @@ const testData = {
       },
     ],
     updatedAt: '2020-04-28T13:22:13.033Z',
-  },
-  expectedModifiedData: {
-    createdAt: '2020-04-28T13:22:13.033Z',
-    dz: [
-      { __component: 'compos.sub-compo', id: 7, name: 'name' },
-      {
-        id: 4,
-        name: 'name',
-        subcomponotrepeatable: null,
-        subrepeatable: [],
-        __component: 'compos.test-compo',
-      },
-      {
-        id: 5,
-        name: 'name',
-        subcomponotrepeatable: { id: 9, name: 'name' },
-        subrepeatable: [{ id: 8, name: 'name' }],
-        __component: 'compos.test-compo',
-      },
-      {
-        id: 6,
-        name: null,
-        subcomponotrepeatable: null,
-        subrepeatable: [],
-        __component: 'compos.test-compo',
-      },
-    ],
-    id: 1,
-    name: 'name',
-    notrepeatable: {
-      id: 1,
-      name: 'name',
-      subcomponotrepeatable: { id: 4, name: 'name' },
-      subrepeatable: [
-        { id: 1, name: 'name' },
-        { id: 2, name: 'name' },
-        { id: 3, name: 'name' },
-      ],
-    },
-    repeatable: [
-      {
-        id: 2,
-        name: 'name',
-        subrepeatable: [{ id: 5, name: 'name' }],
-        subcomponotrepeatable: { id: 6, name: 'name' },
-      },
-      {
-        id: 3,
-        name: 'name',
-        subrepeatable: [],
-        subcomponotrepeatable: null,
-      },
-    ],
-    updatedAt: '2020-04-28T13:22:13.033Z',
-  },
-  expectedNoFieldsModifiedData: {
-    dz: [
-      { __component: 'compos.sub-compo', name: 'name', password: 'password' },
-      {
-        name: 'name',
-        password: 'password',
-        subcomponotrepeatable: null,
-        subrepeatable: [],
-        __component: 'compos.test-compo',
-      },
-      {
-        name: 'name',
-        password: 'password',
-        subcomponotrepeatable: { name: 'name', password: 'password' },
-        subrepeatable: [{ name: 'name', password: 'password' }],
-        __component: 'compos.test-compo',
-      },
-      {
-        name: null,
-        password: null,
-        subcomponotrepeatable: null,
-        subrepeatable: [],
-        __component: 'compos.test-compo',
-      },
-    ],
-    name: 'name',
-    notrepeatable: {
-      name: 'name',
-      password: 'password',
-      subcomponotrepeatable: { name: 'name', password: 'password' },
-      subrepeatable: [
-        { name: 'name', password: 'password' },
-        { name: 'name', password: 'password' },
-        { name: 'name', password: 'password' },
-      ],
-    },
-    password: 'password',
-    repeatable: [
-      {
-        name: 'name',
-        password: 'password',
-        subrepeatable: [{ name: 'name', password: 'password' }],
-        subcomponotrepeatable: { name: 'name', password: 'password' },
-      },
-      {
-        name: 'name',
-        password: 'password',
-        subrepeatable: [],
-        subcomponotrepeatable: null,
-      },
-    ],
   },
 };
 

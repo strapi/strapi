@@ -13,8 +13,8 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { Form, getAPIInnerErrors, useNotification, useTracking } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { getAPIInnerErrors, useNotification, useTracking } from '@strapi/helper-plugin';
+import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

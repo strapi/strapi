@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { omit, difference, isNil, isEmpty, map, isArray, uniq } from 'lodash/fp';
+import { omit, difference, isNil, isEmpty, map, isArray, uniq, isNumber } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
 import constants from './constants';
@@ -61,16 +61,27 @@ const assertCustomTokenPermissionsValidity = (
 };
 
 /**
- * Assert that a token's lifespan is valid
+ * Check if a token's lifespan is valid
  */
-const assertValidLifespan = (lifespan: ApiTokenBody['lifespan']) => {
+const isValidLifespan = (lifespan: unknown) => {
   if (isNil(lifespan)) {
-    return;
+    return true;
   }
 
-  if (!Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan as number)) {
+  if (!isNumber(lifespan) || !Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan)) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Assert that a token's lifespan is valid
+ */
+const assertValidLifespan = (lifespan: unknown) => {
+  if (!isValidLifespan(lifespan)) {
     throw new ValidationError(
-      `lifespan must be one of the following values: 
+      `lifespan must be one of the following values:
       ${Object.values(constants.API_TOKEN_LIFESPANS).join(', ')}`
     );
   }
@@ -106,7 +117,7 @@ const getBy = async (whereParams: WhereParams = {}): Promise<ApiToken | null> =>
     return null;
   }
 
-  const token = await strapi
+  const token = await strapi.db
     .query('admin::api-token')
     .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
 
@@ -138,14 +149,14 @@ const hash = (accessKey: string) => {
 
 const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = Number.isFinite(lifespan) && (lifespan as number) > 0;
+  const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
   return {
     lifespan: lifespan || null,
-    expiresAt: lifespan ? Date.now() + (lifespan as number) : null,
+    expiresAt: lifespan ? Date.now() + lifespan : null,
   };
 };
 
@@ -159,7 +170,7 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
   assertValidLifespan(attributes.lifespan);
 
   // Create the token
-  const apiToken: ApiToken = await strapi.query('admin::api-token').create({
+  const apiToken: ApiToken = await strapi.db.query('admin::api-token').create({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     data: {
@@ -174,23 +185,21 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
   // If this is a custom type token, create and the related permissions
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
     // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
-    // const permissionsCount = await strapi.query('admin::api-token-permission').createMany({
+    // const permissionsCount = await strapi.db.query('admin::api-token-permission').createMany({
     //   populate: POPULATE_FIELDS,
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
     await Promise.all(
       uniq(attributes.permissions).map((action) =>
-        strapi.query('admin::api-token-permission').create({
+        strapi.db.query('admin::api-token-permission').create({
           data: { action, token: apiToken },
         })
       )
     );
 
-    const currentPermissions = await strapi.entityService.load(
-      'admin::api-token',
-      apiToken,
-      'permissions'
-    );
+    const currentPermissions = await strapi.db
+      .query('admin::api-token')
+      .load(apiToken, 'permissions');
 
     if (currentPermissions) {
       Object.assign(result, { permissions: map('action', currentPermissions) });
@@ -203,7 +212,7 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
 const regenerate = async (id: string | number): Promise<ApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
-  const apiToken: ApiToken = await strapi.query('admin::api-token').update({
+  const apiToken: ApiToken = await strapi.db.query('admin::api-token').update({
     select: ['id', 'accessKey'],
     where: { id },
     data: {
@@ -242,7 +251,7 @@ For security reasons, prefer storing the secret in an environment variable and r
  * Return a list of all tokens and their permissions
  */
 const list = async (): Promise<Array<ApiToken>> => {
-  const tokens: Array<DBApiToken> = await strapi.query('admin::api-token').findMany({
+  const tokens: Array<DBApiToken> = await strapi.db.query('admin::api-token').findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
@@ -259,7 +268,7 @@ const list = async (): Promise<Array<ApiToken>> => {
  * Revoke (delete) a token
  */
 const revoke = async (id: string | number): Promise<ApiToken> => {
-  return strapi
+  return strapi.db
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
 };
@@ -286,7 +295,7 @@ const update = async (
   attributes: Update.Request['body']
 ): Promise<ApiToken> => {
   // retrieve token without permissions
-  const originalToken: DBApiToken = await strapi
+  const originalToken: DBApiToken = await strapi.db
     .query('admin::api-token')
     .findOne({ where: { id } });
 
@@ -309,7 +318,7 @@ const update = async (
 
   assertValidLifespan(attributes.lifespan);
 
-  const updatedToken: ApiToken = await strapi.query('admin::api-token').update({
+  const updatedToken: ApiToken = await strapi.db.query('admin::api-token').update({
     select: SELECT_FIELDS,
     where: { id },
     data: omit('permissions', attributes),
@@ -317,11 +326,9 @@ const update = async (
 
   // custom tokens need to have their permissions updated as well
   if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
-    const currentPermissionsResult = await strapi.entityService.load(
-      'admin::api-token',
-      updatedToken,
-      'permissions'
-    );
+    const currentPermissionsResult = await strapi.db
+      .query('admin::api-token')
+      .load(updatedToken, 'permissions');
 
     const currentPermissions = map('action', currentPermissionsResult || []);
     const newPermissions = uniq(attributes.permissions);
@@ -333,7 +340,7 @@ const update = async (
     // method using a loop -- works but very inefficient
     await Promise.all(
       actionsToDelete.map((action) =>
-        strapi.query('admin::api-token-permission').delete({
+        strapi.db.query('admin::api-token-permission').delete({
           where: { action, token: id },
         })
       )
@@ -343,7 +350,7 @@ const update = async (
     // using a loop -- works but very inefficient
     await Promise.all(
       actionsToAdd.map((action) =>
-        strapi.query('admin::api-token-permission').create({
+        strapi.db.query('admin::api-token-permission').create({
           data: { action, token: id },
         })
       )
@@ -351,17 +358,15 @@ const update = async (
   }
   // if type is not custom, make sure any old permissions get removed
   else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {
-    await strapi.query('admin::api-token-permission').delete({
+    await strapi.db.query('admin::api-token-permission').delete({
       where: { token: id },
     });
   }
 
   // retrieve permissions
-  const permissionsFromDb = await strapi.entityService.load(
-    'admin::api-token',
-    updatedToken,
-    'permissions'
-  );
+  const permissionsFromDb = await strapi.db
+    .query('admin::api-token')
+    .load(updatedToken, 'permissions');
 
   return {
     ...updatedToken,

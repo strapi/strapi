@@ -13,7 +13,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
     .fill(ADMIN_PASSWORD);
 
   if (rememberMe) {
-    await page.getByLabel('rememberMe').click();
+    await page.getByLabel('Remember me').click();
   }
 
   await page.getByRole('button', { name: 'Login' }).click();

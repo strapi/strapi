@@ -21,7 +21,11 @@ const componentsApi = contentManagerApi.injectEndpoints({
       }),
       transformResponse: (response: Contracts.Components.UpdateComponentConfiguration.Response) =>
         response.data,
-      invalidatesTags: (_result, _error, { uid }) => [{ type: 'ComponentConfiguration', id: uid }],
+      invalidatesTags: (_result, _error, { uid }) => [
+        { type: 'ComponentConfiguration', id: uid },
+        // otherwise layouts already fetched will have stale component configuration data.
+        { type: 'ContentTypeSettings', id: 'LIST' },
+      ],
     }),
   }),
 });

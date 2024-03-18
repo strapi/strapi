@@ -28,7 +28,9 @@ export const useRemoveAsset = (onSuccess) => {
     },
   });
 
-  const removeAsset = (assetId) => mutation.mutate(assetId);
+  const removeAsset = async (assetId) => {
+    await mutation.mutateAsync(assetId);
+  };
 
   return { ...mutation, removeAsset };
 };

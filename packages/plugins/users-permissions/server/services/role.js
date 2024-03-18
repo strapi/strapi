@@ -10,7 +10,7 @@ module.exports = ({ strapi }) => ({
       params.type = _.snakeCase(_.deburr(_.toLower(params.name)));
     }
 
-    const role = await strapi
+    const role = await strapi.db
       .query('plugin::users-permissions.role')
       .create({ data: _.omit(params, ['users', 'permissions']) });
 
@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => ({
               const actionID = `${typeName}.${controllerName}.${actionName}`;
 
               acc.push(
-                strapi
+                strapi.db
                   .query('plugin::users-permissions.permission')
                   .create({ data: { action: actionID, role: role.id } })
               );
@@ -42,7 +42,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async findOne(roleID) {
-    const role = await strapi
+    const role = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
@@ -69,10 +69,12 @@ module.exports = ({ strapi }) => ({
   },
 
   async find() {
-    const roles = await strapi.query('plugin::users-permissions.role').findMany({ sort: ['name'] });
+    const roles = await strapi.db
+      .query('plugin::users-permissions.role')
+      .findMany({ sort: ['name'] });
 
     for (const role of roles) {
-      role.nb_users = await strapi
+      role.nb_users = await strapi.db
         .query('plugin::users-permissions.user')
         .count({ where: { role: { id: role.id } } });
     }
@@ -81,7 +83,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async updateRole(roleID, data) {
-    const role = await strapi
+    const role = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
@@ -89,7 +91,7 @@ module.exports = ({ strapi }) => ({
       throw new NotFoundError('Role not found');
     }
 
-    await strapi.query('plugin::users-permissions.role').update({
+    await strapi.db.query('plugin::users-permissions.role').update({
       where: { id: roleID },
       data: _.pick(data, ['name', 'description']),
     });
@@ -129,7 +131,7 @@ module.exports = ({ strapi }) => ({
 
     await Promise.all(
       toDelete.map((permission) =>
-        strapi
+        strapi.db
           .query('plugin::users-permissions.permission')
           .delete({ where: { id: permission.id } })
       )
@@ -137,13 +139,13 @@ module.exports = ({ strapi }) => ({
 
     await Promise.all(
       toCreate.map((permissionInfo) =>
-        strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo })
+        strapi.db.query('plugin::users-permissions.permission').create({ data: permissionInfo })
       )
     );
   },
 
   async deleteRole(roleID, publicRoleID) {
-    const role = await strapi
+    const role = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['users', 'permissions'] });
 
@@ -154,7 +156,7 @@ module.exports = ({ strapi }) => ({
     // Move users to guest role.
     await Promise.all(
       role.users.map((user) => {
-        return strapi.query('plugin::users-permissions.user').update({
+        return strapi.db.query('plugin::users-permissions.user').update({
           where: { id: user.id },
           data: { role: publicRoleID },
         });
@@ -165,13 +167,13 @@ module.exports = ({ strapi }) => ({
     // TODO: use delete many
     await Promise.all(
       role.permissions.map((permission) => {
-        return strapi.query('plugin::users-permissions.permission').delete({
+        return strapi.db.query('plugin::users-permissions.permission').delete({
           where: { id: permission.id },
         });
       })
     );
 
     // Delete the role.
-    await strapi.query('plugin::users-permissions.role').delete({ where: { id: roleID } });
+    await strapi.db.query('plugin::users-permissions.role').delete({ where: { id: roleID } });
   },
 });

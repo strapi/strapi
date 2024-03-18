@@ -2,12 +2,6 @@ import { render, screen } from '@tests/utils';
 
 import { ReleaseActionMenu } from '../ReleaseActionMenu';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
-}));
-
 describe('ReleaseActionMenu', () => {
   it('should render the menu with its options', async () => {
     const { user } = render(
@@ -16,12 +10,12 @@ describe('ReleaseActionMenu', () => {
         <ReleaseActionMenu.ReleaseActionEntryLinkItem
           contentTypeUid="api::category.category"
           locale="en"
-          entryId="1"
+          entryId={1}
         />
       </ReleaseActionMenu.Root>
     );
 
-    const menuTrigger = screen.getByRole('button', { name: 'Release action options' });
+    const menuTrigger = await screen.findByRole('button', { name: 'Release action options' });
     expect(menuTrigger).toBeInTheDocument();
 
     await user.click(menuTrigger);

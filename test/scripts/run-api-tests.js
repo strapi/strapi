@@ -42,7 +42,7 @@ const databases = {
   },
 };
 
-const jestCmd = 'jest --config jest.config.api.js --verbose --runInBand --forceExit'.split(' ');
+const jestCmd = 'jest --config jest.config.api.js --runInBand --forceExit'.split(' ');
 
 const runAllTests = async (args) => {
   return execa('yarn', [...jestCmd, ...args], {
@@ -54,6 +54,7 @@ const runAllTests = async (args) => {
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
       JWT_SECRET: 'aSecret',
+      STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE: 'true',
     },
   });
 };

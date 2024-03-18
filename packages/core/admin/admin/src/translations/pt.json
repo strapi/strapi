@@ -208,7 +208,7 @@
   "content-manager.containers.Home.pluginHeaderDescription": "Administre as suas entradas através de uma interface poderosa e bonita.",
   "content-manager.containers.Home.pluginHeaderTitle": "Gestor de conteúdos",
   "content-manager.containers.List.errorFetchRecords": "Erro",
-  "content-manager.containers.ListPage.displayedFields": "Campos visíveis",
+  "content-manager.containers.list.displayedFields": "Campos visíveis",
   "content-manager.containers.SettingPage.attributes": "Campos de atributos",
   "content-manager.containers.SettingPage.attributes.description": "Definir a ordem dos atributos",
   "content-manager.containers.SettingPage.editSettings.description": "Agarre & solte os campos para criar o layout",

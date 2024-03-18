@@ -1,17 +1,14 @@
 import React, { useReducer, useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button, ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  Link,
-  useFocusWhenNavigate,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { Link } from '@strapi/design-system/v2';
+import { useFocusWhenNavigate, useNotification, useTracking } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
 import { useConfig } from '../../../hooks/useConfig';
 import pluginID from '../../../pluginId';
@@ -66,7 +63,7 @@ const ConfigureTheView = ({ config }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
+              <Link as={NavLink} startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }
@@ -100,17 +97,16 @@ const ConfigureTheView = ({ config }) => {
           </ContentLayout>
 
           <ConfirmDialog
-            bodyText={{
+            isOpen={showWarningSubmit}
+            onClose={toggleWarningSubmit}
+            onConfirm={handleConfirm}
+            variant="success-light"
+          >
+            {formatMessage({
               id: getTrad('config.popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
+            })}
+          </ConfirmDialog>
         </form>
       </Main>
     </Layout>

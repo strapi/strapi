@@ -8,8 +8,8 @@ import {
   MultiSelectOption,
   TextInput,
   Typography,
+  useCollator,
 } from '@strapi/design-system';
-import { useCollator } from '@strapi/helper-plugin';
 import { useField } from 'formik';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';

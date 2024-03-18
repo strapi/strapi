@@ -7,7 +7,9 @@
     "displayName": "Article",
     "description": ""
   },
-  "options": {},
+  "options": {
+    "draftAndPublish": true
+  },
   "pluginOptions": {
     "i18n": {
       "localized": true
@@ -25,6 +27,20 @@
       "relation": "manyToMany",
       "target": "api::author.author",
       "inversedBy": "articles"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "meta.seo"
     }
   }
 }

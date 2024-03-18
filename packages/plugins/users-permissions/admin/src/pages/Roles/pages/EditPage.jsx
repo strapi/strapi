@@ -13,18 +13,15 @@ import {
   Grid,
 } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   useOverlayBlocker,
-  SettingsPageTitle,
-  LoadingIndicatorPage,
-  Form,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
-  Link,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Check } from '@strapi/icons';
+import { Page, BackButton } from '@strapi/strapi/admin';
+import { Formik, Form } from 'formik';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { useMatch } from 'react-router-dom';
@@ -93,13 +90,17 @@ export const EditPage = () => {
   };
 
   if (isLoadingRole) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
     <Main>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="Roles" />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'Roles' }
+        )}
+      />
       <Formik
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}
@@ -110,7 +111,7 @@ export const EditPage = () => {
           <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
-                !isLoadingPlugins && (
+                !isLoadingPlugins ? (
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     type="submit"
@@ -122,18 +123,11 @@ export const EditPage = () => {
                       defaultMessage: 'Save',
                     })}
                   </Button>
-                )
+                ) : null
               }
               title={role.name}
               subtitle={role.description}
-              navigationAction={
-                <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
-                  {formatMessage({
-                    id: 'global.back',
-                    defaultMessage: 'Back',
-                  })}
-                </Link>
-              }
+              navigationAction={<BackButton />}
             />
             <ContentLayout>
               <Flex
@@ -214,7 +208,7 @@ export const EditPage = () => {
 };
 
 export const ProtectedRolesEditPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.updateRole}>
+  <Page.Protect permissions={PERMISSIONS.updateRole}>
     <EditPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

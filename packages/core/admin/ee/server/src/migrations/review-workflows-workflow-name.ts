@@ -12,7 +12,7 @@ async function migrateReviewWorkflowName({ oldContentTypes, contentTypes }: any)
 
   // Add the default workflow name if name attribute was added
   if (!hadName && hasName) {
-    await strapi.query(WORKFLOW_MODEL_UID).updateMany({
+    await strapi.db.query(WORKFLOW_MODEL_UID).updateMany({
       where: {
         name: { $null: true },
       },

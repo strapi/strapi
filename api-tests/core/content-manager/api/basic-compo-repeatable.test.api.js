@@ -79,20 +79,20 @@ describe('CM API - Basic + compo', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.publishedAt).toBeDefined();
-    data.productsWithCompo.push(res.body);
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.productsWithCompo.push(res.body.data);
   });
 
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${data.productsWithCompo[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.publishedAt).toBeDefined();
+    expect(res.body.data).toMatchObject(data.productsWithCompo[0]);
+    expect(res.body.data.publishedAt).toBeDefined();
   });
 
   test('Update product with compo', async () => {
@@ -108,21 +108,21 @@ describe('CM API - Basic + compo', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${data.productsWithCompo[0].documentId}`,
       body: product,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.publishedAt).toBeDefined();
-    data.productsWithCompo[0] = res.body;
+    expect(res.body.data).toMatchObject(product);
+    expect(res.body.data.documentId).toEqual(data.productsWithCompo[0].documentId);
+    expect(res.body.data.publishedAt).toBeDefined();
+    data.productsWithCompo[0] = res.body.data;
   });
 
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${data.productsWithCompo[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${data.productsWithCompo[0].documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -181,7 +181,7 @@ describe('CM API - Basic + compo', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);
@@ -260,7 +260,7 @@ describe('CM API - Basic + compo', () => {
 
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.id}/actions/publish`,
+        url: `/content-manager/collection-types/api::product-with-compo.product-with-compo/${creationRes.body.documentId}/actions/publish`,
       });
 
       expect(res.statusCode).toBe(400);

@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 
 import { Strapi } from '@strapi/types';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { validateUpdateStageOnEntity } from '../../../validation/review-workflows';
 import {
@@ -42,7 +42,7 @@ export default {
     });
 
     ctx.body = {
-      data: await mapAsync(stages, sanitizer),
+      data: await async.map(stages, sanitizer),
     };
   },
   /**
@@ -92,7 +92,8 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     // Load entity
-    const entity = (await strapi.entityService.findOne(modelUID, Number(id), {
+    const entity = (await strapi.db.query(modelUID).findOne({
+      where: { id },
       populate: [ENTITY_STAGE_ATTRIBUTE],
     })) as any;
 
@@ -149,7 +150,8 @@ export default {
     }
 
     // Load entity
-    const entity = (await strapi.entityService.findOne(modelUID, Number(id), {
+    const entity = (await strapi.db.query(modelUID).findOne({
+      where: { id },
       populate: [ENTITY_STAGE_ATTRIBUTE],
     })) as any;
 

@@ -6,7 +6,9 @@ import {
   split,
   isObject,
   trim,
+  constant,
   isNil,
+  identity,
   cloneDeep,
   join,
   first,
@@ -27,8 +29,6 @@ const isKeyword = (keyword: string) => {
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
-const isWildCardConstant = (value: unknown): value is '*' => value === '*';
-
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
 const populate = traverseFactory()
@@ -40,24 +40,40 @@ const populate = traverseFactory()
 
     return visitedPopulate.filter((item) => !isNil(item));
   })
-  // Transform wildcard populate to an exhaustive list of attributes to populate.
-  .intercept(isWildCardConstant, (visitor, options, _data, { recurse }) => {
-    const attributes = options.schema?.attributes;
+  // for wildcard, generate custom utilities to modify the values
+  .parse(
+    (value): value is '*' => value === '*',
+    () => ({
+      /**
+       * Since value is '*', we don't need to transform it
+       */
+      transform: identity,
 
-    // This should never happen, but adding the check in
-    // case this method is called with wrong parameters
-    if (!attributes) {
-      return '*';
-    }
+      /**
+       * '*' isn't a key/value structure, so regardless
+       *  of the given key, it returns the data ('*')
+       */
+      get: (_key, data) => data,
 
-    const parsedPopulate = Object.entries(attributes)
-      // Get the list of all attributes that can be populated
-      .filter(([, value]) => ['relation', 'component', 'dynamiczone', 'media'].includes(value.type))
-      // Only keep the attributes key
-      .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
+      /**
+       * '*' isn't a key/value structure, so regardless
+       * of the given `key`, use `value` as the new `data`
+       */
+      set: (_key, value) => value,
 
-    return recurse(visitor, options, parsedPopulate);
-  })
+      /**
+       * '*' isn't a key/value structure, but we need to simulate at least one to enable
+       * the data traversal. We're using '' since it represents a falsy string value
+       */
+      keys: constant(['']),
+
+      /**
+       * Removing '*' means setting it to undefined, regardless of the given key
+       */
+      remove: constant(undefined),
+    })
+  )
+
   // Parse string values
   .parse(isString, () => {
     const tokenize = split('.');

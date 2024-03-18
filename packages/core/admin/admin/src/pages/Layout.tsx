@@ -1,12 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
-import {
-  AppInfoProvider,
-  LoadingIndicatorPage,
-  useGuidedTour,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { AppInfoProvider, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -16,42 +11,33 @@ import valid from 'semver/functions/valid';
 
 import packageJSON from '../../../package.json';
 import { GuidedTourModal } from '../components/GuidedTour/Modal';
+import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Onboarding } from '../components/Onboarding';
+import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { RBACProvider } from '../components/RBACProvider';
+import { useIsHistoryRoute } from '../content-manager/history/routes';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { useGetMyPermissionsQuery } from '../services/auth';
-import { getFullName } from '../utils/getFullName';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
+import { getDisplayName } from '../utils/users';
 
 const strapiVersion = packageJSON.version;
 
 const AdminLayout = () => {
-  const { setGuidedTourVisibility } = useGuidedTour();
+  const setGuidedTourVisibility = useGuidedTour(
+    'AdminLayout',
+    (state) => state.setGuidedTourVisibility
+  );
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
-  const [userDisplayName, setUserDisplayName] = React.useState<string>(() =>
-    userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
-  );
-  /**
-   * Keep this in sync with the user info we return from the useAuth hook.
-   * We can't remove the above state because it's used in `useAppInfo` which
-   * is a public API.
-   *
-   * TODO: remove this workaround in V5.
-   */
-  React.useEffect(() => {
-    setUserDisplayName(
-      userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
-    );
-  }, [userInfo]);
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
@@ -129,14 +115,17 @@ const AdminLayout = () => {
     trackUsage('didAccessAuthenticatedAdministration');
   });
 
+  // Check if we're on a history route to know if we should render the left menu
+  const isHistoryRoute = useIsHistoryRoute();
+
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
   if (isLoadingMenu || isLoadingAppInfo || isLoadingPermissions) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
-  const refetchPermissions = () => {
-    refetch();
+  const refetchPermissions = async () => {
+    await refetch();
   };
 
   return (
@@ -144,9 +133,9 @@ const AdminLayout = () => {
       {...appInfo}
       userId={userId}
       latestStrapiReleaseTag={tagName}
-      setUserDisplayName={setUserDisplayName}
+      setUserDisplayName={() => {}}
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
-      userDisplayName={userDisplayName}
+      userDisplayName={getDisplayName(userInfo, formatMessage) ?? ''}
     >
       <RBACProvider permissions={permissions ?? []} refetchPermissions={refetchPermissions}>
         <NpsSurvey />
@@ -157,10 +146,12 @@ const AdminLayout = () => {
                 {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
               </SkipToContent>
               <Flex alignItems="flex-start">
-                <LeftMenu
-                  generalSectionLinks={generalSectionLinks}
-                  pluginsSectionLinks={pluginsSectionLinks}
-                />
+                {!isHistoryRoute && (
+                  <LeftMenu
+                    generalSectionLinks={generalSectionLinks}
+                    pluginsSectionLinks={pluginsSectionLinks}
+                  />
+                )}
                 <Box flex={1}>
                   <Outlet />
                   <GuidedTourModal />

@@ -191,7 +191,7 @@
   "content-manager.containers.Home.pluginHeaderDescription": "Spravujte své záznamy mocným a intuitivním rozhraním.",
   "content-manager.containers.Home.pluginHeaderTitle": "Správce obsahu",
   "content-manager.containers.List.errorFetchRecords": "Chyba",
-  "content-manager.containers.ListPage.displayedFields": "Zobrazená pole",
+  "content-manager.containers.list.displayedFields": "Zobrazená pole",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Upravit popisek",
   "content-manager.containers.SettingPage.add.field": "Vložit další pole",
   "content-manager.containers.SettingPage.attributes": "Pole atributů",

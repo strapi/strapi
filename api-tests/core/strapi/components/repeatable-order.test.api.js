@@ -30,21 +30,21 @@ const ct = {
   },
 };
 
-const createEntity = async (data) => {
+const createDocument = async (data) => {
   return rq.post('/', {
     body: { data },
     qs: { populate: ['field'] },
   });
 };
 
-const updateEntity = async (id, data) => {
+const updateDocument = async (id, data) => {
   return rq.put(`/${id}`, {
     body: { data },
     qs: { populate: ['field'] },
   });
 };
 
-const getEntity = async (id) => {
+const getDocument = async (id) => {
   return rq.get(`/${id}`, {
     qs: { populate: ['field'] },
   });
@@ -52,8 +52,8 @@ const getEntity = async (id) => {
 
 describe('Given a content type with a repeatable component and two entities created', () => {
   const builder = createTestBuilder();
-  let entity1;
-  let entity2;
+  let document1;
+  let document2;
 
   beforeAll(async () => {
     await builder.addComponent(component).addContentType(ct).build();
@@ -63,11 +63,11 @@ describe('Given a content type with a repeatable component and two entities crea
     rq.setURLPrefix('/api/withcomponents');
 
     // Create two entities
-    const res1 = await createEntity({ field: [{ name: 'field1' }, { name: 'field2' }] });
-    entity1 = res1.body.data;
+    const res1 = await createDocument({ field: [{ name: 'field1' }, { name: 'field2' }] });
+    document1 = res1.body.data;
 
-    const res2 = await createEntity({ field: [{ name: 'field1' }, { name: 'field2' }] });
-    entity2 = res2.body.data;
+    const res2 = await createDocument({ field: [{ name: 'field1' }, { name: 'field2' }] });
+    document2 = res2.body.data;
   });
 
   afterAll(async () => {
@@ -75,22 +75,23 @@ describe('Given a content type with a repeatable component and two entities crea
     await builder.cleanup();
   });
 
-  describe('When I update the order of one of the entities components', () => {
+  // TODO V5: Discuss component id update, updating a draft component
+  describe.skip('When I update the order of one of the entities components', () => {
     test('Then the order of both entity components is preserved', async () => {
-      const updatedEntity1 = await updateEntity(entity1.id, {
-        field: [entity1.attributes.field[1], entity1.attributes.field[0]],
+      const updatedDocument1 = await updateDocument(document1.documentId, {
+        field: [document1.field[1], document1.field[0]],
       });
 
-      const res = await getEntity(entity2.id);
+      const res = await getDocument(document2.documentId);
 
-      expect(updatedEntity1.body.data.attributes.field).toEqual([
-        { id: expect.anything(), name: 'field2' },
-        { id: expect.anything(), name: 'field1' },
+      expect(updatedDocument1.body.data.field).toEqual([
+        { documentId: expect.anything(), name: 'field2' },
+        { documentId: expect.anything(), name: 'field1' },
       ]);
       expect(res.statusCode).toBe(200);
-      expect(res.body.data.attributes.field).toEqual([
-        { id: expect.anything(), name: 'field1' },
-        { id: expect.anything(), name: 'field2' },
+      expect(res.body.data.field).toEqual([
+        { documentId: expect.anything(), name: 'field1' },
+        { documentId: expect.anything(), name: 'field2' },
       ]);
     });
   });

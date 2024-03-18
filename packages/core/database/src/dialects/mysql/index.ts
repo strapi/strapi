@@ -62,8 +62,13 @@ export default class MysqlDialect extends Dialect {
     }
 
     // We only need to get info on the first connection in the pool
+    /**
+     * Note: There is a race condition here where if two connections are opened at the same time, both will retrieve
+     * db info, but it doesn't cause issues, it's just one wasted query one time, so we can safely leave it to avoid
+     * adding extra complexity
+     * */
     if (!this.info) {
-      this.info = await this.databaseInspector.getInformation();
+      this.info = await this.databaseInspector.getInformation(nativeConnection);
     }
   }
 

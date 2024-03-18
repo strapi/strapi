@@ -2,13 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import {
-  ContentBox,
-  LoadingIndicatorPage,
-  useAppInfo,
-  useGuidedTour,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useAppInfo, useTracking } from '@strapi/helper-plugin';
 import {
   ArrowRight,
   CodeSquare,
@@ -28,7 +22,10 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
+import { useGuidedTour } from '../components/GuidedTour/Provider';
+import { Page } from '../components/PageHelpers';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
 
@@ -44,7 +41,10 @@ const HomePageCE = () => {
   const { formatMessage } = useIntl();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
-  const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  const guidedTourState = useGuidedTour('HomePage', (state) => state.guidedTourState);
+  const isGuidedTourVisible = useGuidedTour('HomePage', (state) => state.isGuidedTourVisible);
+  const isSkipped = useGuidedTour('HomePage', (state) => state.isSkipped);
+
   const showGuidedTour =
     !Object.values(guidedTourState).every((section) =>
       Object.values(section).every((step) => step)
@@ -61,7 +61,7 @@ const HomePageCE = () => {
   const hasAlreadyCreatedContentTypes = collectionTypes.length > 1 || singleTypes.length > 0;
 
   if (isLoadingForModels) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (

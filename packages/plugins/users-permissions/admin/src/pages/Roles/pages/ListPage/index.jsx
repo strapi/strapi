@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   ContentLayout,
@@ -13,19 +14,12 @@ import {
   Typography,
   useNotifyAT,
   VisuallyHidden,
-} from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  CheckPermissions,
-  ConfirmDialog,
   EmptyStateLayout,
-  LinkButton,
-  LoadingIndicatorPage,
-  NoPermissions,
-  SearchURLQuery,
-  SettingsPageTitle,
   useCollator,
   useFilter,
+} from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
+import {
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
@@ -33,8 +27,11 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
+import { Page, SearchInput, BackButton } from '@strapi/strapi/admin';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
+import { NavLink } from 'react-router-dom';
 
 import { PERMISSIONS } from '../../../../constants';
 import { getTrad } from '../../../../utils';
@@ -50,13 +47,12 @@ export const RolesListPage = () => {
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
   useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canRead, canDelete },
+    allowedActions: { canRead, canDelete, canCreate, canUpdate },
   } = useRBAC({
     create: PERMISSIONS.createRole,
     read: PERMISSIONS.readRoles,
@@ -74,7 +70,7 @@ export const RolesListPage = () => {
     enabled: canRead,
   });
 
-  const { includes } = useFilter(locale, {
+  const { contains } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -85,7 +81,7 @@ export const RolesListPage = () => {
     sensitivity: 'base',
   });
 
-  const isLoading = isLoadingForData || isFetching;
+  const isLoading = isLoadingForData || isFetching || isLoadingForPermissions;
 
   const handleShowConfirmDelete = () => {
     setShowConfirmDelete(!showConfirmDelete);
@@ -114,14 +110,12 @@ export const RolesListPage = () => {
   });
 
   const handleConfirmDelete = async () => {
-    setIsConfirmButtonLoading(true);
     await deleteMutation.mutateAsync(roleToDelete);
     setShowConfirmDelete(!showConfirmDelete);
-    setIsConfirmButtonLoading(false);
   };
 
   const sortedRoles = (roles || [])
-    .filter((role) => includes(role.name, _q) || includes(role.description, _q))
+    .filter((role) => contains(role.name, _q) || contains(role.description, _q))
     .sort(
       (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.description, b.description)
     );
@@ -131,9 +125,18 @@ export const RolesListPage = () => {
   const colCount = 4;
   const rowCount = (roles?.length || 0) + 1;
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <Layout>
-      <SettingsPageTitle name={pageTitle} />
+      <Helmet
+        title={formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: pageTitle }
+        )}
+      />
       <Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({
@@ -145,9 +148,10 @@ export const RolesListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={PERMISSIONS.createRole}>
+            canCreate ? (
               <LinkButton
                 to="new"
+                as={NavLink}
                 onClick={() => trackUsage('willCreateRole')}
                 startIcon={<Plus />}
                 size="S"
@@ -157,13 +161,14 @@ export const RolesListPage = () => {
                   defaultMessage: 'Add new role',
                 })}
               </LinkButton>
-            </CheckPermissions>
+            ) : null
           }
+          navigationAction={<BackButton />}
         />
 
         <ActionLayout
           startActions={
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage({
                 id: 'app.component.search.label',
                 defaultMessage: 'Search',
@@ -173,8 +178,7 @@ export const RolesListPage = () => {
         />
 
         <ContentLayout>
-          {!canRead && <NoPermissions />}
-          {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
+          {!canRead && <Page.NoPermissions />}
           {canRead && sortedRoles && sortedRoles?.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
@@ -213,19 +217,19 @@ export const RolesListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
+                canUpdate={canUpdate}
                 permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}
               />
             </Table>
           ) : (
-            <EmptyStateLayout content={emptyLayout[emptyContent]} />
+            <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
           )}
         </ContentLayout>
         <ConfirmDialog
-          isConfirmButtonLoading={isConfirmButtonLoading}
           onConfirm={handleConfirmDelete}
-          onToggleDialog={handleShowConfirmDelete}
+          onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Main>
@@ -235,8 +239,8 @@ export const RolesListPage = () => {
 
 export const ProtectedRolesListPage = () => {
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.accessRoles}>
+    <Page.Protect permissions={PERMISSIONS.accessRoles}>
       <RolesListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

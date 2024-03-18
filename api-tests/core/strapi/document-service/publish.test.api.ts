@@ -23,7 +23,9 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        const result = await strapi
+          .documents(ARTICLE_UID)
+          .publish(articleDb.documentId, { locale: '*' });
 
         expect(result).not.toBeNull();
 
@@ -39,7 +41,7 @@ describe('Document Service', () => {
         ]);
 
         // All locales should have been published
-        expect(draftArticlesDb.length).toBeGreaterThan(0);
+        expect(draftArticlesDb.length).toBeGreaterThanOrEqual(3);
         expect(publishedArticlesDb.length).toBe(draftArticlesDb.length);
         publishedArticlesDb.forEach((article) => {
           expect(article.publishedAt).not.toBeNull();
@@ -60,10 +62,12 @@ describe('Document Service', () => {
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({
             documentId: articleDb.documentId,
+            locale: 'en',
             publishedAt: { $null: true },
           }),
           findArticlesDb({
             documentId: articleDb.documentId,
+            locale: 'en',
             publishedAt: { $notNull: true },
           }),
         ]);
@@ -77,10 +81,36 @@ describe('Document Service', () => {
       })
     );
 
+    it('should publish default locale if no locale is provided', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+      const result = await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+
+      expect(result).not.toBeNull();
+
+      const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
+        findArticlesDb({
+          documentId: articleDb.documentId,
+          publishedAt: { $null: true },
+        }),
+        findArticlesDb({
+          documentId: articleDb.documentId,
+          publishedAt: { $notNull: true },
+        }),
+      ]);
+
+      // All locales should have been published
+      expect(draftArticlesDb.length).toBeGreaterThan(0);
+      expect(publishedArticlesDb.length).toBe(1);
+      publishedArticlesDb.forEach((article) => {
+        expect(article.publishedAt).not.toBeNull();
+      });
+    });
+
     it(
       'publish one locale',
       testInTransaction(async () => {
-        const articlesDb = await findArticlesDb({ documentId: 'Article1' });
+        const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
         const documentId = articlesDb.at(0)!.documentId;
 
         const result = await strapi.documents(ARTICLE_UID).publish(documentId, {

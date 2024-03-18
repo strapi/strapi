@@ -114,21 +114,21 @@ const getAttributeModifiers = (attribute) => {
       throw new Error('typeof min/max values mismatch');
     }
 
-    const typeofMinMax = (max && typeofMax) ?? (min && typeofMin);
     let typeKeyword;
 
-    // Determines type keyword (string/number) based on min/max options, throws error for invalid types
-    switch (typeofMinMax) {
-      case 'string':
-        typeKeyword = ts.SyntaxKind.StringKeyword;
-        break;
-      case 'number':
-        typeKeyword = ts.SyntaxKind.NumberKeyword;
-        break;
-      default:
-        throw new Error(
-          `Invalid data type for min/max options. Must be string or number, but found ${typeofMinMax}`
-        );
+    // use 'string'
+    if (typeofMin === 'string' || typeofMax === 'string') {
+      typeKeyword = ts.SyntaxKind.StringKeyword;
+    }
+    // use 'number'
+    else if (typeofMin === 'number' || typeofMax === 'number') {
+      typeKeyword = ts.SyntaxKind.NumberKeyword;
+    }
+    // invalid type
+    else {
+      throw new Error(
+        `Invalid data type for min/max options. Must be string, number or undefined, but found { min: ${min} (${typeofMin}), max: ${max} (${typeofMax}) }`
+      );
     }
 
     modifiers.push(

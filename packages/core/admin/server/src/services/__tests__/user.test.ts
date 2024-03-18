@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import constants from '../constants';
 import userService from '../user';
+import userContentType from '../../content-types/User';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -23,6 +24,10 @@ const {
 } = userService;
 
 describe('User', () => {
+  global.strapi = {
+    getModel: jest.fn(() => userContentType),
+  } as any;
+
   describe('sanitizeUser', () => {
     test('Removes password and resetPasswordToken', () => {
       const res = sanitizeUser({
@@ -53,6 +58,7 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
@@ -64,8 +70,10 @@ describe('User', () => {
             metrics: { sendDidInviteUser },
           },
         },
-        query() {
-          return { create: dbCreate, count };
+        db: {
+          query() {
+            return { create: dbCreate, count };
+          },
         },
       } as any;
 
@@ -85,6 +93,7 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
@@ -96,8 +105,10 @@ describe('User', () => {
             metrics: { sendDidInviteUser },
           },
         },
-        query() {
-          return { create: dbCreate, count };
+        db: {
+          query() {
+            return { create: dbCreate, count };
+          },
         },
       } as any;
 
@@ -130,6 +141,7 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
@@ -141,8 +153,10 @@ describe('User', () => {
             metrics: { sendDidInviteUser },
           },
         },
-        query() {
-          return { create: dbCreate, count };
+        db: {
+          query() {
+            return { create: dbCreate, count };
+          },
         },
       } as any;
 
@@ -166,7 +180,8 @@ describe('User', () => {
     test('Count users without params', async () => {
       const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count: dbCount }),
+        ...global.strapi,
+        db: { query: () => ({ count: dbCount }) },
       } as any;
 
       const amount = await count();
@@ -178,7 +193,8 @@ describe('User', () => {
     test('Count users with params', async () => {
       const dbCount = jest.fn(() => Promise.resolve(2));
       global.strapi = {
-        query: () => ({ count: dbCount }),
+        ...global.strapi,
+        db: { query: () => ({ count: dbCount }) },
       } as any;
 
       const params = { foo: 'bar' };
@@ -201,11 +217,14 @@ describe('User', () => {
       const hashPassword = jest.fn(() => Promise.resolve(hash));
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query() {
-          return { update, findOne };
+        db: {
+          query() {
+            return { update, findOne };
+          },
         },
         admin: {
           services: {
@@ -238,11 +257,14 @@ describe('User', () => {
       const update = jest.fn(() => Promise.resolve(user));
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query() {
-          return { update, findOne };
+        db: {
+          query() {
+            return { update, findOne };
+          },
         },
       } as any;
       const id = 1;
@@ -273,14 +295,17 @@ describe('User', () => {
       const hashPassword = jest.fn(() => hash);
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query() {
-          return {
-            findOne,
-            update,
-          };
+        db: {
+          query() {
+            return {
+              findOne,
+              update,
+            };
+          },
         },
         admin: {
           services: {
@@ -311,10 +336,11 @@ describe('User', () => {
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query: () => ({ findOne }),
+        db: { query: () => ({ findOne }) },
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
@@ -335,10 +361,11 @@ describe('User', () => {
       const deleteFn = jest.fn(() => user);
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query: () => ({ findOne, delete: deleteFn }),
+        db: { query: () => ({ findOne, delete: deleteFn }) },
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
@@ -354,10 +381,11 @@ describe('User', () => {
       const count = jest.fn(() => Promise.resolve(2));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query: () => ({ count }),
+        db: { query: () => ({ count }) },
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
@@ -381,10 +409,11 @@ describe('User', () => {
         .mockImplementationOnce(() => users[1]);
 
       global.strapi = {
+        ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
-        query: () => ({ count, delete: deleteFn }),
+        db: { query: () => ({ count, delete: deleteFn }) },
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       } as any;
 
@@ -402,8 +431,11 @@ describe('User', () => {
       const count = jest.fn(() => Promise.resolve(1));
 
       global.strapi = {
-        query() {
-          return { count };
+        ...global.strapi,
+        db: {
+          query() {
+            return { count };
+          },
         },
       } as any;
 
@@ -416,8 +448,11 @@ describe('User', () => {
       const count = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query() {
-          return { count };
+        ...global.strapi,
+        db: {
+          query() {
+            return { count };
+          },
         },
       } as any;
 
@@ -431,18 +466,19 @@ describe('User', () => {
     const defaults = { page: 1, pageSize: 100 };
 
     beforeEach(() => {
-      const findPage = jest.fn(
-        (uid, { page = defaults.page, pageSize = defaults.pageSize } = {}) => {
-          return {
-            results: Array.from({ length: pageSize }).map((_, i) => i + (page - 1) * pageSize),
-            pagination: { page, pageSize, total: page * pageSize, pageCount: page },
-          };
-        }
-      );
+      const findPage = jest.fn(({ page = defaults.page, pageSize = defaults.pageSize } = {}) => {
+        return {
+          results: Array.from({ length: pageSize }).map((_, i) => i + (page - 1) * pageSize),
+          pagination: { page, pageSize, total: page * pageSize, pageCount: page },
+        };
+      });
 
       global.strapi = {
-        entityService: {
-          findPage,
+        ...global.strapi,
+        db: {
+          query() {
+            return { findPage };
+          },
         },
       } as any;
     });
@@ -478,17 +514,20 @@ describe('User', () => {
     const user = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
 
     beforeEach(() => {
-      const findOne = jest.fn((uid, id: number) =>
-        Promise.resolve(
-          {
-            1: user,
-          }[id] || null
-        )
-      );
+      const userMap: Record<number, typeof user> = {
+        1: user,
+      };
+
+      const findOne = jest.fn((query: { where: { id: number } }): any => {
+        return userMap[query.where.id] ?? null;
+      });
 
       global.strapi = {
-        entityService: {
-          findOne,
+        ...global.strapi,
+        db: {
+          query() {
+            return { findOne };
+          },
         },
       } as any;
     });
@@ -512,8 +551,12 @@ describe('User', () => {
       const findOne = jest.fn();
       const fakeEmail = 'admin@admin.com';
 
-      // @ts-expect-error - test purpose
-      global.strapi = { query: () => ({ findOne }) };
+      global.strapi = {
+        ...global.strapi,
+        db: {
+          query: () => ({ findOne }),
+        },
+      } as any;
 
       await userService.findOneByEmail(fakeEmail);
 
@@ -530,8 +573,11 @@ describe('User', () => {
       const findOne = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query() {
-          return { findOne };
+        ...global.strapi,
+        db: {
+          query() {
+            return { findOne };
+          },
         },
       } as any;
 
@@ -551,8 +597,11 @@ describe('User', () => {
       const findOne = jest.fn(() => Promise.resolve(user));
 
       global.strapi = {
-        query() {
-          return { findOne };
+        ...global.strapi,
+        db: {
+          query() {
+            return { findOne };
+          },
         },
       } as any;
 
@@ -571,10 +620,13 @@ describe('User', () => {
       const findOne = jest.fn(() => Promise.resolve(undefined));
 
       global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
+        ...global.strapi,
+        db: {
+          query() {
+            return {
+              findOne,
+            };
+          },
         },
       } as any;
 
@@ -595,10 +647,13 @@ describe('User', () => {
       const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
+        ...global.strapi,
+        db: {
+          query() {
+            return {
+              findOne,
+            };
+          },
         },
         admin: {
           services: {
@@ -629,10 +684,13 @@ describe('User', () => {
       const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
+        ...global.strapi,
+        db: {
+          query() {
+            return {
+              findOne,
+            };
+          },
         },
         admin: {
           services: {
@@ -660,10 +718,13 @@ describe('User', () => {
       const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
+        ...global.strapi,
+        db: {
+          query() {
+            return {
+              findOne,
+            };
+          },
         },
         admin: {
           services: {
@@ -698,7 +759,8 @@ describe('User', () => {
       const warn = jest.fn();
 
       global.strapi = {
-        query: () => ({ model: { orm: 'bookshelf' }, count }),
+        ...global.strapi,
+        db: { query: () => ({ model: { orm: 'bookshelf' }, count }) },
         log: { warn },
       } as any;
 
@@ -712,7 +774,8 @@ describe('User', () => {
       const warn = jest.fn();
 
       global.strapi = {
-        query: () => ({ model: { orm: 'bookshelf' }, count }),
+        ...global.strapi,
+        db: { query: () => ({ model: { orm: 'bookshelf' }, count }) },
         log: { warn },
       } as any;
 
@@ -732,10 +795,13 @@ describe('User', () => {
       });
 
       global.strapi = {
-        query() {
-          return {
-            findOne,
-          };
+        ...global.strapi,
+        db: {
+          query() {
+            return {
+              findOne,
+            };
+          },
         },
       } as any;
 
@@ -754,10 +820,13 @@ describe('User', () => {
         const findOne = jest.fn(() => ({ id: 1 }));
 
         global.strapi = {
-          query() {
-            return {
-              findOne,
-            };
+          ...global.strapi,
+          db: {
+            query() {
+              return {
+                findOne,
+              };
+            },
           },
         } as any;
 
@@ -792,10 +861,13 @@ describe('User', () => {
       );
 
       global.strapi = {
-        query() {
-          return {
-            findMany,
-          };
+        ...global.strapi,
+        db: {
+          query() {
+            return {
+              findMany,
+            };
+          },
         },
       } as any;
 

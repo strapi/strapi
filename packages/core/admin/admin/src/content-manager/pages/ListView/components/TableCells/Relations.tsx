@@ -5,28 +5,23 @@ import { Menu } from '@strapi/design-system/v2';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import { useDoc } from '../../../../hooks/useDocument';
 import { useGetRelationsQuery } from '../../../../services/relations';
+import { getRelationLabel } from '../../../../utils/relations';
 import { getTranslation } from '../../../../utils/translations';
 
-import { CellValue } from './CellValue';
-
 import type { CellContentProps } from './CellContent';
-import type { Entity } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * RelationSingle
  * -----------------------------------------------------------------------------------------------*/
 
-interface RelationSingleProps extends Pick<CellContentProps, 'metadatas' | 'content'> {}
+interface RelationSingleProps extends Pick<CellContentProps, 'mainField' | 'content'> {}
 
-const RelationSingle = ({ metadatas, content }: RelationSingleProps) => {
+const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
   return (
     <TypographyMaxWidth textColor="neutral800" ellipsis>
-      <CellValue
-        // integer is default because that's what the id will be.
-        type={metadatas.mainField?.type ?? 'integer'}
-        value={metadatas.mainField?.name ? content[metadatas.mainField?.name] : content.id}
-      />
+      {getRelationLabel(content, mainField)}
     </TypographyMaxWidth>
   );
 };
@@ -39,23 +34,25 @@ const TypographyMaxWidth = styled(Typography)`
  * RelationMultiple
  * -----------------------------------------------------------------------------------------------*/
 
-interface RelationMultipleProps extends Pick<CellContentProps, 'metadatas' | 'name' | 'content'> {
-  entityId: Entity.ID;
-  uid: string;
-}
+interface RelationMultipleProps
+  extends Pick<CellContentProps, 'mainField' | 'content' | 'name' | 'rowId'> {}
 
-const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationMultipleProps) => {
+/**
+ * TODO: fix this component – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
+ */
+const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleProps) => {
+  const { model } = useDoc();
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const [fieldName] = name.split('.');
+  const [targetField] = name.split('.');
 
   const { data, isLoading } = useGetRelationsQuery(
     {
-      model: uid,
-      id: entityId.toString(),
-      targetField: fieldName,
+      model,
+      id: rowId,
+      targetField,
     },
     {
       skip: !isOpen,
@@ -81,7 +78,7 @@ const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationM
           <Badge>{content.count}</Badge>
           {formatMessage(
             {
-              id: 'content-manager.containers.ListPage.items',
+              id: 'content-manager.containers.list.items',
               defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
             },
             { number: content.count }
@@ -99,17 +96,12 @@ const RelationMultiple = ({ metadatas, name, entityId, content, uid }: RelationM
             </Loader>
           </Menu.Item>
         )}
-
         {data?.results && (
           <>
             {data.results.map((entry) => (
-              <Menu.Item key={entry.id} disabled>
+              <Menu.Item key={entry.documentId} disabled>
                 <TypographyMaxWidth ellipsis>
-                  <CellValue
-                    type={metadatas.mainField?.type ?? 'integer'}
-                    // @ts-expect-error – can't use a string to index the RelationResult object.
-                    value={metadatas.mainField?.name ? entry[metadatas.mainField.name] : entry.id}
-                  />
+                  {getRelationLabel(entry, mainField)}
                 </TypographyMaxWidth>
               </Menu.Item>
             ))}
