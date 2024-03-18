@@ -17,7 +17,7 @@
     "@strapi/plugin-i18n": "4.20.5",
     "@strapi/plugin-users-permissions": "4.20.5",
     "@strapi/strapi": "4.20.5",
-    "better-sqlite3": "9.0.0",
+    "better-sqlite3": "9.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "6.21.1",
