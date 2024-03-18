@@ -22,7 +22,6 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
-import type { Data } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -39,6 +38,8 @@ import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
+
+import type { Data } from '@strapi/types';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;

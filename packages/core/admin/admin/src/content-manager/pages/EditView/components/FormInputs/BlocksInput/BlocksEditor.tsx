@@ -3,7 +3,6 @@ import * as React from 'react';
 import { createContext } from '@radix-ui/react-context';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
-import type { Schema } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
@@ -27,6 +26,8 @@ import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
+
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * BlocksEditorProvider
