@@ -1,5 +1,6 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -19,7 +20,6 @@ import {
   useCustomFields,
   useNotification,
   useStrapiApp,
-  useTracking,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import has from 'lodash/has';

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Flex,
@@ -11,7 +12,6 @@ import {
   ModalHeader,
   Typography,
 } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

@@ -1,9 +1,9 @@
 import React, { useReducer, useState } from 'react';
 
-import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, useTracking } from '@strapi/admin/strapi-admin';
 import { Button, ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFocusWhenNavigate, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';

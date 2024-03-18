@@ -15,8 +15,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  translatedErrors,
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -31,24 +29,26 @@ import * as yup from 'yup';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../../../admin/src/hooks/useAPIErrorHandler';
 import {
   useGetProviderOptionsQuery,
   useUpdateProviderOptionsMutation,
 } from '../../../../../../admin/src/services/auth';
 import { isBaseQueryError } from '../../../../../../admin/src/utils/baseQuery';
+import { translatedErrors } from '../../../../../../admin/src/utils/translatedErrors';
 import { ProvidersOptions } from '../../../../../../shared/contracts/admin';
 
 const schema = yup.object().shape({
-  autoRegister: yup.bool().required(translatedErrors.required),
+  autoRegister: yup.bool().required(translatedErrors.required.id),
   defaultRole: yup.mixed().when('autoRegister', (value, initSchema) => {
-    return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
+    return value ? initSchema.required(translatedErrors.required.id) : initSchema.nullable();
   }),
   ssoLockedRoles: yup
     .array()
     .nullable()
     .of(
       yup.mixed().when('ssoLockedRoles', (value, initSchema) => {
-        return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
+        return value ? initSchema.required(translatedErrors.required.id) : initSchema.nullable();
       })
     ),
 });

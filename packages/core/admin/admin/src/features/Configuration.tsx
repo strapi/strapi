@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { useAPIErrorHandler, useNotification, useRBAC, useTracking } from '@strapi/helper-plugin';
+import { useNotification, useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { useTypedSelector } from '../core/store/hooks';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import {
   ConfigurationLogo,
   useProjectSettingsQuery,
@@ -13,6 +14,7 @@ import {
 } from '../services/admin';
 
 import { useAuth } from './Auth';
+import { useTracking } from './Tracking';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Context
@@ -40,12 +42,6 @@ interface ConfigurationContextValue {
   showReleaseNotification: boolean;
   updateProjectSettings: (body: UpdateProjectSettingsBody) => Promise<void>;
 }
-
-/**
- * TODO: it would be nice if this context actually lived in redux.
- * But we'd probably need to reconcile the fact we get the data three
- * different ways and what that actually looks like.
- */
 
 const [ConfigurationContextProvider, useConfiguration] =
   createContext<ConfigurationContextValue>('ConfigurationContext');

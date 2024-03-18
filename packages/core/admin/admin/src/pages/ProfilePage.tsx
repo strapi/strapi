@@ -12,14 +12,7 @@ import {
   GridItem,
   Typography,
 } from '@strapi/design-system';
-import {
-  translatedErrors,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
@@ -31,9 +24,12 @@ import { InputRenderer } from '../components/FormInputs/Renderer';
 import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
+import { useTracking } from '../features/Tracking';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
+import { translatedErrors } from '../utils/translatedErrors';
 import { getDisplayName } from '../utils/users';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
@@ -48,7 +44,7 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
     .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
       return password || confirmPassword
         ? passSchema.required({
-            id: translatedErrors.required,
+            id: translatedErrors.required.id,
             defaultMessage: 'This field is required',
           })
         : passSchema;

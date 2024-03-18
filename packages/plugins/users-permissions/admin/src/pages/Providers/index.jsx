@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   ContentLayout,
   HeaderLayout,
@@ -19,16 +20,14 @@ import {
 import {
   onRowClick,
   stopPropagation,
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

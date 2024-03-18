@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 
+import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useAdminUsers } from '../../../../../../../../admin/src/services/users';
 import { useGetAuditLogsQuery } from '../../../../../services/auditLogs';
 

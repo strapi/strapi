@@ -2,12 +2,10 @@ import * as React from 'react';
 
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -17,6 +15,8 @@ import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useTracking } from '../../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import {
   useCreateAPITokenMutation,
   useGetAPITokenQuery,
