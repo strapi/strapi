@@ -1,10 +1,6 @@
 import * as React from 'react';
 
-import {
-  AutoReloadOverlayBlockerProvider,
-  NotificationsProvider,
-  OverlayBlockerProvider,
-} from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
@@ -59,22 +55,18 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                   settings={strapi.settings}
                 >
                   <NotificationsProvider>
-                    <AutoReloadOverlayBlockerProvider>
-                      <OverlayBlockerProvider>
-                        <TrackingProvider>
-                          <GuidedTourProvider>
-                            <ConfigurationProvider
-                              defaultAuthLogo={strapi.configurations.authLogo}
-                              defaultMenuLogo={strapi.configurations.menuLogo}
-                              showTutorials={strapi.configurations.tutorials}
-                              showReleaseNotification={strapi.configurations.notifications.releases}
-                            >
-                              {children}
-                            </ConfigurationProvider>
-                          </GuidedTourProvider>
-                        </TrackingProvider>
-                      </OverlayBlockerProvider>
-                    </AutoReloadOverlayBlockerProvider>
+                    <TrackingProvider>
+                      <GuidedTourProvider>
+                        <ConfigurationProvider
+                          defaultAuthLogo={strapi.configurations.authLogo}
+                          defaultMenuLogo={strapi.configurations.menuLogo}
+                          showTutorials={strapi.configurations.tutorials}
+                          showReleaseNotification={strapi.configurations.notifications.releases}
+                        >
+                          {children}
+                        </ConfigurationProvider>
+                      </GuidedTourProvider>
+                    </TrackingProvider>
                   </NotificationsProvider>
                 </StrapiAppProvider>
               </QueryClientProvider>

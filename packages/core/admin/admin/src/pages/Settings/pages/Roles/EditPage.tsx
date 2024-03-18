@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
-import { useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -45,7 +45,6 @@ const EditPage = () => {
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -96,9 +95,6 @@ const EditPage = () => {
     formik: FormikHelpers<EditRoleFormValues>
   ) => {
     try {
-      // @ts-expect-error – This will be fixed in V5
-      lockApp();
-
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
 
@@ -157,9 +153,6 @@ const EditPage = () => {
         type: 'warning',
         message: { id: 'notification.error' },
       });
-    } finally {
-      // @ts-expect-error – This will be fixed in V5
-      unlockApp();
     }
   };
 

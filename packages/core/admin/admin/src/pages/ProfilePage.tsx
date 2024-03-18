@@ -12,7 +12,7 @@ import {
   GridItem,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
@@ -61,7 +61,6 @@ const ProfilePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
   const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
   const dispatch = useTypedDispatch();
@@ -118,9 +117,6 @@ const ProfilePage = () => {
     body: UpdateUsersMeBody,
     { setErrors }: FormHelpers<UpdateUsersMeBody>
   ) => {
-    // @ts-expect-error – we're going to implement a context assertion to avoid this
-    lockApp();
-
     const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
     let dataToSend = bodyRest;
 
@@ -167,8 +163,6 @@ const ProfilePage = () => {
         });
       }
     }
-
-    unlockApp?.();
   };
 
   if (isLoading) {

@@ -20,7 +20,6 @@ import {
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
@@ -51,7 +50,6 @@ export const ProtectedSettingsPage = () => (
 const SettingsPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { get, post } = useFetchClient();
 
   const [testAddress, setTestAddress] = React.useState('');
@@ -127,11 +125,7 @@ const SettingsPage = () => {
       }
     }
 
-    lockApp!();
-
     mutation.mutate({ to: testAddress });
-
-    unlockApp!();
   };
 
   if (isLoading) {

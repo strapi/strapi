@@ -3,9 +3,7 @@
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './features/AppInfo';
-export * from './features/AutoReloadOverlayBlocker';
 export * from './features/Notifications';
-export * from './features/OverlayBlocker';
 export * from './features/RBAC';
 
 /* -------------------------------------------------------------------------------------------------

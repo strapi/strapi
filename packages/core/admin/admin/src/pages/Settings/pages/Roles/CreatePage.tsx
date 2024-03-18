@@ -13,7 +13,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -62,7 +62,6 @@ interface CreateRoleFormValues {
 const CreatePage = () => {
   const match = useMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
@@ -105,9 +104,6 @@ const CreatePage = () => {
     formik: FormikHelpers<CreateRoleFormValues>
   ) => {
     try {
-      // @ts-expect-error – fixed in V5
-      lockApp();
-
       if (id) {
         trackUsage('willDuplicateRole');
       } else {
@@ -162,9 +158,6 @@ const CreatePage = () => {
         type: 'warning',
         message: { id: 'notification.error' },
       });
-    } finally {
-      // @ts-expect-error – fixed in V5
-      unlockApp();
     }
   };
 

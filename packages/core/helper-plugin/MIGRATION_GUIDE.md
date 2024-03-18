@@ -399,6 +399,10 @@ Note! some of the props have changed, please refer to the documentation for the 
 
 ## Features
 
+### AutoReloadOverlayBlocker
+
+This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
+
 ### CustomFields
 
 This feature has been removed and is part of the `useStrapiApp` hook.
@@ -410,6 +414,10 @@ This feature has been moved to `@strapi/admin` and only the hook `useGuidedTour`
 ### Library
 
 This feature has been removed and is part of the `useStrapiApp` hook.
+
+### OverlayBlocker
+
+This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
 
 ### StrapiApp
 

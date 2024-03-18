@@ -1,12 +1,7 @@
 import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
-import {
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -52,7 +47,6 @@ const schema = yup.object().shape({
 const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const navigate = useNavigate();
   const { state: locationState } = useLocation();
@@ -115,9 +109,6 @@ const EditView = () => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
-
-    // @ts-expect-error context assertation
-    lockApp();
 
     const permissions = body.permissions.split('-');
 
@@ -223,9 +214,6 @@ const EditView = () => {
             defaultMessage: 'Something went wrong',
           },
         });
-      } finally {
-        // @ts-expect-error context assertation
-        unlockApp();
       }
     }
   };

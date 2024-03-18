@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -30,8 +30,6 @@ import { translatedErrors } from '../../../../../utils/translatedErrors';
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
-import type { DistributiveOmit } from 'react-redux';
-
 interface ModalFormProps {
   onToggle: () => void;
 }
@@ -43,7 +41,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -102,9 +99,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   });
 
   const handleSubmit = async (body: InitialData, { setErrors }: FormHelpers<InitialData>) => {
-    // @ts-expect-error – this will be fixed in V5.
-    lockApp();
-
     const res = await createUser({
       ...body,
       roles: body.roles ?? [],
@@ -132,9 +126,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
         setErrors(formatValidationErrors(res.error));
       }
     }
-
-    // @ts-expect-error – this will be fixed in V5.
-    unlockApp();
   };
 
   const goNext = () => {
