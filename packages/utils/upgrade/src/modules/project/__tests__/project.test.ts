@@ -89,7 +89,7 @@ describe('Project', () => {
     // TODO: Waiting for https://github.com/jestjs/jest/issues/9543 to be implemented as we rely on require.resolve to find the actual module
     test.todo(`Use the @strapi/strapi's package.json version as a fallback succeed`);
 
-    test('Succeed for valid project', () => {
+    test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(defaultVolume, defaultCWD);
 
       const project = projectFactory(defaultCWD);
@@ -100,13 +100,12 @@ describe('Project', () => {
       );
 
       expect(project.cwd).toBe(defaultCWD);
-
-      expect(project.strapiVersion.raw).toBe(currentStrapiVersion);
+      expect((project as any).strapiVersion.raw).toBe(currentStrapiVersion);
     });
   });
 
   describe('refresh', () => {
-    test('Succeed for valid project', () => {
+    test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(defaultVolume, defaultCWD);
 
       const project = projectFactory(defaultCWD);
@@ -120,7 +119,7 @@ describe('Project', () => {
 
       expect(project.cwd).toBe(defaultCWD);
 
-      expect(project.strapiVersion.raw).toBe(currentStrapiVersion);
+      expect((project as any).strapiVersion.raw).toBe(currentStrapiVersion);
 
       project.packageJSON.name = 'test';
     });

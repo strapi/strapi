@@ -76,9 +76,11 @@ describe('CodemodRunner', () => {
 
   it('runs codemods successfully', async () => {
     const range = rangeFactory('1.1.1');
-    const codemodRunner = codemodRunnerFactory(projectFactory(validCwd), range).setLogger(
+    const proj = projectFactory(validCwd);
+    const codemodRunner = codemodRunnerFactory(proj, range).setLogger(
       loggerFactory({ debug: true })
     );
+
     const res = await codemodRunner.run(`${validCwd}/src`);
     expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
     expect(res.success).toBe(true);

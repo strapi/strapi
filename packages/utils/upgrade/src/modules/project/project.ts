@@ -141,6 +141,7 @@ export class AppProject extends Project implements AppProjectInterface {
   constructor(cwd: string) {
     super(cwd);
     this.type = 'app';
+    this.refreshStrapiVersion();
   }
 
   getFilesByExtensions(extensions: FileExtension[]) {
@@ -238,11 +239,13 @@ const isPlugin = (cwd: string) => {
 
   const packageJSON = JSON.parse(packageJSONBuffer.toString());
 
-  return packageJSON.strapi.kind === 'plugin';
+  return packageJSON?.strapi?.kind === 'plugin';
 };
 
 // TODO: make this async so we can use async file methods
 export const projectFactory = (cwd: string) => {
+  fse.accessSync(cwd);
+
   if (isPlugin(cwd)) {
     return new PluginProject(cwd);
   }
