@@ -36,7 +36,6 @@ export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/stopPropagation';
-export * from './utils/translatedErrors';
 
 /* -------------------------------------------------------------------------------------------------
  * Types

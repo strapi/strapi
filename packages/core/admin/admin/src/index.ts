@@ -51,4 +51,9 @@ export type {
 } from './core/apis/content-manager';
 export type { ApiError } from './types/errors';
 
+/**
+ * Utils
+ */
+export { translatedErrors } from './utils/translatedErrors';
+
 export * from './content-manager/exports';

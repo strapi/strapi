@@ -1,6 +1,5 @@
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { translatedErrors } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -16,6 +15,7 @@ import {
 } from '../../../layouts/UnauthenticatedLayout';
 import { useForgotPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 import type { ForgotPassword } from '../../../../../shared/contracts/authentication';
 
@@ -64,16 +64,10 @@ const ForgotPassword = () => {
               }
             }}
             validationSchema={yup.object().shape({
-              email: yup
-                .string()
-                .email({
-                  id: translatedErrors.email,
-                  defaultMessage: 'This is not a valid email.',
-                })
-                .required({
-                  id: translatedErrors.required,
-                  defaultMessage: 'This field is required.',
-                }),
+              email: yup.string().email(translatedErrors.email).required({
+                id: translatedErrors.required.id,
+                defaultMessage: 'This field is required.',
+              }),
             })}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
