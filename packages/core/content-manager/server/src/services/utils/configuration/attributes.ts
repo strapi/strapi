@@ -79,7 +79,7 @@ const isVisible = (schema: any, name: any) => {
     return false;
   }
 
-  if (isTimestamp(schema, name) || name === 'id') {
+  if (isTimestamp(schema, name) || ['id', 'documentId'].includes(name)) {
     return false;
   }
 
@@ -163,11 +163,11 @@ const hasEditableAttribute = (schema: any, name: any) => {
 const findFirstStringAttribute = (schema: any) => {
   return Object.keys(schema.attributes || {}).find((key) => {
     const { type } = schema.attributes[key];
-    return type === 'string' && key !== 'id';
+    return type === 'string' && key !== 'documentId';
   });
 };
 
-const getDefaultMainField = (schema: any) => findFirstStringAttribute(schema) || 'id';
+const getDefaultMainField = (schema: any) => findFirstStringAttribute(schema) || 'documentId';
 
 /**
  * Returns list of all sortable attributes for a given content type schema
@@ -186,6 +186,7 @@ const getSortableAttributes = (schema: any) => {
 
   return [
     'id',
+    'documentId',
     ...validAttributes,
     ...nonVisibleWritableAttributes,
     CREATED_BY_ATTRIBUTE,

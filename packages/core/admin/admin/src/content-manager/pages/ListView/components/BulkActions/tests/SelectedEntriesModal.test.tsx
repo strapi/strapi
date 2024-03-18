@@ -29,7 +29,7 @@ const render = (props = { onToggle: jest.fn() }) =>
     <Table.Root
       defaultSelectedRows={[{ id: 1 }, { id: 2 }, { id: 3 }]}
       headers={[
-        { name: 'id', label: 'id' },
+        { name: 'documentId', label: 'documentId' },
         { name: 'name', label: 'name' },
         { name: 'email', label: 'email' },
         { name: 'createdAt', label: 'createdAt' },

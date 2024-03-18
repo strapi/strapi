@@ -39,6 +39,7 @@ async function createDefaultLayouts(schema: any) {
 function createDefaultListLayout(schema: any) {
   return Object.keys(schema.attributes)
     .filter((name) => isListable(schema, name))
+    .filter((name) => name !== 'id')
     .slice(0, DEFAULT_LIST_LENGTH);
 }
 

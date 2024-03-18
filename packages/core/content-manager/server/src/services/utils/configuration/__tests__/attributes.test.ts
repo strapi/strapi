@@ -27,7 +27,7 @@ const createMockSchema = (attrs: any, timestamps = true) => {
 describe('attributesUtils', () => {
   describe('isSortable', () => {
     test('The id attribute is always sortable', () => {
-      expect(isSortable(createMockSchema({}), 'id')).toBe(true);
+      expect(isSortable(createMockSchema({}), 'documentId')).toBe(true);
     });
 
     test('Timestamps are sortable', () => {

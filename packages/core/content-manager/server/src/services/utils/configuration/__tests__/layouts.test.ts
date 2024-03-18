@@ -19,7 +19,7 @@ jest.mock('../../../../utils', () => ({
 
 const createMockSchema = ({ attributes = {} }) => ({
   attributes: {
-    id: { type: 'integer' },
+    documentId: { type: 'string' },
     title: { type: 'string' },
     nodes: { type: 'json' },
     ...attributes,
@@ -33,28 +33,28 @@ const createMockSchema = ({ attributes = {} }) => ({
 });
 
 describe('Layouts', () => {
-  it('should create default layouts with valid fields if no configuration is provided', async () => {
+  it('should create default layouts with valdocumentId fields if no configuration is provdocumentIded', async () => {
     const configuration = { layouts: {} };
 
     const layout = await syncLayouts(configuration, createMockSchema({}));
 
-    expect(layout.list).toEqual(['id', 'title']);
+    expect(layout.list).toEqual(['documentId', 'title']);
     expect(layout.edit).toEqual([[{ name: 'title', size: 6 }], [{ name: 'nodes', size: 12 }]]);
   });
 
   it('should append new fields at the end of the layouts', async () => {
     const configuration = {
       layouts: {
-        list: ['id', 'title'],
+        list: ['documentId', 'title'],
         edit: [[{ name: 'title', size: 6 }], [{ name: 'nodes', size: 12 }]],
       },
-      metadatas: { id: {}, title: {}, nodes: {} },
+      metadatas: { documentId: {}, title: {}, nodes: {} },
     };
     const schema = createMockSchema({ attributes: { description: { type: 'string' } } });
 
     const layout = await syncLayouts(configuration, schema);
 
-    expect(layout.list).toEqual(['id', 'title', 'description']);
+    expect(layout.list).toEqual(['documentId', 'title', 'description']);
     expect(layout.edit).toEqual([
       [{ name: 'title', size: 6 }],
       [{ name: 'nodes', size: 12 }],
@@ -65,10 +65,10 @@ describe('Layouts', () => {
   it('should use the custom field size if the field is a custom field with custom size', async () => {
     const configuration = {
       layouts: {
-        list: ['id', 'title'],
+        list: ['documentId', 'title'],
         edit: [[{ name: 'title', size: 6 }], [{ name: 'nodes', size: 12 }]],
       },
-      metadatas: { id: {}, title: {}, nodes: {} },
+      metadatas: { documentId: {}, title: {}, nodes: {} },
     };
     const schema = createMockSchema({
       attributes: { color: { type: 'string', customField: 'customField' } },
@@ -76,7 +76,7 @@ describe('Layouts', () => {
 
     const layout = await syncLayouts(configuration, schema);
 
-    expect(layout.list).toEqual(['id', 'title', 'color']);
+    expect(layout.list).toEqual(['documentId', 'title', 'color']);
     expect(layout.edit).toEqual([
       [{ name: 'title', size: 6 }],
       [{ name: 'nodes', size: 12 }],

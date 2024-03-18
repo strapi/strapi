@@ -158,13 +158,15 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const realServerRelationsCount =
       'pagination' in data && data.pagination ? data.pagination.total : 0;
+
     /**
      * Items that are already connected, but reordered would be in
      * this list, so to get an accurate figure, we remove them.
      */
     const relationsConnected =
       (field.value?.connect ?? []).filter(
-        (rel: Relation) => data.results.findIndex((relation) => relation.id === rel.id) === -1
+        (rel: Relation) =>
+          data.results.findIndex((relation) => relation.documentId === rel.documentId) === -1
       ).length ?? 0;
     const relationsDisconnected = field.value?.disconnect?.length ?? 0;
 
@@ -221,7 +223,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
          */
         __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [props.mainField?.name ?? 'id']: relation[props.mainField?.name ?? 'id'],
+        [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, props.mainField),
         // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
         href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
@@ -341,7 +343,7 @@ const addLabelAndHref =
       return {
         ...relation,
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [mainField?.name ?? 'id']: relation[mainField?.name ?? 'id'],
+        [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, mainField),
         href: `${href}/${relation.documentId}`,
       };
@@ -791,7 +793,7 @@ const RelationsList = ({
           handleDisconnect,
           relations: data,
         }}
-        itemKey={(index) => data[index].id}
+        itemKey={(index) => data[index].documentId}
         innerElementType="ol"
       >
         {ListItem}

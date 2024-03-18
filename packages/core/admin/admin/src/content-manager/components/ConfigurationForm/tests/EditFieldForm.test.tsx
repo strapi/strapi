@@ -252,7 +252,7 @@ describe('EditFieldForm', () => {
 
       await user.click(screen.getByRole('combobox', { name: 'Entry title' }));
 
-      expect(screen.getByRole('option', { name: 'id' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'documentId' })).toBeInTheDocument();
     });
   });
 });

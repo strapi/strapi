@@ -23,6 +23,14 @@ function createDefaultMetadatas(schema: any) {
         sortable: true,
       },
     },
+    documentId: {
+      edit: {},
+      list: {
+        label: 'documentId',
+        searchable: true,
+        sortable: true,
+      },
+    },
   };
 }
 
@@ -116,7 +124,7 @@ async function syncMetadatas(configuration: any, schema: any) {
     }
 
     // if the mainField is id you can keep it
-    if (edit.mainField === 'id') return acc;
+    if (edit.mainField === 'documentId') return acc;
 
     // check the mainField in the targetModel
     const targetSchema = getTargetSchema(attr.targetModel);

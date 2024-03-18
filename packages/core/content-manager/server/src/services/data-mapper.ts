@@ -23,7 +23,10 @@ export default () => ({
       isDisplayed: isVisible(contentType),
       attributes: {
         id: {
-          type: 'integer',
+          type: 'number',
+        },
+        documentId: {
+          type: 'string',
         },
         ...formatAttributes(contentType),
       },

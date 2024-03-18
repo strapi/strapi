@@ -62,11 +62,11 @@ const DynamicComponent = ({
   } = useDocLayout();
 
   const title = React.useMemo(() => {
-    const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
+    const { mainField } = components[componentUid]?.settings ?? { mainField: 'documentId' };
 
     const mainFieldValue = getIn(formValues, `${name}.${index}.${mainField}`);
 
-    const displayedValue = mainField === 'id' ? '' : String(mainFieldValue).trim();
+    const displayedValue = mainField === 'documentId' ? '' : String(mainFieldValue).trim();
 
     const mainValue = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
@@ -258,8 +258,8 @@ const DynamicComponent = ({
 };
 
 const ActionsFlex = styled(Flex)`
-  /* 
-    we need to remove the background from the button but we can't 
+  /*
+    we need to remove the background from the button but we can't
     wrap the element in styled because it breaks the forwardedAs which
     we need for drag handler to work on firefox
   */

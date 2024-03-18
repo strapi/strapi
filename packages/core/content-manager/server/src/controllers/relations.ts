@@ -36,7 +36,7 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   });
 
   if (!isListable(model, mainField)) {
-    return 'id';
+    return 'documentId';
   }
 
   if (permissionChecker.cannot.read(null, mainField)) {
@@ -52,7 +52,7 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
       }
     }
 
-    return 'id';
+    return 'documentId';
   }
 
   return mainField;
@@ -201,7 +201,7 @@ export default {
 
     const mainField = flow(
       prop(`metadatas.${targetField}.edit.mainField`),
-      (mainField) => mainField || 'id',
+      (mainField) => mainField || 'documentId',
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 

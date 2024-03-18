@@ -28,14 +28,14 @@ const createSettingsSchema = (schema: any) => {
       pageSize: yup.number().integer().min(10).max(100).required(),
       searchable: yup.boolean().required(),
       // should be reset when the type changes
-      mainField: yup.string().oneOf(validAttributes.concat('id')).default('id'),
+      mainField: yup.string().oneOf(validAttributes.concat('documentId')).default('documentId'),
       // should be reset when the type changes
       defaultSortBy: yup
         .string()
         .test('is-valid-sort-attribute', '${path} is not a valid sort attribute', async (value) =>
           isValidDefaultSort(schema, value)
         )
-        .default('id'),
+        .default('documentId'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
     .noUnknown();
@@ -72,7 +72,10 @@ const createMetadasSchema = (schema: any) => {
                   isListable(targetSchema, key)
                 );
 
-                return yup.string().oneOf(validAttributes.concat('id')).default('id');
+                return yup
+                  .string()
+                  .oneOf(validAttributes.concat('documentId'))
+                  .default('documentId');
               }),
             })
             .noUnknown()

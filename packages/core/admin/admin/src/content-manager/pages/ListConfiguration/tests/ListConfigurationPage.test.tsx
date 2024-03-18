@@ -86,7 +86,7 @@ describe('Configure the List View', () => {
 
     await user.click(getByRole('button', { name: 'Delete id' }));
     await user.click(getByRole('button', { name: 'Add a field' }));
-    await user.click(getByRole('menuitem', { name: 'id' }));
+    await user.click(getByRole('menuitem', { name: 'documentId' }));
 
     expect(getByRole('button', { name: `Edit id` })).toBeInTheDocument();
     expect(getByRole('button', { name: `Delete id` })).toBeInTheDocument();

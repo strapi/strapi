@@ -108,7 +108,7 @@ describe('VersionHeader', () => {
 
     it('should display the correct subtitle without an entry title (mainField)', () => {
       render(
-        { selectedVersion, mainField: 'id' },
+        { selectedVersion, mainField: 'documentId' },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 

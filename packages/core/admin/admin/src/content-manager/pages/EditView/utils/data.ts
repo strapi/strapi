@@ -15,7 +15,7 @@ type Predicate = <TAttribute extends Attribute.Any>(
   value: Attribute.GetValue<TAttribute>
 ) => boolean;
 type Transform = <TAttribute extends Attribute.Any>(value: any, attribute: TAttribute) => any;
-type AnyData = Omit<Document, 'id'>;
+type AnyData = Omit<Document, 'documentId'>;
 
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
 

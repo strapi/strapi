@@ -159,7 +159,7 @@ const EditViewPage = () => {
    * not very user friendly. Instead in that case, we simply write "Untitled".
    */
   const documentTitle =
-    mainField !== 'id' && document?.[mainField] ? document[mainField] : 'Untitled';
+    mainField !== 'documentId' && document?.[mainField] ? document[mainField] : 'Untitled';
 
   return (
     <Main paddingLeft={10} paddingRight={10}>

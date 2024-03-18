@@ -120,7 +120,7 @@ interface SelectedEntriesTableContentProps {
 }
 
 const TABLE_HEADERS: Table.Header<any, any>[] = [
-  { name: 'id', label: 'id' },
+  { name: 'documentId', label: 'documentId' },
   { name: 'name', label: 'name' },
   { name: 'status', label: 'status' },
 ];
@@ -140,7 +140,7 @@ const SelectedEntriesTableContent = ({
     },
   } = useDocLayout();
 
-  const shouldDisplayMainField = mainField != null && mainField !== 'id';
+  const shouldDisplayMainField = mainField != null && mainField !== 'documentId';
 
   return (
     <Table.Content>

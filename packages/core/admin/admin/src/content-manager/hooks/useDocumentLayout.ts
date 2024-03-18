@@ -107,7 +107,7 @@ const DEFAULT_SETTINGS = {
   pagination: false,
   defaultSortBy: '',
   defaultSortOrder: 'asc',
-  mainField: 'id',
+  mainField: 'documentId',
   pageSize: 10,
 };
 

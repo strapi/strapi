@@ -80,7 +80,7 @@ const hasContent = (
     const value = content?.[mainField.name];
 
     // relations, media ... show the id as fallback
-    if (mainField.name === 'id' && ![undefined, null].includes(value)) {
+    if (mainField.name === 'documentId' && ![undefined, null].includes(value)) {
       return true;
     }
 
@@ -95,7 +95,7 @@ const hasContent = (
     return content?.count > 0;
   }
 
-  /* 
+  /*
       Biginteger fields need to be treated as strings, as `isNumber`
       doesn't deal with them.
   */

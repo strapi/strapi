@@ -1,5 +1,4 @@
-const ID = 'id';
-
+const DOCUMENT_ID = 'documentId';
 const CREATED_BY_ATTRIBUTE_NAME = 'createdBy';
 const UPDATED_BY_ATTRIBUTE_NAME = 'updatedBy';
 
@@ -11,7 +10,7 @@ const UPDATED_AT_ATTRIBUTE_NAME = 'updatedAt';
 const PUBLISHED_AT_ATTRIBUTE_NAME = 'publishedAt';
 
 const DOCUMENT_META_FIELDS = [
-  ID,
+  DOCUMENT_ID,
   ...CREATOR_FIELDS,
   PUBLISHED_BY_ATTRIBUTE_NAME,
   CREATED_AT_ATTRIBUTE_NAME,

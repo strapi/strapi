@@ -393,8 +393,8 @@ const Component = ({
   isOpen,
   name,
   mainField = {
-    name: 'id',
-    type: 'integer',
+    name: 'documentId',
+    type: 'string',
   },
   onClickToggle,
   onDeleteComponent,

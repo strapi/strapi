@@ -112,7 +112,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
     });
 
     return [
-      'id',
+      'documentId',
       ...allowedFields,
       ...DEFAULT_ALLOWED_FILTERS,
       ...(canReadAdminUsers ? CREATOR_FIELDS : []),
@@ -163,7 +163,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
               },
             ],
             mainField: {
-              name: 'id',
+              name: 'documentId',
               type: 'integer',
             },
           };

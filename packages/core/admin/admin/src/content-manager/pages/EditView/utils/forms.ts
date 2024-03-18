@@ -1,7 +1,7 @@
 import type { ComponentsDictionary, Document } from '../../../hooks/useDocument';
 import type { Schema } from '@strapi/types';
 
-type AnyData = Omit<Document, 'id'>;
+type AnyData = Omit<Document, 'documentId'>;
 
 /* -------------------------------------------------------------------------------------------------
  * createDefaultForm

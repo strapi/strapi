@@ -32,10 +32,10 @@ describe('Configuration settings service', () => {
       expect(settings).toMatchInlineSnapshot(`
         {
           "bulkable": true,
-          "defaultSortBy": "id",
+          "defaultSortBy": "documentId",
           "defaultSortOrder": "ASC",
           "filterable": true,
-          "mainField": "id",
+          "mainField": "documentId",
           "pageSize": 10,
           "searchable": true,
         }
@@ -50,8 +50,8 @@ describe('Configuration settings service', () => {
       const settings = await settingsService.createDefaultSettings(schema);
 
       expect(settings).toMatchObject({
-        mainField: 'id',
-        defaultSortBy: 'id',
+        mainField: 'documentId',
+        defaultSortBy: 'documentId',
       });
     });
 
@@ -156,8 +156,8 @@ describe('Configuration settings service', () => {
       const settings = await settingsService.syncSettings(existingConfig, schema);
 
       expect(settings).toMatchObject({
-        mainField: 'id',
-        defaultSortBy: 'id',
+        mainField: 'documentId',
+        defaultSortBy: 'documentId',
         searchable: false,
         bulkable: true,
       });
@@ -167,7 +167,7 @@ describe('Configuration settings service', () => {
       const schema = { attributes: {} };
       const existingConfig = {
         settings: {
-          mainField: 'id',
+          mainField: 'documentId',
           searchable: false,
           bulkable: true,
         },
@@ -176,8 +176,8 @@ describe('Configuration settings service', () => {
       const settings = await settingsService.syncSettings(existingConfig, schema);
 
       expect(settings).toMatchObject({
-        mainField: 'id',
-        defaultSortBy: 'id',
+        mainField: 'documentId',
+        defaultSortBy: 'documentId',
         searchable: false,
         bulkable: true,
       });
@@ -187,7 +187,7 @@ describe('Configuration settings service', () => {
       const schema = { attributes: {} };
       const existingConfig = {
         settings: {
-          mainField: 'id',
+          mainField: 'documentId',
           searchable: false,
           bulkable: true,
         },
@@ -196,8 +196,8 @@ describe('Configuration settings service', () => {
       const settings = await settingsService.syncSettings(existingConfig, schema);
 
       expect(settings).toMatchObject({
-        mainField: 'id',
-        defaultSortBy: 'id',
+        mainField: 'documentId',
+        defaultSortBy: 'documentId',
         searchable: false,
         bulkable: true,
       });
