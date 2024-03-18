@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Check, Refresh } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { BackButton } from '../../../../features/BackButton';
 import { useRegenerateTokenMutation } from '../../../../services/api';
 
@@ -76,28 +77,30 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
       </Button>
 
       <ConfirmDialog
-        bodyText={{
-          id: 'Settings.tokens.popUpWarning.message',
-          defaultMessage: 'Are you sure you want to regenerate this token?',
-        }}
-        iconRightButton={<Refresh />}
-        isConfirmButtonLoading={isLoadingConfirmation}
         isOpen={showConfirmDialog}
-        onToggleDialog={() => setShowConfirmDialog(false)}
-        onConfirm={handleConfirmRegeneration}
-        leftButtonText={{
-          id: 'Settings.tokens.Button.cancel',
-          defaultMessage: 'Cancel',
-        }}
-        rightButtonText={{
-          id: 'Settings.tokens.Button.regenerate',
-          defaultMessage: 'Regenerate',
-        }}
-        title={{
+        onClose={() => setShowConfirmDialog(false)}
+        title={formatMessage({
           id: 'Settings.tokens.RegenerateDialog.title',
           defaultMessage: 'Regenerate token',
-        }}
-      />
+        })}
+        endAction={
+          <Button
+            startIcon={<Refresh />}
+            loading={isLoadingConfirmation}
+            onClick={handleConfirmRegeneration}
+          >
+            {formatMessage({
+              id: 'Settings.tokens.Button.regenerate',
+              defaultMessage: 'Regenerate',
+            })}
+          </Button>
+        }
+      >
+        {formatMessage({
+          id: 'Settings.tokens.popUpWarning.message',
+          defaultMessage: 'Are you sure you want to regenerate this token?',
+        })}
+      </ConfirmDialog>
     </>
   );
 };

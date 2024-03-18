@@ -60,6 +60,34 @@ export declare namespace CreateReleaseAction {
 }
 
 /**
+ * POST /content-releases/:releaseId/actions/bulk - Create multiple release actions
+ */
+export declare namespace CreateManyReleaseActions {
+  export interface Request {
+    params: {
+      releaseId: Release['id'];
+    };
+    body: Array<{
+      type: ReleaseAction['type'];
+      entry: {
+        id: ReleaseActionEntry['id'];
+        locale?: ReleaseActionEntry['locale'];
+        contentType: UID.ContentType;
+      };
+    }>;
+  }
+
+  export interface Response {
+    data: Array<ReleaseAction>;
+    meta: {
+      totalEntries: number;
+      entriesAlreadyInRelease: number;
+    };
+    error?: errors.ApplicationError | errors.ValidationError | errors.NotFoundError;
+  }
+}
+
+/**
  * GET /content-releases/:id/actions - Get all release actions
  */
 

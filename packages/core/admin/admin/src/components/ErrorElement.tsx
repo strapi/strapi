@@ -1,5 +1,7 @@
-import { Alert, Flex, Icon, Main, Typography } from '@strapi/design-system';
-import { ExclamationMarkCircle } from '@strapi/icons';
+import { Alert, Button, Flex, Icon, Main, Typography } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
+import { useClipboard } from '@strapi/helper-plugin';
+import { Duplicate, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
 import styled from 'styled-components';
@@ -11,20 +13,18 @@ import styled from 'styled-components';
 const ErrorElement = () => {
   const error = useRouteError();
   const { formatMessage } = useIntl();
-
-  const errorMsg =
-    process.env.NODE_ENV === 'development'
-      ? formatMessage({
-          id: 'app.error.development',
-          defaultMessage: 'This is likely a bug with Strapi. Please open an issue.',
-        })
-      : formatMessage({
-          id: 'app.error.production',
-          defaultMessage: 'Please contact your administrator.',
-        });
+  const { copy } = useClipboard();
 
   if (error instanceof Error) {
     console.error(error);
+
+    const handleClick = async () => {
+      await copy(`
+\`\`\`
+${error.stack}
+\`\`\`
+      `);
+    };
 
     return (
       <Main height="100%">
@@ -38,28 +38,47 @@ const ErrorElement = () => {
             borderColor="neutral150"
             background="neutral0"
             hasRadius
+            maxWidth="512px"
           >
             <Flex direction="column" gap={2}>
               <Icon as={ExclamationMarkCircle} width="32px" height="32px" color="danger600" />
-              <Typography fontSize={4} fontWeight="bold">
+              <Typography fontSize={4} fontWeight="bold" textAlign="center">
                 {formatMessage({
                   id: 'app.error',
-                  defaultMessage: 'Your app crashed',
+                  defaultMessage: 'Something went wrong',
                 })}
               </Typography>
               <Typography variant="omega" textAlign="center">
-                {errorMsg}
+                {formatMessage(
+                  {
+                    id: 'app.error.message',
+                    defaultMessage: `It seems like there is a bug in your instance, but we've got you covered. Please notify your technical team so they can investigate the source of the problem and report the issue to us by opening a bug report on {link}.`,
+                  },
+                  {
+                    link: (
+                      <Link
+                        isExternal
+                        // hack to get rid of the current endIcon, which should be removable by using `null`.
+                        endIcon
+                        href="https://github.com/strapi/strapi/issues/new?assignees=&labels=&projects=&template=BUG_REPORT.md"
+                      >{`Strapi's GitHub`}</Link>
+                    ),
+                  }
+                )}
               </Typography>
             </Flex>
-            {/* the Alert component needs to make its close button optional. */}
-            <StyledAlert
-              title={error.name !== 'Error' ? error.name : ''}
-              onClose={() => {}}
-              closeLabel=""
-              variant="danger"
-            >
-              <ErrorType>{error.message}</ErrorType>
-            </StyledAlert>
+            {/* the Alert component needs to make its close button optional as well as the icon. */}
+            <Flex gap={4} direction="column" width="100%">
+              <StyledAlert onClose={() => {}} width="100%" closeLabel="" variant="danger">
+                <ErrorType>{error.message}</ErrorType>
+              </StyledAlert>
+              <Button onClick={handleClick} variant="tertiary" startIcon={<Duplicate />}>
+                {formatMessage({
+                  id: 'app.error.copy',
+                  defaultMessage: 'Copy to clipboard',
+                })}
+              </Button>
+            </Flex>
           </Flex>
         </Flex>
       </Main>
@@ -70,6 +89,10 @@ const ErrorElement = () => {
 };
 
 const StyledAlert = styled(Alert)`
+  & > div:first-child {
+    display: none;
+  }
+
   & > button {
     display: none;
   }
@@ -77,6 +100,7 @@ const StyledAlert = styled(Alert)`
 
 const ErrorType = styled(Typography)`
   word-break: break-all;
+  color: ${({ theme }) => theme.colors.danger600};
 `;
 
 export { ErrorElement };

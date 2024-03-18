@@ -8,7 +8,7 @@ export interface RelationResult {
   id: number;
   status: Modules.Documents.Params.PublicationStatus.Kind;
   locale?: Modules.Documents.Params.Locale;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface Pagination {

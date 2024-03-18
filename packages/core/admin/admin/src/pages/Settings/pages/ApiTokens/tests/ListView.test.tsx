@@ -18,6 +18,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
+jest.mock('../../../../../components/GuidedTour/Provider');
+
 describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   afterAll(() => {
     jest.clearAllMocks();

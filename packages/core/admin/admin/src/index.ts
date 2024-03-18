@@ -8,6 +8,7 @@ export * from './render';
  * components
  */
 export { BackButton, type BackButtonProps } from './features/BackButton';
+export * from './components/ConfirmDialog';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
@@ -21,6 +22,7 @@ export * from './components/Table';
 export { useInjectReducer } from './hooks/useInjectReducer';
 // TODO: Replace this export with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
 export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
+export { useGuidedTour } from './components/GuidedTour/Provider';
 
 /**
  * Types

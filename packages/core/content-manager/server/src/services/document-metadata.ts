@@ -73,7 +73,11 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  getAvailableLocales(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableLocales(
+    uid: UID.ContentType,
+    version: DocumentVersion,
+    allVersions: DocumentVersion[]
+  ) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
 
@@ -81,17 +85,27 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     delete versionsByLocale[version.locale];
 
     // For each locale, get the ones with the same status
-    return Object.values(versionsByLocale).map((localeVersions: DocumentVersion[]) => {
-      const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-      const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
+    return (
+      Object.values(versionsByLocale)
+        .map((localeVersions: DocumentVersion[]) => {
+          // There will not be a draft and a version counterpart if the content type does not have draft and publish
+          if (!contentTypes.hasDraftAndPublish(strapi.getModel(uid))) {
+            return pick(AVAILABLE_LOCALES_FIELDS, localeVersions[0]);
+          }
 
-      if (!draftVersion) return;
+          const draftVersion = localeVersions.find((v) => v.publishedAt === null);
+          const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
 
-      return {
-        ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
-        status: this.getStatus(draftVersion, otherVersions as any),
-      };
-    });
+          if (!draftVersion) return;
+
+          return {
+            ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
+            status: this.getStatus(draftVersion, otherVersions as any),
+          };
+        })
+        // Filter just in case there is a document with no drafts
+        .filter(Boolean)
+    );
   },
 
   /**
@@ -186,7 +200,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
     });
 
     const availableLocalesResult = availableLocales
-      ? this.getAvailableLocales(version, versions)
+      ? this.getAvailableLocales(uid, version, versions)
       : [];
 
     const availableStatusResult = availableStatus

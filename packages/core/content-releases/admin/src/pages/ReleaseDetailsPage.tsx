@@ -6,6 +6,7 @@ import {
   Pagination,
   Table,
   BackButton,
+  ConfirmDialog,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -26,11 +27,9 @@ import {
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
-  ConfirmDialog,
   useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
@@ -66,14 +65,12 @@ import type {
   ReleaseAction,
   ReleaseActionGroupBy,
   ReleaseActionEntry,
-  FormattedReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -231,9 +228,8 @@ const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const {
-    allowedActions: { canUpdate, canDelete },
-  } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
 
@@ -319,7 +315,6 @@ const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
@@ -358,8 +353,7 @@ const ReleaseDetailsLayout = ({
         subtitle={
           <Flex gap={2} lineHeight={6}>
             <Typography textColor="neutral600" variant="epsilon">
-              {numberOfEntriesText +
-                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
             </Typography>
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
@@ -458,7 +452,7 @@ const ReleaseDetailsLayout = ({
                   defaultMessage: 'Refresh',
                 })}
               </Button>
-              <CheckPermissions permissions={PERMISSIONS.publish}>
+              {canPublish ? (
                 <Button
                   size="S"
                   variant="default"
@@ -471,7 +465,7 @@ const ReleaseDetailsLayout = ({
                     defaultMessage: 'Publish',
                   })}
                 </Button>
-              </CheckPermissions>
+              ) : null}
             </Flex>
           )
         }
@@ -846,7 +840,7 @@ const ReleaseDetailsPage = () => {
     }
   );
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
-  const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
+  const [deleteRelease] = useDeleteReleaseMutation();
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
@@ -957,15 +951,15 @@ const ReleaseDetailsPage = () => {
         />
       )}
       <ConfirmDialog
-        bodyText={{
+        isOpen={showWarningSubmit}
+        onClose={toggleWarningSubmit}
+        onConfirm={handleDeleteRelease}
+      >
+        {formatMessage({
           id: 'content-releases.dialog.confirmation-message',
           defaultMessage: 'Are you sure you want to delete this release?',
-        }}
-        isOpen={showWarningSubmit}
-        isConfirmButtonLoading={isDeletingRelease}
-        onToggleDialog={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      />
+        })}
+      </ConfirmDialog>
     </ReleaseDetailsLayout>
   );
 };

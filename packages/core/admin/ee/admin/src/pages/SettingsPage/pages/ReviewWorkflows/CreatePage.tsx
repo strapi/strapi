@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { BackButton } from '../../../../../../../admin/src/features/BackButton';
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
@@ -284,40 +285,37 @@ export const ReviewWorkflowsCreatePage = () => {
         </Form>
       </FormikProvider>
 
-      <ConfirmDialog.Root
-        isConfirmButtonLoading={isLoading}
+      <ConfirmDialog
         isOpen={Object.keys(savePrompts).length > 0}
-        onToggleDialog={handleConfirmClose}
+        onClose={handleConfirmClose}
         onConfirm={handleConfirmDeleteDialog}
       >
-        <ConfirmDialog.Body>
-          <Flex direction="column" gap={5}>
-            {savePrompts.hasReassignedContentTypes && (
-              <Typography textAlign="center" variant="omega">
-                {formatMessage(
-                  {
-                    id: 'Settings.review-workflows.page.delete.confirm.contentType.body',
-                    defaultMessage:
-                      '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
-                  },
-                  {
-                    count: contentTypesFromOtherWorkflows?.filter((contentType) =>
-                      currentWorkflow.contentTypes?.includes(contentType)
-                    ).length,
-                  }
-                )}
-              </Typography>
-            )}
-
+        <Flex direction="column" gap={5}>
+          {savePrompts.hasReassignedContentTypes && (
             <Typography textAlign="center" variant="omega">
-              {formatMessage({
-                id: 'Settings.review-workflows.page.delete.confirm.confirm',
-                defaultMessage: 'Are you sure you want to save?',
-              })}
+              {formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.delete.confirm.contentType.body',
+                  defaultMessage:
+                    '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
+                },
+                {
+                  count: contentTypesFromOtherWorkflows?.filter((contentType) =>
+                    currentWorkflow.contentTypes?.includes(contentType)
+                  ).length,
+                }
+              )}
             </Typography>
-          </Flex>
-        </ConfirmDialog.Body>
-      </ConfirmDialog.Root>
+          )}
+
+          <Typography textAlign="center" variant="omega">
+            {formatMessage({
+              id: 'Settings.review-workflows.page.delete.confirm.confirm',
+              defaultMessage: 'Are you sure you want to save?',
+            })}
+          </Typography>
+        </Flex>
+      </ConfirmDialog>
 
       <LimitsModal.Root
         isOpen={showLimitModal === 'workflow'}

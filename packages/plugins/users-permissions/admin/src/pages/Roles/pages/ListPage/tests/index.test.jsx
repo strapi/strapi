@@ -14,9 +14,10 @@ import { RolesListPage } from '../index';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn().mockImplementation(() => jest.fn()),
-  useRBAC: jest
-    .fn()
-    .mockImplementation(() => ({ isLoading: false, allowedActions: { canRead: true } })),
+  useRBAC: jest.fn().mockImplementation(() => ({
+    isLoading: false,
+    allowedActions: { canRead: true, canUpdate: true, canDelete: true, canCreate: true },
+  })),
   CheckPermissions: jest.fn(({ children }) => children),
 }));
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   ContentLayout,
@@ -19,8 +20,6 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
-  ConfirmDialog,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
@@ -48,13 +47,12 @@ export const RolesListPage = () => {
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
   useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canRead, canDelete },
+    allowedActions: { canRead, canDelete, canCreate, canUpdate },
   } = useRBAC({
     create: PERMISSIONS.createRole,
     read: PERMISSIONS.readRoles,
@@ -112,10 +110,8 @@ export const RolesListPage = () => {
   });
 
   const handleConfirmDelete = async () => {
-    setIsConfirmButtonLoading(true);
     await deleteMutation.mutateAsync(roleToDelete);
     setShowConfirmDelete(!showConfirmDelete);
-    setIsConfirmButtonLoading(false);
   };
 
   const sortedRoles = (roles || [])
@@ -152,7 +148,7 @@ export const RolesListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={PERMISSIONS.createRole}>
+            canCreate ? (
               <LinkButton
                 to="new"
                 as={NavLink}
@@ -165,7 +161,7 @@ export const RolesListPage = () => {
                   defaultMessage: 'Add new role',
                 })}
               </LinkButton>
-            </CheckPermissions>
+            ) : null
           }
           navigationAction={<BackButton />}
         />
@@ -221,6 +217,7 @@ export const RolesListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
+                canUpdate={canUpdate}
                 permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}
@@ -231,9 +228,8 @@ export const RolesListPage = () => {
           )}
         </ContentLayout>
         <ConfirmDialog
-          isConfirmButtonLoading={isConfirmButtonLoading}
           onConfirm={handleConfirmDelete}
-          onToggleDialog={handleShowConfirmDelete}
+          onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Main>

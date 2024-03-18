@@ -27,6 +27,10 @@ const MyPage = () => {
 };
 ```
 
+### CheckPermissions
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
 ### CheckPagePermissions
 
 This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
@@ -48,6 +52,20 @@ const MyProtectedPage = () => {
 ```
 
 The behaviour has slightly changed, where previously no permissions would redirect you to the root of the page, now it will render the `NoPermissions` component.
+
+### ConfirmDialog
+
+This component has been moved and refactored. It can imported from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { ConfirmDialog } from '@strapi/helper-plugin';
+
+// After
+import { ConfirmDialog } from '@strapi/strapi/admin';
+```
+
+Please see the documentation for the `ConfirmDialog` component for more information.
 
 ### ContentBox
 
@@ -380,6 +398,12 @@ import { Table } from '@strapi/strapi/admin';
 Note! some of the props have changed, please refer to the documentation for the `Table` component.
 
 ## Content Manager
+
+## Features
+
+### GuidedTour
+
+This component has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
 
 ### contentManagementUtilRemoveFieldsFromData
 

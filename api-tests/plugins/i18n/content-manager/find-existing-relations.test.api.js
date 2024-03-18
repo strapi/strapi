@@ -24,6 +24,7 @@ const productModel = {
       type: 'string',
     },
   },
+  draftAndPublish: false,
   displayName: 'Product',
   singularName: 'product',
   pluralName: 'products',
@@ -48,6 +49,7 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
+  draftAndPublish: false,
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
@@ -130,7 +132,6 @@ describe('i18n - Find existing relations', () => {
       locale,
       publishedAt,
       updatedAt,
-      status: 'published',
     };
 
     expect(res.body.results).toHaveLength(1);
@@ -155,7 +156,6 @@ describe('i18n - Find existing relations', () => {
       locale,
       publishedAt,
       updatedAt,
-      status: 'published',
     };
 
     expect(res.body.results).toHaveLength(1);
