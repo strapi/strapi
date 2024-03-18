@@ -22,11 +22,20 @@ export default async ({ oldContentTypes, contentTypes }: any) => {
     if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
       const defaultLocale = (await getDefaultLocale()) || DEFAULT_LOCALE.code;
 
-      await strapi.db
-        .queryBuilder(uid)
-        .delete()
-        .where({ locale: { $ne: defaultLocale } })
-        .execute();
+      await Promise.all([
+        // Delete all entities that are not in the default locale
+        strapi.db
+          .queryBuilder(uid)
+          .delete()
+          .where({ locale: { $ne: defaultLocale } })
+          .execute(),
+        // Set locale to null for the rest
+        strapi.db
+          .queryBuilder(uid)
+          .update({ locale: null })
+          .where({ locale: { $eq: defaultLocale } })
+          .execute(),
+      ]);
     }
   }
 };
