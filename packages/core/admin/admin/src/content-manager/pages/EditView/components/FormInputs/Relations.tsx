@@ -228,7 +228,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
-        field.onChange(props.name, { connect: [item] });
+        field.onChange(`${props.name}.connect`, [item]);
       } else {
         field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
       }

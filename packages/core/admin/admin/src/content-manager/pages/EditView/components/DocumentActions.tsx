@@ -641,6 +641,7 @@ const UpdateAction: DocumentActionComponent = ({
     }),
     onClick: async () => {
       setSubmitting(true);
+
       try {
         const { errors } = await validate();
 
