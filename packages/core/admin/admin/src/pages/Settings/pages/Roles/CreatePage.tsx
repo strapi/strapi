@@ -13,12 +13,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  useNotification,
-  useOverlayBlocker,
-  translatedErrors,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useNotification, useOverlayBlocker, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -38,6 +33,7 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 
@@ -46,8 +42,8 @@ import { Permissions, PermissionsAPI } from './components/Permissions';
  * -----------------------------------------------------------------------------------------------*/
 
 const CREATE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
-  description: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
+  description: yup.string().required(translatedErrors.required.id),
 });
 
 /**

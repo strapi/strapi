@@ -1,26 +1,20 @@
-import { translatedErrors } from '@strapi/helper-plugin';
 import * as yup from 'yup';
+
+import { translatedErrors } from '../../../../../utils/translatedErrors';
 
 /**
  * @description This needs wrapping in `yup.object().shape()` before use.
  */
 const COMMON_USER_SCHEMA = {
   firstname: yup.string().trim().required({
-    id: translatedErrors.required,
+    id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
   }),
   lastname: yup.string(),
-  email: yup
-    .string()
-    .email({
-      id: translatedErrors.email,
-      defaultMessage: 'This is not a valid email',
-    })
-    .lowercase()
-    .required({
-      id: translatedErrors.required,
-      defaultMessage: 'This field is required',
-    }),
+  email: yup.string().email(translatedErrors.email).lowercase().required({
+    id: translatedErrors.required.id,
+    defaultMessage: 'This field is required',
+  }),
   username: yup
     .string()
     .transform((value) => (value === '' ? undefined : value))
@@ -30,8 +24,7 @@ const COMMON_USER_SCHEMA = {
     .transform((value) => (value === '' ? undefined : value))
     .nullable()
     .min(8, {
-      id: translatedErrors.minLength,
-      defaultMessage: 'The value is too short (min: {min}).',
+      ...translatedErrors.minLength,
       values: { min: 8 },
     })
     .matches(/[a-z]/, {
@@ -51,8 +44,7 @@ const COMMON_USER_SCHEMA = {
     .transform((value) => (value === '' ? null : value))
     .nullable()
     .min(8, {
-      id: translatedErrors.minLength,
-      defaultMessage: 'The value is too short (min: {min}).',
+      ...translatedErrors.minLength,
       values: { min: 8 },
     })
     .oneOf([yup.ref('password'), null], {
@@ -62,7 +54,7 @@ const COMMON_USER_SCHEMA = {
     .when('password', (password, passSchema) => {
       return password
         ? passSchema.required({
-            id: translatedErrors.required,
+            id: translatedErrors.required.id,
             defaultMessage: 'This field is required',
           })
         : passSchema;

@@ -39,7 +39,6 @@ export * from './utils/hasPermissions';
 export * from './utils/normalizeAPIError';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/stopPropagation';
-export * from './utils/translatedErrors';
 
 /* -------------------------------------------------------------------------------------------------
  * Types

@@ -575,6 +575,20 @@ If you feel like you need this util, please open an issue on the Strapi reposito
 
 This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### translatedErrors
+
+This utils has been removed. You should import it from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { translatedErrors } from '@strapi/helper-plugin';
+
+// After
+import { translatedErrors } from '@strapi/strapi/admin';
+```
+
+If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### wrapAxiosInstance
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.

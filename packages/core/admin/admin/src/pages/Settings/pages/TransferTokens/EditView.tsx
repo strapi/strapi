@@ -7,7 +7,6 @@ import {
   useNotification,
   useOverlayBlocker,
   useRBAC,
-  translatedErrors,
 } from '@strapi/helper-plugin';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -25,6 +24,7 @@ import {
   useUpdateTransferTokenMutation,
 } from '../../../../services/transferTokens';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { FormHead } from '../../components/Tokens/FormHead';
 import { LifeSpanInput } from '../../components/Tokens/LifeSpanInput';
@@ -39,10 +39,10 @@ import type {
 } from '../../../../../../shared/contracts/transfer';
 
 const schema = yup.object().shape({
-  name: yup.string().max(100).required(translatedErrors.required),
+  name: yup.string().max(100).required(translatedErrors.required.id),
   description: yup.string().nullable(),
-  lifespan: yup.number().integer().min(0).nullable().defined(translatedErrors.required),
-  permissions: yup.string().required(translatedErrors.required),
+  lifespan: yup.number().integer().min(0).nullable().defined(translatedErrors.required.id),
+  permissions: yup.string().required(translatedErrors.required.id),
 });
 
 /* -------------------------------------------------------------------------------------------------

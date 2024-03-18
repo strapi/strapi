@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  translatedErrors,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -34,6 +33,7 @@ import { useTracking } from '../features/Tracking';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
+import { translatedErrors } from '../utils/translatedErrors';
 import { getDisplayName } from '../utils/users';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
@@ -48,7 +48,7 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
     .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
       return password || confirmPassword
         ? passSchema.required({
-            id: translatedErrors.required,
+            id: translatedErrors.required.id,
             defaultMessage: 'This field is required',
           })
         : passSchema;

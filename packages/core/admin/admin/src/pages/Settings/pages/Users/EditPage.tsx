@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  translatedErrors,
   useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
@@ -36,6 +35,7 @@ import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
@@ -48,11 +48,11 @@ const EDIT_VALIDATION_SCHEMA = yup.object().shape({
   roles: yup
     .array()
     .min(1, {
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     }),
 });
