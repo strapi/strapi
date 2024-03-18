@@ -160,6 +160,9 @@ const BulkActionAction = (action: Action) => {
 
   const handleClose = () => {
     setDialogId(null);
+    if (action.dialog?.type === 'modal' && action.dialog?.onClose) {
+      action.dialog.onClose();
+    }
   };
 
   return (

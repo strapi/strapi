@@ -535,7 +535,13 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
         return (
           <ModalFooter
             startActions={
-              <Button onClick={onClose} variant="tertiary">
+              <Button
+                onClick={() => {
+                  onClose();
+                  refetchList();
+                }}
+                variant="tertiary"
+              >
                 {formatMessage({
                   id: 'app.components.Button.cancel',
                   defaultMessage: 'Cancel',
@@ -554,6 +560,7 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
                     selectedEntries.length === selectedEntriesWithErrorsCount ||
                     isLoading
                   }
+                  // TODO: in V5 when bulk actions are refactored, we should use the isLoading prop
                   // loading={bulkPublishMutation.isLoading}
                 >
                   {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
@@ -562,6 +569,9 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
             }
           />
         );
+      },
+      onClose: () => {
+        refetchList();
       },
     },
   };
