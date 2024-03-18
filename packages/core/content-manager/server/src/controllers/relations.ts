@@ -78,6 +78,34 @@ const addStatusToRelations = async (uid: Common.UID.ContentType, relations: Rela
   });
 };
 
+const getPublishedAtClause = (
+  status: Documents.Params.PublicationStatus.Kind,
+  sourceUid: Common.UID.Schema,
+  targetUid: Common.UID.ContentType
+) => {
+  const sourceModel = strapi.getModel(sourceUid);
+  const targetModel = strapi.getModel(targetUid);
+
+  /**
+   * If target does not have dp, status should be published.
+   * As it only contains entries with publishedAt set.
+   */
+  if (!contentTypes.hasDraftAndPublish(targetModel)) {
+    return { $ne: null };
+  }
+
+  /**
+   * If source does not have dp, status should be draft.
+   * Both draft and publish entries are connectable, but we are doing it like
+   * this atm.
+   */
+  if (!contentTypes.hasDraftAndPublish(sourceModel)) {
+    return { $null: true };
+  }
+
+  return { $null: status === 'draft' };
+};
+
 export default {
   async extractAndValidateRequestInfo(
     ctx: any,
@@ -121,7 +149,7 @@ export default {
         where.documentId = id;
 
         if (status) {
-          where.publishedAt = status === 'published' ? { $ne: null } : null;
+          where.publishedAt = getPublishedAtClause(status, sourceSchema.uid, attribute.target);
         }
 
         const isSourceLocalized = strapi
@@ -249,7 +277,7 @@ export default {
     // If no status is requested, we find all the draft relations and later update them
     // with the latest available status
     addFiltersClause(queryParams, {
-      publishedAt: status === 'published' ? { $ne: null } : null,
+      publishedAt: getPublishedAtClause(status, sourceUid, targetUid),
     });
 
     // We will only filter by locale if the target content type is localized
@@ -287,7 +315,7 @@ export default {
 
       // Add the status and locale filters if they are provided
       if (status) {
-        where[`${alias}.published_at`] = status === 'published' ? { $ne: null } : null;
+        where[`${alias}.published_at`] = getPublishedAtClause(status, sourceUid, targetUid);
       }
       if (filterByLocale) {
         where[`${alias}.locale`] = locale;
