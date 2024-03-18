@@ -1,4 +1,5 @@
 import type { Strapi } from '@strapi/types';
+import { convertQueryParams } from '@strapi/utils';
 import auditLogContentType from './content-types/audit-log';
 
 interface Event {
@@ -41,7 +42,7 @@ export default {
         return strapi.db?.query('admin::audit-log').findPage({
           populate: ['user'],
           select: ['action', 'date', 'payload'],
-          ...query,
+          ...convertQueryParams.transformParamsToQuery('admin::audit-log', query),
         });
       },
 

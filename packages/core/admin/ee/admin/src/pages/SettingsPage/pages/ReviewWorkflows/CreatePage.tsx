@@ -100,7 +100,7 @@ export const ReviewWorkflowsCreatePage = () => {
         },
       });
 
-      navigate(res.data.id.toString());
+      navigate(`/settings/review-workflows/${res.data.id}`);
     } catch (error) {
       toggleNotification({
         type: 'warning',

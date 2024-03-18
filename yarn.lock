@@ -7722,6 +7722,7 @@ __metadata:
   dependencies:
     "@strapi/pack-up": "npm:4.20.5"
     "@strapi/types": "npm:4.20.5"
+    "@strapi/utils": "npm:4.20.5"
     eslint-config-custom: "npm:4.20.5"
     tsconfig: "npm:4.20.5"
   languageName: unknown
