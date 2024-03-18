@@ -73,7 +73,6 @@ export const ReviewWorkflowsListView = () => {
   const [showLimitModal, setShowLimitModal] = React.useState<boolean>(false);
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { meta, workflows, isLoading, deleteWorkflow } = useReviewWorkflows();
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
@@ -107,8 +106,6 @@ export const ReviewWorkflowsListView = () => {
     if (!workflowToDelete) return;
 
     try {
-      setIsDeleting(true);
-
       const res = await deleteWorkflow({ id: workflowToDelete });
 
       if ('error' in res) {
@@ -134,8 +131,6 @@ export const ReviewWorkflowsListView = () => {
           defaultMessage: 'An error occurred',
         },
       });
-    } finally {
-      setIsDeleting(false);
     }
   };
 

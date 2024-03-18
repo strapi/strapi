@@ -4,7 +4,6 @@ import { Box, ContentLayout, Flex, Grid, GridItem, Main, Typography } from '@str
 import {
   useAPIErrorHandler,
   useFocusWhenNavigate,
-  useGuidedTour,
   useNotification,
   useOverlayBlocker,
   useRBAC,
@@ -17,6 +16,7 @@ import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import {
@@ -66,7 +66,7 @@ const EditView = () => {
       : null
   );
   const { trackUsage } = useTracking();
-  const { setCurrentStep } = useGuidedTour();
+  const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.['transfer-tokens']
   );
