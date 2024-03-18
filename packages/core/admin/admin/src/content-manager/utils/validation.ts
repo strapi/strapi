@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
 
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
-import type { Schema as SchemaUtils, Data } from '@strapi/types';
+import type { Schema as SchemaUtils } from '@strapi/types';
 import type { ObjectShape } from 'yup/lib/object';
 
 type AnySchema =

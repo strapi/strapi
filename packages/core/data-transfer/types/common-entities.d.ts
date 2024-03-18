@@ -1,5 +1,5 @@
 import type { Readable } from 'stream';
-import type { Schema } from '@strapi/types';
+import type { Schema, Data } from '@strapi/types';
 
 export interface IMetadata {
   strapi?: {
@@ -28,7 +28,7 @@ export interface IEntity<T extends UID.ContentType = UID.ContentType> {
   /**
    * The entity data (attributes value)
    */
-  data: Entity<T>;
+  data: Data.Entity<T>;
 }
 
 /**

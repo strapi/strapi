@@ -3,7 +3,7 @@ import * as React from 'react';
 import { createContext } from '@radix-ui/react-context';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
-import { type Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';

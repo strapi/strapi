@@ -22,7 +22,7 @@ import {
   useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
-import { Data } from '@strapi/types';
+import type { Data } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';

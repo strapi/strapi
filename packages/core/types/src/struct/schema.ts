@@ -128,7 +128,6 @@ export interface ContentTypeSchema extends BaseSchema {
 
 /**
  * Represents information about a content type schema.
- * @extends SchemaInfo
  */
 export interface ContentTypeSchemaInfo extends SchemaInfo {
   /**

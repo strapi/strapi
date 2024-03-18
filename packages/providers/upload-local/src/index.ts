@@ -4,7 +4,7 @@ import path from 'path';
 import fse from 'fs-extra';
 import * as utils from '@strapi/utils';
 
-// Needed to load global.strapi without having to pu @strapi/types in the regular dependencies
+// Needed to load global.strapi without having to put @strapi/types in the regular dependencies
 import type {} from '@strapi/types';
 
 interface File {
