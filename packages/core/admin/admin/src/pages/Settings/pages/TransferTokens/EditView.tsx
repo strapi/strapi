@@ -115,6 +115,7 @@ const EditView = () => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
+
     // @ts-expect-error context assertation
     lockApp();
 
@@ -138,7 +139,10 @@ const EditView = () => {
           const res = await createToken({
             ...body,
             // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
-            lifespan: body?.lifespan || null,
+            lifespan:
+              body?.lifespan && body.lifespan !== '0'
+                ? parseInt(body.lifespan.toString(), 10)
+                : null,
             permissions,
           });
 
