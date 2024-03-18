@@ -1,12 +1,13 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page, useGuidedTour, useTracking, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
-  useAppInfo,
-  useFetchClient,
+  Page,
+  useGuidedTour,
+  useTracking,
+  useStrapiApp,
   useNotification,
-  useRBACProvider,
-} from '@strapi/helper-plugin';
+} from '@strapi/admin/strapi-admin';
+import { useAppInfo, useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
@@ -78,7 +79,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     modifiedData,
     reservedNames,
   } = useSelector(makeSelectDataManagerProvider());
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
 
@@ -141,8 +142,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     }
   };
@@ -170,7 +171,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     if (!autoReload) {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('notification.info.autoreaload-disable') },
+        message: formatMessage({ id: getTrad('notification.info.autoreaload-disable') }),
       });
     }
   }, [autoReload, toggleNotification]);
@@ -311,8 +312,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -362,8 +363,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -393,8 +394,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -514,12 +515,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
         if (!isValidSchema) {
           toggleNotification({
-            type: 'warning',
-            message: {
+            type: 'danger',
+            message: formatMessage({
               id: getTrad('notification.error.dynamiczone-min.validation'),
               defaultMessage:
                 'At least one component is required in a dynamic zone to be able to save a content type',
-            },
+            }),
           });
 
           return;
@@ -583,8 +584,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       console.error({ err: err.response });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();

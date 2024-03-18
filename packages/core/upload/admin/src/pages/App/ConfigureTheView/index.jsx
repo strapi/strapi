@@ -1,9 +1,9 @@
 import React, { useReducer, useState } from 'react';
 
-import { ConfirmDialog, useTracking } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import { Button, ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -22,7 +22,7 @@ import reducer from './state/reducer';
 const ConfigureTheView = ({ config }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { mutateConfig } = useConfig();
   const { isLoading: isSubmittingForm } = mutateConfig;
 
@@ -44,10 +44,10 @@ const ConfigureTheView = ({ config }) => {
     dispatch(setLoaded());
     toggleNotification({
       type: 'success',
-      message: {
+      message: formatMessage({
         id: 'notification.form.success.fields',
         defaultMessage: 'Changes saved',
-      },
+      }),
     });
   };
 

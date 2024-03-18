@@ -19,12 +19,11 @@ import {
   getFetchClient,
   useFocusWhenNavigate,
   useQueryParams,
-  useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +32,7 @@ import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Page } from '../../../../components/PageHelpers';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
@@ -44,7 +44,7 @@ const ListPage = () => {
   useFocusWhenNavigate();
   const permissions = useTypedSelector(selectAdminPermissions);
   const { formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = React.useState(false);
   const [{ query }] = useQueryParams<{ _q?: string }>();
   const {
@@ -83,7 +83,7 @@ const ListPage = () => {
     } catch (error) {
       if (error instanceof AxiosError) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
       }
@@ -102,7 +102,7 @@ const ListPage = () => {
     if (role.usersCount) {
       toggleNotification({
         type: 'info',
-        message: { id: 'Roles.ListPage.notification.delete-not-allowed' },
+        message: formatMessage({ id: 'Roles.ListPage.notification.delete-not-allowed' }),
       });
     } else {
       dispatch({

@@ -1,9 +1,8 @@
 import * as React from 'react';
 
 import { IconButton } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
-import { ConfirmDialog, useAPIErrorHandler } from '@strapi/strapi/admin';
+import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { useDeleteLocaleMutation } from '../services/locales';
@@ -19,7 +18,7 @@ interface DeleteLocaleProps extends Locale {}
 
 const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [visible, setVisible] = React.useState(false);
@@ -30,25 +29,25 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
       const res = await deleteLocale(id);
 
       if ('error' in res) {
-        toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+        toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
         return;
       }
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTranslation('Settings.locales.modal.delete.success'),
           defaultMessage: 'Deleted locale',
-        },
+        }),
       });
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again',
-        },
+        }),
       });
     }
   };

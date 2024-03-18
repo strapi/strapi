@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { useAPIErrorHandler } from '@strapi/strapi/admin';
+import { useFetchClient } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { useQueries } from 'react-query';
 
 import { cleanPermissions, getTrad } from '../../../utils';
 
 export const usePlugins = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
 
@@ -49,7 +49,7 @@ export const usePlugins = () => {
   useEffect(() => {
     if (permissionsError) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(permissionsError),
       });
     }
@@ -58,7 +58,7 @@ export const usePlugins = () => {
   useEffect(() => {
     if (routesError) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(routesError),
       });
     }

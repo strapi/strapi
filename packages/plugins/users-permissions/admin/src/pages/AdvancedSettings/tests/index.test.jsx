@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/strapi/admin';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -15,7 +15,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -44,7 +44,7 @@ export const ProtectedSettingsPage = () => (
 );
 
 const SettingsPage = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { get, post } = useFetchClient();
 
@@ -71,7 +71,7 @@ const SettingsPage = () => {
     {
       onError() {
         toggleNotification!({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage(
             {
               id: 'email.Settings.email.plugin.notification.test.error',

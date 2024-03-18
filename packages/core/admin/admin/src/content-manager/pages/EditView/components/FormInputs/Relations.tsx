@@ -14,7 +14,7 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useFocusInputField, useQueryParams } from '@strapi/helper-plugin';
 import { Cross, Drag, Refresh } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
@@ -25,6 +25,7 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { useNotification } from '../../../../../features/Notifications';
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
@@ -382,7 +383,7 @@ const RelationsInput = ({
     _q: '',
     page: 1,
   });
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
 
   const { formatMessage } = useIntl();
@@ -454,7 +455,7 @@ const RelationsInput = ({
           id: getTranslation('relation.error-adding-relation'),
           defaultMessage: 'An error occurred while trying to add the relation.',
         }),
-        type: 'warning',
+        type: 'danger',
       });
 
       return;

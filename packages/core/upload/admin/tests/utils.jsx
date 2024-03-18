@@ -1,8 +1,9 @@
 import * as React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { RBACContext, NotificationsProvider } from '@strapi/helper-plugin';
+import { RBACContext } from '@strapi/helper-plugin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,

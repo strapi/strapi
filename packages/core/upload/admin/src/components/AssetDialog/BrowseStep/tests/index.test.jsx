@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, usePersistentState } from '@strapi/helper-plugin';
+import { usePersistentState } from '@strapi/helper-plugin';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';

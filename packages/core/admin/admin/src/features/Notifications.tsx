@@ -2,41 +2,29 @@ import * as React from 'react';
 
 import { Alert, AlertVariant, Flex, useCallbackRef } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 
-import { TranslationMessage } from '../types';
-
-/**
- * TODO: realistically a lot of this logic is isolated to the `core/admin` package.
- * However, we want to expose the `useNotification` hook to the plugins.
- *
- * Therefore, in V5 we should move this logic back to the `core/admin` package & export
- * the hook from that package and re-export here. For now, let's keep it all together
- * because it's easier to diagnose and we're not using a million refs because we don't
- * understand what's going on.
- */
-
-export interface NotificationLink {
-  label: string | MessageDescriptor;
+interface NotificationLink {
+  label: string;
   target?: string;
   url: string;
 }
 
-export interface NotificationConfig {
+interface NotificationConfig {
   blockTransition?: boolean;
   link?: NotificationLink;
-  message?: string | TranslationMessage;
+  message?: string;
   onClose?: () => void;
   timeout?: number;
-  title?: string | TranslationMessage;
-  type?: 'info' | 'warning' | 'softWarning' | 'success';
+  title?: string;
+  type?: 'info' | 'warning' | 'danger' | 'success';
 }
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-export interface NotificationsContextValue {
+interface NotificationsContextValue {
   /**
    * Toggles a notification, wrapped in `useCallback` for a stable identity.
    */
@@ -51,13 +39,17 @@ const NotificationsContext = React.createContext<NotificationsContextValue>({
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-export interface NotificationsProviderProps {
+interface NotificationsProviderProps {
   children: React.ReactNode;
 }
-export interface Notification extends NotificationConfig {
+interface Notification extends NotificationConfig {
   id: number;
 }
 
+/**
+ * @internal
+ * @description DO NOT USE. This will be removed before stable release of v5.
+ */
 const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
   const notificationIdRef = React.useRef(0);
 
@@ -116,7 +108,7 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
   );
 };
 
-export interface NotificationProps extends Notification {
+interface NotificationProps extends Notification {
   clearNotification: (id: number) => void;
 }
 
@@ -125,17 +117,13 @@ const Notification = ({
   blockTransition = false,
   id,
   link,
-  message = {
-    id: 'notification.success.saved',
-    defaultMessage: 'Saved',
-  },
+  message,
   onClose,
   timeout = 2500,
   title,
   type,
 }: NotificationProps) => {
   const { formatMessage } = useIntl();
-
   /**
    * Chances are `onClose` won't be classed as stabilised,
    * so we use `useCallbackRef` to avoid make it stable.
@@ -170,15 +158,13 @@ const Notification = ({
       id: 'notification.default.title',
       defaultMessage: 'Information:',
     });
-  } else if (type === 'warning') {
-    // TODO: type should be renamed to danger in the future, but it might introduce changes if done now
+  } else if (type === 'danger') {
     variant = 'danger';
     alertTitle = formatMessage({
       id: 'notification.warning.title',
       defaultMessage: 'Warning:',
     });
-  } else if (type === 'softWarning') {
-    // TODO: type should be renamed to just warning in the future
+  } else if (type === 'warning') {
     variant = 'warning';
     alertTitle = formatMessage({
       id: 'notification.warning.title',
@@ -193,16 +179,7 @@ const Notification = ({
   }
 
   if (title) {
-    alertTitle =
-      typeof title === 'string'
-        ? title
-        : formatMessage(
-            {
-              id: title.id,
-              defaultMessage: title.defaultMessage ?? title.id,
-            },
-            title.values
-          );
+    alertTitle = title;
   }
 
   return (
@@ -210,13 +187,7 @@ const Notification = ({
       action={
         link ? (
           <Link href={link.url} isExternal>
-            {formatMessage({
-              id: typeof link.label === 'object' ? link.label.id : link.label,
-              defaultMessage:
-                typeof link.label === 'object'
-                  ? link.label.defaultMessage ?? link.label.id
-                  : link.label,
-            })}
+            {link.label}
           </Link>
         ) : undefined
       }
@@ -228,14 +199,7 @@ const Notification = ({
       title={alertTitle}
       variant={variant}
     >
-      {formatMessage(
-        {
-          id: typeof message === 'object' ? message.id : message,
-          defaultMessage:
-            typeof message === 'object' ? message.defaultMessage ?? message.id : message,
-        },
-        typeof message === 'object' ? message.values : undefined
-      )}
+      {message}
     </Alert>
   );
 };
@@ -255,10 +219,11 @@ const Notification = ({
  * import { useNotification } from '@strapi/helper-plugin';
  *
  * const MyComponent = () => {
- *  const toggleNotification = useNotification();
+ *  const { toggleNotification } = useNotification();
  *
  *  return <button onClick={() => toggleNotification({ message: 'Hello world!' })}>Click me</button>;
  */
-const useNotification = () => React.useContext(NotificationsContext).toggleNotification;
+const useNotification = () => React.useContext(NotificationsContext);
 
-export { NotificationsContext, NotificationsProvider, useNotification };
+export { NotificationsProvider, useNotification };
+export type { NotificationConfig, NotificationsContextValue };

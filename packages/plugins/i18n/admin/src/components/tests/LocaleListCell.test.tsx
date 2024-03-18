@@ -7,6 +7,7 @@ import { LocaleListCell } from '../LocaleListCell';
  * It'd be good to export an FE rendering wrapper that would work for plugins...
  */
 jest.mock('@strapi/strapi/admin', () => ({
+  ...jest.requireActual('@strapi/strapi/admin'),
   unstable_useDocument: jest.fn(() => ({
     meta: {
       availableLocales: [

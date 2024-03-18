@@ -9,11 +9,12 @@ import {
   Typography,
   DialogFooterProps,
 } from '@strapi/design-system';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useTable } from '../../../../../components/Table';
+import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
@@ -87,7 +88,7 @@ const ConfirmDialogPublishAll = ({
 }: ConfirmDialogPublishAllProps) => {
   const { formatMessage } = useIntl();
   const selectedEntries = useTable('ConfirmDialogPublishAll', (state) => state.selectedRows);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const { model } = useDoc();
   const [{ query }] = useQueryParams<{
@@ -115,7 +116,7 @@ const ConfirmDialogPublishAll = ({
 
   React.useEffect(() => {
     if (error) {
-      toggleNotification({ type: 'warning', message: formatAPIError(error) });
+      toggleNotification({ type: 'danger', message: formatAPIError(error) });
     }
   }, [error, formatAPIError, toggleNotification]);
 

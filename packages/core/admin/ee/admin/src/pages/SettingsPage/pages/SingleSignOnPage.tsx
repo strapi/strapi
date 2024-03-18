@@ -14,7 +14,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -23,6 +23,7 @@ import * as yup from 'yup';
 
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
+import { useNotification } from '../../../../../../admin/src/features/Notifications';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../../../admin/src/hooks/useAPIErrorHandler';
 import {
@@ -53,7 +54,7 @@ export const SingleSignOnPage = () => {
 
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -88,7 +89,7 @@ export const SingleSignOnPage = () => {
           formik.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
@@ -98,15 +99,15 @@ export const SingleSignOnPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved' },
+        message: formatMessage({ id: 'notification.success.saved' }),
       });
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again.',
-        },
+        }),
       });
     }
   };

@@ -2,7 +2,8 @@ import React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
+import { RBACContext } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/strapi/admin';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';

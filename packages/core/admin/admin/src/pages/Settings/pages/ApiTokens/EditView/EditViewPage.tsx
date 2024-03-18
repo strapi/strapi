@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { ContentLayout, Flex, Main } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -10,6 +10,7 @@ import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useNotification } from '../../../../../features/Notifications';
 import { useTracking } from '../../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import {
@@ -41,7 +42,7 @@ import type { Get, ApiToken } from '../../../../../../../shared/contracts/api-to
 export const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { state: locationState } = useLocation();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [apiToken, setApiToken] = React.useState<ApiToken | null>(
@@ -77,7 +78,7 @@ export const EditView = () => {
   React.useEffect(() => {
     if (contentAPIPermissionsQuery.error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(contentAPIPermissionsQuery.error),
       });
     }
@@ -86,7 +87,7 @@ export const EditView = () => {
   React.useEffect(() => {
     if (contentAPIRoutesQuery.error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(contentAPIRoutesQuery.error),
       });
     }
@@ -144,7 +145,7 @@ export const EditView = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -200,7 +201,7 @@ export const EditView = () => {
             formik.setErrors(formatValidtionErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -240,7 +241,7 @@ export const EditView = () => {
             formik.setErrors(formatValidtionErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -263,11 +264,11 @@ export const EditView = () => {
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'Something went wrong',
-        },
+        }),
       });
     }
   };

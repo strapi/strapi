@@ -10,7 +10,7 @@ import {
   Status,
   IconButton,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { Helmet } from 'react-helmet';
@@ -24,6 +24,7 @@ import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
@@ -44,7 +45,7 @@ const ListPageCE = () => {
     allowedActions: { canCreate, canDelete, canRead },
   } = useRBAC(permissions.settings?.users);
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
@@ -83,14 +84,14 @@ const ListPageCE = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch (err) {
       console.error(err);
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({
           id: 'global.error',
           defaultMessage: 'An error occurred',

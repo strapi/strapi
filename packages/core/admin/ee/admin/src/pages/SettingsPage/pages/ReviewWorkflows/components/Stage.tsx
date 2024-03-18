@@ -19,7 +19,6 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
-import { useNotification } from '@strapi/helper-plugin';
 import { Duplicate, Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -30,6 +29,7 @@ import styled from 'styled-components';
 import { ConfirmDialog } from '../../../../../../../../admin/src/components/ConfirmDialog';
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
 import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
+import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
 import { useTracking } from '../../../../../../../../admin/src/features/Tracking';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
@@ -80,8 +80,8 @@ const DragIconButton = styled(IconButton)`
   display: flex;
   justify-content: center;
 
-  :hover,
-  :focus {
+  &:hover,
+  &:focus {
     background-color: ${({ theme }) => theme.colors.neutral100};
   }
 
@@ -198,7 +198,7 @@ export const Stage = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
   const [isApplyAllConfirmationOpen, setIsApplyAllConfirmationOpen] = React.useState(false);
   const [nameField, nameMeta, nameHelper] = useField(`stages.${index}.name`);

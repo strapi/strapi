@@ -11,7 +11,7 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
@@ -25,6 +25,7 @@ import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
@@ -63,7 +64,7 @@ const EditPage = () => {
   const match = useMatch('/settings/users/:id');
   const id = match?.params?.id ?? '';
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const MagicLink = useEnterprise(
     MagicLinkCE,
     async () =>
@@ -111,21 +112,21 @@ const EditPage = () => {
       if (error.name === 'UnauthorizedError') {
         toggleNotification({
           type: 'info',
-          message: {
+          message: formatMessage({
             id: 'notification.permission.not-allowed-read',
             defaultMessage: 'You are not allowed to see this document',
-          },
+          }),
         });
 
         navigate('/');
       } else {
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: formatAPIError(error) },
+          type: 'danger',
+          message: formatAPIError(error),
         });
       }
     }
-  }, [error, formatAPIError, navigate, toggleNotification]);
+  }, [error, formatAPIError, formatMessage, navigate, toggleNotification]);
 
   const isLoading = isLoadingAdminUsers || !MagicLink || isLoadingRBAC;
 
@@ -159,7 +160,7 @@ const EditPage = () => {
       }
 
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(res.error),
       });
     } else {
