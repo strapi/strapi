@@ -219,6 +219,7 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
 
   return collection.length === 1 ? collection[0] : `{${collection}}`;
 };
+
 export class PluginProject extends Project implements PluginProjectInterface {
   constructor(cwd: string) {
     super(cwd);
