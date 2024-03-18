@@ -1,13 +1,8 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  auth,
-  useAPIErrorHandler,
-  useNotification,
-  useQuery,
-} from '@strapi/helper-plugin';
+import { auth, useAPIErrorHandler, useNotification, useQuery } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';

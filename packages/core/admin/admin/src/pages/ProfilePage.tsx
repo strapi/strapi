@@ -48,9 +48,9 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
     .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
       return password || confirmPassword
         ? passSchema.required({
-          id: translatedErrors.required.id,
-          defaultMessage: 'This field is required',
-        })
+            id: translatedErrors.required.id,
+            defaultMessage: 'This field is required',
+          })
         : passSchema;
     }),
   preferedLanguage: yup.string().nullable(),
