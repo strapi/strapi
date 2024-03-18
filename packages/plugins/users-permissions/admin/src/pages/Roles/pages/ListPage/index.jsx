@@ -20,7 +20,6 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
@@ -53,7 +52,7 @@ export const RolesListPage = () => {
 
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canRead, canDelete },
+    allowedActions: { canRead, canDelete, canCreate, canUpdate },
   } = useRBAC({
     create: PERMISSIONS.createRole,
     read: PERMISSIONS.readRoles,
@@ -149,7 +148,7 @@ export const RolesListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={PERMISSIONS.createRole}>
+            canCreate ? (
               <LinkButton
                 to="new"
                 as={NavLink}
@@ -162,7 +161,7 @@ export const RolesListPage = () => {
                   defaultMessage: 'Add new role',
                 })}
               </LinkButton>
-            </CheckPermissions>
+            ) : null
           }
           navigationAction={<BackButton />}
         />
@@ -218,6 +217,7 @@ export const RolesListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
+                canUpdate={canUpdate}
                 permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}

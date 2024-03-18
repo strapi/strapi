@@ -82,6 +82,7 @@
     "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-query": "3.39.3",
     "react-router-dom": "6.21.1",
     "styled-components": "5.3.3",
     "typescript": "5.2.2"

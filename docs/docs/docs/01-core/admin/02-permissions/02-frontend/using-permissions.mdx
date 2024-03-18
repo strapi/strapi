@@ -112,47 +112,6 @@ type CheckPagePermissionsProps = {
 type CheckPagePermissions = (props: CheckPagePermissionsProps) => JSX.Element;
 ```
 
-### CheckPermissions
-
-Used to apply RBAC to a specific component. If the user does not have the permissions to access this component it will not be rendered.
-This would be useful in the content-manager when you're trying to hide fields based on permissions.
-
-#### Usage
-
-```tsx
-import { CheckPermissions } from '@strapi/helper-plugin';
-
-const permissions = [{ action: 'plugins::my-plugin.access', subject: null }];
-
-const MyComponent = () => {
-  return (
-    <CheckPermissions permissions={permissions}>
-      <h1>aha you found me</h1>
-    </CheckPermissions>
-  );
-};
-```
-
-#### Typescript
-
-```ts
-interface Permission {
-  id: number;
-  action: string;
-  subject: string | null;
-  // This can be custom defined to the needs of the plugin/application
-  properties: Record<string, any>;
-  conditions: Array<string>;
-}
-
-type CheckPermissionsProps = {
-  permissions: Permission[];
-  children: React.ReactNode;
-};
-
-type CheckPermissions = (props: CheckPermissionsProps) => JSX.Element;
-```
-
 ## useRBAC
 
 Is a wrapper around the [`hasPermissions`](#haspermissions) function which calls the `/admin/permissions/check` endpoint with a provided

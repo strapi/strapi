@@ -24,10 +24,10 @@ import {
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
   useQueryParams,
   useNotification,
   useTracking,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -192,6 +192,9 @@ const ReleasesPage = () => {
     maximumReleases: number;
   };
   const { trackUsage } = useTracking();
+  const {
+    allowedActions: { canCreate },
+  } = useRBAC(PERMISSIONS);
 
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
@@ -293,7 +296,7 @@ const ReleasesPage = () => {
           defaultMessage: 'Create and manage content updates',
         })}
         primaryAction={
-          <CheckPermissions permissions={PERMISSIONS.create}>
+          canCreate ? (
             <Button
               startIcon={<Plus />}
               onClick={toggleAddReleaseModal}
@@ -304,7 +307,7 @@ const ReleasesPage = () => {
                 defaultMessage: 'New release',
               })}
             </Button>
-          </CheckPermissions>
+          ) : null
         }
       />
       <ContentLayout>
