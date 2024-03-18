@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -18,6 +17,7 @@ import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useTracking } from '../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useCreateTransferTokenMutation,
   useGetTransferTokenQuery,

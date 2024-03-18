@@ -15,7 +15,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -30,6 +29,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../../../admin/src/hooks/useAPIErrorHandler';
 import {
   useGetProviderOptionsQuery,
   useUpdateProviderOptionsMutation,

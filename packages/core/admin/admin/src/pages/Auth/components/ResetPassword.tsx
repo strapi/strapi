@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
+import { useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, Navigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -10,6 +10,7 @@ import { Form } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import {
   Column,
   LayoutContent,

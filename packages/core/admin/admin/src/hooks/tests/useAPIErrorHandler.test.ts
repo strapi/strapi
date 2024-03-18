@@ -2,7 +2,7 @@ import { renderHook } from '@tests/utils';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { useIntl } from 'react-intl';
 
-import { ApiError } from '../../types';
+import { ApiError } from '../../types/errors';
 import { useAPIErrorHandler } from '../useAPIErrorHandler';
 
 jest.mock('react-intl', () => ({

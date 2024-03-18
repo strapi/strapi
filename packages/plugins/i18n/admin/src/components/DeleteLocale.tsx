@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { IconButton } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
-import { ConfirmDialog } from '@strapi/strapi/admin';
+import { ConfirmDialog, useAPIErrorHandler } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { useDeleteLocaleMutation } from '../services/locales';

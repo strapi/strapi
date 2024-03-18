@@ -12,12 +12,7 @@ import {
   GridItem,
   Typography,
 } from '@strapi/design-system';
-import {
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
@@ -30,6 +25,7 @@ import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';

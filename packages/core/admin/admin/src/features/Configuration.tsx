@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { useAPIErrorHandler, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useNotification, useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { useTypedSelector } from '../core/store/hooks';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import {
   ConfigurationLogo,
   useProjectSettingsQuery,

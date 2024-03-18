@@ -8,6 +8,7 @@ import {
   BackButton,
   ConfirmDialog,
   useTracking,
+  useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -27,12 +28,7 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useQueryParams,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -71,6 +67,7 @@ import type { Schema } from '@strapi/types';
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
+// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};

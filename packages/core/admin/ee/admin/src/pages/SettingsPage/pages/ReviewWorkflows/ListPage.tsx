@@ -15,7 +15,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import { onRowClick, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { onRowClick, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,7 @@ import { ConfirmDialog } from '../../../../../../../admin/src/components/Confirm
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
 import { useTracking } from '../../../../../../../admin/src/features/Tracking';
+import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 

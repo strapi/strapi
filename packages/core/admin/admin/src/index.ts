@@ -28,6 +28,7 @@ export { useInjectReducer } from './hooks/useInjectReducer';
 // TODO: Replace this export with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
 export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
 export { useGuidedTour } from './components/GuidedTour/Provider';
+export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
 
 /**
  * Types
@@ -48,6 +49,7 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './core/apis/content-manager';
+export type { ApiError } from './types/errors';
 
 /**
  * Utils

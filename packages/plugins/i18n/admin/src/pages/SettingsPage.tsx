@@ -1,14 +1,9 @@
 import * as React from 'react';
 
 import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';

@@ -1,7 +1,13 @@
 import * as React from 'react';
 
 // TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
-import { Page, Pagination, useLicenseLimits, useTracking } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  Pagination,
+  useLicenseLimits,
+  useTracking,
+  useAPIErrorHandler,
+} from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Badge,
@@ -23,12 +29,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  useQueryParams,
-  useAPIErrorHandler,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useQueryParams, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';

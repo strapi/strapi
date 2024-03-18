@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { useGetInitialDataQuery } from '../services/init';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';

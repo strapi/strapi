@@ -13,13 +13,14 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useNotification, useOverlayBlocker, useAPIErrorHandler } from '@strapi/helper-plugin';
+import { useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
 import { FormLayoutInputProps } from '../../../../../types/forms';
