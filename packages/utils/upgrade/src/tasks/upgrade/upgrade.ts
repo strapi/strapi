@@ -9,7 +9,7 @@ import * as f from '../../modules/format';
 import { Version } from '../../modules/version';
 
 import type { UpgradeOptions } from './types';
-import { PluginProject } from '../../modules/project/project';
+import { isPluginProject } from '../../modules/project/project';
 
 export const upgrade = async (options: UpgradeOptions) => {
   const timer = timerFactory();
@@ -20,10 +20,11 @@ export const upgrade = async (options: UpgradeOptions) => {
 
   const project = projectFactory(cwd);
 
-  if (project instanceof PluginProject) {
-    throw new Error('Upgrade cannot be run on a plugin; please use the `codemods` argument');
+  if (isPluginProject(project)) {
+    throw new Error(
+      `"${options.target}" upgrade cannot be run on a plugin; please use the "codemods" argument'`
+    );
   }
-
   const npmPackage = npmPackageFactory(upgraderConstants.STRAPI_PACKAGE_NAME);
   // Load all versions from the registry
   await npmPackage.refresh();

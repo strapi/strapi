@@ -21,6 +21,33 @@ import type {
   IProjectBase,
 } from './types';
 
+export const isPluginProject = (project: unknown): project is IPluginProject => {
+  return (
+    project instanceof PluginProject &&
+    'type' in project &&
+    project.type === 'plugin' &&
+    !('strapiVersion' in project)
+  );
+};
+
+export const assertPluginProject: (project: unknown) => asserts project is IPluginProject = (
+  project
+) => {
+  if (!isPluginProject(project)) {
+    throw new Error('Project must be an app');
+  }
+};
+
+export const isAppProject = (project: unknown): project is IAppProject => {
+  return project instanceof AppProject && 'type' in project && project.type === 'app';
+};
+
+export const assertAppProject: (project: unknown) => asserts project is IAppProject = (project) => {
+  if (!isAppProject(project)) {
+    throw new Error('Project must be an app');
+  }
+};
+
 export class Project implements IProjectBase {
   public cwd: string;
 
@@ -136,7 +163,7 @@ export class Project implements IProjectBase {
 export class AppProject extends Project implements IAppProject {
   public strapiVersion!: Version.SemVer;
 
-  type = 'app' as const;
+  readonly type = 'app' as const;
 
   constructor(cwd: string) {
     super(cwd);
@@ -212,7 +239,7 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
 };
 
 export class PluginProject extends Project implements IPluginProject {
-  type = 'plugin' as const;
+  readonly type = 'plugin' as const;
 }
 
 const isPlugin = (cwd: string) => {

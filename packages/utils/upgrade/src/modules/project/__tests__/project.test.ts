@@ -1,6 +1,16 @@
 import path from 'node:path';
 import { vol, fs } from 'memfs';
 
+// eslint-disable-next-line import/first
+import {
+  PluginProject,
+  assertAppProject,
+  assertPluginProject,
+  isPluginProject,
+  projectFactory,
+} from '../project';
+import { IAppProject, IPluginProject } from '../types';
+
 jest.mock('fs', () => fs);
 
 const srcFilename = (cwd: string, filename: string) => path.join(cwd, 'src', filename);
@@ -44,9 +54,6 @@ const pluginVolume = {
   'package.json': pluginPackageJSONFile,
   src: srcFiles,
 };
-
-// eslint-disable-next-line import/first
-import { AppProject, PluginProject, projectFactory } from '../project';
 
 describe('Project', () => {
   beforeEach(() => {
@@ -108,7 +115,9 @@ describe('Project', () => {
     test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(appVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD) as AppProject;
+      const project: IAppProject | IPluginProject = projectFactory(defaultCWD);
+
+      assertAppProject(project);
 
       expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
@@ -122,7 +131,10 @@ describe('Project', () => {
     test('Succeed for valid PluginProject', () => {
       vol.fromNestedJSON(pluginVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD) as AppProject;
+      const project = projectFactory(defaultCWD);
+
+      assertPluginProject(project);
+
       expect(project.type).toBe('plugin');
       expect(project instanceof PluginProject).toBe(true);
 
@@ -132,7 +144,6 @@ describe('Project', () => {
       );
 
       expect(project.cwd).toBe(defaultCWD);
-      expect(project.strapiVersion).toBe(undefined);
     });
   });
 
@@ -140,7 +151,9 @@ describe('Project', () => {
     test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(appVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD) as AppProject;
+      const project = projectFactory(defaultCWD);
+
+      assertAppProject(project);
 
       project.refresh();
 
@@ -159,10 +172,8 @@ describe('Project', () => {
     test('Succeed for valid PluginProject', () => {
       vol.fromNestedJSON(pluginVolume, defaultCWD);
 
-      const project = projectFactory(defaultCWD) as PluginProject;
-      expect((project as AppProject).strapiVersion).toBe(undefined);
-      expect(project.type).toBe('plugin');
-      expect(project instanceof PluginProject).toBe(true);
+      const project = projectFactory(defaultCWD);
+      expect(isPluginProject(project)).toBe(true);
 
       project.refresh();
 
