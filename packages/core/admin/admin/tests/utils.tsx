@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { configureStore } from '@reduxjs/toolkit';
+import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
@@ -48,31 +48,10 @@ setLogger({
 interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
+  storeConfig?: Partial<ConfigureStoreOptions>;
 }
 
-const storeConfig = {
-  preloadedState: initialState,
-  reducer: {
-    [adminApi.reducerPath]: adminApi.reducer,
-    admin_app: appReducer,
-    rbacProvider: RBACReducer,
-    'content-manager_app': cmAppReducer,
-    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-    'content-manager': contentManagerReducer,
-  },
-  // @ts-expect-error – this fails.
-  middleware: (getDefaultMiddleware) => [
-    ...getDefaultMiddleware({
-      // Disable timing checks for test env
-      immutableCheck: false,
-      serializableCheck: false,
-    }),
-    adminApi.middleware,
-    contentManagerApi.middleware,
-  ],
-};
-
-const Providers = ({ children, initialEntries }: ProvidersProps) => {
+const Providers = ({ children, initialEntries, storeConfig }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -157,18 +136,48 @@ export interface RenderOptions {
   renderOptions?: RTLRenderOptions;
   userEventOptions?: Parameters<typeof userEvent.setup>[0];
   initialEntries?: MemoryRouterProps['initialEntries'];
+  providerOptions?: {
+    storeConfig?: Partial<ConfigureStoreOptions>;
+  };
 }
+
+const defaultTestStoreConfig = {
+  preloadedState: initialState,
+  reducer: {
+    [adminApi.reducerPath]: adminApi.reducer,
+    admin_app: appReducer,
+    rbacProvider: RBACReducer,
+    'content-manager_app': cmAppReducer,
+    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
+    'content-manager': contentManagerReducer,
+  },
+  // @ts-expect-error – this fails.
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware({
+      // Disable timing checks for test env
+      immutableCheck: false,
+      serializableCheck: false,
+    }),
+    adminApi.middleware,
+    contentManagerApi.middleware,
+  ],
+};
 
 const render = (
   ui: React.ReactElement,
-  { renderOptions, userEventOptions, initialEntries }: RenderOptions = {}
+  { renderOptions, userEventOptions, initialEntries, providerOptions }: RenderOptions = {}
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
+  const { storeConfig = defaultTestStoreConfig, ...restProviderOptions } = providerOptions ?? {};
 
   return {
     ...renderRTL(ui, {
       wrapper: ({ children }) => (
-        <Providers initialEntries={initialEntries}>
+        <Providers
+          storeConfig={storeConfig}
+          initialEntries={initialEntries}
+          {...restProviderOptions}
+        >
           <Wrapper>{children}</Wrapper>
         </Providers>
       ),
@@ -201,5 +210,4 @@ const renderHook = <
   });
 };
 
-export { render, renderHook, waitFor, server, act, screen, fireEvent };
-export const adminTestUtils = { storeConfig };
+export { render, renderHook, waitFor, server, act, screen, fireEvent, defaultTestStoreConfig };

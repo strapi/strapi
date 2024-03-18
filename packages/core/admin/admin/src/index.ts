@@ -45,4 +45,4 @@ export * from './content-manager/exports';
 /**
  * Test Utils
  */
-export { adminTestUtils } from '../tests/utils';
+export * from '../tests/utils';
