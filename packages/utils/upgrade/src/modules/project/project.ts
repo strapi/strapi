@@ -32,7 +32,7 @@ export class Project implements ProjectInterface {
 
   public packageJSON!: MinimalPackageJSON;
 
-  public type?: 'plugin' | 'app';
+  public readonly type: 'plugin' | 'app';
 
   constructor(cwd: string) {
     if (!fse.pathExistsSync(cwd)) {
