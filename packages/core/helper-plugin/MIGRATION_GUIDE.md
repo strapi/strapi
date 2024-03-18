@@ -180,7 +180,7 @@ This component has been removed and not replaced. However, you can easily replic
 
 ```tsx
 const MyComponent = ({ area, ...compProps }) => {
-  const { getPlugin } = useStrapiApp();
+  const getPlugin = useStrapiApp('MyComponent', (state) => state.getPlugin);
 
   const [pluginName, page, position] = area.split('.');
 
@@ -397,17 +397,29 @@ import { Table } from '@strapi/strapi/admin';
 
 Note! some of the props have changed, please refer to the documentation for the `Table` component.
 
-## Content Manager
-
 ## Features
+
+### CustomFields
+
+This feature has been removed and is part of the `useStrapiApp` hook.
 
 ### GuidedTour
 
-This component has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
+This feature has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
+
+### Library
+
+This feature has been removed and is part of the `useStrapiApp` hook.
+
+### StrapiApp
+
+This feature has been moved to `@strapi/admin` and only the hook `useStrapiApp` is now exported.
 
 ### Tracking
 
 This feature has been moved to the `@strapi/admin` package and only the `useTracking` hook is exported.
+
+## Content Manager
 
 ### contentManagementUtilRemoveFieldsFromData
 

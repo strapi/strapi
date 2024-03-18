@@ -64,22 +64,6 @@ describe('ADMIN | new StrapiApp', () => {
       expect(res).toBe(7);
     });
 
-    it('runs the "moto" hooks in waterfall asynchronously', async () => {
-      const app = new StrapiApp();
-
-      app.createHook('hello');
-      app.createHook('moto');
-
-      app.registerHook('hello', () => 5);
-      app.registerHook('moto', (n) => n + 1);
-      app.registerHook('moto', (n) => Promise.resolve(n + 2));
-      app.registerHook('moto', (n) => n + 3);
-
-      const res = await app.runHookWaterfall('moto', 1, true);
-
-      expect(res).toBe(7);
-    });
-
     it('runs the "moto" hooks in parallel', async () => {
       const app = new StrapiApp();
 

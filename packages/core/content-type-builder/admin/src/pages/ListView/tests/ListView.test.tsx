@@ -26,9 +26,32 @@ jest.mock('../../../hooks/useDataManager', () => {
   };
 });
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  CheckPermissions: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useStrapiApp: jest.fn((_name, getter) =>
+    getter({
+      customFields: {
+        get: jest.fn().mockReturnValueOnce({
+          name: 'color',
+          pluginId: 'mycustomfields',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: {
+            id: 'mycustomfields.color.label',
+            defaultMessage: 'Color',
+          },
+          intlDescription: {
+            id: 'mycustomfields.color.description',
+            defaultMessage: 'Select any color',
+          },
+          components: {
+            Input: jest.fn(),
+          },
+        }),
+        getAll: jest.fn(),
+      },
+    })
+  ),
 }));
 
 const makeApp = () => {

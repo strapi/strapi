@@ -15,15 +15,13 @@ import { AttributeIcon, IconByType } from './AttributeIcon';
 import { DisplayedType } from './DisplayedType';
 import { UpperFirst } from './UpperFirst';
 
-import type { CustomFieldUID } from '@strapi/helper-plugin';
-
 export const BoxWrapper = styled(Box)`
   position: relative;
 `;
 
 type ListRowProps = {
   configurable?: boolean;
-  customField?: CustomFieldUID | null;
+  customField?: string | null;
   editTarget: string;
   firstLoopComponentUid?: string | null;
   isFromDynamicZone?: boolean;

@@ -1,17 +1,15 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from '@strapi/helper-plugin';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
-import { Helmet } from 'react-helmet';
 import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { DefaultTheme } from 'styled-components';
 
-import { getEERoutes as getBaseEERoutes } from '../../ee/admin/src/constants';
+import { ADMIN_PERMISSIONS_EE, getEERoutes as getBaseEERoutes } from '../../ee/admin/src/constants';
 import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/SettingsPage/constants';
 
 import { App } from './App';
@@ -27,9 +25,8 @@ import {
 } from './components/InjectionZone';
 import { LanguageProvider } from './components/LanguageProvider';
 import { Page } from './components/PageHelpers';
-import { Providers } from './components/Providers';
 import { Theme } from './components/Theme';
-import { HOOKS } from './constants';
+import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { routes as cmRoutes } from './content-manager/router';
 import { ContentManagerPlugin } from './core/apis/content-manager';
 import { CustomFields } from './core/apis/CustomFields';
@@ -44,6 +41,8 @@ import { THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY, ThemeName } from '
 import { languageNativeNames } from './translations/languageNativeNames';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+import type { Permission } from '@strapi/helper-plugin';
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -63,6 +62,21 @@ interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>
     translations?: Record<string, Record<string, string>>;
     tutorials?: boolean;
   };
+}
+
+interface MenuItem {
+  to: string;
+  icon: React.ElementType;
+  intlLabel: MessageDescriptor & { values?: Record<string, PrimitiveType> };
+  permissions: Permission[];
+  notificationsCount?: number;
+  Component: React.LazyExoticComponent<React.ComponentType>;
+  exact?: boolean;
+  lockIcon?: boolean;
+}
+
+interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {
+  id: string;
 }
 
 interface StrapiAppPlugin {
@@ -100,6 +114,14 @@ interface Field {
 interface Library {
   fields: Record<Field['type'], Field['Component']>;
   components: Record<Component['name'], Component['Component']>;
+}
+
+interface StrapiAppSetting {
+  id: string;
+  intlLabel: MessageDescriptor & {
+    values?: Record<string, PrimitiveType>;
+  };
+  links: StrapiAppSettingLink[];
 }
 
 class StrapiApp {
@@ -594,10 +616,8 @@ class StrapiApp {
   runHookSeries = (name: string, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = <T,>(name: string, initialValue: T, asynchronous = false, store?: Store) => {
-    return asynchronous
-      ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
-      : this.hooksDict[name].runWaterfall(initialValue, store);
+  runHookWaterfall = <T,>(name: string, initialValue: T, store?: Store) => {
+    return this.hooksDict[name].runWaterfall(initialValue, store);
   };
 
   runHookParallel = (name: string) => this.hooksDict[name].runParallel();
@@ -610,7 +630,7 @@ class StrapiApp {
     const store = configureStore(
       {
         admin_app: {
-          permissions: {},
+          permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
           theme: {
             availableThemes: [],
             currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
@@ -642,7 +662,7 @@ class StrapiApp {
               </LanguageProvider>
             </Provider>
           ),
-          element: <Root strapi={this} localeNames={localeNames} store={store} />,
+          element: <App strapi={this} store={store} />,
           children: [
             {
               path: 'usecase',
@@ -661,7 +681,7 @@ class StrapiApp {
             {
               path: '/*',
               lazy: async () => {
-                const { PrivateAdminLayout } = await import('./pages/Layout');
+                const { PrivateAdminLayout } = await import('./layouts/AuthenticatedLayout');
 
                 return {
                   Component: PrivateAdminLayout,
@@ -775,47 +795,11 @@ class StrapiApp {
   }
 }
 
-interface RootProps {
-  localeNames: Record<string, string>;
-  strapi: StrapiApp;
-  store: Store;
-}
-/**
- * The Root component sets up all the context providers which _do not_
- * require data-fetching to perform their duties i.e. Notifications or
- * CustomFields or the Store.
- */
-const Root = ({ strapi, store, localeNames }: RootProps) => {
-  return (
-    <Providers
-      components={strapi.library.components}
-      fields={strapi.library.fields}
-      customFields={strapi.customFields}
-      localeNames={localeNames}
-      getAdminInjectedComponents={strapi.getAdminInjectedComponents}
-      getPlugin={strapi.getPlugin}
-      messages={strapi.configurations.translations}
-      menu={strapi.menu}
-      plugins={strapi.plugins}
-      runHookParallel={strapi.runHookParallel}
-      runHookWaterfall={(name, initialValue, async = false) => {
-        return strapi.runHookWaterfall(name, initialValue, async, store);
-      }}
-      // @ts-expect-error – context issue. TODO: fix this.
-      runHookSeries={strapi.runHookSeries}
-      themes={strapi.configurations.themes}
-      settings={strapi.settings}
-      store={store}
-    >
-      <Helmet htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }} />
-      <App
-        authLogo={strapi.configurations.authLogo}
-        menuLogo={strapi.configurations.menuLogo}
-        showTutorials={strapi.configurations.tutorials}
-        showReleaseNotification={strapi.configurations.notifications.releases}
-      />
-    </Providers>
-  );
+export { StrapiApp };
+export type {
+  StrapiAppPlugin,
+  StrapiAppSettingLink,
+  StrapiAppSetting,
+  MenuItem,
+  StrapiAppConstructorArgs,
 };
-
-export { StrapiApp, StrapiAppConstructorArgs };
