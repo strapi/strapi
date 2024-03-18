@@ -27,7 +27,6 @@ export * from './hooks/useSelectionState';
 
 export * from './utils/auth';
 export * from './utils/getFetchClient';
-export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/stopPropagation';

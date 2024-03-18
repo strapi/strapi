@@ -15,7 +15,7 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { getYupInnerErrors, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -30,6 +30,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import { findAttribute } from '../../utils/findAttribute';
+import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
 import { IconByType } from '../AttributeIcon';
