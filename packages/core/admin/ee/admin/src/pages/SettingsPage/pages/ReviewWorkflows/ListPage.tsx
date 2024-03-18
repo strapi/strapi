@@ -18,7 +18,7 @@ import { Link, LinkButton } from '@strapi/design-system/v2';
 import { onRowClick, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
@@ -158,7 +158,8 @@ export const ReviewWorkflowsListView = () => {
             <LinkButton
               startIcon={<Plus />}
               size="S"
-              // @ts-expect-error - types are not inferred correctly through the as prop.
+              as={NavLink}
+              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
               to="/settings/review-workflows/create"
               onClick={(event) => {
                 /**
