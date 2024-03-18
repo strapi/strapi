@@ -1,5 +1,9 @@
-import type { TranslationMessage } from '../types';
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 import type { ValidationError } from 'yup';
+
+interface TranslationMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
+}
 
 const extractValuesFromYupError = (
   errorType?: string | undefined,

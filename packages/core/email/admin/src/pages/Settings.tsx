@@ -15,12 +15,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  getYupInnerErrors,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useFetchClient, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -29,6 +24,7 @@ import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { PERMISSIONS } from '../constants';
+import { getYupInnerErrors } from '../utils/getYupInnerErrors';
 import { schema } from '../utils/schema';
 
 import type { EmailSettings } from '../../../shared/types';

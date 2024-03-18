@@ -6,16 +6,12 @@
 
 import * as React from 'react';
 
-import {
-  TranslationMessage,
-  getYupInnerErrors,
-  useNotification,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { TranslationMessage, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
+import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 import { SINGLE_TYPES } from '../constants/collections';
 import { useGetDocumentQuery } from '../services/documents';
 import { buildValidParams } from '../utils/api';
