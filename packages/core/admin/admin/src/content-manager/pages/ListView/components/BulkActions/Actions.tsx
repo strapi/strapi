@@ -502,5 +502,5 @@ const Emphasis = (chunks: React.ReactNode) => (
 
 const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [PublishAction, UnpublishAction, DeleteAction];
 
-export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer };
+export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer, Emphasis };
 export type { BulkActionDescription };

@@ -35,9 +35,6 @@ type InjectionZoneArea =
   | 'contentManager.editView.informations'
   | 'contentManager.editView.right-links'
   | 'contentManager.listView.actions'
-  | 'contentManager.listView.unpublishModalAdditionalInfos'
-  | 'contentManager.listView.deleteModalAdditionalInfos'
-  | 'contentManager.listView.publishModalAdditionalInfos'
   | 'contentManager.listView.deleteModalAdditionalInfos';
 
 type InjectionZoneModule = InjectionZoneArea extends `${infer Word}.${string}` ? Word : never;
