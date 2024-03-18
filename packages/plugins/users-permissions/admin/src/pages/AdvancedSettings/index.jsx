@@ -8,11 +8,10 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import {
   useAPIErrorHandler,
@@ -44,8 +43,6 @@ const AdvancedSettingsPage = () => {
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -119,7 +116,7 @@ const AdvancedSettingsPage = () => {
   }
 
   return (
-    <Main aria-busy={isSubmittingForm}>
+    <Page.Main aria-busy={isSubmittingForm}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -214,7 +211,7 @@ const AdvancedSettingsPage = () => {
           );
         }}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

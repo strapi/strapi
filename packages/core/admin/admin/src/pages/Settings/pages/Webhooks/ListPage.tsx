@@ -11,7 +11,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Switch,
   Table,
   Tbody,
@@ -24,7 +23,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -50,7 +49,6 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
-  useFocusWhenNavigate();
   const navigate = useNavigate();
 
   const {
@@ -164,7 +162,7 @@ const ListPage = () => {
           }
         )}
       />
-      <Main aria-busy={isLoading}>
+      <Page.Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
@@ -400,7 +398,7 @@ const ListPage = () => {
             />
           )}
         </ContentLayout>
-      </Main>
+      </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
         onClose={() => setShowModal((prev) => !prev)}

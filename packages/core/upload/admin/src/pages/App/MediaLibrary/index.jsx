@@ -11,16 +11,10 @@ import {
   GridItem,
   IconButton,
   Layout,
-  Main,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {
-  useFocusWhenNavigate,
-  usePersistentState,
-  useQueryParams,
-  useSelectionState,
-} from '@strapi/helper-plugin';
+import { usePersistentState, useQueryParams, useSelectionState } from '@strapi/helper-plugin';
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -207,8 +201,6 @@ export const MediaLibrary = () => {
     handleAssetDeleted(selected.length);
   };
 
-  useFocusWhenNavigate();
-
   if (isLoading) {
     return <Page.Loading />;
   }
@@ -219,7 +211,7 @@ export const MediaLibrary = () => {
 
   return (
     <Layout>
-      <Main aria-busy={isLoading}>
+      <Page.Main>
         <Header
           breadcrumbs={
             !isCurrentFolderLoading && getBreadcrumbDataML(currentFolder, { pathname, query })
@@ -480,7 +472,7 @@ export const MediaLibrary = () => {
             <Pagination.Links />
           </Pagination.Root>
         </ContentLayout>
-      </Main>
+      </Page.Main>
 
       {showUploadAssetDialog && (
         <UploadAssetDialog

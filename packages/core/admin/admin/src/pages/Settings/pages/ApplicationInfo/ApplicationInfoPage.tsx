@@ -10,15 +10,15 @@ import {
   HeaderLayout,
   Layout,
   Link,
-  Main,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { Page } from '../../../../components/PageHelpers';
 import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
@@ -63,8 +63,6 @@ const ApplicationInfoPage = () => {
   const {
     allowedActions: { canRead, canUpdate },
   } = useRBAC(settings ? settings['project-settings'] : {});
-
-  useFocusWhenNavigate();
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -124,7 +122,7 @@ const ApplicationInfoPage = () => {
           }
         )}
       />
-      <Main>
+      <Page.Main>
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             title={formatMessage({
@@ -291,7 +289,7 @@ const ApplicationInfoPage = () => {
             </Flex>
           </ContentLayout>
         </form>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

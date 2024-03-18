@@ -5,7 +5,6 @@ import {
   ContentLayout,
   HeaderLayout,
   Layout,
-  Main,
   Table,
   Th,
   Thead,
@@ -18,7 +17,7 @@ import {
   useFilter,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useFocusWhenNavigate, useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import {
   ConfirmDialog,
@@ -48,7 +47,6 @@ export const RolesListPage = () => {
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -137,7 +135,7 @@ export const RolesListPage = () => {
           { name: pageTitle }
         )}
       />
-      <Main aria-busy={isLoading}>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: 'global.roles',
@@ -232,7 +230,7 @@ export const RolesListPage = () => {
           onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

@@ -6,7 +6,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -17,13 +16,7 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import {
-  onRowClick,
-  stopPropagation,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { onRowClick, stopPropagation, useFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import { Page, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
@@ -49,8 +42,6 @@ export const ProvidersPage = () => {
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingPermissions,
@@ -164,7 +155,7 @@ export const ProvidersPage = () => {
           }
         )}
       />
-      <Main>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
@@ -242,7 +233,7 @@ export const ProvidersPage = () => {
             </Tbody>
           </Table>
         </ContentLayout>
-      </Main>
+      </Page.Main>
       <FormModal
         initialData={data[providerToEditName]}
         isOpen={isOpen}

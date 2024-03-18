@@ -6,13 +6,11 @@ import {
   ContentLayout,
   Flex,
   HeaderLayout,
-  Main,
   useNotifyAT,
   Grid,
   GridItem,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
@@ -69,8 +67,6 @@ const ProfilePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
     _unstableFormatAPIError: formatApiError,
   } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const user = useAuth('ProfilePage', (state) => state.user);
 
@@ -184,7 +180,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <Main aria-busy={isSubmittingForm}>
+    <Page.Main aria-busy={isSubmittingForm}>
       <Helmet
         title={formatMessage({
           id: 'Settings.profile.form.section.helmet.title',
@@ -224,7 +220,7 @@ const ProfilePage = () => {
           </>
         )}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

@@ -6,7 +6,6 @@ import {
   GridItem,
   HeaderLayout,
   Layout,
-  Main,
   MultiSelect,
   MultiSelectOption,
   Option,
@@ -14,7 +13,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -50,8 +49,6 @@ const schema = yup.object().shape({
 });
 
 export const SingleSignOnPage = () => {
-  useFocusWhenNavigate();
-
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { toggleNotification } = useNotification();
@@ -124,7 +121,7 @@ export const SingleSignOnPage = () => {
           }
         )}
       />
-      <Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
+      <Page.Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
         <Formik
           onSubmit={handleSubmit}
           initialValues={
@@ -296,7 +293,7 @@ export const SingleSignOnPage = () => {
             </Form>
           )}
         </Formik>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

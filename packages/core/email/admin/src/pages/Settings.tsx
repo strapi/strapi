@@ -9,13 +9,12 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   Option,
   Select,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -97,8 +96,6 @@ const SettingsPage = () => {
     }
   );
 
-  useFocusWhenNavigate();
-
   React.useEffect(() => {
     schema
       .validate({ email: testAddress }, { abortEarly: false })
@@ -129,7 +126,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
+    <Page.Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -312,6 +309,6 @@ const SettingsPage = () => {
           </form>
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };

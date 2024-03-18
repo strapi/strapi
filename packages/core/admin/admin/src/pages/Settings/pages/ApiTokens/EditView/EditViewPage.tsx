@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { ContentLayout, Flex, Main } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { ContentLayout, Flex } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -40,7 +40,6 @@ import type { Get, ApiToken } from '../../../../../../../shared/contracts/api-to
  * server response as the source of the truth for the data.
  */
 export const EditView = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { state: locationState } = useLocation();
@@ -319,7 +318,7 @@ export const EditView = () => {
 
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
-      <Main>
+      <Page.Main>
         <Helmet
           title={formatMessage(
             { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -386,7 +385,7 @@ export const EditView = () => {
             );
           }}
         </Formik>
-      </Main>
+      </Page.Main>
     </ApiTokenPermissionsProvider>
   );
 };

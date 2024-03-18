@@ -4,10 +4,9 @@ import {
   Flex,
   HeaderLayout,
   IconButton,
-  Main,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { Eye } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -47,8 +46,6 @@ const ListPage = () => {
     canReadAuditLogs,
     canReadUsers,
   });
-
-  useFocusWhenNavigate();
 
   const formatTimeStamp = useFormatTimeStamp();
 
@@ -100,7 +97,7 @@ const ListPage = () => {
   const { results = [] } = auditLogs ?? {};
 
   return (
-    <Main aria-busy={isLoading}>
+    <Page.Main aria-busy={isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -217,7 +214,7 @@ const ListPage = () => {
       {query?.id && (
         <Modal handleClose={() => setQuery({ id: '' }, 'remove')} logId={query.id.toString()} />
       )}
-    </Main>
+    </Page.Main>
   );
 };
 

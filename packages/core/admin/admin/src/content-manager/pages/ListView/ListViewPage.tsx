@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  Main,
   ActionLayout,
   Button,
   ContentLayout,
@@ -11,7 +10,7 @@ import {
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
@@ -70,7 +69,6 @@ const ListViewPage = () => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  useFocusWhenNavigate();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
   const { collectionType, model, schema } = useDoc();
@@ -241,7 +239,7 @@ const ListViewPage = () => {
   };
 
   return (
-    <Main>
+    <Page.Main>
       <Helmet title={`${contentTypeTitle} | Strapi`} />
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
@@ -401,7 +399,7 @@ const ListViewPage = () => {
           </Pagination.Root>
         </Flex>
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

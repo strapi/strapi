@@ -554,6 +554,10 @@ import { useCallbackRef } from '@strapi/helper-plugin';
 import { useCallbackRef } from '@strapi/design-system';
 ```
 
+### useClipboard
+
+This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
+
 ### useCollator
 
 This hook has been removed. You should import it from the `@strapi/design-system` package:
@@ -581,6 +585,10 @@ import { useFilter } from '@strapi/helper-plugin';
 // After
 import { useFilter } from '@strapi/design-system';
 ```
+
+### useFocusWhenNavigate
+
+This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
 
 ### useFormattedMessage
 
