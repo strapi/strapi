@@ -103,7 +103,8 @@ const getPublishedAtClause = (
     return { $null: true };
   }
 
-  return { $null: status === 'draft' };
+  // Prioritize the draft status in case it's not provided
+  return status === 'published' ? { $notNull: true } : { $null: true };
 };
 
 export default {

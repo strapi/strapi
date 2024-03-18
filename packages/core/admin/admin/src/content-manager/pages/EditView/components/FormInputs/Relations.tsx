@@ -531,7 +531,7 @@ const RelationsInput = ({
           <ComboboxOption key={opt.documentId} value={opt.documentId} textValue={textValue}>
             <Flex gap={2} justifyContent="space-between">
               <Typography ellipsis>{textValue}</Typography>
-              <DocumentStatus status={opt.status} />
+              {opt.status ? <DocumentStatus status={opt.status} /> : null}
             </Flex>
           </ComboboxOption>
         );
