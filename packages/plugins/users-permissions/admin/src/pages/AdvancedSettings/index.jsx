@@ -12,14 +12,15 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import {
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFetchClient, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { useAPIErrorHandler, Page, Form, InputRenderer } from '@strapi/strapi/admin';
+import {
+  useAPIErrorHandler,
+  Page,
+  Form,
+  InputRenderer,
+  useNotification,
+} from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -38,7 +39,7 @@ const ProtectedAdvancedSettingsPage = () => (
 
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
@@ -69,8 +70,11 @@ const AdvancedSettingsPage = () => {
       },
       onError() {
         toggleNotification({
-          type: 'warning',
-          message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({
+            id: getTrad('notification.error'),
+            defaultMessage: 'An error occured',
+          }),
         });
       },
     }
@@ -84,12 +88,15 @@ const AdvancedSettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
+        message: formatMessage({
+          id: getTrad('notification.success.saved'),
+          defaultMessage: 'Saved',
+        }),
       });
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     },

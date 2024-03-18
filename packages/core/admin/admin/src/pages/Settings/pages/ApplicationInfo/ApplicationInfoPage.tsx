@@ -13,12 +13,13 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import { useAppInfo, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
@@ -40,13 +41,14 @@ const ApplicationInfoPage = () => {
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const {
-    communityEdition,
-    latestStrapiReleaseTag,
-    nodeVersion,
-    shouldUpdateStrapi,
-    strapiVersion,
-  } = useAppInfo();
+  const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
+  const latestStrapiReleaseTag = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.latestStrapiReleaseTag
+  );
+  const nodeVersion = useAppInfo('ApplicationInfoPage', (state) => state.nodeVersion);
+  const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
+  const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
 
   const AdminSeatInfo = useEnterprise(
     AdminSeatInfoCE,

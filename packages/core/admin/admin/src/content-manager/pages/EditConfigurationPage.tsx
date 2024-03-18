@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
+import { useNotification } from '../../features/Notifications';
 import { useTracking } from '../../features/Tracking';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { setIn } from '../../utils/objects';
@@ -19,7 +20,8 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 
 const EditConfigurationPage = () => {
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { isLoading: isLoadingSchema, schema, model } = useDoc();
   const { isLoading: isLoadingLayout, error, list, edit } = useDocLayout();
@@ -51,7 +53,7 @@ const EditConfigurationPage = () => {
   React.useEffect(() => {
     if (errorFieldSizes) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(errorFieldSizes),
       });
     }
@@ -116,18 +118,18 @@ const EditConfigurationPage = () => {
         trackUsage('didEditEditSettings');
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
         });
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };

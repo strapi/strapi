@@ -18,9 +18,9 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useRBACProvider } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { useAPIErrorHandler, Form, FormHelpers } from '@strapi/strapi/admin';
+import { useNotification, useAPIErrorHandler, Form, FormHelpers } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { UpdateLocale, Locale } from '../../../shared/contracts/locales';
@@ -76,7 +76,7 @@ type FormValues = UpdateLocale.Request['body'] & { code: string };
  * @description Exported to be used when someone clicks on a table row.
  */
 const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -104,7 +104,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
         }
 
         return;
@@ -112,21 +112,21 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTranslation('Settings.locales.modal.edit.success'),
           defaultMessage: 'Updated locale',
-        },
+        }),
       });
 
       refetchPermissions();
       onClose();
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again',
-        },
+        }),
       });
     }
   };

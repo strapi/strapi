@@ -12,9 +12,9 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page, useTracking } from '@strapi/strapi/admin';
+import { Page, useTracking, useNotification } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -29,7 +29,7 @@ import { usePlugins } from '../hooks/usePlugins';
 
 export const CreatePage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
@@ -38,11 +38,11 @@ export const CreatePage = () => {
   const mutation = useMutation((body) => post(`/users-permissions/roles`, body), {
     onError() {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     },
 
@@ -51,10 +51,10 @@ export const CreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('Settings.roles.created'),
           defaultMessage: 'Role created',
-        },
+        }),
       });
 
       // Forcing redirecting since we don't have the id in the response

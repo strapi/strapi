@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { DescriptionComponentRenderer } from '../../../../components/Description
 import { useForm } from '../../../../components/Form';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
 import { useStrapiApp } from '../../../../features/StrapiApp';
 import { getDisplayName } from '../../../../utils/users';
 import {
@@ -427,7 +428,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
   const listViewPathMatch = useMatch(LIST_PATH);
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
   const { delete: deleteAction } = useDocumentActions();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
 
   return {
@@ -474,7 +475,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
                 id: 'content-manager.actions.delete.error',
                 defaultMessage: 'An error occurred while trying to delete the document.',
               }),
-              type: 'warning',
+              type: 'danger',
             });
 
             return;

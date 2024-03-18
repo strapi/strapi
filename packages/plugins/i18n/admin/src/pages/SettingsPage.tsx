@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
-import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';
@@ -15,7 +15,7 @@ import { getTranslation } from '../utils/getTranslation';
 const SettingsPage = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { data: locales, isLoading: isLoadingLocales, error } = useGetLocalesQuery();
   const {
@@ -26,7 +26,7 @@ const SettingsPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

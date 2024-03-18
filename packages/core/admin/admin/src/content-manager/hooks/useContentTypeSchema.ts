@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { useNotification } from '@strapi/helper-plugin';
-
+import { useNotification } from '../../features/Notifications';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { useGetInitialDataQuery } from '../services/init';
 
@@ -23,7 +22,7 @@ type ComponentsDictionary = Record<string, Contracts.Components.Component>;
  * If no model is provided, the hook will return all the schemas.
  */
 const useContentTypeSchema = (model?: string) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { components, contentType, contentTypes, error, isLoading, isFetching } =
@@ -56,7 +55,7 @@ const useContentTypeSchema = (model?: string) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

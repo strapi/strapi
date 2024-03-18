@@ -9,11 +9,12 @@ import {
   Loader,
   Main,
 } from '@strapi/design-system';
-import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Permission } from '../../../shared/contracts/shared';
+import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
 
@@ -162,7 +163,7 @@ export interface ProtectProps {
  */
 const Protect = ({ permissions = [], children }: ProtectProps) => {
   const { allPermissions } = useRBACProvider();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const matchingPermissions = allPermissions.filter(
@@ -191,7 +192,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

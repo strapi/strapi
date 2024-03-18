@@ -14,12 +14,13 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { Page } from '../components/PageHelpers';
+import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../selectors';
 import { useGetPluginsQuery } from '../services/admin';
@@ -27,7 +28,7 @@ import { useGetPluginsQuery } from '../services/admin';
 const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   useFocusWhenNavigate();
 
@@ -53,7 +54,7 @@ const InstalledPluginsPage = () => {
 
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

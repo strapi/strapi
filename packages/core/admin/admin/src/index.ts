@@ -30,6 +30,13 @@ export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
 export { useGuidedTour } from './components/GuidedTour/Provider';
 export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
 export { useStrapiApp, type StrapiAppContextValue } from './features/StrapiApp';
+export {
+  useNotification,
+  type NotificationsContextValue,
+  type NotificationConfig,
+  NotificationsProvider,
+} from './features/Notifications';
+export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
 
 /**
  * Types

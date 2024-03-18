@@ -11,7 +11,7 @@ import {
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useQueryParams, useNotification } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
@@ -27,6 +27,7 @@ import { SearchInput } from '../../../components/SearchInput';
 import { Table } from '../../../components/Table';
 import { HOOKS } from '../../../constants';
 import { BackButton } from '../../../features/BackButton';
+import { useNotification } from '../../../features/Notifications';
 import { useStrapiApp } from '../../../features/StrapiApp';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
@@ -68,7 +69,7 @@ const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   useFocusWhenNavigate();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
@@ -119,7 +120,7 @@ const ListViewPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

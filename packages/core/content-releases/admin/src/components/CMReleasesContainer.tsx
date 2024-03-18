@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { skipToken } from '@reduxjs/toolkit/query';
-import { useAPIErrorHandler } from '@strapi/admin/strapi-admin';
+import { useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -17,7 +17,7 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useNotification, useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
@@ -96,7 +96,7 @@ const AddActionToReleaseModal = ({
 }: AddActionToReleaseModalProps) => {
   const releaseHeaderId = React.useId();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale;
@@ -140,13 +140,13 @@ const AddActionToReleaseModal = ({
       if (isAxiosError(response.error)) {
         // Handle axios error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(response.error),
         });
       } else {
         // Handle generic error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }

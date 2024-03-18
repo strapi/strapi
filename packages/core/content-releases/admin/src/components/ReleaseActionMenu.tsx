@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler } from '@strapi/admin/strapi-admin';
+import { useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
 import { Menu, Link } from '@strapi/design-system/v2';
-import { useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
@@ -63,7 +63,7 @@ interface DeleteReleaseActionItemProps {
 
 const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionItemProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
   const {
@@ -92,13 +92,13 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
       if (isAxiosError(response.error)) {
         // Handle axios error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(response.error),
         });
       } else {
         // Handle generic error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }

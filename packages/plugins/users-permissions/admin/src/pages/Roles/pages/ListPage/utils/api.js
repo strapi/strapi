@@ -1,6 +1,6 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 
-export const fetchData = async (toggleNotification, notifyStatus) => {
+export const fetchData = async (toggleNotification, formatMessage, notifyStatus) => {
   try {
     const { get } = getFetchClient();
     const { data } = await get('/users-permissions/roles');
@@ -9,22 +9,22 @@ export const fetchData = async (toggleNotification, notifyStatus) => {
     return data;
   } catch (err) {
     toggleNotification({
-      type: 'warning',
-      message: { id: 'notification.error' },
+      type: 'danger',
+      message: formatMessage({ id: 'notification.error' }),
     });
 
     throw new Error(err);
   }
 };
 
-export const deleteData = async (id, toggleNotification) => {
+export const deleteData = async (id, formatMessage, toggleNotification) => {
   try {
     const { del } = getFetchClient();
     await del(`/users-permissions/roles/${id}`);
   } catch (error) {
     toggleNotification({
-      type: 'warning',
-      message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      type: 'danger',
+      message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
     });
   }
 };

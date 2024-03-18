@@ -14,12 +14,7 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import {
-  useAppInfo,
-  useFocusWhenNavigate,
-  useNotification,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
 import { ExternalLink, GlassesSquare } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -28,6 +23,8 @@ import { ContentBox } from '../../components/ContentBox';
 import { Page } from '../../components/PageHelpers';
 import { Pagination } from '../../components/Pagination';
 import { useTypedSelector } from '../../core/store/hooks';
+import { useAppInfo } from '../../features/AppInfo';
+import { useNotification } from '../../features/Notifications';
 import { useTracking } from '../../features/Tracking';
 import { useDebounce } from '../../hooks/useDebounce';
 
@@ -60,11 +57,16 @@ const MarketplacePage = () => {
   const tabRef = React.useRef<any>(null);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [{ query }, setQuery] = useQueryParams<MarketplacePageQuery>();
   const debouncedSearch = useDebounce(query?.search, 500) || '';
 
-  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfo();
+  const {
+    autoReload: isInDevelopmentMode,
+    dependencies,
+    useYarn,
+    strapiVersion,
+  } = useAppInfo('MarketplacePage', (state) => state);
   const isOnline = useNavigatorOnline();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
@@ -84,13 +86,13 @@ const MarketplacePage = () => {
     if (!isInDevelopmentMode) {
       toggleNotification({
         type: 'info',
-        message: {
+        message: formatMessage({
           id: 'admin.pages.MarketPlacePage.production',
           defaultMessage: 'Manage plugins from the development environment',
-        },
+        }),
       });
     }
-  }, [toggleNotification, isInDevelopmentMode]);
+  }, [toggleNotification, isInDevelopmentMode, formatMessage]);
 
   const {
     pluginsResponse,

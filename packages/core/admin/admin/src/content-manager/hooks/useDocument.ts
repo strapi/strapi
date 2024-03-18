@@ -6,10 +6,11 @@
 
 import * as React from 'react';
 
-import { TranslationMessage, useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { TranslationMessage, useQueryParams } from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
+import { useNotification } from '../../features/Notifications';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 import { SINGLE_TYPES } from '../constants/collections';
@@ -85,7 +86,7 @@ type UseDocument = (
  * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document} for more information
  */
 const useDocument: UseDocument = (args, opts) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const {
@@ -100,7 +101,7 @@ const useDocument: UseDocument = (args, opts) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

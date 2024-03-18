@@ -83,14 +83,14 @@ that has been thrown.
  * const MyComponent = () => {
  *   const { get } = useFetchClient();
  *   const { formatAPIError } = useAPIErrorHandler(getTrad);
- *   const toggleNotification = useNotification();
+ *   const { toggleNotification } = useNotification();
  * 
  *   const handleDeleteItem = async () => {
  *     try {
  *       return await get('/admin');
  *     } catch (error) {
  *       toggleNotification({
- *         type: 'warning',
+ *         type: 'danger',
  *         message: formatAPIError(error),
  *       });
  *     }

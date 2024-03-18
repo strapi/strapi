@@ -7,7 +7,7 @@ import {
   LinkButton,
   Main,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useOnce } from '../../../../hooks/useOnce';
@@ -69,7 +70,7 @@ const tableHeaders = [
 const ListView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.['transfer-tokens']
   );
@@ -116,7 +117,7 @@ const ListView = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -130,14 +131,14 @@ const ListView = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
       });
     }
   };

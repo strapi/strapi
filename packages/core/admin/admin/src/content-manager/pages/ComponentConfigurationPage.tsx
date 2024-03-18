@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
+import { useNotification } from '../../features/Notifications';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { setIn } from '../../utils/objects';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
@@ -36,7 +37,8 @@ const ComponentConfigurationPage = () => {
    * just extracted the logic to make an edit view layout and reproduced it here.
    */
   const { slug: model } = useParams<{ slug: string }>();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const {
@@ -83,7 +85,7 @@ const ComponentConfigurationPage = () => {
   React.useEffect(() => {
     if (errorSchema) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(errorSchema),
       });
     }
@@ -99,7 +101,7 @@ const ComponentConfigurationPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -176,18 +178,18 @@ const ComponentConfigurationPage = () => {
       if ('data' in res) {
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
         });
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };

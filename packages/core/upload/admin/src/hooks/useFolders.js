@@ -1,7 +1,8 @@
 import * as React from 'react';
 
+import { useNotification } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
@@ -10,7 +11,7 @@ import pluginId from '../pluginId';
 
 export const useFolders = ({ enabled = true, query = {} } = {}) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
   const { get } = useFetchClient();
@@ -61,8 +62,8 @@ export const useFolders = ({ enabled = true, query = {} } = {}) => {
       cacheTime: 0,
       onError() {
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error' }),
         });
       },
     }

@@ -17,7 +17,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu } from '@strapi/design-system/v2';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -25,6 +25,7 @@ import styled, { DefaultTheme } from 'styled-components';
 
 import { useForm } from '../../../../components/Form';
 import { DocumentActionComponent } from '../../../../core/apis/content-manager';
+import { NotificationConfig, useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
@@ -78,7 +79,7 @@ interface NotificationOptions {
   };
   content?: string;
   onClose?: () => void;
-  status?: 'info' | 'warning' | 'softWarning' | 'success';
+  status?: NotificationConfig['type'];
   timeout?: number;
 }
 
@@ -149,7 +150,7 @@ interface DocumentActionButtonProps extends Action {}
 
 const DocumentActionButton = (action: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
 
   const handleClick = (action: Action) => async (e: React.MouseEvent) => {
     const { onClick = () => false, dialog, id } = action;
@@ -229,7 +230,7 @@ const DocumentActionsMenu = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
@@ -490,7 +491,7 @@ const PublishAction: DocumentActionComponent = ({
 }) => {
   const { schema } = useDoc();
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
@@ -549,12 +550,12 @@ const PublishAction: DocumentActionComponent = ({
 
         if (errors) {
           toggleNotification({
-            type: 'warning',
-            message: {
+            type: 'danger',
+            message: formatMessage({
               id: 'content-manager.validation.error',
               defaultMessage:
                 'There are validation errors in your document. Please fix them before saving.',
-            },
+            }),
           });
 
           return;
@@ -601,7 +602,7 @@ const UpdateAction: DocumentActionComponent = ({
   collectionType,
 }) => {
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
@@ -646,12 +647,12 @@ const UpdateAction: DocumentActionComponent = ({
 
         if (errors) {
           toggleNotification({
-            type: 'warning',
-            message: {
+            type: 'danger',
+            message: formatMessage({
               id: 'content-manager.validation.error',
               defaultMessage:
                 'There are validation errors in your document. Please fix them before saving.',
-            },
+            }),
           });
 
           return;
@@ -752,7 +753,7 @@ const UnpublishAction: DocumentActionComponent = ({
   const { unpublish } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [shouldKeepDraft, setShouldKeepDraft] = React.useState(true);
 
   const isDocumentModified = document?.status === 'modified';
@@ -796,7 +797,7 @@ const UnpublishAction: DocumentActionComponent = ({
               id: 'content-manager.actions.unpublish.error',
               defaultMessage: 'An error occurred while trying to unpublish the document.',
             }),
-            type: 'warning',
+            type: 'danger',
           });
         }
 
@@ -871,7 +872,7 @@ const UnpublishAction: DocumentActionComponent = ({
                   id: 'content-manager.actions.unpublish.error',
                   defaultMessage: 'An error occurred while trying to unpublish the document.',
                 }),
-                type: 'warning',
+                type: 'danger',
               });
             }
 

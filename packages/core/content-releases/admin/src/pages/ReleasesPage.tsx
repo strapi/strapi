@@ -7,6 +7,7 @@ import {
   useLicenseLimits,
   useTracking,
   useAPIErrorHandler,
+  useNotification,
 } from '@strapi/admin/strapi-admin';
 import {
   Alert,
@@ -29,7 +30,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQueryParams, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -181,7 +182,7 @@ const ReleasesPage = () => {
   const tabRef = React.useRef<any>(null);
   const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
@@ -205,7 +206,7 @@ const ReleasesPage = () => {
   React.useEffect(() => {
     if (location?.state?.errors) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         title: formatMessage({
           id: 'content-releases.pages.Releases.notification.error.title',
           defaultMessage: 'Your request could not be processed.',
@@ -273,13 +274,13 @@ const ReleasesPage = () => {
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(response.error),
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }

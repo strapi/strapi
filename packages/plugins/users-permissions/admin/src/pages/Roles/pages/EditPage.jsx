@@ -12,9 +12,9 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page, BackButton, useAPIErrorHandler } from '@strapi/strapi/admin';
+import { Page, BackButton, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -29,7 +29,7 @@ import { usePlugins } from '../hooks/usePlugins';
 
 export const EditPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     params: { id },
   } = useMatch(`/settings/users-permissions/roles/:id`);
@@ -54,7 +54,7 @@ export const EditPage = () => {
   const mutation = useMutation((body) => put(`/users-permissions/roles/${id}`, body), {
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     },
@@ -62,10 +62,10 @@ export const EditPage = () => {
     async onSuccess() {
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('Settings.roles.created'),
           defaultMessage: 'Role edited',
-        },
+        }),
       });
 
       await refetchRole();

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -11,6 +10,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
@@ -40,7 +40,7 @@ interface EditRoleFormValues {
 }
 
 const EditPage = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
@@ -108,7 +108,7 @@ const EditPage = () => {
           formik.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
@@ -127,7 +127,7 @@ const EditPage = () => {
             formik.setErrors(formatValidationErrors(updateRes.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(updateRes.error),
             });
           }
@@ -146,12 +146,12 @@ const EditPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved' },
+        message: formatMessage({ id: 'notification.success.saved' }),
       });
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     }
   };

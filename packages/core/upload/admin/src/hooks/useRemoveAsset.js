@@ -1,11 +1,13 @@
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/admin/strapi-admin';
+import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
 import { deleteRequest } from '../utils/deleteRequest';
 
 export const useRemoveAsset = (onSuccess) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
 
   const mutation = useMutation((assetId) => deleteRequest('files', assetId), {
@@ -15,16 +17,16 @@ export const useRemoveAsset = (onSuccess) => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: 'modal.remove.success-label',
           defaultMessage: 'Elements have been successfully deleted.',
-        },
+        }),
       });
 
       onSuccess();
     },
     onError(error) {
-      toggleNotification({ type: 'warning', message: error.message });
+      toggleNotification({ type: 'danger', message: error.message });
     },
   });
 

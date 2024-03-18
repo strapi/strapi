@@ -7,7 +7,7 @@ import {
   LinkButton,
   Main,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useOnce } from '../../../../hooks/useOnce';
@@ -63,7 +64,7 @@ const TABLE_HEADERS = [
 export const ListView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.['api-tokens']
   );
@@ -99,7 +100,7 @@ export const ListView = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -117,7 +118,7 @@ export const ListView = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -127,11 +128,11 @@ export const ListView = () => {
       trackUsage('didDeleteToken');
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'Something went wrong',
-        },
+        }),
       });
     }
   };

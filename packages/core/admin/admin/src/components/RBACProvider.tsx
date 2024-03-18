@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Permission, RBACContext, RBACContextValue } from '@strapi/helper-plugin';
-import produce from 'immer';
+import { produce } from 'immer';
 
 import { useTypedSelector, useTypedDispatch } from '../core/store/hooks';
 

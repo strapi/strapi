@@ -9,17 +9,6 @@ jest.mock('../hooks/useNavigatorOnline');
 jest.mock('../../../hooks/useDebounce', () => ({
   useDebounce: jest.fn((value) => value),
 }));
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfo: jest.fn(() => ({
-    autoReload: true,
-    dependencies: {
-      '@strapi/plugin-documentation': '4.2.0',
-      '@strapi/provider-upload-cloudinary': '4.2.0',
-    },
-    useYarn: true,
-  })),
-}));
 
 const waitForReload = async () => {
   await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());

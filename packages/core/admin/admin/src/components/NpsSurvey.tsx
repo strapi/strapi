@@ -13,14 +13,16 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { useNotification, useAppInfo, usePersistentState } from '@strapi/helper-plugin';
+import { usePersistentState } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
 
+import { useAppInfo } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
 
 const FieldWrapper = styled(Field)`
   height: ${32 / 16}rem;
@@ -134,8 +136,9 @@ const NpsSurvey = () => {
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
-  const toggleNotification = useNotification();
-  const { currentEnvironment, strapiVersion } = useAppInfo();
+  const { toggleNotification } = useNotification();
+  const currentEnvironment = useAppInfo('NpsSurvey', (state) => state.currentEnvironment);
+  const strapiVersion = useAppInfo('NpsSurvey', (state) => state.strapiVersion);
 
   interface NpsSurveyMutationBody {
     email: string;
@@ -215,7 +218,7 @@ const NpsSurvey = () => {
       }, 3000);
     } catch (err) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }

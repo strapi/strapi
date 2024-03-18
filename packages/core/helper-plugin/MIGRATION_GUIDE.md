@@ -397,36 +397,6 @@ import { Table } from '@strapi/strapi/admin';
 
 Note! some of the props have changed, please refer to the documentation for the `Table` component.
 
-## Features
-
-### AutoReloadOverlayBlocker
-
-This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
-
-### CustomFields
-
-This feature has been removed and is part of the `useStrapiApp` hook.
-
-### GuidedTour
-
-This feature has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
-
-### Library
-
-This feature has been removed and is part of the `useStrapiApp` hook.
-
-### OverlayBlocker
-
-This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
-
-### StrapiApp
-
-This feature has been moved to `@strapi/admin` and only the hook `useStrapiApp` is now exported.
-
-### Tracking
-
-This feature has been moved to the `@strapi/admin` package and only the `useTracking` hook is exported.
-
 ## Content Manager
 
 ### contentManagementUtilRemoveFieldsFromData
@@ -490,6 +460,74 @@ const {
 } = useDocumentLayout();
 ```
 
+## Features
+
+### AppInfo
+
+This feature has been moved to `@strapi/admin` and only the hook `useStrapiApp` is now exported.
+
+### AutoReloadOverlayBlocker
+
+This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
+
+### CustomFields
+
+This feature has been removed and is part of the `useStrapiApp` hook.
+
+### GuidedTour
+
+This feature has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
+
+### Library
+
+This feature has been removed and is part of the `useStrapiApp` hook.
+
+### Notifications
+
+This feature has been moved to the `@strapi/admin` package and only the `useNotifications` hook is exported. The `message` property
+can no longer be a `TranslationMessage` and instead, only a string. If you were previously using the `warning` type you should instead
+use the `danger` type and if you were using the `softWarning` type you should use `warning`. Finally, the return type is now an object.
+
+```tsx
+// Before
+import { useNotification } from '@strapi/helper-plugin';
+
+const toggleNotification = useNotification();
+
+toggleNotification({
+  type: 'warning',
+  message: {
+    id: 'my.message.id',
+    defaultMessage: 'My message',
+  },
+});
+
+// After
+import { useNotification } from '@strapi/strapi/admin';
+
+const { toggleNotification } = useNotification();
+
+toggleNotification({
+  type: 'danger',
+  message: formatMessage({
+    id: 'my.message.id',
+    defaultMessage: 'My message',
+  }),
+});
+```
+
+### OverlayBlocker
+
+This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
+
+### StrapiApp
+
+This feature has been moved to `@strapi/admin` and only the hook `useStrapiApp` is now exported.
+
+### Tracking
+
+This feature has been moved to the `@strapi/admin` package and only the `useTracking` hook is exported.
+
 ## Hooks
 
 ### useAPIErrorHandler
@@ -506,7 +544,7 @@ import { useAPIErrorHandler } from '@strapi/strapi/admin';
 
 ### useCallbackRef
 
-This component has been removed. You should import it from the `@strapi/design-system` package:
+This hook has been removed. You should import it from the `@strapi/design-system` package:
 
 ```tsx
 // Before
@@ -518,7 +556,7 @@ import { useCallbackRef } from '@strapi/design-system';
 
 ### useCollator
 
-This component has been removed. You should import it from the `@strapi/design-system` package:
+This hook has been removed. You should import it from the `@strapi/design-system` package:
 
 ```tsx
 // Before
@@ -528,9 +566,13 @@ import { useCollator } from '@strapi/helper-plugin';
 import { useCollator } from '@strapi/design-system';
 ```
 
+### useFieldHint
+
+This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
+
 ### useFilter
 
-This component has been removed. You should import it from the `@strapi/design-system` package:
+This hook has been removed. You should import it from the `@strapi/design-system` package:
 
 ```tsx
 // Before
@@ -539,6 +581,10 @@ import { useFilter } from '@strapi/helper-plugin';
 // After
 import { useFilter } from '@strapi/design-system';
 ```
+
+### useFormattedMessage
+
+This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
 
 ## Icons
 

@@ -14,7 +14,7 @@ import {
 import { TranslationMessage } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
-import produce from 'immer';
+import { produce } from 'immer';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useBlocker } from 'react-router-dom';

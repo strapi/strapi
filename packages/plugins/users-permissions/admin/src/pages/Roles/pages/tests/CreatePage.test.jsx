@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/strapi/admin';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';

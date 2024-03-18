@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { UpdateProjectSettings } from '../../../shared/contracts/admin';
@@ -16,6 +16,7 @@ import {
 } from '../services/admin';
 
 import { useAuth } from './Auth';
+import { useNotification } from './Notifications';
 import { useTracking } from './Tracking';
 
 import type { StrapiApp } from '../StrapiApp';
@@ -71,7 +72,7 @@ const ConfigurationProvider = ({
 }: ConfigurationProviderProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.['project-settings']
@@ -90,11 +91,11 @@ const ConfigurationProvider = ({
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'app.containers.App.notification.error.init' },
+        type: 'danger',
+        message: formatMessage({ id: 'app.containers.App.notification.error.init' }),
       });
     }
-  }, [error, toggleNotification]);
+  }, [error, formatMessage, toggleNotification]);
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
     skip: !token || !canRead,
@@ -143,7 +144,7 @@ const ConfigurationProvider = ({
         });
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }

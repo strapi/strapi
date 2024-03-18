@@ -1,18 +1,14 @@
 import { useEffect } from 'react';
 
 import { useNotifyAT } from '@strapi/design-system';
-import {
-  Permission,
-  hasPermissions,
-  useNotification,
-  useRBACProvider,
-} from '@strapi/helper-plugin';
+import { Permission, hasPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useNotification } from '../../features/Notifications';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
@@ -36,7 +32,7 @@ interface ContentManagerLink {
 
 const useContentManagerInitData = (): ContentManagerAppState => {
   const dispatch = useTypedDispatch();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { allPermissions } = useRBACProvider();
   const runHookWaterfall = useStrapiApp(
     'useContentManagerInitData',
@@ -69,7 +65,7 @@ const useContentManagerInitData = (): ContentManagerAppState => {
 
   useEffect(() => {
     if (initialDataQuery.error) {
-      toggleNotification({ type: 'warning', message: formatAPIError(initialDataQuery.error) });
+      toggleNotification({ type: 'danger', message: formatAPIError(initialDataQuery.error) });
     }
   }, [formatAPIError, initialDataQuery.error, toggleNotification]);
 
@@ -78,7 +74,7 @@ const useContentManagerInitData = (): ContentManagerAppState => {
   useEffect(() => {
     if (contentTypeSettingsQuery.error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(contentTypeSettingsQuery.error),
       });
     }

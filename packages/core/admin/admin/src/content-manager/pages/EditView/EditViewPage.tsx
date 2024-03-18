@@ -11,7 +11,7 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
@@ -19,6 +19,7 @@ import styled from 'styled-components';
 
 import { Blocker, Form, FormHelpers } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
+import { useNotification } from '../../../features/Notifications';
 import { useOnce } from '../../../hooks/useOnce';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -48,7 +49,7 @@ const EditViewPage = () => {
     setQuery,
   ] = useQueryParams<{ status: 'draft' | 'published' }>();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const tabApi = React.useRef<{
     _handlers: {
       setSelectedTabIndex: SetSelectedTabIndexHandler;
@@ -82,7 +83,7 @@ const EditViewPage = () => {
      */
     if (location?.state && 'error' in location.state) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: location.state.error,
         timeout: 5000,
       });

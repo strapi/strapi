@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { Helmet } from 'react-helmet';
@@ -29,7 +29,7 @@ import reducer, { initialState } from './reducer';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
 
   useFocusWhenNavigate();
@@ -67,7 +67,7 @@ export const SettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.form.success.fields' },
+        message: formatMessage({ id: 'notification.form.success.fields' }),
       });
     },
     onError(err) {

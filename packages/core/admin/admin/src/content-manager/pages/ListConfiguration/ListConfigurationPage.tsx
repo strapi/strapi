@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { ContentLayout, Divider, Flex, Layout, Main } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
@@ -9,6 +8,7 @@ import { Navigate } from 'react-router-dom';
 import { Form, FormProps } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useTypedSelector } from '../../../core/store/hooks';
+import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { setIn } from '../../../utils/objects';
@@ -30,7 +30,7 @@ interface FormData extends Pick<ListLayout, 'settings'> {
 const ListConfiguration = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { model, collectionType } = useDoc();
@@ -83,19 +83,19 @@ const ListConfiguration = () => {
         trackUsage('didEditListSettings');
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
         });
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch (err) {
       console.error(err);
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
