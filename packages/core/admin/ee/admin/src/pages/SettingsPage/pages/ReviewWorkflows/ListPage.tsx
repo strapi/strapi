@@ -15,13 +15,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import {
-  onRowClick,
-  useAPIErrorHandler,
-  useNotification,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { onRowClick, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +24,7 @@ import styled from 'styled-components';
 import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
+import { useTracking } from '../../../../../../../admin/src/features/Tracking';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
@@ -73,7 +68,6 @@ export const ReviewWorkflowsListView = () => {
   const [showLimitModal, setShowLimitModal] = React.useState<boolean>(false);
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { meta, workflows, isLoading, deleteWorkflow } = useReviewWorkflows();
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
@@ -107,8 +101,6 @@ export const ReviewWorkflowsListView = () => {
     if (!workflowToDelete) return;
 
     try {
-      setIsDeleting(true);
-
       const res = await deleteWorkflow({ id: workflowToDelete });
 
       if ('error' in res) {
@@ -134,8 +126,6 @@ export const ReviewWorkflowsListView = () => {
           defaultMessage: 'An error occurred',
         },
       });
-    } finally {
-      setIsDeleting(false);
     }
   };
 

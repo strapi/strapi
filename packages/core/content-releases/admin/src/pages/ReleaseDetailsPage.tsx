@@ -7,6 +7,7 @@ import {
   Table,
   BackButton,
   ConfirmDialog,
+  useTracking,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -27,12 +28,10 @@ import {
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
@@ -66,7 +65,6 @@ import type {
   ReleaseAction,
   ReleaseActionGroupBy,
   ReleaseActionEntry,
-  FormattedReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { Schema } from '@strapi/types';
 
@@ -230,9 +228,8 @@ const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const {
-    allowedActions: { canUpdate, canDelete },
-  } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
 
@@ -455,7 +452,7 @@ const ReleaseDetailsLayout = ({
                   defaultMessage: 'Refresh',
                 })}
               </Button>
-              <CheckPermissions permissions={PERMISSIONS.publish}>
+              {canPublish ? (
                 <Button
                   size="S"
                   variant="default"
@@ -468,7 +465,7 @@ const ReleaseDetailsLayout = ({
                     defaultMessage: 'Publish',
                   })}
                 </Button>
-              </CheckPermissions>
+              ) : null}
             </Flex>
           )
         }
@@ -841,7 +838,7 @@ const ReleaseDetailsPage = () => {
     }
   );
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
-  const [deleteRelease, { isLoading: isDeletingRelease }] = useDeleteReleaseMutation();
+  const [deleteRelease] = useDeleteReleaseMutation();
 
   const toggleEditReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);

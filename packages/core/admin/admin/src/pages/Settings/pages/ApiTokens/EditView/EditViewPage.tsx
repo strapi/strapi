@@ -4,19 +4,19 @@ import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
   useAPIErrorHandler,
   useFocusWhenNavigate,
-  useGuidedTour,
   useNotification,
   useOverlayBlocker,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
+import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useTracking } from '../../../../../features/Tracking';
 import {
   useCreateAPITokenMutation,
   useGetAPITokenQuery,
@@ -58,7 +58,7 @@ export const EditView = () => {
       : null
   );
   const { trackUsage } = useTracking();
-  const { setCurrentStep } = useGuidedTour();
+  const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions.settings?.['api-tokens']);

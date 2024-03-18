@@ -6,6 +6,7 @@
 
 import React, { useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
   FieldLabel,
@@ -19,7 +20,6 @@ import {
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';

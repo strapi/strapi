@@ -17,11 +17,17 @@ export * from './components/SearchInput';
 export * from './components/Table';
 
 /**
+ * Features
+ */
+export { useTracking, type TrackingEvent } from './features/Tracking';
+
+/**
  * Hooks
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
 // TODO: Replace this export with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
 export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
+export { useGuidedTour } from './components/GuidedTour/Provider';
 
 /**
  * Types

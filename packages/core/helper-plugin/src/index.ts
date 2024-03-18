@@ -1,23 +1,15 @@
 /* -------------------------------------------------------------------------------------------------
- * Components
- * -----------------------------------------------------------------------------------------------*/
-
-export * from './components/CheckPermissions';
-
-/* -------------------------------------------------------------------------------------------------
  * Features
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './features/AppInfo';
 export * from './features/AutoReloadOverlayBlocker';
 export * from './features/CustomFields';
-export * from './features/GuidedTour';
 export * from './features/Library';
 export * from './features/Notifications';
 export * from './features/OverlayBlocker';
 export * from './features/RBAC';
 export * from './features/StrapiApp';
-export * from './features/Tracking';
 
 /* -------------------------------------------------------------------------------------------------
  * Hooks
@@ -52,4 +44,4 @@ export * from './utils/stopPropagation';
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export type { TranslationMessage, FilterData } from './types';
+export type { TranslationMessage } from './types';

@@ -12,7 +12,6 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
@@ -23,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
 import { useOnce } from '../../../../hooks/useOnce';
 import {
   useDeleteTransferTokenMutation,

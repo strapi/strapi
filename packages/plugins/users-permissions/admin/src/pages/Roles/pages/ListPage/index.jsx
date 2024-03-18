@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, useTracking } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   ContentLayout,
@@ -20,12 +20,10 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import {
-  CheckPermissions,
   useFocusWhenNavigate,
   useNotification,
   useQueryParams,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { Page, SearchInput, BackButton } from '@strapi/strapi/admin';
@@ -53,7 +51,7 @@ export const RolesListPage = () => {
 
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canRead, canDelete },
+    allowedActions: { canRead, canDelete, canCreate, canUpdate },
   } = useRBAC({
     create: PERMISSIONS.createRole,
     read: PERMISSIONS.readRoles,
@@ -149,7 +147,7 @@ export const RolesListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={PERMISSIONS.createRole}>
+            canCreate ? (
               <LinkButton
                 to="new"
                 as={NavLink}
@@ -162,7 +160,7 @@ export const RolesListPage = () => {
                   defaultMessage: 'Add new role',
                 })}
               </LinkButton>
-            </CheckPermissions>
+            ) : null
           }
           navigationAction={<BackButton />}
         />
@@ -218,6 +216,7 @@ export const RolesListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
+                canUpdate={canUpdate}
                 permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}

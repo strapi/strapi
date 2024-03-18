@@ -27,6 +27,10 @@ const MyPage = () => {
 };
 ```
 
+### CheckPermissions
+
+This component has been removed and not replaced. If you feel like you need this component, please open an issue on the Strapi repository to discuss your usecase.
+
 ### CheckPagePermissions
 
 This component has been removed and refactored to be part of the `Page` component exported from `@strapi/strapi/admin`. You should use the `Page` component from there:
@@ -394,6 +398,16 @@ import { Table } from '@strapi/strapi/admin';
 Note! some of the props have changed, please refer to the documentation for the `Table` component.
 
 ## Content Manager
+
+## Features
+
+### GuidedTour
+
+This component has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
+
+### Tracking
+
+This feature has been moved to the `@strapi/admin` package and only the `useTracking` hook is exported.
 
 ### contentManagementUtilRemoveFieldsFromData
 

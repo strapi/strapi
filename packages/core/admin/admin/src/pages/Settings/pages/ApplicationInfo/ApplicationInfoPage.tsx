@@ -13,13 +13,14 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import { useAppInfo, useFocusWhenNavigate, useRBAC, useTracking } from '@strapi/helper-plugin';
+import { useAppInfo, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useConfiguration } from '../../../../features/Configuration';
+import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 

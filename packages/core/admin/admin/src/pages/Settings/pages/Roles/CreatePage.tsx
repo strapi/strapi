@@ -13,12 +13,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useNotification, useOverlayBlocker, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -30,6 +25,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useTracking } from '../../../../features/Tracking';
 import {
   useCreateRoleMutation,
   useGetRolePermissionLayoutQuery,

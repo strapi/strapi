@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -33,11 +32,9 @@ const render = (
   ...renderRTL(<ConfigureTheView config={config} />, {
     wrapper: ({ children }) => (
       <IntlProvider locale="en" messages={{}}>
-        <TrackingProvider>
-          <ThemeProvider theme={lightTheme}>
-            <MemoryRouter>{children}</MemoryRouter>
-          </ThemeProvider>
-        </TrackingProvider>
+        <ThemeProvider theme={lightTheme}>
+          <MemoryRouter>{children}</MemoryRouter>
+        </ThemeProvider>
       </IntlProvider>
     ),
   }),

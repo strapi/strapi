@@ -10,10 +10,8 @@ import {
 import {
   useAPIErrorHandler,
   useFocusWhenNavigate,
-  useGuidedTour,
   useNotification,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
@@ -22,8 +20,10 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
 import { useOnce } from '../../../../hooks/useOnce';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
@@ -76,7 +76,7 @@ export const ListView = () => {
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
-  const { startSection } = useGuidedTour();
+  const startSection = useGuidedTour('ListView', (state) => state.startSection);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {

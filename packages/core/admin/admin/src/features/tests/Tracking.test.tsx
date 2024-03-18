@@ -1,8 +1,9 @@
-import { renderHook } from '@testing-library/react';
+import { AppInfoProvider } from '@strapi/helper-plugin';
+import { renderHook } from '@tests/utils';
 import axios from 'axios';
 
-import { AppInfoProvider } from '../AppInfo';
-import { TrackingProvider, TrackingProviderProps, useTracking } from '../Tracking';
+import { useInitQuery } from '../../services/admin';
+import { TrackingProvider, useTracking } from '../Tracking';
 
 jest.mock('axios', () => ({
   ...jest.requireActual('axios'),
@@ -11,29 +12,33 @@ jest.mock('axios', () => ({
   }),
 }));
 
-const setup = (props?: TrackingProviderProps['value']) =>
+jest.mock('../../services/admin', () => ({
+  useInitQuery: jest.fn().mockReturnValue({
+    data: {
+      uuid: '1',
+    },
+  }),
+  useTelemetryPropertiesQuery: jest.fn().mockReturnValue({
+    data: {
+      useTypescriptOnServer: true,
+    },
+  }),
+}));
+
+const setup = () =>
   renderHook(() => useTracking(), {
     wrapper: ({ children }) => (
-      <AppInfoProvider
-        currentEnvironment="testing"
-        userId="someTestUserId"
-        shouldUpdateStrapi={false}
-        setUserDisplayName={jest.fn()}
-        userDisplayName="someTestUserDisplayName"
-      >
-        <TrackingProvider
-          value={{
-            uuid: '1',
-            telemetryProperties: {
-              useTypescriptOnServer: true,
-            },
-            deviceId: 'someTestDeviceId',
-            ...props,
-          }}
+      <TrackingProvider>
+        <AppInfoProvider
+          currentEnvironment="testing"
+          userId="someTestUserId"
+          shouldUpdateStrapi={false}
+          setUserDisplayName={jest.fn()}
+          userDisplayName="someTestUserDisplayName"
         >
           {children}
-        </TrackingProvider>
-      </AppInfoProvider>
+        </AppInfoProvider>
+      </TrackingProvider>
     ),
   });
 
@@ -55,7 +60,6 @@ describe('useTracking', () => {
       'https://analytics.strapi.io/api/v2/track',
       {
         userId: 'someTestUserId',
-        deviceId: 'someTestDeviceId',
         event: 'didAccessAuthenticatedAdministration',
         eventProperties: {},
         groupProperties: {
@@ -92,16 +96,6 @@ describe('useTracking', () => {
     window.strapi.telemetryDisabled = false;
   });
 
-  it('should not track if there is no uuid set in the context', async () => {
-    const { result } = setup({
-      uuid: false,
-    });
-
-    await result.current.trackUsage('didAccessAuthenticatedAdministration');
-
-    expect(axios.post).not.toBeCalled();
-  });
-
   it('should fail gracefully if the request does not work', async () => {
     axios.post = jest.fn().mockRejectedValueOnce({});
 
@@ -112,5 +106,20 @@ describe('useTracking', () => {
     expect(axios.post).toHaveBeenCalled();
     expect(res).toEqual(null);
     expect(result.current.trackUsage).not.toThrow();
+  });
+
+  it('should not track if there is no uuid set in the context', async () => {
+    jest.mocked(useInitQuery).mockReturnValue({
+      data: {
+        uuid: false,
+      },
+      refetch: jest.fn(),
+    });
+
+    const { result } = setup();
+
+    await result.current.trackUsage('didAccessAuthenticatedAdministration');
+
+    expect(axios.post).not.toBeCalled();
   });
 });
