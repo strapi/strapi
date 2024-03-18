@@ -18,7 +18,7 @@ type InputFieldRefs<T extends HTMLElement> = T | { input: MutableRefObject<T> } 
  * );
  * ```
  */
-export const useFocusInputField = <T extends HTMLElement>(
+const useFocusInputField = <T extends HTMLElement>(
   name: string
 ): ((node: InputFieldRefs<T>) => void) => {
   const { search: searchString } = useLocation();
@@ -53,3 +53,5 @@ export const useFocusInputField = <T extends HTMLElement>(
 
   return setField;
 };
+
+export { useFocusInputField };
