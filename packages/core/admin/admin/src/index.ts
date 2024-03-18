@@ -36,6 +36,7 @@ export {
   type NotificationConfig,
   NotificationsProvider,
 } from './features/Notifications';
+export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
 
 /**
  * Types

@@ -1,6 +1,6 @@
 import { Box, Flex, Icon, Tooltip, Typography, Divider, Button } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { AppInfoContextValue, useClipboard } from '@strapi/helper-plugin';
+import { useClipboard } from '@strapi/helper-plugin';
 import { CheckCircle, ExternalLink, Download, Github, Star, Check, Duplicate } from '@strapi/icons';
 import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
@@ -8,6 +8,7 @@ import * as semver from 'semver';
 import styled from 'styled-components';
 
 import StrapiLogo from '../../../assets/images/logo-strapi-2022.svg';
+import { AppInfoContextValue } from '../../../features/AppInfo';
 import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 

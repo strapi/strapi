@@ -1,10 +1,10 @@
 import { Box, Flex, Grid, GridItem, GridLayout, Icon, Typography } from '@strapi/design-system';
-import { AppInfoContextValue } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { Page } from '../../../components/PageHelpers';
+import { AppInfoContextValue } from '../../../features/AppInfo';
 
 import { NpmPackageCard, NpmPackageCardProps } from './NpmPackageCard';
 

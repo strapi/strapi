@@ -6,8 +6,9 @@ import {
   useTracking,
   useStrapiApp,
   useNotification,
+  useAppInfo,
 } from '@strapi/admin/strapi-admin';
-import { useAppInfo, useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
+import { useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
@@ -86,7 +87,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
 
   const plugin = getPlugin(pluginId);
-  const { autoReload } = useAppInfo();
+  const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();

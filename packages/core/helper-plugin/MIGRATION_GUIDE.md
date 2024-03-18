@@ -462,6 +462,10 @@ const {
 
 ## Features
 
+### AppInfo
+
+This feature has been moved to `@strapi/admin` and only the hook `useStrapiApp` is now exported.
+
 ### AutoReloadOverlayBlocker
 
 This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.

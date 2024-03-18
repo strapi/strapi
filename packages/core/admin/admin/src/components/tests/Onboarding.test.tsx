@@ -1,11 +1,11 @@
-import { useAppInfo } from '@strapi/helper-plugin';
 import { render } from '@tests/utils';
 
+import { useAppInfo } from '../../features/AppInfo';
 import { Onboarding } from '../Onboarding';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfo: jest.fn(() => ({ communityEdition: true })),
+jest.mock('../../features/AppInfo', () => ({
+  ...jest.requireActual('../../features/AppInfo'),
+  useAppInfo: jest.fn((name, getter) => getter({ communityEdition: true })),
 }));
 
 describe('Onboarding', () => {
@@ -38,7 +38,7 @@ describe('Onboarding', () => {
 
   test('should display support link for EE edition', async () => {
     // @ts-expect-error - mock
-    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
+    useAppInfo.mockImplementation((name, getter) => getter({ communityEdition: false }));
     const { getByRole, user } = render(<Onboarding />);
 
     await user.click(getByRole('button', { name: /open help menu/i }));

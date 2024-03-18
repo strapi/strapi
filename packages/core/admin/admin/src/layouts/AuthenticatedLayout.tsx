@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
-import { AppInfoProvider } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -20,6 +19,7 @@ import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { RBACProvider } from '../components/RBACProvider';
 import { useIsHistoryRoute } from '../content-manager/history/routes';
+import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { useTracking } from '../features/Tracking';
@@ -28,7 +28,6 @@ import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { useGetMyPermissionsQuery } from '../services/auth';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
-import { getDisplayName } from '../utils/users';
 
 const strapiVersion = packageJSON.version;
 
@@ -134,9 +133,7 @@ const AdminLayout = () => {
       {...appInfo}
       userId={userId}
       latestStrapiReleaseTag={tagName}
-      setUserDisplayName={() => {}}
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
-      userDisplayName={getDisplayName(userInfo, formatMessage) ?? ''}
     >
       <RBACProvider permissions={permissions ?? []} refetchPermissions={refetchPermissions}>
         <NpsSurvey />
