@@ -1215,7 +1215,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
               <tbody>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -1267,9 +1266,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1340,7 +1337,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -1395,9 +1391,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1468,7 +1462,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -1522,9 +1515,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1595,7 +1586,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -1649,9 +1639,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1722,7 +1710,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -1774,9 +1761,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1847,7 +1832,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -1901,9 +1885,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1974,7 +1956,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -2022,9 +2003,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2095,7 +2074,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -2153,9 +2131,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2240,7 +2216,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           <tbody>
                             <tr
                               class="c25"
-                              style="cursor: pointer;"
                             >
                               <td
                                 style="position: relative;"
@@ -2311,9 +2286,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -2384,7 +2357,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </tr>
                             <tr
                               class="c25"
-                              style="cursor: pointer;"
                             >
                               <td
                                 style="position: relative;"
@@ -2455,9 +2427,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -2528,7 +2498,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </tr>
                             <tr
                               class="c25"
-                              style="cursor: pointer;"
                             >
                               <td
                                 style="position: relative;"
@@ -2599,9 +2568,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -2713,7 +2680,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -2771,9 +2737,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2858,7 +2822,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           <tbody>
                             <tr
                               class="c25"
-                              style="cursor: pointer;"
                             >
                               <td
                                 style="position: relative;"
@@ -2929,9 +2892,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -3002,7 +2963,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </tr>
                             <tr
                               class="c25"
-                              style="cursor: pointer;"
                             >
                               <td
                                 style="position: relative;"
@@ -3073,9 +3033,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -3146,7 +3104,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </tr>
                             <tr
                               class="c25"
-                              style="cursor: pointer;"
                             >
                               <td
                                 style="position: relative;"
@@ -3217,9 +3174,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -3331,7 +3286,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 </tr>
                 <tr
                   class="c25"
-                  style="cursor: pointer;"
                 >
                   <td
                     style="position: relative;"
@@ -3383,9 +3337,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"

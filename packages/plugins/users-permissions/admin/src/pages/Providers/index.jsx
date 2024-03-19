@@ -16,7 +16,7 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import { onRowClick, stopPropagation, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import { Page, useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
@@ -192,10 +192,7 @@ export const ProvidersPage = () => {
               {providers.map((provider) => (
                 <Tr
                   key={provider.name}
-                  {...onRowClick({
-                    fn: () => handleClickEdit(provider),
-                    condition: canUpdate,
-                  })}
+                  onClick={() => (canUpdate ? handleClickEdit(provider) : undefined)}
                 >
                   <Td width="45%">
                     <Typography fontWeight="semiBold" textColor="neutral800">
@@ -218,7 +215,7 @@ export const ProvidersPage = () => {
                           })}
                     </Typography>
                   </Td>
-                  <Td {...stopPropagation}>
+                  <Td onClick={(e) => e.stopPropagation()}>
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
