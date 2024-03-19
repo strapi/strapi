@@ -11,7 +11,7 @@ import { Header } from '../Header';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
+  useQueryParams: jest.fn(() => [{ rawQuery: '', query: { folder: 2 } }, jest.fn()]),
 }));
 
 const FIXTURE_FOLDER = {

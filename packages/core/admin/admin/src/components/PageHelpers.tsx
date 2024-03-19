@@ -13,7 +13,6 @@ import {
 import { useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
 
 import { Permission } from '../../../shared/contracts/shared';
 import { useNotification } from '../features/Notifications';
@@ -28,17 +27,6 @@ interface PageMainProps extends MainProps {
 }
 
 const PageMain = ({ children, ...restProps }: PageMainProps) => {
-  const { pathname } = useLocation();
-
-  React.useEffect(() => {
-    const mainElement: HTMLElement | null = document.querySelector('main');
-
-    if (mainElement) {
-      mainElement.focus();
-      window.scrollTo({ top: 0 });
-    }
-  }, [pathname]);
-
   return <Main {...restProps}>{children}</Main>;
 };
 

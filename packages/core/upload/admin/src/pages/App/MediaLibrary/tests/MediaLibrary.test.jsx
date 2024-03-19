@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { usePersistentState, useQueryParams, useSelectionState } from '@strapi/helper-plugin';
+import { usePersistentState, useSelectionState } from '@strapi/helper-plugin';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -56,6 +57,11 @@ const FIXTURE_ASSETS = [
   },
 ];
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useQueryParams: jest.fn().mockReturnValue([{ rawQuery: '', query: {} }, jest.fn()]),
+}));
+
 jest.mock('../../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../../hooks/useFolders');
 jest.mock('../../../../hooks/useFolder');
@@ -98,13 +104,6 @@ const renderML = () => ({
 describe('Media library homepage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('navigation', () => {
-    it('focuses the title when mounting the component', () => {
-      const { getByRole } = renderML();
-      expect(getByRole('main')).toHaveFocus();
-    });
   });
 
   describe('loading state', () => {
