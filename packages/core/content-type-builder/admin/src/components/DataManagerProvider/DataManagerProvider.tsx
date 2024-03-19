@@ -42,6 +42,7 @@ import {
   REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
   SET_MODIFIED_DATA,
   UPDATE_SCHEMA,
+  UPDATE_INITIAL_STATE,
 } from './constants';
 import { makeSelectDataManagerProvider } from './selectors';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
@@ -552,7 +553,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await serverRestartWatcher(true);
 
       // Unlock the app
-      await unlockAppWithAutoreload?.();
+      unlockAppWithAutoreload?.();
 
       if (
         isCreating &&
@@ -575,6 +576,10 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       } else {
         trackUsage('didSaveComponent');
       }
+
+      // refetch and update initial state after the data has been saved
+      await getDataRef.current();
+      dispatch({ type: UPDATE_INITIAL_STATE });
 
       // Update the app's permissions
       await updatePermissions();
