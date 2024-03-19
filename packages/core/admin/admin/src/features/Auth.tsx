@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { auth } from '@strapi/helper-plugin';
 import { useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
@@ -119,13 +118,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
     }
   }, [renewTokenMutation, clearStorage, navigate]);
 
-  /**
-   * Backwards compat – store the user info in the session storage
-   *
-   * TODO: V5 remove this and only explicitly set it when required.
-   */
   React.useEffect(() => {
-    auth.setUserInfo(user, true);
     if (user) {
       if (user.preferedLanguage) {
         dispatch(setLocale(user.preferedLanguage));
@@ -133,13 +126,10 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
     }
   }, [dispatch, user]);
 
-  /**
-   * Backwards compat – store the token in the session storage
-   *
-   * TODO: V5 remove this and only explicitly set it when required.
-   */
   React.useEffect(() => {
-    auth.setToken(token, false);
+    if (token) {
+      storeToken(token, false);
+    }
   }, [token]);
 
   React.useEffect(() => {
@@ -171,7 +161,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
       if ('data' in res) {
         const { token } = res.data;
 
-        auth.setToken(token, rememberMe);
+        storeToken(token, rememberMe);
         setToken(token);
       }
 
@@ -246,5 +236,12 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
   );
 };
 
-export { AuthProvider, useAuth };
+const storeToken = (token: string, sessionStorage = true) => {
+  if (sessionStorage) {
+    return window.sessionStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+  }
+  return window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+};
+
+export { AuthProvider, useAuth, STORAGE_KEYS };
 export type { AuthContextValue, Permission };

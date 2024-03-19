@@ -384,7 +384,7 @@ export interface UseTrackingReturn {
  *
  * @example
  * ```tsx
- * import { useTracking } from '@strapi/helper-plugin';
+ * import { useTracking } from '@strapi/strapi/admin';
  *
  * const MyComponent = () => {
  *  const { trackUsage } = useTracking();

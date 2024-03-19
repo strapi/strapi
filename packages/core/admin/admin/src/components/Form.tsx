@@ -11,12 +11,11 @@ import {
   useCallbackRef,
   useComposedRefs,
 } from '@strapi/design-system';
-import { TranslationMessage } from '@strapi/helper-plugin';
 import { ExclamationMarkCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
 import isEqual from 'lodash/isEqual';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
 import { getIn, setIn } from '../utils/objects';
@@ -34,6 +33,10 @@ import type * as Yup from 'yup';
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
 type InputProps = InputPropsImpl | StringProps | EnumerationProps;
+
+interface TranslationMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
+}
 
 interface FormValues {
   [field: string]: any;

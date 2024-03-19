@@ -3,12 +3,6 @@ import { rest } from 'msw';
 
 import { ProfilePage } from '../ProfilePage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useFocusWhenNavigate: jest.fn(),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
-}));
-
 describe('Profile page', () => {
   const originalIsEnabled = window.strapi.features.isEnabled;
   const originalIsEE = window.strapi.isEE;

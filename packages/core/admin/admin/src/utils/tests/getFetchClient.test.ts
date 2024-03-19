@@ -1,22 +1,10 @@
-import { auth } from '@strapi/helper-plugin';
 import { server } from '@tests/utils';
 import { AxiosError } from 'axios';
 import { rest } from 'msw';
 
 import { getFetchClient, instance } from '../getFetchClient';
 
-const token = 'coolToken';
-const mockClearAppStorage = jest.fn().mockImplementation();
-
-auth.getToken = jest.fn().mockReturnValue(token);
-auth.clearAppStorage = mockClearAppStorage;
-
 describe('fetchClient', () => {
-  it('should add the authorization token in each request', async () => {
-    const response = await instance.get('/test-fetch-client');
-    expect(response.config.headers.Authorization).toBe(`Bearer ${token}`);
-  });
-
   it('should contain a paramsSerializer that can serialize a params object to a string', async () => {
     const mockParams = {
       page: '1',
@@ -61,7 +49,6 @@ describe('fetchClient', () => {
     try {
       await instance.get('http://realURL/test-fetch-client-error');
     } catch (error) {
-      expect(mockClearAppStorage).toHaveBeenCalled();
       expect(mockReload).toHaveBeenCalled();
     }
 

@@ -6985,7 +6985,6 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-alpha.2"
     "@strapi/admin-test-utils": "npm:5.0.0-alpha.2"
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "workspace:*"
     "@strapi/types": "workspace:*"
@@ -7371,7 +7370,6 @@ __metadata:
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/strapi": "npm:5.0.0-alpha.2"
     "@types/react": "npm:18.2.66"
@@ -7399,7 +7397,6 @@ __metadata:
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/strapi": "npm:5.0.0-alpha.2"
     "@testing-library/react": "npm:14.0.0"
@@ -7449,7 +7446,6 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-alpha.2"
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/generators": "npm:5.0.0-alpha.2"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.2"
     "@strapi/types": "npm:5.0.0-alpha.2"
@@ -7489,7 +7485,6 @@ __metadata:
   dependencies:
     "@apidevtools/swagger-parser": "npm:^10.1.0"
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.2"
     "@strapi/strapi": "npm:5.0.0-alpha.2"
@@ -7530,7 +7525,6 @@ __metadata:
   dependencies:
     "@strapi/admin": "npm:5.0.0-alpha.2"
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.2"
     "@strapi/provider-email-sendmail": "npm:5.0.0-alpha.2"
@@ -7571,7 +7565,6 @@ __metadata:
     "@graphql-tools/utils": "npm:^8.13.1"
     "@koa/cors": "npm:3.4.3"
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/strapi": "npm:5.0.0-alpha.2"
     "@strapi/types": "npm:5.0.0-alpha.2"
@@ -7614,7 +7607,6 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-alpha.2"
     "@strapi/admin-test-utils": "npm:5.0.0-alpha.2"
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.2"
     "@strapi/types": "npm:5.0.0-alpha.2"
@@ -7648,7 +7640,6 @@ __metadata:
   dependencies:
     "@sentry/node": "npm:6.19.7"
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.2"
     "@strapi/strapi": "npm:5.0.0-alpha.2"
@@ -7719,7 +7710,6 @@ __metadata:
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
     "@strapi/design-system": "npm:1.16.0"
-    "@strapi/helper-plugin": "npm:5.0.0-alpha.2"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.2"
     "@strapi/strapi": "npm:5.0.0-alpha.2"

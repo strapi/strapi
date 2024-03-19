@@ -5,5 +5,4 @@ module.exports = {
   moduleNameMapper: {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
-  setupFilesAfterEnv: ['./tests/setup.ts'],
 };

@@ -3,11 +3,6 @@ import { render as renderRTL } from '@tests/utils';
 import { Form } from '../../../../../../../components/Form';
 import { Wysiwyg, WysiwygProps } from '../Field';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useLibrary: () => ({ components: {} }),
-}));
-
 /**
  * TODO: these should be in the JEST setup.
  */

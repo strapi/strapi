@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { auth } from '@strapi/helper-plugin';
 import { produce } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -80,7 +79,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       }
     }
 
-    auth.set(null, GUIDED_TOUR_KEYS.GUIDED_TOUR_CURRENT_STEP, true);
+    window.localStorage.setItem(GUIDED_TOUR_CURRENT_STEP, JSON.stringify(null));
 
     return dispatch({
       type: 'SET_CURRENT_STEP',
@@ -131,7 +130,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
   };
 
   const setSkipped = (value: SetSkippedAction['value']) => {
-    auth.set(value, GUIDED_TOUR_KEYS.GUIDED_TOUR_SKIPPED, true);
+    window.localStorage.setItem(GUIDED_TOUR_SKIPPED, JSON.stringify(value));
 
     dispatch({
       type: 'SET_SKIPPED',
@@ -240,9 +239,15 @@ const reducer: React.Reducer<State, Action> = (state: State = initialState, acti
 
 const initialiseState = (initialState: State) => {
   const copyInitialState = { ...initialState };
-  const guidedTourLocaleStorage = auth.get(GUIDED_TOUR_KEYS.GUIDED_TOUR_COMPLETED_STEPS);
-  const currentStepLocaleStorage = auth.get(GUIDED_TOUR_KEYS.GUIDED_TOUR_CURRENT_STEP);
-  const skippedLocaleStorage = auth.get(GUIDED_TOUR_KEYS.GUIDED_TOUR_SKIPPED);
+  const guidedTourLocaleStorage = JSON.parse(
+    window.localStorage.getItem(GUIDED_TOUR_COMPLETED_STEPS) ?? '[]'
+  );
+  const currentStepLocaleStorage = JSON.parse(
+    window.localStorage.getItem(GUIDED_TOUR_CURRENT_STEP) ?? 'null'
+  );
+  const skippedLocaleStorage = JSON.parse(
+    window.localStorage.getItem(GUIDED_TOUR_SKIPPED) ?? 'false'
+  );
 
   if (Array.isArray(guidedTourLocaleStorage)) {
     guidedTourLocaleStorage.forEach((step) => {
@@ -258,7 +263,7 @@ const initialiseState = (initialState: State) => {
 
     addCompletedStep(currentStepLocaleStorage as Step);
 
-    auth.set(null, GUIDED_TOUR_KEYS.GUIDED_TOUR_CURRENT_STEP, true);
+    window.localStorage.setItem(GUIDED_TOUR_CURRENT_STEP, JSON.stringify(null));
   }
 
   if (skippedLocaleStorage !== null) {
@@ -272,7 +277,7 @@ const initialiseState = (initialState: State) => {
  * @description Add a completed step to the local storage if it does not already exist.
  */
 const addCompletedStep = (completedStep: Step) => {
-  const currentSteps = auth.get(GUIDED_TOUR_KEYS.GUIDED_TOUR_COMPLETED_STEPS) ?? [];
+  const currentSteps = JSON.parse(window.localStorage.getItem(GUIDED_TOUR_COMPLETED_STEPS) ?? '[]');
 
   if (!Array.isArray(currentSteps)) {
     return;
@@ -284,7 +289,10 @@ const addCompletedStep = (completedStep: Step) => {
     return;
   }
 
-  auth.set([...currentSteps, completedStep], GUIDED_TOUR_KEYS.GUIDED_TOUR_COMPLETED_STEPS, true);
+  window.localStorage.setItem(
+    GUIDED_TOUR_COMPLETED_STEPS,
+    JSON.stringify([...currentSteps, completedStep])
+  );
 };
 
 export { GuidedTourProvider, useGuidedTour, GuidedTourContextValue, GUIDED_TOUR_KEYS };

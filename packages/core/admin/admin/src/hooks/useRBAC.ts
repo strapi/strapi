@@ -11,7 +11,7 @@ type AllowedActions = Record<string, boolean>;
 const useRBAC = (
   permissionsToCheck: Record<string, Permission[]> = {},
   passedPermissions?: Permission[]
-): { allowedActions: AllowedActions; isLoading: boolean; error: unknown } => {
+): { allowedActions: AllowedActions; isLoading: boolean; error?: unknown } => {
   const userPermissions = useAuth('useRBAC', (state) => state.permissions);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<unknown>();

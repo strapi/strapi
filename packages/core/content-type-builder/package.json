@@ -60,7 +60,6 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "1.16.0",
     "@strapi/generators": "5.0.0-alpha.2",
-    "@strapi/helper-plugin": "5.0.0-alpha.2",
     "@strapi/icons": "1.16.0",
     "@strapi/utils": "5.0.0-alpha.2",
     "date-fns": "2.30.0",

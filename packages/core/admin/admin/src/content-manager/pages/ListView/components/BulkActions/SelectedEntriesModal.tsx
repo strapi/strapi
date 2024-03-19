@@ -14,7 +14,6 @@ import {
   Tooltip,
   Loader,
 } from '@strapi/design-system';
-import { TranslationMessage } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -478,7 +477,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
       const validate = createYupSchema(schema.attributes, components);
-      const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
+      const validationErrors: Record<Entity.ID, Record<string, MessageDescriptor>> = {};
       const rows = data.map((entry) => {
         try {
           validate.validateSync(entry, { abortEarly: false });

@@ -74,8 +74,6 @@ jest.mock('../../../../hooks/useSelectionState', () => ({
 }));
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(),
-  useRBACProvider: jest.fn().mockReturnValue({ allPermissions: [] }),
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 const renderML = () => ({

@@ -53,7 +53,6 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.16.0",
-    "@strapi/helper-plugin": "5.0.0-alpha.2",
     "@strapi/icons": "1.16.0",
     "@strapi/provider-email-sendmail": "5.0.0-alpha.2",
     "@strapi/utils": "5.0.0-alpha.2",

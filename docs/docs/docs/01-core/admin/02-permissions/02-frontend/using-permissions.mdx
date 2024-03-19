@@ -12,7 +12,7 @@ on when is best to use them. It's advised that you've read [how they work](../01
 ## Components
 
 There are two different wrapper components available to use. They are very similar but have different use cases. They are both
-available in the `@strapi/helper-plugin`.
+available in the `@strapi/strapi/admin`.
 
 ### CheckPagePermissions
 
@@ -69,7 +69,7 @@ If the hook is unmouted before the fetch request completes, the request will be 
 In the below example, we're checking if a user can "create" a post from the content-manager list view. If they can't, the button is `disabled`.
 
 ```tsx
-import { useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/strapi/admin';
 
 const MyComponent = () => {
   const { isLoading, allowedActions } = useRBAC({
@@ -146,7 +146,7 @@ While it is required to pass three arguments, only the middle argument is curren
 :::
 
 ```tsx
-import { useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/strapi/admin';
 import { useSyncRBAC } from 'path/to/conent-manager/hooks';
 
 const MyComponent = () => {
