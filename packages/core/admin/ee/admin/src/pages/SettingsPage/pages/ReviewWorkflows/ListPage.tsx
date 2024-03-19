@@ -15,7 +15,7 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import { onRowClick, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -290,17 +290,15 @@ export const ReviewWorkflowsListView = () => {
             <Tbody>
               {workflows?.map((workflow) => (
                 <Tr
-                  {...onRowClick({
-                    fn(event) {
-                      const el = event.target as HTMLElement;
-                      // Abort row onClick event when the user click on the delete button
-                      if (el.nodeName === 'BUTTON') {
-                        return;
-                      }
+                  onClick={(event) => {
+                    const el = event.target as HTMLElement;
+                    // Abort row onClick event when the user click on the delete button
+                    if (el.nodeName === 'BUTTON') {
+                      return;
+                    }
 
-                      navigate(`/settings/review-workflows/${workflow.id}`);
-                    },
-                  })}
+                    navigate(`/settings/review-workflows/${workflow.id}`);
+                  }}
                   key={`workflow-${workflow.id}`}
                 >
                   <Td width={`${250 / 16}rem`}>

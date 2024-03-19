@@ -1,7 +1,6 @@
 import { memo } from 'react';
 
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
-import { onRowClick } from '@strapi/helper-plugin';
 import { Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
@@ -103,10 +102,7 @@ export const ListRow = memo(
     return (
       <BoxWrapper
         as="tr"
-        {...onRowClick({
-          fn: handleClick,
-          condition: isInDevelopmentMode && configurable && !isMorph,
-        })}
+        onClick={isInDevelopmentMode && configurable && !isMorph ? handleClick : undefined}
       >
         <td style={{ position: 'relative' }}>
           {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}

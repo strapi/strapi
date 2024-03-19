@@ -466,7 +466,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                     <tr
                       aria-rowindex="2"
                       class="c15"
-                      style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
@@ -547,7 +546,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                     <tr
                       aria-rowindex="3"
                       class="c15"
-                      style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
