@@ -29,9 +29,9 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { selectAdminPermissions } from '../../../../selectors';
-import { getFetchClient } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
@@ -57,8 +57,7 @@ const ListPage = () => {
 
   const navigate = useNavigate();
   const [{ roleToDelete }, dispatch] = React.useReducer(reducer, initialState);
-
-  const { post } = getFetchClient();
+  const { post } = useFetchClient();
 
   const handleDeleteData = async () => {
     try {

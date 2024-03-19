@@ -9,11 +9,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
-jest.mock('../../../utils/deleteRequest', () => ({
-  ...jest.requireActual('../../../utils/deleteRequest'),
-  deleteRequest: jest.fn().mockResolvedValue({ id: 1 }),
-}));
-
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
 

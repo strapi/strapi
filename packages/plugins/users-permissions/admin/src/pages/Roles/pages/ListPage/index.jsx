@@ -27,6 +27,7 @@ import {
   BackButton,
   useNotification,
   useQueryParams,
+  useFetchClient,
 } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -37,7 +38,6 @@ import { PERMISSIONS } from '../../../../constants';
 import { getTrad } from '../../../../utils';
 
 import TableBody from './components/TableBody';
-import { deleteData, fetchData } from './utils/api';
 
 export const RolesListPage = () => {
   const { trackUsage } = useTracking();
@@ -48,6 +48,7 @@ export const RolesListPage = () => {
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
+  const { del, get } = useFetchClient();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -84,6 +85,33 @@ export const RolesListPage = () => {
 
   const handleShowConfirmDelete = () => {
     setShowConfirmDelete(!showConfirmDelete);
+  };
+
+  const deleteData = async (id, formatMessage, toggleNotification) => {
+    try {
+      await del(`/users-permissions/roles/${id}`);
+    } catch (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+      });
+    }
+  };
+
+  const fetchData = async (toggleNotification, formatMessage, notifyStatus) => {
+    try {
+      const { data } = await get('/users-permissions/roles');
+      notifyStatus('The roles have loaded successfully');
+
+      return data;
+    } catch (err) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
+      });
+
+      throw new Error(err);
+    }
   };
 
   const emptyLayout = {
