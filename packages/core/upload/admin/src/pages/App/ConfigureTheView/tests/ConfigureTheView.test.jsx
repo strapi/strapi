@@ -47,7 +47,7 @@ describe('Upload - Configure', () => {
 
   describe('initial render', () => {
     it('renders and matches the snapshot', () => {
-      const { container, getByRole, getByText } = render();
+      const { container, getByText } = render();
 
       expect(getByText('Configure the view - Media Library')).toBeInTheDocument();
 

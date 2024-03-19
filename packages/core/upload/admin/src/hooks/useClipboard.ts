@@ -5,7 +5,9 @@ const useClipboard = () => {
     try {
       // only strings and numbers casted to strings can be copied to clipboard
       if (typeof value !== 'string' && typeof value !== 'number') {
-        throw new Error(`Cannot copy typeof ${typeof value} to clipboard, must be a string`);
+        throw new Error(
+          `Cannot copy typeof ${typeof value} to clipboard, must be a string or number`
+        );
       }
       // empty strings are also considered invalid
       else if (value === '') {
