@@ -213,6 +213,23 @@ module.exports = config
 
               await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
+              // Store the filesystem state with git so it can be reset between tests
+              // TODO: if we have a large test test suite, it might be worth it to run a `strapi start` and then shutdown here to generate documentation and types only once and save unneccessary server restarts from those files being cleared every time
+              console.log('Initializing git');
+              await execa('git', ['init'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+              // we need to use -A to track even hidden files like .env; remember we're only using git as a file state manager
+              await execa('git', ['add', '-A', '.'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+              await execa('git', ['commit', '-m', 'initial commit'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
 
               await execa(
@@ -224,6 +241,7 @@ module.exports = config
                   env: {
                     PORT: port,
                     HOST: '127.0.0.1',
+                    TEST_APP_PATH: testAppPath,
                     STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
                   },
                 }

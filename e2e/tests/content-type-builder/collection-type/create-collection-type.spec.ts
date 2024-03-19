@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath, resetFiles } from '../../../scripts/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 
 test.describe('Create collection type', () => {
   test.beforeEach(async ({ page }) => {
+    await resetFiles();
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
