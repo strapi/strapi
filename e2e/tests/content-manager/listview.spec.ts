@@ -30,7 +30,7 @@ test.describe('List View', () => {
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
       const publishedItems = page.getByRole('gridcell', { name: 'published' });
       expect(publishedItems).toHaveCount(2);
-      const checkbox = await page.$('input[aria-label="Select all entries"]');
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
 
       // Select all entries to unpublish
       await checkbox.check();
@@ -38,9 +38,10 @@ test.describe('List View', () => {
       await unpublish.click();
 
       // Wait for the confirmation dialog to appear
-      const dialog = await page.$('[role="dialog"]');
       await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
-      const unpublishButton = await dialog.$('button:has-text("Unpublish")');
+      const unpublishButton = page
+        .getByLabel('Confirmation')
+        .getByRole('button', { name: 'Unpublish' });
       await unpublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
@@ -49,13 +50,12 @@ test.describe('List View', () => {
     await test.step('bulk publish', async () => {
       // Select all entries to publish
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const checkbox1 = await page.$('input[aria-label="Select all entries"]');
-      await checkbox1.check();
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      await checkbox.check();
       const publish = page.getByRole('button', { name: 'Publish' });
       await publish.click();
 
       // Wait for the selected entries modal to appear
-      const publishModal = await page.$('[role="dialog"]');
       await page.waitForSelector(
         'text=0 entries already published. 2 entries ready to publish. 0 entries waiting for action'
       );
@@ -76,14 +76,18 @@ test.describe('List View', () => {
         'text=0 entries already published. 0 entries ready to publish. 0 entries waiting for action'
       );
 
-      const publishButton = await publishModal.$('button:has-text("Publish")');
+      const publishButton = page
+        .getByLabel('Publish entries')
+        .getByRole('button', { name: 'Publish' });
       expect(await publishButton.isDisabled()).toBeTruthy();
 
       // Select all entries to publish
       await checkboxEntry1.check();
       await checkboxEntry2.check();
 
-      const publishModalButton = await publishModal.$('button:has-text("Publish")');
+      const publishModalButton = page
+        .getByLabel('Publish entries')
+        .getByRole('button', { name: 'Publish' });
       await publishModalButton.click();
 
       // Wait for the confirmation dialog to appear
@@ -100,15 +104,16 @@ test.describe('List View', () => {
     await test.step('bulk delete', async () => {
       // Select all entries to delete
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const checkbox1 = await page.$('input[aria-label="Select all entries"]');
-      await checkbox1.check();
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      await checkbox.check();
       const deleteButton = page.getByRole('button', { name: 'Delete', exact: true });
       await deleteButton.click();
 
       // Wait for the selected entries modal to appear
-      const modal = await page.$('[role="dialog"]');
       await page.waitForSelector('text=Are you sure you want to delete these entries?');
-      const confirmDeleteButton = await modal.$('button:has-text("Confirm")');
+      const confirmDeleteButton = page
+        .getByLabel('Confirmation')
+        .getByRole('button', { name: 'Confirm' });
       await confirmDeleteButton.click();
 
       await page.waitForSelector('text=No content found');
