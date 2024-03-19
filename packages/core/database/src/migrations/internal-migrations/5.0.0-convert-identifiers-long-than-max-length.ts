@@ -1,6 +1,5 @@
 import type { Knex } from 'knex';
 import createDebug from 'debug';
-import fs from 'node:fs';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import { type Database, type MetadataOptions } from '../..';
