@@ -9,7 +9,6 @@ import {
   isPluginProject,
   projectFactory,
 } from '../project';
-import { IAppProject, IPluginProject } from '../types';
 
 jest.mock('fs', () => fs);
 
@@ -115,7 +114,7 @@ describe('Project', () => {
     test('Succeed for valid AppProject', () => {
       vol.fromNestedJSON(appVolume, defaultCWD);
 
-      const project: IAppProject | IPluginProject = projectFactory(defaultCWD);
+      const project = projectFactory(defaultCWD);
 
       assertAppProject(project);
 
