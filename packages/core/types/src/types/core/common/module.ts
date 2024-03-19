@@ -1,3 +1,4 @@
+import type { PropertyPath } from 'lodash';
 import type { Common, Schema } from '..';
 import type { Strapi } from '../../..';
 
@@ -5,7 +6,10 @@ export interface Module {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  config<TDefault = unknown, TResult = unknown>(path: string, defaultValue?: TDefault): TResult;
+  config<TDefault = unknown, TResult = unknown>(
+    path: PropertyPath,
+    defaultValue?: TDefault
+  ): TResult;
   routes: Record<string, Common.Router>;
   controllers: Record<string, Common.Controller>;
   services: Record<string, Common.Service>;
