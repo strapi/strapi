@@ -59,13 +59,39 @@ test.describe('List View', () => {
       await page.waitForSelector(
         'text=0 entries already published. 2 entries ready to publish. 0 entries waiting for action'
       );
+      // All entries should be selected
+      const checkboxEntry1 = page
+        .getByLabel('Publish entries')
+        .getByRole('checkbox', { name: 'Select 1' });
+      const checkboxEntry2 = page
+        .getByLabel('Publish entries')
+        .getByRole('checkbox', { name: 'Select 2' });
+      await expect(checkboxEntry1).toBeChecked();
+      await expect(checkboxEntry2).toBeChecked();
+
+      await checkboxEntry1.uncheck();
+      await checkboxEntry2.uncheck();
+
+      await page.waitForSelector(
+        'text=0 entries already published. 0 entries ready to publish. 0 entries waiting for action'
+      );
+
       const publishButton = await publishModal.$('button:has-text("Publish")');
-      await publishButton.click();
+      expect(await publishButton.isDisabled()).toBeTruthy();
+
+      // Select all entries to publish
+      await checkboxEntry1.check();
+      await checkboxEntry2.check();
+
+      const publishModalButton = await publishModal.$('button:has-text("Publish")');
+      await publishModalButton.click();
 
       // Wait for the confirmation dialog to appear
-      const confirmDialog = await page.$$('[role="dialog"]');
       await page.waitForSelector('text=Are you sure you want to publish these entries?');
-      const confirmPublishButton = await confirmDialog[1].$('button:has-text("Publish")');
+
+      const confirmPublishButton = page
+        .getByLabel('Confirmation')
+        .getByRole('button', { name: 'Publish' });
       await confirmPublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
