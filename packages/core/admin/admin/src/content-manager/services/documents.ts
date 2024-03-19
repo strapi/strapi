@@ -59,7 +59,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (result, _error, { model }) => [
+        { type: 'Document', id: `${model}_LIST` },
+        {
+          type: 'Relations',
+          id: `${model}_${result?.data.documentId}`,
+        },
+      ],
     }),
     deleteDocument: builder.mutation<
       Contracts.CollectionTypes.Delete.Response,
@@ -121,6 +127,10 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           { type: 'Document', id: `${model}_LIST` },
+          {
+            type: 'Relations',
+            id: `${model}_${documentId}`,
+          },
         ];
       },
     }),
@@ -268,6 +278,10 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           { type: 'Document', id: `${model}_LIST` },
+          {
+            type: 'Relations',
+            id: `${model}_${documentId}`,
+          },
         ];
       },
     }),
@@ -306,6 +320,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           {
             type: 'Document',
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
+          {
+            type: 'Relations',
+            id: `${model}_${documentId}`,
           },
         ];
       },

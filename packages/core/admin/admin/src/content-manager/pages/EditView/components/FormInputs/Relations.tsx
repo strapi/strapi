@@ -217,7 +217,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       const [lastItemInList] = relations.slice(-1);
 
       const item = {
-        ...relation,
+        id: relation.id,
         /**
          * If there's a last item, that's the first key we use to generate out next one.
          */
@@ -441,7 +441,7 @@ const RelationsInput = ({
       return;
     }
 
-    const relation = options.find((opt) => opt.documentId === relationId);
+    const relation = options.find((opt) => opt.id.toString() === relationId);
 
     if (!relation) {
       // This is very unlikely to happen, but it ensures we don't have any data for.
@@ -528,7 +528,7 @@ const RelationsInput = ({
         const textValue = getRelationLabel(opt, mainField);
 
         return (
-          <ComboboxOption key={opt.documentId} value={opt.documentId} textValue={textValue}>
+          <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
             <Flex gap={2} justifyContent="space-between">
               <Typography ellipsis>{textValue}</Typography>
               {opt.status ? <DocumentStatus status={opt.status} /> : null}
