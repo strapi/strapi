@@ -216,16 +216,21 @@ module.exports = config
               // Store the filesystem state with git so it can be reset between tests
               // TODO: if we have a large test test suite, it might be worth it to run a `strapi start` and then shutdown here to generate documentation and types only once and save unneccessary server restarts from those files being cleared every time
               console.log('Initializing git');
-              await execa('git', ['init'], {
+
+              const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
+
+              await execa('git', [...gitUser, 'init'], {
                 stdio: 'inherit',
                 cwd: testAppPath,
               });
+
               // we need to use -A to track even hidden files like .env; remember we're only using git as a file state manager
-              await execa('git', ['add', '-A', '.'], {
+              await execa('git', [...gitUser, 'add', '-A', '.'], {
                 stdio: 'inherit',
                 cwd: testAppPath,
               });
-              await execa('git', ['commit', '-m', 'initial commit'], {
+
+              await execa('git', [...gitUser, 'commit', '-m', 'initial commit'], {
                 stdio: 'inherit',
                 cwd: testAppPath,
               });

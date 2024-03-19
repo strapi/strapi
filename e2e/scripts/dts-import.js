@@ -43,14 +43,16 @@ async function pollHealthCheck(interval = 1000, timeout = 30000) {
   console.error('Timeout reached, service did not become available in time.');
 }
 
+const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
+
 export const resetFiles = async () => {
   if (process.env.TEST_APP_PATH) {
     console.log('Restoring filesystem');
-    await execa('git', ['reset', '--hard'], {
+    await execa('git', [...gitUser, 'reset', '--hard'], {
       stdio: 'inherit',
       cwd: process.env.TEST_APP_PATH,
     });
-    const dryRun = await execa('git', ['clean', '-fd'], {
+    const dryRun = await execa('git', [...gitUser, 'clean', '-fd'], {
       stdio: 'inherit',
       cwd: process.env.TEST_APP_PATH,
     });
