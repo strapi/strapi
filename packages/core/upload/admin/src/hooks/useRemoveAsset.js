@@ -1,16 +1,16 @@
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
-import { deleteRequest } from '../utils/deleteRequest';
 
 export const useRemoveAsset = (onSuccess) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
+  const { del } = useFetchClient();
 
-  const mutation = useMutation((assetId) => deleteRequest('files', assetId), {
+  const mutation = useMutation((assetId) => del(`/upload/files/${assetId}`), {
     onSuccess() {
       queryClient.refetchQueries([pluginId, 'assets'], { active: true });
       queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });

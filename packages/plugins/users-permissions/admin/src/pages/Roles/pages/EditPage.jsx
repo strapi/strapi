@@ -12,9 +12,14 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
-import { useFetchClient } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page, BackButton, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
+import {
+  Page,
+  BackButton,
+  useAPIErrorHandler,
+  useNotification,
+  useFetchClient,
+} from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

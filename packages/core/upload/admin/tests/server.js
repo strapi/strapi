@@ -42,6 +42,13 @@ export const server = setupServer(
         })
       );
     }),
+    rest.delete('/upload/:type/:id', async (req, res, ctx) => {
+      return res(
+        ctx.json({
+          id: 1,
+        })
+      );
+    }),
     rest.get('/upload/folders', async (req, res, ctx) => {
       const query = qs.parse(req.url.search.slice(1));
 

@@ -7,8 +7,9 @@ import {
   useStrapiApp,
   useNotification,
   useAppInfo,
+  useFetchClient,
 } from '@strapi/admin/strapi-admin';
-import { useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
+import { useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';

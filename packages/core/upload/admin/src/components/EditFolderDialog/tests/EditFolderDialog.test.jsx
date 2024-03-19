@@ -11,8 +11,8 @@ import { useEditFolder } from '../../../hooks/useEditFolder';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { EditFolderDialog } from '../EditFolderDialog';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     put: jest.fn().mockImplementation({}),
   }),

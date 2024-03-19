@@ -14,7 +14,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { getFetchClient, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import { produce } from 'immer';
@@ -29,6 +29,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -56,8 +57,7 @@ const ListPage = () => {
 
   const navigate = useNavigate();
   const [{ roleToDelete }, dispatch] = React.useReducer(reducer, initialState);
-
-  const { post } = getFetchClient();
+  const { post } = useFetchClient();
 
   const handleDeleteData = async () => {
     try {

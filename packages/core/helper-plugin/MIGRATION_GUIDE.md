@@ -53,7 +53,7 @@ const MyProtectedPage = () => {
 
 The behaviour has slightly changed, where previously no permissions would redirect you to the root of the page, now it will render the `NoPermissions` component.
 
-### ConfirmDialog
+### ConfirmDialog
 
 This component has been moved and refactored. It can imported from the `@strapi/strapi/admin` package:
 
@@ -570,6 +570,18 @@ import { useCollator } from '@strapi/helper-plugin';
 import { useCollator } from '@strapi/design-system';
 ```
 
+### useFetchClient
+
+This hook has been removed. You should import it from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { useFetchClient } from '@strapi/helper-plugin';
+
+// After
+import { useFetchClient } from '@strapi/strapi/admin';
+```
+
 ### useFieldHint
 
 This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
@@ -645,6 +657,18 @@ This util has been removed and not replaced. If you feel like you need this util
 ### getAPIInnerErrors
 
 This util has been removed and not replaced, use async / await with try / catch instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### getFetchClient
+
+This util has been removed. You should import it from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { getFetchClient } from '@strapi/helper-plugin';
+
+// After
+import { getFetchClient } from '@strapi/strapi/admin';
+```
 
 ### getFileExtension
 

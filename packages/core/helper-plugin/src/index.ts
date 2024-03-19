@@ -8,7 +8,6 @@ export * from './features/RBAC';
  * Hooks
  * -----------------------------------------------------------------------------------------------*/
 
-export * from './hooks/useFetchClient';
 export * from './hooks/usePersistentState';
 export * from './hooks/useRBAC';
 
@@ -17,7 +16,6 @@ export * from './hooks/useRBAC';
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './utils/auth';
-export * from './utils/getFetchClient';
 export * from './utils/hasPermissions';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/stopPropagation';

@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';

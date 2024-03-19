@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { ContentLayout, HeaderLayout, useNotifyAT } from '@strapi/design-system';
-import { useFetchClient, useRBAC } from '@strapi/helper-plugin';
-import { Page, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
+import { useRBAC } from '@strapi/helper-plugin';
+import { Page, useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';

@@ -1,5 +1,4 @@
-import { useNotification } from '@strapi/admin/strapi-admin';
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 

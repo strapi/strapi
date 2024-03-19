@@ -39,6 +39,7 @@ export { useInjectReducer } from './hooks/useInjectReducer';
 export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
 export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
 export { useQueryParams } from './hooks/useQueryParams';
+export { useFetchClient } from './hooks/useFetchClient';
 
 /**
  * Types
@@ -64,5 +65,6 @@ export type {
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
+export { getFetchClient } from './utils/getFetchClient';
 
 export * from './content-manager/exports';
