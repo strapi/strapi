@@ -24,13 +24,8 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
     const md = db.metadata;
-    console.log('metadata', fs.writeFileSync('md.json', JSON.stringify(Array.from(md), null, 2)));
 
     const maxLength = db.DEFAULT_MAX_IDENTIFIER_LENGTH;
-
-    if (maxLength === undefined) {
-      throw new Error('Could not retrieve maxLength from db configuration');
-    }
 
     const metadataOptions = {
       maxLength,
