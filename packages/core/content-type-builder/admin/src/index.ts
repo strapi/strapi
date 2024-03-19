@@ -1,5 +1,3 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
-
 import pluginPkg from '../../package.json';
 
 import { PluginIcon } from './components/PluginIcon';
@@ -7,6 +5,7 @@ import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { reducers } from './reducers';
 import { formsAPI } from './utils/formAPI';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pluginPkg.strapi.name;
 

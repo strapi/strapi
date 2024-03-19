@@ -52,7 +52,7 @@ const TYPESCRIPT: TemplateFile[] = [
   {
     name: 'admin/src/index.ts',
     contents: outdent`
-        import { prefixPluginTranslations } from '@strapi/helper-plugin';
+        import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
         import { PLUGIN_ID } from './pluginId';
         import { Initializer } from './components/Initializer';
         import { PluginIcon } from './components/PluginIcon';
@@ -175,7 +175,7 @@ const JAVASCRIPT: TemplateFile[] = [
   {
     name: 'admin/src/index.js',
     contents: outdent`
-            import { prefixPluginTranslations } from '@strapi/helper-plugin';
+            import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
             import { PLUGIN_ID } from './pluginId';
             import { Initializer } from './components/Initializer';
             import { PluginIcon } from './components/PluginIcon';
