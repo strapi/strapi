@@ -1,5 +1,3 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
-
 import pluginPkg from '../../package.json';
 
 import { MediaLibraryDialog } from './components/MediaLibraryDialog';
@@ -8,6 +6,7 @@ import PluginIcon from './components/PluginIcon';
 import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pluginPkg.strapi.name;
 
