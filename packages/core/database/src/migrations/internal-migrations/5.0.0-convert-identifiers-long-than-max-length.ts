@@ -1,6 +1,5 @@
 import type { Knex } from 'knex';
 import createDebug from 'debug';
-import fs from 'node:fs';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import { type Database, type MetadataOptions } from '../..';
@@ -24,7 +23,6 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
   name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
     const md = db.metadata;
-    console.log('metadata', fs.writeFileSync('md.json', JSON.stringify(Array.from(md), null, 2)));
 
     const maxLength = db.DEFAULT_MAX_IDENTIFIER_LENGTH;
 
