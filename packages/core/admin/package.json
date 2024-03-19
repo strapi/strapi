@@ -65,7 +65,6 @@
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.16.0",
-    "@strapi/helper-plugin": "5.0.0-alpha.2",
     "@strapi/icons": "1.16.0",
     "@strapi/permissions": "5.0.0-alpha.2",
     "@strapi/provider-audit-logs-local": "5.0.0-alpha.2",

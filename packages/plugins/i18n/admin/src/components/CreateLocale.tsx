@@ -33,6 +33,14 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Check, Plus } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import * as yup from 'yup';
+
+import { CreateLocale } from '../../../shared/contracts/locales';
+import {
+  useCreateLocaleMutation,
+  useGetDefaultLocalesQuery,
+  useGetLocalesQuery,
 } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';

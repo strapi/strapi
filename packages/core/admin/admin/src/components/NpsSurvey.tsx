@@ -13,7 +13,6 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -23,6 +22,7 @@ import * as yup from 'yup';
 import { useAppInfo } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 const FieldWrapper = styled(Field)`
   height: ${32 / 16}rem;

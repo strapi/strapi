@@ -26,6 +26,10 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+
+import { Locale, UpdateLocale } from '../../../shared/contracts/locales';
+import { useUpdateLocaleMutation } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
 

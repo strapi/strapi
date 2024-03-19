@@ -11,7 +11,6 @@ import {
   NavSections,
   NavUser,
 } from '@strapi/design-system/v2';
-import { usePersistentState } from '@strapi/helper-plugin';
 import { Exit, Write, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
@@ -21,6 +20,7 @@ import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { useTracking } from '../features/Tracking';
 import { Menu } from '../hooks/useMenu';
+import { usePersistentState } from '../hooks/usePersistentState';
 import { getDisplayName } from '../utils/users';
 
 const LinkUserWrapper = styled(Box)`
