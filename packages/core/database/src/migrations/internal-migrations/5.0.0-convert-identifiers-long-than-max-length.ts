@@ -26,10 +26,6 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
 
     const maxLength = db.DEFAULT_MAX_IDENTIFIER_LENGTH;
 
-    if (maxLength === undefined) {
-      throw new Error('Could not retrieve maxLength from db configuration');
-    }
-
     const metadataOptions = {
       maxLength,
     };
