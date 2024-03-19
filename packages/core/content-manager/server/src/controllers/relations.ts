@@ -84,7 +84,7 @@ const getPublishedAtClause = (status: string, uid: Common.UID.Schema) => {
   /**
    * If dp is disabled, ignore the filter
    */
-  if (!contentTypes.hasDraftAndPublish(model)) {
+  if (!model || !contentTypes.hasDraftAndPublish(model)) {
     return {};
   }
 
@@ -106,7 +106,7 @@ const validateLocale = (
 
   let validatedLocale = locale;
 
-  if (!isSourceLocalized) validatedLocale = undefined;
+  if (!targetModel || !isTargetLocalized) validatedLocale = undefined;
 
   return {
     locale: validatedLocale,
@@ -242,7 +242,6 @@ export default {
       'documentId',
     ]);
 
-    // TODO: Locale is always present, should we set it regardless?
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
     }
