@@ -12,7 +12,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick } from '@strapi/helper-plugin';
 import { Check, Pencil, Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -72,7 +72,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               })}
             </Typography>
           </Td>
-          <Td {...stopPropagation}>
+          <Td onClick={(e) => e.stopPropagation()}>
             <IconButton
               onClick={() => onEditClick('reset_password')}
               label={formatMessage({
@@ -103,7 +103,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               })}
             </Typography>
           </Td>
-          <Td {...stopPropagation}>
+          <Td onClick={(e) => e.stopPropagation()}>
             <IconButton
               onClick={() => onEditClick('email_confirmation')}
               label={formatMessage({

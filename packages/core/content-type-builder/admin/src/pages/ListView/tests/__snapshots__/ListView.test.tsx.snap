@@ -1267,9 +1267,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1395,9 +1393,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1522,9 +1518,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1649,9 +1643,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1774,9 +1766,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -1901,9 +1891,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2022,9 +2010,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2153,9 +2139,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2311,9 +2295,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -2455,9 +2437,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -2599,9 +2579,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -2771,9 +2749,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"
@@ -2929,9 +2905,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -3073,9 +3047,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -3217,9 +3189,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </td>
                               <td>
                                 <div
-                                  aria-hidden="true"
                                   class="c20"
-                                  role="button"
                                 >
                                   <div
                                     class="c32"
@@ -3383,9 +3353,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </td>
                   <td>
                     <div
-                      aria-hidden="true"
                       class="c20"
-                      role="button"
                     >
                       <div
                         class="c32"

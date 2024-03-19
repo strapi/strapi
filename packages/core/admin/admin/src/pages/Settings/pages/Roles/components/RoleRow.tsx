@@ -1,5 +1,5 @@
 import { Box, Flex, IconButton, IconButtonProps, Td, Tr, Typography } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
@@ -55,7 +55,7 @@ const RoleRow = ({
         <Typography textColor="neutral800">{usersCountText}</Typography>
       </Td>
       <Td>
-        <Flex justifyContent="flex-end" {...stopPropagation}>
+        <Flex justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
           {icons.map((icon, i) =>
             icon ? (
               <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>

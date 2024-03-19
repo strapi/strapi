@@ -508,9 +508,8 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="3"
-                        aria-hidden="true"
                         class="c17"
-                        role="button"
+                        role="gridcell"
                       >
                         <span>
                           <button
@@ -588,9 +587,8 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="3"
-                        aria-hidden="true"
                         class="c17"
-                        role="button"
+                        role="gridcell"
                       >
                         <span>
                           <button

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick } from '@strapi/helper-plugin';
 import { Eye, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -74,7 +74,7 @@ export const TableRows = ({
               );
             })}
 
-            <Td {...stopPropagation}>
+            <Td onClick={(e) => e.stopPropagation()}>
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
                   <IconButton

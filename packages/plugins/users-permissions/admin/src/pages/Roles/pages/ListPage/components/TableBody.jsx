@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -70,7 +70,7 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
             </Typography>
           </Td>
           <Td>
-            <Flex justifyContent="end" {...stopPropagation}>
+            <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
               {canUpdate ? (
                 <EditLink
                   to={role.id.toString()}

@@ -18,7 +18,6 @@ export * from './hooks/useRBAC';
 export * from './utils/auth';
 export * from './utils/hasPermissions';
 export * from './utils/prefixPluginTranslations';
-export * from './utils/stopPropagation';
 
 /* -------------------------------------------------------------------------------------------------
  * Types

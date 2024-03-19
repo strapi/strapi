@@ -16,7 +16,7 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import { onRowClick, stopPropagation, useRBAC } from '@strapi/helper-plugin';
+import { onRowClick, useRBAC } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
 import { Page, useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
@@ -218,7 +218,7 @@ export const ProvidersPage = () => {
                           })}
                     </Typography>
                   </Td>
-                  <Td {...stopPropagation}>
+                  <Td onClick={(e) => e.stopPropagation()}>
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
