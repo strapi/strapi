@@ -3,7 +3,7 @@ import createDebug from 'debug';
 import fs from 'node:fs';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
-import type { Database, MetadataOptions } from '../..';
+import { type Database, type MetadataOptions } from '../..';
 import { getUnshortenedName } from '../../utils/identifiers/shortener';
 
 const debug = createDebug('strapi::database::migration');
@@ -26,10 +26,7 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
     const md = db.metadata;
     console.log('metadata', fs.writeFileSync('md.json', JSON.stringify(Array.from(md), null, 2)));
 
-    const maxLength = db.config?.settings?.maxIdentifierLength;
-    if (maxLength === 0) {
-      return;
-    }
+    const maxLength = db.DEFAULT_MAX_IDENTIFIER_LENGTH;
 
     if (maxLength === undefined) {
       throw new Error('Could not retrieve maxLength from db configuration');

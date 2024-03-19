@@ -5,7 +5,7 @@ import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
-import { Database, constants as dbConstants } from '@strapi/database';
+import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
 import type {
   Strapi as StrapiI,
@@ -241,7 +241,6 @@ class Strapi extends Container implements StrapiI {
           migrations: {
             dir: path.join(this.dirs.app.root, 'database/migrations'),
           },
-          maxIdentifierLength: dbConstants.DEFAULT_MAX_IDENTIFIER_LENGTH,
         },
       })
     );
@@ -513,7 +512,7 @@ class Strapi extends Container implements StrapiI {
     const models = [
       ...utils.transformContentTypesToModels(
         [...Object.values(this.contentTypes), ...Object.values(this.components)],
-        { maxLength: dbConstants.DEFAULT_MAX_IDENTIFIER_LENGTH }
+        { maxLength: this.db.DEFAULT_MAX_IDENTIFIER_LENGTH }
       ),
       ...this.get('models').get(),
     ];

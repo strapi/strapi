@@ -15,13 +15,9 @@ import * as identifiers from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
-// The max length for a database identifier
-export const DEFAULT_MAX_IDENTIFIER_LENGTH = 55;
-
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
-  maxIdentifierLength?: number;
   migrations: {
     dir: string;
   };
@@ -62,6 +58,8 @@ class Database {
 
   entityManager: EntityManager;
 
+  readonly DEFAULT_MAX_IDENTIFIER_LENGTH = 55 as const;
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -76,7 +74,7 @@ class Database {
     this.dialect.configure();
 
     const metadataOptions = {
-      maxLength: config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
+      maxLength: this.DEFAULT_MAX_IDENTIFIER_LENGTH,
     };
     this.metadata = createMetadata([], metadataOptions);
 
@@ -94,7 +92,7 @@ class Database {
 
   async init({ models }: { models: Model[] }) {
     const metadataOptions = {
-      maxLength: this.config?.settings?.maxIdentifierLength ?? DEFAULT_MAX_IDENTIFIER_LENGTH,
+      maxLength: this.DEFAULT_MAX_IDENTIFIER_LENGTH,
     };
 
     this.metadata.loadModels(models, metadataOptions);
@@ -188,7 +186,6 @@ class Database {
 }
 
 const utils = { identifiers };
-const constants = { DEFAULT_MAX_IDENTIFIER_LENGTH };
 
-export { Database, errors, utils, constants };
+export { Database, errors, utils };
 export type { Model, MetadataOptions };
