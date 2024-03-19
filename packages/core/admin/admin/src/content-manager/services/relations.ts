@@ -97,9 +97,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
           return response;
         }
       },
-      providesTags: (result, error, args) => [
-        { type: 'Relations', id: `${args.model}_${args.id}` },
-      ],
+      providesTags: ['Relations'],
     }),
     searchRelations: build.query<
       Contracts.Relations.FindAvailable.Response,
