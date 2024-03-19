@@ -2,7 +2,6 @@ import path from 'node:path';
 import { vol, fs } from 'memfs';
 
 import { PluginProject, projectFactory } from '../project';
-
 import { assertAppProject, assertPluginProject, isPluginProject } from '../utils';
 
 jest.mock('fs', () => fs);
