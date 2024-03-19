@@ -1,5 +1,6 @@
 import type { ConfigProvider, LoadedStrapi, Strapi } from '@strapi/types';
-import { get, set, has, isString, type PropertyName } from 'lodash';
+import { get, set, has, isString, type PropertyName, type PropertyPath } from 'lodash';
+import { isArray } from 'lodash/fp';
 
 type Config = Record<string, unknown>;
 
@@ -8,7 +9,7 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change
   // we will still support certain namespaces, currently only 'plugin.'
-  const transformDeprecatedPaths = (path: PropertyName) => {
+  const transformPathString = (path: PropertyName) => {
     if (isString(path) && path.startsWith('plugin.')) {
       const newPath = path.replace('plugin.', 'plugin::');
 
@@ -22,16 +23,27 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
     return path;
   };
 
+  const transformDeprecatedPaths = (path: PropertyPath | PropertyName) => {
+    if (isString(path)) {
+      return transformPathString(path);
+    }
+    if (isArray(path)) {
+      return path.map((name) => transformPathString(name));
+    }
+
+    return path;
+  };
+
   return {
     ..._config, // TODO: to remove
-    get(path: PropertyName, defaultValue?: unknown) {
+    get(path: PropertyPath | PropertyName, defaultValue?: unknown) {
       return get(_config, transformDeprecatedPaths(path), defaultValue);
     },
-    set(path: PropertyName, val: unknown) {
+    set(path: PropertyPath | PropertyName, val: unknown) {
       set(_config, transformDeprecatedPaths(path), val);
       return this;
     },
-    has(path: PropertyName) {
+    has(path: PropertyPath | PropertyName) {
       return has(_config, path);
     },
   };

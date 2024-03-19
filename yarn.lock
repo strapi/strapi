@@ -7993,6 +7993,7 @@ __metadata:
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:4.20.5"
     koa: "npm:2.13.4"
+    lodash: "npm:4.17.21"
     node-schedule: "npm:2.1.0"
     tsconfig: "npm:4.20.5"
     typescript: "npm:5.3.2"
