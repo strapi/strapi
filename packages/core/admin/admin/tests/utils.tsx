@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { configureStore } from '@reduxjs/toolkit';
+import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import { Permission, RBACContext } from '@strapi/helper-plugin';
@@ -51,9 +51,32 @@ setLogger({
 interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
+  storeConfig?: Partial<ConfigureStoreOptions>;
 }
 
-const Providers = ({ children, initialEntries }: ProvidersProps) => {
+const defaultTestStoreConfig = {
+  preloadedState: initialState,
+  reducer: {
+    [adminApi.reducerPath]: adminApi.reducer,
+    admin_app: appReducer,
+    rbacProvider: RBACReducer,
+    'content-manager_app': cmAppReducer,
+    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
+    'content-manager': contentManagerReducer,
+  },
+  // @ts-expect-error – this fails.
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware({
+      // Disable timing checks for test env
+      immutableCheck: false,
+      serializableCheck: false,
+    }),
+    adminApi.middleware,
+    contentManagerApi.middleware,
+  ],
+};
+
+const Providers = ({ children, initialEntries, storeConfig }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -62,28 +85,10 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     },
   });
 
-  const store = configureStore({
+  const store = configureStore(
     // @ts-expect-error – we've not filled up the entire initial state.
-    preloadedState: initialState,
-    reducer: {
-      [adminApi.reducerPath]: adminApi.reducer,
-      admin_app: appReducer,
-      rbacProvider: RBACReducer,
-      'content-manager_app': cmAppReducer,
-      [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-      'content-manager': contentManagerReducer,
-    },
-    // @ts-expect-error – this fails.
-    middleware: (getDefaultMiddleware) => [
-      ...getDefaultMiddleware({
-        // Disable timing checks for test env
-        immutableCheck: false,
-        serializableCheck: false,
-      }),
-      adminApi.middleware,
-      contentManagerApi.middleware,
-    ],
-  });
+    storeConfig ?? defaultTestStoreConfig
+  );
 
   const router = createMemoryRouter(
     [
@@ -205,18 +210,26 @@ export interface RenderOptions {
   renderOptions?: RTLRenderOptions;
   userEventOptions?: Parameters<typeof userEvent.setup>[0];
   initialEntries?: MemoryRouterProps['initialEntries'];
+  providerOptions?: {
+    storeConfig?: Partial<ConfigureStoreOptions>;
+  };
 }
 
+/**
+ * @alpha
+ * @description A custom render function that wraps the component with the necessary providers,
+ * for use of testing components within the Strapi Admin.
+ */
 const render = (
   ui: React.ReactElement,
-  { renderOptions, userEventOptions, initialEntries }: RenderOptions = {}
+  { renderOptions, userEventOptions, initialEntries, providerOptions }: RenderOptions = {}
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
 
   return {
     ...renderRTL(ui, {
       wrapper: ({ children }) => (
-        <Providers initialEntries={initialEntries}>
+        <Providers initialEntries={initialEntries} {...providerOptions}>
           <Wrapper>{children}</Wrapper>
         </Providers>
       ),
@@ -226,6 +239,11 @@ const render = (
   };
 };
 
+/**
+ * @alpha
+ * @description A custom render-hook function that wraps the component with the necessary providers,
+ * for use of testing hooks within the Strapi Admin.
+ */
 const renderHook = <
   Result,
   Props,
@@ -249,4 +267,4 @@ const renderHook = <
   });
 };
 
-export { render, renderHook, waitFor, server, act, screen, fireEvent };
+export { render, renderHook, waitFor, server, act, screen, fireEvent, defaultTestStoreConfig };

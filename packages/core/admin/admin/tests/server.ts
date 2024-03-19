@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+import { type SetupServer, setupServer } from 'msw/node';
 import * as qs from 'qs';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../src/content-manager/constants/collections';
@@ -8,7 +8,7 @@ import { historyHandlers } from '../src/content-manager/history/tests/server';
 
 import { MockData, mockData } from './mockData';
 
-export const server = setupServer(
+export const server: SetupServer = setupServer(
   ...[
     /**
      * TRACKING
