@@ -95,7 +95,9 @@ export interface Options {
   version?: string;
 }
 
-export interface PluginOptions {}
+export interface PluginOptions {
+  i18n?: { localized: boolean };
+}
 
 /**
  * Schema for a content type
