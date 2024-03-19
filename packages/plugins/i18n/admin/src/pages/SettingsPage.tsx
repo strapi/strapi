@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
 import { Page, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
@@ -13,7 +13,6 @@ import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 const SettingsPage = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -43,7 +42,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <Main tabIndex={-1}>
+    <Page.Main tabIndex={-1}>
       <HeaderLayout
         primaryAction={<CreateLocale disabled={!canCreate} />}
         title={formatMessage({
@@ -69,7 +68,7 @@ const SettingsPage = () => {
           />
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

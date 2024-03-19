@@ -15,11 +15,6 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
-
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/:id" element={<EditPage />} />, {
     wrapper({ children }) {

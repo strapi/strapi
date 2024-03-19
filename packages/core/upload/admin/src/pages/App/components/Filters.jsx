@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { useTracking, useQueryParams } from '@strapi/admin/strapi-admin';
 import { Button } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 

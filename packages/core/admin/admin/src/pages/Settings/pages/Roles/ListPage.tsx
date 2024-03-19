@@ -5,7 +5,6 @@ import {
   Button,
   ContentLayout,
   HeaderLayout,
-  Main,
   Table,
   Tbody,
   TFooter,
@@ -15,12 +14,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {
-  getFetchClient,
-  useFocusWhenNavigate,
-  useQueryParams,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { getFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import { produce } from 'immer';
@@ -35,13 +29,13 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
 const ListPage = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
   const permissions = useTypedSelector(selectAdminPermissions);
   const { formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
@@ -129,7 +123,7 @@ const ListPage = () => {
   }
 
   return (
-    <Main>
+    <Page.Main>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -274,7 +268,7 @@ const ListPage = () => {
         onConfirm={handleDeleteData}
         onClose={handleToggleModal}
       />
-    </Main>
+    </Page.Main>
   );
 };
 

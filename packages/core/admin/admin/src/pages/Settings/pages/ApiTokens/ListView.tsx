@@ -1,13 +1,7 @@
 import * as React from 'react';
 
-import {
-  ContentLayout,
-  EmptyStateLayout,
-  HeaderLayout,
-  LinkButton,
-  Main,
-} from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Entity } from '@strapi/types';
 import * as qs from 'qs';
@@ -62,7 +56,6 @@ const TABLE_HEADERS = [
 ];
 
 export const ListView = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const permissions = useTypedSelector(
@@ -175,7 +168,7 @@ export const ListView = () => {
       {!canRead ? (
         <Page.NoPermissions />
       ) : (
-        <Main aria-busy={isLoading}>
+        <Page.Main aria-busy={isLoading}>
           <ContentLayout>
             {apiTokens.length > 0 && (
               <Table
@@ -218,7 +211,7 @@ export const ListView = () => {
               />
             ) : null}
           </ContentLayout>
-        </Main>
+        </Page.Main>
       )}
     </>
   );

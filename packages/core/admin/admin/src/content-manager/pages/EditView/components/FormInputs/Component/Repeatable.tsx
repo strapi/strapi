@@ -15,10 +15,10 @@ import {
   KeyboardNavigable,
   useComposedRefs,
 } from '@strapi/design-system';
-import { useQuery } from '@strapi/helper-plugin';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
@@ -53,6 +53,8 @@ const RepeatableComponent = ({
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+  const { search: searchString } = useLocation();
+  const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { components } = useDoc();
 
   const { value = [], error } =
@@ -64,8 +66,6 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<number | null>(null);
   const [liveText, setLiveText] = React.useState('');
-
-  const search = useQuery();
 
   /**
    * Get the temp key of the component that has the field that is currently focussed

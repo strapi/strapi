@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { FieldAction, Flex, TextInput, Typography, useComposedRefs } from '@strapi/design-system';
-import { useFocusInputField, useQueryParams } from '@strapi/helper-plugin';
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
@@ -11,6 +10,8 @@ import { type InputProps, useField, useForm } from '../../../../../components/Fo
 import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+import { useFocusInputField } from '../../../../../hooks/useFocusInputField';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { useDoc } from '../../../../hooks/useDocument';
 import {
   useGenerateUIDMutation,

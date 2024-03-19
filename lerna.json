@@ -1,9 +1,6 @@
 {
   "version": "5.0.0-alpha.0",
-  "packages": [
-    "packages/*",
-    "examples/*"
-  ],
+  "packages": ["packages/*", "examples/*"],
   "npmClient": "yarn",
   "useWorkspaces": true,
   "useNx": true

@@ -10,6 +10,7 @@ import {
   useTracking,
   useAPIErrorHandler,
   useNotification,
+  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -29,7 +30,7 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
-import { useQueryParams, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';

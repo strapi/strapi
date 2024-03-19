@@ -6,8 +6,6 @@ import { SingleSignOnPage } from '../SingleSignOnPage';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-  useFocusWhenNavigate: jest.fn(),
 }));
 
 describe('Admin | ee | SettingsPage | SSO', () => {

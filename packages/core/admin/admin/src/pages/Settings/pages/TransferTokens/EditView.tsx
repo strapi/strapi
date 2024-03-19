@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Box, ContentLayout, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -46,7 +46,6 @@ const schema = yup.object().shape({
  * -----------------------------------------------------------------------------------------------*/
 
 const EditView = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const navigate = useNavigate();
@@ -227,7 +226,7 @@ const EditView = () => {
   }
 
   return (
-    <Main>
+    <Page.Main>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -291,7 +290,7 @@ const EditView = () => {
           );
         }}
       </Formik>
-    </Main>
+    </Page.Main>
   );
 };
 

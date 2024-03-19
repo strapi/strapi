@@ -4,13 +4,12 @@ import {
   ActionLayout,
   ContentLayout,
   HeaderLayout,
-  Main,
   Flex,
   Typography,
   Status,
   IconButton,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { Helmet } from 'react-helmet';
@@ -48,7 +47,6 @@ const ListPageCE = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
-  useFocusWhenNavigate();
   const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
 
   const { pagination, users = [] } = data ?? {};
@@ -119,7 +117,7 @@ const ListPageCE = () => {
   }
 
   return (
-    <Main aria-busy={isLoading}>
+    <Page.Main aria-busy={isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -226,7 +224,7 @@ const ListPageCE = () => {
         </Pagination.Root>
       </ContentLayout>
       {isModalOpened && <ModalForm onToggle={handleToggle} />}
-    </Main>
+    </Page.Main>
   );
 };
 

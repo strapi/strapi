@@ -64,7 +64,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('should return empty plugin search results given a bad query', async () => {
-    const { getByPlaceholderText, getByText, user } = render();
+    const { getByPlaceholderText, findByText, user } = render();
 
     await waitForReload();
 
@@ -72,7 +72,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.type(getByPlaceholderText('Search'), badQuery);
     await waitForReload();
 
-    expect(getByText(`No result for "${badQuery}"`)).toBeVisible();
+    await findByText(`No result for "${badQuery}"`);
   });
 
   it('shows the installed text for installed plugins', async () => {

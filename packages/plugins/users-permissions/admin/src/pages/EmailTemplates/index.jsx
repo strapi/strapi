@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { ContentLayout, HeaderLayout, useNotifyAT } from '@strapi/design-system';
+import { useFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { Page, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -27,8 +27,6 @@ const EmailTemplatesPage = () => {
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [templateToEdit, setTemplateToEdit] = React.useState(null);
@@ -111,7 +109,7 @@ const EmailTemplatesPage = () => {
   }
 
   return (
-    <Main aria-busy={submitMutation.isLoading}>
+    <Page.Main aria-busy={submitMutation.isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -139,7 +137,7 @@ const EmailTemplatesPage = () => {
           />
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { auth, useQuery } from '@strapi/helper-plugin';
+import { auth } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
-import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';
+import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
@@ -164,7 +164,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
   const {
     _unstableFormatAPIError: formatAPIError,

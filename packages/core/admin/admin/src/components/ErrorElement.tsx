@@ -1,10 +1,11 @@
 import { Alert, Button, Flex, Icon, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useClipboard } from '@strapi/helper-plugin';
 import { Duplicate, ExclamationMarkCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { useClipboard } from '../hooks/useClipboard';
 
 /**
  * @description this stops the app from going white, and instead shows the error message.

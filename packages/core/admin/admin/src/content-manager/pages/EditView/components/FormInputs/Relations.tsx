@@ -14,7 +14,6 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFocusInputField, useQueryParams } from '@strapi/helper-plugin';
 import { Cross, Drag, Refresh } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
@@ -26,6 +25,8 @@ import styled from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
 import { useNotification } from '../../../../../features/Notifications';
+import { useFocusInputField } from '../../../../../hooks/useFocusInputField';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';

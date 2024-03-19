@@ -6,7 +6,6 @@ import {
   Flex,
   Icon,
   Layout,
-  Main,
   Searchbar,
   Tab,
   TabGroup,
@@ -14,7 +13,6 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
 import { ExternalLink, GlassesSquare } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -27,6 +25,7 @@ import { useAppInfo } from '../../features/AppInfo';
 import { useNotification } from '../../features/Notifications';
 import { useTracking } from '../../features/Tracking';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useQueryParams } from '../../hooks/useQueryParams';
 
 import { NpmPackagesFilters } from './components/NpmPackagesFilters';
 import { NpmPackagesGrid } from './components/NpmPackagesGrid';
@@ -75,8 +74,6 @@ const MarketplacePage = () => {
     plugin: npmPackageType === 'plugin' ? { ...query } : {},
     provider: npmPackageType === 'provider' ? { ...query } : {},
   });
-
-  useFocusWhenNavigate();
 
   React.useEffect(() => {
     trackUsage('didGoToMarketplace');
@@ -168,7 +165,7 @@ const MarketplacePage = () => {
 
   return (
     <Layout>
-      <Main>
+      <Page.Main>
         <Helmet
           title={formatMessage({
             id: 'admin.pages.MarketPlacePage.helmet',
@@ -301,7 +298,7 @@ const MarketplacePage = () => {
             </a>
           </Box>
         </ContentLayout>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

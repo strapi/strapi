@@ -1,16 +1,7 @@
 import { renderHook } from '@tests/utils';
 import { AxiosError, AxiosHeaders } from 'axios';
-import { useIntl } from 'react-intl';
 
-import { ApiError } from '../../types/errors';
-import { useAPIErrorHandler } from '../useAPIErrorHandler';
-
-jest.mock('react-intl', () => ({
-  ...jest.requireActual('react-intl'),
-  useIntl: jest.fn().mockReturnValue({
-    formatMessage: jest.fn((obj) => obj.defaultMessage),
-  }),
-}));
+import { useAPIErrorHandler, ApiError } from '../useAPIErrorHandler';
 
 describe('useAPIErrorHandler', () => {
   class Err extends AxiosError<{ error: ApiError }> {
@@ -47,7 +38,6 @@ describe('useAPIErrorHandler', () => {
 
   test('formats a single API error', async () => {
     const { result } = renderHook(() => useAPIErrorHandler());
-    const { formatMessage } = useIntl();
 
     const message = result.current.formatAPIError(
       new Err({
@@ -58,12 +48,10 @@ describe('useAPIErrorHandler', () => {
     );
 
     expect(message).toBe('Field contains errors');
-    expect(formatMessage).toBeCalledTimes(1);
   });
 
   test('formats an API error containing multiple errors', async () => {
     const { result } = renderHook(() => useAPIErrorHandler());
-    const { formatMessage } = useIntl();
 
     const message = result.current.formatAPIError(
       new Err({
@@ -86,7 +74,6 @@ describe('useAPIErrorHandler', () => {
     );
 
     expect(message).toBe('Field contains errors\nField must be unique');
-    expect(formatMessage).toBeCalledTimes(2);
   });
 
   test('formats AxiosErrors', async () => {

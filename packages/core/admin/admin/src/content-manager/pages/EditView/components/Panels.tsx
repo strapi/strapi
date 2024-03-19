@@ -1,13 +1,13 @@
 import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useMatch } from 'react-router-dom';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
 import { InjectionZone } from '../../../../components/InjectionZone';
 import { useStrapiApp } from '../../../../features/StrapiApp';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useDoc } from '../../../hooks/useDocument';
 import { CLONE_PATH } from '../../../router';
 

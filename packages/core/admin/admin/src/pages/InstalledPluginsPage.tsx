@@ -4,7 +4,6 @@ import {
   ContentLayout,
   HeaderLayout,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -14,7 +13,6 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -30,7 +28,6 @@ const InstalledPluginsPage = () => {
   const { notifyStatus } = useNotifyAT();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  useFocusWhenNavigate();
 
   const { isLoading, data, error } = useGetPluginsQuery();
 
@@ -66,7 +63,7 @@ const InstalledPluginsPage = () => {
 
   return (
     <Layout>
-      <Main>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: 'global.plugins',
@@ -125,7 +122,7 @@ const InstalledPluginsPage = () => {
             </Tbody>
           </Table>
         </ContentLayout>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

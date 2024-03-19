@@ -8,10 +8,9 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
@@ -90,8 +89,6 @@ const EditPage = () => {
   });
 
   const [updateUser] = useUpdateUserMutation();
-
-  useFocusWhenNavigate();
 
   const {
     data,
@@ -178,7 +175,7 @@ const EditPage = () => {
   };
 
   return (
-    <Main>
+    <Page.Main>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -293,7 +290,7 @@ const EditPage = () => {
           );
         }}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

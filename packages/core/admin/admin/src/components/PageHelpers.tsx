@@ -8,6 +8,7 @@ import {
   Icon,
   Loader,
   Main,
+  MainProps,
 } from '@strapi/design-system';
 import { useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
@@ -17,6 +18,17 @@ import { Permission } from '../../../shared/contracts/shared';
 import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
+
+/* -------------------------------------------------------------------------------------------------
+ * Main
+ * -----------------------------------------------------------------------------------------------*/
+interface PageMainProps extends MainProps {
+  children: React.ReactNode;
+}
+
+const PageMain = ({ children, ...restProps }: PageMainProps) => {
+  return <Main {...restProps}>{children}</Main>;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Loading
@@ -35,11 +47,11 @@ interface LoadingProps {
  */
 const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
   return (
-    <Main height="100vh" aria-busy={true}>
+    <PageMain height="100vh" aria-busy={true}>
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Loader>{children}</Loader>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -57,7 +69,7 @@ const Error = (props: ErrorProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <EmptyStateLayout
           icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
@@ -68,7 +80,7 @@ const Error = (props: ErrorProps) => {
           {...props}
         />
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -88,7 +100,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
@@ -101,7 +113,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
           />
         </Box>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -121,7 +133,7 @@ const NoData = (props: NoDataProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
@@ -134,7 +146,7 @@ const NoData = (props: NoDataProps) => {
           />
         </Box>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -227,7 +239,8 @@ const Page = {
   NoPermissions,
   Protect,
   NoData,
+  Main: PageMain,
 };
 
 export { Page };
-export type { ErrorProps, LoadingProps, NoPermissionsProps };
+export type { ErrorProps, LoadingProps, NoPermissionsProps, PageMainProps as MainProps };

@@ -10,11 +10,6 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { CreatePage } from '../CreatePage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
-
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {
     wrapper({ children }) {

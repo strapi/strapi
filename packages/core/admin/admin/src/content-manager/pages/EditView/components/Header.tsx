@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -13,6 +12,7 @@ import { RelativeTime } from '../../../../components/RelativeTime';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useStrapiApp } from '../../../../features/StrapiApp';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { getDisplayName } from '../../../../utils/users';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
