@@ -9,7 +9,7 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change
   // we will still support certain namespaces, currently only 'plugin.'
-  const transformPathString = (path: PropertyName) => {
+  const transformPathString = (path: PropertyName): PropertyName => {
     if (isString(path) && path.startsWith('plugin.')) {
       const newPath = path.replace('plugin.', 'plugin::');
 
@@ -23,12 +23,12 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
     return path;
   };
 
-  const transformDeprecatedPaths = (path: PropertyPath) => {
+  const transformDeprecatedPaths = (path: PropertyPath): PropertyPath => {
     if (isString(path)) {
       return transformPathString(path);
     }
     if (isArray(path)) {
-      return path.map((name) => transformPathString(name));
+      return path.map((name, index) => (index === 0 ? transformPathString(name) : name));
     }
 
     return path;
