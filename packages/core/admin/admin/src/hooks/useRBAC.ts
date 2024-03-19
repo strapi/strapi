@@ -9,8 +9,10 @@ import { capitalise } from '../utils/strings';
 type AllowedActions = Record<string, boolean>;
 
 const useRBAC = (
-  permissionsToCheck: Record<string, Permission[]> = {}
+  permissionsToCheck: Record<string, Permission[]> = {},
+  passedPermissions?: Permission[]
 ): { allowedActions: AllowedActions; isLoading: boolean; error: unknown } => {
+  const userPermissions = useAuth('useRBAC', (state) => state.permissions);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<unknown>();
   const [data, setData] = useState<Record<string, boolean>>();
@@ -42,7 +44,7 @@ const useRBAC = (
       const permissionEntries = Object.entries(permissionsToCheck);
 
       for (const [name, permissions] of permissionEntries) {
-        checkUserHasPermissions(permissions)
+        checkUserHasPermissions(permissions, passedPermissions)
           .then((res) => {
             if (res) {
               setData((s) => ({
@@ -59,7 +61,7 @@ const useRBAC = (
           });
       }
     }
-  }, [checkUserHasPermissions, permissionsToCheck, permssionsChecked]);
+  }, [checkUserHasPermissions, passedPermissions, permissionsToCheck, permssionsChecked]);
 
   const actions = {
     ...defaultAllowedActions,
@@ -76,7 +78,7 @@ const useRBAC = (
     return acc;
   }, {} as AllowedActions);
 
-  return { allowedActions, isLoading, error };
+  return { allowedActions, isLoading: isLoading || userPermissions.length === 0, error };
 };
 
 export { useRBAC };

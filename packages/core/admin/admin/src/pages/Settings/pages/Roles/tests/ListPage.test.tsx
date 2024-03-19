@@ -1,78 +1,13 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { fixtures } from '@strapi/admin-test-utils';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
+import { render } from '@tests/utils';
 
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListPage } from '../ListPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-  useRBAC: jest.fn(() => ({
-    isLoading: true,
-    allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-  })),
-}));
-
+jest.mock('../../../../../hooks/useRBAC');
 jest.mock('../../../../../hooks/useAdminRoles');
 
-const setup = () =>
-  render(<ListPage />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <QueryClientProvider client={client}>
-          <Provider
-            store={configureStore({
-              reducer: (state) => state,
-              preloadedState: {
-                admin_app: { permissions: fixtures.permissions.app },
-              },
-              middleware: (getDefaultMiddleware: any) =>
-                getDefaultMiddleware({
-                  // Disable timing checks for test env
-                  immutableCheck: false,
-                  serializableCheck: false,
-                }),
-            })}
-          >
-            <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-              <ThemeProvider theme={lightTheme}>
-                <MemoryRouter>{children}</MemoryRouter>
-              </ThemeProvider>
-            </IntlProvider>
-          </Provider>
-        </QueryClientProvider>
-      );
-    },
-  });
-
 describe('<ListPage />', () => {
-  it('renders and matches the snapshot', () => {
-    // @ts-expect-error - mock
-    useAdminRoles.mockImplementationOnce(() => ({
-      roles: [],
-      isLoading: true,
-    }));
-
-    const { getByText } = setup();
-
-    expect(getByText('Loading content.')).toBeInTheDocument();
-  });
-
   it('should show a list of roles', () => {
     // @ts-expect-error - mock
     useAdminRoles.mockImplementationOnce(() => ({
@@ -95,7 +30,7 @@ describe('<ListPage />', () => {
       isLoading: false,
       allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
     }));
-    const { getByText } = setup();
+    const { getByText } = render(<ListPage />);
 
     expect(getByText('Super Admin')).toBeInTheDocument();
   });

@@ -2,15 +2,9 @@
 import * as React from 'react';
 
 import { ConfigureStoreOptions } from '@reduxjs/toolkit';
-import {
-  defaultTestStoreConfig,
-  render as renderAdmin,
-  RenderOptions,
-  server,
-  waitFor,
-  act,
-  screen,
-} from '@strapi/admin/strapi-admin/tests';
+import { TestUtils } from '@strapi/admin/strapi-admin';
+
+const { defaultTestStoreConfig, render: renderAdmin, server, waitFor, act, screen } = TestUtils;
 
 import { PERMISSIONS } from '../src/constants';
 import { releaseApi } from '../src/services/release';
@@ -29,7 +23,7 @@ const storeConfig: ConfigureStoreOptions = {
 
 const render = (
   ui: React.ReactElement,
-  options: RenderOptions = {}
+  options: TestUtils.RenderOptions = {}
 ): ReturnType<typeof renderAdmin> =>
   renderAdmin(ui, {
     ...options,

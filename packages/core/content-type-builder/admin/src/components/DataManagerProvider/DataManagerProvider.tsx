@@ -146,7 +146,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       console.error({ err });
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
@@ -316,7 +316,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       console.error({ err });
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -367,7 +367,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       console.error({ err });
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -398,7 +398,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       console.error({ err });
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -592,7 +592,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       console.error({ err: err.response });
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();

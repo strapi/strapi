@@ -30,7 +30,10 @@ interface AuthContextValue {
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
   logout: () => Promise<void>;
-  checkUserHasPermissions: (permissions: Permission[]) => Promise<boolean>;
+  checkUserHasPermissions: (
+    permissions: Permission[],
+    passedPermissions?: Permission[]
+  ) => Promise<boolean>;
   permissions: Permission[];
   refetchPermissions: () => Promise<void>;
   setToken: (token: string | null) => void;
@@ -42,6 +45,10 @@ const [Provider, useAuth] = createContext<AuthContextValue>('Auth');
 
 interface AuthProviderProps {
   children: React.ReactNode;
+  /**
+   * @internal could be removed at any time.
+   */
+  _defaultPermissions?: Permission[];
 }
 
 const STORAGE_KEYS = {
@@ -49,7 +56,7 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-const AuthProvider = ({ children }: AuthProviderProps) => {
+const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps) => {
   const dispatch = useTypedDispatch();
   const [token, setToken] = React.useState<string | null>(() => {
     const token =
@@ -69,7 +76,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
      */
     skip: !token,
   });
-  const { data: permissions = [], refetch } = useGetMyPermissionsQuery(undefined, {
+  const {
+    data: userPermissions = _defaultPermissions,
+    refetch,
+    isUninitialized,
+  } = useGetMyPermissionsQuery(undefined, {
     skip: !token,
   });
 
@@ -176,19 +187,21 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [clearStorage, logoutMutation, navigate]);
 
   const refetchPermissions = React.useCallback(async () => {
-    await refetch();
-  }, [refetch]);
+    if (!isUninitialized) {
+      await refetch();
+    }
+  }, [isUninitialized, refetch]);
 
   const [checkPermissions] = useLazyCheckPermissionsQuery();
   const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
-    async (permissions) => {
+    async (permissions, passedPermissions) => {
       if (!permissions || !permissions.length) {
         return true;
       }
 
       const matchingPermissions = permissions.filter(
         (permission) =>
-          permissions.findIndex(
+          (passedPermissions || userPermissions).findIndex(
             (perm) => perm.action === permission.action && perm.subject === permission.subject
           ) >= 0
       );
@@ -214,7 +227,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         return data?.data.every((v) => v === true) ?? false;
       }
     },
-    [checkPermissions]
+    [checkPermissions, userPermissions]
   );
 
   return (
@@ -223,7 +236,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       user={user}
       login={login}
       logout={logout}
-      permissions={permissions}
+      permissions={userPermissions}
       checkUserHasPermissions={checkUserHasPermissions}
       refetchPermissions={refetchPermissions}
       setToken={setToken}

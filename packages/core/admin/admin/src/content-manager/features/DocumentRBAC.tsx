@@ -79,7 +79,7 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
     }, {});
   }, [slug, userPermissions]);
 
-  const { isLoading, allowedActions } = useRBAC(contentTypePermissions);
+  const { isLoading, allowedActions } = useRBAC(contentTypePermissions, permissions ?? undefined);
 
   const canCreateFields =
     !isLoading && allowedActions.canCreate

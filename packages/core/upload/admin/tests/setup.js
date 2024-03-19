@@ -1,13 +1,19 @@
-import { server } from './server';
+import { TestUtils } from '@strapi/admin/strapi-admin';
+
+import { handlers } from './handlers';
 
 beforeAll(() => {
-  server.listen();
+  TestUtils.server.listen();
+});
+
+beforeEach(() => {
+  TestUtils.server.use(...handlers);
 });
 
 afterEach(() => {
-  server.resetHandlers();
+  TestUtils.server.resetHandlers();
 });
 
 afterAll(() => {
-  server.close();
+  TestUtils.server.close();
 });

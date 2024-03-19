@@ -107,7 +107,7 @@ export const RolesListPage = () => {
     } catch (err) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error' }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
 
       throw new Error(err);

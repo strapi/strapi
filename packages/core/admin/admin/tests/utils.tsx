@@ -18,7 +18,6 @@ import {
   Queries,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { rest } from 'msw';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
@@ -51,7 +50,7 @@ interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
   storeConfig?: Partial<ConfigureStoreOptions>;
-  permissions?: Permission[];
+  permissions?: Permission[] | ((defaultPermissions: Permission[]) => Permission[] | undefined);
 }
 
 const defaultTestStoreConfig = {
@@ -75,6 +74,18 @@ const defaultTestStoreConfig = {
   ],
 };
 
+const DEFAULT_PERMISSIONS = [
+  ...fixtures.permissions.allPermissions,
+  {
+    id: 314,
+    action: 'admin::users.read',
+    subject: null,
+    properties: {},
+    conditions: [],
+    actionParameters: {},
+  },
+];
+
 const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -89,26 +100,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     storeConfig ?? defaultTestStoreConfig
   );
 
-  server.use(
-    rest.get('/admin/users/me/permissions', (req, res, ctx) =>
-      res(
-        ctx.json({
-          data: [
-            ...fixtures.permissions.allPermissions,
-            ...permissions,
-            {
-              id: 314,
-              action: 'admin::users.read',
-              subject: null,
-              properties: {},
-              conditions: [],
-              actionParameters: {},
-            },
-          ],
-        })
-      )
-    )
-  );
+  const allPermissions =
+    typeof permissions === 'function'
+      ? permissions(DEFAULT_PERMISSIONS)
+      : [...DEFAULT_PERMISSIONS, ...permissions];
 
   const router = createMemoryRouter(
     [
@@ -116,7 +111,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
         path: '/*',
         element: (
           <Provider store={store}>
-            <AuthProvider>
+            <AuthProvider _defaultPermissions={allPermissions}>
               <QueryClientProvider client={queryClient}>
                 <DndProvider backend={HTML5Backend}>
                   <LanguageProvider messages={{}}>
@@ -254,13 +249,18 @@ const renderHook = <
 >(
   hook: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> &
-    Pick<RenderOptions, 'initialEntries'>
+    Pick<RenderOptions, 'initialEntries' | 'providerOptions'>
 ): RenderHookResult<Result, Props> => {
-  const { wrapper: Wrapper = fallbackWrapper, initialEntries, ...restOptions } = options ?? {};
+  const {
+    wrapper: Wrapper = fallbackWrapper,
+    initialEntries,
+    providerOptions,
+    ...restOptions
+  } = options ?? {};
 
   return renderHookRTL(hook, {
     wrapper: ({ children }) => (
-      <Providers initialEntries={initialEntries}>
+      <Providers initialEntries={initialEntries} {...providerOptions}>
         <Wrapper>{children}</Wrapper>
       </Providers>
     ),

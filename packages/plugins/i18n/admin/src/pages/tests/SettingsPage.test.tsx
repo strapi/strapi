@@ -3,11 +3,6 @@ import { rest } from 'msw';
 
 import { SettingsPage } from '../SettingsPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useFocusWhenNavigate: jest.fn(),
-}));
-
 describe('Settings Page', () => {
   it('renders correctly with default data', async () => {
     render(<SettingsPage />);

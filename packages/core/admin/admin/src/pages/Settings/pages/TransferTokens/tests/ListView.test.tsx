@@ -1,12 +1,9 @@
-import { useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@tests/utils';
 
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListView } from '../ListView';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(),
-}));
+jest.mock('../../../../../hooks/useRBAC');
 
 describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   afterAll(() => {

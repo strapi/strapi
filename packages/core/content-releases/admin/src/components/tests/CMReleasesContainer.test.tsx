@@ -9,6 +9,9 @@ const render = (
   initialEntries: string[] = ['/content-manager/collection-types/api::article.article/12345']
 ) =>
   renderRTL(<CMReleasesContainer />, {
+    userEventOptions: {
+      skipHover: true,
+    },
     renderOptions: {
       wrapper: ({ children }) => (
         <Routes>
@@ -132,8 +135,6 @@ describe('CMReleasesContainer', () => {
         );
       })
     );
-
-    render();
 
     await screen.findByRole('complementary', { name: 'Releases' });
     expect(screen.getByText('01/01/2024 at 11:00 (UTC+01:00)')).toBeInTheDocument();

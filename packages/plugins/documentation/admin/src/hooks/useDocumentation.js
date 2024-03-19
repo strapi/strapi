@@ -27,7 +27,9 @@ export const useDocumentation = () => {
     if (isError && error) {
       toggleNotification({
         type: 'danger',
-        message: error ? formatAPIError(error) : formatMessage({ id: 'notification.error' }),
+        message: error
+          ? formatAPIError(error)
+          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   }, [isError, error, toggleNotification, formatAPIError, formatMessage]);

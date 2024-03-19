@@ -20,7 +20,7 @@ export default defineConfig({
       source: './src/admin.ts',
       import: './dist/admin.js',
       require: './dist/admin.js',
-      types: './dist/index.d.ts',
+      types: './dist/admin.d.ts',
       runtime: 'web',
     },
   ],
