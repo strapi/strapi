@@ -4,7 +4,7 @@ import * as requirements from './requirements';
 import { timerFactory } from '../../modules/timer';
 import { upgraderFactory, constants as upgraderConstants } from '../../modules/upgrader';
 import { npmPackageFactory } from '../../modules/npm';
-import { projectFactory, isPluginProject } from '../../modules/project';
+import { projectFactory, isAppProject } from '../../modules/project';
 import * as f from '../../modules/format';
 import { Version } from '../../modules/version';
 
@@ -19,9 +19,9 @@ export const upgrade = async (options: UpgradeOptions) => {
 
   const project = projectFactory(cwd);
 
-  if (isPluginProject(project)) {
+  if (!isAppProject(project)) {
     throw new Error(
-      `"${options.target}" upgrade cannot be run on a plugin; please use the "codemods" argument'`
+      `The "${options.target}" upgrade can only be run on a Strapi project; for plugins, please use "codemods".`
     );
   }
   const npmPackage = npmPackageFactory(upgraderConstants.STRAPI_PACKAGE_NAME);
