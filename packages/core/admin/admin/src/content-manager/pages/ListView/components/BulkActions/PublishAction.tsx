@@ -503,6 +503,11 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
     queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
   };
 
+  // If all the entries are published, we want to refetch the list view
+  if (rows.length === 0) {
+    refetchList();
+  }
+
   if (!showPublishButton) return null;
 
   return {
