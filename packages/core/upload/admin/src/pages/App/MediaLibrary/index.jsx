@@ -20,7 +20,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { usePersistentState, useSelectionState } from '@strapi/helper-plugin';
+import { usePersistentState } from '@strapi/helper-plugin';
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -45,6 +45,7 @@ import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useSelectionState } from '../../../hooks/useSelectionState';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';

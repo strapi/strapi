@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import * as React from 'react';
 
 export const useSelectionState = <TValues extends object>(
   keys: Array<keyof TValues>,
   initialValue: TValues[]
 ) => {
-  const [selections, setSelections] = useState(initialValue);
+  const [selections, setSelections] = React.useState(initialValue);
 
   const selectOne = (selection: TValues) => {
     const index = selections.findIndex((currentSelection) =>
