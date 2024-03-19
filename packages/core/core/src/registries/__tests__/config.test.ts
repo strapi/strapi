@@ -44,7 +44,7 @@ describe('config', () => {
   });
 
   describe('dot notation deprecations', () => {
-    test('get supports `plugin.` prefix in string path', () => {
+    test('`get` supports `plugin.` prefix in string path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
       const config = configProvider({
@@ -56,7 +56,7 @@ describe('config', () => {
       consoleSpy.mockRestore();
     });
 
-    test('get supports `plugin.` prefix in array path', () => {
+    test('`get` supports `plugin.` prefix in array path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
       const config = configProvider({
@@ -68,7 +68,7 @@ describe('config', () => {
       consoleSpy.mockRestore();
     });
 
-    test('set supports dot notation deprecation for plugin.', () => {
+    test('`set` supports `plugin.` prefix in string path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
       const config = configProvider({
@@ -81,7 +81,46 @@ describe('config', () => {
       consoleSpy.mockRestore();
     });
 
-    test('logs dot notation deprecation with strapi logger if available', () => {
+    test('`set` supports `plugin.` prefix in array path', () => {
+      const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
+
+      const config = configProvider({
+        'plugin::myplugin': { foo: 'bar' },
+      });
+      config.set(['plugin.myplugin', 'thing'], 'val');
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+
+      expect(config.get('plugin::myplugin.thing')).toEqual('val');
+      consoleSpy.mockRestore();
+    });
+
+    test('`has` supports `plugin.` prefix in string path', () => {
+      const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
+
+      const config = configProvider({
+        'plugin::myplugin': { foo: 'bar' },
+      });
+
+      expect(config.has('plugin.myplugin.foo')).toEqual(true);
+      expect(config.has('plugin.myplugin.foose')).toEqual(false);
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+      consoleSpy.mockRestore();
+    });
+
+    test('`has` supports `plugin.` prefix in array path', () => {
+      const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
+
+      const config = configProvider({
+        'plugin::myplugin': { foo: 'bar' },
+      });
+
+      expect(config.has(['plugin.myplugin', 'foo'])).toEqual(true);
+      expect(config.has(['plugin.myplugin', 'foose'])).toEqual(false);
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+      consoleSpy.mockRestore();
+    });
+
+    test('logs deprecation warning with Strapi logger if available', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
       const logSpy = jest.fn();

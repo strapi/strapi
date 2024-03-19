@@ -44,7 +44,7 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
       return this;
     },
     has(path: PropertyPath) {
-      return has(_config, path);
+      return has(_config, transformDeprecatedPaths(path));
     },
   };
 };
