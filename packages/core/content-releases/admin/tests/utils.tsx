@@ -7,9 +7,10 @@ import {
   render as renderAdmin,
   RenderOptions,
   server,
+  waitFor,
+  act,
+  screen,
 } from '@strapi/admin/strapi-admin/tests';
-import { waitFor, RenderResult, act, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import { PERMISSIONS } from '../src/constants';
 import { releaseApi } from '../src/services/release';
@@ -29,7 +30,10 @@ const storeConfig: ConfigureStoreOptions = {
 const render = (
   ui: React.ReactElement,
   options: RenderOptions = {}
-): RenderResult & { user: ReturnType<typeof userEvent.setup> } =>
-  renderAdmin(ui, { ...options, providerOptions: { storeConfig } });
+): ReturnType<typeof renderAdmin> =>
+  renderAdmin(ui, {
+    ...options,
+    providerOptions: { storeConfig, permissions: Object.values(PERMISSIONS).flat() },
+  });
 
 export { render, waitFor, act, screen, server };

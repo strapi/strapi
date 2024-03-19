@@ -52,6 +52,7 @@ interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
   storeConfig?: Partial<ConfigureStoreOptions>;
+  permissions?: Permission[];
 }
 
 const defaultTestStoreConfig = {
@@ -76,7 +77,7 @@ const defaultTestStoreConfig = {
   ],
 };
 
-const Providers = ({ children, initialEntries, storeConfig }: ProvidersProps) => {
+const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -148,6 +149,7 @@ const Providers = ({ children, initialEntries, storeConfig }: ProvidersProps) =>
                               refetchPermissions: jest.fn(),
                               allPermissions: [
                                 ...fixtures.permissions.allPermissions,
+                                ...permissions,
                                 {
                                   id: 314,
                                   action: 'admin::users.read',
@@ -210,9 +212,7 @@ export interface RenderOptions {
   renderOptions?: RTLRenderOptions;
   userEventOptions?: Parameters<typeof userEvent.setup>[0];
   initialEntries?: MemoryRouterProps['initialEntries'];
-  providerOptions?: {
-    storeConfig?: Partial<ConfigureStoreOptions>;
-  };
+  providerOptions?: Pick<ProvidersProps, 'storeConfig' | 'permissions'>;
 }
 
 /**
