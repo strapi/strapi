@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import { Flex, Icon, Status, Typography } from '@strapi/design-system';
-import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
   unstable_useDocument as useDocument,
@@ -9,7 +7,9 @@ import {
   type DocumentActionComponent,
   useNotification,
   useQueryParams,
-} from '@strapi/strapi/admin';
+} from '@strapi/admin/strapi-admin';
+import { Flex, Icon, Status, Typography } from '@strapi/design-system';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
