@@ -30,6 +30,7 @@ export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
 export { useGuidedTour } from './components/GuidedTour/Provider';
 export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
 export { useStrapiApp, type StrapiAppContextValue } from './features/StrapiApp';
+export { useFetchClient } from './hooks/useFetchClient';
 
 /**
  * Types
@@ -56,5 +57,6 @@ export type { ApiError } from './types/errors';
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
+export { getFetchClient } from './utils/getFetchClient';
 
 export * from './content-manager/exports';

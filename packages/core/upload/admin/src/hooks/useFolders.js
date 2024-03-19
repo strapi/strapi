@@ -1,7 +1,8 @@
 import * as React from 'react';
 
+import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';

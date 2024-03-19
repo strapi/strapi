@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
-import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
+import { getFetchClient } from './utils/getFetchClient';
 
 import type { FeaturesConfig, FeaturesService } from '@strapi/types';
 

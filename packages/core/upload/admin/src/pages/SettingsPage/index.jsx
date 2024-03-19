@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useFetchClient } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { Helmet } from 'react-helmet';

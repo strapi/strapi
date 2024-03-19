@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { useAPIErrorHandler } from '@strapi/strapi/admin';
+import { useNotification } from '@strapi/helper-plugin';
+import { useAPIErrorHandler, useFetchClient } from '@strapi/strapi/admin';
 import { useQueries } from 'react-query';
 
 import { cleanPermissions, getTrad } from '../../../utils';

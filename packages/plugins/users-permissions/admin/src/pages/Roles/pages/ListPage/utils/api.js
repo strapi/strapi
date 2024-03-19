@@ -1,4 +1,4 @@
-import { getFetchClient } from '@strapi/helper-plugin';
+import { getFetchClient } from '@strapi/strapi/admin';
 
 export const fetchData = async (toggleNotification, notifyStatus) => {
   try {

@@ -12,9 +12,9 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page, useTracking } from '@strapi/strapi/admin';
+import { Page, useTracking, useFetchClient } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

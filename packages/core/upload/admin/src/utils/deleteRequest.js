@@ -1,4 +1,4 @@
-import { getFetchClient } from '@strapi/helper-plugin';
+import { getFetchClient } from '@strapi/admin/strapi-admin';
 
 export const deleteRequest = (type, id) => {
   const { del } = getFetchClient();

@@ -1,12 +1,13 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page, useGuidedTour, useTracking, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
-  useAppInfo,
+  Page,
+  useGuidedTour,
+  useTracking,
+  useStrapiApp,
   useFetchClient,
-  useNotification,
-  useRBACProvider,
-} from '@strapi/helper-plugin';
+} from '@strapi/admin/strapi-admin';
+import { useAppInfo, useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';

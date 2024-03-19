@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useFetchClient } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -15,12 +15,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  getYupInnerErrors,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { getYupInnerErrors, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

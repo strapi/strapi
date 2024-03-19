@@ -16,7 +16,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
-  getFetchClient,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -36,6 +35,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
+import { getFetchClient } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
