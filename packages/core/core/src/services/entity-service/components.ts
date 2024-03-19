@@ -222,11 +222,7 @@ const updateComponents = async <
           },
         };
       }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
+    } else if (attribute.type === 'dynamiczone') {
       const dynamiczoneValues = data[
         attributeName as keyof TData
       ] as Attribute.GetValue<Attribute.DynamicZone>;
@@ -253,8 +249,6 @@ const updateComponents = async <
         },
         { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
       );
-
-      continue;
     }
   }
 
