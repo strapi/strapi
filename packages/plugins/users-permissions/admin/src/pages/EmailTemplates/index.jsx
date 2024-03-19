@@ -1,16 +1,14 @@
 import * as React from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -31,7 +29,6 @@ const EmailTemplatesPage = () => {
   const { trackUsage } = useTracking();
   const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
@@ -95,7 +92,6 @@ const EmailTemplatesPage = () => {
 
         trackUsage('didEditEmailTemplates');
 
-        unlockApp();
         handleToggle();
       },
       onError(error) {
@@ -103,16 +99,12 @@ const EmailTemplatesPage = () => {
           type: 'warning',
           message: formatAPIError(error),
         });
-
-        unlockApp();
       },
       refetchActive: true,
     }
   );
 
   const handleSubmit = (body) => {
-    lockApp();
-
     trackUsage('willEditEmailTemplates');
 
     const editedTemplates = { ...data, [templateToEdit]: body };

@@ -13,27 +13,22 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import {
-  useNotification,
-  useOverlayBlocker,
-  translatedErrors,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
 import { FormLayoutInputProps } from '../../../../../types/forms';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../../utils/translatedErrors';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
-
-import type { DistributiveOmit } from 'react-redux';
 
 interface ModalFormProps {
   onToggle: () => void;
@@ -46,7 +41,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -105,9 +99,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   });
 
   const handleSubmit = async (body: InitialData, { setErrors }: FormHelpers<InitialData>) => {
-    // @ts-expect-error – this will be fixed in V5.
-    lockApp();
-
     const res = await createUser({
       ...body,
       roles: body.roles ?? [],
@@ -135,9 +126,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
         setErrors(formatValidationErrors(res.error));
       }
     }
-
-    // @ts-expect-error – this will be fixed in V5.
-    unlockApp();
   };
 
   const goNext = () => {
@@ -335,28 +323,22 @@ const FORM_LAYOUT = [
 
 const FORM_SCHEMA = yup.object().shape({
   firstname: yup.string().trim().required({
-    id: translatedErrors.required,
+    id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
   }),
   lastname: yup.string(),
-  email: yup
-    .string()
-    .email({
-      id: translatedErrors.email,
-      defaultMessage: 'This is not a valid email',
-    })
-    .required({
-      id: translatedErrors.required,
-      defaultMessage: 'This field is required',
-    }),
+  email: yup.string().email(translatedErrors.email).required({
+    id: translatedErrors.required.id,
+    defaultMessage: 'This field is required',
+  }),
   roles: yup
     .array()
     .min(1, {
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     }),
 });

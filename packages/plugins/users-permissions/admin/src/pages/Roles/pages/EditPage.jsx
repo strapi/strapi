@@ -12,14 +12,9 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
-import {
-  useOverlayBlocker,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-} from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page, BackButton } from '@strapi/strapi/admin';
+import { Page, BackButton, useAPIErrorHandler } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -35,7 +30,6 @@ import { usePlugins } from '../hooks/usePlugins';
 export const EditPage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     params: { id },
   } = useMatch(`/settings/users-permissions/roles/:id`);
@@ -79,14 +73,9 @@ export const EditPage = () => {
   });
 
   const handleEditRoleSubmit = async (data) => {
-    // Set loading state
-    lockApp();
-
     const permissions = permissionsRef.current.getPermissions();
 
     await mutation.mutate({ ...data, ...permissions, users: [] });
-
-    unlockApp();
   };
 
   if (isLoadingRole) {

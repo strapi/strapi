@@ -1,14 +1,11 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
+import { Page, useGuidedTour, useTracking, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
   useAppInfo,
-  useAutoReloadOverlayBlocker,
   useFetchClient,
   useNotification,
   useRBACProvider,
-  useStrapiApp,
-  useTracking,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
@@ -23,6 +20,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import { makeUnique } from '../../utils/makeUnique';
+import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
 import { FormModal } from '../FormModal/FormModal';
 
 import {
@@ -84,7 +82,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
 
-  const { getPlugin } = useStrapiApp();
+  const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
 
   const plugin = getPlugin(pluginId);
   const { autoReload } = useAppInfo();

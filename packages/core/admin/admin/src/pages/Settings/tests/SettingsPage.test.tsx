@@ -1,7 +1,8 @@
-import { AppInfoContext, StrapiAppProvider, StrapiAppProviderProps } from '@strapi/helper-plugin';
+import { AppInfoContext } from '@strapi/helper-plugin';
 import { render as baseRender, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
+import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/StrapiApp';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 import { Layout } from '../Layout';
 
@@ -13,7 +14,7 @@ const LocationDisplay = () => {
   return <span data-testid="location-display">{location.pathname}</span>;
 };
 
-const render = (settings: StrapiAppProviderProps['settings']) =>
+const render = (settings: StrapiAppContextValue['settings']) =>
   baseRender(<Route path="/settings?/:settingId" element={<Layout />} />, {
     initialEntries: ['/settings'],
     renderOptions: {
@@ -27,6 +28,14 @@ const render = (settings: StrapiAppProviderProps['settings']) =>
             }}
           >
             <StrapiAppProvider
+              components={{}}
+              fields={{}}
+              customFields={{
+                customFields: {},
+                get: jest.fn(),
+                getAll: jest.fn(),
+                register: jest.fn(),
+              }}
               settings={settings}
               plugins={{}}
               getPlugin={jest.fn()}

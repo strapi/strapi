@@ -21,7 +21,7 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { Check, Plus } from '@strapi/icons';
 import {
   Form,
@@ -30,6 +30,7 @@ import {
   useField,
   type FormHelpers,
   useForm,
+  useAPIErrorHandler,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';

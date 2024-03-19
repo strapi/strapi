@@ -1,15 +1,7 @@
 import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-  useTracking,
-  translatedErrors,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -19,12 +11,15 @@ import * as yup from 'yup';
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useCreateTransferTokenMutation,
   useGetTransferTokenQuery,
   useUpdateTransferTokenMutation,
 } from '../../../../services/transferTokens';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { FormHead } from '../../components/Tokens/FormHead';
 import { LifeSpanInput } from '../../components/Tokens/LifeSpanInput';
@@ -39,10 +34,10 @@ import type {
 } from '../../../../../../shared/contracts/transfer';
 
 const schema = yup.object().shape({
-  name: yup.string().max(100).required(translatedErrors.required),
+  name: yup.string().max(100).required(translatedErrors.required.id),
   description: yup.string().nullable(),
-  lifespan: yup.number().integer().min(0).nullable().defined(translatedErrors.required),
-  permissions: yup.string().required(translatedErrors.required),
+  lifespan: yup.number().integer().min(0).nullable().defined(translatedErrors.required.id),
+  permissions: yup.string().required(translatedErrors.required.id),
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -52,7 +47,6 @@ const schema = yup.object().shape({
 const EditView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const navigate = useNavigate();
   const { state: locationState } = useLocation();
@@ -115,8 +109,6 @@ const EditView = () => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
-    // @ts-expect-error context assertation
-    lockApp();
 
     const permissions = body.permissions.split('-');
 
@@ -138,7 +130,10 @@ const EditView = () => {
           const res = await createToken({
             ...body,
             // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
-            lifespan: body?.lifespan || null,
+            lifespan:
+              body?.lifespan && body.lifespan !== '0'
+                ? parseInt(body.lifespan.toString(), 10)
+                : null,
             permissions,
           });
 
@@ -219,9 +214,6 @@ const EditView = () => {
             defaultMessage: 'Something went wrong',
           },
         });
-      } finally {
-        // @ts-expect-error context assertation
-        unlockApp();
       }
     }
   };

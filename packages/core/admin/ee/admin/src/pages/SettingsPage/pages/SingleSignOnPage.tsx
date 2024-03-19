@@ -14,14 +14,7 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  translatedErrors,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -31,24 +24,26 @@ import * as yup from 'yup';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../../../admin/src/hooks/useAPIErrorHandler';
 import {
   useGetProviderOptionsQuery,
   useUpdateProviderOptionsMutation,
 } from '../../../../../../admin/src/services/auth';
 import { isBaseQueryError } from '../../../../../../admin/src/utils/baseQuery';
+import { translatedErrors } from '../../../../../../admin/src/utils/translatedErrors';
 import { ProvidersOptions } from '../../../../../../shared/contracts/admin';
 
 const schema = yup.object().shape({
-  autoRegister: yup.bool().required(translatedErrors.required),
+  autoRegister: yup.bool().required(translatedErrors.required.id),
   defaultRole: yup.mixed().when('autoRegister', (value, initSchema) => {
-    return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
+    return value ? initSchema.required(translatedErrors.required.id) : initSchema.nullable();
   }),
   ssoLockedRoles: yup
     .array()
     .nullable()
     .of(
       yup.mixed().when('ssoLockedRoles', (value, initSchema) => {
-        return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
+        return value ? initSchema.required(translatedErrors.required.id) : initSchema.nullable();
       })
     ),
 });
@@ -58,7 +53,6 @@ export const SingleSignOnPage = () => {
 
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -86,9 +80,6 @@ export const SingleSignOnPage = () => {
     body: ProvidersOptions.Request['body'],
     formik: FormikHelpers<ProvidersOptions.Request['body']>
   ) => {
-    // @ts-expect-error - context assertation
-    lockApp();
-
     try {
       const res = await updateProviderOptions(body);
 
@@ -117,9 +108,6 @@ export const SingleSignOnPage = () => {
           defaultMessage: 'An error occurred, please try again.',
         },
       });
-    } finally {
-      // @ts-expect-error - context assertation
-      unlockApp();
     }
   };
 

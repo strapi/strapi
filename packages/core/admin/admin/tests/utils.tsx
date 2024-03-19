@@ -33,6 +33,7 @@ import { reducer as contentManagerReducer } from '../src/content-manager/modules
 import { contentManagerApi } from '../src/content-manager/services/api';
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
+import { StrapiAppProvider } from '../src/features/StrapiApp';
 import { reducer as appReducer } from '../src/reducer';
 import { adminApi } from '../src/services/api';
 
@@ -98,36 +99,73 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                         light: lightTheme,
                       }}
                     >
-                      <NotificationsProvider>
-                        <RBACContext.Provider
-                          value={{
-                            refetchPermissions: jest.fn(),
-                            allPermissions: [
-                              ...fixtures.permissions.allPermissions,
-                              {
-                                id: 314,
-                                action: 'admin::users.read',
-                                subject: null,
-                                properties: {},
-                                conditions: [],
-                                actionParameters: {},
-                              },
-                            ] as Permission[],
-                          }}
-                        >
-                          <ConfigurationContextProvider
-                            showReleaseNotification={false}
-                            showTutorials={false}
-                            logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
+                      <StrapiAppProvider
+                        components={{}}
+                        customFields={{
+                          customFields: {},
+                          get: jest.fn().mockReturnValue({
+                            name: 'color',
+                            pluginId: 'mycustomfields',
+                            type: 'text',
+                            icon: jest.fn(),
+                            intlLabel: {
+                              id: 'mycustomfields.color.label',
+                              defaultMessage: 'Color',
+                            },
+                            intlDescription: {
+                              id: 'mycustomfields.color.description',
+                              defaultMessage: 'Select any color',
+                            },
+                            components: {
+                              Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
+                            },
+                          }),
+                          getAll: jest.fn(),
+                          register: jest.fn(),
+                        }}
+                        fields={{}}
+                        menu={[]}
+                        getAdminInjectedComponents={jest.fn()}
+                        getPlugin={jest.fn()}
+                        plugins={{}}
+                        runHookParallel={jest.fn()}
+                        runHookWaterfall={jest
+                          .fn()
+                          .mockImplementation((_name, initialValue) => initialValue)}
+                        runHookSeries={jest.fn()}
+                        settings={{}}
+                      >
+                        <NotificationsProvider>
+                          <RBACContext.Provider
+                            value={{
+                              refetchPermissions: jest.fn(),
+                              allPermissions: [
+                                ...fixtures.permissions.allPermissions,
+                                {
+                                  id: 314,
+                                  action: 'admin::users.read',
+                                  subject: null,
+                                  properties: {},
+                                  conditions: [],
+                                  actionParameters: {},
+                                },
+                              ] as Permission[],
                             }}
-                            updateProjectSettings={jest.fn()}
                           >
-                            {children}
-                          </ConfigurationContextProvider>
-                        </RBACContext.Provider>
-                      </NotificationsProvider>
+                            <ConfigurationContextProvider
+                              showReleaseNotification={false}
+                              showTutorials={false}
+                              logos={{
+                                auth: { default: '' },
+                                menu: { default: '' },
+                              }}
+                              updateProjectSettings={jest.fn()}
+                            >
+                              {children}
+                            </ConfigurationContextProvider>
+                          </RBACContext.Provider>
+                        </NotificationsProvider>
+                      </StrapiAppProvider>
                     </Theme>
                   </LanguageProvider>
                 </DndProvider>

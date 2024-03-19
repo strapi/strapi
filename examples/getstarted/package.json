@@ -24,17 +24,17 @@
     "@strapi/provider-upload-aws-s3": "4.20.5",
     "@strapi/provider-upload-cloudinary": "4.20.5",
     "@strapi/strapi": "4.20.5",
-    "better-sqlite3": "9.0.0",
+    "better-sqlite3": "9.4.3",
     "lodash": "4.17.21",
     "mysql2": "3.6.2",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-intl": "6.4.1",
-    "react-router-dom": "6.21.1",
+    "react-intl": "6.6.2",
+    "react-router-dom": "6.22.3",
     "strapi-plugin-workspace-plugin": "workspace:*",
-    "styled-components": "5.3.3"
+    "styled-components": "5.3.11"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

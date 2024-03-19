@@ -3,14 +3,27 @@ import * as React from 'react';
 import { AxiosError } from 'axios';
 import { IntlFormatters, useIntl } from 'react-intl';
 
-import { ApiError } from '../types';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 
+import type { ApiError } from '../types/errors';
+
 interface UnknownApiError {
+  /**
+   * The name of the ApiError, is always a static value.
+   */
   name: 'UnknownError';
+  /**
+   * The error message.
+   */
   message: string;
+  /**
+   * The error details.
+   */
   details?: unknown;
+  /**
+   * The HTTP status code of the error.
+   */
   status?: number;
 }
 
@@ -19,9 +32,21 @@ interface UnknownApiError {
  * typically comes from redux-toolkit itself.
  */
 interface SerializedError {
+  /**
+   * The name of the error.
+   */
   name?: string;
+  /**
+   * The error message that explains what went wrong.
+   */
   message?: string;
+  /**
+   * The stack trace of the error.
+   */
   stack?: string;
+  /**
+   * A specific error code associated with the error.
+   */
   code?: string;
 }
 
@@ -29,23 +54,62 @@ interface SerializedError {
  * These are the types or errors we return
  * from the redux-toolkit data-fetching setup.
  */
-
 type BaseQueryError = ApiError | UnknownApiError | SerializedError;
 
 interface YupFormattedError {
+  /**
+   * An array representing the path to the field where the validation error occurred.
+   */
   path: string[];
+  /**
+   * The error message describing the validation failure.
+   */
   message: string;
+  /**
+   * The name of the error, typically identifies the type of validation error that occurred.
+   */
   name: string;
 }
 
 /**
- * Hook that exports an error message formatting function.
+ * @public
+ * @description The purpose of this hook is to offer a unified way to handle errors thrown by API endpoints, regardless of the type of error (`ValidationError`, `ApplicationErrror` ...)
+that has been thrown.
+ * @example
+ * ```tsx
+ * import * as React from 'react';
+ * import { useFetchClient, useAPIErrorHandler, useNotification } from '@strapi/admin/admin';
+ *
+ * const MyComponent = () => {
+ *   const { get } = useFetchClient();
+ *   const { formatAPIError } = useAPIErrorHandler(getTrad);
+ *   const toggleNotification = useNotification();
+ * 
+ *   const handleDeleteItem = async () => {
+ *     try {
+ *       return await get('/admin');
+ *     } catch (error) {
+ *       toggleNotification({
+ *         type: 'warning',
+ *         message: formatAPIError(error),
+ *       });
+ *     }
+ *   };
+ *   return <button onClick={handleDeleteItem}>Delete item</button>;
+ * };
+ * ```
  */
 export function useAPIErrorHandler(
   intlMessagePrefixCallback?: FormatAPIErrorOptions['intlMessagePrefixCallback']
 ) {
   const { formatMessage } = useIntl();
 
+  /**
+   * @description This method try to normalize the passed error
+   * and then call formatAPIError to stringify the ResponseObject
+   * into a string. If it fails it will call formatAxiosError and
+   * return the error message.
+   */
   const formatError = React.useCallback(
     (error: AxiosError<{ error: ApiError }>) => {
       // Try to normalize the passed error first. This will fail for e.g. network
@@ -154,7 +218,10 @@ type FormatAPIErrorOptions = Partial<Pick<NormalizeErrorOptions, 'intlMessagePre
   Pick<IntlFormatters, 'formatMessage'>;
 
 /**
- * Method to stringify an API error object
+ * @description This method stringifies the `ResponseObject` into
+ * a string. If multiple errors are thrown by the API, which
+ * happens e.g.in the case of a `ValidationError`, all errors
+ * will bo concatenated into a single string.
  */
 function formatAPIError(
   error: AxiosError<{ error: ApiError }>,

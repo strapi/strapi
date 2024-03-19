@@ -1,13 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  translatedErrors,
-} from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Formik, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -17,7 +11,9 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useTracking } from '../../../../features/Tracking';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useGetRolePermissionLayoutQuery,
   useGetRolePermissionsQuery,
@@ -25,12 +21,13 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
   description: yup.string().optional(),
 });
 
@@ -48,7 +45,6 @@ const EditPage = () => {
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -99,9 +95,6 @@ const EditPage = () => {
     formik: FormikHelpers<EditRoleFormValues>
   ) => {
     try {
-      // @ts-expect-error – This will be fixed in V5
-      lockApp();
-
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
 
@@ -160,9 +153,6 @@ const EditPage = () => {
         type: 'warning',
         message: { id: 'notification.error' },
       });
-    } finally {
-      // @ts-expect-error – This will be fixed in V5
-      unlockApp();
     }
   };
 

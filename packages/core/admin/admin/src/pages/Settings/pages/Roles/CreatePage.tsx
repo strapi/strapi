@@ -13,13 +13,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  translatedErrors,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -31,6 +25,8 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useTracking } from '../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useCreateRoleMutation,
   useGetRolePermissionLayoutQuery,
@@ -38,6 +34,7 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 
@@ -46,8 +43,8 @@ import { Permissions, PermissionsAPI } from './components/Permissions';
  * -----------------------------------------------------------------------------------------------*/
 
 const CREATE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
-  description: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
+  description: yup.string().required(translatedErrors.required.id),
 });
 
 /**
@@ -65,7 +62,6 @@ interface CreateRoleFormValues {
 const CreatePage = () => {
   const match = useMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
@@ -108,9 +104,6 @@ const CreatePage = () => {
     formik: FormikHelpers<CreateRoleFormValues>
   ) => {
     try {
-      // @ts-expect-error – fixed in V5
-      lockApp();
-
       if (id) {
         trackUsage('willDuplicateRole');
       } else {
@@ -165,9 +158,6 @@ const CreatePage = () => {
         type: 'warning',
         message: { id: 'notification.error' },
       });
-    } finally {
-      // @ts-expect-error – fixed in V5
-      unlockApp();
     }
   };
 

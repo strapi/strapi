@@ -1,7 +1,7 @@
-import { StrapiAppProvider } from '@strapi/helper-plugin';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
+import { StrapiAppProvider } from '../../../../../features/StrapiApp';
 import { Header, HeaderProps } from '../Header';
 
 describe('Header', () => {
@@ -14,6 +14,14 @@ describe('Header', () => {
             <StrapiAppProvider
               menu={[]}
               settings={{}}
+              components={{}}
+              fields={{}}
+              customFields={{
+                customFields: {},
+                get: jest.fn(),
+                getAll: jest.fn(),
+                register: jest.fn(),
+              }}
               getAdminInjectedComponents={jest.fn()}
               getPlugin={jest.fn()}
               runHookParallel={jest.fn()}
@@ -26,6 +34,7 @@ describe('Header', () => {
                   isReady: true,
                   name: 'content-manager',
                   pluginId: 'content-manager',
+                  injectComponent: jest.fn(),
                   getInjectedComponents: jest.fn(),
                   apis: {
                     getDocumentActions: () => [],

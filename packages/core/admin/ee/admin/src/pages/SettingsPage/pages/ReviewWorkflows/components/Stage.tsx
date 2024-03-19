@@ -19,7 +19,7 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Duplicate, Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -30,6 +30,7 @@ import styled from 'styled-components';
 import { ConfirmDialog } from '../../../../../../../../admin/src/components/ConfirmDialog';
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
 import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
+import { useTracking } from '../../../../../../../../admin/src/features/Tracking';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,

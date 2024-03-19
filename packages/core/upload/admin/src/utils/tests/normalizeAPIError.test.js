@@ -2,61 +2,47 @@ import { AxiosError, AxiosHeaders } from 'axios';
 
 import { normalizeAPIError } from '../normalizeAPIError';
 
-import type { ApiError } from '../../types';
+const API_VALIDATION_ERROR_FIXTURE = new AxiosError(undefined, undefined, undefined, undefined, {
+  data: {
+    error: {
+      name: 'ValidationError',
+      message: 'errors',
+      details: {
+        errors: [
+          {
+            path: ['field', '0', 'name'],
+            message: 'Field contains errors',
+            name: 'ValidationError',
+          },
 
-const API_VALIDATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  {
-    data: {
-      error: {
-        name: 'ValidationError',
-        message: 'errors',
-        details: {
-          errors: [
-            {
-              path: ['field', '0', 'name'],
-              message: 'Field contains errors',
-              name: 'ValidationError',
-            },
-
-            {
-              path: ['field'],
-              message: 'Field must be unique',
-              name: 'ValidationError',
-            },
-          ],
-        },
+          {
+            path: ['field'],
+            message: 'Field must be unique',
+            name: 'ValidationError',
+          },
+        ],
       },
     },
-    status: 422,
-    statusText: 'Validation',
-    headers: {},
-    config: { headers: new AxiosHeaders() },
-  }
-);
+  },
+  status: 422,
+  statusText: 'Validation',
+  headers: {},
+  config: { headers: new AxiosHeaders() },
+});
 
-const API_APPLICATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  {
-    data: {
-      error: {
-        name: 'ApplicationError',
-        message: 'Application crashed',
-        details: {},
-      },
+const API_APPLICATION_ERROR_FIXTURE = new AxiosError(undefined, undefined, undefined, undefined, {
+  data: {
+    error: {
+      name: 'ApplicationError',
+      message: 'Application crashed',
+      details: {},
     },
-    status: 400,
-    statusText: 'Bad Request',
-    headers: {},
-    config: { headers: new AxiosHeaders() },
-  }
-);
+  },
+  status: 400,
+  statusText: 'Bad Request',
+  headers: {},
+  config: { headers: new AxiosHeaders() },
+});
 
 describe('normalizeAPIError', () => {
   test('Handle ValidationError', () => {
@@ -86,7 +72,7 @@ describe('normalizeAPIError', () => {
   });
 
   test('Handle ValidationError with custom prefix function', () => {
-    const prefixFunction = (id: string) => `custom.${id}`;
+    const prefixFunction = (id) => `custom.${id}`;
 
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ValidationError',
@@ -123,7 +109,7 @@ describe('normalizeAPIError', () => {
   });
 
   test('Handle ApplicationError with custom prefix function', () => {
-    const prefixFunction = (id: string) => `custom.${id}`;
+    const prefixFunction = (id) => `custom.${id}`;
 
     expect(normalizeAPIError(API_APPLICATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ApplicationError',

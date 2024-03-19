@@ -1,8 +1,11 @@
 import * as React from 'react';
 
+import { useAppInfo } from '@strapi/helper-plugin';
 import axios, { AxiosResponse } from 'axios';
 
-import { useAppInfo } from './AppInfo';
+import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
+
+import { useAuth } from './Auth';
 
 export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
@@ -15,7 +18,6 @@ export interface TelemetryProperties {
 
 export interface TrackingContextValue {
   uuid?: string | boolean;
-  deviceId?: string;
   telemetryProperties?: TelemetryProperties;
 }
 
@@ -33,13 +35,50 @@ const TrackingContext = React.createContext<TrackingContextValue>({
 
 export interface TrackingProviderProps {
   children: React.ReactNode;
-  value?: TrackingContextValue;
 }
 
-const TrackingProvider = ({ value = { uuid: false }, children }: TrackingProviderProps) => {
-  const memoizedValue = React.useMemo(() => value, [value]);
+const TrackingProvider = ({ children }: TrackingProviderProps) => {
+  const token = useAuth('App', (state) => state.token);
+  const { data: initData } = useInitQuery();
+  const { uuid } = initData ?? {};
 
-  return <TrackingContext.Provider value={memoizedValue}>{children}</TrackingContext.Provider>;
+  const { data } = useTelemetryPropertiesQuery(undefined, {
+    skip: !initData?.uuid || !token,
+  });
+
+  React.useEffect(() => {
+    if (uuid && data) {
+      const event = 'didInitializeAdministration';
+      try {
+        fetch('https://analytics.strapi.io/api/v2/track', {
+          method: 'POST',
+          body: JSON.stringify({
+            // This event is anonymous
+            event,
+            userId: '',
+            eventPropeties: {},
+            groupProperties: { ...data, projectId: uuid },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Strapi-Event': event,
+          },
+        });
+      } catch {
+        // silence is golden
+      }
+    }
+  }, [data, uuid]);
+
+  const value = React.useMemo(
+    () => ({
+      uuid,
+      telemetryProperties: data,
+    }),
+    [uuid, data]
+  );
+
+  return <TrackingContext.Provider value={value}>{children}</TrackingContext.Provider>;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -359,9 +398,8 @@ export interface UseTrackingReturn {
  * ```
  */
 const useTracking = (): UseTrackingReturn => {
-  const { uuid, telemetryProperties, deviceId } = React.useContext(TrackingContext);
-  const appInfo = useAppInfo();
-  const userId = appInfo?.userId;
+  const { uuid, telemetryProperties } = React.useContext(TrackingContext);
+  const { userId } = useAppInfo();
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],
@@ -374,7 +412,6 @@ const useTracking = (): UseTrackingReturn => {
             {
               event,
               userId,
-              deviceId,
               eventProperties: { ...properties },
               userProperties: {},
               groupProperties: {
@@ -399,10 +436,10 @@ const useTracking = (): UseTrackingReturn => {
 
       return null;
     },
-    [deviceId, telemetryProperties, userId, uuid]
+    [telemetryProperties, userId, uuid]
   );
 
   return { trackUsage };
 };
 
-export { TrackingContext, TrackingProvider, useTracking };
+export { TrackingProvider, useTracking };

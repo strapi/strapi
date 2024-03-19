@@ -15,21 +15,17 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import {
-  onRowClick,
-  useAPIErrorHandler,
-  useNotification,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { onRowClick, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
+import { useTracking } from '../../../../../../../admin/src/features/Tracking';
+import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
@@ -162,7 +158,8 @@ export const ReviewWorkflowsListView = () => {
             <LinkButton
               startIcon={<Plus />}
               size="S"
-              // @ts-expect-error - types are not inferred correctly through the as prop.
+              as={NavLink}
+              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
               to="/settings/review-workflows/create"
               onClick={(event) => {
                 /**

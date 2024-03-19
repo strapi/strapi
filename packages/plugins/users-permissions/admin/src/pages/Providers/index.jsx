@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   ContentLayout,
   HeaderLayout,
@@ -19,16 +20,13 @@ import {
 import {
   onRowClick,
   stopPropagation,
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -47,7 +45,6 @@ export const ProvidersPage = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [providerToEditName, setProviderToEditName] = React.useState(null);
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const formatter = useCollator(locale, {
@@ -85,15 +82,12 @@ export const ProvidersPage = () => {
       trackUsage('didEditAuthenticationProvider');
 
       handleToggleModal();
-      unlockApp();
     },
     onError(error) {
       toggleNotification({
         type: 'warning',
         message: formatAPIError(error),
       });
-
-      unlockApp();
     },
     refetchActive: false,
   });
@@ -149,8 +143,6 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async (values) => {
-    lockApp();
-
     trackUsage('willEditAuthenticationProvider');
 
     submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });

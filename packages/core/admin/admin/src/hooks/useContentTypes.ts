@@ -1,8 +1,9 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useGetContentTypesQuery } from '../services/contentManager';
 
 export function useContentTypes(): {

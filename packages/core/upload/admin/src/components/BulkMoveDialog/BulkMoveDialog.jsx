@@ -13,7 +13,6 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { normalizeAPIError } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
@@ -23,6 +22,7 @@ import { AssetDefinition, FolderDefinition } from '../../constants';
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getTrad } from '../../utils';
+import { normalizeAPIError } from '../../utils/normalizeAPIError';
 import SelectTree from '../SelectTree';
 
 export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {

@@ -180,7 +180,7 @@ This component has been removed and not replaced. However, you can easily replic
 
 ```tsx
 const MyComponent = ({ area, ...compProps }) => {
-  const { getPlugin } = useStrapiApp();
+  const getPlugin = useStrapiApp('MyComponent', (state) => state.getPlugin);
 
   const [pluginName, page, position] = area.split('.');
 
@@ -397,13 +397,37 @@ import { Table } from '@strapi/strapi/admin';
 
 Note! some of the props have changed, please refer to the documentation for the `Table` component.
 
-## Content Manager
-
 ## Features
+
+### AutoReloadOverlayBlocker
+
+This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
+
+### CustomFields
+
+This feature has been removed and is part of the `useStrapiApp` hook.
 
 ### GuidedTour
 
-This component has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
+This feature has been moved to `@strapi/admin` and only the hook `useGuidedTour` is now exported.
+
+### Library
+
+This feature has been removed and is part of the `useStrapiApp` hook.
+
+### OverlayBlocker
+
+This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
+
+### StrapiApp
+
+This feature has been moved to `@strapi/admin` and only the hook `useStrapiApp` is now exported.
+
+### Tracking
+
+This feature has been moved to the `@strapi/admin` package and only the `useTracking` hook is exported.
+
+## Content Manager
 
 ### contentManagementUtilRemoveFieldsFromData
 
@@ -468,6 +492,18 @@ const {
 
 ## Hooks
 
+### useAPIErrorHandler
+
+This hook has been removed. You should import it from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { useAPIErrorHandler } from '@strapi/helper-plugin';
+
+// After
+import { useAPIErrorHandler } from '@strapi/strapi/admin';
+```
+
 ### useCallbackRef
 
 This component has been removed. You should import it from the `@strapi/design-system` package:
@@ -524,7 +560,15 @@ This util has been removed and not replaced, use async / await with try / catch 
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### getAPIInnerErrors
+
+This util has been removed and not replaced, use async / await with try / catch instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### getFileExtension
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### normalizeAPIError
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
@@ -570,6 +614,20 @@ If you feel like you need this util, please open an issue on the Strapi reposito
 ### setHexOpacity
 
 This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### translatedErrors
+
+This utils has been removed. You should import it from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { translatedErrors } from '@strapi/helper-plugin';
+
+// After
+import { translatedErrors } from '@strapi/strapi/admin';
+```
+
+If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
 ### wrapAxiosInstance
 
