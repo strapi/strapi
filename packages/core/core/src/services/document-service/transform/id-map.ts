@@ -1,5 +1,7 @@
-import { Strapi, Entity } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { isNil } from 'lodash/fp';
+
+import { Strapi, Entity, Common } from '@strapi/types';
+import { async, contentTypes } from '@strapi/utils';
 
 /**
  * TODO: Find a better way to encode keys than this
@@ -33,6 +35,19 @@ export interface IdMap {
   get(keys: KeyFields): string | undefined;
   clear(): void;
 }
+
+const hasDraftAndPublish = (uid: Common.UID.ContentType) => {
+  const contentType = strapi.contentType(uid);
+  return contentTypes.hasDraftAndPublish(contentType);
+};
+
+const getPublishedAtClause = (uid: Common.UID.ContentType, status: 'draft' | 'published') => {
+  if (!hasDraftAndPublish(uid)) {
+    return {};
+  }
+
+  return { $null: status === 'draft' };
+};
 
 /**
  * Holds a registry of document ids and their corresponding entity ids.
@@ -84,7 +99,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
             where: {
               documentId: { $in: documentIds },
               locale: locale || null,
-              publishedAt: status === 'draft' ? null : { $ne: null },
+              publishedAt: getPublishedAtClause(uid, status),
             },
           } as any;
 
@@ -96,7 +111,7 @@ const createIdMap = ({ strapi }: { strapi: Strapi }): IdMap => {
               documentId,
               uid,
               locale,
-              status: publishedAt ? 'published' : 'draft',
+              status: hasDraftAndPublish(uid) && isNil(publishedAt) ? 'draft' : 'published',
             });
             loadedIds.set(key, id);
           });
