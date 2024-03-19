@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, type BoxProps } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { RelativeTime } from '../../../components/RelativeTime';
+import { useQueryParams } from '../../../hooks/useQueryParams';
 import { getDisplayName } from '../../../utils/users';
 import { useHistoryContext } from '../pages/History';
 

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
@@ -10,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { BackButton } from '../../../../../../../admin/src/features/BackButton';
+import { useNotification } from '../../../../../../../admin/src/features/Notifications';
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
@@ -52,7 +52,7 @@ export const ReviewWorkflowsCreatePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const dispatch = useDispatch();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { collectionTypes, singleTypes, isLoading: isLoadingContentTypes } = useContentTypes();
   const { isLoading: isLoadingWorkflow, meta, workflows, createWorkflow } = useReviewWorkflows();
   const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles();
@@ -85,7 +85,7 @@ export const ReviewWorkflowsCreatePage = () => {
         }
 
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -94,20 +94,20 @@ export const ReviewWorkflowsCreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: 'Settings.review-workflows.create.page.notification.success',
           defaultMessage: 'Workflow successfully created',
-        },
+        }),
       });
 
       navigate(res.data.id.toString());
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'Settings.review-workflows.create.page.notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
@@ -225,7 +225,7 @@ export const ReviewWorkflowsCreatePage = () => {
     if (!isLoading && roles?.length === 0) {
       toggleNotification({
         blockTransition: true,
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({
           id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
           defaultMessage: 'You don’t have the permission to see roles',

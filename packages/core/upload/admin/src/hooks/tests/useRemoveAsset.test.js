@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
@@ -20,9 +20,11 @@ jest.mock('../../utils/deleteRequest', () => ({
 
 const notificationStatusMock = jest.fn();
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useNotification() {
+    return { toggleNotification: notificationStatusMock };
+  },
 }));
 
 const refetchQueriesMock = jest.fn();
@@ -84,7 +86,7 @@ describe('useRemoveAsset', () => {
   });
 
   test('calls toggleNotification in case of an success', async () => {
-    const toggleNotification = useNotification();
+    const { toggleNotification } = useNotification();
     const {
       result: { current },
     } = await setup(jest.fn);
@@ -127,7 +129,7 @@ describe('useRemoveAsset', () => {
 
     deleteRequest.mockRejectedValue({ message: 'error-msg' });
 
-    const toggleNotification = useNotification();
+    const { toggleNotification } = useNotification();
     const {
       result: { current },
     } = await setup();
@@ -143,7 +145,7 @@ describe('useRemoveAsset', () => {
 
     await waitFor(() =>
       expect(toggleNotification).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'warning', message: 'error-msg' })
+        expect.objectContaining({ type: 'danger', message: 'error-msg' })
       )
     );
 

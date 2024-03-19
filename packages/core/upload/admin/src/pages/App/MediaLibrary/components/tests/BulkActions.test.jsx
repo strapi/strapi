@@ -10,12 +10,6 @@ import { BulkActions } from '../BulkActions';
 
 jest.mock('../../../../../hooks/useBulkRemove');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
-}));
-
 const setup = (
   props = {
     selected: [],

@@ -13,13 +13,13 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useNotification } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, type FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
@@ -40,7 +40,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -112,13 +112,13 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
       } else {
         // This shouldn't happen, but just incase.
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
         });
       }
     } else {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(res.error),
       });
 

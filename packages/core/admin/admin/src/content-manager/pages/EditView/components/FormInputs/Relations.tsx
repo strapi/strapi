@@ -14,7 +14,6 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Cross, Drag, Refresh } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
@@ -25,6 +24,9 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { useNotification } from '../../../../../features/Notifications';
+import { useFocusInputField } from '../../../../../hooks/useFocusInputField';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
@@ -228,7 +230,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
-        field.onChange(props.name, { connect: [item] });
+        field.onChange(`${props.name}.connect`, [item]);
       } else {
         field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
       }
@@ -382,7 +384,7 @@ const RelationsInput = ({
     _q: '',
     page: 1,
   });
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
 
   const { formatMessage } = useIntl();
@@ -454,7 +456,7 @@ const RelationsInput = ({
           id: getTranslation('relation.error-adding-relation'),
           defaultMessage: 'An error occurred while trying to add the relation.',
         }),
-        type: 'warning',
+        type: 'danger',
       });
 
       return;

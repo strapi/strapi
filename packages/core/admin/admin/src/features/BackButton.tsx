@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Link, LinkProps } from '@strapi/design-system/v2';
 import { ArrowLeft } from '@strapi/icons';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 

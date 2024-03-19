@@ -15,7 +15,6 @@ import useModalQueryParams from '../../../hooks/useModalQueryParams';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => jest.fn()),
-  useQueryParams: jest.fn(),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');

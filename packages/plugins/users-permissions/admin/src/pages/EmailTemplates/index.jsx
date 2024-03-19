@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
-import { Page, useAPIErrorHandler, useFetchClient } from '@strapi/strapi/admin';
+import { ContentLayout, HeaderLayout, useNotifyAT } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
+import { Page, useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -23,12 +23,10 @@ const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [templateToEdit, setTemplateToEdit] = React.useState(null);
@@ -56,7 +54,7 @@ const EmailTemplatesPage = () => {
       },
       onError(error) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
       },
@@ -82,7 +80,7 @@ const EmailTemplatesPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
         });
 
         trackUsage('didEditEmailTemplates');
@@ -91,7 +89,7 @@ const EmailTemplatesPage = () => {
       },
       onError(error) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
       },
@@ -111,7 +109,7 @@ const EmailTemplatesPage = () => {
   }
 
   return (
-    <Main aria-busy={submitMutation.isLoading}>
+    <Page.Main aria-busy={submitMutation.isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -139,7 +137,7 @@ const EmailTemplatesPage = () => {
           />
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

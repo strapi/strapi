@@ -4,7 +4,7 @@ import { isAxiosError, type AxiosRequestConfig } from 'axios';
 
 import { getFetchClient } from '../utils/getFetchClient';
 
-import type { ApiError } from '../types/errors';
+import type { ApiError } from '../hooks/useAPIErrorHandler';
 
 /* -------------------------------------------------------------------------------------------------
  * Axios data

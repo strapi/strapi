@@ -1,9 +1,8 @@
-import { AxiosError } from 'axios';
-
 import { getPrefixedId } from './getPrefixedId';
 
-import type { ApiError } from '../types/errors';
+import type { ApiError } from '../hooks/useAPIErrorHandler';
 import type { errors } from '@strapi/utils';
+import type { AxiosError } from 'axios';
 
 export interface NormalizeErrorOptions {
   name?: string;

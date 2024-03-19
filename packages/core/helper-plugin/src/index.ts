@@ -2,21 +2,13 @@
  * Features
  * -----------------------------------------------------------------------------------------------*/
 
-export * from './features/AppInfo';
-export * from './features/Notifications';
 export * from './features/RBAC';
 
 /* -------------------------------------------------------------------------------------------------
  * Hooks
  * -----------------------------------------------------------------------------------------------*/
 
-export * from './hooks/useClipboard';
-export * from './hooks/useFocusInputField';
-export * from './hooks/useFocusWhenNavigate';
-export * from './hooks/useLockScroll';
 export * from './hooks/usePersistentState';
-export * from './hooks/useQuery';
-export * from './hooks/useQueryParams';
 export * from './hooks/useRBAC';
 export * from './hooks/useSelectionState';
 
@@ -25,7 +17,6 @@ export * from './hooks/useSelectionState';
  * -----------------------------------------------------------------------------------------------*/
 
 export * from './utils/auth';
-export * from './utils/getYupInnerErrors';
 export * from './utils/hasPermissions';
 export * from './utils/prefixPluginTranslations';
 export * from './utils/stopPropagation';

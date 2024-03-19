@@ -6,7 +6,20 @@ import { IntlFormatters, useIntl } from 'react-intl';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 
-import type { ApiError } from '../types/errors';
+import type { errors } from '@strapi/utils';
+
+type ApiError =
+  | errors.ApplicationError
+  | errors.ForbiddenError
+  | errors.NotFoundError
+  | errors.NotImplementedError
+  | errors.PaginationError
+  | errors.PayloadTooLargeError
+  | errors.PolicyError
+  | errors.RateLimitError
+  | errors.UnauthorizedError
+  | errors.ValidationError
+  | errors.YupValidationError;
 
 interface UnknownApiError {
   /**
@@ -83,14 +96,14 @@ that has been thrown.
  * const MyComponent = () => {
  *   const { get } = useFetchClient();
  *   const { formatAPIError } = useAPIErrorHandler(getTrad);
- *   const toggleNotification = useNotification();
+ *   const { toggleNotification } = useNotification();
  * 
  *   const handleDeleteItem = async () => {
  *     try {
  *       return await get('/admin');
  *     } catch (error) {
  *       toggleNotification({
- *         type: 'warning',
+ *         type: 'danger',
  *         message: formatAPIError(error),
  *       });
  *     }

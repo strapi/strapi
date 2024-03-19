@@ -8,7 +8,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -18,7 +17,7 @@ import {
   Typography,
   EmptyStateLayout,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
 import { Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
@@ -30,7 +29,6 @@ import { useDocumentation } from '../../hooks/useDocumentation';
 import { getTrad } from '../../utils';
 
 const PluginPage = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { data, isLoading, isError, remove, regenerate } = useDocumentation();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -74,7 +72,7 @@ const PluginPage = () => {
   return (
     <Layout>
       <Helmet title={title} />
-      <Main aria-busy={isLoading}>
+      <Page.Main>
         <HeaderLayout
           title={title}
           subtitle={formatMessage({
@@ -189,7 +187,7 @@ const PluginPage = () => {
           onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

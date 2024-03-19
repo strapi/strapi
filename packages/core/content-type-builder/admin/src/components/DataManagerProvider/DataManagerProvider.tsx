@@ -5,9 +5,11 @@ import {
   useGuidedTour,
   useTracking,
   useStrapiApp,
+  useNotification,
+  useAppInfo,
   useFetchClient,
 } from '@strapi/admin/strapi-admin';
-import { useAppInfo, useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
@@ -79,14 +81,14 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     modifiedData,
     reservedNames,
   } = useSelector(makeSelectDataManagerProvider());
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
 
   const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
 
   const plugin = getPlugin(pluginId);
-  const { autoReload } = useAppInfo();
+  const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -142,8 +144,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     }
   };
@@ -171,7 +173,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     if (!autoReload) {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('notification.info.autoreaload-disable') },
+        message: formatMessage({ id: getTrad('notification.info.autoreaload-disable') }),
       });
     }
   }, [autoReload, toggleNotification]);
@@ -312,8 +314,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -363,8 +365,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -394,8 +396,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -515,12 +517,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
         if (!isValidSchema) {
           toggleNotification({
-            type: 'warning',
-            message: {
+            type: 'danger',
+            message: formatMessage({
               id: getTrad('notification.error.dynamiczone-min.validation'),
               defaultMessage:
                 'At least one component is required in a dynamic zone to be able to save a content type',
-            },
+            }),
           });
 
           return;
@@ -584,8 +586,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       console.error({ err: err.response });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error' }),
       });
     } finally {
       unlockAppWithAutoreload?.();

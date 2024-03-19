@@ -5,6 +5,7 @@ import { useRBAC } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 import { EmailTemplatesPage } from '../index';
 
@@ -28,7 +29,9 @@ const App = (
   <QueryClientProvider client={client}>
     <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
       <ThemeProvider theme={lightTheme}>
-        <EmailTemplatesPage />
+        <MemoryRouter>
+          <EmailTemplatesPage />
+        </MemoryRouter>
       </ThemeProvider>
     </IntlProvider>
   </QueryClientProvider>

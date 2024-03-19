@@ -1,4 +1,3 @@
-import { useQueryParams } from '@strapi/helper-plugin';
 import { errors } from '@strapi/utils';
 import { within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
@@ -6,14 +5,14 @@ import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { Table } from '../../../../../../components/Table';
+import { useQueryParams } from '../../../../../../hooks/useQueryParams';
 import {
   ConfirmBulkActionDialog,
   ConfirmBulkActionDialogProps,
   ConfirmDialogPublishAll,
 } from '../ConfirmBulkActionDialog';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../../../../hooks/useQueryParams', () => ({
   /**
    * TODO: can we remove this mock by instead passing a value to `initialEntries`?
    */

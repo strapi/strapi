@@ -5,13 +5,12 @@ import { useRBAC } from '@strapi/helper-plugin';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 import { ProvidersPage } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
   useRBAC: jest.fn(),
 }));
 
@@ -30,7 +29,7 @@ const render = (props) =>
         <ThemeProvider theme={lightTheme}>
           <QueryClientProvider client={client}>
             <IntlProvider locale="en" messages={{}} textComponent="span">
-              {children}
+              <MemoryRouter>{children}</MemoryRouter>
             </IntlProvider>
           </QueryClientProvider>
         </ThemeProvider>

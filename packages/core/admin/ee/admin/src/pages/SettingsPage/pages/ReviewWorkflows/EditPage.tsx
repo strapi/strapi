@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import { useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { BackButton } from '../../../../../../../admin/src/features/BackButton';
+import { useNotification } from '../../../../../../../admin/src/features/Notifications';
 import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
@@ -58,7 +59,7 @@ export const ReviewWorkflowsEditPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { isLoading: isLoadingWorkflow, meta, workflows } = useReviewWorkflows();
   const { collectionTypes, singleTypes, isLoading: isLoadingContentTypes } = useContentTypes();
   const serverState = useSelector(selectServerState);
@@ -136,7 +137,7 @@ export const ReviewWorkflowsEditPage = () => {
         }
 
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -145,15 +146,15 @@ export const ReviewWorkflowsEditPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
       setSaving(false);
@@ -289,7 +290,7 @@ export const ReviewWorkflowsEditPage = () => {
     if (!isLoading && roles?.length === 0) {
       toggleNotification({
         blockTransition: true,
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({
           id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
           defaultMessage: 'You don’t have the permission to see roles',

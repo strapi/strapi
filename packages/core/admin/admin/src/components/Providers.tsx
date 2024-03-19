@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { NotificationsProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
 import { AuthProvider } from '../features/Auth';
 import { HistoryProvider } from '../features/BackButton';
 import { ConfigurationProvider } from '../features/Configuration';
+import { NotificationsProvider } from '../features/Notifications';
 import { StrapiAppProvider } from '../features/StrapiApp';
 import { TrackingProvider } from '../features/Tracking';
 

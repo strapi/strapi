@@ -1,10 +1,11 @@
 import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
-import { useNotification, useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { useField } from '../../../../../../../admin/src/components/Form';
 import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
+import { useNotification } from '../../../../../../../admin/src/features/Notifications';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useAdminUsers } from '../../../../../../../admin/src/services/users';
 import { getDisplayName } from '../../../../../../../admin/src/utils/users';
@@ -17,7 +18,7 @@ const AssigneeSelect = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     allowedActions: { canRead },
     isLoading: isLoadingPermissions,
@@ -57,10 +58,10 @@ const AssigneeSelect = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: 'content-manager.reviewWorkflows.assignee.notification.saved',
           defaultMessage: 'Assignee updated',
-        },
+        }),
       });
     }
   };

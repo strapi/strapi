@@ -1,13 +1,14 @@
 import * as React from 'react';
 
 import { Combobox, ComboboxOption, useCollator } from '@strapi/design-system';
-import { findMatchingPermissions, useQueryParams, useRBACProvider } from '@strapi/helper-plugin';
+import { findMatchingPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../components/Filters';
 import { useField } from '../../../../components/Form';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useAdminUsers } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';
 import { CREATOR_FIELDS } from '../../../constants/attributes';

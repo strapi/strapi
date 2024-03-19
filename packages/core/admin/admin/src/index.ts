@@ -16,10 +16,20 @@ export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
 
+export { useGuidedTour } from './components/GuidedTour/Provider';
+
 /**
  * Features
  */
 export { useTracking, type TrackingEvent } from './features/Tracking';
+export { useStrapiApp, type StrapiAppContextValue } from './features/StrapiApp';
+export {
+  useNotification,
+  type NotificationsContextValue,
+  type NotificationConfig,
+  NotificationsProvider,
+} from './features/Notifications';
+export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
 
 /**
  * Hooks
@@ -27,9 +37,8 @@ export { useTracking, type TrackingEvent } from './features/Tracking';
 export { useInjectReducer } from './hooks/useInjectReducer';
 // TODO: Replace this export with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
 export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
-export { useGuidedTour } from './components/GuidedTour/Provider';
-export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
-export { useStrapiApp, type StrapiAppContextValue } from './features/StrapiApp';
+export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
+export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 
 /**
@@ -51,7 +60,6 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './core/apis/content-manager';
-export type { ApiError } from './types/errors';
 
 /**
  * Utils

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
+import { Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   fireEvent,
   renderHook as renderHookRTL,
@@ -31,8 +31,10 @@ import { Theme } from '../src/components/Theme';
 import { reducer as cmAppReducer } from '../src/content-manager/layout';
 import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
 import { contentManagerApi } from '../src/content-manager/services/api';
+import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
+import { NotificationsProvider } from '../src/features/Notifications';
 import { StrapiAppProvider } from '../src/features/StrapiApp';
 import { reducer as appReducer } from '../src/reducer';
 import { adminApi } from '../src/services/api';
@@ -161,7 +163,19 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
                               }}
                               updateProjectSettings={jest.fn()}
                             >
-                              {children}
+                              <AppInfoProvider
+                                autoReload
+                                useYarn
+                                dependencies={{
+                                  '@strapi/plugin-documentation': '4.2.0',
+                                  '@strapi/provider-upload-cloudinary': '4.2.0',
+                                }}
+                                strapiVersion="4.1.0"
+                                communityEdition
+                                shouldUpdateStrapi={false}
+                              >
+                                {children}
+                              </AppInfoProvider>
                             </ConfigurationContextProvider>
                           </RBACContext.Provider>
                         </NotificationsProvider>

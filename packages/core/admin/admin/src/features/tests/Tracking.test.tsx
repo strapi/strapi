@@ -1,8 +1,8 @@
-import { AppInfoProvider } from '@strapi/helper-plugin';
 import { renderHook } from '@tests/utils';
 import axios from 'axios';
 
 import { useInitQuery } from '../../services/admin';
+import { AppInfoProvider } from '../AppInfo';
 import { TrackingProvider, useTracking } from '../Tracking';
 
 jest.mock('axios', () => ({
@@ -33,8 +33,6 @@ const setup = () =>
           currentEnvironment="testing"
           userId="someTestUserId"
           shouldUpdateStrapi={false}
-          setUserDisplayName={jest.fn()}
-          userDisplayName="someTestUserDisplayName"
         >
           {children}
         </AppInfoProvider>

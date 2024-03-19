@@ -6,7 +6,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -17,15 +16,9 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import {
-  onRowClick,
-  stopPropagation,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { onRowClick, stopPropagation, useRBAC } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page, useAPIErrorHandler, useFetchClient } from '@strapi/strapi/admin';
+import { Page, useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -43,14 +36,12 @@ export const ProvidersPage = () => {
   const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = React.useState(false);
   const [providerToEditName, setProviderToEditName] = React.useState(null);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingPermissions,
@@ -75,7 +66,7 @@ export const ProvidersPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.submit') },
+        message: formatMessage({ id: getTrad('notification.success.submit') }),
       });
 
       trackUsage('didEditAuthenticationProvider');
@@ -84,7 +75,7 @@ export const ProvidersPage = () => {
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     },
@@ -164,7 +155,7 @@ export const ProvidersPage = () => {
           }
         )}
       />
-      <Main>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
@@ -242,7 +233,7 @@ export const ProvidersPage = () => {
             </Tbody>
           </Table>
         </ContentLayout>
-      </Main>
+      </Page.Main>
       <FormModal
         initialData={data[providerToEditName]}
         isOpen={isOpen}
