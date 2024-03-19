@@ -48,18 +48,6 @@ describe('config', () => {
     consoleSpy.mockRestore();
   });
 
-  test('`get` supports `plugin` in array path', () => {
-    const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
-
-    const config = configProvider({
-      'plugin::myplugin': { foo: 'bar' },
-    });
-
-    expect(config.get(['plugin', 'myplugin', 'foo'])).toEqual('bar');
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
-    consoleSpy.mockRestore();
-  });
-
   test('`get` supports `plugin::model` in array path', () => {
     const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
@@ -85,7 +73,7 @@ describe('config', () => {
       consoleSpy.mockRestore();
     });
 
-    test('`get` supports `plugin.` prefix in array path', () => {
+    test('`get` supports `plugin.model` prefix in array path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
       const config = configProvider({
@@ -97,6 +85,17 @@ describe('config', () => {
       consoleSpy.mockRestore();
     });
 
+    test('`get` supports `plugin` + `model` in array path', () => {
+      const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
+
+      const config = configProvider({
+        'plugin::myplugin': { foo: 'bar' },
+      });
+
+      expect(config.get(['plugin', 'myplugin', 'foo'])).toEqual('bar');
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+      consoleSpy.mockRestore();
+    });
     test('`set` supports `plugin.` prefix in string path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
