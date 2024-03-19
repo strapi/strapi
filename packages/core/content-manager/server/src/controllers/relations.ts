@@ -328,7 +328,7 @@ export default {
        * We don't want to include them in the available relations.
        */
       if ((idsToInclude?.length ?? 0) !== 0) {
-        where[`${alias}.document_id`].$notIn = idsToInclude;
+        where[`${alias}.id`].$notIn = idsToInclude;
       }
 
       const knexSubQuery = subQuery
@@ -354,7 +354,7 @@ export default {
     if (idsToOmit?.length > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
-        documentId: { $notIn: uniq(idsToOmit) },
+        id: { $notIn: uniq(idsToOmit) },
       });
     }
 
