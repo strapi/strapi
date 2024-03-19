@@ -38,7 +38,6 @@ const isUrlForCreation = (url: string) => {
     splitUrl.splice(indexQueryParam, 1);
   }
 
-
   // Get the last element of the array
   // api::category.category / 1 / publish
   
